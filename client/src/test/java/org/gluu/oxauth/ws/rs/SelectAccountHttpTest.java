@@ -1,9 +1,9 @@
 package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.client.*;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;

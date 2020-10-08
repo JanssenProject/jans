@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ws.rs.uma;
 
-import org.gluu.oxauth.client.uma.UmaClientFactory;
-import org.gluu.oxauth.client.uma.UmaScopeService;
+import io.jans.as.client.uma.UmaClientFactory;
+import io.jans.as.client.uma.UmaScopeService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaScopeDescription;
 import org.gluu.oxauth.model.uma.UmaTestUtil;

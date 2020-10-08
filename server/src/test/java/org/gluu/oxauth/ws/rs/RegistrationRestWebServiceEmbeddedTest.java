@@ -8,8 +8,8 @@ package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;

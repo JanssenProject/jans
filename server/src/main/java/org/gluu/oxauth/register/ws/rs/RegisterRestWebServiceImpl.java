@@ -16,7 +16,7 @@ import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBARegisterClientMetadataService;
 import org.gluu.oxauth.ciba.CIBARegisterClientResponseService;
 import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorService;
-import org.gluu.oxauth.client.RegisterRequest;
+import io.jans.as.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import io.jans.as.model.config.StaticConfiguration;

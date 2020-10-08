@@ -1,7 +1,7 @@
 package org.gluu.oxauth.json;
 
 import com.google.common.collect.Lists;
-import org.gluu.oxauth.client.RegisterRequest;
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.json.JsonApplier;
 import org.json.JSONArray;
 import org.json.JSONObject;

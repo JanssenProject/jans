@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.action;
 
-import org.gluu.oxauth.client.BackchannelAuthenticationClient;
-import org.gluu.oxauth.client.BackchannelAuthenticationRequest;
-import org.gluu.oxauth.client.BackchannelAuthenticationResponse;
+import io.jans.as.client.BackchannelAuthenticationClient;
+import io.jans.as.client.BackchannelAuthenticationRequest;
+import io.jans.as.client.BackchannelAuthenticationResponse;
 import org.gluu.oxauth.model.ciba.CibaFlowState;
 import org.gluu.oxauth.model.ciba.CibaRequestSession;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;

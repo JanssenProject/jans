@@ -13,7 +13,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.client.EndSessionRequest;
+import io.jans.as.client.EndSessionRequest;
 import org.slf4j.Logger;
 
 /**

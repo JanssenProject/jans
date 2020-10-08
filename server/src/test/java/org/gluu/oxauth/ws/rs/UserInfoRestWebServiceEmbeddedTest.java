@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.model.authorize.Claim;
-import org.gluu.oxauth.client.model.authorize.ClaimValue;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.model.authorize.Claim;
+import io.jans.as.client.model.authorize.ClaimValue;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.crypto.OxAuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -78,7 +78,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.CODE, io.jans.as.model.common.ResponseType.TOKEN, io.jans.as.model.common.ResponseType.ID_TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -103,7 +103,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
-            final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+            final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
             ClientTestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
@@ -124,7 +124,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -147,7 +147,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -176,7 +176,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken1);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -211,7 +211,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1ImplicitFlow")
     public void requestUserInfoStep2GetImplicitFlow(final String userInfoPath) throws Exception {
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + userInfoPath + "?" + userInfoRequest.getQueryString()).request();
@@ -253,7 +253,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         // Testing with valid parameters
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
         tokenRequest.setScope("openid profile address email");
@@ -298,7 +298,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken4);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -333,7 +333,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidRequest(final String userInfoPath) throws Exception {
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
         Response response = request
@@ -357,7 +357,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidToken(final String userInfoPath) throws Exception {
-        UserInfoRequest userInfoRequest = new UserInfoRequest("INVALID_ACCESS_TOKEN");
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest("INVALID_ACCESS_TOKEN");
         userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
@@ -385,7 +385,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest("INVALID_ACCESS_TOKEN");
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest("INVALID_ACCESS_TOKEN");
 
         Map<String, String> userInfoParameters = userInfoRequest.getParameters();
         userInfoParameters.put("schema", "INVALID_SCHEMA");
@@ -419,7 +419,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -456,7 +456,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -484,7 +484,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken3);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(accessToken3);
         userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Response response = request
@@ -529,7 +529,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
@@ -576,7 +576,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -613,7 +613,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -634,7 +634,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken5);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -672,7 +672,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void requestUserInfoHS384Step1(final String registerPath, final String redirectUris) throws Exception {
         List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
@@ -721,7 +721,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId2, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -759,7 +759,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -779,7 +779,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
         request.header("Authorization", "Bearer " + accessToken6);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -819,7 +819,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
@@ -866,7 +866,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId3, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -903,7 +903,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -925,7 +925,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken7);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));

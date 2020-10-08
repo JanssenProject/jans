@@ -10,9 +10,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.client.AuthorizeClient;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

@@ -13,8 +13,8 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.client.UserInfoClient;
-import org.gluu.oxauth.client.UserInfoRequest;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoRequest;
 import io.jans.as.model.common.AuthorizationMethod;
 import org.slf4j.Logger;
 

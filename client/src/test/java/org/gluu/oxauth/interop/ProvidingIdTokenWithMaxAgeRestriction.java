@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.interop;
 
+import io.jans.as.client.*;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;

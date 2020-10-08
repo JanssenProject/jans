@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -65,7 +65,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
@@ -83,7 +83,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
-            final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+            final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
             ClientTestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
@@ -109,7 +109,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -134,7 +134,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -158,7 +158,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode1);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
@@ -203,7 +203,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     public void completeFlowStep3(final String tokenPath, final String refreshToken) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken);
         tokenRequest.setScope("email read_stream manage_pages");
         tokenRequest.setAuthUsername(clientId);
@@ -249,7 +249,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -274,7 +274,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -298,7 +298,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                                                    final String redirectUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode4);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
@@ -346,7 +346,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     public void completeFlowWithOptionalNonceStep3(final String tokenPath, final String refreshToken) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken);
         tokenRequest.setScope("email read_stream manage_pages");
         tokenRequest.setAuthUsername(clientId);
@@ -400,7 +400,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, null);
         authorizationRequest.getPrompts().add(Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
@@ -426,7 +426,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -448,7 +448,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = {"dynamicClientRegistration", "revokeTokensStep1"})
     public void revokeTokensStep2n3(final String tokenPath, final String redirectUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
-        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode2);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
@@ -481,7 +481,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             refreshToken1 = jsonObj.getString("refresh_token");
 
             Builder request2 = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
-            TokenRequest tokenRequest2 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            io.jans.as.client.TokenRequest tokenRequest2 = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest2.setCode(authorizationCode2);
             tokenRequest2.setRedirectUri(redirectUri);
             tokenRequest2.setAuthUsername(clientId);
@@ -521,7 +521,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     public void revokeTokensStep4(final String tokenPath) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
         tokenRequest.setRefreshToken(refreshToken1);
         tokenRequest.setScope("email read_stream manage_pages");
         tokenRequest.setAuthUsername(clientId);
@@ -554,7 +554,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         request.header("Authorization", "Bearer " + accessToken1);
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -592,7 +592,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, null);
         authorizationRequest.getPrompts().add(Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
@@ -618,7 +618,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -645,7 +645,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode3);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);

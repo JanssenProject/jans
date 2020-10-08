@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.*;
 import io.jans.as.model.common.*;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;

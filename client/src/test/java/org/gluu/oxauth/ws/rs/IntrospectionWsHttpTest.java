@@ -7,10 +7,10 @@
 package org.gluu.oxauth.ws.rs;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.BaseRequest;
-import org.gluu.oxauth.client.service.ClientFactory;
-import org.gluu.oxauth.client.service.IntrospectionService;
-import org.gluu.oxauth.client.uma.wrapper.UmaClient;
+import io.jans.as.client.BaseRequest;
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.client.service.IntrospectionService;
+import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.uma.wrapper.Token;

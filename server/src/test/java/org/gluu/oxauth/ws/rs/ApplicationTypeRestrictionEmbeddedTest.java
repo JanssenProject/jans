@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterRequest;
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;

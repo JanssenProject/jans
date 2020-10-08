@@ -10,9 +10,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterClient;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
