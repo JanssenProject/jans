@@ -7,12 +7,12 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.ldap.TokenLdap;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

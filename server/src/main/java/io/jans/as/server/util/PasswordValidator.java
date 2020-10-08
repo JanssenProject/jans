@@ -1,8 +1,8 @@
 package io.jans.as.server.util;
 
+import io.jans.as.server.i18n.LanguageBean;
 import io.jans.model.attribute.AttributeValidation;
 import io.jans.service.AttributeService;
-import io.jans.as.server.i18n.LanguageBean;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;

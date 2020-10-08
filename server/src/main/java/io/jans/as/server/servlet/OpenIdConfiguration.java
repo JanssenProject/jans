@@ -6,23 +6,23 @@
 
 package io.jans.as.server.servlet;
 
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.model.GluuAttribute;
-import org.apache.commons.lang.StringUtils;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.persistence.model.ScopeAttributes;
 import io.jans.as.server.ciba.CIBAConfigurationService;
-import io.jans.as.common.service.AttributeService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.GluuAttribute;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import io.jans.as.persistence.model.Scope;
-import io.jans.as.persistence.model.ScopeAttributes;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

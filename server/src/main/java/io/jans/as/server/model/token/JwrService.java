@@ -1,6 +1,7 @@
 package io.jans.as.server.model.token;
 
 import com.google.common.base.Function;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -18,11 +19,10 @@ import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.IAuthorizationGrant;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.ServerCryptoProvider;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

@@ -6,16 +6,16 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
 import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.registration.Client;
+import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

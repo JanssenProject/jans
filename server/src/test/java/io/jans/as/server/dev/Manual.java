@@ -6,12 +6,12 @@
 
 package io.jans.as.server.dev;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
-import io.jans.as.common.model.registration.Client;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

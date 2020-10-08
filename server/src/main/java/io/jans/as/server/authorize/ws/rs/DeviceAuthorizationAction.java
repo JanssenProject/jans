@@ -6,10 +6,9 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
-import io.jans.jsf2.message.FacesMessages;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
@@ -18,7 +17,8 @@ import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.SessionIdService;
-import io.jans.as.common.util.RedirectUri;
+import io.jans.jsf2.message.FacesMessages;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

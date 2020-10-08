@@ -5,11 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.audit.debug.entity.HttpRequest;
+import io.jans.as.server.audit.debug.entity.HttpResponse;
 import io.jans.as.server.audit.debug.wrapper.RequestWrapper;
 import io.jans.as.server.audit.debug.wrapper.ResponseWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
-import io.jans.as.server.audit.debug.entity.HttpResponse;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

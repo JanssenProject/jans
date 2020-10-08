@@ -6,6 +6,8 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.DefaultErrorResponse;
@@ -16,8 +18,6 @@ import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.util.ServerUtil;
 import org.slf4j.Logger;
 

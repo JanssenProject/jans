@@ -6,6 +6,8 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -14,22 +16,20 @@ import io.jans.as.model.fido.u2f.exception.RegistrationNotAllowed;
 import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import io.jans.util.StringHelper;
 import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.common.User;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.service.SessionIdService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.fido.u2f.DeviceRegistrationService;
 import io.jans.as.server.service.fido.u2f.RegistrationService;
 import io.jans.as.server.service.fido.u2f.UserSessionIdService;
 import io.jans.as.server.service.fido.u2f.ValidationService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

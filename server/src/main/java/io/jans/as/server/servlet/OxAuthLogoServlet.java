@@ -1,9 +1,9 @@
 package io.jans.as.server.servlet;
 
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.persistence.model.GluuOrganization;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.persistence.model.GluuOrganization;
-import io.jans.as.common.service.OrganizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

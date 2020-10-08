@@ -7,11 +7,11 @@
 package io.jans.as.server.service.fido.u2f;
 
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.search.filter.Filter;
-import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

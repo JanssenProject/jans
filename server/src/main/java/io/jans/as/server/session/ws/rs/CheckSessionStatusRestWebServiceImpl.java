@@ -7,11 +7,11 @@
 package io.jans.as.server.session.ws.rs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.util.StringHelper;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

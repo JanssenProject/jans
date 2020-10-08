@@ -6,11 +6,11 @@
 
 package io.jans.as.server.ws.rs;
 
-import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.client.BaseTest;
-import io.jans.as.server.model.uma.TUma;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.server.model.uma.TUma;
 import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

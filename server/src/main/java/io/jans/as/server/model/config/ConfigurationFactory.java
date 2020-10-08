@@ -6,6 +6,8 @@
 
 package io.jans.as.server.model.config;
 
+import io.jans.as.common.model.event.CryptoProviderEvent;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.StaticConfiguration;
@@ -17,6 +19,7 @@ import io.jans.as.model.crypto.CryptoProviderFactory;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
@@ -29,9 +32,6 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.model.event.CryptoProviderEvent;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.server.util.ServerUtil;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

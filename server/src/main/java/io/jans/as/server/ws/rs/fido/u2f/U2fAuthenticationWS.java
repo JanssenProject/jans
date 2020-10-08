@@ -6,6 +6,7 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -14,7 +15,6 @@ import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateStatus;
 import io.jans.as.model.util.Base64Util;
-import io.jans.util.StringHelper;
 import io.jans.as.server.exception.fido.u2f.DeviceCompromisedException;
 import io.jans.as.server.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import io.jans.as.server.exception.fido.u2f.NoEligableDevicesException;
@@ -22,12 +22,12 @@ import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.fido.u2f.AuthenticateRequestMessageLdap;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.service.fido.u2f.AuthenticationService;
 import io.jans.as.server.service.fido.u2f.DeviceRegistrationService;
 import io.jans.as.server.service.fido.u2f.UserSessionIdService;
 import io.jans.as.server.service.fido.u2f.ValidationService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

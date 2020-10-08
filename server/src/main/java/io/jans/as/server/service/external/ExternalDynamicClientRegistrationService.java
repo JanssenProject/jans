@@ -7,6 +7,7 @@
 package io.jans.as.server.service.external;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import io.jans.model.SimpleCustomProperty;
@@ -14,7 +15,6 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
-import io.jans.as.common.model.registration.Client;
 import org.json.JSONObject;
 
 import javax.ejb.DependsOn;

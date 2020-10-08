@@ -9,9 +9,9 @@ import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.protocol.DeviceData;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.exception.fido.u2f.InvalidDeviceCounterException;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.BaseEntry;
-import io.jans.as.server.exception.fido.u2f.InvalidDeviceCounterException;
 
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;

@@ -6,19 +6,18 @@
 
 package io.jans.as.server.uma.service;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.uma.authorization.*;
-import org.gluu.oxauth.uma.authorization.*;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
