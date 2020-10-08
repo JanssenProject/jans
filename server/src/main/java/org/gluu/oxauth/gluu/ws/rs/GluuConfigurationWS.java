@@ -8,13 +8,13 @@ package org.gluu.oxauth.gluu.ws.rs;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
-import io.jans.model.GluuAttribute;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.gluu.GluuConfiguration;
 import io.jans.as.model.gluu.GluuErrorResponseType;
+import io.jans.model.GluuAttribute;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;

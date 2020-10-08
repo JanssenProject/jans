@@ -6,27 +6,21 @@
 
 package org.gluu.oxauth.action;
 
-import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
-
-import java.io.Serializable;
-import java.net.URISyntaxException;
-
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.jans.as.client.*;
+import io.jans.net.SslDefaultHttpClient;
+import io.jans.net.TrustAllTrustManager;
 import org.apache.http.client.HttpClient;
-import io.jans.as.client.OpenIdConfigurationClient;
-import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.as.client.OpenIdConnectDiscoveryClient;
-import io.jans.as.client.OpenIdConnectDiscoveryRequest;
-import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 
-import io.jans.net.SslDefaultHttpClient;
-import io.jans.net.TrustAllTrustManager;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.net.URISyntaxException;
+
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
 
 /**
  * @author Javier Rojas Blum

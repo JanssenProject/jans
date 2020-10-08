@@ -1,11 +1,11 @@
 package org.gluu.oxauth.session.ws.rs;
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.token.JsonWebResponse;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.common.User;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import io.jans.as.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.service.SectorIdentifierService;
 import org.json.JSONObject;

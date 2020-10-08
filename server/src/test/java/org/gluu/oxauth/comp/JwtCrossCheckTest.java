@@ -10,7 +10,6 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.model.crypto.OxAuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -22,6 +21,7 @@ import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
+import org.gluu.oxauth.BaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

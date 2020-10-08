@@ -11,6 +11,7 @@ import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.external.ExternalUmaRptClaimsService;
 import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
@@ -21,7 +22,6 @@ import org.gluu.oxauth.uma.service.UmaRptService;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.util.StringHelper;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

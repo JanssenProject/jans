@@ -6,13 +6,25 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import io.jans.as.client.*;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.util.ServerUtil;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -20,29 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.gluu.oxauth.BaseTest;
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.EndSessionRequest;
-import io.jans.as.client.QueryStringDecoder;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
-import org.gluu.oxauth.util.ServerUtil;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID;
+import static org.testng.Assert.*;
 
 /**
  * Test cases for the end session web service (embedded)

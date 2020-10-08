@@ -7,9 +7,9 @@
 package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;

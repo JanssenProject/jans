@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.model.registration;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -19,6 +18,7 @@ import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;

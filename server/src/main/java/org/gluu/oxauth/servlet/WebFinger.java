@@ -6,15 +6,12 @@
 
 package org.gluu.oxauth.servlet;
 
-import static io.jans.as.model.discovery.WebFingerParam.HREF;
-import static io.jans.as.model.discovery.WebFingerParam.LINKS;
-import static io.jans.as.model.discovery.WebFingerParam.REL;
-import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
-import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
-import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import io.jans.as.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -22,13 +19,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
-import org.slf4j.Logger;
+import static io.jans.as.model.discovery.WebFingerParam.*;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

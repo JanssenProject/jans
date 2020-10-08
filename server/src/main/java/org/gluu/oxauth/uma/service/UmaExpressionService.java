@@ -9,10 +9,10 @@ import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.util.Util;
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

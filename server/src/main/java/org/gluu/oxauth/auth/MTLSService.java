@@ -1,21 +1,21 @@
 package org.gluu.oxauth.auth;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.Prompt;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.SessionIdState;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.JwtUtil;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.SessionIdService;
 import org.json.JSONObject;
 import org.slf4j.Logger;

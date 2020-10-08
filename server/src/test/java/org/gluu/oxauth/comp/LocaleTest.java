@@ -6,16 +6,16 @@
 
 package org.gluu.oxauth.comp;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import io.jans.util.ilocale.LocaleUtil;
+import org.gluu.oxauth.BaseTest;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.gluu.oxauth.BaseTest;
-import io.jans.util.ilocale.LocaleUtil;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013

@@ -7,9 +7,6 @@
 package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Strings;
-import io.jans.as.model.token.ClientAssertionType;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -20,11 +17,14 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.jwt.JwtType;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.util.JwtUtil;
-import org.gluu.oxauth.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.service.ClientService;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;

@@ -6,22 +6,18 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import java.net.URI;
-import java.util.Arrays;
-
-import org.gluu.oxauth.BaseTest;
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.RPTResponse;
-import io.jans.as.model.uma.RptIntrospectionResponse;
-import org.gluu.oxauth.model.uma.TUma;
-import io.jans.as.model.uma.UmaPermission;
-import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.*;
 import io.jans.as.model.uma.wrapper.Token;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.model.uma.TUma;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+
+import java.net.URI;
+import java.util.Arrays;
 
 /**
  * @author Yuriy Zabrovarnyy

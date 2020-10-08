@@ -8,13 +8,13 @@ package org.gluu.oxauth.uma.authorization;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.context.ExternalScriptContext;

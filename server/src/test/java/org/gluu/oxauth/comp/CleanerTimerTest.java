@@ -1,15 +1,19 @@
 package org.gluu.oxauth.comp;
 
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.service.CacheService;
+import io.jans.util.security.StringEncrypter;
 import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
-import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.CleanerTimer;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
@@ -22,12 +26,8 @@ import org.gluu.oxauth.uma.service.UmaPctService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaRptService;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.service.CacheService;
-import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-import io.jans.as.model.config.StaticConfiguration;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;

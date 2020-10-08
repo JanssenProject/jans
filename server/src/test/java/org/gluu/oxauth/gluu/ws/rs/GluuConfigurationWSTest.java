@@ -1,19 +1,7 @@
 package org.gluu.oxauth.gluu.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.model.gluu.GluuConfiguration;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.extension.rest.client.ArquillianResteasyResource;
@@ -21,6 +9,15 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+
+import static org.testng.Assert.*;
 
 /**
  * Created by eugeniuparvan on 8/12/16.

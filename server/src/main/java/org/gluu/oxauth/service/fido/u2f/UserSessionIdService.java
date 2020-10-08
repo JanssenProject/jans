@@ -6,19 +6,18 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Map;
 
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication

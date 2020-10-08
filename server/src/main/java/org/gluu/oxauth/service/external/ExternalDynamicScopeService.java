@@ -6,25 +6,19 @@
 
 package org.gluu.oxauth.service.external;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-
+import com.google.common.collect.Sets;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
-import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.oxauth.persistence.model.Scope;
 
-import com.google.common.collect.Sets;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Provides factory methods needed to create dynamic scope extension

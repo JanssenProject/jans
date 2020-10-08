@@ -1,7 +1,7 @@
 package org.gluu.oxauth.service.external.context;
 
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;

@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.model.ldap;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.common.GrantType;
 import io.jans.orm.annotation.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;

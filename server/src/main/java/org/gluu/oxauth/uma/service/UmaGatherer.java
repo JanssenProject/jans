@@ -6,9 +6,18 @@
 
 package org.gluu.oxauth.uma.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.jsf2.service.FacesService;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.i18n.LanguageBean;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.service.common.UserService;
+import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
+import org.gluu.oxauth.uma.authorization.UmaGatherContext;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -18,19 +27,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import io.jans.jsf2.service.FacesService;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.oxauth.i18n.LanguageBean;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.service.common.UserService;
-import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
-import org.gluu.oxauth.uma.authorization.UmaGatherContext;
-import org.slf4j.Logger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz

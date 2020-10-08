@@ -6,16 +6,15 @@
 
 package org.gluu.oxauth.util;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
-
 import io.jans.as.model.common.*;
-import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum

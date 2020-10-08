@@ -1,10 +1,9 @@
 package org.gluu.oxauth.audit.debug.wrapper;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by eugeniuparvan on 5/10/17.
