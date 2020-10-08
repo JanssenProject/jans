@@ -17,7 +17,7 @@ import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;

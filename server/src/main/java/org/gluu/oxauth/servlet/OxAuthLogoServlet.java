@@ -3,7 +3,7 @@ package org.gluu.oxauth.servlet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.GluuOrganization;
-import org.gluu.oxauth.service.OrganizationService;
+import io.jans.as.common.service.OrganizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

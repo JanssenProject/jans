@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.userinfo.ws.rs;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -37,12 +39,12 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
-import org.gluu.oxauth.claims.Audience;
+import io.jans.as.common.claims.Audience;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;

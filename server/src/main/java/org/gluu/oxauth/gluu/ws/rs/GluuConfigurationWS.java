@@ -15,7 +15,7 @@ import io.jans.as.model.gluu.GluuErrorResponseType;
 import io.jans.model.GluuAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.service.AttributeService;
+import io.jans.as.common.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.util.ServerUtil;

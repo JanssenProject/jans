@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.slf4j.Logger;

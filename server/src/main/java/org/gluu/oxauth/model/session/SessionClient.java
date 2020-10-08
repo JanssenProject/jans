@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.session;
 
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import javax.inject.Named;
 import java.util.GregorianCalendar;

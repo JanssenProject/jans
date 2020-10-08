@@ -13,7 +13,7 @@ import io.jans.as.model.error.IErrorType;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.util.StringHelper;
-import org.gluu.oxauth.util.RedirectUri;
+import io.jans.as.common.util.RedirectUri;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 

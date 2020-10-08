@@ -10,7 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import java.util.Arrays;
 import java.util.List;

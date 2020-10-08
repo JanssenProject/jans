@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
@@ -15,11 +16,11 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
 import org.gluu.oxauth.service.MetricService;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
