@@ -27,7 +27,7 @@ import org.gluu.oxtrust.model.scim2.util.ScimResourceUtil;
 import org.gluu.oxtrust.service.IPersonService;
 import org.gluu.oxtrust.ws.rs.scim2.BaseScimWebService;
 import org.gluu.oxtrust.ws.rs.scim2.IUserWebService;
-import org.gluu.persist.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
 import org.slf4j.Logger;
 
 /**

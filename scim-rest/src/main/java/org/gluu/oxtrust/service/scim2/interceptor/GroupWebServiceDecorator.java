@@ -25,7 +25,7 @@ import org.gluu.oxtrust.model.scim2.patch.PatchRequest;
 import org.gluu.oxtrust.service.IGroupService;
 import org.gluu.oxtrust.ws.rs.scim2.BaseScimWebService;
 import org.gluu.oxtrust.ws.rs.scim2.IGroupWebService;
-import org.gluu.persist.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
 import org.slf4j.Logger;
 
 /**

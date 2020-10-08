@@ -9,8 +9,8 @@ import javax.inject.Named;
 import org.gluu.config.oxtrust.AppConfiguration;
 import org.gluu.config.oxtrust.LdapOxTrustConfiguration;
 import org.gluu.oxtrust.service.ApplicationFactory;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.BasePersistenceException;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
 
 /**

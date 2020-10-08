@@ -10,7 +10,7 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.scim.ScimType;
-import org.gluu.persist.model.PagedResult;
+import io.jans.orm.model.PagedResult;
 import org.gluu.oxtrust.model.GluuGroup;
 import org.gluu.oxtrust.model.scim.ScimCustomPerson;
 import org.gluu.service.custom.script.ExternalScriptService;

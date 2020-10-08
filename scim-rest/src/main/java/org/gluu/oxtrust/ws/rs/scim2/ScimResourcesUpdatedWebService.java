@@ -13,9 +13,9 @@ import org.gluu.oxtrust.service.antlr.scimFilter.ScimFilterParserService;
 //import org.gluu.oxtrust.service.scim2.Scim2GroupService;
 import org.gluu.oxtrust.service.filter.ProtectedApi;
 import org.gluu.oxtrust.util.ServiceUtil;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.model.SortOrder;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.SortOrder;
 import org.gluu.search.filter.Filter;
 
 import javax.annotation.PostConstruct;

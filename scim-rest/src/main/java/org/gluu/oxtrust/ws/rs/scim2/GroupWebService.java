@@ -50,8 +50,8 @@ import org.gluu.oxtrust.service.filter.ProtectedApi;
 import org.gluu.oxtrust.service.scim2.Scim2GroupService;
 import org.gluu.oxtrust.service.scim2.Scim2PatchService;
 import org.gluu.oxtrust.service.scim2.interceptor.RefAdjusted;
-import org.gluu.persist.model.PagedResult;
-import org.gluu.persist.model.SortOrder;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.wordnik.swagger.annotations.Api;
