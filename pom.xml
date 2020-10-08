@@ -37,7 +37,7 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>janssen-core-bom</artifactId>
+                <artifactId>jans-bom</artifactId>
                 <version>${janssen.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -93,7 +93,7 @@
        
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>janssen-model</artifactId>
+            <artifactId>jans-core-model</artifactId>
             <version>${janssen.version}</version>
             <exclusions>
                 <exclusion>
@@ -108,7 +108,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>janssen-common</artifactId>
+            <artifactId>jans-auth-common</artifactId>
             <version>${janssen.version}</version>
             <exclusions>
                 <exclusion>
@@ -127,7 +127,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>core-service</artifactId>
+            <artifactId>jans-core-service</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.jboss.resteasy</artifactId>
@@ -137,7 +137,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>janssen-client</artifactId>
+            <artifactId>jans-auth-client</artifactId>
             <version>${janssen.version}</version>
         </dependency>
 
