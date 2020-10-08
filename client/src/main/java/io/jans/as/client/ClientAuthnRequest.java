@@ -1,7 +1,5 @@
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -9,6 +7,8 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.util.QueryBuilder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 

@@ -6,8 +6,7 @@
 
 package io.jans.as.client.model;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -20,7 +19,8 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
-import io.jans.as.client.util.ClientUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 

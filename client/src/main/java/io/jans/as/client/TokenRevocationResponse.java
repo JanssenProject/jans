@@ -6,11 +6,11 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.jans.as.model.token.TokenRevocationErrorResponseType;
-import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * @author Javier Rojas Blum

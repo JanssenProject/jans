@@ -7,10 +7,9 @@ import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.util.*;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
-
-import java.util.*;
 
 /**
  * Created by eugeniuparvan on 8/12/16.

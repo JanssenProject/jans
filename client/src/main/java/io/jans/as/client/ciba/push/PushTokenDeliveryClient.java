@@ -6,9 +6,9 @@
 
 package io.jans.as.client.ciba.push;
 
+import io.jans.as.client.BaseClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import io.jans.as.client.BaseClient;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;

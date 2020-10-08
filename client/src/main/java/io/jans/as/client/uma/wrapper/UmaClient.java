@@ -7,7 +7,6 @@
 package io.jans.as.client.uma.wrapper;
 
 import io.jans.as.client.*;
-import org.gluu.oxauth.client.*;
 import io.jans.as.client.uma.exception.UmaException;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;

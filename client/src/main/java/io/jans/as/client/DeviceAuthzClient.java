@@ -6,16 +6,17 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 
-import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.*;
+import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.CLIENT_ID;
+import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.SCOPE;
 import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
 
 /**

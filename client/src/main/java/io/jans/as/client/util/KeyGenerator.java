@@ -6,19 +6,19 @@
 
 package io.jans.as.client.util;
 
-import io.jans.as.model.jwk.*;
-import org.apache.commons.cli.*;
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.OxAuthCryptoProvider;
 import io.jans.as.model.crypto.OxElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
+import org.apache.commons.cli.*;
+import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
