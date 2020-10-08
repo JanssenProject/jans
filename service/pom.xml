@@ -46,15 +46,15 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-ldap</artifactId>
+			<artifactId>jans-orm-ldap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-couchbase</artifactId>
+			<artifactId>jans-orm-couchbase</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-hybrid</artifactId>
+			<artifactId>jans-orm-hybrid</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

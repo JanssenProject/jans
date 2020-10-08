@@ -38,11 +38,11 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-core</artifactId>
+			<artifactId>jans-orm-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-model</artifactId>
+			<artifactId>jans-orm-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -86,7 +86,7 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>persistence-ldap</artifactId>
+			<artifactId>jans-orm-ldap</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
