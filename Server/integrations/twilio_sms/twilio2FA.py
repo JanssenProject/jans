@@ -14,7 +14,7 @@ from org.gluu.oxauth.util import ServerUtil
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 
 import com.twilio.Twilio as Twilio
 import com.twilio.rest.api.v2010.account.Message as Message

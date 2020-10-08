@@ -13,7 +13,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;

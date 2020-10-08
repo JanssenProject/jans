@@ -15,7 +15,7 @@ from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.gluu.oxauth.service import ConfigurationService
 from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
 from io.jans.orm.exception import AuthenticationException
 

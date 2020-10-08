@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.config;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.exception.ConfigurationException;
+import io.jans.exception.ConfigurationException;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;

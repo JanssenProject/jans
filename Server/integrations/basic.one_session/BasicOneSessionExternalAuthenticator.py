@@ -12,7 +12,7 @@ from io.jans.orm import PersistenceEntryManager
 from org.gluu.oxauth.model.ldap import TokenLdap
 from io.jans.util import StringHelper
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from org.gluu.oxauth.model.config import StaticConfiguration
 
 import java
