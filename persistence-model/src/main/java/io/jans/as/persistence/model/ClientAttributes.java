@@ -1,4 +1,4 @@
-package org.oxauth.persistence.model;
+package io.jans.as.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.oxauth.persistence.model.base;
+package io.jans.as.persistence.model.base;
 
 import io.jans.orm.annotation.DN;
 

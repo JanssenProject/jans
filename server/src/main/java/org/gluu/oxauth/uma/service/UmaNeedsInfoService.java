@@ -13,7 +13,7 @@ import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

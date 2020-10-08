@@ -16,6 +16,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
+import io.jans.as.persistence.model.Scope;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -462,7 +463,7 @@ public class AuthorizeAction {
         return authorizeService.getSession(sessionId);
     }
 
-    public List<org.oxauth.persistence.model.Scope> getScopes() {
+    public List<Scope> getScopes() {
         return authorizeService.getScopes(allowedScope);
     }
 

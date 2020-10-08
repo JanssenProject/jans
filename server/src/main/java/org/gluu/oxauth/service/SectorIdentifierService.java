@@ -12,8 +12,8 @@ import org.gluu.oxauth.model.common.CIBAGrant;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import org.oxauth.persistence.model.PairwiseIdentifier;
-import org.oxauth.persistence.model.SectorIdentifier;
+import io.jans.as.persistence.model.PairwiseIdentifier;
+import io.jans.as.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
