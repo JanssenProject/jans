@@ -9,7 +9,7 @@ package org.gluu.oxauth.model.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeEnum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

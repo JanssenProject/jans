@@ -6,9 +6,9 @@
 
 package org.oxauth.persistence.model.configuration;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
 import org.oxauth.persistence.model.base.Entry;
 
 /**

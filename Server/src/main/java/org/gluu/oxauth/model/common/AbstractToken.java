@@ -10,8 +10,8 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
 import org.gluu.oxauth.model.util.HashUtil;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.model.base.Deletable;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.base.Deletable;
 
 import java.io.Serializable;
 import java.util.Calendar;

@@ -14,7 +14,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;

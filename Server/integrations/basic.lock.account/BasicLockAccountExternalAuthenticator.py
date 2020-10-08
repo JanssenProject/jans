@@ -12,7 +12,7 @@ from org.gluu.oxauth.service import AuthenticationService
 from org.gluu.oxauth.service.common import UserService
 from org.gluu.service import CacheService
 from org.gluu.util import StringHelper
-from org.gluu.persist.exception import AuthenticationException
+from io.jans.orm.exception import AuthenticationException
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration

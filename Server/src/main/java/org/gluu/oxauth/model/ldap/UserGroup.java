@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
 
 /**
  * @author Yuriy Zabrovarnyy

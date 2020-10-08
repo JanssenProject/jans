@@ -23,7 +23,7 @@ import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

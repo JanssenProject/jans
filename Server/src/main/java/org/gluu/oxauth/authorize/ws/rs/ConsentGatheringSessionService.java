@@ -14,7 +14,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.persist.exception.EntryPersistenceException;
+import io.jans.orm.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

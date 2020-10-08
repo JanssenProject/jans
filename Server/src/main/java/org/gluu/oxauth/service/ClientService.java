@@ -13,10 +13,10 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.EncryptionService;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.persist.model.base.CustomEntry;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomEntry;
 import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
@@ -192,8 +192,8 @@ public class ClientService {
         }
 	}
 
-	public org.gluu.persist.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
-		for (org.gluu.persist.model.base.CustomAttribute customAttribute : client.getCustomAttributes()) {
+	public io.jans.orm.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
+		for (io.jans.orm.model.base.CustomAttribute customAttribute : client.getCustomAttributes()) {
 			if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
 				return customAttribute;
 			}
@@ -203,10 +203,10 @@ public class ClientService {
 	}
 
 	public void setCustomAttribute(Client client, String attributeName, String attributeValue) {
-		org.gluu.persist.model.base.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
+		io.jans.orm.model.base.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
 
 		if (customAttribute == null) {
-			customAttribute = new org.gluu.persist.model.base.CustomAttribute(attributeName);
+			customAttribute = new io.jans.orm.model.base.CustomAttribute(attributeName);
 			client.getCustomAttributes().add(customAttribute);
 		}
 

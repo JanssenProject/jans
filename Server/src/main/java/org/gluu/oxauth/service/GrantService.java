@@ -15,7 +15,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.util.TokenHashUtil;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.service.cache.CacheConfiguration;
