@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>notify-client2</artifactId>
+	<artifactId>jans-notify-client2</artifactId>
 	<name>notify Client2</name>
 	<packaging>jar</packaging>
 
@@ -19,10 +19,10 @@
 	</properties>
 
 	<dependencies>
-		<!-- janssen -->
+		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>notify-model</artifactId>
+			<artifactId>jans-notify-model</artifactId>
 		</dependency>
 
 		<!-- Net -->

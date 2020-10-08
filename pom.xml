@@ -57,7 +57,7 @@
 			<!-- notify -->
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>notify-model</artifactId>
+				<artifactId>jans-notify-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
