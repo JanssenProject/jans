@@ -1,9 +1,9 @@
 package io.jans.as.client.uma;
 
-import javax.ws.rs.*;
-
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaTokenResponse;
+
+import javax.ws.rs.*;
 
 /**
  * @author yuriyz on 06/21/2017.

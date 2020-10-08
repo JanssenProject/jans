@@ -6,11 +6,11 @@
 
 package io.jans.as.client;
 
-import org.apache.log4j.Logger;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.token.TokenRevocationRequestParam;
 import io.jans.as.model.util.QueryBuilder;
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.MediaType;
 

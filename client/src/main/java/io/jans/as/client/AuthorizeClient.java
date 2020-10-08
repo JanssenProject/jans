@@ -6,12 +6,12 @@
 
 package io.jans.as.client;
 
-import org.apache.log4j.Logger;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 

@@ -6,13 +6,12 @@
 
 package io.jans.as.client.uma;
 
-import javax.ws.rs.*;
-
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaResourceWithId;
 
+import javax.ws.rs.*;
 import java.util.List;
 
 /**

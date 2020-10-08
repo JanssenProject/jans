@@ -6,6 +6,10 @@
 
 package io.jans.as.client.util;
 
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.SecurityProviderUtility;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
@@ -13,10 +17,6 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.bouncycastle.util.encoders.Base64;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.SecurityProviderUtility;
 
 import java.io.File;
 import java.security.PrivateKey;

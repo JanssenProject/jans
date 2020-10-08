@@ -6,10 +6,10 @@
 
 package io.jans.as.client.ciba.ping;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.client.BaseClient;
 import io.jans.as.client.util.ClientUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.json.JSONObject;
 

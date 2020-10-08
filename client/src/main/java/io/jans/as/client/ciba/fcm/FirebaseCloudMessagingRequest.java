@@ -6,8 +6,8 @@
 
 package io.jans.as.client.ciba.fcm;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.BaseRequest;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 

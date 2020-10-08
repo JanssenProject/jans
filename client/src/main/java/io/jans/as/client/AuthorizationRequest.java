@@ -6,8 +6,6 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.Display;
@@ -15,6 +13,8 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
