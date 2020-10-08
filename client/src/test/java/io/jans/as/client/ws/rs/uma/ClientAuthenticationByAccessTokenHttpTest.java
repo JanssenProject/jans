@@ -1,6 +1,6 @@
 package io.jans.as.client.ws.rs.uma;
 
-import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static io.jans.as.model.uma.UmaTestUtil.assert_;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 

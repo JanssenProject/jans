@@ -13,7 +13,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.uma.wrapper.UmaClient;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
