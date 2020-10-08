@@ -74,15 +74,15 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-util</artifactId>
+			<artifactId>jans-core-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-model</artifactId>
+			<artifactId>jans-core-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-service</artifactId>
+			<artifactId>jans-core-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>

@@ -70,7 +70,7 @@
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-service</artifactId>
+			<artifactId>jans-core-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -78,7 +78,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-document-store</artifactId>
+			<artifactId>jans-core-document-store</artifactId>
 		</dependency>
 
 	</dependencies>
