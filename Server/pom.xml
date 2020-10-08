@@ -370,7 +370,7 @@
 		<!-- Fido2 -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>fido2-client</artifactId>
+			<artifactId>jans-fido2-client</artifactId>
 		</dependency>
 
 		<!-- Weld -->
