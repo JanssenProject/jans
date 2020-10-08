@@ -7,14 +7,14 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
-import io.jans.model.security.Identity;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
+import io.jans.model.security.Identity;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

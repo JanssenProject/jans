@@ -1,14 +1,14 @@
 package org.gluu.oxauth.service.fido.u2f;
 
-import static org.testng.Assert.assertNotNull;
+import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
+import io.jans.as.model.util.Base64Util;
+import org.gluu.oxauth.BaseComponentTest;
+import org.python.bouncycastle.util.encoders.Hex;
+import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 
-import org.gluu.oxauth.BaseComponentTest;
-import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
-import io.jans.as.model.util.Base64Util;
-import org.python.bouncycastle.util.encoders.Hex;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertNotNull;
 
 public class RawAuthenticationServiceTest extends BaseComponentTest {
 

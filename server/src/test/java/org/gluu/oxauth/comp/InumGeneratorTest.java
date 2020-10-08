@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.comp;
 
-import javax.inject.Inject;
-
+import io.jans.as.model.common.IdType;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.idgen.ws.rs.InumGenerator;
-import io.jans.as.model.common.IdType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
 
 /**
  * @author Yuriy Zabrovarnyy

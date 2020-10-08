@@ -6,23 +6,10 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.service.fido.u2f.RequestService;
-import org.gluu.oxauth.uma.service.UmaPctService;
-import org.gluu.oxauth.uma.service.UmaResourceService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.search.filter.Filter;
@@ -32,10 +19,21 @@ import io.jans.service.cdi.event.CleanerEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+import org.gluu.oxauth.service.fido.u2f.RequestService;
+import org.gluu.oxauth.uma.service.UmaPctService;
+import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.slf4j.Logger;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy

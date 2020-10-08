@@ -6,14 +6,13 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import org.gluu.net.InetAddressUtility;
+import org.gluu.oxauth.exception.fido.u2f.BadConfigurationException;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
-
-import org.gluu.net.InetAddressUtility;
-import org.gluu.oxauth.exception.fido.u2f.BadConfigurationException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Provides operations with U2F applications

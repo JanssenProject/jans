@@ -8,10 +8,6 @@ package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -23,13 +19,19 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.uma.ClaimTokenFormatType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.util.StringHelper;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.service.token.TokenService;
@@ -37,8 +39,6 @@ import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.util.StringHelper;
 import org.oxauth.persistence.model.Scope;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
@@ -51,9 +51,9 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.jans.as.model.uma.UmaErrorResponseType.*;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static io.jans.as.model.uma.UmaErrorResponseType.*;
 
 /**
  * @author Yuriy Zabrovarnyy

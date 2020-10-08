@@ -6,21 +6,21 @@
 
 package org.gluu.oxauth.model.token;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.common.AccessToken;
 import org.gluu.oxauth.model.common.AuthorizationGrantType;
 import org.gluu.oxauth.model.common.IdToken;
 import org.gluu.oxauth.model.common.RefreshToken;
-import io.jans.as.model.util.Util;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 05.22.2012

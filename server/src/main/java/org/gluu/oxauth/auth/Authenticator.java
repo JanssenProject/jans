@@ -6,26 +6,26 @@
 
 package org.gluu.oxauth.auth;
 
-import org.apache.commons.lang.StringUtils;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
+import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.i18n.LanguageBean;
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
-import io.jans.as.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

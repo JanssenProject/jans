@@ -1,10 +1,10 @@
 package org.gluu.oxauth.model.audit;
 
-import java.util.Date;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.net.InetAddressUtility;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
+
+import java.util.Date;
 
 
 public class OAuth2AuditLog {

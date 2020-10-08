@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
 
 import java.util.Arrays;

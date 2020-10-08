@@ -7,7 +7,6 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
@@ -16,6 +15,7 @@ import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 

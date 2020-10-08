@@ -1,33 +1,26 @@
 package org.gluu.oxauth.audit.debug;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.gluu.oxauth.audit.debug.entity.HttpRequest;
 import org.gluu.oxauth.audit.debug.entity.HttpResponse;
 import org.gluu.oxauth.audit.debug.wrapper.RequestWrapper;
 import org.gluu.oxauth.audit.debug.wrapper.ResponseWrapper;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.inject.Inject;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Set;
 
 /**
  * Created by eugeniuparvan on 5/10/17.

@@ -6,17 +6,16 @@
 
 package org.gluu.oxauth.action;
 
-import java.io.Serializable;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoRequest;
+import io.jans.as.model.common.AuthorizationMethod;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoRequest;
-import io.jans.as.model.common.AuthorizationMethod;
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2012

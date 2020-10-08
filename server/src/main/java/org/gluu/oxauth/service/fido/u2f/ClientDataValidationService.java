@@ -6,19 +6,18 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
+import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.apache.commons.lang.ArrayUtils;
-import io.jans.as.model.fido.u2f.exception.BadInputException;
-import io.jans.as.model.fido.u2f.protocol.ClientData;
-import org.slf4j.Logger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Client data validation service

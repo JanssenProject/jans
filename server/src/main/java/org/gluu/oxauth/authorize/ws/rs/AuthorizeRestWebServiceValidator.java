@@ -1,13 +1,15 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
-import io.jans.as.model.common.Prompt;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
-import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.common.*;
+import io.jans.as.model.common.Prompt;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.orm.exception.EntryPersistenceException;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
+import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
@@ -16,7 +18,6 @@ import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.orm.exception.EntryPersistenceException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

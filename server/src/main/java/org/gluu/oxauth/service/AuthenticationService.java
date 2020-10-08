@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.GluuStatus;
 import io.jans.model.SimpleProperty;
@@ -27,10 +29,8 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SimpleUser;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import io.jans.as.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.UserService;

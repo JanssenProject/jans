@@ -1,19 +1,19 @@
 package org.gluu.oxauth.uma.authorization;
 
-import java.util.Date;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.gluu.oxauth.model.common.AbstractToken;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
-import org.gluu.oxauth.uma.service.UmaPctService;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.AbstractToken;
+import org.gluu.oxauth.uma.service.UmaPctService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * @author yuriyz on 05/30/2017.

@@ -6,17 +6,17 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBADeviceRegistrationValidatorService;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.User;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.DefaultErrorResponse;
-import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;

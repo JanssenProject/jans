@@ -8,9 +8,9 @@ package org.gluu.oxauth.ws;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.ciba.CibaCallback;
 import org.gluu.oxauth.model.ciba.CibaRequestSession;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.service.CibaService;
 import org.gluu.oxauth.service.CibaSessions;
 import org.slf4j.Logger;

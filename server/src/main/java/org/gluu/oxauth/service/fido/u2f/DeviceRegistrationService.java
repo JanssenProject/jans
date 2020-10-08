@@ -6,18 +6,18 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.util.Base64Util;
-import org.gluu.oxauth.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+import org.gluu.oxauth.service.common.UserService;
 import org.slf4j.Logger;
-import io.jans.as.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

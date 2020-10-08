@@ -6,17 +6,17 @@
 
 package org.gluu.oxauth.revoke;
 
+import io.jans.as.model.common.TokenTypeHint;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import io.jans.as.model.common.TokenTypeHint;
-import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;

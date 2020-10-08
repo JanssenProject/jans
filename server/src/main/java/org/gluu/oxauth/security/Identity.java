@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.security;
 
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.session.SessionClient;
+
 import javax.annotation.Priority;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Named;
 import javax.interceptor.Interceptor;
-
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.session.SessionClient;
-import org.gluu.oxauth.model.common.User;
 
 /**
  * @version August 9, 2017

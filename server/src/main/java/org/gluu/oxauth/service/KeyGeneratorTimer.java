@@ -7,18 +7,18 @@
 package org.gluu.oxauth.service;
 
 import io.jans.as.model.config.Conf;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.jwk.JSONWebKey;
-import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
-import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
+import org.gluu.oxauth.util.ServerUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
