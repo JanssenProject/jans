@@ -83,7 +83,7 @@
 		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>org.gluu.oxauth.service.TestResteasyInitializer</param-value>
+			<param-value>io.jans.as.server.service.TestResteasyInitializer</param-value>
 		</init-param>
 	</servlet>
 
