@@ -5,8 +5,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService

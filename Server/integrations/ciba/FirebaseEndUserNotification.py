@@ -9,7 +9,7 @@ from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingResponse
 from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingClient
 from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingRequest
 from org.gluu.oxauth.util import RedirectUri
-from org.gluu.model.custom.script.type.ciba import EndUserNotificationType
+from io.jans.model.custom.script.type.ciba import EndUserNotificationType
 from java.lang import String
 from java.util import UUID
 

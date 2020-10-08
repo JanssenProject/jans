@@ -8,7 +8,7 @@ package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.security.Identity;
+import io.jans.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;

@@ -1,8 +1,8 @@
 package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.uma.ClaimDefinition;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.uma.ClaimDefinition;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaConstants;

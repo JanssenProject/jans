@@ -6,28 +6,20 @@
 
 package org.gluu.oxauth.service.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-
-import org.gluu.model.GluuStatus;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import org.gluu.search.filter.Filter;
+import io.jans.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.util.Util;
 import org.slf4j.Logger;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import java.util.*;
 
 /**
  * Provides operations with users.

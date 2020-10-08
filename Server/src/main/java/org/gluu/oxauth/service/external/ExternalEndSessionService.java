@@ -1,11 +1,11 @@
 package org.gluu.oxauth.service.external;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.logout.EndSessionType;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.logout.EndSessionType;
 import org.gluu.oxauth.service.external.context.EndSessionContext;
-import org.gluu.service.custom.script.ExternalScriptService;
+import io.jans.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

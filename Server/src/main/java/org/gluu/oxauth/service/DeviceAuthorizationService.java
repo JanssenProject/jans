@@ -15,7 +15,7 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.service.CacheService;
+import io.jans.service.CacheService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

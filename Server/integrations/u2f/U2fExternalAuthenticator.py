@@ -9,7 +9,7 @@ import sys
 from javax.ws.rs.core import Response
 from javax.ws.rs import WebApplicationException
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.client.fido.u2f import FidoU2fClientFactory
 from org.gluu.oxauth.model.config import Constants
 from org.gluu.oxauth.security import Identity
@@ -17,7 +17,7 @@ from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 

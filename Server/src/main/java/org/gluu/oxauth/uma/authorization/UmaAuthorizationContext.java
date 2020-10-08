@@ -8,7 +8,7 @@ package org.gluu.oxauth.uma.authorization;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.gluu.model.SimpleCustomProperty;
+import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.configuration.AppConfiguration;

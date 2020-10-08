@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.service.CacheService;
+import io.jans.service.CacheService;
 
 import javax.inject.Inject;
 

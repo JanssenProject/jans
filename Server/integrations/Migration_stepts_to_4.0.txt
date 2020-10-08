@@ -3,4 +3,4 @@
 ## Packages renamed
    1. All packages starting **org.xdi** has been renamed to start with **org.gluu**.
 ## Packages moved
-  1. The class named **GluuStatus** has been move from **org.gluu.ldap.model** to **org.gluu.model** 
+  1. The class named **GluuStatus** has been move from **org.gluu.ldap.model** to **io.jans.model**

@@ -4,18 +4,18 @@
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService, AppInitializer
 from org.gluu.oxauth.service import MetricService
 from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.model.metric import MetricType
+from io.jans.model.metric import MetricType
 from io.jans.util import StringHelper
 from io.jans.util import ArrayHelper
 from io.jans.orm.service import PersistanceFactoryService
 from io.jans.orm.ldap.impl import LdapEntryManagerFactory
-from org.gluu.model.ldap import GluuLdapConfiguration
+from io.jans.model.ldap import GluuLdapConfiguration
 from java.util import Arrays, Properties
 
 import java

@@ -1,8 +1,8 @@
 # Author: Naveen Kumar Gopi
 
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import AuthenticationService, UserService
 from org.gluu.oxauth.model.common import User
 from io.jans.util import StringHelper, ArrayHelper

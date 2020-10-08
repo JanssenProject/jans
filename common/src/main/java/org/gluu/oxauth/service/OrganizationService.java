@@ -3,9 +3,9 @@ package org.gluu.oxauth.service;
 import org.gluu.oxauth.model.GluuOrganization;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.service.BaseCacheService;
-import org.gluu.service.CacheService;
-import org.gluu.service.LocalCacheService;
+import io.jans.service.BaseCacheService;
+import io.jans.service.CacheService;
+import io.jans.service.LocalCacheService;
 import io.jans.util.OxConstants;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,7 +14,7 @@ import javax.inject.Named;
 
 @ApplicationScoped
 @Named("organizationService")
-public class OrganizationService extends org.gluu.service.OrganizationService {
+public class OrganizationService extends io.jans.service.OrganizationService {
 
     private static final long serialVersionUID = -8966940469789981584L;
     public static final int ONE_MINUTE_IN_SECONDS = 60;

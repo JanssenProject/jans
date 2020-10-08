@@ -16,7 +16,7 @@ import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.service.SpontaneousScopeService;
 import org.gluu.oxauth.service.common.InumService;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
+import io.jans.search.filter.Filter;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 

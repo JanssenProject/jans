@@ -14,9 +14,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.model.AuthenticationScriptUsageType;
-import org.gluu.model.SimpleCustomProperty;
-import org.gluu.model.config.CustomAuthenticationConfiguration;
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.config.CustomAuthenticationConfiguration;
 import org.gluu.oxauth.service.common.ConfigurationService;
 import io.jans.util.StringHelper;
 import org.oxauth.persistence.model.configuration.CustomProperty;

@@ -30,12 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.GluuStatus;
-import org.gluu.model.SimpleProperty;
-import org.gluu.model.ldap.GluuLdapConfiguration;
-import org.gluu.model.metric.MetricType;
-import org.gluu.model.security.Credentials;
-import org.gluu.model.security.SimplePrincipal;
+import io.jans.model.GluuStatus;
+import io.jans.model.SimpleProperty;
+import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.model.metric.MetricType;
+import io.jans.model.security.Credentials;
+import io.jans.model.security.SimplePrincipal;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SimpleUser;
 import org.gluu.oxauth.model.common.User;

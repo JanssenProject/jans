@@ -23,7 +23,7 @@ import org.gluu.oxauth.model.common.User;
 @Priority(Interceptor.Priority.APPLICATION + 20)
 @RequestScoped
 @Named
-public class Identity extends org.gluu.model.security.Identity {
+public class Identity extends io.jans.model.security.Identity {
 
     private static final long serialVersionUID = 2751659008033189259L;
 

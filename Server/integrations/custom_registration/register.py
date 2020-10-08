@@ -5,10 +5,10 @@
 # Author: Gasmyr Mougang
 
 from org.gluu.oxauth.model.common import User, WebKeyStorage
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.xdi.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.util import StringHelper, ArrayHelper
@@ -17,7 +17,7 @@ from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from org.gluu.service import MailService
+from io.jans.service import MailService
 
 
 import org.codehaus.jettison.json.JSONArray as JSONArray

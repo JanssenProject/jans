@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.service.custom.script.AbstractCustomScriptService;
+import io.jans.service.custom.script.AbstractCustomScriptService;
 
 /**
  * Operations with custom scripts

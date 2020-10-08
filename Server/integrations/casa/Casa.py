@@ -12,13 +12,13 @@ from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.oxauth.service.custom import CustomScriptService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.model import SimpleCustomProperty
-from org.gluu.model.casa import ApplicationConfiguration
-from org.gluu.model.custom.script import CustomScriptType
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model import SimpleCustomProperty
+from io.jans.model.casa import ApplicationConfiguration
+from io.jans.model.custom.script import CustomScriptType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager
-from org.gluu.service import CacheService
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service import CacheService
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 try:
