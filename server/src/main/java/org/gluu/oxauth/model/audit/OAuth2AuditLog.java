@@ -1,7 +1,7 @@
 package org.gluu.oxauth.model.audit;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.net.InetAddressUtility;
+import io.jans.net.InetAddressUtility;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 
 import java.util.Date;
