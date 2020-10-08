@@ -7,10 +7,10 @@
 package org.gluu.oxauth.comp;
 
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.ldap.TokenLdap;
-import org.gluu.oxauth.model.ldap.TokenType;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.util.TokenHashUtil;
+import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenType;
+import io.jans.as.server.service.GrantService;
+import io.jans.as.server.util.TokenHashUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

@@ -148,7 +148,7 @@
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.as.server.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_AUDIT_LOG_FILE" />
 		</Logger>
 

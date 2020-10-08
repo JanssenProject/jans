@@ -6,16 +6,16 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.oxauth.authorize.ws.rs.AuthorizeRestWebServiceImpl;
-import org.gluu.oxauth.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
-import org.gluu.oxauth.gluu.ws.rs.GluuConfigurationWS;
-import org.gluu.oxauth.introspection.ws.rs.IntrospectionWebService;
-import org.gluu.oxauth.jwk.ws.rs.JwkRestWebServiceImpl;
-import org.gluu.oxauth.register.ws.rs.RegisterRestWebServiceImpl;
-import org.gluu.oxauth.session.ws.rs.EndSessionRestWebServiceImpl;
-import org.gluu.oxauth.token.ws.rs.TokenRestWebServiceImpl;
-import org.gluu.oxauth.uma.ws.rs.*;
-import org.gluu.oxauth.userinfo.ws.rs.UserInfoRestWebServiceImpl;
+import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
+import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
+import io.jans.as.server.gluu.ws.rs.GluuConfigurationWS;
+import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
+import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
+import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
+import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
+import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
+import io.jans.as.server.uma.ws.rs.*;
+import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.ext.Provider;

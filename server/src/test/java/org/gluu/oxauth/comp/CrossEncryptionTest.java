@@ -40,7 +40,7 @@ import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import org.apache.commons.codec.Charsets;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.gluu.oxauth.model.token.JwtSigner;
+import io.jans.as.server.model.token.JwtSigner;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;

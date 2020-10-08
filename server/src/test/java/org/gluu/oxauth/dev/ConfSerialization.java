@@ -11,7 +11,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.error.ErrorMessage;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
