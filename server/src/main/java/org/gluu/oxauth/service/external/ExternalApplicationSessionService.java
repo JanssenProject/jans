@@ -10,9 +10,9 @@ import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
+import io.jans.service.custom.script.ExternalScriptService;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.service.external.session.SessionEvent;
-import io.jans.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.jans.as.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.jans.as.model.util.Util;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012

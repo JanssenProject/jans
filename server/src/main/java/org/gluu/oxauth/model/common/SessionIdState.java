@@ -1,9 +1,9 @@
 package org.gluu.oxauth.model.common;
 
+import io.jans.orm.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Zabrovarnyy

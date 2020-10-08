@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import org.apache.commons.lang.StringUtils;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
@@ -35,10 +35,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.FOUND;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SESSION;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.FOUND;
 
 /**
  * Claims-Gathering Endpoint.

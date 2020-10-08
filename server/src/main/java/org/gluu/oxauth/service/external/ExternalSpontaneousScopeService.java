@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
+import io.jans.service.custom.script.ExternalScriptService;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.external.context.SpontaneousScopeExternalContext;
-import io.jans.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

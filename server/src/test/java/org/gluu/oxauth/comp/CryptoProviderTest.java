@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.comp;
 
-import org.json.JSONObject;
-import org.gluu.oxauth.ConfigurableTest;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
+import org.gluu.oxauth.ConfigurableTest;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;

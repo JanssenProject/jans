@@ -6,12 +6,13 @@
 
 package org.gluu.oxauth.i18n;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.service.cdi.event.ConfigurationUpdate;
+import io.jans.util.StringHelper;
+import io.jans.util.ilocale.LocaleUtil;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -20,14 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.util.Strings;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.service.cdi.event.ConfigurationUpdate;
-import io.jans.util.StringHelper;
-import io.jans.util.ilocale.LocaleUtil;
-import org.slf4j.Logger;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * @version August 9, 2017

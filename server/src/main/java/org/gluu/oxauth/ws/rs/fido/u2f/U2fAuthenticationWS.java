@@ -6,28 +6,28 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
-import org.gluu.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
-import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
-import org.gluu.oxauth.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateStatus;
 import io.jans.as.model.util.Base64Util;
+import io.jans.util.StringHelper;
+import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.gluu.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
+import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
+import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.fido.u2f.AuthenticationService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.UserSessionIdService;
 import org.gluu.oxauth.service.fido.u2f.ValidationService;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

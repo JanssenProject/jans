@@ -6,12 +6,11 @@
 
 package org.gluu.oxauth.model.session;
 
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import org.gluu.oxauth.model.registration.Client;
 
 import javax.inject.Named;
-
-import org.gluu.oxauth.model.registration.Client;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * @author Javier Rojas Blum Date: 03.20.2012

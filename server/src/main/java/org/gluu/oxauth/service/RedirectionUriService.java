@@ -8,14 +8,14 @@ package org.gluu.oxauth.service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.QueryStringDecoder;
-import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.registration.Client;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jetbrains.annotations.NotNull;

@@ -6,15 +6,14 @@
 
 package org.gluu.oxauth.action;
 
-import java.io.Serializable;
+import io.jans.as.client.EndSessionRequest;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.jans.as.client.EndSessionRequest;
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum

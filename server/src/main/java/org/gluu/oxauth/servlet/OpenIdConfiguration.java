@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.servlet;
 
-import org.apache.commons.lang.StringUtils;
-import io.jans.model.GluuAttribute;
-import org.gluu.oxauth.ciba.CIBAConfigurationService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.model.GluuAttribute;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.ciba.CIBAConfigurationService;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;

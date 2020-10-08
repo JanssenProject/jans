@@ -6,11 +6,10 @@
 
 package org.gluu.oxauth.action;
 
-import io.jans.as.model.common.*;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import org.gluu.oxauth.model.common.*;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;

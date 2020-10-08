@@ -6,18 +6,18 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.AuthorizeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

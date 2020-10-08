@@ -9,10 +9,10 @@ package org.gluu.oxauth.action;
 import io.jans.as.client.BackchannelAuthenticationClient;
 import io.jans.as.client.BackchannelAuthenticationRequest;
 import io.jans.as.client.BackchannelAuthenticationResponse;
-import org.gluu.oxauth.model.ciba.CibaFlowState;
-import org.gluu.oxauth.model.ciba.CibaRequestSession;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.util.StringUtils;
+import org.gluu.oxauth.model.ciba.CibaFlowState;
+import org.gluu.oxauth.model.ciba.CibaRequestSession;
 import org.gluu.oxauth.service.CibaSessions;
 import org.slf4j.Logger;
 

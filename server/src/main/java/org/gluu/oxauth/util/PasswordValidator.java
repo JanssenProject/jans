@@ -1,8 +1,8 @@
 package org.gluu.oxauth.util;
 
 import io.jans.model.attribute.AttributeValidation;
-import org.gluu.oxauth.i18n.LanguageBean;
 import io.jans.service.AttributeService;
+import org.gluu.oxauth.i18n.LanguageBean;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;

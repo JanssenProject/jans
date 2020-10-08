@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.util.Util;
+import org.gluu.oxauth.model.registration.Client;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

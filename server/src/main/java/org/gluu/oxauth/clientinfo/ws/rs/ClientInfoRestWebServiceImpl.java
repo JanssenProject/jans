@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.clientinfo.ws.rs;
 
-import io.jans.model.GluuAttribute;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.model.GluuAttribute;
 import org.gluu.oxauth.model.clientinfo.ClientInfoParamsValidator;
 import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;

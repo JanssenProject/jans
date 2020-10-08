@@ -6,21 +6,20 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * Provides operations with users.

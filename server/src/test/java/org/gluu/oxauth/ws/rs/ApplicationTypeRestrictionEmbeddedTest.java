@@ -6,40 +6,28 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum

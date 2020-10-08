@@ -1,13 +1,13 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.service.cdi.util.CdiUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;

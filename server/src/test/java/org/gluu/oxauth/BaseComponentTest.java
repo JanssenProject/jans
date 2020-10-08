@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth;
 
-import org.gluu.oxauth.BaseTest;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan

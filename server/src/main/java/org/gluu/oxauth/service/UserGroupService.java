@@ -6,19 +6,18 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.Arrays;
-import java.util.List;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.search.filter.Filter;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.ldap.UserGroup;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.ldap.UserGroup;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.search.filter.Filter;
-import org.slf4j.Logger;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * It's utility service which applications uses in custom authentication scripts 

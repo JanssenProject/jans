@@ -1,30 +1,24 @@
 package org.gluu.oxauth.service.push.sns;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.service.common.EncryptionService;
-import org.gluu.oxauth.util.ServerUtil;
-import io.jans.orm.PersistenceEntryManager;
-import org.gluu.oxauth.model.common.User;
-
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+import com.amazonaws.services.sns.model.*;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.orm.PersistenceEntryManager;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.common.EncryptionService;
+import org.gluu.oxauth.util.ServerUtil;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides operations to send AWS SNS push messages

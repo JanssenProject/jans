@@ -6,6 +6,17 @@
 
 package org.gluu.oxauth.dev;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import net.spy.memcached.DefaultConnectionFactory;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
+import org.gluu.oxauth.model.common.CacheGrant;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.registration.Client;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -15,19 +26,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import org.gluu.oxauth.model.common.CacheGrant;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.common.User;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz
