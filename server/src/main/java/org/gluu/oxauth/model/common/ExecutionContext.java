@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.common;
 
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

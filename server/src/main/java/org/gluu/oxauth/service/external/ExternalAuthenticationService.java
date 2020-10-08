@@ -22,7 +22,7 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
-import org.gluu.oxauth.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 
 import javax.enterprise.context.ApplicationScoped;

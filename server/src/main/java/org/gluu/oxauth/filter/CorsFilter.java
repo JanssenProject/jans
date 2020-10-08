@@ -12,7 +12,7 @@ import io.jans.server.filters.AbstractCorsFilter;
 import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.slf4j.Logger;
 

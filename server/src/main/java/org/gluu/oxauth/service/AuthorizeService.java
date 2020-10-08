@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.ciba.PushErrorResponseType;
@@ -20,10 +21,10 @@ import org.gluu.oxauth.auth.Authenticator;
 import org.gluu.oxauth.ciba.CIBAPingCallbackService;
 import org.gluu.oxauth.ciba.CIBAPushErrorService;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
-import org.gluu.oxauth.util.RedirectUri;
+import io.jans.as.common.util.RedirectUri;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 

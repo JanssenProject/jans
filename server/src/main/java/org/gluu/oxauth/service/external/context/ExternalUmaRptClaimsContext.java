@@ -2,7 +2,7 @@ package org.gluu.oxauth.service.external.context;
 
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.ExecutionContext;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

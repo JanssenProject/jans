@@ -7,7 +7,7 @@
 package org.gluu.oxauth.security;
 
 import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
+import io.jans.as.common.model.common.User;
 import org.gluu.oxauth.model.session.SessionClient;
 
 import javax.annotation.Priority;

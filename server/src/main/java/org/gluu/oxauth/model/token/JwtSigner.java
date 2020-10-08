@@ -15,7 +15,7 @@ import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.service.cdi.util.CdiUtil;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ServerCryptoProvider;
 import org.python.jline.internal.Preconditions;

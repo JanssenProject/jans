@@ -12,8 +12,8 @@ import io.jans.model.ApplicationType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
-import org.gluu.oxauth.service.common.ApplicationFactory;
-import org.gluu.oxauth.service.common.ConfigurationService;
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.ConfigurationService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

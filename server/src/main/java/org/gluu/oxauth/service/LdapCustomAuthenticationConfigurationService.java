@@ -11,7 +11,7 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.config.CustomAuthenticationConfiguration;
 import io.jans.util.StringHelper;
-import org.gluu.oxauth.service.common.ConfigurationService;
+import io.jans.as.common.service.common.ConfigurationService;
 import org.oxauth.persistence.model.configuration.CustomProperty;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;

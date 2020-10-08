@@ -6,7 +6,8 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 
 import java.util.Date;
 

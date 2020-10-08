@@ -1,5 +1,6 @@
 package org.gluu.oxauth.comp;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.uma.persistence.UmaPermission;
@@ -12,12 +13,12 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.gluu.oxauth.model.ldap.TokenLdap;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
 import org.gluu.oxauth.service.CleanerTimer;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.common.InumService;
+import io.jans.as.common.service.common.InumService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.RegistrationService;
 import org.gluu.oxauth.uma.authorization.UmaPCT;

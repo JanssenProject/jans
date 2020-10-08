@@ -22,7 +22,7 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.json.JSONObject;
 

@@ -7,10 +7,11 @@
 package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ldap.TokenLdap;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import java.util.Collection;
 import java.util.Date;

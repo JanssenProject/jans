@@ -7,7 +7,7 @@
 package org.gluu.oxauth.comp;
 
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.service.common.EncryptionService;
+import io.jans.as.common.service.common.EncryptionService;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

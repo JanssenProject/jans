@@ -11,7 +11,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

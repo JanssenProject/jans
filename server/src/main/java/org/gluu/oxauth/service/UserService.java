@@ -28,7 +28,7 @@ import java.util.List;
  * @version @version August 20, 2019
  */
 @ApplicationScoped
-public class UserService extends org.gluu.oxauth.service.common.UserService {
+public class UserService extends io.jans.as.common.service.common.UserService {
 
 	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
 
