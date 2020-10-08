@@ -5,7 +5,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.json.JsonApplier;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.ClientAttributes;
+import io.jans.as.persistence.model.ClientAttributes;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

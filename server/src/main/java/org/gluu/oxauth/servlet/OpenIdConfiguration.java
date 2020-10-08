@@ -21,8 +21,8 @@ import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.Scope;
-import org.oxauth.persistence.model.ScopeAttributes;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.persistence.model.ScopeAttributes;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

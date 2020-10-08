@@ -25,7 +25,7 @@ import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
 import io.jans.as.common.util.RedirectUri;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
@@ -248,7 +248,7 @@ public class AuthorizeService {
         facesService.redirect("/error.xhtml");
     }
 
-    public List<org.oxauth.persistence.model.Scope> getScopes() {
+    public List<Scope> getScopes() {
         SessionId session = getSession();
         String scope = session.getSessionAttributes().get("scope");
 
@@ -257,12 +257,12 @@ public class AuthorizeService {
     }
 
     public List<Scope> getScopes(String scopes) {
-        List<org.oxauth.persistence.model.Scope> result = new ArrayList<org.oxauth.persistence.model.Scope>();
+        List<Scope> result = new ArrayList<Scope>();
 
         if (scopes != null && !scopes.isEmpty()) {
             String[] scopesName = scopes.split(" ");
             for (String scopeName : scopesName) {
-                org.oxauth.persistence.model.Scope s = scopeService.getScopeById(scopeName);
+                Scope s = scopeService.getScopeById(scopeName);
                 if (s != null && s.getDescription() != null) {
                     result.add(s);
                 }

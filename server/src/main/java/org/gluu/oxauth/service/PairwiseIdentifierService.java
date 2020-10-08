@@ -8,7 +8,7 @@ import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
 import io.jans.as.common.service.common.UserService;
-import org.oxauth.persistence.model.PairwiseIdentifier;
+import io.jans.as.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

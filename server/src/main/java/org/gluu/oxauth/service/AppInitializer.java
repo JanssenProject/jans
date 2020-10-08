@@ -51,8 +51,8 @@ import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
-import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;

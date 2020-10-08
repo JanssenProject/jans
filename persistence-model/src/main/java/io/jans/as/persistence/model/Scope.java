@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.oxauth.persistence.model;
+package io.jans.as.persistence.model;
 
 import io.jans.as.model.common.ScopeType;
 import io.jans.orm.annotation.*;

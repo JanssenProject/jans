@@ -21,7 +21,7 @@ import org.gluu.oxauth.service.external.context.ExternalScriptContext;
 import org.gluu.oxauth.uma.service.RedirectParameters;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
