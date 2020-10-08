@@ -10,7 +10,7 @@ import org.apache.http.HttpStatus;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxeleven.client.*;
+import io.jans.eleven.client.*;
 import org.json.JSONObject;
 
 import java.security.PrivateKey;
