@@ -7,13 +7,10 @@
 package org.gluu.oxauth.ciba;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -32,15 +29,18 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.model.util.Util;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
 import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -3081,7 +3081,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -3150,7 +3150,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
