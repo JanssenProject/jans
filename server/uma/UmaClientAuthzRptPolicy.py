@@ -1,5 +1,5 @@
 # Janssen Project software is available under the MIT License (2017). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2017, Gluu
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Jose Gonzalez
 # Adapted from previous 3.0.1 script of Yuriy Movchan
