@@ -1,4 +1,4 @@
-package org.gluu.oxauth.rp.demo;
+package io.jans.as.rp.demo;
 
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
