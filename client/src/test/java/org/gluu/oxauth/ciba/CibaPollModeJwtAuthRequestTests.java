@@ -37,8 +37,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowPS256HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowPS256HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
 
@@ -52,8 +52,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowPS384HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowPS384HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS384);
 
@@ -67,8 +67,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowPS512HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowPS512HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS512);
 
@@ -82,8 +82,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"ES256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowES256HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowES256HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES256);
 
@@ -97,8 +97,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"ES384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowES384HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowES384HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES384);
 
@@ -112,8 +112,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"ES512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void pollFlowES512HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri) throws Exception {
         showTitle("pollFlowES512HappyFlow");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES512);
 
@@ -127,8 +127,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void cibaPollJWTRequestDataValidations(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
+                                                  final String keyStoreFile, final String keyStoreSecret,
+                                                  final String clientJwksUri) throws Exception {
         showTitle("cibaPollJWTRequestDataValidations");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
 
@@ -166,8 +166,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test(dependsOnMethods = "idTokenHintRS384")
     public void cibaPollJWTRequestIdTokenHint(final String keyId, final String userId, final String dnName,
-                                                  final String keyStoreFile, final String keyStoreSecret,
-                                                  final String clientJwksUri) throws Exception {
+                                              final String keyStoreFile, final String keyStoreSecret,
+                                              final String clientJwksUri) throws Exception {
         showTitle("cibaPollJWTRequestIdTokenHint");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
 
@@ -183,8 +183,8 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
     @Test
     public void cibaPollJWTRequestWrongSigning(final String keyId, final String userId, final String dnName,
-                                              final String keyStoreFile, final String keyStoreSecret,
-                                              final String clientJwksUri) throws Exception {
+                                               final String keyStoreFile, final String keyStoreSecret,
+                                               final String clientJwksUri) throws Exception {
         showTitle("cibaPollJWTRequestWrongSigning");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
 
@@ -200,6 +200,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Registers a client using CIBA configuration for Poll flow and PS256
+     *
      * @param clientJwksUri
      */
     private void registerPollClient(final String clientJwksUri, BackchannelTokenDeliveryMode mode, AsymmetricSignatureAlgorithm algorithm) {
@@ -232,8 +233,9 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Process a Ciba call to the OP using JWT Request object.
-     * @param jwtRequest JWT in plain String.
-     * @param clientId Client identifier.
+     *
+     * @param jwtRequest   JWT in plain String.
+     * @param clientId     Client identifier.
      * @param clientSecret Client secret.
      */
     private void processCibaAuthorizationEndpointSuccessfulCall(String jwtRequest, String clientId, String clientSecret) {
@@ -257,11 +259,12 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Process a Ciba call to the OP using JWT Request object and validate HTTP status and error type.
-     * @param jwtRequest JWT in plain String.
-     * @param clientId Client identifier.
+     *
+     * @param jwtRequest   JWT in plain String.
+     * @param clientId     Client identifier.
      * @param clientSecret Client secret.
-     * @param httpStatus Param used to validate response from the server.
-     * @param error Error used to validate error response from the server.
+     * @param httpStatus   Param used to validate response from the server.
+     * @param error        Error used to validate error response from the server.
      */
     private void processCibaAuthorizationEndpointFailCall(String jwtRequest, String clientId, String clientSecret, int httpStatus, String error) {
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -293,7 +296,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientId = registerResponse.getClientId();
 
-        int now = (int)(System.currentTimeMillis() / 1000);
+        int now = (int) (System.currentTimeMillis() / 1000);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 null, signatureAlgorithm, cryptoProvider);
@@ -303,7 +306,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
         jwtAuthorizationRequest.setIss(clientId);
         jwtAuthorizationRequest.setBindingMessage("1234");
-        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setExp((int) (DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
         jwtAuthorizationRequest.setIat(now);
         jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
         jwtAuthorizationRequest.setKeyId(keyId);
