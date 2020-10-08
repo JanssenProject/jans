@@ -9,14 +9,14 @@
         </locale-config>
 
         <resource-bundle>
-            <base-name>org.gluu.oxauth.i18n.CustomResourceBundle</base-name>
+            <base-name>io.jans.as.server.i18n.CustomResourceBundle</base-name>
             <var>msgs</var>
         </resource-bundle>
     </application>
 
     <factory>
         <exception-handler-factory>
-            org.gluu.oxauth.exception.GlobalExceptionHandlerFactory
+            io.jans.as.server.exception.GlobalExceptionHandlerFactory
         </exception-handler-factory>
     </factory>
 

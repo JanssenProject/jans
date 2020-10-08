@@ -2,6 +2,7 @@ package org.gluu.oxauth.service.fido.u2f;
 
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.service.fido.u2f.RawAuthenticationService;
 import org.gluu.oxauth.BaseComponentTest;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;

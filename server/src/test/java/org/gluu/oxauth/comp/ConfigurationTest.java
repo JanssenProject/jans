@@ -14,8 +14,8 @@ import io.jans.as.model.error.ErrorMessages;
 import io.jans.orm.PersistenceEntryManager;
 import org.apache.commons.io.IOUtils;
 import org.gluu.oxauth.ConfigurableTest;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.util.ServerUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
