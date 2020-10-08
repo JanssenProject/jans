@@ -8,7 +8,7 @@ package org.gluu.oxauth.uma.ws.rs;
 
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeDescription;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.model.uma.TUma;
 import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
