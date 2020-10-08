@@ -1,7 +1,7 @@
 /*
  * oxAuth-CIBA is available under the Gluu Enterprise License (2019).
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package org.gluu.oxauth.client.ciba.fcm;
