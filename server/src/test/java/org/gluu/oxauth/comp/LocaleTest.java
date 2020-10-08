@@ -7,7 +7,7 @@
 package org.gluu.oxauth.comp;
 
 import io.jans.util.ilocale.LocaleUtil;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

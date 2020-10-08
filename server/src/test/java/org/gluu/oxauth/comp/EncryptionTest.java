@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.comp;
 
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 
 /**
  * @author Javier Rojas Blum
