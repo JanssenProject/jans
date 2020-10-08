@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author Yuriy Movchan  Date: 07/01/2015
  */
 
-public class ExternalScriptContext extends org.gluu.service.external.context.ExternalScriptContext {
+public class ExternalScriptContext extends io.jans.service.external.context.ExternalScriptContext {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 

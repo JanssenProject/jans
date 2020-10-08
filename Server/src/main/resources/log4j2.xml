@@ -88,7 +88,7 @@
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
 		<Logger name="org.gluu.oxauth" level="${log4j.default.log.level}" />
-		<Logger name="org.gluu.service" level="${log4j.default.log.level}" />
+		<Logger name="io.jans.service" level="${log4j.default.log.level}" />
 
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />
@@ -136,11 +136,11 @@
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.service.PythonService" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.service.PythonService" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.service.custom.script" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.service.custom.script" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 

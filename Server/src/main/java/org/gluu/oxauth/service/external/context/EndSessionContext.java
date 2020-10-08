@@ -1,7 +1,7 @@
 package org.gluu.oxauth.service.external.context;
 
 import com.google.common.collect.Sets;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.SessionId;
 
 import javax.servlet.http.HttpServletRequest;

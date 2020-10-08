@@ -7,7 +7,7 @@
 package org.gluu.oxauth.servlet;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.GluuAttribute;
+import io.jans.model.GluuAttribute;
 import org.gluu.oxauth.ciba.CIBAConfigurationService;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseMode;

@@ -9,11 +9,11 @@ import json
 from com.toopher import RequestError
 from com.toopher import ToopherAPI
 from java.util import Arrays
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import EncryptionService
 from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
 
 

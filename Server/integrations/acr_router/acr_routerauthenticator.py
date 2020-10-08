@@ -4,7 +4,7 @@
 # Author: Yuriy Movchan
 #
 
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 
 
 class PersonAuthentication(PersonAuthenticationType):

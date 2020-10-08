@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.model.ApplicationType;
+import io.jans.model.ApplicationType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.service.metric.inject.ReportMetric;
-import org.gluu.service.net.NetworkService;
+import io.jans.service.metric.inject.ReportMetric;
+import io.jans.service.net.NetworkService;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.DependsOn;
@@ -29,7 +29,7 @@ import javax.inject.Named;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-public class MetricService extends org.gluu.service.metric.MetricService {
+public class MetricService extends io.jans.service.metric.MetricService {
 	
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
@@ -64,7 +64,7 @@ public class MetricService extends org.gluu.service.metric.MetricService {
 		return staticConfiguration.getBaseDn().getMetric();
 	}
 
-	public org.gluu.service.metric.MetricService getMetricServiceInstance() {
+	public io.jans.service.metric.MetricService getMetricServiceInstance() {
 		return instance.get();
 	}
 
