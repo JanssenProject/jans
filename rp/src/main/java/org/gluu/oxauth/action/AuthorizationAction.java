@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.action;
 
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.AuthorizeClient;
-import org.gluu.oxauth.client.model.authorize.Claim;
-import org.gluu.oxauth.client.model.authorize.ClaimValue;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.model.authorize.Claim;
+import io.jans.as.client.model.authorize.ClaimValue;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;

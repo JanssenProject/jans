@@ -12,9 +12,9 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.client.TokenClient;
-import org.gluu.oxauth.client.TokenRequest;
-import org.gluu.oxauth.client.TokenResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import org.slf4j.Logger;

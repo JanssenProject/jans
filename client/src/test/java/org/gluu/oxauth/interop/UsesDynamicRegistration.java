@@ -12,9 +12,9 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterClient;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;

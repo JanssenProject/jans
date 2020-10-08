@@ -6,14 +6,15 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.*;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.model.authorize.Claim;
-import org.gluu.oxauth.client.model.authorize.ClaimValue;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.model.authorize.Claim;
+import io.jans.as.client.model.authorize.ClaimValue;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.crypto.OxAuthCryptoProvider;

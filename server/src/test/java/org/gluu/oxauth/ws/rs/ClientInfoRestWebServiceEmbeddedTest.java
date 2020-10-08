@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.GrantType;
@@ -63,7 +63,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         try {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -87,7 +87,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
-            final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+            final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
             ClientTestUtil.assert_(registerResponse);
 
             clientId = registerResponse.getClientId();
@@ -108,7 +108,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("clientinfo");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -133,7 +133,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -162,7 +162,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken1);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        ClientInfoRequest clientInfoRequest = new ClientInfoRequest(null);
+        io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(clientInfoRequest.getParameters())));
@@ -200,7 +200,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestClientInfoStep1ImplicitFlow")
     public void requestClientInfoStep2GetImplicitFlow(final String clientInfoPath) throws Exception {
 
-        ClientInfoRequest clientInfoRequest = new ClientInfoRequest(null);
+        io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest(null);
         Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + clientInfoPath + "?" + clientInfoRequest.getQueryString()).request();
 
@@ -244,7 +244,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
             throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
         tokenRequest.setScope("clientinfo");
@@ -288,7 +288,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Authorization", "Bearer " + accessToken3);
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        ClientInfoRequest clientInfoRequest = new ClientInfoRequest(null);
+        io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(clientInfoRequest.getParameters())));
@@ -329,7 +329,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        ClientInfoRequest clientInfoRequest = new ClientInfoRequest(null);
+        io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest(null);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(clientInfoRequest.getParameters())));
@@ -357,7 +357,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        ClientInfoRequest clientInfoRequest = new ClientInfoRequest("INVALID-TOKEN");
+        io.jans.as.client.ClientInfoRequest clientInfoRequest = new io.jans.as.client.ClientInfoRequest("INVALID-TOKEN");
         clientInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Response response = request

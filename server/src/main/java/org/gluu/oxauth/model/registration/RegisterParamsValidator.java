@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.client.RegisterRequest;
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;

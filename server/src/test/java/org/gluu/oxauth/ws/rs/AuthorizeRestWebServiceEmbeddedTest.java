@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
@@ -30,7 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
 import static org.testng.Assert.*;
 
 /**
@@ -57,7 +58,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -76,7 +77,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
-            final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+            final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
             ClientTestUtil.assert_(registerResponse);
 
             clientId1 = registerResponse.getClientId();
@@ -95,7 +96,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -119,7 +120,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -140,7 +141,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -167,7 +168,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(jsonObj.getString("redirect"));
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -187,7 +188,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
     public void requestAuthorizationCodeFail1(final String authorizePath, final String userId, final String userSecret)
             throws Exception {
         // Testing with missing parameters
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(null, null, null, null, null);
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(null, null, null, null, null);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
@@ -222,7 +223,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 "https://INVALID_REDIRECT_URI", null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -263,7 +264,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -304,7 +305,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -329,7 +330,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("access_token"), "The access token is null");
                 assertNotNull(params.get("state"), "The state is null");
@@ -356,7 +357,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, null, scopes, redirectUri,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, null, scopes, redirectUri,
                 nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
@@ -396,7 +397,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = null;
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -421,7 +422,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -444,7 +445,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -469,7 +470,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -495,7 +496,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         responseTypes.add(ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -519,7 +520,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
@@ -541,7 +542,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -566,7 +567,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -590,7 +591,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -615,7 +616,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -640,7 +641,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -665,7 +666,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -686,7 +687,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -710,7 +711,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -735,7 +736,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -756,7 +757,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -778,7 +779,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.LOGIN);
@@ -821,7 +822,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.CONSENT);
@@ -864,7 +865,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.LOGIN);
@@ -908,7 +909,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -934,7 +935,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -957,7 +958,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         try {
             request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     Arrays.asList(redirectUri));
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
@@ -986,7 +987,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes, null,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId2, scopes, null,
                 null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1011,7 +1012,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1032,7 +1033,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes, null,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes, null,
                 null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1072,7 +1073,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1097,7 +1098,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -1124,7 +1125,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1147,7 +1148,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1172,7 +1173,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, null);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1195,7 +1196,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");

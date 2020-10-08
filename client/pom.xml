@@ -94,7 +94,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.gluu.oxauth.util.KeyGenerator</mainClass>
+							<mainClass>io.jans.as.client.util.KeyGenerator</mainClass>
 						</manifest>
                         <manifestEntries>
                             <Multi-Release>true</Multi-Release>

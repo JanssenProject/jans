@@ -1,8 +1,8 @@
 package org.gluu.oxauth.rp.demo;
 
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.client.UserInfoClient;
-import org.gluu.oxauth.client.UserInfoResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
