@@ -4,7 +4,7 @@
 import sys
 from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
 from org.oxauth.persistence.model.configuration import GluuConfiguration
-from org.gluu.persist import PersistenceEntryManager
+from io.jans.orm import PersistenceEntryManager
 from java.nio.charset import Charset
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity

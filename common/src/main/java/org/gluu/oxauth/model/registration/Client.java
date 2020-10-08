@@ -12,9 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.persist.model.base.DeletableEntity;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.DeletableEntity;
 import org.oxauth.persistence.model.ClientAttributes;
 
 import java.io.Serializable;

@@ -14,9 +14,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.SearchScope;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.SearchScope;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.StaticConfiguration;

@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.uma.persistence;
 
 import com.google.common.collect.Maps;
 import org.gluu.oxauth.model.util.Pair;
-import org.gluu.persist.annotation.*;
+import io.jans.orm.annotation.*;
 
 import java.io.Serializable;
 import java.util.*;

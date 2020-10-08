@@ -6,7 +6,7 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.SectorIdentifier;

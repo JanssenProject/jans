@@ -17,10 +17,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.oxauth.service.common.ApplicationFactory;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.operation.LdapOperationService;
-import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
-import org.gluu.persist.operation.PersistenceOperationService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.ldap.operation.LdapOperationService;
+import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
+import io.jans.orm.operation.PersistenceOperationService;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.LdapStatusEvent;
 import org.gluu.service.cdi.event.Scheduled;

@@ -16,8 +16,8 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.IdType;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.DummyEntry;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;

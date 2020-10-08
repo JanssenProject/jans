@@ -10,9 +10,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.CustomObjectAttribute;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import org.gluu.util.StringHelper;
 
 /**

@@ -2,7 +2,7 @@ package org.gluu.oxauth.service;
 
 import org.gluu.oxauth.model.GluuOrganization;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;

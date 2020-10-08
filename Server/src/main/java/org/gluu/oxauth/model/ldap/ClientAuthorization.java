@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.persist.annotation.*;
+import io.jans.orm.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
