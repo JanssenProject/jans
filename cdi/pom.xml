@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>core-cdi</artifactId>
-	<name>core-cdi</name>
+	<artifactId>jans-core-cdi</artifactId>
+	<name>jans-core-cdi</name>
 	<description>Reusable CDI classes which not depend on specific framework</description>
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>jans-core-parent</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 

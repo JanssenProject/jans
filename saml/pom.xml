@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>core-saml</artifactId>
-	<name>core-saml</name>
+	<artifactId>jans-core-saml</artifactId>
+	<name>jans-core-saml</name>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>jans-core-parent</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -48,11 +48,11 @@
 		<!-- Gluu -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-util</artifactId>
+			<artifactId>jans-core-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-document-store</artifactId>
+			<artifactId>jans-core-document-store</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

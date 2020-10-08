@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
-	<artifactId>core</artifactId>
+	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
-	<name>core</name>
+	<name>jans-core</name>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
@@ -28,7 +28,7 @@
 		<module>util</module>
 		<module>model</module>
 		<module>cache</module>
-		<module>core-document-store</module>
+		<module>document-store</module>
 		<module>standalone</module>
 		<module>saml</module>
 		<module>jsf-util</module>
