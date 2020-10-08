@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>core-jsf-util</artifactId>
+	<artifactId>jans-core-jsf-util</artifactId>
 	<packaging>jar</packaging>
-	<name>core-jsf-util</name>
+	<name>jans-core-jsf-util</name>
 	<description>JSF2 utilities</description>
 
 	<parent>
 		<groupId>io.jans</groupId>
-		<artifactId>core</artifactId>
+		<artifactId>jans-core-parent</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -30,7 +30,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-service</artifactId>
+			<artifactId>jans-core-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>
