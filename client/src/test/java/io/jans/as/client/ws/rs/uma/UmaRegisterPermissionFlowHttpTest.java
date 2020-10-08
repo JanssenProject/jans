@@ -22,7 +22,7 @@ import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.UmaTestUtil;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

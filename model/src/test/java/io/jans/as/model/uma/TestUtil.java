@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.gluu.oxauth.model.uma;
+package io.jans.as.model.uma;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
