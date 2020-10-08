@@ -66,11 +66,11 @@
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>persistence-annotation</artifactId>
+			<artifactId>jans-orm-annotation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>persistence-ldap</artifactId>
+			<artifactId>jans-orm-ldap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
