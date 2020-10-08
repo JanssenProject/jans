@@ -9,8 +9,8 @@ from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.service.common import EncryptionService 
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
-from org.gluu.jsf2.service import FacesService
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.service import FacesService
+from io.jans.jsf2.message import FacesMessages
 from java.util import Arrays
 from java.lang import String
 from java.lang import System

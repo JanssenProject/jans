@@ -15,7 +15,7 @@ from org.gluu.oxauth.service import UserService, AuthenticationService, RequestP
 from org.gluu.oxauth.service.net import HttpService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
-from org.gluu.jsf2.service import FacesService
+from io.jans.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

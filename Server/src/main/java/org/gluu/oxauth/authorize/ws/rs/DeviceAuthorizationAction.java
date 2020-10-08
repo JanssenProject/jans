@@ -7,7 +7,7 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.message.FacesMessages;
+import io.jans.jsf2.message.FacesMessages;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
