@@ -24,7 +24,7 @@ import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.json.JSONObject;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;

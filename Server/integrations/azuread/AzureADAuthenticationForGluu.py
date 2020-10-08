@@ -5,7 +5,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import AuthenticationService, UserService
 from org.gluu.oxauth.model.common import User
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import IdentityHashMap
 from org.apache.commons.codec.binary import Base64
 from java.lang import String

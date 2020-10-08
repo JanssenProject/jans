@@ -15,7 +15,7 @@ import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.fido.u2f.U2fConstants;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.common.UserService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.common.User;
 

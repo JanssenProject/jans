@@ -17,7 +17,7 @@ import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

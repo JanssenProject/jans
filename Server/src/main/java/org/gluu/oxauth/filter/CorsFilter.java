@@ -29,7 +29,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.server.filters.AbstractCorsFilter;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

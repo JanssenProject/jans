@@ -7,7 +7,7 @@
 package org.gluu.oxauth.service.common;
 
 import org.gluu.oxauth.model.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

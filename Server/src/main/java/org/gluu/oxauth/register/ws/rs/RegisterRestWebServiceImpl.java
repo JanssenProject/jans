@@ -45,8 +45,8 @@ import org.gluu.oxauth.service.external.ExternalDynamicClientRegistrationService
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.model.base.CustomAttribute;
-import org.gluu.util.StringHelper;
-import org.gluu.util.security.StringEncrypter;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -10,7 +10,7 @@ from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import AuthenticationService
 from io.jans.orm import PersistenceEntryManager
 from org.gluu.oxauth.model.ldap import TokenLdap
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from org.gluu.oxauth.model.config import StaticConfiguration

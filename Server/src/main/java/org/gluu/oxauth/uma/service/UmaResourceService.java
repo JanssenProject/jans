@@ -17,7 +17,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

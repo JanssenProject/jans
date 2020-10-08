@@ -15,7 +15,7 @@ import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 
@@ -92,7 +92,7 @@ public class DeviceRegistrationService {
 	}
 
 	public List<DeviceRegistration> findDeviceRegistrationsByKeyHandle(String appId, String keyHandle, String ... returnAttributes) {
-		if (org.gluu.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+		if (io.jans.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
 			return new ArrayList<DeviceRegistration>(0);
 		}
 

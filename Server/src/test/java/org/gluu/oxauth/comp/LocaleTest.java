@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.util.ilocale.LocaleUtil;
+import io.jans.util.ilocale.LocaleUtil;
 import org.testng.annotations.Test;
 
 /**

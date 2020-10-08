@@ -45,7 +45,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.slf4j.Logger;

@@ -13,7 +13,7 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 
 /**
  * OxAuthConfigurationService

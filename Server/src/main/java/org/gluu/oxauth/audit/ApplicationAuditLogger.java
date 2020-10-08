@@ -29,7 +29,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.ConfigurationUpdate;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.google.common.base.Objects;

@@ -15,7 +15,7 @@ from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 
 from java.util.concurrent.locks import ReentrantLock
 
