@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-server</artifactId>
-	<name>janssen server</name>
+	<name>jans-auth-server</name>
 	<packaging>war</packaging>
 
 	<parent>
@@ -240,7 +240,7 @@
 				<configuration>
 					<webAppConfig>
 						<descriptor>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</descriptor>
-						<contextPath>/janssen</contextPath>
+						<contextPath>/jans</contextPath>
 					</webAppConfig>
 
 					<webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
@@ -273,7 +273,7 @@
 			<groupId>com.wywy</groupId>
 			<artifactId>log4j-plugin-fluency</artifactId>
 		</dependency>
-		<!-- janssen -->
+		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-model</artifactId>
@@ -297,7 +297,7 @@
 			<artifactId>jans-auth-static</artifactId>
 		</dependency>
 
-		<!-- janssen -->
+		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>core-model</artifactId>
@@ -357,7 +357,7 @@
 			<artifactId>eleven-client</artifactId>
 		</dependency>
 
-		<!-- janssen-notify -->
+		<!-- jans-notify -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-notify-model</artifactId>
@@ -941,7 +941,7 @@
 			</activation>
 
 			<dependencies>
-				<!-- Remove after janssen client update to same version -->
+				<!-- Remove after jans client update to same version -->
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-jaxrs</artifactId>
