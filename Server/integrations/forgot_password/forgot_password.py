@@ -17,7 +17,7 @@ from org.gluu.oxauth.service import ConfigurationService
 from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
-from org.gluu.persist.exception import AuthenticationException
+from io.jans.orm.exception import AuthenticationException
 
 #dealing with smtp server
 import smtplib

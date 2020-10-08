@@ -8,8 +8,8 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.Deletable;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.Deletable;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;

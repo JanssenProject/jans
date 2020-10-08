@@ -22,7 +22,7 @@ import org.gluu.oxauth.uma.service.UmaPctService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaRptService;
-import org.gluu.persist.exception.EntryPersistenceException;
+import io.jans.orm.exception.EntryPersistenceException;
 import org.gluu.service.CacheService;
 import org.gluu.util.security.StringEncrypter;
 import org.testng.annotations.Test;

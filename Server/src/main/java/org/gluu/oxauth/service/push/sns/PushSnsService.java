@@ -12,7 +12,7 @@ import javax.inject.Named;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.oxauth.model.common.User;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;

@@ -10,15 +10,15 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
-import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.persist.model.base.CustomObjectAttribute;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import org.gluu.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
  * @version May 3, 2019
  */
-public class SimpleUser extends org.gluu.persist.model.base.SimpleUser {
+public class SimpleUser extends io.jans.orm.model.base.SimpleUser {
 
     private static final long serialVersionUID = -2634191420188575733L;
 

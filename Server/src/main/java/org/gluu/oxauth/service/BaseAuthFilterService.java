@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.model.configuration.BaseFilter;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.operation.SearchException;
-import org.gluu.persist.ldap.impl.LdapFilterConverter;
-import org.gluu.persist.model.base.DummyEntry;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.ldap.impl.LdapFilterConverter;
+import io.jans.orm.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;

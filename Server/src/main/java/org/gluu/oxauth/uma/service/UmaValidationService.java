@@ -37,7 +37,7 @@ import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.exception.EntryPersistenceException;
+import io.jans.orm.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.Scope;
 import org.python.google.common.base.Function;

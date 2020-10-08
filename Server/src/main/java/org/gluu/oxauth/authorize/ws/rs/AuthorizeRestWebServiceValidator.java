@@ -15,7 +15,7 @@ import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.exception.EntryPersistenceException;
+import io.jans.orm.exception.EntryPersistenceException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
