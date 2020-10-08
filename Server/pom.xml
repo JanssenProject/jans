@@ -300,11 +300,11 @@
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-model</artifactId>
+			<artifactId>jans-core-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-util</artifactId>
+			<artifactId>jans-core-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -328,23 +328,23 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-service</artifactId>
+			<artifactId>jans-core-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-server</artifactId>
+			<artifactId>jans-core-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-jsf-util</artifactId>
+			<artifactId>jans-core-jsf-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>core-timer-weld</artifactId>
+			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>core-script</artifactId>
+            <artifactId>jans-core-script</artifactId>
         </dependency>
 
 		<!-- Eleven -->
@@ -1075,7 +1075,7 @@
 			<dependencies>
 				<dependency>
 					<groupId>io.jans</groupId>
-					<artifactId>core-saml</artifactId>
+					<artifactId>jans-core-saml</artifactId>
 				</dependency>
 			</dependencies>
 		</profile>

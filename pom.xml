@@ -170,7 +170,7 @@
 			<!-- jans -->
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-util</artifactId>
+				<artifactId>jans-core-util</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
@@ -205,32 +205,32 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-service</artifactId>
+				<artifactId>jans-core-service</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-server</artifactId>
+				<artifactId>jans-core-server</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-jsf-util</artifactId>
+				<artifactId>jans-core-jsf-util</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-saml</artifactId>
+				<artifactId>jans-core-saml</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-model</artifactId>
+				<artifactId>jans-core-model</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>core-document-store</artifactId>
+				<artifactId>jans-core-document-store</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
