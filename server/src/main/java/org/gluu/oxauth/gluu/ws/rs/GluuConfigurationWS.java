@@ -19,7 +19,7 @@ import io.jans.as.common.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

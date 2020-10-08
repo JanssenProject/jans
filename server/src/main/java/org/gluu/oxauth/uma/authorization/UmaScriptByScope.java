@@ -1,7 +1,7 @@
 package org.gluu.oxauth.uma.authorization;
 
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 
 /**
  * @author yuriyz

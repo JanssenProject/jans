@@ -13,7 +13,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
 import io.jans.service.custom.script.ExternalScriptService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
@@ -70,7 +70,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 
 	private Set<CustomScriptConfiguration> getScriptsToExecute(DynamicScopeExternalContext context) {
         Set<String> allowedScripts = Sets.newHashSet();
-		for (org.oxauth.persistence.model.Scope scope : context.getScopes()) {
+		for (Scope scope : context.getScopes()) {
 			List<String> scopeScripts = scope.getDynamicScopeScripts();
 			if (scopeScripts != null) { 
 				allowedScripts.addAll(scopeScripts);

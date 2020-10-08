@@ -53,7 +53,7 @@ import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -320,7 +320,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Claims
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
-            org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
+            Scope scope = scopeService.getScopeById(scopeName);
             if ((scope != null) && (ScopeType.DYNAMIC == scope.getScopeType())) {
                 dynamicScopes.add(scope);
                 continue;
@@ -423,7 +423,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         for (String scopeName : scopes) {
-            org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
+            Scope scope = scopeService.getScopeById(scopeName);
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {

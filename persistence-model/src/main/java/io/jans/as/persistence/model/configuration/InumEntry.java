@@ -4,12 +4,12 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.oxauth.persistence.model.configuration;
+package io.jans.as.persistence.model.configuration;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import org.oxauth.persistence.model.base.Entry;
+import io.jans.as.persistence.model.base.Entry;
 
 /**
  * Provides global inum search ability.

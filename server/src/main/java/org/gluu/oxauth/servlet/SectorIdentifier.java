@@ -39,7 +39,7 @@ public class SectorIdentifier extends HttpServlet {
             String urlPath = httpRequest.getPathInfo();
             String oxId = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
 
-            org.oxauth.persistence.model.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(oxId);
+            io.jans.as.persistence.model.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(oxId);
 
             JSONArray jsonArray = new JSONArray();
 

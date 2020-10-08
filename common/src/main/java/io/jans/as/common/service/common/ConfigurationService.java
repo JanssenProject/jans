@@ -14,7 +14,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
 
 /**
