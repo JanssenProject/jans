@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>eleven-server</artifactId>
+	<artifactId>jans-eleven-server</artifactId>
 	<name>Eleven Server</name>
 	<packaging>war</packaging>
 
 	<parent>
-		<artifactId>eleven</artifactId>
+		<artifactId>jans-eleven-parent</artifactId>
 		<groupId>io.jans</groupId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
@@ -20,7 +20,7 @@
 		<!-- oxEleven -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>eleven-model</artifactId>
+			<artifactId>jans-eleven-model</artifactId>
 		</dependency>
 
 		<!-- Weld -->
