@@ -11,9 +11,9 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.authorize.ws.rs.ConsentGatheringSessionService;
 import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

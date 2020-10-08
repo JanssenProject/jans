@@ -18,7 +18,7 @@ import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.util.RedirectUri;
+import io.jans.as.common.util.RedirectUri;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

@@ -13,7 +13,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.ciba.CibaEncryptionService;
 import org.gluu.oxauth.service.external.ExternalCibaEndUserNotificationService;
 import org.gluu.oxauth.service.external.context.ExternalCibaEndUserNotificationContext;
-import org.gluu.oxauth.util.RedirectUri;
+import io.jans.as.common.util.RedirectUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.model.common.CibaRequestCacheControl;
 import org.gluu.oxauth.model.common.CibaRequestStatus;
 import org.gluu.oxauth.model.ldap.CIBARequest;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

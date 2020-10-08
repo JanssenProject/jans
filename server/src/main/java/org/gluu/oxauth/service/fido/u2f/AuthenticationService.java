@@ -26,7 +26,7 @@ import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.gluu.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

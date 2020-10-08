@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.authorize;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.SpontaneousScopeService;
 import org.gluu.oxauth.service.external.ExternalSpontaneousScopeService;

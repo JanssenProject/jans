@@ -5,7 +5,7 @@ import io.jans.as.model.session.EndSessionErrorResponseType;
 import org.apache.commons.lang.ArrayUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
-import org.gluu.oxauth.model.common.User;
+import io.jans.as.common.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;

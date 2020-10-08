@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.util;
 
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.common.ResponseMode;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.json.JSONException;

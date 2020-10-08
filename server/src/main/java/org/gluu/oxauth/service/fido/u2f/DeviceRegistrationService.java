@@ -16,7 +16,7 @@ import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

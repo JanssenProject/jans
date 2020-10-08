@@ -22,7 +22,7 @@ import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.service.fido.u2f.AuthenticationService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.UserSessionIdService;

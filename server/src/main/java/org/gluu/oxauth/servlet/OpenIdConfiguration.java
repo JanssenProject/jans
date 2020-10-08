@@ -14,7 +14,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.model.GluuAttribute;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.ciba.CIBAConfigurationService;
-import org.gluu.oxauth.service.AttributeService;
+import io.jans.as.common.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;

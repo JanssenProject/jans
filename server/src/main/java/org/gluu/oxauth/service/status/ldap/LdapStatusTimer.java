@@ -15,7 +15,7 @@ import io.jans.service.cdi.event.LdapStatusEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.gluu.oxauth.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.ApplicationFactory;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;

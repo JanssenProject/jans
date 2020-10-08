@@ -8,8 +8,8 @@ import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.common.EncryptionService;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.EncryptionService;
 import org.gluu.oxauth.util.ServerUtil;
 
 import javax.ejb.Stateless;
