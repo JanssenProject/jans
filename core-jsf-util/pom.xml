@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>core-jsf-util</artifactId>
 	<packaging>jar</packaging>
-	<name>oxJsfUtil</name>
+	<name>core-jsf-util</name>
 	<description>JSF2 utilities</description>
 
 	<parent>
