@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.*;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;

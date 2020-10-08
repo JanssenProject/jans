@@ -10,7 +10,7 @@ import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
-import org.gluu.oxauth.client.RegisterRequest;
+import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.external.context.DynamicClientRegistrationContext;

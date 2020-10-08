@@ -9,7 +9,7 @@ package org.gluu.oxauth.ws.rs;
 import static org.testng.Assert.assertNotNull;
 import static org.gluu.oxauth.model.uma.TestUtil.assertNotBlank;
 
-import org.gluu.oxauth.client.RegisterResponse;
+import io.jans.as.client.RegisterResponse;
 
 /**
  * @author Yuriy Zabrovarnyy

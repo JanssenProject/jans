@@ -2,6 +2,7 @@ package org.gluu.oxauth.rp.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import io.jans.as.client.*;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.AuthenticationMethod;

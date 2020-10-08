@@ -13,7 +13,7 @@ import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorService;
 import org.gluu.oxauth.ciba.CIBAEndUserNotificationService;
-import org.gluu.oxauth.client.JwkClient;
+import io.jans.as.client.JwkClient;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;

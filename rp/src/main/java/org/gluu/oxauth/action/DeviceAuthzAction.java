@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.action;
 
-import org.gluu.oxauth.client.DeviceAuthzClient;
-import org.gluu.oxauth.client.DeviceAuthzRequest;
-import org.gluu.oxauth.client.DeviceAuthzResponse;
+import io.jans.as.client.DeviceAuthzClient;
+import io.jans.as.client.DeviceAuthzRequest;
+import io.jans.as.client.DeviceAuthzResponse;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;

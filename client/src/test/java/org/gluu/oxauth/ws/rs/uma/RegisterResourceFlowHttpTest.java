@@ -18,9 +18,9 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.uma.UmaClientFactory;
-import org.gluu.oxauth.client.uma.UmaResourceService;
-import org.gluu.oxauth.client.uma.wrapper.UmaClient;
+import io.jans.as.client.uma.UmaClientFactory;
+import io.jans.as.client.uma.UmaResourceService;
+import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;

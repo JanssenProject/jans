@@ -1,6 +1,7 @@
 package org.gluu.oxauth.client;
 
 import com.google.common.collect.Lists;
+import io.jans.as.client.RegisterRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
