@@ -8,7 +8,7 @@ package org.gluu.oxauth.service;
 
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
-import io.jans.as.server.gluu.ws.rs.GluuConfigurationWS;
+import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
 import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
@@ -51,7 +51,7 @@ public class TestResteasyInitializer extends Application {
         classes.add(UmaMetadataWS.class);
         classes.add(UmaGatheringWS.class);
 
-        classes.add(GluuConfigurationWS.class);
+        classes.add(JansConfigurationWS.class);
         return classes;
     }
 
