@@ -58,7 +58,16 @@
         <!-- Gluu -->
         <dependency>
             <groupId>io.jans</groupId>
+            <artifactId>jans-scim-model</artifactId>
+            <version>${gluu.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
             <artifactId>jans-core-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
