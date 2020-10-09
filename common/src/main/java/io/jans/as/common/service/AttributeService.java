@@ -7,10 +7,10 @@
 package io.jans.as.common.service;
 
 import io.jans.model.GluuAttribute;
+import io.jans.orm.search.filter.Filter;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.common.util.OxConstants;
-import io.jans.search.filter.Filter;
 import io.jans.service.BaseCacheService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
