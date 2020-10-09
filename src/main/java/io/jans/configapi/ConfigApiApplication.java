@@ -1,11 +1,11 @@
 package io.jans.configapi;
 
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.quarkus.runtime.ShutdownEvent;
