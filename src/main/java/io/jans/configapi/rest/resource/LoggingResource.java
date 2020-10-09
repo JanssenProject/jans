@@ -1,11 +1,11 @@
 package io.jans.configapi.rest.resource;
 
 import com.couchbase.client.core.message.ResponseStatus;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.rest.model.Logging;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.oxauth.model.config.Conf;
-import io.jans.oxauth.model.configuration.AppConfiguration;
 import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;

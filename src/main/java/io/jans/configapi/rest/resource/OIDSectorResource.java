@@ -1,12 +1,12 @@
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+import io.jans.as.persistence.model.SectorIdentifier;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.SectorService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
-import org.oxauth.persistence.model.SectorIdentifier;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
