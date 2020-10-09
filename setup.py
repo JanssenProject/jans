@@ -57,6 +57,12 @@ from setup_app.installers.radius import RadiusInstaller
 from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.casa import CasaInstaller
 
+if base.snap:
+    try:
+        open('/proc/mounts').close()
+    except:
+        print("Please execute the following command\n  sudo snap connect gluu-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
+        sys.exit()
 
 # initialize config object
 Config.init(paths.INSTALL_DIR)
