@@ -23,8 +23,9 @@ import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterBaseListener;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterLexer;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterParser;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
+import io.jans.orm.search.filter.Filter;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.search.filter.Filter;
+
 import org.slf4j.Logger;
 
 /**

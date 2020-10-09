@@ -40,6 +40,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.fido.GluuCustomFidoDevice;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -55,7 +56,6 @@ import io.jans.scim.service.FidoDeviceService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.search.filter.Filter;
 
 /**
  * Implementation of /FidoDevices endpoint. Methods here are intercepted and/or decorated.

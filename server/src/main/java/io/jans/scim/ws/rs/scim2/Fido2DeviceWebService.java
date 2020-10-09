@@ -52,7 +52,8 @@ import io.jans.scim.ws.rs.scim2.PATCH;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 

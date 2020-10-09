@@ -9,7 +9,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
+
 import org.slf4j.Logger;
 
 import io.jans.scim.model.fido.GluuCustomFidoDevice;

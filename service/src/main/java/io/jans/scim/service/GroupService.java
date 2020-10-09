@@ -21,11 +21,11 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.GluuGroupVisibility;
 import io.jans.scim.util.OxTrustConstants;
-import io.jans.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 

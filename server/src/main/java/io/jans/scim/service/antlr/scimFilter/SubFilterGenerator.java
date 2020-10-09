@@ -1,5 +1,6 @@
 package io.jans.scim.service.antlr.scimFilter;
 
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.scim2.AttributeDefinition.Type;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +9,6 @@ import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.antlr.scimFilter.enums.CompValueType;
 import io.jans.scim.service.antlr.scimFilter.enums.ScimOperator;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
-import io.jans.search.filter.Filter;
 import io.jans.util.Pair;
 
 import java.util.Optional;

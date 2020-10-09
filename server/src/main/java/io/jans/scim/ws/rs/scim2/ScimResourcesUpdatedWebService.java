@@ -16,7 +16,7 @@ import io.jans.scim.util.ServiceUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.model.SortOrder;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;

@@ -25,7 +25,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.base.SimpleUser;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;

@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.jans.scim.model.scim2.AttributeDefinition.Type;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.annotations.Attribute;
 import io.jans.scim.model.scim2.extensions.ExtensionField;
@@ -19,7 +20,6 @@ import io.jans.scim.service.antlr.scimFilter.enums.CompValueType;
 import io.jans.scim.service.antlr.scimFilter.enums.ScimOperator;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
 import io.jans.scim.service.scim2.ExtensionService;
-import io.jans.search.filter.Filter;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.Pair;
 

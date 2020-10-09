@@ -30,6 +30,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.GluuBoolean;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -55,7 +56,6 @@ import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.util.ServiceUtil;
 import io.jans.scim.ws.rs.scim2.GroupWebService;
-import io.jans.search.filter.Filter;
 
 /**
  * This class holds the most important business logic of the SCIM service for

@@ -18,6 +18,7 @@ import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -31,7 +32,6 @@ import io.jans.scim.service.OrganizationService;
 import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.external.ExternalScimService;
-import io.jans.search.filter.Filter;
 
 /**
  * @author Val Pecaoco Re-engineered by jgomer on 2017-10-18.
