@@ -619,6 +619,13 @@
 				<artifactId>velocity-engine-core</artifactId>
 				<version>2.2</version>
 			</dependency>
+			
+			<!-- Date/time utils -->
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.9.9</version>
+			</dependency>
 
 			<!-- Tests -->
 			<dependency>
