@@ -1,4 +1,4 @@
-package org.gluu.configapi;
+package io.jans.configapi;
 
 import io.quarkus.test.junit.QuarkusTest;
 
