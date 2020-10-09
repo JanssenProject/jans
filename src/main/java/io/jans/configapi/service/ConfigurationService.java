@@ -27,7 +27,7 @@ public class ConfigurationService {
     ConfigurationFactory configurationFactory;
 
     public Conf findConf() {
-        final String dn = configurationFactory.getOxauthConfigurationDn();
+        final String dn = configurationFactory.getConfigurationDn();
         return persistenceManager.get().find(dn, Conf.class, null);
     }
 
