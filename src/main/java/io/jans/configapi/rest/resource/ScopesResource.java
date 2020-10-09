@@ -1,14 +1,14 @@
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+import io.jans.as.model.common.ScopeType;
+import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
-import io.jans.oxauth.model.common.ScopeType;
 import io.jans.util.StringHelper;
-import org.oxauth.persistence.model.Scope;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
