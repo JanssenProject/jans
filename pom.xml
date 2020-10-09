@@ -48,6 +48,7 @@
 
 	<modules>
 		<module>model</module>
+		<module>service</module>
 		<module>rest</module>
 		<module>server</module>
 		<module>client</module>

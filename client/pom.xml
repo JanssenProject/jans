@@ -94,8 +94,7 @@
         <!-- Gluu -->
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxauth-client</artifactId>
-            <version>${gluu.version}</version>
+            <artifactId>jans-auth-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>

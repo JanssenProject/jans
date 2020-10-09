@@ -23,13 +23,11 @@
             <artifactId>jans-scim-model</artifactId>
             <version>${gluu.version}</version>
         </dependency>
-<!--
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxtrust-service</artifactId>
+            <artifactId>jans-scim-service</artifactId>
             <version>${gluu.version}</version>
         </dependency>
- -->
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-service</artifactId>
