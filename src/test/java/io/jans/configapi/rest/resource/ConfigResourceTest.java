@@ -1,4 +1,4 @@
-package org.gluu.configapi.rest.resource;
+package io.jans.configapi.rest.resource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
