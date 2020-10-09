@@ -1,10 +1,8 @@
 package io.jans.scim.service.external;
 
-import java.util.Collections;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.annotation.PostConstruct;
 
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
