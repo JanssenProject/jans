@@ -65,6 +65,7 @@ public class ApiConstants {
     public static final String SCOPE_INUM = "scope_inum";
     public static final String TYPE = "type";
     public static final String NAME = "name";
+    public static final String DISPLAY_NAME = "displayName";
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
@@ -74,5 +75,15 @@ public class ApiConstants {
 
     // Custom CODE
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
+    
+    // API Protection
+    public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
+    public static final String PROTECTION_TYPE_UMA = "uma";
+
+    // Connection pool properties
+    public static final int CONNECTION_POOL_MAX_TOTAL = 200;
+    public static final int CONNECTION_POOL_DEFAULT_MAX_PER_ROUTE = 20;
+    public static final int CONNECTION_POOL_VALIDATE_AFTER_INACTIVITY = 10;
+    public static final int CONNECTION_POOL_CUSTOM_KEEP_ALIVE_TIMEOUT = 5;
 
 }
