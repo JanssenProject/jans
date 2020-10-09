@@ -1,11 +1,11 @@
 package io.jans.configapi.rest.resource;
 
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
-import io.jans.oxauth.model.config.Conf;
-import io.jans.oxauth.model.configuration.AppConfiguration;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

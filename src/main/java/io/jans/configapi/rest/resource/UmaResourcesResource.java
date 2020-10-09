@@ -1,13 +1,13 @@
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
 import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.oxauth.model.uma.persistence.UmaResource;
 
 import javax.inject.Inject;
 import javax.validation.Valid;

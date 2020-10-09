@@ -1,11 +1,11 @@
 package io.jans.configapi.rest.resource;
 
 import com.couchbase.client.core.message.ResponseStatus;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
