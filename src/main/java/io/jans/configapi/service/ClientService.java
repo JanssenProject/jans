@@ -11,7 +11,7 @@ import io.jans.oxauth.service.OrganizationService;
 import io.jans.oxauth.service.common.InumService;
 import io.jans.oxauth.util.OxConstants;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
