@@ -18,7 +18,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
-		<gluu.parent.version>5.0.0-SNAPSHOT</gluu.parent.version>
+		<janssen.version>5.0.0-SNAPSHOT</janssen.version>
 		<gluu.version>5.0.0-SNAPSHOT</gluu.version>
         <weld.version>3.1.2.Final</weld.version>
 	</properties>
@@ -47,19 +47,19 @@
 	</scm>
 
 	<modules>
-		<module>scim-model</module>
-		<module>scim-rest</module>
-		<module>scim-server</module>
-		<module>scim-client</module>
+		<module>model</module>
+		<module>rest</module>
+		<module>server</module>
+		<module>client</module>
 	</modules>
 	
 	<dependencyManagement>
 		<dependencies>
-			<!-- Gluu -->
+			<!-- janssen -->
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-bom</artifactId>
-				<version>${gluu.parent.version}</version>
+				<version>${janssen.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
