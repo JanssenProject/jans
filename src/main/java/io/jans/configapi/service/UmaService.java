@@ -1,14 +1,13 @@
 package io.jans.configapi.service;
 
-import io.jans.oxauth.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaMetadata;
 import io.jans.util.exception.ConfigurationException;
+import org.slf4j.Logger;
 
-import java.io.Serializable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 @ApplicationScoped
 @Named("umaService")
@@ -38,14 +37,8 @@ public class UmaService implements Serializable {
     public UmaMetadata getUmaMetadata() throws Exception{
         return this.umaMetadata;
     }
-    
 
-    
     public UmaMetadata loadUmaConfiguration() throws Exception {
         return null;
     }
-
-
-
-
 }

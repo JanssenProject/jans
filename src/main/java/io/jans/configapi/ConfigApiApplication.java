@@ -1,15 +1,15 @@
 package io.jans.configapi;
 
-import io.quarkus.runtime.ShutdownEvent;
-import io.quarkus.runtime.StartupEvent;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.exception.OxIntializationException;
-import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
+import io.quarkus.runtime.ShutdownEvent;
+import io.quarkus.runtime.StartupEvent;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 

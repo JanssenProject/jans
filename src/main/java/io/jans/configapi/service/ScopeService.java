@@ -1,13 +1,13 @@
 package io.jans.configapi.service;
 
-import org.apache.commons.lang.StringUtils;
-import io.jans.oxauth.model.config.StaticConfiguration;
-import io.jans.oxauth.service.OrganizationService;
-import io.jans.oxauth.util.OxConstants;
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.common.util.OxConstants;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.oxauth.persistence.model.Scope;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

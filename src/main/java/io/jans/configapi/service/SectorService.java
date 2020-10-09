@@ -1,12 +1,12 @@
 package io.jans.configapi.service;
 
-import io.jans.oxauth.model.registration.Client;
-import io.jans.oxauth.service.OrganizationService;
-import io.jans.oxauth.util.OxConstants;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.common.util.OxConstants;
+import io.jans.as.persistence.model.SectorIdentifier;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
