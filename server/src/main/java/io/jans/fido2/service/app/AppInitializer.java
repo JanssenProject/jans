@@ -12,7 +12,7 @@ import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.model.custom.script.CustomScriptType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.oxauth.model.util.SecurityProviderUtility;
 import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.oxauth.service.common.EncryptionService;
 import io.jans.orm.PersistenceEntryManager;

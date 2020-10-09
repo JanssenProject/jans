@@ -6,7 +6,7 @@
 
 package io.jans.fido2.model.conf;
 
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.oxauth.model.config.StaticConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;

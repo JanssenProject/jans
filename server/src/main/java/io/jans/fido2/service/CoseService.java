@@ -41,7 +41,7 @@ import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseKeyType;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import org.gluu.oxauth.model.exception.SignatureException;
+import io.jans.oxauth.model.exception.SignatureException;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

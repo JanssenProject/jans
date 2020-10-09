@@ -8,7 +8,7 @@ package io.jans.fido2.model.conf;
 
 import java.util.List;
 
-import org.gluu.oxauth.model.configuration.Configuration;
+import io.jans.oxauth.model.configuration.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

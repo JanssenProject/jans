@@ -13,7 +13,7 @@ import javax.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.oxauth.model.config.StaticConfiguration;
 import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;

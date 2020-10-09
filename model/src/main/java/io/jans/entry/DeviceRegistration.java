@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
+import io.jans.oxauth.model.fido.u2f.protocol.DeviceData;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
