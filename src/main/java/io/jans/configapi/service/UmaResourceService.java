@@ -4,7 +4,7 @@ import io.jans.oxauth.model.config.StaticConfiguration;
 import io.jans.oxauth.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
