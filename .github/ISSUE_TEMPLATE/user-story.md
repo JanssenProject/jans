@@ -34,14 +34,14 @@ This allows us to assign a risk level to the user story, which represents the le
  This is the core of the user story. It should be relatively short (3 to 5 lines) and should describe the high-level requirement or requirements of the feature. For example:
 
 ```
-As an API Consumer, I want to make a request to the oxauth-config-api server containing the details of an OpenID client so that I can create a new OpenID client.
+As an API Consumer, I want to make a request to the jans-config-api server containing the details of an OpenID client so that I can create a new OpenID client.
 ```
 
 #### Acceptance Criteria. This section contains every condition under which the feature should operate for the end-user to consider the feature to be accepted or marked complete. The criteria also serve as a guideline for writing unit tests for the feature. For example:
 
 ```
 When the API Consumer sends a request to POST /api/v1/openid/clients containing valid OpenID Client creation data
-Then the oxauth-config-api server will create a new OpenID client
+Then the jans-config-api server will create a new OpenID client
 And will return a HTTP 201 Created Response
 Also when the the API Consumer sees the 201 Response
 And a JSON response body containing the details of the newly created client

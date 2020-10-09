@@ -140,14 +140,14 @@ public class ConfigurationFactory {
         throw new ConfigurationException("Unable to find configuration in DB... ");
     }
 
-    public String getOxauthConfigurationDn() {
+    public String getConfigurationDn() {
         return this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
     }
 
     private Conf loadConfigurationFromDb() {
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            return persistenceEntryManager.find(Conf.class, getOxauthConfigurationDn());
+            return persistenceEntryManager.find(Conf.class, getConfigurationDn());
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
             return null;
