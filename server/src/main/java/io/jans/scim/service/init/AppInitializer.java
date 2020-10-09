@@ -10,24 +10,24 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import io.jans.exception.ConfigurationException;
+import org.slf4j.Logger;
+
 import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.scim.service.ApplicationFactory;
-import io.jans.scim.service.logger.LoggerService;
-import io.jans.scim.service.external.ExternalScimService;
+import io.jans.exception.ConfigurationException;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.scim.service.ApplicationFactory;
+import io.jans.scim.service.logger.LoggerService;
 import io.jans.service.PythonService;
+import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
-import org.slf4j.Logger;
 
 @ApplicationScoped
 public class AppInitializer {
