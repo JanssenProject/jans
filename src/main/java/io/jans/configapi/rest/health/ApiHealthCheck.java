@@ -10,6 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ApiHealthCheck implements HealthCheck {
     public HealthCheckResponse call() {
-        return HealthCheckResponse.up("oxauth-config-api liveness");
+        return HealthCheckResponse.up("jans-config-api liveness");
     }
 }

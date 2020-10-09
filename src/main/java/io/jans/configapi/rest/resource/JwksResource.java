@@ -1,12 +1,12 @@
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
-import io.jans.oxauth.model.config.Conf;
-import io.jans.oxauth.model.config.WebKeysConfiguration;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;

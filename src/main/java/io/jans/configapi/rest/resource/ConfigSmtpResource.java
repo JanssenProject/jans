@@ -1,13 +1,13 @@
 package io.jans.configapi.rest.resource;
 
+import io.jans.as.common.service.common.ConfigurationService;
+import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SmtpConfiguration;
-import io.jans.oxauth.service.common.ConfigurationService;
-import io.jans.oxauth.service.common.EncryptionService;
 import io.jans.service.MailService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
 
 import javax.inject.Inject;
 import javax.json.Json;
