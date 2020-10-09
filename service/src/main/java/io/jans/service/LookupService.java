@@ -18,7 +18,7 @@ import javax.inject.Named;
 import io.jans.model.DisplayNameEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.Entry;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.OxConstants;
 
 /**

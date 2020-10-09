@@ -18,7 +18,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.DefaultBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.util.StringHelper;
