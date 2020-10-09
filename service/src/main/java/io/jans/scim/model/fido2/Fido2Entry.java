@@ -18,9 +18,6 @@ import io.jans.orm.annotation.ObjectClass;
 @ObjectClass
 public class Fido2Entry extends BaseEntry implements Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 7351459527571263266L;
 
 	@AttributeName(ignoreDuringUpdate = true, name = "oxId")
