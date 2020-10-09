@@ -46,7 +46,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>jans-orm-core</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 
 		<!-- CDI -->
