@@ -6,7 +6,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
