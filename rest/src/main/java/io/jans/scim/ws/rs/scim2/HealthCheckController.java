@@ -1,4 +1,4 @@
-package org.gluu.scim.ws.rs.controller;
+package io.jans.scim.ws.rs.scim2;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
