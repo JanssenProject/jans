@@ -3,12 +3,12 @@ package io.jans.configapi.service;
 import com.github.fge.jackson.JacksonUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
+import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
 import io.jans.model.ldap.GluuLdapConfiguration;
-import io.jans.oxauth.service.common.EncryptionService;
 import io.jans.util.security.StringEncrypter;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
-import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

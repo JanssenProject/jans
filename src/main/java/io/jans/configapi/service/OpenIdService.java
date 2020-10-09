@@ -1,16 +1,10 @@
 package io.jans.configapi.service;
 
-import io.jans.oxauth.client.service.*;
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.client.service.IntrospectionService;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.ConfigurationException;
 import io.jans.util.init.Initializable;
-
-import java.io.IOException;
-import java.io.Serializable;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -19,6 +13,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.Serializable;
 
 @ApplicationScoped
 public class OpenIdService extends Initializable implements Serializable {

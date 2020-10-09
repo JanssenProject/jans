@@ -6,8 +6,8 @@ import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
-import io.jans.oxauth.model.uma.persistence.UmaResource;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.oxauth.model.uma.persistence.UmaResource;
 
 import javax.inject.Inject;
 import javax.validation.Valid;

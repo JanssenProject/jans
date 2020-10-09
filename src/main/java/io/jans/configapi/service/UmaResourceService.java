@@ -1,7 +1,7 @@
 package io.jans.configapi.service;
 
-import io.jans.oxauth.model.config.StaticConfiguration;
-import io.jans.oxauth.model.uma.persistence.UmaResource;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;

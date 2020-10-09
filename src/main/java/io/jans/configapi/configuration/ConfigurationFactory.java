@@ -1,24 +1,27 @@
 package io.jans.configapi.configuration;
 
-import io.quarkus.arc.AlternativePriority;
-import org.apache.commons.lang.StringUtils;
-import io.jans.configapi.auth.*;
+import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.auth.OpenIdAuthorizationService;
+import io.jans.configapi.auth.UmaAuthorizationService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
+import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.oxauth.model.config.Conf;
 import io.jans.oxauth.model.config.StaticConfiguration;
 import io.jans.oxauth.model.config.WebKeysConfiguration;
 import io.jans.oxauth.model.configuration.AppConfiguration;
 import io.jans.oxauth.model.error.ErrorResponseFactory;
 import io.jans.oxauth.service.common.ApplicationFactory;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.BasePersistenceException;
-import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
+import io.quarkus.arc.AlternativePriority;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -28,8 +31,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.util.Properties;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
