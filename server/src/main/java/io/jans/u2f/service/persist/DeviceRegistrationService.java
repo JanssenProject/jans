@@ -31,7 +31,7 @@ import io.jans.oxauth.model.config.StaticConfiguration;
 import io.jans.oxauth.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
