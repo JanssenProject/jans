@@ -32,7 +32,7 @@ import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
