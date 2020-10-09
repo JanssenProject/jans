@@ -1,5 +1,11 @@
 package io.jans.configapi.configuration;
 
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.UmaAuthorizationService;
@@ -9,12 +15,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.oxauth.model.config.Conf;
-import io.jans.oxauth.model.config.StaticConfiguration;
-import io.jans.oxauth.model.config.WebKeysConfiguration;
-import io.jans.oxauth.model.configuration.AppConfiguration;
-import io.jans.oxauth.model.error.ErrorResponseFactory;
-import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
