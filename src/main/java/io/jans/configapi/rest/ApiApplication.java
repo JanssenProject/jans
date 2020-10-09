@@ -1,6 +1,3 @@
-/**
- *
- */
 package io.jans.configapi.rest;
 
 import javax.ws.rs.ApplicationPath;

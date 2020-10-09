@@ -1,6 +1,6 @@
 package io.jans.configapi.auth;
 
-import io.jans.oxauth.model.common.IntrospectionResponse;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.service.OpenIdService;
 
 import javax.enterprise.context.ApplicationScoped;

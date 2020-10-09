@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: oxauth-config
-  description: oxauth-config - Authorization services
+  title: jans-config-api
+  description: jans-config-api - Authorization services
   contact:
     email: xxx@gluu.org
   license:
@@ -12,7 +12,7 @@ servers:
   - url: 'https://gluu.org/'
 tags:
   - name: developers
-    description: oxauth-config enables access to the features available via the existing oxAuth API.
+    description: jans-config enables access to the features available via the existing oxAuth API.
   - name: Attribute
   - name: Default Authentication Method
   - name: Cache Configuration
@@ -34,8 +34,8 @@ tags:
 paths:
   /api/v1/oxauth/config/oxauth:
     get:
-      summary: Gets all oxAuth configuration properties.
-      description: Gets all oxAuth configuration properties.
+      summary: Gets all jans-auth-server configuration properties.
+      description: Gets all jans-auth-server configuration properties.
       operationId: get-properties
       security:
         - oxAuth:
@@ -57,8 +57,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partially modifies oxAuth Application configuration properties.
-      description: Partially modifies oxAuth AppConfiguration properties.
+      summary: Partially modifies jans-auth-server Application configuration properties.
+      description: Partially modifies jans-auth-server AppConfiguration properties.
       operationId: patch-properties
       security:
         - oxAuth:
@@ -80,7 +80,7 @@ paths:
             application/json:
               schema:
                 title: AppConfiguration
-                description: oxAuth config properties.
+                description: jans-auth-server config properties.
                 items:
                   $ref: '#/components/schemas/AppConfiguration'
         '401':
@@ -156,8 +156,8 @@ paths:
         - oxAuth:
             - read
     put:
-      summary: Updates oxAuth Fido2 configuration properties.
-      description: Updates oxAuth Fido2 configuration properties.
+      summary: Updates Fido2 configuration properties.
+      description: Updates Fido2 configuration properties.
       operationId: put-properties-fido2
       tags:
         - Configuration – Fido2

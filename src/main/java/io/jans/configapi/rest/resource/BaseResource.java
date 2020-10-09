@@ -1,6 +1,3 @@
-/**
- *
- */
 package io.jans.configapi.rest.resource;
 
 import io.jans.configapi.rest.model.ApiError;
