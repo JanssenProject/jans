@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 
 /**

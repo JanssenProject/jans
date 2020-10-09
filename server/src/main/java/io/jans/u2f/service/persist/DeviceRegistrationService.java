@@ -20,7 +20,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.oxauth.model.config.StaticConfiguration;
 
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
