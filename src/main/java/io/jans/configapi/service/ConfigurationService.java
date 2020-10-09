@@ -1,12 +1,12 @@
 package io.jans.configapi.service;
 
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.oxauth.model.config.Conf;
-import io.jans.oxauth.model.configuration.AppConfiguration;
-import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;

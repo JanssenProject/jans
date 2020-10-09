@@ -4,8 +4,8 @@ import io.jans.configapi.filters.ProtectedApi;
 
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Method;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,10 +1,10 @@
 package io.jans.configapi.rest.health;
 
+import io.jans.configapi.service.ConfigurationService;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 import org.eclipse.microprofile.health.Readiness;
-import io.jans.configapi.service.ConfigurationService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

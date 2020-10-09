@@ -5,8 +5,8 @@ import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
-import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.oxauth.service.common.ApplicationFactory;
 import io.jans.service.cache.*;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 

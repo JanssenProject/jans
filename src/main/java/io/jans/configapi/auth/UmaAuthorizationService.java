@@ -1,7 +1,8 @@
 package io.jans.configapi.auth;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.configapi.service.UmaService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,11 +10,8 @@ import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
-
 import java.io.Serializable;
 import java.util.List;
-
-import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
