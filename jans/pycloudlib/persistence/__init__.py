@@ -48,6 +48,6 @@ def render_gluu_properties(src: str, dest: str) -> None:
         rendered_txt = txt % {
             "gluuOptPythonFolder": "/opt/gluu/python",
             "certFolder": "/etc/certs",
-            "persistence_type": os.environ.get("GLUU_PERSISTENCE_TYPE", "ldap"),
+            "persistence_type": os.environ.get("JANS_PERSISTENCE_TYPE", "ldap"),
         }
         f.write(rendered_txt)

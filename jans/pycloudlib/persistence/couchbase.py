@@ -21,33 +21,33 @@ from jans.pycloudlib.utils import (
 )
 from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
 
-GLUU_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
+JANS_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
 logger = logging.getLogger(__name__)
 
 
 def get_couchbase_user(manager=None) -> str:
-    """Get Couchbase username from ``GLUU_COUCHBASE_USER``
+    """Get Couchbase username from ``JANS_COUCHBASE_USER``
     environment variable (default to ``admin``).
 
     :params manager: A no-op argument, preserved for backward compatibility.
     :returns: Couchbase username.
     """
-    return os.environ.get("GLUU_COUCHBASE_USER", "admin")
+    return os.environ.get("JANS_COUCHBASE_USER", "admin")
 
 
 def get_couchbase_password(manager, plaintext: bool = True) -> str:
     """Get Couchbase user's password from file (default to
     ``/etc/gluu/conf/couchbase_password``).
 
-    To change the location, simply pass ``GLUU_COUCHBASE_PASSWORD_FILE`` environment variable.
+    To change the location, simply pass ``JANS_COUCHBASE_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params plaintext: Whether to return plaintext or encoded password.
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "GLUU_COUCHBASE_PASSWORD_FILE", "/etc/gluu/conf/couchbase_password"
+        "JANS_COUCHBASE_PASSWORD_FILE", "/etc/gluu/conf/couchbase_password"
     )
 
     with open(password_file) as f:
@@ -65,27 +65,27 @@ get_encoded_couchbase_password = partial(get_couchbase_password, plaintext=False
 
 
 def get_couchbase_superuser(manager=None) -> str:
-    """Get Couchbase username from ``GLUU_COUCHBASE_SUPERUSER``
+    """Get Couchbase username from ``JANS_COUCHBASE_SUPERUSER``
     environment variable (default to empty-string).
 
     :params manager: A no-op argument, preserved for backward compatibility.
     :returns: Couchbase username.
     """
-    return os.environ.get("GLUU_COUCHBASE_SUPERUSER", "")
+    return os.environ.get("JANS_COUCHBASE_SUPERUSER", "")
 
 
 def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
     """Get Couchbase superuser's password from file (default to
     ``/etc/gluu/conf/couchbase_superuser_password``).
 
-    To change the location, simply pass ``GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
+    To change the location, simply pass ``JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params plaintext: Whether to return plaintext or encoded password.
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/gluu/conf/couchbase_superuser_password"
+        "JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/gluu/conf/couchbase_superuser_password"
     )
 
     with open(password_file) as f:
@@ -137,14 +137,14 @@ def get_couchbase_conn_timeout() -> int:
     """Get connection timeout to Couchbase server.
 
     Default connection timeout is 10000  milliseconds. To change the value, pass
-    `GLUU_COUCHBASE_CONN_TIMEOUT` environment variable.
+    `JANS_COUCHBASE_CONN_TIMEOUT` environment variable.
 
     :returns: Connection timeout (in milliseconds).
     """
     default = 10000
 
     try:
-        val = int(os.environ.get("GLUU_COUCHBASE_CONN_TIMEOUT", default))
+        val = int(os.environ.get("JANS_COUCHBASE_CONN_TIMEOUT", default))
     except ValueError:
         val = default
     return val
@@ -154,14 +154,14 @@ def get_couchbase_conn_max_wait() -> int:
     """Get connection maximum wait time to Couchbase server.
 
     Default time is 20000  milliseconds. To change the value, pass
-    `GLUU_COUCHBASE_CONN_MAX_WAIT` environment variable.
+    `JANS_COUCHBASE_CONN_MAX_WAIT` environment variable.
 
     :returns: Connection wait time (in milliseconds).
     """
     default = 20000
 
     try:
-        val = int(os.environ.get("GLUU_COUCHBASE_CONN_MAX_WAIT", default))
+        val = int(os.environ.get("JANS_COUCHBASE_CONN_MAX_WAIT", default))
     except ValueError:
         val = default
     return val
@@ -180,7 +180,7 @@ def get_couchbase_scan_consistency() -> str:
     """
     opts = ("not_bounded", "request_plus", "statement_plus")
     default = "not_bounded"
-    opt = os.environ.get("GLUU_COUCHBASE_SCAN_CONSISTENCY", default)
+    opt = os.environ.get("JANS_COUCHBASE_SCAN_CONSISTENCY", default)
     if opt not in opts:
         opt = default
     return opt
@@ -194,9 +194,9 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
     """
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
-    hostname = os.environ.get("GLUU_COUCHBASE_URL", "localhost")
+    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
+    hostname = os.environ.get("JANS_COUCHBASE_URL", "localhost")
 
     _couchbase_mappings = get_couchbase_mappings(persistence_type, ldap_mapping)
     couchbase_buckets = []
@@ -231,7 +231,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "ssl_enabled": "true",
                 "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn"),
                 "encoded_couchbaseTrustStorePass": encode_text(
-                    GLUU_COUCHBASE_TRUSTSTORE_PASSWORD,
+                    JANS_COUCHBASE_TRUSTSTORE_PASSWORD,
                     manager.secret.get("encoded_salt"),
                 ).decode(),
                 "couchbase_conn_timeout": get_couchbase_conn_timeout(),
@@ -243,7 +243,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
 
 # DEPRECATED
 def sync_couchbase_cert(manager=None) -> str:
-    cert_file = os.environ.get("GLUU_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = os.environ.get("JANS_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     with open(cert_file) as f:
         return f.read()
 
@@ -255,10 +255,10 @@ def sync_couchbase_truststore(manager, dest: str = "") -> None:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params dest: Absolute path where generated file is located.
     """
-    cert_file = os.environ.get("GLUU_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = os.environ.get("JANS_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
-        "gluu_couchbase", cert_file, dest, GLUU_COUCHBASE_TRUSTSTORE_PASSWORD,
+        "gluu_couchbase", cert_file, dest, JANS_COUCHBASE_TRUSTSTORE_PASSWORD,
     )
 
 
@@ -281,8 +281,8 @@ class BaseClient:
 
         To enable certificate verification:
 
-        - set ``GLUU_COUCHBASE_VERIFY`` environment variable to ``true`` (default to ``false``)
-        - ensure ``GLUU_COUCHBASE_CERT_FILE`` pointed to valid Couchbase cluster
+        - set ``JANS_COUCHBASE_VERIFY`` environment variable to ``true`` (default to ``false``)
+        - ensure ``JANS_COUCHBASE_CERT_FILE`` pointed to valid Couchbase cluster
           certificate (default to ``/etc/certs/couchbase.crt``)
         - optionally, set ``GLUU_COUCHBASE_HOST_HEADER`` to match Common Name
           or any of SubjectAltName defined in certificate (default to ``localhost``)

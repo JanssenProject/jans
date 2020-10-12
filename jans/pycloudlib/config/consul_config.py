@@ -30,26 +30,26 @@ class ConsulConfig(BaseConfig):
 
     The following environment variables are used to instantiate the client:
 
-    - ``GLUU_CONFIG_CONSUL_HOST``
-    - ``GLUU_CONFIG_CONSUL_PORT``
-    - ``GLUU_CONFIG_CONSUL_CONSISTENCY``
-    - ``GLUU_CONFIG_CONSUL_SCHEME``
-    - ``GLUU_CONFIG_CONSUL_VERIFY``
-    - ``GLUU_CONFIG_CONSUL_CACERT_FILE``
-    - ``GLUU_CONFIG_CONSUL_CERT_FILE``
-    - ``GLUU_CONFIG_CONSUL_KEY_FILE``
-    - ``GLUU_CONFIG_CONSUL_TOKEN_FILE``
+    - ``JANS_CONFIG_CONSUL_HOST``
+    - ``JANS_CONFIG_CONSUL_PORT``
+    - ``JANS_CONFIG_CONSUL_CONSISTENCY``
+    - ``JANS_CONFIG_CONSUL_SCHEME``
+    - ``JANS_CONFIG_CONSUL_VERIFY``
+    - ``JANS_CONFIG_CONSUL_CACERT_FILE``
+    - ``JANS_CONFIG_CONSUL_CERT_FILE``
+    - ``JANS_CONFIG_CONSUL_KEY_FILE``
+    - ``JANS_CONFIG_CONSUL_TOKEN_FILE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("GLUU_CONFIG_CONSUL_")
+            if k.isupper() and k.startswith("JANS_CONFIG_CONSUL_")
         }
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_HOST", "localhost",
+            "JANS_CONFIG_CONSUL_HOST", "localhost",
         )
 
         self.settings.setdefault(

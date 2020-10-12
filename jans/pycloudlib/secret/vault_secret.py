@@ -29,25 +29,25 @@ class VaultSecret(BaseSecret):
 
     The following environment variables are used to instantiate the client:
 
-    - ``GLUU_SECRET_VAULT_HOST``
-    - ``GLUU_SECRET_VAULT_PORT``
-    - ``GLUU_SECRET_VAULT_SCHEME``
-    - ``GLUU_SECRET_VAULT_VERIFY``
-    - ``GLUU_SECRET_VAULT_ROLE_ID_FILE``
-    - ``GLUU_SECRET_VAULT_SECRET_ID_FILE``
-    - ``GLUU_SECRET_VAULT_CERT_FILE``
-    - ``GLUU_SECRET_VAULT_KEY_FILE``
-    - ``GLUU_SECRET_VAULT_CACERT_FILE``
+    - ``JANS_SECRET_VAULT_HOST``
+    - ``JANS_SECRET_VAULT_PORT``
+    - ``JANS_SECRET_VAULT_SCHEME``
+    - ``JANS_SECRET_VAULT_VERIFY``
+    - ``JANS_SECRET_VAULT_ROLE_ID_FILE``
+    - ``JANS_SECRET_VAULT_SECRET_ID_FILE``
+    - ``JANS_SECRET_VAULT_CERT_FILE``
+    - ``JANS_SECRET_VAULT_KEY_FILE``
+    - ``JANS_SECRET_VAULT_CACERT_FILE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("GLUU_SECRET_VAULT_")
+            if k.isupper() and k.startswith("JANS_SECRET_VAULT_")
         }
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_HOST", "localhost",
+            "JANS_SECRET_VAULT_HOST", "localhost",
         )
         self.settings.setdefault(
             "GLUU_SECRET_VAULT_PORT", 8200,

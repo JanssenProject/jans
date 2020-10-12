@@ -17,8 +17,8 @@ def render_hybrid_properties(dest: str) -> None:
 
     :params dest: Absolute path where generated file is located.
     """
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
+    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
 
     if ldap_mapping == "default":
         default_storage = "ldap"
