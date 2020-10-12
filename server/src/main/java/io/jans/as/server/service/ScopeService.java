@@ -11,7 +11,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;

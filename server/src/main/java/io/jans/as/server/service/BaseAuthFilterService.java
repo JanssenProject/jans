@@ -11,7 +11,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;
 import io.jans.orm.model.base.DummyEntry;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
