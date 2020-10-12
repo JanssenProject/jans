@@ -2,7 +2,7 @@ package io.jans.configapi.util;
 
 public class ApiConstants {
 
-    public static final String BASE_API_URL = "/oxauth";
+    public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
     public static final String JWKS = "/jwks";
     public static final String OXAUTH = "/oxauth";
