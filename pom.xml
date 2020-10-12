@@ -16,6 +16,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<maven.min-version>3.0.3</maven.min-version>
+
+		<janssen.version>5.0.0-SNAPSHOT</janssen.version>
 	</properties>
 
 	<scm>
@@ -49,7 +51,7 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-bom</artifactId>
-				<version>5.0.0-SNAPSHOT</version>
+				<version>${janssen.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
