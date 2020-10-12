@@ -284,18 +284,18 @@ class BaseClient:
         - set ``JANS_COUCHBASE_VERIFY`` environment variable to ``true`` (default to ``false``)
         - ensure ``JANS_COUCHBASE_CERT_FILE`` pointed to valid Couchbase cluster
           certificate (default to ``/etc/certs/couchbase.crt``)
-        - optionally, set ``GLUU_COUCHBASE_HOST_HEADER`` to match Common Name
+        - optionally, set ``JANS_COUCHBASE_HOST_HEADER`` to match Common Name
           or any of SubjectAltName defined in certificate (default to ``localhost``)
         """
         if not self._session:
             self._session = requests.Session()
             self._session.verify = False
 
-            verify = as_boolean(os.environ.get("GLUU_COUCHBASE_VERIFY", False))
+            verify = as_boolean(os.environ.get("JANS_COUCHBASE_VERIFY", False))
             if verify:
                 self._session.mount("https://", HostHeaderSSLAdapter())
-                self._session.verify = os.environ.get("GLUU_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
-                self._session.headers["Host"] = os.environ.get("GLUU_COUCHBASE_HOST_HEADER") or "localhost"
+                self._session.verify = os.environ.get("JANS_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
+                self._session.headers["Host"] = os.environ.get("JANS_COUCHBASE_HOST_HEADER") or "localhost"
         return self._session
 
     def resolve_host(self) -> str:

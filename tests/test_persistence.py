@@ -354,14 +354,14 @@ storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
     assert dest.read() == expected
 
     os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_token(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "token"
+    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "token"
 
     expected = """
 storages: ldap, couchbase
@@ -374,15 +374,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh,
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
+    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_session(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "session"
+    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "session"
 
     expected = """
 storages: ldap, couchbase
@@ -395,15 +395,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh,
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
+    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_cache(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "cache"
+    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "cache"
 
     expected = """
 storages: ldap, couchbase
@@ -416,15 +416,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
+    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_site(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "site"
+    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "site"
 
     expected = """
 storages: ldap, couchbase
@@ -437,5 +437,5 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
+    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)

@@ -27,24 +27,24 @@ class KubernetesSecret(BaseSecret):
 
     The following environment variables are used to instantiate the client:
 
-    - ``GLUU_SECRET_KUBERNETES_NAMESPACE``
-    - ``GLUU_SECRET_KUBERNETES_SECRET``
-    - ``GLUU_SECRET_KUBERNETES_USE_KUBE_CONFIG``
+    - ``JANS_SECRET_KUBERNETES_NAMESPACE``
+    - ``JANS_SECRET_KUBERNETES_SECRET``
+    - ``JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("GLUU_SECRET_KUBERNETES_")
+            if k.isupper() and k.startswith("JANS_SECRET_KUBERNETES_")
         }
         self.settings.setdefault(
-            "GLUU_SECRET_KUBERNETES_NAMESPACE", "default",
+            "JANS_SECRET_KUBERNETES_NAMESPACE", "default",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_KUBERNETES_SECRET", "gluu",
+            "JANS_SECRET_KUBERNETES_SECRET", "gluu",
         )
-        self.settings.setdefault("GLUU_SECRET_KUBERNETES_USE_KUBE_CONFIG", False)
+        self.settings.setdefault("JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG", False)
 
         self._client = None
         self.name_exists = False
@@ -55,7 +55,7 @@ class KubernetesSecret(BaseSecret):
         """Lazy-loaded client to interact with Kubernetes API.
         """
         if not self._client:
-            if as_boolean(self.settings["GLUU_SECRET_KUBERNETES_USE_KUBE_CONFIG"]):
+            if as_boolean(self.settings["JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG"]):
                 kubernetes.config.load_kube_config(self.kubeconfig_file)
             else:
                 kubernetes.config.load_incluster_config()
@@ -78,8 +78,8 @@ class KubernetesSecret(BaseSecret):
         if not self.name_exists:
             try:
                 self.client.read_namespaced_secret(
-                    self.settings["GLUU_SECRET_KUBERNETES_SECRET"],
-                    self.settings["GLUU_SECRET_KUBERNETES_NAMESPACE"],
+                    self.settings["JANS_SECRET_KUBERNETES_SECRET"],
+                    self.settings["JANS_SECRET_KUBERNETES_NAMESPACE"],
                 )
                 self.name_exists = True
             except kubernetes.client.rest.ApiException as exc:
@@ -89,12 +89,12 @@ class KubernetesSecret(BaseSecret):
                         "kind": "Secret",
                         "apiVersion": "v1",
                         "metadata": {
-                            "name": self.settings["GLUU_SECRET_KUBERNETES_SECRET"],
+                            "name": self.settings["JANS_SECRET_KUBERNETES_SECRET"],
                         },
                         "data": {},
                     }
                     created = self.client.create_namespaced_secret(
-                        self.settings["GLUU_SECRET_KUBERNETES_NAMESPACE"], body
+                        self.settings["JANS_SECRET_KUBERNETES_NAMESPACE"], body
                     )
                     if created:
                         self.name_exists = True
@@ -112,12 +112,12 @@ class KubernetesSecret(BaseSecret):
         body = {
             "kind": "Secret",
             "apiVersion": "v1",
-            "metadata": {"name": self.settings["GLUU_SECRET_KUBERNETES_SECRET"]},
+            "metadata": {"name": self.settings["JANS_SECRET_KUBERNETES_SECRET"]},
             "data": {key: base64.b64encode(safe_value(value).encode()).decode()},
         }
         ret = self.client.patch_namespaced_secret(
-            self.settings["GLUU_SECRET_KUBERNETES_SECRET"],
-            self.settings["GLUU_SECRET_KUBERNETES_NAMESPACE"],
+            self.settings["JANS_SECRET_KUBERNETES_SECRET"],
+            self.settings["JANS_SECRET_KUBERNETES_NAMESPACE"],
             body=body,
         )
         return bool(ret)
@@ -129,8 +129,8 @@ class KubernetesSecret(BaseSecret):
         """
         self._prepare_secret()
         result = self.client.read_namespaced_secret(
-            self.settings["GLUU_SECRET_KUBERNETES_SECRET"],
-            self.settings["GLUU_SECRET_KUBERNETES_NAMESPACE"],
+            self.settings["JANS_SECRET_KUBERNETES_SECRET"],
+            self.settings["JANS_SECRET_KUBERNETES_NAMESPACE"],
         )
 
         data = result.data or {}

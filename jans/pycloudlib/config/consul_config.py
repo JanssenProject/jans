@@ -53,54 +53,54 @@ class ConsulConfig(BaseConfig):
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_PORT", 8500,
+            "JANS_CONFIG_CONSUL_PORT", 8500,
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CONSISTENCY", "stale",
+            "JANS_CONFIG_CONSUL_CONSISTENCY", "stale",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_SCHEME", "http",
+            "JANS_CONFIG_CONSUL_SCHEME", "http",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_VERIFY", False,
+            "JANS_CONFIG_CONSUL_VERIFY", False,
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
+            "JANS_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
+            "JANS_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
+            "JANS_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
+            "JANS_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
         )
 
         self.prefix = "gluu/config/"
         cert, verify = self._verify_cert(
-            self.settings["GLUU_CONFIG_CONSUL_SCHEME"],
-            self.settings["GLUU_CONFIG_CONSUL_VERIFY"],
-            self.settings["GLUU_CONFIG_CONSUL_CACERT_FILE"],
-            self.settings["GLUU_CONFIG_CONSUL_CERT_FILE"],
-            self.settings["GLUU_CONFIG_CONSUL_KEY_FILE"],
+            self.settings["JANS_CONFIG_CONSUL_SCHEME"],
+            self.settings["JANS_CONFIG_CONSUL_VERIFY"],
+            self.settings["JANS_CONFIG_CONSUL_CACERT_FILE"],
+            self.settings["JANS_CONFIG_CONSUL_CERT_FILE"],
+            self.settings["JANS_CONFIG_CONSUL_KEY_FILE"],
         )
 
-        self._request_warning(self.settings["GLUU_CONFIG_CONSUL_SCHEME"], verify)
+        self._request_warning(self.settings["JANS_CONFIG_CONSUL_SCHEME"], verify)
 
         self.client = Consul(
-            host=self.settings["GLUU_CONFIG_CONSUL_HOST"],
-            port=self.settings["GLUU_CONFIG_CONSUL_PORT"],
-            token=self._token_from_file(self.settings["GLUU_CONFIG_CONSUL_TOKEN_FILE"]),
-            scheme=self.settings["GLUU_CONFIG_CONSUL_SCHEME"],
-            consistency=self.settings["GLUU_CONFIG_CONSUL_CONSISTENCY"],
+            host=self.settings["JANS_CONFIG_CONSUL_HOST"],
+            port=self.settings["JANS_CONFIG_CONSUL_PORT"],
+            token=self._token_from_file(self.settings["JANS_CONFIG_CONSUL_TOKEN_FILE"]),
+            scheme=self.settings["JANS_CONFIG_CONSUL_SCHEME"],
+            consistency=self.settings["JANS_CONFIG_CONSUL_CONSISTENCY"],
             verify=verify,
             cert=cert,
         )
@@ -176,8 +176,8 @@ class ConsulConfig(BaseConfig):
             urllib3.disable_warnings()
             logger.warning(
                 "All requests to Consul will be unverified. "
-                "Please adjust GLUU_CONFIG_CONSUL_SCHEME and "
-                "GLUU_CONFIG_CONSUL_VERIFY environment variables."
+                "Please adjust JANS_CONFIG_CONSUL_SCHEME and "
+                "JANS_CONFIG_CONSUL_VERIFY environment variables."
             )
 
     def _token_from_file(self, path) -> str:
