@@ -51,18 +51,20 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
     private UmaMetadata umaMetadata;
 
     public void validateAuthorization(String token, ResourceInfo resourceInfo) throws Exception {
-        System.out.println(" UmaAuthorizationService::validateAuthorization() - token = " + token
+        logger.debug(" UmaAuthorizationService::validateAuthorization() - token = " + token
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + "\n");
+
         if (StringUtils.isBlank(token)) {
             logger.info("Token is blank");
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
+
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        System.out.println(
-                " UmaAuthorizationService::validateAuthorization() - resourceScopes = " + resourceScopes + "\n");
+        logger.debug(" UmaAuthorizationService::validateAuthorization() - resourceScopes = " + resourceScopes + "\n");
+
         Token patToken = null;
         try {
-            //patToken = getPatToken(); //To-be-fixed ??
+            patToken = getPatToken(); // WIP ??
         } catch (Exception ex) {
             logger.error("Failed to obtain PAT token", ex);
             throw new WebApplicationException("Failed to obtain PAT token", ex);
@@ -71,26 +73,18 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         Pair<Boolean, Response> rptTokenValidationResult;
 
         logger.debug("this.umaService.getUmaMetadata() = " + this.umaService.getUmaMetadata());
-        System.out.println(" UmaAuthorizationService::validateAuthorization() - this.umaService.getUmaMetadata() = "
+        logger.debug(" UmaAuthorizationService::validateAuthorization() - this.umaService.getUmaMetadata() = "
                 + this.umaService.getUmaMetadata() + " , this.umaService.getUmaMetadata().getIntrospectionEndpoint() = "
                 + this.umaService.getUmaMetadata().getIntrospectionEndpoint() + "\n");
-        System.out.println(
+        logger.debug(
                 "AuthClientFactory::createUmaMetadataService() - New - this.umaService.getUmaMetadata().getIssuer() = "
                         + this.umaService.getUmaMetadata().getIssuer() + "\n\n");
-        // RptIntrospectionResponse rptIntrospectionResponse = this.umaService.ge
-        /*
-         * if (!resourceScopes.isEmpty()) { rptTokenValidationResult =
-         * this.umaService.validateRptToken(patToken, token, getUmaResourceId(),
-         * resourceScopes); } else { rptTokenValidationResult =
-         * this.umaService.validateRptToken(patToken, token, getUmaResourceId(),
-         * getUmaScope()); }
-         * 
-         * if (rptTokenValidationResult.getFirst()) { if
-         * (rptTokenValidationResult.getSecond() != null) { return ; } } else {
-         * logger.error("Invalid GAT/RPT token"); throw new
-         * WebApplicationException("Invalid GAT/RPT token"); }
-         */
 
+        if (!resourceScopes.isEmpty()) {
+            this.umaService.validateRptToken(patToken, token, getUmaResourceId(), resourceScopes);
+        } else {
+            this.umaService.validateRptToken(patToken, token, getUmaResourceId(), getUmaScope());
+        }
     }
 
     public String getUmaResourceId() {
@@ -102,7 +96,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         List<String> scopeList = configApiResource.getScopes();
         if (scopeList != null && !scopeList.isEmpty()) {
             scopes = scopeList.stream().map(s -> s.concat(" ")).collect(Collectors.joining());
-            System.out.println(scopes);
+            logger.debug(scopes);
         }
 
         return scopes.trim();
@@ -161,23 +155,20 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         if (umaMetadata == null) {
             return;
         }
-        System.out.println("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile()
-                + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() ="
-                + getClientId() + " , getClientKeyId() = " + getClientKeyId() + "\n\n");
+        logger.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = "
+                + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "
+                + getClientKeyId() + "\n\n");
         String umaClientKeyStoreFile = getClientKeyStoreFile();
         String umaClientKeyStorePassword = getClientKeyStorePassword();
         if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
             throw new Exception("UMA JKS keystore path or password is empty");
         }
-/*
-        if (umaClientKeyStorePassword != null) {
-            try {
-                umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-            } catch (EncryptionException ex) {
-                logger.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-            }
-        }
-*/
+        /*
+         * if (umaClientKeyStorePassword != null) { try { umaClientKeyStorePassword =
+         * encryptionService.decrypt(umaClientKeyStorePassword); } catch
+         * (EncryptionException ex) {
+         * logger.error("Failed to decrypt UmaClientKeyStorePassword password", ex); } }
+         */
         try {
             this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
                     umaClientKeyStorePassword, getClientId(), getClientKeyId());

@@ -42,7 +42,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            logger.trace("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
+            logger.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
