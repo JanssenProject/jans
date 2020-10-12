@@ -21,7 +21,7 @@ import java.util.UUID;
 /**
  * @author Mougang T.Gasmyr
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.SECTORS)
+@Path(ApiConstants.OPENID + ApiConstants.SECTORS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {

@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 /**
  * @author Puja Sharma
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.ACRS)
+@Path(ApiConstants.ACRS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AcrsResource extends BaseResource {

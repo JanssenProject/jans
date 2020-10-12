@@ -23,7 +23,7 @@ import java.util.UUID;
  * @author Mougang T.Gasmyr
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.RESOURCES)
+@Path(ApiConstants.UMA + ApiConstants.RESOURCES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UmaResourcesResource extends BaseResource {
