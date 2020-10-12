@@ -21,7 +21,7 @@ import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
