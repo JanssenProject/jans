@@ -1,0 +1,43 @@
+name: triggerdevbuild
+# This builds, packages and releases pygluu-kubernetes
+on: [workflow_dispatch]
+jobs:
+  checkBuildAndUpdate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+
+      - uses: actions/checkout@v2
+
+      - name: Update images
+        run: |
+          cd automation
+          sudo python3 auto_update_build_date.py
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          # Required
+          commit_message: Updated build date.
+          # Optional local file path to the repository
+          repository: .
+
+          # Optional commit user and author settings
+          commit_user_name: git-gluu
+          commit_user_email: git-gluu@github.com
+          commit_author: git-gluu <git-gluu@github.com>
+          # Optional: Disable dirty check and always try to create a commit and push
+          skip_dirty_check: true
