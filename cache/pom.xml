@@ -45,6 +45,10 @@
 		<!-- Gluu -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>jans-orm-core</artifactId>
 		</dependency>
 

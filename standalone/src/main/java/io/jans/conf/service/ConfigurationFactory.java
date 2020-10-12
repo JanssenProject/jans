@@ -16,7 +16,7 @@ import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.service.StandalonePersistanceFactoryService;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.ConfigurationException;
-import io.jans.util.properties.FileConfiguration;
+import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
