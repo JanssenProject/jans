@@ -14,7 +14,7 @@ import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;

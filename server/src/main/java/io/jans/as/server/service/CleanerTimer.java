@@ -15,7 +15,7 @@ import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DeletableEntity;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.cache.CacheProvider;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.CleanerEvent;
