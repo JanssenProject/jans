@@ -1,0 +1,1 @@
+-e git+https://github.com/JanssenProject/pygluu-containerlib@2.3.0#egg=pygluu-containerlib
