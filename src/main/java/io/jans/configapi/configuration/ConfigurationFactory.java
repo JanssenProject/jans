@@ -313,17 +313,18 @@ public class ConfigurationFactory {
             Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
             Filter searchFilter = Filter.createORFilter(oxIdFilter, displayNameFilter);
             List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-                    .findEntries(getBaseDnForResource(), UmaResource.class,searchFilter);
-            log.error(" \n umaResourceList = " + umaResourceList+"\n");
-            if (umaResourceList == null || umaResourceList.isEmpty())
-                throw new ConfigurationException("Matching Config API Resource not found!");
-            UmaResource resource = umaResourceList.stream()
-                    .filter(x -> ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
-                    .orElse(null);
-            if (resource == null)
-                throw new ConfigurationException("Config API Resource not found!");
-
-            return resource;
+                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
+            log.error(" \n umaResourceList = " + umaResourceList + "\n");
+            /*
+             * if (umaResourceList == null || umaResourceList.isEmpty()) throw new
+             * ConfigurationException("Matching Config API Resource not found!");
+             * UmaResource resource = umaResourceList.stream() .filter(x ->
+             * ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
+             * .orElse(null); if (resource == null) throw new
+             * ConfigurationException("Config API Resource not found!"); return resource;
+             */
+            // To-uncomment-later???
+            return null;
 
         } catch (Exception ex) {
             log.error("Failed to load Config API Resource.", ex);
