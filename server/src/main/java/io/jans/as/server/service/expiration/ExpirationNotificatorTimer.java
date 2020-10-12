@@ -8,7 +8,7 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
