@@ -1,0 +1,1 @@
+-e git+https://github.com/JanssenProject/jans-pycloudlib@2.2.0#egg=pygluu-containerlib
