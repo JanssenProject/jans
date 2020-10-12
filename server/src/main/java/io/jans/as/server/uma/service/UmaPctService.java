@@ -8,7 +8,7 @@ import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.INumGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

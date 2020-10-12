@@ -16,7 +16,7 @@ import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
