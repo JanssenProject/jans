@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

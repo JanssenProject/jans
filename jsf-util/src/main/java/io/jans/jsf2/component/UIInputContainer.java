@@ -28,7 +28,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     /**
      * The standard component type for this component.
      */
-    public static final String COMPONENT_TYPE = "org.gluu.Janssen Project.util.jsf.InputContainer";
+    public static final String COMPONENT_TYPE = "io.jans.Janssen Project.util.jsf.InputContainer";
 
     protected static final String HTML_ID_ATTR_NAME = "id";
     protected static final String HTML_CLASS_ATTR_NAME = "class";

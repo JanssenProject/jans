@@ -74,7 +74,7 @@ public class StandaloneCacheProviderFactory {
 				
 				// TODO: Remove after configuration fix
 				if (StringHelper.isEmpty(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
-					cacheConfiguration.getNativePersistenceConfiguration().setBaseDn("o=gluu");
+					cacheConfiguration.getNativePersistenceConfiguration().setBaseDn("o=jans");
 				}
 
 				nativePersistenceCacheProvider.init();

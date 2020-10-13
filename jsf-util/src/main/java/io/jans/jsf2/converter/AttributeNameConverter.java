@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import io.jans.model.GluuAttribute;
 import io.jans.service.AttributeService;
 
-@FacesConverter("org.gluu.jsf2.converter.AttributeNameConverter")
+@FacesConverter("io.jans.jsf2.converter.AttributeNameConverter")
 public class AttributeNameConverter implements Converter {
 
 	@Inject

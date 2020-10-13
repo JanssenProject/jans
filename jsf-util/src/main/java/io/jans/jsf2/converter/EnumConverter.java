@@ -15,7 +15,7 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 import javax.faces.convert.FacesConverter;
 
-@FacesConverter(value = "org.gluu.jsf2.converter.EnumConverter")
+@FacesConverter(value = "io.jans.jsf2.converter.EnumConverter")
 public class EnumConverter implements Converter {
 
     public Object getAsObject(FacesContext context, UIComponent comp, String value) throws ConverterException {
