@@ -1,10 +1,10 @@
 /*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.oxtrust;
+package io.jans.config.Janssen Project;
 
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.annotation.AttributeName;
@@ -18,8 +18,8 @@ import io.jans.orm.annotation.ObjectClass;
  * @version 0.9, 05/16/2013
  */
 @DataEntry
-@ObjectClass(value = "oxTrustConfiguration")
-public class LdapOxTrustConfiguration extends Entry {
+@ObjectClass(value = "Janssen ProjectConfiguration")
+public class LdapJanssen ProjectConfiguration extends Entry {
 
     private static final long serialVersionUID = -15289347651306279L;
 
@@ -27,25 +27,25 @@ public class LdapOxTrustConfiguration extends Entry {
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "oxTrustConfApplication")
+    @AttributeName(name = "Janssen ProjectConfApplication")
     private AppConfiguration application;
 
     @JsonObject
-    @AttributeName(name = "oxTrustConfCacheRefresh")
+    @AttributeName(name = "Janssen ProjectConfCacheRefresh")
     private CacheRefreshConfiguration cacheRefresh;
 
     @AttributeName(name = "oxRevision")
     private long revision;
 
     @JsonObject
-    @AttributeName(name = "oxTrustConfImportPerson")
+    @AttributeName(name = "Janssen ProjectConfImportPerson")
     private ImportPersonConfig importPersonConfig;
 
     @JsonObject
-    @AttributeName(name = "oxTrustConfAttributeResolver")
+    @AttributeName(name = "Janssen ProjectConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;
 
-    public LdapOxTrustConfiguration() {
+    public LdapJanssen ProjectConfiguration() {
     }
 
     public AppConfiguration getApplication() {
@@ -92,7 +92,7 @@ public class LdapOxTrustConfiguration extends Entry {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=")
+        builder.append("LdapJanssen ProjectConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=")
                 .append(cacheRefresh).append(", revision=").append(revision).append("]");
         return builder.toString();
     }

@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.service.cache;
 
 import java.io.File;
@@ -41,10 +47,10 @@ public final class RedisProviderFactory {
                 case SENTINEL:
                     return new RedisSentinelProvider(redisConfiguration);
                 default:
-                    LOG.error("Failed to create RedisProvider. RedisProviderType is not supported by current version of oxcore: "
+                    LOG.error("Failed to create RedisProvider. RedisProviderType is not supported by current version of Janssen Project: "
                             + redisConfiguration.getRedisProviderType() + ", redisConfiguration:" + redisConfiguration);
                     throw new RuntimeException(
-                            "RedisProviderType is not supported by current version of oxcore: " + redisConfiguration.getRedisProviderType());
+                            "RedisProviderType is not supported by current version of Janssen Project: " + redisConfiguration.getRedisProviderType());
             }
         } catch (Exception e) {
             LOG.error("Failed to create RedisProvider.");

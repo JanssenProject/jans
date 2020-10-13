@@ -1,10 +1,10 @@
 /*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.oxtrust;
+package io.jans.config.Janssen Project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +16,7 @@ import java.util.List;
 
 
 /**
- * oxTrust configuration
+ * Janssen Project configuration
  *
  * @author Yuriy Movchan
  * @version 0.1, 05/15/2013
@@ -127,7 +127,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private boolean authenticationRecaptchaEnabled;
 
     private boolean scimTestMode;
-    private boolean oxTrustApiTestMode;
+    private boolean Janssen ProjectApiTestMode;
     private boolean enableUpdateNotification;
 
     private boolean rptConnectionPoolUseConnectionPooling;
@@ -664,12 +664,12 @@ public class AppConfiguration implements Configuration, Serializable {
         this.scimTestMode = scimTestMode;
     }
 
-    public boolean isOxTrustApiTestMode() {
-        return oxTrustApiTestMode;
+    public boolean isJanssen ProjectApiTestMode() {
+        return Janssen ProjectApiTestMode;
     }
 
-    public void setOxTrustApiTestMode(boolean oxTrustApiTestMode) {
-        this.oxTrustApiTestMode = oxTrustApiTestMode;
+    public void setJanssen ProjectApiTestMode(boolean Janssen ProjectApiTestMode) {
+        this.Janssen ProjectApiTestMode = Janssen ProjectApiTestMode;
     }
 
     public boolean isRptConnectionPoolUseConnectionPooling() {

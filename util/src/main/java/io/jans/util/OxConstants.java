@@ -1,8 +1,10 @@
 /*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
- */package io.jans.util;
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.util;
 
 /**
  * Constants loads the LDAP schema attribute names like uid, iname

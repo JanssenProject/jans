@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.jsf2.component;
 
 import io.jans.util.StringHelper;
@@ -22,7 +28,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     /**
      * The standard component type for this component.
      */
-    public static final String COMPONENT_TYPE = "org.gluu.oxtrust.util.jsf.InputContainer";
+    public static final String COMPONENT_TYPE = "org.gluu.Janssen Project.util.jsf.InputContainer";
 
     protected static final String HTML_ID_ATTR_NAME = "id";
     protected static final String HTML_CLASS_ATTR_NAME = "class";
