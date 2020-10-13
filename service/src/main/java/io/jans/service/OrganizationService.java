@@ -18,7 +18,7 @@ public abstract class OrganizationService implements Serializable {
 
     public String getDnForOrganization(String baseDn) {
         if (baseDn == null) {
-            baseDn = "o=gluu";
+            baseDn = "o=jans";
         }
         return baseDn;
     }

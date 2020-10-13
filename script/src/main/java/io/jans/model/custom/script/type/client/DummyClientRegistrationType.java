@@ -2,7 +2,9 @@
  * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2020, Janssen Project
- */package io.jans.model.custom.script.type.client;
+ */
+
+package io.jans.model.custom.script.type.client;
 
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;

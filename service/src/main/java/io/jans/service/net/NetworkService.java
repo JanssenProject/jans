@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.service.net;
 
 import io.jans.net.InetAddressUtility;

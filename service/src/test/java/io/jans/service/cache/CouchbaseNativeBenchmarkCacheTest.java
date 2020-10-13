@@ -36,7 +36,7 @@ public class CouchbaseNativeBenchmarkCacheTest {
 
 	@Test(enabled = false, threadPoolSize = 300, invocationCount = 10000) // manual
 	public void couchbaseCacheProvider() {
-		final String baseDn = "ou=cache,o=gluu";
+		final String baseDn = "ou=cache,o=jans";
 
 		final CacheConfiguration cacheConfiguration = new CacheConfiguration();
 		cacheConfiguration.setNativePersistenceConfiguration(new NativePersistenceConfiguration());

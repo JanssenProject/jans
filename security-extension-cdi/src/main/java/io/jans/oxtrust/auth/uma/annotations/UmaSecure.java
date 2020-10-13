@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.Janssen Project.auth.uma.annotations;
 
 import java.lang.annotation.ElementType;

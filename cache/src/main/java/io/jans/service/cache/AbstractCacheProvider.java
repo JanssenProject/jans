@@ -20,7 +20,7 @@ public abstract class AbstractCacheProvider<T> extends CacheProvider<T> {
     /*
      * Default clean up haven't any logic because it uses specialized server to store data
      * 
-     * @see org.gluu.service.cache.CacheProvider#cleanup(java.util.Date)
+     * @see io.jans.service.cache.CacheProvider#cleanup(java.util.Date)
      */
     public void cleanup(final Date now) {}
 

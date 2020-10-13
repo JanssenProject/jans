@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 /**
  * @author: Yuriy Movchan Date: 07.11.2012
  */
-@FacesConverter("org.gluu.jsf2.converter.newLineToBRConverter")
+@FacesConverter("io.jans.jsf2.converter.newLineToBRConverter")
 public class NewLineToBRConverter implements Converter {
 
     public Object getAsObject(FacesContext arg0, UIComponent converter, String str) {

@@ -56,7 +56,7 @@ public class StandaloneCustomScriptManagerTest {
 		}
 
 		PersistenceEntryManager persistenceEntryManager = createLdapEntryManager();
-		StandaloneCustomScriptManager customScriptManager = new StandaloneCustomScriptManager(persistenceEntryManager, "ou=scripts,o=gluu", "/opt/gluu/python/libs");
+		StandaloneCustomScriptManager customScriptManager = new StandaloneCustomScriptManager(persistenceEntryManager, "ou=scripts,o=jans", "/opt/gluu/python/libs");
 
 		// Register required external scripts
 		SampleIdpExternalScriptService sampleIdpExternalScriptService = new SampleIdpExternalScriptService();

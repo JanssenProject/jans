@@ -359,7 +359,7 @@ public abstract class MetricService implements Serializable {
 
     /*
      * Should return similar to this pattern DN:
-     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=metric,ou=organization_name,o=gluu
+     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=metric,ou=organization_name,o=jans
      */
     public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
         final StringBuilder dn = new StringBuilder();
@@ -382,7 +382,7 @@ public abstract class MetricService implements Serializable {
         return registeredMetricTypes;
     }
 
-    // Should return ou=metric,o=gluu
+    // Should return ou=metric,o=jans
     public abstract String baseDn();
 
     public abstract MetricService getMetricServiceInstance();

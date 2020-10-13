@@ -62,7 +62,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 
 	private static final String SALT_FILE_NAME = "salt";
 
-	private static final String SHARED_CONFIGURATION_DN = "ou=configuration,o=gluu";
+	private static final String SHARED_CONFIGURATION_DN = "ou=configuration,o=jans";
 
 	private String confDir, saltFilePath;
 
