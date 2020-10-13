@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.Janssen Project;
+package io.jans.config.oxtrust;
 
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.annotation.AttributeName;
@@ -19,7 +19,7 @@ import io.jans.orm.annotation.ObjectClass;
  */
 @DataEntry
 @ObjectClass(value = "Janssen ProjectConfiguration")
-public class LdapJanssen ProjectConfiguration extends Entry {
+public class LdapOxTrustConfiguration extends Entry {
 
     private static final long serialVersionUID = -15289347651306279L;
 
@@ -45,7 +45,7 @@ public class LdapJanssen ProjectConfiguration extends Entry {
     @AttributeName(name = "Janssen ProjectConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;
 
-    public LdapJanssen ProjectConfiguration() {
+    public LdapOxTrustConfiguration() {
     }
 
     public AppConfiguration getApplication() {

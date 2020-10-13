@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.Janssen Project;
+package io.jans.config.oxtrust;
 
 import io.jans.config.oxauth.WebKeysSettings;
 import io.jans.orm.model.base.Entry;
