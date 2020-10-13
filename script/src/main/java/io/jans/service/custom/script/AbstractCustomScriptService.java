@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.service.custom.script;
 
 import com.google.common.base.Optional;

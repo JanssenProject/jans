@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.service.document.store.service;
 
 import java.io.InputStream;

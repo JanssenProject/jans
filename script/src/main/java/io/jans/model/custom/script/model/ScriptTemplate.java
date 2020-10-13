@@ -8,8 +8,8 @@ package io.jans.model.custom.script.model;
 
 public enum ScriptTemplate {
 
-    AUTHEN( "from org.gluu.service.cdi.util import CdiUtil\n" +
-            "from org.gluu.model.custom.script.type.auth import PersonAuthenticationType\n" +
+    AUTHEN( "from io.jans.service.cdi.util import CdiUtil\n" +
+            "from io.jans.model.custom.script.type.auth import PersonAuthenticationType\n" +
             "\n" +
             "import java\n" +
             "\n" +
@@ -49,10 +49,10 @@ public enum ScriptTemplate {
             "\n" +
             "    def logout(self, configurationAttributes, requestParameters):\n" +
             "        return True\n"),
-    NO_AUTHEN("from org.gluu.service.cdi.util import CdiUtil\n" +
-            "from org.gluu.oxauth.security import Identity\n" +
-            "from org.gluu.model.custom.script.type.authz import ConsentGatheringType\n" +
-            "from org.gluu.util import StringHelper\n" +
+    NO_AUTHEN("from io.jans.service.cdi.util import CdiUtil\n" +
+            "from io.jans.oxauth.security import Identity\n" +
+            "from io.jans.model.custom.script.type.authz import ConsentGatheringType\n" +
+            "from io.jans.util import StringHelper\n" +
             "\n" +
             "import java\n" +
             "import random\n" +
