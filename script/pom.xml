@@ -83,6 +83,15 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>

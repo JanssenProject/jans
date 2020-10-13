@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.Janssen Project;
+package io.jans.config.oxtrust;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -127,7 +127,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private boolean authenticationRecaptchaEnabled;
 
     private boolean scimTestMode;
-    private boolean Janssen ProjectApiTestMode;
+    private boolean oxTrustApiTestMode;
     private boolean enableUpdateNotification;
 
     private boolean rptConnectionPoolUseConnectionPooling;
@@ -664,15 +664,15 @@ public class AppConfiguration implements Configuration, Serializable {
         this.scimTestMode = scimTestMode;
     }
 
-    public boolean isJanssen ProjectApiTestMode() {
-        return Janssen ProjectApiTestMode;
-    }
+    public boolean isOxTrustApiTestMode() {
+		return oxTrustApiTestMode;
+	}
 
-    public void setJanssen ProjectApiTestMode(boolean Janssen ProjectApiTestMode) {
-        this.Janssen ProjectApiTestMode = Janssen ProjectApiTestMode;
-    }
+	public void setOxTrustApiTestMode(boolean oxTrustApiTestMode) {
+		this.oxTrustApiTestMode = oxTrustApiTestMode;
+	}
 
-    public boolean isRptConnectionPoolUseConnectionPooling() {
+	public boolean isRptConnectionPoolUseConnectionPooling() {
         return rptConnectionPoolUseConnectionPooling;
     }
 
