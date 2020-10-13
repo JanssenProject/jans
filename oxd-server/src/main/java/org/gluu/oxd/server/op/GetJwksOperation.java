@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.client.JwkResponse;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -41,9 +42,9 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
             final DiscoveryService discoveryService = getDiscoveryService();
 
-            final UmaMetadata umaMetadata = discoveryService.getUmaDiscovery(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
+            final OpenIdConfigurationResponse openIdConfigurationResponse = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
 
-            final String jwksUri = umaMetadata.getJwksUri();
+            final String jwksUri = openIdConfigurationResponse.getJwksUri();
 
             final JwkClient jwkClient = new JwkClient(jwksUri);
             jwkClient.setExecutor(getHttpService().getClientExecutor());

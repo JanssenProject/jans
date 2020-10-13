@@ -17,7 +17,7 @@ public class GetIssuerTest {
 
         final GetIssuerParams commandParams = new GetIssuerParams();
         commandParams.setResource(emailWebfingerInput);
-
+        commandParams.setOpHost(opHost);
         final GetIssuerResponse resp = api.getIssuer(commandParams);
         assertNotNull(resp);
         assertEquals(resp.getSubject(), emailWebfingerInput);
@@ -33,7 +33,7 @@ public class GetIssuerTest {
 
         final GetIssuerParams commandParams = new GetIssuerParams();
         commandParams.setResource(urlWebfingerInput);
-
+        commandParams.setOpHost(opHost);
         final GetIssuerResponse resp = api.getIssuer(commandParams);
         assertNotNull(resp);
         assertEquals(resp.getSubject(), urlWebfingerInput);
@@ -49,7 +49,7 @@ public class GetIssuerTest {
 
         final GetIssuerParams commandParams = new GetIssuerParams();
         commandParams.setResource(hostnameWebfingerInput);
-
+        commandParams.setOpHost(opHost);
         final GetIssuerResponse resp = api.getIssuer(commandParams);
         assertNotNull(resp);
         assertEquals(resp.getSubject(), hostnameWebfingerInput);
