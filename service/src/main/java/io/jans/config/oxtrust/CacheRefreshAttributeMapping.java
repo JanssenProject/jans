@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.config.Janssen Project;
+package io.jans.config.oxtrust;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
