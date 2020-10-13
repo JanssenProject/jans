@@ -1,0 +1,20 @@
+name: Scan Image
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag local/scanimage:latest
+    - uses: anchore/scan-action@master
+      with:
+        image-reference: "local/scanimage:latest"
+        dockerfile-path: "Dockerfile"
+        fail-build: true
+    - name: anchore inline scan JSON results
+      run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
+    - uses: azure/container-scan@v0
+      with:
+        image-name: local/scanimage:latest
+# Add Serif report once Code Scanner is out of beta stage
