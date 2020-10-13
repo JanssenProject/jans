@@ -29,28 +29,10 @@
 		<shrinkwrap.version>2.1.0</shrinkwrap.version>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>repository.jboss.org</id>
-			<name>JBoss Repository</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-		</repository>
-		<repository>
-			<id>gluu</id>
-			<name>Gluu repository</name>
-			<url>http://ox.gluu.org/maven</url>
-		</repository>
-		<repository>
-			<id>bouncycastle</id>
-			<name>Bouncy Castle</name>
-			<url>http://repo2.maven.org/maven2/org/bouncycastle</url>
-		</repository>
-	</repositories>
-
 	<modules>
-		<module>Server</module>
-		<module>Client</module>
-		<module>Model</module>
+		<module>server</module>
+		<module>client</module>
+		<module>model</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
