@@ -1,4 +1,10 @@
-package io.jans.config.oxtrust;
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.config.Janssen Project;
 
 import io.jans.model.passport.PassportConfiguration;
 import io.jans.orm.model.base.Entry;
