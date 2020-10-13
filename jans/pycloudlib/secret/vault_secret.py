@@ -38,6 +38,7 @@ class VaultSecret(BaseSecret):
     - ``JANS_SECRET_VAULT_CERT_FILE``
     - ``JANS_SECRET_VAULT_KEY_FILE``
     - ``JANS_SECRET_VAULT_CACERT_FILE``
+    - ``JANS_SECRET_VAULT_NAMESPACE``
     """
 
     def __init__(self):
@@ -74,6 +75,8 @@ class VaultSecret(BaseSecret):
             "JANS_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
         )
 
+        self.settings.setdefault("JANS_SECRET_VAULT_NAMESPACE", "jans")
+
         cert, verify = self._verify_cert(
             self.settings["JANS_SECRET_VAULT_SCHEME"],
             self.settings["JANS_SECRET_VAULT_VERIFY"],
@@ -93,7 +96,7 @@ class VaultSecret(BaseSecret):
             cert=cert,
             verify=verify,
         )
-        self.prefix = "secret/gluu"
+        self.prefix = f"secret/{self.settings['JANS_SECRET_VAULT_NAMESPACE']}"
 
     @property
     def role_id(self):

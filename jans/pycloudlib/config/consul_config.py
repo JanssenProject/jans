@@ -39,6 +39,7 @@ class ConsulConfig(BaseConfig):
     - ``JANS_CONFIG_CONSUL_CERT_FILE``
     - ``JANS_CONFIG_CONSUL_KEY_FILE``
     - ``JANS_CONFIG_CONSUL_TOKEN_FILE``
+    - ``JANS_CONFIG_CONSUL_NAMESPACE``
     """
 
     def __init__(self):
@@ -84,7 +85,9 @@ class ConsulConfig(BaseConfig):
             "JANS_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
         )
 
-        self.prefix = "gluu/config/"
+        self.settings.setdefault("JANS_CONFIG_CONSUL_NAMESPACE", "jans")
+
+        self.prefix = f"{self.settings['JANS_CONFIG_CONSUL_NAMESPACE']}/config/"
         cert, verify = self._verify_cert(
             self.settings["JANS_CONFIG_CONSUL_SCHEME"],
             self.settings["JANS_CONFIG_CONSUL_VERIFY"],
@@ -108,8 +111,8 @@ class ConsulConfig(BaseConfig):
     def _merge_path(self, key: str) -> str:
         """Add prefix to the key.
 
-        For example, given the prefix is ``gluu/config`` and key ``random``,
-        calling this method returns ``gluu/config/random`` key.
+        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
+        and key ``random``, calling this method returns ``jans/config/random`` key.
 
         :params key: Key name as relative path.
         :returns: Absolute path to prefixed key.
@@ -119,8 +122,8 @@ class ConsulConfig(BaseConfig):
     def _unmerge_path(self, key: str) -> str:
         """Remove prefix from the key.
 
-        For example, given the prefix is ``gluu/config`` and an absolute path
-        ``gluu/config/random``, calling this method returns ``random`` key.
+        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
+        and an absolute path``jans/config/random``, calling this method returns ``random`` key.
 
         :params key: Key name as relative path.
         :returns: Relative path to key.
