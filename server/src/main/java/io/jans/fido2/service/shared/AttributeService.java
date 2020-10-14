@@ -10,7 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.service.BaseCacheService;
 import io.jans.util.StringHelper;
 
@@ -19,7 +19,7 @@ import io.jans.util.StringHelper;
  * @version May 20, 2020
  */
 @ApplicationScoped
-public class AttributeService extends org.gluu.service.AttributeService {
+public class AttributeService extends io.jans.service.AttributeService {
 
 	private static final long serialVersionUID = -990409035168814270L;
 

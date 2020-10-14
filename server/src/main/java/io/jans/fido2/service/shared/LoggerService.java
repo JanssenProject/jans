@@ -19,7 +19,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
  */
 @ApplicationScoped
 @Named
-public class LoggerService extends org.gluu.service.logger.LoggerService {
+public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Inject
     private AppConfiguration appConfiguration;
