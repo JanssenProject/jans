@@ -31,7 +31,7 @@ public class CryptoProviderFactory {
 
                 break;
             case PKCS11:
-                cryptoProvider = new OxElevenCryptoProvider(
+                cryptoProvider = new ElevenCryptoProvider(
                         configuration.getOxElevenGenerateKeyEndpoint(),
                         configuration.getOxElevenSignEndpoint(),
                         configuration.getOxElevenVerifySignatureEndpoint(),
