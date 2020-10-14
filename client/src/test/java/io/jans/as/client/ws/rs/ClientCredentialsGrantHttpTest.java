@@ -10,7 +10,7 @@ import io.jans.as.client.*;
 import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.token.TokenErrorResponseType;
@@ -491,7 +491,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -555,7 +555,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -611,7 +611,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -675,7 +675,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -731,7 +731,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -796,7 +796,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -854,7 +854,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -921,7 +921,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -979,7 +979,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1046,7 +1046,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1104,7 +1104,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1171,7 +1171,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1229,7 +1229,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1296,7 +1296,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1354,7 +1354,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1421,7 +1421,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1479,7 +1479,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1546,7 +1546,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1604,7 +1604,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1671,7 +1671,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1729,7 +1729,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1796,7 +1796,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1854,7 +1854,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
@@ -1921,7 +1921,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");

@@ -14,7 +14,7 @@ import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -299,7 +299,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
      */
     private JwtAuthorizationRequest createJwtRequest(String keyStoreFile, String keyStoreSecret, String dnName,
                                                      String userId, String keyId, SignatureAlgorithm signatureAlgorithm) throws Exception {
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientId = registerResponse.getClientId();
 
         int now = (int) (System.currentTimeMillis() / 1000);

@@ -13,7 +13,7 @@ import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -83,7 +83,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -199,7 +199,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -312,7 +312,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -425,7 +425,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -539,7 +539,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -658,7 +658,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -777,7 +777,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -896,7 +896,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1015,7 +1015,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1134,7 +1134,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1253,7 +1253,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1372,7 +1372,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1491,7 +1491,7 @@ public class AddressClaimsTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1849,7 +1849,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -1975,7 +1975,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();
@@ -2101,7 +2101,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "address");
         String nonce = UUID.randomUUID().toString();

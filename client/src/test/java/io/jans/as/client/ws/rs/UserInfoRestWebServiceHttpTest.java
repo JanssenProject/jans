@@ -14,7 +14,7 @@ import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.client.model.authorize.UserInfoMember;
 import org.gluu.oxauth.model.common.*;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -503,7 +503,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -633,7 +633,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -1399,7 +1399,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1467,7 +1467,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1535,7 +1535,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info (encrypted)
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);

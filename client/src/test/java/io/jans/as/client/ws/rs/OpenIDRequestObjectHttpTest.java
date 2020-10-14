@@ -14,7 +14,7 @@ import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -85,7 +85,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -167,7 +167,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -246,7 +246,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String state = "STATE0";
@@ -299,7 +299,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String state = UUID.randomUUID().toString();
@@ -354,7 +354,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String state = UUID.randomUUID().toString();
@@ -410,7 +410,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
@@ -479,7 +479,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -567,7 +567,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -655,7 +655,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String clientId = response.getClientId();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -743,7 +743,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -834,7 +834,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = response.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -925,7 +925,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1013,7 +1013,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1101,7 +1101,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1189,7 +1189,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1277,7 +1277,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1365,7 +1365,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1453,7 +1453,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1541,7 +1541,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1630,7 +1630,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1719,7 +1719,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1861,7 +1861,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             String clientSecret = registerResponse.getClientSecret();
 
             // 2. Authorization Request
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -1931,7 +1931,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             String clientSecret = registerResponse.getClientSecret();
 
             // 2. Authorization Request
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -2002,7 +2002,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             String clientSecret = registerResponse.getClientSecret();
 
             // 2. Authorization Request
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid");
             String nonce = UUID.randomUUID().toString();
@@ -2070,7 +2070,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -2280,7 +2280,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authorization Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -2460,7 +2460,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -2557,7 +2557,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -2654,7 +2654,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             // 3. Request authorization
             JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();

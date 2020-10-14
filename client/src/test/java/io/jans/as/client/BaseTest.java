@@ -12,7 +12,7 @@ import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
@@ -1061,6 +1061,6 @@ public abstract class BaseTest {
     }
 
     public static AbstractCryptoProvider createCryptoProviderWithAllowedNone() throws Exception {
-        return new OxAuthCryptoProvider(null, null, null, false);
+        return new AuthCryptoProvider(null, null, null, false);
     }
 }

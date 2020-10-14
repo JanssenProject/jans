@@ -11,7 +11,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
@@ -116,7 +116,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -208,7 +208,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -301,7 +301,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -395,7 +395,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -485,7 +485,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
                                                                         final String keyStoreSecret) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -578,7 +578,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);

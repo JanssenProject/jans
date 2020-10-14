@@ -12,7 +12,7 @@ import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.HMACSigner;
 import io.jans.as.model.jwt.Jwt;
@@ -69,7 +69,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
