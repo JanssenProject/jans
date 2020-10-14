@@ -5,21 +5,21 @@ from java.nio.charset import Charset
 
 from org.apache.http.params import CoreConnectionPNames
 
-from org.oxauth.persistence.model.configuration import GluuConfiguration
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService
-from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.oxauth.service.custom import CustomScriptService
-from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.model import SimpleCustomProperty
-from org.gluu.model.casa import ApplicationConfiguration
-from org.gluu.model.custom.script import CustomScriptType
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.persist import PersistenceEntryManager
-from org.gluu.service import CacheService
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from org.oxauth.persistence.model.configuration import JanssenConfiguration
+from org.jans.oxauth.security import Identity
+from org.jans.oxauth.service import AuthenticationService, UserService
+from org.jans.oxauth.service.common import EncryptionService
+from org.jans.oxauth.service.custom import CustomScriptService
+from org.jans.oxauth.service.net import HttpService
+from org.jans.oxauth.util import ServerUtil
+from org.jans.model import SimpleCustomProperty
+from org.jans.model.casa import ApplicationConfiguration
+from org.jans.model.custom.script import CustomScriptType
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.persist import PersistenceEntryManager
+from org.jans.service import CacheService
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.util import StringHelper
 
 try:
     import json
@@ -31,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
-        self.ACR_SG = "super_gluu"
+        self.ACR_SG = "super.jans.
         self.ACR_U2F = "u2f"
 
         self.modulePrefix = "casa-external_"
@@ -62,7 +62,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
                         configAttrs.put("u2f_application_id", SimpleCustomProperty("u2f_application_id", u2f_application_id))
                     elif acr == self.ACR_SG:
-                        application_id = configurationAttributes.get("supergluu_app_id").getValue2()
+                        application_id = configurationAttributes.get("supe.jans.app_id").getValue2()
                         configAttrs.put("application_id", SimpleCustomProperty("application_id", application_id))
 
                     if module.init(None, configAttrs):
@@ -296,8 +296,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getLocalPrimaryKey(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
-        config = GluuConfiguration()
-        config = entryManager.find(config.getClass(), "ou=configuration,o=gluu")
+        config = JanssenConfiguration()
+        config = entryManager.find(config.getClass(), "ou=configuration,o.jans.)
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
         uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
@@ -307,7 +307,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getSettings(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
         config = ApplicationConfiguration()
-        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o=gluu")
+        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o.jans.)
         settings = None
         try:
             settings = json.loads(config.getSettings())

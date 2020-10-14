@@ -1,7 +1,7 @@
-# Developers Guide for Gluu CE Setup Application
+# Developers Guide for Janssen Project Setup Application
 
-This guide is prepared for developers who will edit and/or create new installer for Gluu CE Setup.
-We will refer Gluu CE Setup Application as **SetupApp**
+This guide is prepared for developers who will edit and/or create new installer forJanssen Project Setup.
+We will refer Janssen Project Application as **SetupApp**
 SetupApp is written with Python3 (we try make it compatible at least version 3.5)
 
 ## Direcory Structure
@@ -88,7 +88,7 @@ Collection of utilities used by SetupApp.
    - `set_oxAuthConfDynamic(entries)`: takes entries as dctionary and updates `oxAuthConfDynamic` in database
    - `set_oxAuthConfDynamic(entries)`: the same for `oxAuthConfDynamic`
    - `enable_script(inum)`: enables script
-   - `enable_service(service)`: enables gluu service in oxtrust ui
+   - `enable_service(service)`: enables jans service in oxtrust ui
    - `add_client2script(inum)`: adds client to script's allowed client property
    
 - `crypto64.py` Cryptographic and base64 utilities are included in this module. Since this module is inherited by `SetupUtils`
@@ -101,7 +101,7 @@ Collection of utilities used by SetupApp.
 
 ### `installers/`
 In this directory we have installer modules for SetupApp, acutal installations are done in these modules. We try to keep
-each installer seperate from others, so that we can install Gluu CE components any time we want (except, basic setup: jre, node,
+each installer seperate from others, so that we can install Janssen Project components any time we want (except, basic setup: jre, node,
 jetty, jython etc). Rather then explaining each module, a brief description for how to write and installer will be given, after
 desciribng base installers
 
@@ -124,10 +124,10 @@ desciribng base installers
    
    This module also contains start/stop/restart/enable linux services.
    
-- `jetty.py` Provides `JettyInstaller`. Gluu CE components either jetty or node services. So `jetty.py` provides installers for jetty services as well as
+- `jetty.py` Provides `JettyInstaller`. Janssen Project components either jetty or node services. So `jetty.py` provides installers for jetty services as well as
    installing jetty itself.
 
-- `node.py` Provides `NodeInstaller` Acts as both node installer and Gluu node component installers.
+- `node.py` Provides `NodeInstaller` Acts as both node installer and Janssen node component installers.
 
 
 #### Writing an Installer Module
@@ -152,14 +152,14 @@ Please refer to variables defined in the `SampleInstaller` below. `hostname` wil
 And I have a configuration ldif file `templates/sample-app/config.ldif` as follows:
 
 ```
-dn: ou=sampleapplication,ou=configuration,o=gluu
+dn: ou=sampleapplication,ou=configuration,o=jans
 objectClass: top
 objectClass: oxApplicationConfiguration
 ou: oxpassport
-gluuPassportConfiguration:: {"name": "%(service_name)s", "some_variable": "same value"}
+jansPassportConfiguration:: {"name": "%(service_name)s", "some_variable": "same value"}
 
 # Application Client
-dn: inum=%(app_client_id)s,ou=clients,o=gluu
+dn: inum=%(app_client_id)s,ou=clients,o=jans
 objectClass: oxAuthClient
 objectClass: top
 inum: %(app_client_id)s
@@ -167,7 +167,7 @@ displayName: Sample Sapplication Client
 oxAuthAppType: native
 oxAuthGrantType: client_credentials
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=ABCD-DEF0,ou=scopes,o=gluu
+oxAuthScope: inum=ABCD-DEF0,ou=scopes,o=jans
 oxAuthJwks:: %(app_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
@@ -175,25 +175,25 @@ oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
 # Scope
-dn: inum=ABCD-DEF0,ou=scopes,o=gluu
+dn: inum=ABCD-DEF0,ou=scopes,o=jans
 objectClass: oxAuthCustomScope
 objectClass: top
 displayName: Sample Apllication Access
 inum: ABCD-DEF0
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/sample_app_access
-oxUmaPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=gluu
+oxUmaPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=jans
 oxScopeType: uma
 
 
 # Resource
-dn: oxId=%(application_resource_id)s,ou=resources,ou=uma,o=gluu
+dn: oxId=%(application_resource_id)s,ou=resources,ou=uma,o=jans
 objectClass: oxUmaResource
 objectClass: top
 displayName: Sample Application Resource
-owner: inum=%(admin_inum)s,ou=people,o=gluu
-oxFaviconImage: http://www.gluu.org/img/sample_app_logo.png
-oxAssociatedClient: inum=%(app_client_id)s,ou=clients,o=gluu
-oxAuthUmaScope: inum=ABCD-DEF0,ou=scopes,o=gluu
+owner: inum=%(admin_inum)s,ou=people,o=jans
+oxFaviconImage: http://www.jans.org/img/sample_app_logo.png
+oxAssociatedClient: inum=%(app_client_id)s,ou=clients,o=jans
+oxAuthUmaScope: inum=ABCD-DEF0,ou=scopes,o=jans
 oxId: %(application_resource_id)s
 oxResource: https://%(hostname)s/identity/restv1/sample_app/v2
 oxRevision: 1
@@ -260,7 +260,7 @@ class SampleInstaller(JettyInstaller):
     
     def create_folders(self):
         # create folders here before installing anything
-        self.createDirs(os.path.join(Config.gluuBaseFolder, 'conf/app'))
+        self.createDirs(os.path.join(Config.jansBaseFolder, 'conf/app'))
     
     def generate_configuration(self):
 
@@ -306,7 +306,7 @@ class SampleInstaller(JettyInstaller):
         # After importing tamplates, we may need some tweaks in database.
         # Do them here
 
-        self.dbUtils.enable_service('gluuAppEnabled') # enable this app in oxtrust ui
+        self.dbUtils.enable_service('jansAppEnabled') # enable this app in oxtrust ui
         oxtrust_conf = base.readJsonFile(self.oxtrust_config_fn)
         self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
 

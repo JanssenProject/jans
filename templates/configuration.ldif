@@ -1,4 +1,4 @@
-dn: ou=configuration,o=gluu
+dn: ou=configuration,o=jans
 objectClass: top
 objectClass: gluuConfiguration
 ou: configuration
@@ -30,7 +30,7 @@ oxIDPAuthentication: {"type": "auth",
             "bindDN": "%(ldap_binddn)s",
             "bindPassword": "%(encoded_ox_ldap_pw)s",
             "useSSL": "true",
-            "baseDNs": ["ou=people,o=gluu"],
+            "baseDNs": ["ou=people,o=jans"],
             "primaryKey": "uid",
             "localPrimaryKey": "uid",
             "useAnonymousBind": false,

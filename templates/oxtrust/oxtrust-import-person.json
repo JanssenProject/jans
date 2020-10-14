@@ -25,7 +25,7 @@
 		"dataType": "string",
 		"required": false
 	}, {
-		"ldapName": "gluuStatus",
+		"ldapName": "jansStatus",
 		"displayName": "User Status",
 		"dataType": "string",
 		"required": false

@@ -1,17 +1,17 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.service import MailService
-from org.gluu.util import ArrayHelper
-from org.gluu.util import StringHelper
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.oxauth.security import Identity
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.oxauth.service import AuthenticationService
+from org.jans.oxauth.service.common import UserService
+from org.jans.service import MailService
+from org.jans.util import ArrayHelper
+from org.jans.util import StringHelper
 from java.util import Arrays
 
 import duo_web

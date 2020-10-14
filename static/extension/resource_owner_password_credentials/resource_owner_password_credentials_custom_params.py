@@ -1,18 +1,18 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2019, Gluu
+# Copyright (c) 2019, Janssen
 #
 # Author: Yuriy Mochan
 #
 #
 
-from org.gluu.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.model.common import SessionIdState
-from org.gluu.oxauth.security import Identity
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.model.authorize import AuthorizeRequestParam
-from org.gluu.oxauth.model.config import Constants
-from org.gluu.util import StringHelper
+from org.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
+from org.jans.oxauth.service import AuthenticationService, SessionIdService
+from org.jans.oxauth.model.common import SessionIdState
+from org.jans.oxauth.security import Identity
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.oxauth.model.authorize import AuthorizeRequestParam
+from org.jans.oxauth.model.config import Constants
+from org.jans.util import StringHelper
 from java.lang import String
 from java.util import Date, HashMap
 
@@ -36,7 +36,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     # Returns True and set user into context when user authenticated succesfully
     # Returns False when user not authenticated or it's needed to cancel notmal flow
     # Note :
-    # context is reference of org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of org.jans.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )
     def authenticate(self, context):
         print "ROPC script. Authenticate"
 

@@ -29,7 +29,7 @@ argsp = parser.parse_args()
 npyscreen_package = '/opt/dist/app/npyscreen-master.zip'
 
 if argsp.o:
-    for cep in glob.glob('/opt/dist/gluu/community-edition-setup*.zip'):
+    for cep in glob.glob('/opt/dist/jans/community-edition-setup*.zip'):
         os.remove(cep)
     if os.path.exists(ces_dir):
         back_dir = ces_dir+'.back.'+run_time
@@ -38,7 +38,7 @@ if argsp.o:
 
 
 
-github_base_url = 'https://github.com/GluuFederation/community-edition-setup/archive/'
+github_base_url = 'https://github.com/JanssenProject/jans-setup/archive/'
 arhchive_name = 'master.zip'
 
 
@@ -47,7 +47,7 @@ if argsp.b:
 
 download_link = urljoin(github_base_url, arhchive_name)
 
-ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
+ces_list = glob.glob('/opt/dist/jans/community-edition-setup*.zip')
 
 if not ces_list:
     if not argsp.o:
@@ -59,9 +59,9 @@ if not ces_list:
     if not dl.strip() or dl.lower()[0]=='y':
         print("Downloading ", download_link)
         result = requests.get(download_link, allow_redirects=True)
-        with open('/opt/dist/gluu/community-edition-setup.zip', 'wb') as w:
+        with open('/opt/dist/jans/community-edition-setup.zip', 'wb') as w:
             w.write(result.content)
-        ces_list = [os.path.join('/opt/dist/gluu', arhchive_name)]
+        ces_list = [os.path.join('/opt/dist/jans', arhchive_name)]
     else:
         print("Exiting...")
         sys.exit()

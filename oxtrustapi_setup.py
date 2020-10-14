@@ -17,23 +17,23 @@ setupObject = Setup(os.path.dirname(os.path.realpath(__file__)))
 setupObject.os_initdaemon = setupObject.detect_initd()
 setupObject.os_type, setupObject.os_version = setupObject.detect_os_type()
 
-if os.path.exists(setupObject.gluu_hybrid_roperties):
-    for l in open(setupObject.gluu_hybrid_roperties):
+if os.path.exists(setupObject.jans_hybrid_roperties):
+    for l in open(setupObject.jans_hybrid_roperties):
         ls = l.strip()
         if ls.startswith('storage.default'):
             n = ls.find(':')
             scripts_location = ls[n+1:].strip()
-elif os.path.exists(setupObject.gluuCouchebaseProperties):
+elif os.path.exists(setupObject.jansCouchebaseProperties):
     scripts_location = 'couchbase'
 
-identtiy_xml_fn = '/opt/gluu/jetty/identity/webapps/identity.xml'
+identtiy_xml_fn = '/opt/jans/jetty/identity/webapps/identity.xml'
 
 tree = ET.parse(identtiy_xml_fn)
 root = tree.getroot()
 
 oxtrust_api_server_version = '5.0.0-SNAPSHOT'
 oxtrust_api_server_url = 'https://ox.gluu.org/maven/org/gluu/oxtrust-api-server/{0}/oxtrust-api-server-{0}.jar'.format(oxtrust_api_server_version)
-oxtrust_api_server_path = '/opt/gluu/jetty/identity/custom/libs/oxtrust-api-server.jar'
+oxtrust_api_server_path = '/opt/jans/jetty/identity/custom/libs/oxtrust-api-server.jar'
 
 print("Downloading oxtrust-api-server-{}.jar".format(oxtrust_api_server_version))
 os.system('wget -nv {} -O {}'.format(oxtrust_api_server_url, oxtrust_api_server_path))
@@ -73,7 +73,7 @@ if scripts_location == 'ldap':
     ldap_conn = get_ldap_conn()
 
     ldap_conn.search(
-                    search_base='inum=OO11-BAFE,ou=scripts,o=gluu', 
+                    search_base='inum=OO11-BAFE,ou=scripts,o=jans', 
                     search_scope=ldap3.BASE,
                     search_filter='(objectclass=*)',
                     attributes=["oxEnabled"]
@@ -87,7 +87,7 @@ if scripts_location == 'ldap':
 
 else:
     cbm = get_cbm_conn()
-    result = cbm.exec_query('UPDATE `gluu` USE KEYS "scripts_OO11-BAFE" SET `oxEnabled`=true')
+    result = cbm.exec_query('UPDATE `jans` USE KEYS "scripts_OO11-BAFE" SET `oxEnabled`=true')
 
 print("Restarting identity, this will take a while")
 setupObject.run_service_command('identity', 'restart')

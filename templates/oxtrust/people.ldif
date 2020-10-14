@@ -1,4 +1,4 @@
-dn: inum=%(admin_inum)s,ou=people,o=gluu
+dn: inum=%(admin_inum)s,ou=people,o=jans
 objectClass: top
 objectClass: gluuPerson
 objectClass: gluuCustomPerson
@@ -11,7 +11,7 @@ preferredUsername: admin
 sn: User
 userPassword: %(encoded_oxtrust_admin_password)s
 gluuStatus: active
-memberOf: inum=60B7,ou=groups,o=gluu
+memberOf: inum=60B7,ou=groups,o=jans
 displayName: Default Admin User
 mail: admin@%(hostname)s
 emailVerified: true

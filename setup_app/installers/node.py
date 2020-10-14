@@ -10,7 +10,7 @@ from setup_app.installers.base import BaseInstaller
 
 class NodeInstaller(BaseInstaller, SetupUtils):
 
-    node_base = os.path.join(Config.gluuOptFolder, 'node')
+    node_base = os.path.join(Config.jansOptFolder, 'node')
     templates_rendered = False
 
     def __init__(self):
@@ -34,7 +34,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
         if not base.snap:
             self.createUser('node', self.node_user_home)
-            self.addUserToGroup('gluu', 'node')
+            self.addUserToGroup('jans', 'node')
 
         nodeArchive = max(node_archieve_list)
 
@@ -55,8 +55,8 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_mkdir, '-p', "%s/temp" % Config.node_home])
 
         # Copy init.d script
-        self.copyFile(self.node_initd_script, Config.gluuOptSystemFolder)
-        self.run([paths.cmd_chmod, '-R', "755", "%s/node" % Config.gluuOptSystemFolder])
+        self.copyFile(self.node_initd_script, Config.jansOptSystemFolder)
+        self.run([paths.cmd_chmod, '-R', "755", "%s/node" % Config.jansOptSystemFolder])
 
         self.run([paths.cmd_chown, '-R', 'node:node', nodeDestinationPath])
         self.run([paths.cmd_chown, '-h', 'node:node', Config.node_home])
@@ -83,7 +83,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chown, 'root:root', os.path.join(Config.osDefault, serviceName)])
 
         if serviceName == 'passport':
-            initscript_fn = os.path.join(Config.gluuOptSystemFolder, serviceName)
+            initscript_fn = os.path.join(Config.jansOptSystemFolder, serviceName)
             self.fix_init_scripts(serviceName, initscript_fn)
         else:
-            self.run([paths.cmd_ln, '-sf', '%s/node' % Config.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
+            self.run([paths.cmd_ln, '-sf', '%s/node' % Config.jansOptSystemFolder, '/etc/init.d/%s' % serviceName])

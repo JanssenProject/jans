@@ -34,7 +34,7 @@
     "useSearchLimit":false,
     "attributeMapping":[
     ],
-    "snapshotFolder":"/var/gluu/identity/cr-snapshots",
+    "snapshotFolder":"/var/jans/identity/cr-snapshots",
     "snapshotMaxCount":10,
     "defaultInumServer":true
 }

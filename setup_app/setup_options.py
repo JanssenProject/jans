@@ -6,7 +6,7 @@ from setup_app.static import InstallTypes
 
 def get_setup_options():
 
-    parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
+    parser_description='''Use setup.py to configure your Jans Server and to add initial data required for
     oxAuth and oxTrust to start. If setup.properties is found in this folder, these
     properties will automatically be used instead of the interactive setup.
     '''
@@ -38,7 +38,7 @@ def get_setup_options():
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-oxauth', help="Do not install oxAuth OAuth2 Authorization Server", action='store_true')
     parser.add_argument('--no-oxtrust', help="Do not install oxTrust Admin UI", action='store_true')
-    parser.add_argument('--install-gluu-radius', help="Install oxTrust Admin UI", action='store_true')
+    parser.add_argument('--install-jans-radius', help="Install oxTrust Admin UI", action='store_true')
     parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
     parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
     parser.add_argument('-org-name', help="Organization name field used for generating X.509 certificates")
@@ -54,8 +54,8 @@ def get_setup_options():
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
     parser.add_argument('--install-scim', help="Install Scim Server", action='store_true')
     parser.add_argument('--install-fido2', help="Install Fido2")
-    parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
-    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
+    parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
+    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     
@@ -72,7 +72,7 @@ def get_setup_options():
         'installSaml': False,
         'installOxAuthRP': False,
         'installPassport': False,
-        'installGluuRadius': False,
+        'installJansRadius': False,
         'installScimServer': False,
         'installCasa': False,
         'installOxd': False,
@@ -96,7 +96,7 @@ def get_setup_options():
     if argsp.no_oxtrust:
         setupOptions['installOxTrust'] = False
 
-    setupOptions['installGluuRadius'] = argsp.install_gluu_radius
+    setupOptions['installJansRadius'] = argsp.install_jans_radius
 
     if argsp.ip_address:
         setupOptions['ip'] = argsp.ip_address
@@ -169,8 +169,8 @@ def get_setup_options():
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
 
-    if argsp.oxd_use_gluu_storage:
-        setupOptions['oxd_use_gluu_storage'] = True
+    if argsp.oxd_use_jans_storage:
+        setupOptions['oxd_use_jans_storage'] = True
 
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):

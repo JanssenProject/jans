@@ -28,7 +28,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
         
         if base.snap:
-            self.log_dir = os.path.join(base.snap_common, 'gluu/oxd-server/log/')
+            self.log_dir = os.path.join(base.snap_common, 'jans/oxd-server/log/')
         else:
             self.log_dir = '/var/log/oxd-server'
             service_file = os.path.join(self.oxd_root, 'oxd-server.service')
@@ -79,20 +79,20 @@ class OxdInstaller(SetupUtils, BaseInstaller):
                 addr_list.append('127.0.0.1')
             oxd_yaml.insert(i, 'bind_ip_addresses',  addr_list)
 
-        if Config.get('oxd_use_gluu_storage'):
+        if Config.get('oxd_use_jans_storage'):
 
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
-            oxd_yaml['storage'] = 'gluu_server_configuration'
-            oxd_yaml['storage_configuration']['baseDn'] = 'o=gluu'
-            oxd_yaml['storage_configuration']['type'] = Config.gluu_properties_fn
-            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
+            oxd_yaml['storage'] = 'jans_server_configuration'
+            oxd_yaml['storage_configuration']['baseDn'] = 'o=jans'
+            oxd_yaml['storage_configuration']['type'] = Config.jans_properties_fn
+            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mappingLocations['default'] == 'ldap' else Config.jansCouchebaseProperties
             oxd_yaml['storage_configuration']['salt'] = os.path.join(Config.configFolder, "salt")
 
         if base.snap:
             for appenders in oxd_yaml['logging']['appenders']:
                 if appenders['type'] == 'file':
                     appenders['currentLogFilename'] = self.log_file
-                    appenders['archivedLogFilenamePattern'] = os.path.join(base.snap_common, 'gluu/oxd-server/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz')
+                    appenders['archivedLogFilenamePattern'] = os.path.join(base.snap_common, 'jans/oxd-server/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz')
 
         yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
         self.writeFile(self.oxd_server_yml_fn, yml_str)
@@ -148,7 +148,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 
         oxd_zip_fn = '/tmp/oxd-server.zip'
-        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.distGluuFolder, 'oxd-server.tgz')
+        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.distJansFolder, 'oxd-server.tgz')
         tmp_dir = os.path.join('/tmp', os.urandom(5).hex())
         oxd_tmp_dir = os.path.join(tmp_dir, 'oxd-server')
         

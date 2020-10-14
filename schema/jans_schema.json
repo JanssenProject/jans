@@ -1,0 +1,6212 @@
+{
+  "attributeTypes": [
+    {
+      "desc": "Associate the dn of an OAuth2 client with a person or UMA Resource Set.",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "oxAssociatedClient",
+        "associatedClient"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Reference the dn of a person.",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "associatedPerson"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Blowfish crypted text",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "blowfishPassword"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ISO 3166-1 Alpha-2 Country Code",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "county"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Creation Date used for password reset requests",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "creationDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track the default scope for an custom OAuth2 Scope.",
+      "equality": "booleanMatch",
+      "names": [
+        "defaultScope"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track which appliances are deployed at an organization.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "deployedAppliances"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track rules for the federation in Janssen SAML config. Deprecated  as multi-party federation management should move to Jagger.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "federationRules"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Organizational attribute to control whether new users can be added  via the oxTrust GUI.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAddPersonCapability"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track bandwidth requirements for the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAdditionalBandwidth"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track additional memory requirements for the Janssen Server instance.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAdditionalMemory"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO : use unclear",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAdditionalusers"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Persist the DNS server that should be used for the Janssen Server instance.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansApplianceDnsServer"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Set the frequency of the health status update of the Janssen Server",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAppliancePollingInterval"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used by the Janssen Server to request an update",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansApplianceUpdateRequestList",
+        "jansApplianceUpdateReuestList"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specify in oxTrust who can view an attribute, admin or user",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeViewType"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specify in oxTrust who can update an attribute, admin or user",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeEditType"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specify the person objectclass associated with the attribute,  used for display purposes in oxTrust.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeOrigin"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - still required?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeSystemEditType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Data type of attribute. Values can be string, photo, numeric, date",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - Usage? Value can be OpenID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAttributeUsageType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track data received by the Janssen Server",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansBandwidthRX"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Track data sent by the Janssen Server",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansBandwidthTX"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use? Used to group attributes together.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansCategory"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship federation info",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "jansContainerFederation"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust custom welcome message",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansCustomMessage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor health of the instance LDAP server.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansDSstatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specifies SAML trust relationship entity ID",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansEntityId"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - Stores URL of favicon",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFaviconImage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust flag for the federation feature. Values enabled or disabled.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFederationHostingEnabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor free disk space on the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFreeDiskSpace"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor free memory on the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFreeMemory"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor swap space on the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansFreeSwap"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor HTTP availability of the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansHTTPstatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor the number of groups. TODO - Remove?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansGroupCount"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Type of Group. Not used.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansGroupType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Group visibility. Not used.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansGroupVisibility"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "The hostname of the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansHostname"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceAmount"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansInvoiceDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceLineItemName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceNo"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceNumber"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceProductNumber"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceQuantity"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansInvoiceStatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "IP address of the Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansIpAddress"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used in oxTrust to specify if a SAML Trust Relationship is a federation.  It could also be a website",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansIsFederation"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors last time the server was able to connect to  the monitoring system.",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansLastUpdate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLifeRay",
+        "TODO-remove"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Montior the average CPU load for a Janssen Server instance.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLoadAvg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Logo used by oxTrust for default look and feel.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansLogoImage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "booleanMatch",
+      "names": [
+        "jansManageIdentityPermission"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used to track with which organizations a person is associated",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansManagedOrganizations"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used to specify if a person has the manager role",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansManager"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in oxTrust.",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "jansManagerGroup"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Maximum Log File Size",
+      "equality": "integerMatch",
+      "names": [
+        "jansMaxLogSize"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "White pages attributes restricted by person in oxTrust profile management",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansOptOuts"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "enable or disable profile management feature in oxTrust",
+      "equality": "booleanMatch",
+      "names": [
+        "jansOrgProfileMgt"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Short description, as few letters as possible, no spaces.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansOrgShortName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPaidUntil"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPaymentProcessorTimestamp"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitor the number of people in the LDAP severs for a Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPersonCount"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPrivate"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - remove",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansProStoresuser"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansProfileConfiguration"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Server flag to publish the IDP metadata via the web server",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPublishIdpMetadata"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust reference for the dn of the released attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansReleasedAttribute"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansResizeInitiated"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - use unknown for Janssen SAML config",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansRulesAccepted"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML 1 uri of attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAML1URI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML 2 uri of attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAML2URI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Metadata filter in SAML trust relationship",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLMetaDataFilter"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML trust relationship configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLTrustEngine"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML trust relationship refresh time",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLmaxRefreshDelay"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship file location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaDataFN"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship SP metadata type - file, URI, federation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaDataSourceType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship URI location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaDataURL"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Specifies if the person has the SLA manager role",
+      "equality": "booleanMatch",
+      "names": [
+        "jansSLAManager"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSPTR"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust SCIM feature - enabled or disabled",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansScimEnabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors activity of Janssen Server Shibboleth IDP",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansShibAssertionsIssued"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors failed login attempts on Janssen Server Shibboleth IDP",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansShibFailedAuth"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors security events on Janssen Server Shibboleth IDP",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansShibSecurityEvents"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors login attempts on Janssen Server Shibboleth IDP",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansShibSuccessfulAuths"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Server SMTP configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpFromEmailAddress"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP From Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpFromName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP Host",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpHost"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP user Password",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpPassword"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP Port",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpPort"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP Requires Authentication",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpRequiresAuthentication"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP Requires SSL",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpRequiresSsl"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP user Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpuserName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSpecificRelyingPartyConfig"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SAML Trust Relationship configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSslExpiry"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Status of the entry, used by many objectclasses",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansStatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors how long the Janssen Server instance has been running.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSystemUptime"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Monitors total available RAM on Janssen Server instance",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTargetRAM"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Store location for upload of Favicon",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTempFaviconImage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust login page configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansThemeColor"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust login page configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTrustContact"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTrustDeconstruction"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen instance URL",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansUrl"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust VDS enabled or disabled",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansVDSenabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen VDS configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansVDSstatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansValidationLog"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansValidationStatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "jansVdsCacheRefreshEnabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jansVdsCacheRefreshLastUpdate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansVdsCacheRefreshLastUpdateCount"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansVdsCacheRefreshPollingInterval"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansVdsCacheRefreshProblemCount"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWhitePagesEnabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Allow Publication",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansWhitePagesListed"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "iname"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "XRI i-number",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "inum"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "XRI i-number sans punctuation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "inumFN"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX literalValue",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "literalBinaryValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX literalValue",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "literalValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "memberOf"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TODO - in use?",
+      "equality": "booleanMatch",
+      "names": [
+        "nonProfit"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX organizationalOwner",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "organizationalOwner"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "am host",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxAmHost"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Used by ja in conjunction with jansttributeName to map claims to attributes in LDAP.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClaimName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja App Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaAppType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Authentication Time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "authnTime"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja authorization code",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "authzCode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Attribute Claim",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClaim"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Group Attribute Claims (true or false)",
+      "equality": "booleanMatch",
+      "names": [
+        "jaGroupClaims"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Client id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClientId"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Client id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "clnId"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Client Issued At",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClientIdIssuedAt"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Client Secret",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClientSecret"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Date client expires",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "jaClientSecretExpiresAt"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Client URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaClientURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Dynamic Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaConfDynamic"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Errors Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaConfErrors"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Static Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaConfStatic"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Web Keys Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaConfWebKeys"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Contact",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaContact"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Creation",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "iat"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Default Acr Values",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaDefaultAcrValues"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Default Max Age",
+      "equality": "integerMatch",
+      "names": [
+        "jaDefaultMaxAge"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Expiration",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "exp"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja grant id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "grtId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Grant Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaGrantType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Grant Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "grtTyp"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja ID Token enc resp Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaIdTokenencrespAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja ID Token enc resp Enc",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaIdTokenencrespEnc"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja ID Token Signed resp Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaIdTokenSignedrespAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Initiate Login URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaInitiateLoginURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja JWKs URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaJwksURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja JWKs",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaJwks"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja JWT Request",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jwtReq"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Logo URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaLogoURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja nonce",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "nnc"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Session State",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSessionState"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Permission Granted Map",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaPermissionGrantedMap"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "substr": "caseIgnoreSubstringsMatch",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Persistent JWT",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaPersistentJWT"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Policy URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaPolicyURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Policy URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaLogoutURI"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Policy URI",
+      "equality": "booleanMatch",
+      "names": [
+        "jaLogoutSessionRequired"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Post Logout Redirect URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaPostLogoutRedirectURI"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Redirect URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRedirectURI"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Registration Access Token",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRegistrationAccessToken"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja released scope attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaReleasedScope"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Request Object Signing Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRequestObjectSigningAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Request Object Encryption Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRequestObjectEncryptionAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Request Object Encryption Enc",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRequestObjectEncryptionEnc"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Request URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaRequestURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Require Authentication Time",
+      "equality": "booleanMatch",
+      "names": [
+        "jaRequireAuthTime"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja resp Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jarespType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Attribute Scope",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaScope"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Attribute Scope",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "scp"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX Attribute Scope type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxScopeType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Sector Identifier URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSectorIdentifierURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Signed resp Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSignedrespAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja skip authorization attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSkipAuthorization"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Subject Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSubjectType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Token Code",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tknCde"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Token Endpoint Auth Method",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaTokenEndpointAuthMethod"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Token Endpoint Auth Signing Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaTokenEndpointAuthSigningAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Token Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tknTyp"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja TOS URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaTosURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Trusted Client",
+      "equality": "booleanMatch",
+      "names": [
+        "jaTrustedClient"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "URI reference of scope descriptor",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaUmaScope"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja user DN",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "jauserDN"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja user id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jauserId",
+        "usrId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja user info enc resp Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jauserinfoencrespAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja user info enc resp Enc",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jauserinfoencrespEnc"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja additional configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaExtraConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja x509 in PEM format",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaX509PEM"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja x509 URL",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaX509URL"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaenticationMode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "acr"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustAuthenticationMode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox configuration code",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxConfigurationCode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Registration time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxCreationTimestamp"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "domain",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDomain"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxExternalUid"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Stores a used OTP to prevent a hacker from using it again. Complementary to oxExternalUid attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxOTPCache"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "URI for a graphic icon",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxFaviconImage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "user group",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxGroup"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "A random string to mark temporary tokens",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxGuid"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Unique identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "uuid"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox host",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxHost"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Custom IDP authentication configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxIDPAuthentication"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox icon url",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxIconUrl"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Session Identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "sid"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Boolean field to indicate whether object is used as JWT",
+      "equality": "booleanMatch",
+      "names": [
+        "oxAsJwt"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "JWT representation of the object or otherwise jwt associated with the object",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxJwt"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Involved clients",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxInvolvedClients"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Last access time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxLastAccessTime"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Last logon time",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxLastLogonTime"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Link Creator",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinkCreator"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Link Expiration Date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxLinkExpirationDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Linktrack link",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinkLinktrack"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Is Link Moderated?",
+      "equality": "booleanMatch",
+      "names": [
+        "oxLinkModerated"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Link Moderators",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinkModerators"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Pending Registrations",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinkPending"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Is Linktrack API configured",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinktrackEnabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Linktrack API login",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinktrackLogin"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Linktrack API password",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLinktrackPassword"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Log viewer configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLogViewerConfig"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "oxMultivaluedAttribute"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "NameId Type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxNameIdType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Policy Rule",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPolicyRule"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX policy script Dn",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "oxUmaPolicyScriptDn"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx access token",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxyAccessToken"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx claim mapping",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxyClaimMapping"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxState",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxState"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxCounter",
+      "equality": "integerMatch",
+      "names": [
+        "oxCounter"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxStatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxApplication",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxApplication"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxDeviceRegistrationConf",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDeviceRegistrationConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxDeviceKeyHandle",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDeviceKeyHandle"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxDeviceHashCode",
+      "equality": "integerMatch",
+      "names": [
+        "oxDeviceHashCode"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxRequest",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxRequest"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxRequestId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxRequestId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxDeviceData",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDeviceData"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxEnrollmentCode",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxEnrollmentCode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx client id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxyClientId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx scope",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxyScope"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxProx client mapping to op client",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxProxyToOpClientMapping"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPush application DN",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "oxPushApplication"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPush application configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPushApplicationConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPush device configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPushDeviceConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Registration Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxRegistrationConfiguration"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Host path",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxResource"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox resource set id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxResourceSetId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Revision",
+      "equality": "integerMatch",
+      "names": [
+        "oxRevision"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Level",
+      "equality": "integerMatch",
+      "names": [
+        "oxLevel"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "oxSCIMCustomAttribute"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attribute that contains script (python, java script)",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxScript"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Script object DN",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "oxScriptDn"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attribute that contains script type (e.g. python, java script)",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxScriptType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attribute that contains first error which application get during it execution",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxScriptError"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SMTP configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSmtpConfiguration"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Source Attribute for this Attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSourceAttribute"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox ticket",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTicket"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "oxTrustActive"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustCacheRefreshServerIpAddress"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Specifies the oxTrust server which should run Cache refresh"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustAddresses"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust Application Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustConfApplication"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust Cache Refresh Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustConfCacheRefresh"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox Application Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxConfApplication"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "scim status",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustCustAttrB"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustEmail"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustEntitlements"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseExactMatch",
+      "names": [
+        "oxTrustExternalId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustImsValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustMetaCreated"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustMetaLastModified"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustMetaLocation"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseExactMatch",
+      "names": [
+        "oxTrustMetaVersion"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustNameFormatted"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustPhoneValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustPhotos"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustProfileURL"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustRole"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPush device configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustStoreCert"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPush application configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustStoreConf"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustTitle"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustuserType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrusthonorificPrefix"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrusthonorificSuffix"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustx509Certificate"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox uma permission",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxUmaPermission"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox url",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxUrl"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "x509 in PEM format",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxX509PEM"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "x509 URL",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxX509URL"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Is password reset mechanics allowed",
+      "equality": "booleanMatch",
+      "names": [
+        "passwordResetAllowed"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "PersistentId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "persistentId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Persistent ID reserved for SAML"
+    },
+    {
+      "desc": "Inum of a person",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "personInum"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Primary Key Attribute Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "primaryKeyAttrName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Primary Key Value",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "primaryKeyValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "proStoresToken"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "programming language",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "programmingLanguage"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "prostoresTimestamp"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Registration date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "registrationDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Role",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "role"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "SCIM Authorization mode",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "scimAuthMode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "scim Group",
+      "equality": "distinguishedNameMatch",
+      "names": [
+        "scimGroup"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "scim status",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "scimStatus"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Secondary Key Attribute Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "secondaryKeyAttrName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Secondary Key Value",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "secondaryKeyValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Secret Answer",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "secretAnswer"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Secret Question",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "secretQuestion"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "softwareVersion"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX SourceRelationalXdiStatement",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "sourceRelationalXdiStatement"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX TargetRelationalXdiStatement",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "targetRelationalXdiStatement"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Tertiary Key Attribute Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tertiaryKeyAttrName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Tertiary Key Value",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tertiaryKeyValue"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "TransientId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "transientId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "url"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "urn"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX XRI Component",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "x"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX xdiStatement",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "xdiStatement"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX XRI address",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "xri"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Middle name(s)",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "middleName",
+        "oxTrustMiddleName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Casual name of the End-user",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "nickname",
+        "oxTrustnickname"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Shorthand Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "preferredusername"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Profile page URL of the person",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "profile"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Profile picture URL of the person",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "picture",
+        "photo1"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Web page or blog URL of the person",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "website"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "True if the e-mail address of the person has been verified; otherwise false",
+      "equality": "booleanMatch",
+      "names": [
+        "emailVerified"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Gender of the person either female or male",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "gender"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Birthday of the person, represented as an ISO 8601:2004 [ISO8601\u20112004] YYYY-MM-DD format",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "birthdate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Time zone database representing the End-users time zone. For example, Europe/Paris or America/Los_Angeles",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "zoneinfo",
+        "timezone"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Locale of the person, represented as a BCP47 [RFC5646] language tag",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "locale",
+        "oxTrustLocale"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "True if the phone number of the person has been verified, otherwise false",
+      "equality": "booleanMatch",
+      "names": [
+        "phoneNumberVerified"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OpenID Connect formatted JSON object representing the address of the person",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "address"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "updatedAt"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Regular expression used to validate attribute data",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansRegExp"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Custom tooltip to be shown on the UI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansTooltip"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Module property",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxModuleProperty"
+      ],
+      "json": true,
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Configuration property",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxConfigurationProperty"
+      ],
+      "json": true,
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "jaSessionAttribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSessionAttribute"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Trust relationship attribute to show that InCommon R&S activated",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "researchAndScholarshipEnabled"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Start date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxStartDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "End date",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxEndDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Application type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxApplicationType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Metric type",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxMetricType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX data",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxData"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX data",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "dat"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX PKCE code challenge",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxCodeChallenge"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX PKCE code challenge",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "chlng"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX PKCE code challenge method",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "chlngMth"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox Sector Identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSectorIdentifier"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox Persist Client Authorizations",
+      "equality": "booleanMatch",
+      "names": [
+        "oxPersistClientAuthorizations"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust Import Person Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustConfImportPerson"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxSessionStateId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSessionStateId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Session DN",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "ssnId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Password Expiration date, represented as an ISO 8601 (YYYY-MM-DD) format",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "oxPasswordExpirationDate"
+      ],
+      "oid": "oxAttribute",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Invalid login attempts count",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxCountInvalidLogin"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "This data has information about your imap connection",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansIMAPData"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust Passport Strategy Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansPassportConfiguration"
+      ],
+      "json": true,
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "jansPassportEnabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "jansRadiusEnabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "equality": "booleanMatch",
+      "names": [
+        "jansSamlEnabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "This data has information about attribute Validation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxValidation"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "This data has information about TR EntityType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansEntityType"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Persistent Pairwise ID for OpenID Connect",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPPID"
+      ],
+      "multivalued": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Session Id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaSessionId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Cache configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxCacheConfiguration"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Path to external log4j2.xml",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxLogConfigLocation"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ox Include Claims In Id Token",
+      "equality": "booleanMatch",
+      "names": [
+        "oxIncludeClaimsInIdToken"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Claim Values",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxClaimValues"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Claim Redirect URI",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxClaimRedirectURI"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attributes",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxAttributes"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attributes",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "attr"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Attributes",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "userRandomKey"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Lifetime of refresh token",
+      "equality": "integerMatch",
+      "names": [
+        "oxRefreshTokenLifetime"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrust Attribute Resolver ",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustConfAttributeResolver"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Permission Granted",
+      "equality": "booleanMatch",
+      "names": [
+        "jaPermissionGranted"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxNickName",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxNickName"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Extended push notification configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDeviceNotificationConf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Claims",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "clms"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Status of client",
+      "equality": "booleanMatch",
+      "names": [
+        "oxDisabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Web Keys Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxWebKeysSettings"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Scope expression",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxScopeExpression"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - preferred method to use for user authentication",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPreferredMethod"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - Json representation of OTP devices. Complementary to oxExternalUid attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxOTPDevices"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - Json representation of mobile devices. Complementary to mobile attribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxMobileDevices"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxd Id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxdId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Authorized Origins",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaAuthorizedOrigins"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - 2FA Enforcement Policy for user",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxStrongAuthPolicy"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - List of devices with which strong authentication may be skipped",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxTrustedDevicesinfo"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxauth - Token Binding Id Hash",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tknBndCnf"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Casa - List of unlinked social accounts (ie disabled oxExternalUids)",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxUnlinkedExternalUids"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxauth - indicator whether to return access token as JWT",
+      "equality": "booleanMatch",
+      "names": [
+        "oxAccessTokenAsJwt"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxauth - access token signing algorithm",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxAccessTokenSigningAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxRegistrationData",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxRegistrationData"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "jaenticationData",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaenticationData"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxPublicKeyId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxPublicKeyId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Lifetime of access token",
+      "equality": "integerMatch",
+      "names": [
+        "oxAccessTokenLifetime"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Software Identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSoftwareId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Software Version",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSoftwareVersion"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Software Statement",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxSoftwareStatement"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxRptAsJwt",
+      "equality": "booleanMatch",
+      "names": [
+        "oxRptAsJwt"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "OX code challenge hash",
+      "equality": "integerMatch",
+      "names": [
+        "oxCodeChallengeHash"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "del",
+      "equality": "booleanMatch",
+      "names": [
+        "del"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Status of the entry, used by many objectclasses",
+      "equality": "booleanMatch",
+      "names": [
+        "oxEnabled"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxAlias",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "oxAlias"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrustLogoPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "oxTrustLogoPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxTrustFaviconPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "oxTrustFaviconPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "jaLogoPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "jaLogoPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "jaFaviconPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "jaFaviconPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "idpLogoPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "idpLogoPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "idpFaviconPath",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "idpFaviconPath"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "parent",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "parent"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "classRef",
+      "equality": "caseIgnoreMatch",
+      "substr": "caseIgnoreSubstringsMatch",
+      "names": [
+        "classRef"
+      ],
+      "oid": "oxAttribute",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Trust SMTP server",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSmtpServerTrust"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "pattern",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "pattern"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel Token Delivery Mode",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchannelTokenDeliveryMode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel Client Notification Endpoint",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchannelClientNotificationEndpoint"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel Authentication Request Signing Alg",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchannelAuthenticationRequestSigningAlg"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel user Code Parameter",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchanneluserCodeParameter"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel Device Registration Token",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchannelDeviceRegistrationToken"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "ja Backchannel user Code",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jaBackchanneluserCode"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "oxDocumentStoreConfiguration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "oxDocumentStoreConfiguration"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Dynamic Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansConfDynamic"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Janssen Static Configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansConfStatic"
+      ],
+      "json": true,
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    },
+    {
+      "desc": "Authentication request id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "authReqId"
+      ],
+      "oid": "oxAttribute",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Janssen created attribute"
+    }
+  ],
+  "objectClasses": [
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "oxSectorIdentifier",
+        "jaClientId",
+        "jauserId"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "pairwiseIdentifier"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "associatedClient",
+        "c",
+        "displayName",
+        "givenName",
+        "jansManagedOrganizations",
+        "jansOptOuts",
+        "jansStatus",
+        "jansWhitePagesListed",
+        "iname",
+        "inum",
+        "mail",
+        "jansSLAManager",
+        "memberOf",
+        "o",
+        "jaPersistentJWT",
+        "oxCreationTimestamp",
+        "oxExternalUid",
+        "oxOTPCache",
+        "oxLastLogonTime",
+        "oxTrustActive",
+        "oxTrustAddresses",
+        "oxTrustEmail",
+        "oxTrustEntitlements",
+        "oxTrustExternalId",
+        "oxTrustImsValue",
+        "oxTrustMetaCreated",
+        "oxTrustMetaLastModified",
+        "oxTrustMetaLocation",
+        "oxTrustMetaVersion",
+        "oxTrustNameFormatted",
+        "oxTrustPhoneValue",
+        "oxTrustPhotos",
+        "oxTrustProfileURL",
+        "oxTrustRole",
+        "oxTrustTitle",
+        "oxTrustuserType",
+        "oxTrusthonorificPrefix",
+        "oxTrusthonorificSuffix",
+        "oxTrustx509Certificate",
+        "oxPasswordExpirationDate",
+        "persistentId",
+        "middleName",
+        "nickname",
+        "preferredusername",
+        "profile",
+        "picture",
+        "website",
+        "emailVerified",
+        "gender",
+        "birthdate",
+        "zoneinfo",
+        "locale",
+        "phoneNumberVerified",
+        "address",
+        "updatedAt",
+        "preferredLanguage",
+        "role",
+        "secretAnswer",
+        "secretQuestion",
+        "seeAlso",
+        "sn",
+        "cn",
+        "transientId",
+        "uid",
+        "userPassword",
+        "st",
+        "street",
+        "l",
+        "oxCountInvalidLogin",
+        "oxEnrollmentCode",
+        "jansIMAPData",
+        "oxPPID",
+        "oxGuid",
+        "userRandomKey",
+        "oxPreferredMethod",
+        "userCertificate",
+        "oxOTPDevices",
+        "oxMobileDevices",
+        "oxStrongAuthPolicy",
+        "oxTrustedDevicesinfo",
+        "oxUnlinkedExternalUids",
+        "jaBackchannelDeviceRegistrationToken",
+        "jaBackchanneluserCode"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansPerson"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "c",
+        "description",
+        "displayName",
+        "jansGroupType",
+        "jansGroupVisibility",
+        "jansStatus",
+        "iname",
+        "inum",
+        "member",
+        "o",
+        "owner",
+        "seeAlso",
+        "oxTrustMetaCreated",
+        "oxTrustMetaLastModified",
+        "oxTrustMetaLocation",
+        "oxTrustMetaVersion"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansGroup"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "c",
+        "county",
+        "deployedAppliances",
+        "description",
+        "displayName",
+        "jansAddPersonCapability",
+        "jansAdditionalusers",
+        "jansApplianceUpdateRequestList",
+        "jansCustomMessage",
+        "jansFaviconImage",
+        "jansFederationHostingEnabled",
+        "jansInvoiceNo",
+        "jansLogoImage",
+        "jansManageIdentityPermission",
+        "jansManager",
+        "jansManagerGroup",
+        "jansOrgShortName",
+        "jansPaidUntil",
+        "jansPaymentProcessorTimestamp",
+        "jansProStoresuser",
+        "jansStatus",
+        "jansTempFaviconImage",
+        "jansThemeColor",
+        "jansWhitePagesEnabled",
+        "iname",
+        "inum",
+        "l",
+        "mail",
+        "memberOf",
+        "nonProfit",
+        "o",
+        "oxCreationTimestamp",
+        "oxLinkLinktrack",
+        "oxLinktrackEnabled",
+        "oxLinktrackLogin",
+        "oxLinktrackPassword",
+        "oxRegistrationConfiguration",
+        "postalCode",
+        "proStoresToken",
+        "prostoresTimestamp",
+        "scimAuthMode",
+        "scimGroup",
+        "scimStatus",
+        "st",
+        "street",
+        "telephoneNumber",
+        "title",
+        "uid",
+        "userPassword",
+        "oxTrustLogoPath",
+        "oxTrustFaviconPath",
+        "jaLogoPath",
+        "jaFaviconPath",
+        "idpLogoPath",
+        "idpFaviconPath"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansOrganization"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "blowfishPassword",
+        "c",
+        "ou",
+        "description",
+        "displayName",
+        "jansAdditionalBandwidth",
+        "jansAdditionalMemory",
+        "jansApplianceDnsServer",
+        "jansAppliancePollingInterval",
+        "jansBandwidthRX",
+        "jansBandwidthTX",
+        "jansDSstatus",
+        "jansFederationHostingEnabled",
+        "jansHTTPstatus",
+        "jansHostname",
+        "jansInvoiceNo",
+        "jansLastUpdate",
+        "jansLifeRay",
+        "jansManageIdentityPermission",
+        "jansManager",
+        "jansMaxLogSize",
+        "jansOrgProfileMgt",
+        "jansPaidUntil",
+        "jansPaymentProcessorTimestamp",
+        "jansPrivate",
+        "jansPublishIdpMetadata",
+        "jansResizeInitiated",
+        "jansSPTR",
+        "jansScimEnabled",
+        "jansShibAssertionsIssued",
+        "jansShibFailedAuth",
+        "jansShibSecurityEvents",
+        "jansShibSuccessfulAuths",
+        "oxTrustEmail",
+        "jansSmtpFromEmailAddress",
+        "jansSmtpFromName",
+        "jansSmtpHost",
+        "jansSmtpPassword",
+        "jansSmtpPort",
+        "jansSmtpRequiresAuthentication",
+        "jansSmtpRequiresSsl",
+        "jansSmtpuserName",
+        "jansSslExpiry",
+        "jansStatus",
+        "jansTargetRAM",
+        "jansUrl",
+        "jansVDSenabled",
+        "jansVDSstatus",
+        "jansVdsCacheRefreshEnabled",
+        "jansVdsCacheRefreshLastUpdate",
+        "jansVdsCacheRefreshLastUpdateCount",
+        "jansVdsCacheRefreshPollingInterval",
+        "jansVdsCacheRefreshProblemCount",
+        "jansWhitePagesEnabled",
+        "iname",
+        "inum",
+        "inumFN",
+        "o",
+        "jaenticationMode",
+        "oxTrustAuthenticationMode",
+        "oxIDPAuthentication",
+        "oxLogViewerConfig",
+        "oxLogConfigLocation",
+        "oxSmtpConfiguration",
+        "oxCacheConfiguration",
+        "oxDocumentStoreConfiguration",
+        "oxTrustStoreCert",
+        "oxTrustStoreConf",
+        "passwordResetAllowed",
+        "softwareVersion",
+        "userPassword",
+        "oxTrustCacheRefreshServerIpAddress",
+        "jansPassportEnabled",
+        "jansRadiusEnabled",
+        "jansSamlEnabled",
+        "jansSmtpServerTrust"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "description",
+        "displayName",
+        "jansAttributeEditType",
+        "jansAttributeName",
+        "jansAttributeOrigin",
+        "jansAttributeSystemEditType",
+        "jansAttributeType",
+        "jaClaimName",
+        "jansAttributeUsageType",
+        "jansAttributeViewType",
+        "jansCategory",
+        "jansSAML1URI",
+        "jansSAML2URI",
+        "jansStatus",
+        "iname",
+        "inum",
+        "oxMultivaluedAttribute",
+        "oxNameIdType",
+        "oxSCIMCustomAttribute",
+        "oxSourceAttribute",
+        "seeAlso",
+        "urn",
+        "jansRegExp",
+        "jansTooltip",
+        "oxValidation"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansAttribute"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "description",
+        "displayName",
+        "federationRules",
+        "jansContainerFederation",
+        "jansEntityId",
+        "jansIsFederation",
+        "jansProfileConfiguration",
+        "jansReleasedAttribute",
+        "jansRulesAccepted",
+        "jansSAMLMetaDataFilter",
+        "jansSAMLTrustEngine",
+        "jansSAMLmaxRefreshDelay",
+        "jansSAMLspMetaDataFN",
+        "jansSAMLspMetaDataSourceType",
+        "jansSAMLspMetaDataURL",
+        "jansSpecificRelyingPartyConfig",
+        "jansStatus",
+        "jansTrustContact",
+        "jansTrustDeconstruction",
+        "jansValidationLog",
+        "jansValidationStatus",
+        "iname",
+        "inum",
+        "o",
+        "jaPostLogoutRedirectURI",
+        "url",
+        "researchAndScholarshipEnabled",
+        "jansEntityType"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansSAMLconfig"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansStatus",
+        "inum",
+        "primaryKeyAttrName",
+        "primaryKeyValue",
+        "secondaryKeyAttrName",
+        "secondaryKeyValue",
+        "tertiaryKeyAttrName",
+        "tertiaryKeyValue"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansInumMap"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansInvoiceAmount",
+        "jansInvoiceDate",
+        "jansInvoiceLineItemName",
+        "jansInvoiceNumber",
+        "jansInvoiceProductNumber",
+        "jansInvoiceQuantity",
+        "jansInvoiceStatus",
+        "inum"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansInvoice"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "creationDate",
+        "oxGuid",
+        "personInum"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansPasswordResetRequest"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "description",
+        "oxGuid",
+        "oxLinkCreator",
+        "oxLinkExpirationDate",
+        "oxLinkLinktrack",
+        "oxLinkModerated",
+        "oxLinkModerators",
+        "oxLinkPending"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxLink"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "vdapcontainer"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "o"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "vdDirectoryView"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "o"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "vdlabel"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "displayName",
+        "iname",
+        "inum"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxEntry"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "organizationalOwner",
+        "owner",
+        "sourceRelationalXdiStatement",
+        "targetRelationalXdiStatement",
+        "x",
+        "xdiStatement",
+        "xri"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxNode"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "associatedPerson",
+        "displayName",
+        "description",
+        "inum",
+        "jaAppType",
+        "jaClientIdIssuedAt",
+        "jaClientSecret",
+        "jaClientSecretExpiresAt",
+        "exp",
+        "del",
+        "jaClientURI",
+        "jaContact",
+        "jaDefaultAcrValues",
+        "jaDefaultMaxAge",
+        "jaGrantType",
+        "jaIdTokenencrespAlg",
+        "jaIdTokenencrespEnc",
+        "jaIdTokenSignedrespAlg",
+        "jaInitiateLoginURI",
+        "jaJwksURI",
+        "jaJwks",
+        "jaLogoURI",
+        "jaPolicyURI",
+        "jaPostLogoutRedirectURI",
+        "jaRedirectURI",
+        "jaRegistrationAccessToken",
+        "jaRequestObjectSigningAlg",
+        "jaRequestObjectEncryptionAlg",
+        "jaRequestObjectEncryptionEnc",
+        "jaRequestURI",
+        "jaRequireAuthTime",
+        "jarespType",
+        "jaScope",
+        "jaClaim",
+        "jaSectorIdentifierURI",
+        "jaSignedrespAlg",
+        "jaSubjectType",
+        "jaTokenEndpointAuthMethod",
+        "jaTokenEndpointAuthSigningAlg",
+        "jaTosURI",
+        "jaTrustedClient",
+        "jauserinfoencrespAlg",
+        "jauserinfoencrespEnc",
+        "jaExtraConf",
+        "oxClaimRedirectURI",
+        "oxLastAccessTime",
+        "oxLastLogonTime",
+        "oxPersistClientAuthorizations",
+        "oxIncludeClaimsInIdToken",
+        "oxRefreshTokenLifetime",
+        "oxDisabled",
+        "jaLogoutURI",
+        "jaLogoutSessionRequired",
+        "oxdId",
+        "jaAuthorizedOrigins",
+        "tknBndCnf",
+        "oxAccessTokenAsJwt",
+        "oxAccessTokenSigningAlg",
+        "oxAccessTokenLifetime",
+        "oxSoftwareId",
+        "oxSoftwareVersion",
+        "oxSoftwareStatement",
+        "oxRptAsJwt",
+        "oxAttributes",
+        "jaBackchannelTokenDeliveryMode",
+        "jaBackchannelClientNotificationEndpoint",
+        "jaBackchannelAuthenticationRequestSigningAlg",
+        "jaBackchanneluserCodeParameter"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaClient"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "defaultScope",
+        "description",
+        "displayName",
+        "inum",
+        "oxScopeType",
+        "jaClaim",
+        "oxScriptDn",
+        "jaGroupClaims",
+        "oxId",
+        "oxIconUrl",
+        "oxUmaPolicyScriptDn",
+        "oxAttributes",
+        "exp",
+        "del"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaCustomScope"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "sid",
+        "creationDate",
+        "exp",
+        "del",
+        "oxLastAccessTime",
+        "jauserDN",
+        "authnTime",
+        "oxState",
+        "oxSessionState",
+        "jaPermissionGranted",
+        "oxAsJwt",
+        "oxJwt",
+        "jaPermissionGrantedMap",
+        "oxInvolvedClients",
+        "jaSessionAttribute"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaSessionId"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "jaConfDynamic",
+        "jaConfErrors",
+        "jaConfStatic",
+        "jaConfWebKeys",
+        "oxRevision",
+        "oxWebKeysSettings"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "oxTrustConfApplication",
+        "oxTrustConfCacheRefresh",
+        "oxRevision",
+        "oxTrustConfImportPerson",
+        "oxTrustConfAttributeResolver"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxTrustConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "oxConfApplication",
+        "oxRevision"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxApplicationConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "displayName",
+        "inum",
+        "owner",
+        "oxAssociatedClient",
+        "jaUmaScope",
+        "oxFaviconImage",
+        "oxGroup",
+        "oxId",
+        "oxResource",
+        "oxRevision",
+        "oxType",
+        "oxScopeExpression",
+        "iat",
+        "exp",
+        "del",
+        "description"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxUmaResource"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "exp",
+        "del",
+        "jaUmaScope",
+        "oxConfigurationCode",
+        "oxResourceSetId",
+        "oxAttributes",
+        "oxTicket",
+        "oxStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxUmaResourcePermission"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "grtId",
+        "iat"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaGrant"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "authnTime",
+        "authzCode",
+        "iat",
+        "exp",
+        "del",
+        "grtId",
+        "grtTyp",
+        "jwtReq",
+        "nnc",
+        "scp",
+        "tknCde",
+        "tknTyp",
+        "usrId",
+        "clnId",
+        "acr",
+        "uuid",
+        "chlng",
+        "chlngMth",
+        "clms",
+        "ssnId",
+        "attr",
+        "tknBndCnf"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "token"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "authnTime",
+        "clnId",
+        "iat",
+        "exp",
+        "del",
+        "tknCde",
+        "usrId",
+        "oxUmaPermission",
+        "uuid"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaUmaRPT"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "literalBinaryValue",
+        "literalValue",
+        "organizationalOwner",
+        "owner",
+        "targetRelationalXdiStatement",
+        "x",
+        "xdiStatement",
+        "xri"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxLiteralNode"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "oxProxConf",
+        "oxScriptDn"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxProxConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "c",
+        "displayName",
+        "inum",
+        "l",
+        "oxDomain",
+        "oxId",
+        "oxX509PEM",
+        "oxX509URL"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxProxOp"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "displayName",
+        "inum",
+        "oxProxyClaimMapping",
+        "oxProxyScope",
+        "oxProxyToOpClientMapping"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxProxClient"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "iat",
+        "exp",
+        "del",
+        "oxProxyAccessToken",
+        "oxProxyClientId"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxProxAccessToken"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "oxScript",
+        "oxScriptType"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxScript"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "displayName",
+        "oxId",
+        "oxName",
+        "oxPushApplicationConf"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxPushApplication"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jauserId",
+        "oxId",
+        "oxPushApplication",
+        "oxPushDeviceConf",
+        "oxType"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxPushDevice"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "displayName",
+        "description",
+        "oxScript",
+        "oxScriptType",
+        "programmingLanguage",
+        "oxModuleProperty",
+        "oxConfigurationProperty",
+        "oxLevel",
+        "oxRevision",
+        "oxEnabled",
+        "oxScriptError",
+        "oxAlias"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxCustomScript"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "displayName",
+        "description",
+        "oxDeviceKeyHandle",
+        "oxDeviceHashCode",
+        "oxApplication",
+        "oxDeviceRegistrationConf",
+        "oxDeviceNotificationConf",
+        "oxNickName",
+        "oxDeviceData",
+        "oxCounter",
+        "oxStatus",
+        "del",
+        "exp",
+        "personInum",
+        "creationDate",
+        "oxLastAccessTime",
+        "oxTrustMetaLastModified",
+        "oxTrustMetaLocation",
+        "oxTrustMetaVersion"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxDeviceRegistration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "oxRequestId",
+        "oxRequest",
+        "oxSessionStateId",
+        "del",
+        "exp",
+        "personInum",
+        "creationDate"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxU2fRequest"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "uniqueIdentifier",
+        "oxStartDate",
+        "oxEndDate",
+        "oxApplicationType",
+        "oxMetricType",
+        "creationDate",
+        "del",
+        "exp",
+        "oxData",
+        "oxHost"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxMetric"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "jaClientId",
+        "jauserId",
+        "exp",
+        "del",
+        "jaScope"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxClientAuthorization"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "description",
+        "jaRedirectURI",
+        "jaClientId"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxSectorIdentifier"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "jansPassportConfiguration",
+        "jansStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxPassportConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "uniqueIdentifier",
+        "inum",
+        "oxConfApplication",
+        "oxRevision"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxShibbolethCASProtocolConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "clnId",
+        "iat",
+        "exp",
+        "del",
+        "tknCde",
+        "oxClaimValues"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jaUmaPCT"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "uuid",
+        "iat",
+        "exp",
+        "del",
+        "dat"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "cache"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "creationDate",
+        "oxSessionStateId",
+        "oxCodeChallenge",
+        "personInum",
+        "jaenticationData",
+        "oxStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxFido2AuthenticationEntry"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "creationDate",
+        "displayName",
+        "oxSessionStateId",
+        "oxCodeChallenge",
+        "oxCodeChallengeHash",
+        "oxPublicKeyId",
+        "personInum",
+        "oxRegistrationData",
+        "oxDeviceNotificationConf",
+        "oxCounter",
+        "oxStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxFido2RegistrationEntry"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "parent",
+        "classRef",
+        "inum"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "samlAcr"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansFreeDiskSpace",
+        "jansFreeMemory",
+        "jansFreeSwap",
+        "jansGroupCount",
+        "jansIpAddress",
+        "jansLoadAvg",
+        "jansPersonCount",
+        "jansSystemUptime",
+        "uniqueIdentifier"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansOxtrustStat"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "ou",
+        "jansConfDynamic",
+        "jansConfStatic",
+        "oxRevision"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansApplicationConfiguration"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "dat",
+        "iat",
+        "exp",
+        "oxType"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxExpiredObject"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "oxId",
+        "dat"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "oxRp"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "authReqId",
+        "clnId",
+        "usrId",
+        "creationDate",
+        "exp",
+        "oxStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "cibaRequest"
+      ],
+      "oid": "oxObjectClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Janssen created objectclass"
+    }
+  ],
+  "oidMacros": {
+    "oxAttribute": "oxPublished:3",
+    "oxMatchRules": "oxPublished:2",
+    "oxObjectClass": "oxPublished:4",
+    "oxOrgOID": "1.3.6.1.4.1.48710",
+    "oxPublished": "oxOrgOID:1",
+    "oxReserved": "oxOrgOID:0",
+    "oxSyntax": "oxPublished:1"
+  }
+}

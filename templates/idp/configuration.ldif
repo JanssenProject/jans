@@ -1,11 +1,11 @@
 # SAML2 Federations - LEVEL 2
 # WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
-dn: ou=federations,o=gluu
+dn: ou=federations,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: federations
 
-dn: ou=oxidp,ou=configuration,o=gluu
+dn: ou=oxidp,ou=configuration,o=jans
 objectClass: top
 objectClass: oxApplicationConfiguration
 ou: oxidp

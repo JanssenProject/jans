@@ -20,11 +20,11 @@ class PassportInstaller(NodeInstaller):
 
         passport_version = Config.oxVersion.replace('-SNAPSHOT','').replace('.Final','')
         self.source_files = [
-                (os.path.join(Config.distGluuFolder, 'passport.tgz'), 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
-                (os.path.join(Config.distGluuFolder, 'passport-node_modules.tar.gz'), 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
+                (os.path.join(Config.distJansFolder, 'passport.tgz'), 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
+                (os.path.join(Config.distJansFolder, 'passport-node_modules.tar.gz'), 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
                 ]
 
-        self.gluu_passport_base = os.path.join(self.node_base, 'passport')
+        self.jans_passport_base = os.path.join(self.node_base, 'passport')
         self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')
         self.passport_config = os.path.join(Config.configFolder, 'passport-config.json')
 
@@ -49,19 +49,19 @@ class PassportInstaller(NodeInstaller):
     def install(self):
         self.logIt("Installing passport", pbar=self.service_name)
         self.logIt("Preparing passport service base folders")
-        self.run([paths.cmd_mkdir, '-p', self.gluu_passport_base])
+        self.run([paths.cmd_mkdir, '-p', self.jans_passport_base])
 
         self.extract_passport()
         self.extract_modules()
 
         # Copy init.d script
-        self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
-        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
+        self.copyFile(self.passport_initd_script, Config.jansOptSystemFolder)
+        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.jansOptSystemFolder, 'passport')])
 
         # Install passport system service script
         self.installNodeService('passport')
 
-        self.run([paths.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
+        self.run([paths.cmd_chown, '-R', 'node:node', self.jans_passport_base])
 
         # enable service at startup
         self.enable()
@@ -69,14 +69,14 @@ class PassportInstaller(NodeInstaller):
     def extract_passport(self):
         # Extract package
         try:
-            self.logIt("Extracting {} into {}".format(self.source_files[0][0], self.gluu_passport_base))
-            self.run([paths.cmd_tar, '--strip', '1', '-xzf', self.source_files[0][0], '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting {} into {}".format(self.source_files[0][0], self.jans_passport_base))
+            self.run([paths.cmd_tar, '--strip', '1', '-xzf', self.source_files[0][0], '-C', self.jans_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive {}".format(self.source_files[0][0]))
 
     def extract_modules(self):
         
-        modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
+        modules_target_dir = os.path.join(self.jans_passport_base, 'node_modules')
         modules_source_dir = os.path.dirname(self.source_files[1][0])
         self.run([paths.cmd_mkdir, '-p', modules_target_dir])
 
@@ -89,17 +89,17 @@ class PassportInstaller(NodeInstaller):
         else:
             # Install dependencies
             try: 
-                self.logIt("Running npm install in %s" % self.gluu_passport_base)
+                self.logIt("Running npm install in %s" % self.jans_passport_base)
                 nodeEnv = os.environ.copy()
                 nodeEnv['PATH'] = ':'.join((os.path.join(Config.node_home, 'bin'), nodeEnv['PATH']))
                 cmd_npm = os.path.join(Config.node_home, 'bin', 'npm')
-                self.run([cmd_npm, 'install', '-P'], self.gluu_passport_base, nodeEnv, True)
+                self.run([cmd_npm, 'install', '-P'], self.jans_passport_base, nodeEnv, True)
             except:
-                self.logIt("Error encountered running npm install in {}".format(self.gluu_passport_base))
+                self.logIt("Error encountered running npm install in {}".format(self.jans_passport_base))
 
 
     def installed(self):
-        return os.path.exists(self.gluu_passport_base)
+        return os.path.exists(self.jans_passport_base)
 
     def generate_configuration(self):
 
@@ -139,7 +139,7 @@ class PassportInstaller(NodeInstaller):
         cert_files = glob.glob(os.path.join(Config.certFolder, 'passport*'))
         for fn in cert_files:
             self.run([paths.cmd_chmod, '500', fn])
-            self.run([paths.cmd_chown, 'root:gluu', fn])
+            self.run([paths.cmd_chown, 'root:jans', fn])
 
         Config.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, Config.passport_rs_client_jks_pass)
         Config.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(Config.passport_rs_client_jwks, 1)
@@ -204,9 +204,9 @@ class PassportInstaller(NodeInstaller):
 
     def create_folders(self):
         # Create logs folder
-        self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'logs')])
+        self.run([paths.cmd_mkdir, '-p', os.path.join(self.jans_passport_base, 'logs')])
 
         #create empty log file unless exists
-        log_file = os.path.join(self.gluu_passport_base, 'logs/start.log')
+        log_file = os.path.join(self.jans_passport_base, 'logs/start.log')
         if not os.path.exists(log_file):
             self.writeFile(log_file, '')

@@ -1,14 +1,14 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2020, Gluu
+# Copyright (c) 2020, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.persistence import PersistenceType
-from org.gluu.util import StringHelper
-from org.gluu.persist.operation.auth import PasswordEncryptionHelper
-from org.gluu.persist.operation.auth import PasswordEncryptionMethod
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.model.custom.script.type.persistence import PersistenceType
+from org.jans.util import StringHelper
+from org.jans.persist.operation.auth import PasswordEncryptionHelper
+from org.jans.persist.operation.auth import PasswordEncryptionMethod
 
 import java
 

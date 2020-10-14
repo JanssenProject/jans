@@ -1,20 +1,20 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 # Author: Gasmyr Mougang
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.service import CacheService
-from org.gluu.util import StringHelper
-from org.gluu.persist.exception import AuthenticationException
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.oxauth.security import Identity
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.oxauth.service import AuthenticationService
+from org.jans.oxauth.service.common import UserService
+from org.jans.service import CacheService
+from org.jans.util import StringHelper
+from org.jans.persist.exception import AuthenticationException
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from org.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
 from java.time.format import DateTimeFormatter
 
@@ -95,7 +95,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
             else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
-                userSatus = self.getUserAttributeValue(user_name, "gluuStatus")
+                userSatus = self.getUserAttributeValue(user_name, .jans.tatus")
                 print "Current user '%s' status is '%s'" % ( user_name, userSatus )
 
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
@@ -232,14 +232,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (find_user_by_uid == None):
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
+        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, .jans.tatus")
         if status_attribute_value != None:
             user_status = status_attribute_value.getValue()
             if StringHelper.equals(user_status, "inactive"):
                 print "Basic (lock account). Lock user. User '%s' locked already" % user_name
                 return
         
-        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
+        userService.setCustomAttribute(find_user_by_uid, .jans.tatus", "inactive")
         userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "false")
         updated_user = userService.updateUser(find_user_by_uid)
 
@@ -264,7 +264,7 @@ class PersonAuthentication(PersonAuthenticationType):
         object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
-        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
+        userService.setCustomAttribute(find_user_by_uid, .jans.tatus", "active")
         userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "true")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         updated_user = userService.updateUser(find_user_by_uid)
