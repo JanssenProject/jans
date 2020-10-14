@@ -2,7 +2,7 @@
 
 # LSB Tags
 ### BEGIN INIT INFO
-# Provides:          gluu-radius
+# Provides:          jans-radius
 # Required-Start:    $local_fs $network opendj
 # Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
@@ -22,7 +22,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 # To get the service to restart correctly on reboot, uncomment below (3 lines):
 # ========================
 # chkconfig: 345 72 28
-# description: Radius 9 gluu-radius
+# description: Radius 9 jans-radius
 # processname: radius
 # ========================
 

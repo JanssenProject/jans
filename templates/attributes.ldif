@@ -1,4 +1,4 @@
-dn: inum=29DA,ou=attributes,o=gluu
+dn: inum=29DA,ou=attributes,o=jans
 description: XRI i-number, persistent non-reassignable identifier
 displayName: Inum
 gluuAttributeName: inum
@@ -15,7 +15,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: inum
 urn: urn:gluu:dir:attribute-def:inum
 
-dn: inum=B4B0,ou=attributes,o=gluu
+dn: inum=B4B0,ou=attributes,o=jans
 description: Given name(s) or first name(s) of the End-User.Note that in som
  e cultures, people can have multiple given names;all can be present, with t
  he names being separated by space characters.
@@ -36,7 +36,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: given_name
 urn: urn:mace:dir:attribute-def:givenName
 
-dn: inum=42E0,ou=attributes,o=gluu
+dn: inum=42E0,ou=attributes,o=jans
 description: A domain issued and managed identifier for the person.Subject -
   Identifier for the End-User at the Issuer.
 displayName: Username
@@ -55,7 +55,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: user_name
 urn: urn:mace:dir:attribute-def:uid
 
-dn: inum=B52A,ou=attributes,o=gluu
+dn: inum=B52A,ou=attributes,o=jans
 description: A domain issued and managed identifier for the person.Subject -
   Identifier for the End-User at the Issuer.
 displayName: Preferred Username
@@ -75,7 +75,7 @@ oxAuthClaimName: preferred_username
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pre
  ferred_username
 
-dn: inum=64A0,ou=attributes,o=gluu
+dn: inum=64A0,ou=attributes,o=jans
 description: URL of the End-User's profile page. The contents of this Web pa
  ge SHOULD be about the End-User.
 displayName: Profile URL
@@ -96,7 +96,7 @@ oxAuthClaimName: profile
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pro
  file
 
-dn: inum=3B47,ou=attributes,o=gluu
+dn: inum=3B47,ou=attributes,o=jans
 description: URL of the End-User's Web page or blog.
 displayName: Website URL
 gluuAttributeEditType: user
@@ -116,7 +116,7 @@ oxAuthClaimName: website
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/web
  site
 
-dn: inum=8F88,ou=attributes,o=gluu
+dn: inum=8F88,ou=attributes,o=jans
 description: True if the End-User's e-mail address has been verified; otherw
  ise false
 displayName: Email Verified
@@ -136,7 +136,7 @@ oxAuthClaimName: email_verified
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/ema
  il_verified
 
-dn: inum=B17A,ou=attributes,o=gluu
+dn: inum=B17A,ou=attributes,o=jans
 description: True if the End-User's phone number has been verified; otherwis
  e false
 displayName: Phone Number Verified
@@ -156,7 +156,7 @@ oxAuthClaimName: phone_number_verified
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pho
  ne_number_verified
 
-dn: inum=C8D5,ou=attributes,o=gluu
+dn: inum=C8D5,ou=attributes,o=jans
 description: End-User's preferred postal address. The value of the address m
  ember is aJSON [RFC4627] structure containing some or all of the members de
  fined inOpenID Connect 1.0 Core Standard Section 5.1.1
@@ -176,7 +176,7 @@ objectClass: gluuAttribute
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/add
  ress
 
-dn: inum=BE64,ou=attributes,o=gluu
+dn: inum=BE64,ou=attributes,o=jans
 description: Time the End-User's information was last updated. Its value is
  aJSON number representing the number of seconds from 1970-01-01T0:0:0Z as m
  easured inUTC until the date/time.
@@ -197,7 +197,7 @@ oxAuthClaimName: updated_at
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/add
  ress
 
-dn: inum=3692,ou=attributes,o=gluu
+dn: inum=3692,ou=attributes,o=jans
 description: Gender of the person, either male or female
 displayName: Gender, male or female
 gluuAttributeEditType: user
@@ -217,7 +217,7 @@ oxAuthClaimName: gender
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gen
  der
 
-dn: inum=98FC,ou=attributes,o=gluu
+dn: inum=98FC,ou=attributes,o=jans
 description:: RW5kLVVzZXIncyBiaXJ0aGRheSwgcmVwcmVzZW50ZWQgYXMgYW4gSVNPIDg2MD
  E6MjAwNCBbSVNPODYwMeKAkTIwMDRdIFlZWVktTU0tREQgZm9ybWF0Lg==
 displayName: Birthdate
@@ -238,7 +238,7 @@ oxAuthClaimName: birthdate
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/bir
  thdate
 
-dn: inum=D2E0,ou=attributes,o=gluu
+dn: inum=D2E0,ou=attributes,o=jans
 description: memberOf
 displayName: memberOf
 gluuAttributeEditType: admin
@@ -256,7 +256,7 @@ oxAuthClaimName: member_of
 oxMultivaluedAttribute: true
 urn: urn:gluu:dir:attribute-def:memberOf
 
-dn: inum=A901,ou=attributes,o=gluu
+dn: inum=A901,ou=attributes,o=jans
 description: String from time zone database representing the End-User's time
   zone. For example,Europe/Paris or America/Los_Angeles.
 displayName: Time zone info
@@ -277,7 +277,7 @@ oxAuthClaimName: zoneinfo
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zon
  einfo
 
-dn: inum=36D9,ou=attributes,o=gluu
+dn: inum=36D9,ou=attributes,o=jans
 description:: RW5kLVVzZXIncyBsb2NhbGUsIHJlcHJlc2VudGVkIGFzIGEgQkNQNDcgKFJGQz
  U2NDYpIGxhbmd1YWdlIHRhZy4gVGhpcyBpcyB0eXBpY2FsbHkgYW5JU08gNjM5LTEgQWxwaGEtM
  iBbSVNPNjM54oCRMV0gbGFuZ3VhZ2UgY29kZSBpbiBsb3dlcmNhc2UgYW5kIGFuIElTTyAzMTY2
@@ -304,7 +304,7 @@ oxAuthClaimName: locale
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/loc
  ale
 
-dn: inum=8A11,ou=attributes,o=gluu
+dn: inum=8A11,ou=attributes,o=jans
 description: Secret Question
 displayName: Secret Question
 gluuAttributeEditType: user
@@ -322,7 +322,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretQuestion
 
-dn: inum=C703,ou=attributes,o=gluu
+dn: inum=C703,ou=attributes,o=jans
 description: Secret Answer
 displayName: Secret Answer
 gluuAttributeEditType: user
@@ -340,7 +340,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretAnswer
 
-dn: inum=6493,ou=attributes,o=gluu
+dn: inum=6493,ou=attributes,o=jans
 description: Preferred Language
 displayName: Preferred Language
 gluuAttributeEditType: user
@@ -359,7 +359,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:preferredLanguage
 
-dn: inum=5CA2,ou=attributes,o=gluu
+dn: inum=5CA2,ou=attributes,o=jans
 description: iname
 displayName: iname
 gluuAttributeEditType: admin
@@ -376,7 +376,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: iname
 urn: urn:gluu:dir:attribute-def:iname
 
-dn: inum=CAE3,ou=attributes,o=gluu
+dn: inum=CAE3,ou=attributes,o=jans
 description: Primary Email Address
 displayName: Email
 gluuAttributeEditType: user
@@ -395,7 +395,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: email
 urn: urn:mace:dir:attribute-def:mail
 
-dn: inum=A0E8,ou=attributes,o=gluu
+dn: inum=A0E8,ou=attributes,o=jans
 description: Middle name(s) of the End-User. Note that in some cultures,peop
  le can have multiple middle names; all can be present, with the namesbeing
  separated by space characters. Also note that in some cultures,middle names
@@ -418,7 +418,7 @@ oxAuthClaimName: middle_name
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/mid
  dle_username
 
-dn: inum=5EC6,ou=attributes,o=gluu
+dn: inum=5EC6,ou=attributes,o=jans
 description: Casual name of the End-User that may or may not be the same as
  the given_name.For instance, a nickname value of Mike might be returned alo
  ngside a given_name value of Michael.
@@ -440,7 +440,7 @@ oxAuthClaimName: nickname
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nic
  kname
 
-dn: inum=0C85,ou=attributes,o=gluu
+dn: inum=0C85,ou=attributes,o=jans
 description: Last Name
 description: Surname(s) or last name(s) of the End-User. Note that in somecu
  ltures, people can have multiple family names or no family name; all canbe
@@ -462,7 +462,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: family_name
 urn: urn:mace:dir:attribute-def:sn
 
-dn: inum=BCA8,ou=attributes,o=gluu
+dn: inum=BCA8,ou=attributes,o=jans
 description: TransientId
 displayName: TransientId
 gluuAttributeEditType: user
@@ -480,7 +480,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: mace:shibboleth:1.0:nameIdentifier
 
-dn: inum=BCB8,ou=attributes,o=gluu
+dn: inum=BCB8,ou=attributes,o=jans
 description: PersistentId
 displayName: PersistentId
 gluuAttributeEditType: user
@@ -498,7 +498,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: mace:shibboleth:1.0:nameIdentifier
 
-dn: inum=BCE8,ou=attributes,o=gluu
+dn: inum=BCE8,ou=attributes,o=jans
 description: Country
 displayName: Country
 gluuAttributeEditType: user
@@ -517,7 +517,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: country
 urn: urn:gluu:dir:attribute-def:c
 
-dn: inum=2B29,ou=attributes,o=gluu
+dn: inum=2B29,ou=attributes,o=jans
 description: End-User's full name in displayable formincluding all name part
  s, possibly including titles andsuffixes, ordered according to the End-User
  's locale and preferences.
@@ -538,7 +538,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: name
 urn: urn:mace:dir:attribute-def:displayName
 
-dn: inum=EC3A,ou=attributes,o=gluu
+dn: inum=EC3A,ou=attributes,o=jans
 description: URL of the End-User's profile picture
 displayName: Picture URL
 gluuAttributeEditType: user
@@ -558,7 +558,7 @@ oxAuthClaimName: picture
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/pic
  ture
 
-dn: inum=D03E,ou=attributes,o=gluu
+dn: inum=D03E,ou=attributes,o=jans
 description: Organization
 displayName: Organization
 gluuAttributeEditType: admin
@@ -575,7 +575,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: o
 urn: urn:mace:dir:attribute-def:o
 
-dn: inum=AAEE,ou=attributes,o=gluu
+dn: inum=AAEE,ou=attributes,o=jans
 description: User secret string
 displayName: Password
 gluuAttributeEditType: user
@@ -593,7 +593,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:userPassword
 
-dn: inum=C001,ou=attributes,o=gluu
+dn: inum=C001,ou=attributes,o=jans
 description: Organizational Title
 displayName: Title
 gluuAttributeEditType: admin
@@ -610,7 +610,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:title
 
-dn: inum=4502,ou=attributes,o=gluu
+dn: inum=4502,ou=attributes,o=jans
 description: Vehicle License Plate Number
 displayName: License Plate
 gluuAttributeEditType: user
@@ -628,7 +628,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:carLicense
 
-dn: inum=BD22,ou=attributes,o=gluu
+dn: inum=BD22,ou=attributes,o=jans
 description: Fax Telephone Number
 displayName: Fax Number
 gluuAttributeEditType: user
@@ -646,7 +646,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
 
-dn: inum=08E2,ou=attributes,o=gluu
+dn: inum=08E2,ou=attributes,o=jans
 description: Organizational Department
 displayName: Department
 gluuAttributeEditType: admin
@@ -663,7 +663,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:departmentNumber
 
-dn: inum=3D44,ou=attributes,o=gluu
+dn: inum=3D44,ou=attributes,o=jans
 description: Employee Type
 displayName: Employee Type
 gluuAttributeEditType: admin
@@ -679,7 +679,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:employeeType
 
-dn: inum=D054,ou=attributes,o=gluu
+dn: inum=D054,ou=attributes,o=jans
 description: Name search keywords
 displayName: Name search keywords
 gluuAttributeEditType: user
@@ -697,7 +697,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:cn
 
-dn: inum=6DA6,ou=attributes,o=gluu
+dn: inum=6DA6,ou=attributes,o=jans
 description: Mobile Telephone Number
 displayName: Mobile Telephone Number
 gluuAttributeEditType: user
@@ -716,7 +716,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: phone_mobile_number
 urn: urn:mace:dir:attribute-def:mobile
 
-dn: inum=0C18,ou=attributes,o=gluu
+dn: inum=0C18,ou=attributes,o=jans
 description: Home Telephone Number
 displayName: Home Telephone Number
 gluuAttributeEditType: user
@@ -735,7 +735,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: phone_number
 urn: urn:mace:dir:attribute-def:phone_number
 
-dn: inum=E6B8,ou=attributes,o=gluu
+dn: inum=E6B8,ou=attributes,o=jans
 description: State or Province
 displayName: State or Province
 gluuAttributeEditType: user
@@ -754,7 +754,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: region
 urn: urn:mace:dir:attribute-def:st
 
-dn: inum=42D8,ou=attributes,o=gluu
+dn: inum=42D8,ou=attributes,o=jans
 description: Manager
 displayName: Manager
 gluuAttributeEditType: admin
@@ -770,7 +770,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:manager
 
-dn: inum=6609,ou=attributes,o=gluu
+dn: inum=6609,ou=attributes,o=jans
 description: Street
 displayName: Street
 gluuAttributeEditType: user
@@ -789,7 +789,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: street_address
 urn: urn:mace:dir:attribute-def:street
 
-dn: inum=E999,ou=attributes,o=gluu
+dn: inum=E999,ou=attributes,o=jans
 description: Postal Box
 displayName: PO Box
 gluuAttributeEditType: user
@@ -807,7 +807,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:postOfficeBox
 
-dn: inum=D0C9,ou=attributes,o=gluu
+dn: inum=D0C9,ou=attributes,o=jans
 description: Employee Number
 displayName: Employee Number
 gluuAttributeEditType: admin
@@ -823,7 +823,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:employeeNumber
 
-dn: inum=894A,ou=attributes,o=gluu
+dn: inum=894A,ou=attributes,o=jans
 description: Preferred Delivery Method
 displayName: Preferred Delivery Method
 gluuAttributeEditType: admin
@@ -839,7 +839,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
 
-dn: inum=570B,ou=attributes,o=gluu
+dn: inum=570B,ou=attributes,o=jans
 description: Work Telephone Number
 displayName: Work Telephone Number
 gluuAttributeEditType: user
@@ -857,7 +857,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:telephoneNumber
 
-dn: inum=D90B,ou=attributes,o=gluu
+dn: inum=D90B,ou=attributes,o=jans
 description: Room Number
 displayName: Room Number
 gluuAttributeEditType: user
@@ -875,7 +875,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:roomNumber
 
-dn: inum=AC0B,ou=attributes,o=gluu
+dn: inum=AC0B,ou=attributes,o=jans
 description: Secretary
 displayName: Secretary
 gluuAttributeEditType: admin
@@ -891,7 +891,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:secretary
 
-dn: inum=4649,ou=attributes,o=gluu
+dn: inum=4649,ou=attributes,o=jans
 description: User status to allow/disable user access
 displayName: User Status
 gluuAttributeEditType: admin
@@ -908,7 +908,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:status
 
-dn: inum=27DB,ou=attributes,o=gluu
+dn: inum=27DB,ou=attributes,o=jans
 description: Home Address
 displayName: Home Address
 gluuAttributeEditType: user
@@ -927,7 +927,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: formatted
 urn: urn:mace:dir:attribute-def:homePostalAddress
 
-dn: inum=6EEB,ou=attributes,o=gluu
+dn: inum=6EEB,ou=attributes,o=jans
 description: City
 displayName: City
 gluuAttributeEditType: user
@@ -946,7 +946,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: locality
 urn: urn:mace:dir:attribute-def:l
 
-dn: inum=2A3D,ou=attributes,o=gluu
+dn: inum=2A3D,ou=attributes,o=jans
 description: Postal or Zip Code
 displayName: Postal Code
 gluuAttributeEditType: user
@@ -965,7 +965,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: postal_code
 urn: urn:mace:dir:attribute-def:postalCode
 
-dn: inum=48EE,ou=attributes,o=gluu
+dn: inum=48EE,ou=attributes,o=jans
 description: Description
 displayName: Description
 gluuAttributeEditType: user
@@ -983,7 +983,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:description
 
-dn: inum=4E0C,ou=attributes,o=gluu
+dn: inum=4E0C,ou=attributes,o=jans
 description: Specifies the person's relationship(s) to the institutionin bro
  ad categories such as student, faculty, staff, alum, etc.
 displayName: eduPersonAffiliation
@@ -1000,7 +1000,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.1
 
-dn: inum=E7BC,ou=attributes,o=gluu
+dn: inum=E7BC,ou=attributes,o=jans
 description: Person's nickname, or the informal name by which the End-User i
  s accustomedto be hailed. A casual name that may or may not be the same as
  the given_name. For instance,a nickname value of Mike might be returned alo
@@ -1019,7 +1019,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.2
 
-dn: inum=6366,ou=attributes,o=gluu
+dn: inum=6366,ou=attributes,o=jans
 description: The distinguished name (DN) of the directory entryrepresenting
  the institution with which the person is associated.
 displayName: eduPersonOrgDN
@@ -1036,7 +1036,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.3
 
-dn: inum=ED0D,ou=attributes,o=gluu
+dn: inum=ED0D,ou=attributes,o=jans
 description: The distinguished name(s) (DN) of the directory entriesrepresen
  ting the person's Organizational Unit(s). May be multivalued,as for example
  , in the case of a faculty member with appointments inmultiple departments
@@ -1055,7 +1055,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.4
 
-dn: inum=91E7,ou=attributes,o=gluu
+dn: inum=91E7,ou=attributes,o=jans
 description: Specifies the person's primary relationship to theinstitution i
  n broad categories such as student, faculty, staff,alum, etc. (See controll
  ed vocabulary).
@@ -1073,7 +1073,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.5
 
-dn: inum=096B,ou=attributes,o=gluu
+dn: inum=096B,ou=attributes,o=jans
 description: A scoped identifier for a person. It should berepresented in th
  e form "user@scope" where 'user' is aname-based identifier for the person a
  nd where 'scope'defines a local security domain. Each value of 'scope' defi
@@ -1094,7 +1094,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.6
 
-dn: inum=BF03,ou=attributes,o=gluu
+dn: inum=BF03,ou=attributes,o=jans
 description: URI (either URN or URL) that indicates a set of rights to speci
  fic resources.
 displayName: eduPersonEntitlement
@@ -1111,7 +1111,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.7
 
-dn: inum=0247,ou=attributes,o=gluu
+dn: inum=0247,ou=attributes,o=jans
 description: The distinguished name (DN) of the directory entry representing
  the person's primary Organizational Unit(s).
 displayName: eduPersonPrimaryOrgUnitDN
@@ -1128,7 +1128,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
-dn: inum=002A,ou=attributes,o=gluu
+dn: inum=002A,ou=attributes,o=jans
 description: Specifies the person's affiliation within a particular security
   domainin broad categories such as student, faculty, staff, alum, etc. The
  values consistof a left and right component separated by an "@" sign. The l
@@ -1155,7 +1155,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.9
 
-dn: inum=8FF3,ou=attributes,o=gluu
+dn: inum=8FF3,ou=attributes,o=jans
 description: A persistent, non-reassigned, opaque identifier for a principal
  .
 displayName: eduPersonTargetedID
@@ -1172,7 +1172,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.10
 
-dn: inum=4B0F,ou=attributes,o=gluu
+dn: inum=4B0F,ou=attributes,o=jans
 description: Set of URIs that assert compliance with specific standardsfor i
  dentity assurance.
 displayName: eduPersonAssurance
@@ -1189,7 +1189,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
 
-dn: inum=4A0A,ou=attributes,o=gluu
+dn: inum=4A0A,ou=attributes,o=jans
 description: Person principal name prior
 displayName: eduPersonPrincipalNamePrior
 gluuAttributeEditType: admin
@@ -1205,7 +1205,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.12
 
-dn: inum=4A0B,ou=attributes,o=gluu
+dn: inum=4A0B,ou=attributes,o=jans
 description: Person unique Id
 displayName: eduPersonUniqueId
 gluuAttributeEditType: admin
@@ -1221,7 +1221,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.13
 
-dn: inum=4A0C,ou=attributes,o=gluu
+dn: inum=4A0C,ou=attributes,o=jans
 description: ORCID researcher identifiers belonging to the principal
 displayName: eduPersonOrcid
 gluuAttributeEditType: admin
@@ -1237,7 +1237,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.16
 
-dn: inum=5039,ou=attributes,o=gluu
+dn: inum=5039,ou=attributes,o=jans
 description: oxEnrollmentCode
 description: Enrollment code, non-reassignable code
 displayName: Enrollment code
@@ -1255,7 +1255,7 @@ objectClass: gluuAttribute
 oxSCIMCustomAttribute: true
 urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
 
-dn: inum=42E1,ou=attributes,o=gluu
+dn: inum=42E1,ou=attributes,o=jans
 description: IMAP Data
 displayName: IMAP Data
 gluuAttributeEditType: admin
@@ -1274,7 +1274,7 @@ objectClass: gluuAttribute
 oxAuthClaimName: imap_data
 urn: urn:mace:dir:attribute-def:gluuIMAPData
 
-dn: inum=6049,ou=attributes,o=gluu
+dn: inum=6049,ou=attributes,o=jans
 description: gluuPermission
 description: User permission or role
 displayName: User Permission
@@ -1293,7 +1293,7 @@ objectClass: top
 oxMultivaluedAttribute: true
 urn: urn:gluu:dir:attribute-def:role
 
-dn: inum=CACA,ou=attributes,o=gluu
+dn: inum=CACA,ou=attributes,o=jans
 description: User certificate
 displayName: User certificate
 gluuAttributeEditType: admin
@@ -1312,7 +1312,7 @@ objectClass: gluuAttribute
 oxValidation: {"minLength":null,"maxLength":2048,"regexp":""}
 urn: urn:mace:dir:attribute-def:userCertificate
 
-dn: inum=11AA,ou=attributes,o=gluu
+dn: inum=11AA,ou=attributes,o=jans
 description: CIBA Device Registration Token
 displayName: CIBA Device Registration Token
 gluuAttributeEditType: admin
@@ -1328,7 +1328,7 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:oxAuthBackchannelDeviceRegistrationToken
 
-dn: inum=11AB,ou=attributes,o=gluu
+dn: inum=11AB,ou=attributes,o=jans
 description: CIBA User code
 displayName: CIBA User code
 gluuAttributeEditType: admin

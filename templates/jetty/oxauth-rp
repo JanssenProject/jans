@@ -1,6 +1,6 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms%(oxauth-rp_min_heap_mem)sm -Xmx%(oxauth-rp_max_heap_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/oxauth-rp -Dlog.base=%(jetty_base)s/oxauth-rp"
+JAVA_OPTIONS="-server -Xms%(oxauth-rp_min_heap_mem)sm -Xmx%(oxauth-rp_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/oxauth-rp -Dlog.base=%(jetty_base)s/oxauth-rp"
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/oxauth-rp

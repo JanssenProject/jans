@@ -166,7 +166,7 @@
     "claimTypesSupported":[
         "normal"
     ],
-    "serviceDocumentation":"http://gluu.org/docs",
+    "serviceDocumentation":"http://jans.org/docs",
     "claimsLocalesSupported":[
         "en"
     ],
@@ -199,8 +199,8 @@
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "requestUriHashVerificationEnabled": false,
     "idTokenFilterClaimsBasedOnAccessToken": false,
-    "opPolicyUri":"http://ox.gluu.org/doku.php?id=oxauth:policy",
-    "opTosUri":"http://ox.gluu.org/doku.php?id=oxauth:tos",
+    "opPolicyUri":"http://ox.jans.org/doku.php?id=oxauth:policy",
+    "opTosUri":"http://ox.jans.org/doku.php?id=oxauth:tos",
     "authorizationCodeLifetime":60,
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
@@ -223,7 +223,7 @@
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "oxId":"https://%(hostname)s/oxid/service/gluu/inum",
+    "oxId":"https://%(hostname)s/oxid/service/jans/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":-1,
     "dynamicRegistrationPersistClientAuthorizations":true,
@@ -232,8 +232,8 @@
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList":[
-        "gluuCustomPerson",
-        "gluuPerson"
+        "jansCustomPerson",
+        "jansPerson"
     ],
     "persistIdTokenInLdap":false,
     "persistRefreshTokenInLdap":true,
@@ -246,13 +246,13 @@
             "filter":"(&(mail=*{0}*)(inum={1}))",
             "bind":false,
             "bindPasswordAttribute":"",
-            "baseDn":"ou=people,o=gluu"
+            "baseDn":"ou=people,o=jans"
         },
         {
             "filter":"uid={0}",
             "bind":true,
             "bindPasswordAttribute":"pwd",
-            "baseDn":"ou=people,o=gluu"
+            "baseDn":"ou=people,o=jans"
         }
     ],
     "clientAuthenticationFilters":[
@@ -260,7 +260,7 @@
             "filter":"myCustomAttr1={0}",
             "bind":"",
             "bindPasswordAttribute":"",
-            "baseDn":"ou=clients,o=gluu"
+            "baseDn":"ou=clients,o=jans"
         }
     ],
     "sessionIdUnusedLifetime":86400,

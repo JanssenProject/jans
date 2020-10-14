@@ -1,4 +1,4 @@
-dn: inum=%(idp_client_id)s,ou=clients,o=gluu
+dn: inum=%(idp_client_id)s,ou=clients,o=jans
 objectClass: oxAuthClient
 objectClass: top
 displayName: IDP client
@@ -8,9 +8,9 @@ oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthGrantType: authorization_code
 oxAuthGrantType: refresh_token
-oxAuthScope: inum=F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=10B2,ou=scopes,o=gluu
-oxAuthScope: inum=764C,ou=scopes,o=gluu
+oxAuthScope: inum=F0C4,ou=scopes,o=jans
+oxAuthScope: inum=10B2,ou=scopes,o=jans
+oxAuthScope: inum=764C,ou=scopes,o=jans
 oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
 oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout

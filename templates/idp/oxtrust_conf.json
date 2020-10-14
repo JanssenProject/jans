@@ -6,7 +6,7 @@
     "shibboleth3SpConfDir": "%(idp3Folder)s/sp",
     "idpSecurityCert": "%(shib_crt_file)s",
     "idpSecurityKey": "%(shib_key_file)s",
-    "gluuSpCert": "%(shib_crt_file)s",
+    "jansSpCert": "%(shib_crt_file)s",
     "idpSecurityKeyPassword": "%(encoded_shib_jks_pw)s",
     "oxTrustConfigGeneration": "true",
     "shibboleth3FederationRootDir": "/opt/shibboleth-federation",

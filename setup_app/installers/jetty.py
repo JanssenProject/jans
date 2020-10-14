@@ -58,7 +58,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def install(self):
 
         self.createUser('jetty', self.jetty_user_home)
-        self.addUserToGroup('gluu', 'jetty')
+        self.addUserToGroup('jans', 'jetty')
         self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
         jettyArchive, jetty_dist = self.get_jetty_info()
@@ -279,7 +279,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         return retVal
         
     def calculate_selected_aplications_memory(self):
-        Config.pbar.progress("gluu", "Calculating application memory")
+        Config.pbar.progress("jans", "Calculating application memory")
 
         installedComponents = []
 

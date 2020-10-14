@@ -18,8 +18,8 @@ class OxauthInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                    (os.path.join(Config.distGluuFolder, 'oxauth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
-                    (os.path.join(Config.distGluuFolder, 'oxauth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
+                    (os.path.join(Config.distJansFolder, 'oxauth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
+                    (os.path.join(Config.distJansFolder, 'oxauth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
@@ -101,11 +101,11 @@ class OxauthInstaller(JettyInstaller):
     def copy_static(self):
         self.copyFile(
                 os.path.join(Config.install_dir, 'static/auth/lib/duo_web.py'),
-                os.path.join(Config.gluuOptPythonFolder, 'libs' )
+                os.path.join(Config.jansOptPythonFolder, 'libs' )
             )
         
-        for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',
-                        'vericloud_gluu_creds.json', 'cert_creds.json', 'otp_configuration.json'):
+        for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_jans_creds.json',
+                        'vericloud_jans_creds.json', 'cert_creds.json', 'otp_configuration.json'):
             
             src_fn = os.path.join(Config.install_dir, 'static/auth/conf', conf_fn)
             self.copyFile(src_fn, Config.certFolder)

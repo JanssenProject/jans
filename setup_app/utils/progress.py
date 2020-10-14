@@ -90,7 +90,7 @@ class ShowProgress(Thread):
             phase_counter += 1
 
 
-class GluuProgress:
+class JansProgress:
 
     services = []
     queue = None
@@ -128,4 +128,4 @@ class GluuProgress:
         else:
             print("Process {}:{}".format(service_name, msg))
         
-gluuProgress = GluuProgress()
+jansProgress = JansProgress()

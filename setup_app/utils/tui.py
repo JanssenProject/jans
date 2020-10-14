@@ -21,26 +21,26 @@ from setup_app.config import Config
 from setup_app import static
 from setup_app.utils import base
 from setup_app.utils.properties_utils import propertiesUtils
-from setup_app.utils.progress import gluuProgress
+from setup_app.utils.progress import jansProgress
 
 import npyscreen
 
 random_marketing_strings = [
-    'Having trouble? Open a ticket: https://support.gluu.org',
-    'Cluster your Gluu Server: https://gluu.org/docs/cm',
-    'oxd exposes simple, static APIs web application developers https://gluu.org/docs/oxd',
-    'Gluu Gateway helps you secure APIs with OAuth, OpenID and UMA. See https://gateway.gluu.org',
-    'Super Gluu is free mobile 2FA applications that uses push notifications and FIDO authentication https://super.gluu.org',
-    'Gluu Casa is a self-service web portal that enables end users to manage their 2FA credentials https://casa.gluu.org',
-    "Interested in VIP support? Schedule a Zoom meeting https://www.gluu.org/booking",
-    'Gluu only uses open source components to build the Gluu Server.',
-    'Consider Gluu VIP Platform Subscription https://gluu.org/contact',
-    "Gluu Cloud Edition uses Kubernetes, Helm and other cloud native components to enable auto-scaling.",
+    'Having trouble? Open a ticket: https://support.jans.io',
+    'Cluster your Janssen Server: https://jans.io/docs/cm',
+    'oxd exposes simple, static APIs web application developers https://jans.io/docs/oxd',
+    'Janssen Gateway helps you secure APIs with OAuth, OpenID and UMA. See https://gateway.jans.io',
+    'Super Janssen is free mobile 2FA applications that uses push notifications and FIDO authentication https://super.jans.io',
+    'Janssen Casa is a self-service web portal that enables end users to manage their 2FA credentials https://casa.jans.io',
+    "Interested in VIP support? Schedule a Zoom meeting https://www.jans.io/booking",
+    'Janssen only uses open source components to build the Janssen Server.',
+    'Consider Janssen VIP Platform Subscription https://jans.io/contact',
+    "Janssen Cloud Edition uses Kubernetes, Helm and other cloud native components to enable auto-scaling.",
     'Interested in Open Source startups? Listen to Open Source Underdogs: https://opensourceunderdogs.com',
-    'Confused about OpenID? Read "Securing the Perimeter" by Gluu CEO Mike Schwartz: https://gluu.co/book',
-    'The Gluu Server is one of the most advanced OpenID Providers. Compare at https://openid.net/certification',
-    'Installing the Gluu Server is a SNAP. Search for Gluu on https://snapcraft.io',
-    'Search the Digital Ocean Marketplace for a quick way to install the Gluu Server: https://marketplace.digitalocean.com/'
+    'Confused about OpenID? Read "Securing the Perimeter" by Janssen CEO Mike Schwartz: https://gluu.co/book',
+    'The Janssen Server is one of the most advanced OpenID Providers. Compare at https://openid.net/certification',
+    'Installing the Janssen Server is a SNAP. Search for Janssen on https://snapcraft.io',
+    'Search the Digital Ocean Marketplace for a quick way to install the Janssen Server: https://marketplace.digitalocean.com/'
     ]
 
 marketing_text_period = 20 
@@ -52,7 +52,7 @@ def getClassName(c):
     except:
         return ''
 
-class GluuSetupApp(npyscreen.StandardApp):
+class JansSetupApp(npyscreen.StandardApp):
     do_installation = None
     exit_reason = str()
     my_counter = 0
@@ -72,14 +72,14 @@ class GluuSetupApp(npyscreen.StandardApp):
             self.addForm('ServicesForm', ServicesForm, name=msg.ServicesForm_label)
 
         for obj in list(globals().items()):
-            if not obj[0] in ('MAIN', 'GluuSetupForm', 'ServicesForm') and obj[0].endswith('Form') and inspect.isclass(obj[1]):
+            if not obj[0] in ('MAIN', 'JansSetupForm', 'ServicesForm') and obj[0].endswith('Form') and inspect.isclass(obj[1]):
                 self.addForm(obj[0], obj[1], name=getattr(msg, obj[0]+'_label'))
 
     def onCleanExit(self):
         if self.do_notify:
             npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
 
-class GluuSetupForm(npyscreen.FormBaseNew):
+class JansSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
 
@@ -132,7 +132,7 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
         npyscreen.notify_confirm(help_text, title="Help", wide=True)
 
-class MAIN(GluuSetupForm):
+class MAIN(JansSetupForm):
 
     def create(self):
 
@@ -190,7 +190,7 @@ class MAIN(GluuSetupForm):
         self.button_next.rely =  self.lines-5
         self.button_next.relx = self.columns-20
 
-class HostForm(GluuSetupForm):
+class HostForm(JansSetupForm):
 
     myfields_ = ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'countryCode', 'application_max_ram', 'oxtrust_admin_password')
 
@@ -263,10 +263,10 @@ class HostForm(GluuSetupForm):
     def backButtonPressed(self):
         self.parentApp.switchForm('MAIN')
 
-class ServicesForm(GluuSetupForm):
+class ServicesForm(JansSetupForm):
     services_before_this_form = []
     services = ('installHttpd', 'installSaml', 'installOxAuthRP', 
-                'installPassport', 'installGluuRadius', 'installOxd', 
+                'installPassport', 'installJansRadius', 'installOxd', 
                 'installCasa', 'installScimServer', 'installFido2',
                 )
 
@@ -297,10 +297,10 @@ class ServicesForm(GluuSetupForm):
 
     def nextButtonPressed(self):
         service_enable_dict = {
-                        'installPassport': ['gluuPassportEnabled', 'enable_scim_access_policy'],
-                        'installGluuRadius': ['gluuRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
-                        'installSaml': ['gluuSamlEnabled'],
-                        'installScimServer': ['gluuScimEnabled', 'enable_scim_access_policy'],
+                        'installPassport': ['jansPassportEnabled', 'enable_scim_access_policy'],
+                        'installJansRadius': ['jansRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
+                        'installSaml': ['jansSamlEnabled'],
+                        'installScimServer': ['jansScimEnabled', 'enable_scim_access_policy'],
                         }
 
         for service in self.services:
@@ -348,7 +348,7 @@ class ServicesForm(GluuSetupForm):
                             )
                     return
 
-                oxd_hostname, oxd_port = self.parentApp.gluuInstaller.parse_url(oxd_server_https)
+                oxd_hostname, oxd_port = self.parentApp.jansInstaller.parse_url(oxd_server_https)
                 oxd_ssl_result = propertiesUtils.check_oxd_ssl_cert(oxd_hostname, oxd_port)
                 if oxd_ssl_result :
 
@@ -362,9 +362,9 @@ class ServicesForm(GluuSetupForm):
         propertiesUtils.check_oxd_server_https()
 
         if self.installOxd.value and not 'installOxd' in self.services_before_this_form:
-            result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
+            result = npyscreen.notify_yes_no(msg.ask_use_jans_storage_oxd, title=msg.ask_use_jans_storage_oxd_title)
             if result:
-                Config.oxd_use_gluu_storage = True
+                Config.oxd_use_jans_storage = True
 
         # check if we have enough memory
         if not self.parentApp.jettyInstaller.calculate_selected_aplications_memory():
@@ -400,7 +400,7 @@ def make_title(text):
     return '-'*10 + ' '+  text +' '+ '-'*10
 
 
-class DBBackendForm(GluuSetupForm):
+class DBBackendForm(JansSetupForm):
     def create(self):
         self.editw = 2
         self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install), editable=False)
@@ -581,7 +581,7 @@ class DBBackendForm(GluuSetupForm):
         self.parentApp.switchForm('ServicesForm')
 
 
-class StorageSelectionForm(GluuSetupForm):
+class StorageSelectionForm(JansSetupForm):
     def create(self):
 
         self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=30, max_height=len(Config.couchbaseBucketDict), 
@@ -614,14 +614,14 @@ class StorageSelectionForm(GluuSetupForm):
 
         self.parentApp.switchForm('DisplaySummaryForm')
 
-class DisplaySummaryForm(GluuSetupForm):
+class DisplaySummaryForm(JansSetupForm):
 
     myfields_1 = ("hostname", "orgName", "os_type", "city", "state", "countryCode",
                    "application_max_ram")
 
     myfields_2 = ( "installOxAuth", "installOxTrust", 
                     "installHttpd", "installSaml", "installOxAuthRP",
-                    "installPassport", "installGluuRadius", 
+                    "installPassport", "installJansRadius", 
                     "installOxd", "installCasa",
                     'installScimServer', 'installFido2',
                     "java_type",
@@ -724,7 +724,7 @@ class InputBox(npyscreen.BoxTitle):
 class MySlider(npyscreen.SliderPercent):
     pass
 
-class InstallStepsForm(GluuSetupForm):
+class InstallStepsForm(JansSetupForm):
     
     desc_value = None
     current_stage = 0
@@ -735,8 +735,8 @@ class InstallStepsForm(GluuSetupForm):
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
 
     def do_beforeEditing(self):
-        gluuProgress.before_start()
-        self.progress_percantage.out_of = len(gluuProgress.services) + 1
+        jansProgress.before_start()
+        self.progress_percantage.out_of = len(jansProgress.services) + 1
         self.progress_percantage.update()
 
         t=threading.Thread(target=self.parentApp.do_installation, args=())
@@ -776,7 +776,7 @@ class InstallStepsForm(GluuSetupForm):
                 if hasattr(msg, 'installation_description_' + str(current)):
                     desc = getattr(msg, 'installation_description_' + current)
                 else:
-                    desc = msg.installation_description_gluu
+                    desc = msg.installation_description_jans
 
                 self.description.value = '\n'.join(textwrap.wrap(desc, self.columns - 10))
                 self.description.update()
@@ -789,4 +789,4 @@ class InstallStepsForm(GluuSetupForm):
     def nextButtonPressed(self):
         pass
 
-GSA = GluuSetupApp()
+GSA = JansSetupApp()

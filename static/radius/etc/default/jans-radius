@@ -23,7 +23,7 @@ JVM_ARGS=
 #####################################################
 if [ -z "$GLUU_RADIUS_USER" ]
 then
-    GLUU_RADIUS_USER=gluu
+    GLUU_RADIUS_USER=jans
 fi
 
 if [ -z "$GLUU_RADIUS_GROUP" ]
@@ -41,34 +41,34 @@ GLUU_RADIUS_PID_DIR=/var/run
 # Gluu Radius Installation Directory
 # This will be our working directory
 #####################################################
-GLUU_RADIUS_INSTALL_DIR=/opt/gluu/radius/
+GLUU_RADIUS_INSTALL_DIR=/opt/jans/radius/
 
 
 #####################################################
 # Gluu Radius Configuration Directory
 #####################################################
-GLUU_RADIUS_CONFIG_DIR=/etc/gluu/conf/radius
+GLUU_RADIUS_CONFIG_DIR=/etc/jans/conf/radius
 
 #####################################################
 # Gluu Radius application configuration file
 #####################################################
-GLUU_RADIUS_APP_CONFIG=$GLUU_RADIUS_CONFIG_DIR/gluu-radius.properties
+GLUU_RADIUS_APP_CONFIG=$GLUU_RADIUS_CONFIG_DIR/jans-radius.properties
 
 #####################################################
 #  Gluu Radius log4j2 configuration file 
 #####################################################
-GLUU_RADIUS_LOG4J2_CONFIG=$GLUU_RADIUS_CONFIG_DIR/gluu-radius-logging.xml
+GLUU_RADIUS_LOG4J2_CONFIG=$GLUU_RADIUS_CONFIG_DIR/jans-radius-logging.xml
 
 #####################################################
 # Gluu Radius jar file 
 # Change this to reflect version bumps
 #####################################################
-GLUU_RADIUS_JAR=super-gluu-radius-server.jar
+GLUU_RADIUS_JAR=super-jans-radius-server.jar
 
 #####################################################
 # Gluu Radius main class (Java)
 #####################################################
-GLUU_RADIUS_JAVA_MAIN=org.gluu.radius.ServerEntry
+GLUU_RADIUS_JAVA_MAIN=org.jans.radius.ServerEntry
 
 
 #####################################################

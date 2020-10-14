@@ -1,4 +1,4 @@
-dn: ou=oxpassport,ou=configuration,o=gluu
+dn: ou=oxpassport,ou=configuration,o=jans
 objectClass: top
 objectClass: oxPassportConfiguration
 ou: oxpassport

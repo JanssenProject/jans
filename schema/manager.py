@@ -33,15 +33,15 @@ def generate(infile, schema_type=None):
 
 def autogenerate():
     """Function that generates the LDAP schemas for OpenDJ from the
-    gluu_schema.json and custom_schema.json and puts them in their respective
+    jans_schema.json and custom_schema.json and puts them in their respective
     folders.
     """
     opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/')
 
-    fp = open(os.path.join(localdir, 'gluu_schema.json'), 'r')
-    gluu_json = fp.read()
+    fp = open(os.path.join(localdir, 'jans_schema.json'), 'r')
+    jans_json = fp.read()
     fp.close()
-    gen = SchemaGenerator(gluu_json)
+    gen = SchemaGenerator(jans_json)
     with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
         f.write(gen.generate_ldif())
 
@@ -105,7 +105,7 @@ def make_json(filename):
 
 
 def make_schema_docs():
-    schema = os.path.join(localdir, 'gluu_schema.json')
+    schema = os.path.join(localdir, 'jans_schema.json')
     f = open(schema)
     json_string = f.read()
     f.close()

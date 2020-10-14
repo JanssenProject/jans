@@ -2,13 +2,13 @@
 
 # Requires the following custom properties and values:
 #   otp_type: totp/hotp
-#   issuer: Gluu Inc
+#   issuer: Janssen. Inc
 #   otp_conf_file: /etc/certs/otp_configuration.json
 #
 # These are non mandatory custom properties and values:
-#   label: Gluu OTP
+#   label: Janssen. OTP
 #   qr_options: { width: 400, height: 400 }
-#   registration_uri: https://ce-dev.gluu.org/identity/register
+#   registration_uri: https://ce-dev.jans.org/identity/register
 
 import jarray
 import json
@@ -25,13 +25,13 @@ from java.security import SecureRandom
 from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from org.jans.jsf2.message import FacesMessages
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.oxauth.security import Identity
+from org.jans.oxauth.service import AuthenticationService, UserService, SessionIdService
+from org.jans.oxauth.util import ServerUtil
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):

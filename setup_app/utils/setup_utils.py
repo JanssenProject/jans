@@ -64,7 +64,7 @@ class SetupUtils(Crypto64):
 
         bc = 1
         while True:
-            backupFile_fn = destFile+'.gluu-{0}-{1}~'.format(Config.currentGluuVersion, bc)
+            backupFile_fn = destFile+'.jans-{0}-{1}~'.format(Config.currentJansVersion, bc)
             if not os.path.exists(backupFile_fn):
                 break
             bc += 1

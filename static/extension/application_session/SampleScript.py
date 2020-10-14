@@ -1,20 +1,20 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.model.custom.script.type.session import ApplicationSessionType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.persist import PersistenceEntryManager
-from org.gluu.oxauth.model.config import StaticConfiguration
-from org.gluu.oxauth.model.ldap import TokenLdap
+from org.jans.model.custom.script.type.session import ApplicationSessionType
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.persist import PersistenceEntryManager
+from org.jans.oxauth.model.config import StaticConfiguration
+from org.jans.oxauth.model.ldap import TokenLdap
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.util import StringHelper, ArrayHelper
-from org.gluu.oxauth.model.config import Constants
+from org.jans.jsf2.message import FacesMessages
+from org.jans.util import StringHelper, ArrayHelper
+from org.jans.oxauth.model.config import Constants
 from java.util import Arrays, ArrayList
-from org.gluu.oxauth.service.external.session import SessionEventType
+from org.jans.oxauth.service.external.session import SessionEventType
 
 import java
 
@@ -41,7 +41,7 @@ class ApplicationSession(ApplicationSessionType):
         return 11
 
     # Called each time specific session event occurs
-    # event is org.gluu.oxauth.service.external.session.SessionEvent
+    # event is org.jans.oxauth.service.external.session.SessionEvent
     def onEvent(self, event):
         if event.getType() == SessionEventType.AUTHENTICATED:
             print "Session is authenticated, session: " + event.getSessionId().getId()
@@ -49,7 +49,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Application calls it at start session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
-    #   sessionId is org.gluu.oxauth.model.common.SessionId
+    #   sessionId is org.jans.oxauth.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def startSession(self, httpRequest, sessionId, configurationAttributes):
         print "Application session. Starting external session"
@@ -67,7 +67,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Application calls it at end session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
-    #   sessionId is org.gluu.oxauth.model.common.SessionId
+    #   sessionId is org.jans.oxauth.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def endSession(self, httpRequest, sessionId, configurationAttributes):
         print "Application session. Starting external session end"
