@@ -24,7 +24,7 @@ import io.jans.as.server.model.fido.u2f.AuthenticateRequestMessageLdap;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
