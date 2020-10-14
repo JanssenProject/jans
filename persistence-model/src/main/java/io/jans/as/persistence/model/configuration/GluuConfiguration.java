@@ -6,9 +6,6 @@
 
 package io.jans.as.persistence.model.configuration;
 
-import java.io.Serializable;
-import java.util.List;
-
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -17,6 +14,9 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Gluu Configuration
@@ -46,7 +46,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	@AttributeName(name = "oxIDPAuthentication")
 	@JsonObject
-	private List<oxIDPAuthConf> oxIDPAuthentication;
+	private List<IDPAuthConf> oxIDPAuthentication;
 
 	@AttributeName(name = "oxAuthenticationMode")
 	private String authenticationMode;
@@ -94,11 +94,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.smtpConfiguration = smtpConfiguration;
 	}
 
-	public List<oxIDPAuthConf> getOxIDPAuthentication(){
+	public List<IDPAuthConf> getOxIDPAuthentication(){
 		return this.oxIDPAuthentication;
 	}
 	
-	public void setOxIDPAuthentication(List<oxIDPAuthConf> oxIDPAuthentication){
+	public void setOxIDPAuthentication(List<IDPAuthConf> oxIDPAuthentication){
 		this.oxIDPAuthentication = oxIDPAuthentication;
 	}
 
