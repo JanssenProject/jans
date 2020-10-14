@@ -62,7 +62,7 @@ class PackageUtils(SetupUtils):
 
                 if not setupOptions['noPrompt']:
                     if install_type == 'mondatory':
-                        print("The following packages are required for Gluu Server")
+                        print("The following packages are required for Jans Server")
                         print(packages)
                         r = input("Do you want to install these now? [Y/n] ")
                         if r and r.lower()=='n':

@@ -1,4 +1,4 @@
-dn: ou=oxtrust,ou=configuration,o=gluu
+dn: ou=oxtrust,ou=configuration,o=jans
 objectClass: top
 objectClass: oxTrustConfiguration
 ou: oxtrust

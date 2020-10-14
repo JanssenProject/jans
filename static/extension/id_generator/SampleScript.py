@@ -1,11 +1,11 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.model.custom.script.type.id import IdGeneratorType
-from org.gluu.util import StringHelper, ArrayHelper
+from org.jans.model.custom.script.type.id import IdGeneratorType
+from org.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
@@ -32,7 +32,7 @@ class IdGenerator(IdGeneratorType):
     #   appId is application Id
     #   idType is Id Type
     #   idPrefix is Id Prefix
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is org.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def generateId(self, appId, idType, idPrefix, configurationAttributes):
         print "Id generator. Generate Id"

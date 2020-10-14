@@ -1,20 +1,20 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 #
 # Author: Jose Gonzalez
 # Author: Gasmyr Mougang
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.service import SessionIdService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.oxauth.security import Identity
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.oxauth.service import AuthenticationService
+from org.jans.oxauth.service.common import UserService
+from org.jans.oxauth.service import SessionIdService
+from org.jans.oxauth.util import ServerUtil
+from org.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from org.jans.jsf2.message import FacesMessages
 
 import com.twilio.Twilio as Twilio
 import com.twilio.rest.api.v2010.account.Message as Message

@@ -11,5 +11,5 @@
     ],
     "openIdRedirectUrl": "https://%(hostname)s/idp/Authn/oxAuth",
     "openIdPostLogoutRedirectUri": "https://%(hostname)s/idp/profile/Logout",
-    "scriptDn": "ou=scripts,o=gluu"
+    "scriptDn": "ou=scripts,o=jans"
 }

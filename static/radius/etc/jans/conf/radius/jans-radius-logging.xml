@@ -8,8 +8,8 @@
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-        <RollingFile name="FileLog" fileName="/opt/gluu/radius/logs/gluu-radius.log" 
-            filePattern="/opt/gluu/radius/logs/gluu-radius-%d{yyyy-mm-dd}.log">
+        <RollingFile name="FileLog" fileName="/opt/jans/radius/logs/jans-radius.log" 
+            filePattern="/opt/jans/radius/logs/jans-radius-%d{yyyy-mm-dd}.log">
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>

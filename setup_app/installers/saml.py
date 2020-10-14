@@ -20,9 +20,9 @@ class SamlInstaller(JettyInstaller):
         self.needdb = True
 
         self.source_files = [
-                (os.path.join(Config.distGluuFolder,'idp.war'), 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{0}/oxshibbolethIdp-{0}.war'.format(Config.oxVersion)),
-                (os.path.join(Config.distGluuFolder,'idp3_cml_keygenerator.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distGluuFolder,'shibboleth-idp.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/{0}/oxShibbolethStatic-{0}.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder,'idp.war'), 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{0}/oxshibbolethIdp-{0}.war'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder,'idp3_cml_keygenerator.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder,'shibboleth-idp.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/{0}/oxShibbolethStatic-{0}.jar'.format(Config.oxVersion)),
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'idp')
@@ -84,7 +84,7 @@ class SamlInstaller(JettyInstaller):
         self.unpack_idp3()
 
         if Config.mappingLocations['user'] == 'couchbase':
-            Config.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
+            Config.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=jansPerson))'
 
         # Process templates
         self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
@@ -191,7 +191,7 @@ class SamlInstaller(JettyInstaller):
             self.logIt("Creating couchbase readonly user for shib")
             self.dbUtils.cbm.create_user(shib_user, Config.couchbaseShibUserPassword, 'Shibboleth IDP', shib_user_roles)
         else:
-            Config.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+            Config.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(jans_utils.colors.WARNING, jans_utils.colors.ENDC))
             Config.post_messages.append('Username: {}'.format(shib_user))
             Config.post_messages.append('Password: {}'.format(Config.couchbaseShibUserPassword))
             Config.post_messages.append('Roles: {}'.format(shib_user_roles))
@@ -222,7 +222,7 @@ class SamlInstaller(JettyInstaller):
         self.copyFile(self.data_source_properties, self.idp3ConfFolder)
 
     def create_folders(self):
-        self.createDirs(os.path.join(Config.gluuBaseFolder, 'conf/shibboleth3'))
+        self.createDirs(os.path.join(Config.jansBaseFolder, 'conf/shibboleth3'))
         self.createDirs(os.path.join(self.jetty_base, 'identity/conf/shibboleth3/idp'))
         self.createDirs(os.path.join(self.jetty_base, 'identity/conf/shibboleth3/sp'))
         

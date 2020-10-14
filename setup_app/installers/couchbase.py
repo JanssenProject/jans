@@ -49,12 +49,12 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             Config.cb_query_node = Config.couchbase_hostname
 
         if not Config.get('couchbase_bucket_prefix'):
-            Config.couchbase_bucket_prefix = 'gluu'
+            Config.couchbase_bucket_prefix = 'jans'
 
         if Config.cb_install == InstallTypes.LOCAL:
             self.add_couchbase_post_messages()
             self.couchbaseInstall()
-            self.checkIfGluuBucketReady()
+            self.checkIfJansBucketReady()
             self.couchebaseCreateCluster()
 
         self.couchbaseSSL()
@@ -240,10 +240,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             self.exec_n1ql_query(n1ql)
 
 
-    def checkIfGluuBucketReady(self):
+    def checkIfJansBucketReady(self):
 
         for i in range(12):
-            self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
+            self.logIt("Checking if jans bucket is ready for N1QL query. Try %d ..." % (i+1))
             cbm_result = self.dbUtils.cbm.test_connection()
             if cbm_result.ok:
                 return True
@@ -279,7 +279,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
                     'encoded_couchbaseTrustStorePass': Config.encoded_couchbaseTrustStorePass,
                     'certFolder': Config.certFolder,
-                    'gluuOptPythonFolder': Config.gluuOptPythonFolder
+                    'jansOptPythonFolder': Config.jansOptPythonFolder
                     }
 
         couchbase_mappings = []
@@ -304,13 +304,13 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         return prop_dict
         
     def couchbaseProperties(self):
-        prop_file = os.path.basename(Config.gluuCouchebaseProperties)
+        prop_file = os.path.basename(Config.jansCouchebaseProperties)
         prop = open(os.path.join(Config.templateFolder, prop_file)).read()
         prop_dict = self.couchbaseDict()
         prop = prop % prop_dict
         out_file = os.path.join(Config.outputFolder, prop_file)
         self.writeFile(out_file, prop)
-        self.writeFile(Config.gluuCouchebaseProperties, prop)
+        self.writeFile(Config.jansCouchebaseProperties, prop)
 
     def create_couchbase_buckets(self):
         #Determine ram_size for buckets

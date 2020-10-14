@@ -1,53 +1,53 @@
 ######################################
 # Custom attributes
 ######################################
-dn: inum=ADA6,ou=attributes,o=gluu
+dn: inum=ADA6,ou=attributes,o=jans
 objectClass: top
-objectClass: gluuAttribute
+objectClass: jansAttribute
 description: Scim First custom attribute
 displayName: Scim Custom First
-gluuAttributeEditType: admin
-gluuAttributeEditType: user
-gluuAttributeName: scimCustomFirst
-gluuAttributeOrigin: gluuCustomPerson
-gluuAttributeType: string
-gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomFirst
-gluuSAML2URI: urn:oid:scimCustomFirst
-gluuStatus: active
+jansAttributeEditType: admin
+jansAttributeEditType: user
+jansAttributeName: scimCustomFirst
+jansAttributeOrigin: jansCustomPerson
+jansAttributeType: string
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomFirst
+jansSAML2URI: urn:oid:scimCustomFirst
+jansStatus: active
 inum: ADA6
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true
 
-dn: inum=70F0,ou=attributes,o=gluu
+dn: inum=70F0,ou=attributes,o=jans
 objectClass: top
-objectClass: gluuAttribute
+objectClass: jansAttribute
 description: Scim Second custom attribute
 displayName: Scim Custom Second
-gluuAttributeEditType: admin
-gluuAttributeEditType: user
-gluuAttributeName: scimCustomSecond
-gluuAttributeOrigin: gluuCustomPerson
-gluuAttributeType: generalizedTime
-gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomSecond
-gluuSAML2URI: urn:oid:scimCustomSecond
-gluuStatus: active
+jansAttributeEditType: admin
+jansAttributeEditType: user
+jansAttributeName: scimCustomSecond
+jansAttributeOrigin: jansCustomPerson
+jansAttributeType: generalizedTime
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomSecond
+jansSAML2URI: urn:oid:scimCustomSecond
+jansStatus: active
 inum: 70F0
 oxMultivaluedAttribute: true
 oxSCIMCustomAttribute: true
 
-dn: inum=653A,ou=attributes,o=gluu
+dn: inum=653A,ou=attributes,o=jans
 objectClass: top
-objectClass: gluuAttribute
+objectClass: jansAttribute
 description: Scim Third custom attribute
 displayName: Scim Custom Third
-gluuAttributeEditType: admin
-gluuAttributeEditType: user
-gluuAttributeName: scimCustomThird
-gluuAttributeOrigin: gluuCustomPerson
-gluuAttributeType: numeric
-gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomThird
-gluuSAML2URI: urn:oid:scimCustomThird
-gluuStatus: active
+jansAttributeEditType: admin
+jansAttributeEditType: user
+jansAttributeName: scimCustomThird
+jansAttributeOrigin: jansCustomPerson
+jansAttributeType: numeric
+jansSAML1URI: urn:jans:dir:attribute-def:scimCustomThird
+jansSAML2URI: urn:oid:scimCustomThird
+jansStatus: active
 inum: 653A
 oxMultivaluedAttribute: false
 oxSCIMCustomAttribute: true

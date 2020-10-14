@@ -17,19 +17,19 @@ class OxtrustInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distGluuFolder,'identity.war'), 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion))
+                (os.path.join(Config.distJansFolder,'identity.war'), 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion))
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust')
         self.output_folder = os.path.join(Config.outputFolder, 'oxtrust')
 
-        self.oxPhotosFolder = '/var/gluu/photos'
-        self.oxTrustRemovedFolder = '/var/gluu/identity/removed'
-        self.oxTrustCacheRefreshFolder = '/var/gluu/identity/cr-snapshots'
+        self.oxPhotosFolder = '/var/jans/photos'
+        self.oxTrustRemovedFolder = '/var/jans/identity/removed'
+        self.oxTrustCacheRefreshFolder = '/var/jans/identity/cr-snapshots'
         self.oxtrust_config_json = os.path.join(self.output_folder, 'oxtrust-config.json')
         self.oxtrust_cache_refresh_json = os.path.join(self.output_folder, 'oxtrust-cache-refresh.json')
         self.oxtrust_import_person_json = os.path.join(self.output_folder, 'oxtrust-import-person.json')
-        self.oxTrust_log_rotation_configuration = os.path.join(Config.gluuBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
+        self.oxTrust_log_rotation_configuration = os.path.join(Config.jansBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.lidf_oxtrust_api = os.path.join(self.output_folder, 'oxtrust_api.ldif')
         self.ldif_oxtrust_api_clients = os.path.join(self.output_folder, 'oxtrust_api_clients.ldif')
@@ -94,7 +94,7 @@ class OxtrustInstaller(JettyInstaller):
 
         # We need oxauth cleint id and encoded password
         if not Config.get('oxauth_client_id'):
-            result = self.dbUtils.search('ou=clients,o=gluu', '(inum=1001.*)')
+            result = self.dbUtils.search('ou=clients,o=jans', '(inum=1001.*)')
             if result:
                 Config.oxauth_client_id = result['inum']
                 self.logIt("oxauth_client_id was found in backend as {}".format(Config.oxauth_client_id))
@@ -139,7 +139,7 @@ class OxtrustInstaller(JettyInstaller):
 
         for folder in (self.oxPhotosFolder, self.oxTrustRemovedFolder, self.oxTrustCacheRefreshFolder):
             self.run([paths.cmd_mkdir, '-m', '775', '-p', folder])
-            self.run([paths.cmd_chown, '-R', 'root:gluu', folder])
+            self.run([paths.cmd_chown, '-R', 'root:jans', folder])
 
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))

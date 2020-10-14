@@ -102,7 +102,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def create_user(self):
         self.createUser('ldap', Config.ldap_user_home)
-        self.addUserToGroup('gluu', 'ldap')
+        self.addUserToGroup('jans', 'ldap')
         self.addUserToGroup('adm', 'ldap')
 
     def install_opendj(self):
@@ -226,11 +226,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                         'ds-cfg-plugin-type': ['postoperationadd', 'postoperationmodify', 'postoperationmodifydn', 'postsynchronizationadd', 'postsynchronizationmodify', 'postsynchronizationmodifydn', 'preoperationadd', 'preoperationmodify', 'preoperationmodifydn'],
                         'ds-cfg-type': [attr],
                         'cn': [cn],
-                        'ds-cfg-base-dn': ['o=gluu']
+                        'ds-cfg-base-dn': ['o=jans']
                         }
                 )
-
-
 
 
     def export_opendj_public_cert(self):

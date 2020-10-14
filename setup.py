@@ -28,7 +28,7 @@ from setup_app.utils import base
 
 from setup_app.messages import msg
 from setup_app.config import Config
-from setup_app.utils.progress import gluuProgress
+from setup_app.utils.progress import jansProgress
 
 
 from setup_app.setup_options import get_setup_options
@@ -39,7 +39,7 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.collect_properties import CollectProperties
 
-from setup_app.installers.gluu import GluuInstaller
+from setup_app.installers.jans import JansInstaller
 from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.couchbase import CouchbaseInstaller
@@ -61,7 +61,7 @@ if base.snap:
     try:
         open('/proc/mounts').close()
     except:
-        print("Please execute the following command\n  sudo snap connect gluu-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
+        print("Please execute the following command\n  sudo snap connect jans-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
         sys.exit()
 
 # initialize config object
@@ -94,38 +94,22 @@ if not argsp.n and not GSA:
 
 
 # pass progress indicator to Config object
-Config.pbar = gluuProgress
+Config.pbar = jansProgress
 
 
 for key in setupOptions:
     setattr(Config, key, setupOptions[key])
 
 
-gluuInstaller = GluuInstaller()
-gluuInstaller.initialize()
+jansInstaller = JansInstaller()
+jansInstaller.initialize()
 
-"""
-Config.hostname = 'snap.gluu.org'
-Config.ip = '174.138.37.150'
-Config.oxtrust_admin_password = 'Top!Secret-20'
-Config.orgName = 'MyGluu'
-Config.countryCode = 'GC'
-Config.city = 'GluuCity'
-Config.state = 'GluuState'
-Config.admin_email = 'admin@mygluu.org'
-Config.installPassport = False
-Config.installFido2 = False
-Config.installScimServer = False
-Config.installSaml = False
-Config.installOxd = False
-Config.installPassport = False
-"""
 
 if not GSA:
     print()
-    print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+    print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
     print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
-    print("Gluu Version    :  {}".format(Config.oxVersion))
+    print("Janssen Version    :  {}".format(Config.oxVersion))
     print("Detected init   :  {}".format(base.os_initdaemon))
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
     print()
@@ -143,7 +127,7 @@ elif os.path.isfile(Config.setup_properties_fn+'.enc'):
 
 
 collectProperties = CollectProperties()
-if os.path.exists(Config.gluu_properties_fn):
+if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
     Config.installed_instance = True
 
@@ -209,7 +193,7 @@ if argsp.x:
 
 if not GSA:
     print()
-    print(gluuInstaller)
+    print(jansInstaller)
 
     proceed = True
     if not Config.noPrompt:
@@ -224,8 +208,8 @@ class PostSetup:
     app_type = static.AppType.APPLICATION
     install_type = static.InstallOption.MONDATORY
 
-gluuProgress.register(PostSetup)
-gluuProgress.queue = queue
+jansProgress.register(PostSetup)
+jansProgress.queue = queue
 
 
 if argsp.shell:
@@ -235,15 +219,15 @@ if argsp.shell:
 def do_installation():
 
     if not GSA:
-        gluuProgress.before_start()
-        gluuProgress.start()
+        jansProgress.before_start()
+        jansProgress.start()
 
     try:
         jettyInstaller.calculate_selected_aplications_memory()
 
         if not Config.installed_instance:
-            gluuInstaller.configureSystem()
-            gluuInstaller.make_salt()
+            jansInstaller.configureSystem()
+            jansInstaller.make_salt()
             oxauthInstaller.make_salt()
 
             if not base.snap:
@@ -252,8 +236,8 @@ def do_installation():
                 jythonInstaller.start_installation()
                 nodeInstaller.start_installation()
 
-            gluuInstaller.copy_scripts()
-            gluuInstaller.encode_passwords()
+            jansInstaller.copy_scripts()
+            jansInstaller.encode_passwords()
 
             oxtrustInstaller.generate_api_configuration()
 
@@ -262,18 +246,18 @@ def do_installation():
             Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
             Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
 
-            gluuInstaller.prepare_base64_extension_scripts()
-            gluuInstaller.render_templates()
-            gluuInstaller.render_configuration_template()
+            jansInstaller.prepare_base64_extension_scripts()
+            jansInstaller.render_templates()
+            jansInstaller.render_configuration_template()
 
             if not base.snap:
-                gluuInstaller.update_hostname()
-                gluuInstaller.set_ulimits()
+                jansInstaller.update_hostname()
+                jansInstaller.set_ulimits()
 
-            gluuInstaller.copy_output()
-            gluuInstaller.setup_init_scripts()
+            jansInstaller.copy_output()
+            jansInstaller.setup_init_scripts()
 
-            # Installing gluu components
+            # Installing jans components
 
             if Config.wrends_install:
                 openDjInstaller.start_installation()
@@ -316,26 +300,26 @@ def do_installation():
             # this will install only base
             radiusInstaller.start_installation()
 
-        if (Config.installed_instance and 'installGluuRadius' in Config.addPostSetupService) or (not Config.installed_instance and Config.installGluuRadius):
-            radiusInstaller.install_gluu_radius()
+        if (Config.installed_instance and 'installJansRadius' in Config.addPostSetupService) or (not Config.installed_instance and Config.installJansRadius):
+            radiusInstaller.install_jans_radius()
 
-        gluuProgress.progress(PostSetup.service_name, "Saving properties")
+        jansProgress.progress(PostSetup.service_name, "Saving properties")
         propertiesUtils.save_properties()
         time.sleep(2)
 
-        for service in gluuProgress.services:
+        for service in jansProgress.services:
             if service['app_type'] == static.AppType.SERVICE:
-                gluuProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].title()))
+                jansProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].title()))
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
                 if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
-                    gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
+                    jansProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
                     service['object'].start('oxauth-rp')
 
-        gluuInstaller.post_install_tasks()
+        jansInstaller.post_install_tasks()
 
-        gluuProgress.progress(static.COMPLETED)
+        jansProgress.progress(static.COMPLETED)
 
         if not GSA:
             print()
@@ -344,7 +328,7 @@ def do_installation():
 
     except:
         if GSA:
-            gluuProgress.progress(static.ERROR  , str(traceback.format_exc()))
+            jansProgress.progress(static.ERROR  , str(traceback.format_exc()))
 
         base.logIt("FATAL", True, True)
 

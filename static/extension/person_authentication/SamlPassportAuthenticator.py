@@ -1,32 +1,32 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2019, Gluu
+# Copyright (c) 2019, Janssen
 #
 # Author: Jose Gonzalez
 # Author: Yuriy Movchan
 # Author: Christian Eland
 #
 
-from org.gluu.jsf2.service import FacesService
-from org.gluu.jsf2.message import FacesMessages
+from org.jans.jsf2.service import FacesService
+from org.jans.jsf2.message import FacesMessages
 
-from org.gluu.oxauth.model.common import User, WebKeyStorage
-from org.gluu.oxauth.model.configuration import AppConfiguration
-from org.gluu.oxauth.model.crypto import CryptoProviderFactory
-from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
-from org.gluu.oxauth.model.util import Base64Util
-from org.gluu.oxauth.service import AppInitializer, AuthenticationService
-from org.gluu.oxauth.service.common import UserService, EncryptionService
-from org.gluu.oxauth.model.authorize import AuthorizeRequestParam
-from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.config.oxtrust import LdapOxPassportConfiguration
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.persist import PersistenceEntryManager
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from org.jans.oxauth.model.common import User, WebKeyStorage
+from org.jans.oxauth.model.configuration import AppConfiguration
+from org.jans.oxauth.model.crypto import CryptoProviderFactory
+from org.jans.oxauth.model.jwt import Jwt, JwtClaimName
+from org.jans.oxauth.model.util import Base64Util
+from org.jans.oxauth.service import AppInitializer, AuthenticationService
+from org.jans.oxauth.service.common import UserService, EncryptionService
+from org.jans.oxauth.model.authorize import AuthorizeRequestParam
+from org.jans.oxauth.service.net import HttpService
+from org.jans.oxauth.security import Identity
+from org.jans.oxauth.util import ServerUtil
+from org.jans.config.oxtrust import LdapOxPassportConfiguration
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.persist import PersistenceEntryManager
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.util import StringHelper
 from java.util import ArrayList, Arrays, Collections, HashSet
-from org.gluu.oxauth.model.exception import InvalidJwtException
+from org.jans.oxauth.model.exception import InvalidJwtException
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
 
@@ -393,7 +393,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPassportConfigDN(self):
 
-        f = open('/etc/gluu/conf/gluu.properties', 'r')
+        f = open('/etc.jans.conf.jans.properties', 'r')
         for line in f:
             prop = line.split("=")
             if prop[0] == "oxpassport_ConfigurationEntryDN":
@@ -573,7 +573,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getUserProfile(self, jwt):
 
-        # getClaims method located at org.gluu.oxauth.model.token.JsonWebResponse.java as a org.gluu.oxauth.model.jwt.JwtClaims object
+        # getClaims method located at org.jans.oxauth.model.token.JsonWebResponse.java as a org.jans.oxauth.model.jwt.JwtClaims object
         jwt_claims = jwt.getClaims()
 
         user_profile_json = None
@@ -788,7 +788,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "passport. IsInboundFlow. authz_state = %s" % authz_state
 
         # the replace above is workaround due a problem reported
-        # on issue: https://github.com/GluuFederation/gluu-passport/issues/95
+        # on issue: https://github.com/JanssenFederation.jans.passport/issues/95
         # TODO: Remove after fixed on JSF side
 
         b64url_decoded_auth_state = base64.urlsafe_b64decode(str(authz_state+'=='))

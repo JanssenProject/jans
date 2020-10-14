@@ -1,26 +1,26 @@
 #
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.service.common import EncryptionService
+from org.jans.oxauth.security import Identity
+from org.jans.oxauth.service import AuthenticationService
+from org.jans.oxauth.service.common import UserService
+from org.jans.util import StringHelper
+from org.jans.oxauth.util import ServerUtil
+from org.jans.oxauth.service.common import EncryptionService
 from java.util import Arrays
-from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
-from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from org.gluu.oxauth.cert.validation.model import ValidationStatus
-from org.gluu.oxauth.util import CertUtil
-from org.gluu.oxauth.model.util import CertUtils
-from org.gluu.oxauth.service.net import HttpService
+from org.jans.oxauth.cert.fingerprint import FingerprintHelper
+from org.jans.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from org.jans.oxauth.cert.validation.model import ValidationStatus
+from org.jans.oxauth.util import CertUtil
+from org.jans.oxauth.model.util import CertUtils
+from org.jans.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
