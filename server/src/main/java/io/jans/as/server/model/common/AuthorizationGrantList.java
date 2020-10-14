@@ -222,8 +222,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken, boolean onlyFromCache) {
-        final TokenLdap tokenLdap = grantService.getGrantByCode(accessToken, onlyFromCache);
-        if (tokenLdap != null    && (tokenLdap.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        final TokenLdap tokenLdap = grantService.getGrantByCode(accessToken);
+        if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
         return null;
