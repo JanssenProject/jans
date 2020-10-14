@@ -49,7 +49,7 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
+import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;

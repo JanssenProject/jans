@@ -11,7 +11,7 @@ import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
