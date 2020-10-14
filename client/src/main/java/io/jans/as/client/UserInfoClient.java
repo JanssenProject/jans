@@ -7,7 +7,7 @@
 package io.jans.as.client;
 
 import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
@@ -123,7 +123,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     } else {
                         Jwt jwt = Jwt.parse(entity);
 
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
                         boolean signatureVerified = cryptoProvider.verifySignature(
                                 jwt.getSigningInput(),
                                 jwt.getEncodedSignature(),

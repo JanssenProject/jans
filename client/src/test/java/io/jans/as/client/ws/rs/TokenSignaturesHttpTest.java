@@ -13,7 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -187,7 +187,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
                 null, clientSecret, SignatureAlgorithm.HS256);
         assertTrue(validJwt);
@@ -255,7 +255,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
                 null, clientSecret, SignatureAlgorithm.HS384);
         assertTrue(validJwt);
@@ -323,7 +323,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
                 null, clientSecret, SignatureAlgorithm.HS512);
         assertTrue(validJwt);
@@ -393,7 +393,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS256);
         assertTrue(validJwt);
@@ -463,7 +463,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS384);
         assertTrue(validJwt);
@@ -533,7 +533,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS512);
         assertTrue(validJwt);
@@ -596,7 +596,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES256);
         assertTrue(validJwt);
@@ -659,7 +659,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES384);
         assertTrue(validJwt);
@@ -722,7 +722,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES512);
         assertTrue(validJwt);
@@ -792,7 +792,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS256);
         assertTrue(validJwt);
@@ -862,7 +862,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS384);
         assertTrue(validJwt);
@@ -932,7 +932,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
                 jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.PS512);
         assertTrue(validJwt);
@@ -953,7 +953,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
             String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
             String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS256);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -971,7 +971,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
             String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
             String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS384);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -989,7 +989,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
             String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
             String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS512);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1011,7 +1011,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS256);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1037,7 +1037,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS384);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1063,7 +1063,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1089,7 +1089,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES256);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1115,7 +1115,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES384);
 
             System.out.println("Encoded Signature: " + encodedSignature);
@@ -1141,7 +1141,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
             String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES512);
 
             System.out.println("Encoded Signature: " + encodedSignature);

@@ -13,7 +13,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.RSASigner;
@@ -285,7 +285,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
         {
             // 4. Request authorization
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();

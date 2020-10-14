@@ -15,7 +15,7 @@ import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -102,12 +102,12 @@ public class AuthorizationAction implements Serializable {
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
                 if (isJWSSelected()) {
                     if (isKeyIdRequired()) {
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
                         jwtAuthorizationRequest = new JwtAuthorizationRequest(
                                 req, requestObjectSigningAlg, cryptoProvider);
                         jwtAuthorizationRequest.setKeyId(keyId);
                     } else {
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
                         jwtAuthorizationRequest = new JwtAuthorizationRequest(
                                 req, requestObjectSigningAlg, clientSecret, cryptoProvider);
                     }
@@ -116,7 +116,7 @@ public class AuthorizationAction implements Serializable {
                 } else {
                     if (isKeyIdRequired()) {
                         JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
                         jwtAuthorizationRequest = new JwtAuthorizationRequest(
                                 req, requestObjectEncryptionAlg, requestObjectEncryptionEnc, cryptoProvider);
                         jwtAuthorizationRequest.setKeyId(keyId);
@@ -433,7 +433,7 @@ public class AuthorizationAction implements Serializable {
                 req.setDisplay(display);
                 req.getPrompts().addAll(prompt);
 
-                OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
                 JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                         req, SignatureAlgorithm.NONE, (String) null, cryptoProvider);
                 jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));

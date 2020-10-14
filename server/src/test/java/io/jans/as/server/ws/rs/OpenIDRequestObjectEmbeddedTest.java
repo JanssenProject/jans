@@ -17,7 +17,7 @@ import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -179,7 +179,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret1, cryptoProvider);
@@ -337,7 +337,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret2, cryptoProvider);
@@ -485,7 +485,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -559,7 +559,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -635,7 +635,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -699,7 +699,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -779,7 +779,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		authorizationRequest.setAuthPassword(userSecret);
 
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -976,7 +976,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		authorizationRequest.setAuthPassword(userSecret);
 
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -1095,7 +1095,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			authorizationRequest.setAuthUsername(userId);
 			authorizationRequest.setAuthPassword(userSecret);
 
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
 			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
 					SignatureAlgorithm.NONE, cryptoProvider);

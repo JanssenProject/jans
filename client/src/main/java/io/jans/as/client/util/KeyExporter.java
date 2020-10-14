@@ -6,7 +6,7 @@
 
 package io.jans.as.client.util;
 
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.SecurityProviderUtility;
@@ -86,7 +86,7 @@ public class KeyExporter {
 					try {
 						SecurityProviderUtility.installBCProvider(true);
 
-						OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStore, keyStorePasswd,
+						AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStore, keyStorePasswd,
 								"CN=oxAuth CA Certificates");
 						PrivateKey privateKey = cryptoProvider.getPrivateKey(keyAlias);
 						String base64EncodedKey = WordUtils.wrap(new String(Base64.encode(privateKey.getEncoded())), 64,

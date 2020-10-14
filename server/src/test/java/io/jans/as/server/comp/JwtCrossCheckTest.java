@@ -17,7 +17,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.jans.as.client.BaseTest;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
@@ -49,7 +49,7 @@ public class JwtCrossCheckTest extends BaseTest {
     public void rs256CrossCheck(final String dnName,
                               final String keyStoreFile,
                               final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS256);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS256);
     }
 
     @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
@@ -57,7 +57,7 @@ public class JwtCrossCheckTest extends BaseTest {
     public void rs384CrossCheck(final String dnName,
                                 final String keyStoreFile,
                                 final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS384);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS384);
     }
 
     @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
@@ -65,7 +65,7 @@ public class JwtCrossCheckTest extends BaseTest {
     public void rs512CrossCheck(final String dnName,
                                 final String keyStoreFile,
                                 final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS512);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS512);
     }
 
     @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
@@ -73,7 +73,7 @@ public class JwtCrossCheckTest extends BaseTest {
     public void es256CrossCheck(final String dnName,
                                 final String keyStoreFile,
                                 final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES256);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES256);
     }
 
     @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
@@ -81,7 +81,7 @@ public class JwtCrossCheckTest extends BaseTest {
     public void es384CrossCheck(final String dnName,
                                 final String keyStoreFile,
                                 final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES384);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES384);
     }
 
     @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
@@ -89,10 +89,10 @@ public class JwtCrossCheckTest extends BaseTest {
     public void es512CrossCheck(final String dnName,
                                 final String keyStoreFile,
                                 final String keyStoreSecret) throws Exception {
-        crossCheck(new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES512);
+        crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES512);
     }
 
-    private void crossCheck(OxAuthCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    private void crossCheck(AuthCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm) throws Exception {
         final String kid = getKeyIdByAlgorithm(signatureAlgorithm, Use.SIGNATURE, cryptoProvider);
 
         System.out.println(String.format("Cross check for %s ...", signatureAlgorithm.getName()));
@@ -104,7 +104,7 @@ public class JwtCrossCheckTest extends BaseTest {
         System.out.println(String.format("Finished cross check for %s.", signatureAlgorithm.getName()));
     }
 
-    private static void validate(String jwtAsString, OxAuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    private static void validate(String jwtAsString, AuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm signatureAlgorithm) throws Exception {
 
         SignedJWT signedJWT = SignedJWT.parse(jwtAsString);
         Jwt jwt = Jwt.parse(jwtAsString);
@@ -140,7 +140,7 @@ public class JwtCrossCheckTest extends BaseTest {
         assertTrue(oxauthVerifier.validate(jwt));
     }
 
-    private static String createNimbusJwt(OxAuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    private static String createNimbusJwt(AuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm signatureAlgorithm) throws Exception {
         final AlgorithmFamily family = signatureAlgorithm.getFamily();
 
         JWSSigner signer = null;
@@ -170,7 +170,7 @@ public class JwtCrossCheckTest extends BaseTest {
         return signedJWT.serialize();
     }
 
-    private static String createOxauthJwt(OxAuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm algorithm) throws Exception {
+    private static String createOxauthJwt(AuthCryptoProvider cryptoProvider, String kid, SignatureAlgorithm algorithm) throws Exception {
         Jwt jwt = new Jwt();
 
         jwt.getHeader().setKeyId(kid);
@@ -188,7 +188,7 @@ public class JwtCrossCheckTest extends BaseTest {
         return jwt.toString();
     }
 
-    private static String getKeyIdByAlgorithm(SignatureAlgorithm algorithm, Use use, OxAuthCryptoProvider cryptoProvider) throws KeyStoreException {
+    private static String getKeyIdByAlgorithm(SignatureAlgorithm algorithm, Use use, AuthCryptoProvider cryptoProvider) throws KeyStoreException {
         final List<String> aliases = cryptoProvider.getKeys();
         for (String keyId : aliases) {
             if (keyId.endsWith(use.getParamName()  + "_" + algorithm.getName().toLowerCase())) {
