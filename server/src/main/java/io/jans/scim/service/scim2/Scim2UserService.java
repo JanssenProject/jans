@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.scim.service.scim2;
 
 import java.io.Serializable;
@@ -29,8 +35,8 @@ import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
-import io.jans.orm.model.base.GluuBoolean;
 import io.jans.orm.search.filter.Filter;
+import io.jans.scim.model.GluuBoolean;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.BaseScimResource;

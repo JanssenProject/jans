@@ -1,8 +1,9 @@
 /*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2019, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
+
 // Generated from ScimFilter.g4 by ANTLR 4.5.3
 package io.jans.scim.service.antlr.scimFilter.antlr4;
 
