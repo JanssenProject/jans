@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.persistence.model.configuration.CustomProperty;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.config.CustomAuthenticationConfiguration;
@@ -47,7 +47,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {
 		GluuConfiguration gluuConfiguration = configurationService.getConfiguration();
-		List<oxIDPAuthConf> authConfigurations = gluuConfiguration.getOxIDPAuthentication();
+		List<IDPAuthConf> authConfigurations = gluuConfiguration.getOxIDPAuthentication();
 		
 		List<CustomAuthenticationConfiguration> customAuthenticationConfigurations = new ArrayList<CustomAuthenticationConfiguration>();
 		
@@ -55,7 +55,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 			return customAuthenticationConfigurations;
 		}
 
-		for (oxIDPAuthConf authConfiguration : authConfigurations) {
+		for (IDPAuthConf authConfiguration : authConfigurations) {
 			if (authConfiguration.getEnabled() && authConfiguration.getType().equalsIgnoreCase("customAuthentication")) {
 				CustomAuthenticationConfiguration customAuthenticationConfiguration = mapCustomAuthentication(authConfiguration);
 				customAuthenticationConfigurations.add(customAuthenticationConfiguration);
@@ -65,7 +65,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 		return customAuthenticationConfigurations;
 	}
 
-	private CustomAuthenticationConfiguration mapCustomAuthentication(oxIDPAuthConf oneConf) {
+	private CustomAuthenticationConfiguration mapCustomAuthentication(IDPAuthConf oneConf) {
 		CustomAuthenticationConfiguration customAuthenticationConfig = new CustomAuthenticationConfiguration();
 		customAuthenticationConfig.setName(oneConf.getName());
 		customAuthenticationConfig.setLevel(oneConf.getLevel());
