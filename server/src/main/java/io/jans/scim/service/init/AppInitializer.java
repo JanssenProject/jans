@@ -25,13 +25,13 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.scim.service.ApplicationFactory;
 import io.jans.scim.service.logger.LoggerService;
 import io.jans.service.PythonService;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 
