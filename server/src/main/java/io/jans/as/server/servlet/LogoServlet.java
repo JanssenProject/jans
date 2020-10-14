@@ -22,11 +22,11 @@ import java.io.*;
 import java.util.Date;
 
 @WebServlet(urlPatterns = "/servlet/logo")
-public class OxAuthLogoServlet extends HttpServlet {
+public class LogoServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 5445488800130871634L;
 
-	private static final Logger log = LoggerFactory.getLogger(OxAuthLogoServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(LogoServlet.class);
 
 	public static final String BASE_OXAUTH_LOGO_PATH = "/opt/gluu/jetty/oxauth/custom/static/logo/";
 
