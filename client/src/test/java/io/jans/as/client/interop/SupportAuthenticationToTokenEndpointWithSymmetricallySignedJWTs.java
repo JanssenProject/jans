@@ -11,7 +11,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -79,7 +79,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -149,7 +149,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -220,7 +220,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);

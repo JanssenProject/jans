@@ -7,7 +7,7 @@
 package io.jans.as.client.util;
 
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.ElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -142,7 +142,7 @@ public class KeyGenerator {
                     try {
                         SecurityProviderUtility.installBCProvider(true);
 
-                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
+                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keystore, keypasswd, dnName);
                         generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expiration_hours);
                     } catch (Exception e) {
                         e.printStackTrace();

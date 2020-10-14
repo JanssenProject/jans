@@ -9,7 +9,7 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.*;
 import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.jwe.Jwe;
@@ -95,7 +95,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -174,7 +174,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -253,7 +253,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);

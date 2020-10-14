@@ -12,7 +12,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
@@ -191,9 +191,9 @@ public class UmaClient {
 	private static Token request(final String tokenUrl, final String clientKeyStoreFile,
 			final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
 			throws UmaException {
-		OxAuthCryptoProvider cryptoProvider;
+		AuthCryptoProvider cryptoProvider;
 		try {
-			cryptoProvider = new OxAuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
+			cryptoProvider = new AuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
 		} catch (Exception ex) {
 			throw new UmaException("Failed to initialize crypto provider");
 		}

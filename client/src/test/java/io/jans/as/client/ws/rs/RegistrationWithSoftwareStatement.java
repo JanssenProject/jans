@@ -13,7 +13,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -57,7 +57,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
@@ -176,7 +176,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);

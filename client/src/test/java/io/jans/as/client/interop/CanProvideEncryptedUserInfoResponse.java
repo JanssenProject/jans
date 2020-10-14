@@ -9,7 +9,7 @@ package io.jans.as.client.interop;
 import io.jans.as.client.*;
 import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -246,7 +246,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -333,7 +333,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -420,7 +420,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             String accessToken = authorizationResponse.getAccessToken();
 
             // 3. Request user info
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
