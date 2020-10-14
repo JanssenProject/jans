@@ -9,7 +9,7 @@ package io.jans.as.common.util;
 /**
  * @author gasmyr on 9/17/20.
  */
-public class OxConstants {
+public class AttributeConstants {
 
     public static final String CURRENT_PERSON = "currentPerson";
 
