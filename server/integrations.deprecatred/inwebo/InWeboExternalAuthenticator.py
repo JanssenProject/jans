@@ -4,13 +4,13 @@
 # Author: Yuriy Movchan
 #
 
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.service.net import HttpService
 from io.jans.service import XmlService
-from org.gluu.oxauth.service import EncryptionService 
+from io.jans.as.server.service import EncryptionService
 from io.jans.util import StringHelper
 from io.jans.util import ArrayHelper
 from java.lang import Boolean

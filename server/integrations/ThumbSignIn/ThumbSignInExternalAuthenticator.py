@@ -1,9 +1,9 @@
 # Author: ThumbSignIn
 
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper
 from org.gluu.oxauth.util import ServerUtil
 from com.pramati.ts.thumbsignin_java_sdk import ThumbsigninApiController

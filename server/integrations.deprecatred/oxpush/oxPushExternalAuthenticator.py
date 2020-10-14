@@ -7,8 +7,8 @@
 import java
 from java.util import Arrays
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, AuthenticationService
 from org.gluu.oxpush import OxPushClient
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
