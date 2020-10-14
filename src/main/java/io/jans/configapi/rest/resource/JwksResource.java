@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * @author Yuriy Zabrovarnyy
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.JWKS)
+@Path(ApiConstants.CONFIG + ApiConstants.JWKS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class JwksResource extends BaseResource {

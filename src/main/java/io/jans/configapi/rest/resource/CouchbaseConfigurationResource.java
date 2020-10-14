@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.Properties;
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.COUCHBASE)
+@Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.COUCHBASE)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CouchbaseConfigurationResource extends BaseResource {

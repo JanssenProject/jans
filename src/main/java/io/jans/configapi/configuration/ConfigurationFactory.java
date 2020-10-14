@@ -23,9 +23,9 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
+import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.slf4j.Logger;
@@ -319,17 +319,18 @@ public class ConfigurationFactory {
             Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
             Filter searchFilter = Filter.createORFilter(oxIdFilter, displayNameFilter);
             List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-                    .findEntries(getBaseDnForResource(), UmaResource.class,searchFilter);
-            log.error(" \n umaResourceList = " + umaResourceList+"\n");
-            if (umaResourceList == null || umaResourceList.isEmpty())
-                throw new ConfigurationException("Matching Config API Resource not found!");
-            UmaResource resource = umaResourceList.stream()
-                    .filter(x -> ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
-                    .orElse(null);
-            if (resource == null)
-                throw new ConfigurationException("Config API Resource not found!");
-
-            return resource;
+                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
+            log.error(" \n umaResourceList = " + umaResourceList + "\n");
+            /*
+             * if (umaResourceList == null || umaResourceList.isEmpty()) throw new
+             * ConfigurationException("Matching Config API Resource not found!");
+             * UmaResource resource = umaResourceList.stream() .filter(x ->
+             * ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
+             * .orElse(null); if (resource == null) throw new
+             * ConfigurationException("Config API Resource not found!"); return resource;
+             */
+            // To-uncomment-later???
+            return null;
 
         } catch (Exception ex) {
             log.error("Failed to load Config API Resource.", ex);

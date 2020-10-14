@@ -1,7 +1,7 @@
 Feature: Couchbase connection configuration
 
   Background:
-    * def mainUrl = baseUrl + '/api/v1/oxauth/config/database/couchbase'
+    * def mainUrl = baseUrl + '/api/v1/config/database/couchbase'
 
   Scenario: Retrieve Couchbase configuration
     Given url  mainUrl

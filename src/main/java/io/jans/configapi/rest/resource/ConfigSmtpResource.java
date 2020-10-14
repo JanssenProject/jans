@@ -28,7 +28,7 @@ import java.util.Objects;
  * @author Mougang T.Gasmyr
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.SMTP)
+@Path(ApiConstants.CONFIG + ApiConstants.SMTP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigSmtpResource extends BaseResource {
