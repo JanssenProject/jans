@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.*;
 import io.jans.as.model.common.*;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;

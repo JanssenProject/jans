@@ -3,7 +3,7 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper,ArrayHelper
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.as.server.service import UserService, AuthenticationService,SessionIdService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.service.common import EncryptionService

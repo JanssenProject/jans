@@ -19,7 +19,7 @@ from io.jans.as.server.service.common import UserService, EncryptionService
 from org.gluu.oxauth.model.authorize import AuthorizeRequestParam
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.security import Identity
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from org.gluu.config.oxtrust import LdapOxPassportConfiguration
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager

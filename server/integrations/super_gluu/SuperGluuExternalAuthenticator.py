@@ -15,7 +15,7 @@ from org.gluu.oxauth.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
 from io.jans.as.server.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.as.server.service.common import EncryptionService, UserService
 from io.jans.service import MailService
