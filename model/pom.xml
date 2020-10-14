@@ -29,6 +29,12 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-model</artifactId>
         </dependency>
+
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
 	</dependencies>
 	
 </project>
