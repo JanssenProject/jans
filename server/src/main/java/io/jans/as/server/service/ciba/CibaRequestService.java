@@ -14,7 +14,7 @@ import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.CibaRequestStatus;
 import io.jans.as.server.model.ldap.CIBARequest;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
