@@ -5,20 +5,20 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService
+from io.jans.as.server.service import UserService, ClientService, AuthenticationService
 from io.jans.util import StringHelper
 from org.gluu.oxauth.model.common import User
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.jsf2.service import FacesService
 from org.gluu.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.service.net import HttpService
 from javax.faces.context import FacesContext
 
 import java

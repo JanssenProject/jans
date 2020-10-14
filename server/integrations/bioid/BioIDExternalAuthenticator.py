@@ -7,12 +7,12 @@ from org.oxauth.persistence.model.configuration import GluuConfiguration
 from io.jans.orm import PersistenceEntryManager
 from java.nio.charset import Charset
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service.common import UserService
 from io.jans.util import StringHelper
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.service.net import HttpService
 from org.json import JSONObject
 import base64
 import java

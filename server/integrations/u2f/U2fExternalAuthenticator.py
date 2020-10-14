@@ -12,10 +12,10 @@ from org.jboss.resteasy.client.exception import ResteasyClientException
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.client.fido.u2f import FidoU2fClientFactory
 from org.gluu.oxauth.model.config import Constants
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service.common import UserService
+from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper

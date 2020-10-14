@@ -6,11 +6,11 @@ from java.nio.charset import Charset
 from org.apache.http.params import CoreConnectionPNames
 
 from org.oxauth.persistence.model.configuration import GluuConfiguration
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService
-from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.oxauth.service.custom import CustomScriptService
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService
+from io.jans.as.server.service.common import EncryptionService
+from io.jans.as.server.service.custom import CustomScriptService
+from io.jans.as.server.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.model import SimpleCustomProperty
 from io.jans.model.casa import ApplicationConfiguration

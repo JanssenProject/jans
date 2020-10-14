@@ -5,9 +5,9 @@
 #
 # NOTE: before using this script, see the accompanying readme file
 
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import UserService
+from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper
 from io.jans.service.cdi.util import CdiUtil
 
