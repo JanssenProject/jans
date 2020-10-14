@@ -15,7 +15,7 @@ import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.CacheProviderType;
