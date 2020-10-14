@@ -1,5 +1,0 @@
-dn: ou=casa,ou=configuration,o=jans
-objectClass: top
-objectClass: oxApplicationConfiguration
-ou: casa
-oxConfApplication: {"enable_pass_reset" : true, "oxd_config" : {"host": "%(oxd_hostname)s", "port": %(oxd_port)s, "frontchannel_logout_uri" : "https://%(hostname)s/casa/autologout", "post_logout_uri" : "https://%(hostname)s/casa/bye.zul", "authz_redirect_uri" : "https://%(hostname)s/casa"}, "log_level" : "INFO"}

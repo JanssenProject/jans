@@ -231,13 +231,6 @@ class PropertiesUtils(SetupUtils):
                 print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
                 sys.exit(1)
 
-        for si, se in ( 
-                        ('installPassport', 'jansPassportEnabled'),
-                        ('jansRadiusEnabled', 'jansRadiusEnabled'),
-                        ('installSaml', 'jansSamlEnabled'),
-                        ):
-            if Config.get(si):
-                setattr(Config, se, 'true')
 
         if not 'oxtrust_admin_password' in p:
             p['oxtrust_admin_password'] = p['ldapPass']
@@ -457,57 +450,6 @@ class PropertiesUtils(SetupUtils):
         for m in couchbase_mappings:
             Config.mappingLocations[m] = 'couchbase'
 
-
-    def promptForCasaInstallation(self, promptForCasa='n'):
-        if Config.installed_instance and Config.installCasa:
-            return
-
-        if promptForCasa == 'n':
-            promptForCasa = self.getPrompt("Install Casa?", 
-                                            self.getDefaultOption(Config.installCasa)
-                                            )[0].lower()
-        Config.installCasa = True if promptForCasa == 'y' else False
-
-        if Config.installCasa:
-            print ("Please enter URL of oxd-server if you have one, for example: https://oxd.myjans.org:8443")
-            if Config.oxd_package:
-                print ("Else leave blank to install oxd server locally.")
-                while True:
-                    oxd_server_https = input("oxd Server URL: ").lower()
-
-                    if not oxd_server_https:
-                        if Config.installed_instance and Config.installOxd:
-                            break
-                        Config.installOxd = True
-                        if Config.installed_instance:
-                            Config.addPostSetupService.append('installOxd')
-                        break
-
-                    print ("Checking oxd server ...")
-                    if self.check_oxd_server(oxd_server_https):
-                        oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
-                        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-                        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-                        self.writeFile(oxd_crt_fn, oxd_cert)
-                        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-                        
-                        if not ssl_subjects['CN'] == oxd_hostname:
-                            print (('Hostname of oxd ssl certificate is {0}{1}{2} '
-                                    'which does not match {0}{3}{2}, \ncasa won\'t start '
-                                    'properly').format(
-                                            colors.DANGER,
-                                            ssl_subjects['CN'],
-                                            colors.ENDC,
-                                            oxd_hostname
-                                            ))
-                        else:
-                            Config.oxd_server_https = oxd_server_https
-                            break
-
-        if Config.installed_instance and Config.installCasa:
-            Config.addPostSetupService.append('installCasa')
-
-
     def set_persistence_type(self):
         if Config.wrends_install and not  Config.cb_install:
             Config.persistence_type = 'ldap'
@@ -559,39 +501,6 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installFido2:
             Config.addPostSetupService.append('installFido2')
 
-    def promptForPassport(self):
-        if Config.installed_instance and Config.installPassport:
-            return
-    
-        promptForPassport = self.getPrompt("Install Passport?", 
-                                            self.getDefaultOption(Config.installPassport)
-                                            )[0].lower()
-        Config.installPassport = True if promptForPassport == 'y' else False
-
-        if Config.installed_instance and Config.installPassport:
-            Config.addPostSetupService.append('installPassport')
-
-
-    def promptForShibIDP(self):
-        if Config.installed_instance and Config.installSaml:
-            return
-
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
-                                            self.getDefaultOption(Config.installSaml)
-                                            )[0].lower()
-        if promptForShibIDP == 'y':
-            Config.shibboleth_version = 'v3'
-            Config.installSaml = True
-            Config.jansSamlEnabled = 'true'
-            if Config.persistence_type in ('couchbase','hybrid'):
-                Config.couchbaseShibUserPassword = self.getPW()
-        else:
-            Config.installSaml = False
-
-        if Config.installed_instance and Config.installSaml:
-            Config.addPostSetupService.append('installSaml')
-
-
 
     def promptForOxd(self):
 
@@ -613,32 +522,6 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installOxd:
             Config.addPostSetupService.append('installOxd')
 
-
-    def promptForOxAuthRP(self):
-        if Config.installed_instance and Config.installOxAuthRP:
-            return
-
-        promptForOxAuthRP = self.getPrompt("Install oxAuth RP?",
-                                            self.getDefaultOption(Config.installOxAuthRP)
-                                            )[0].lower()
-
-        Config.installOxAuthRP = True if promptForOxAuthRP == 'y'else False
-
-        if Config.installed_instance and Config.installOxAuthRP:
-            Config.addPostSetupService.append('installOxAuthRP')
-
-
-    def promptForJansRadius(self):
-        if Config.installed_instance and Config.installJansRadius:
-            return
-        
-        promptForJansRadius = self.getPrompt("Install Janssen Radius?", 
-                                            self.getDefaultOption(Config.installJansRadius)
-                                            )[0].lower()
-        Config.installJansRadius = True if promptForJansRadius == 'y' else False
-
-        if Config.installed_instance and Config.installJansRadius:
-            Config.addPostSetupService.append('installJansRadius')
 
     def promptForProperties(self):
 
@@ -702,15 +585,6 @@ class PropertiesUtils(SetupUtils):
             Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.application_max_ram))
 
             oxtrust_admin_password = Config.oxtrust_admin_password if Config.oxtrust_admin_password else self.getPW(special='.*=!%&+/-')
-
-            while True:
-                oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
-                if len(oxtrust_admin_password) > 5:
-                    break
-                else:
-                    print("Password must be at least 6 characters")
-            
-            Config.oxtrust_admin_password = oxtrust_admin_password
 
             available_backends = self.getBackendTypes()
 
@@ -808,11 +682,6 @@ class PropertiesUtils(SetupUtils):
                                                 )[0].lower()
             self.installOxAuth = True if promptForOxAuth == 'y' else False
 
-            promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?",
-                                                self.getDefaultOption(Config.installOxTrust)
-                                                )[0].lower()
-            Config.installOxTrust = True if promptForOxTrust == 'y' else False
-
             couchbase_mappings_ = self.getMappingType('couchbase')
             buckets_ = [ 'jans_{}'.format(b) for b in couchbase_mappings_ ]
 
@@ -832,22 +701,13 @@ class PropertiesUtils(SetupUtils):
                                     ))
                     sys.exit(False)
 
-
         self.promptForHTTPD()
         self.promptForScimServer()
         self.promptForFido2Server()
-        self.promptForShibIDP()
-        self.promptForOxAuthRP()
-        self.promptForPassport()
 
+        #if (not Config.installOxd) and Config.oxd_package:
+        #    self.promptForOxd()
 
-        if os.path.exists(os.path.join(Config.distJansFolder, 'casa.war')):
-            self.promptForCasaInstallation()
-
-        if (not Config.installOxd) and Config.oxd_package:
-            self.promptForOxd()
-            
-        self.promptForJansRadius()
 
 
 propertiesUtils = PropertiesUtils()
