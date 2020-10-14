@@ -23,10 +23,9 @@ import java.util.stream.Stream;
 
 public abstract class AuthorizationService implements Serializable {
 
-    
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     @Inject
     ConfigurationService configurationService;
 
@@ -52,18 +51,15 @@ public abstract class AuthorizationService implements Serializable {
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
         return authScopes.containsAll(resourceScopes);
     }
-    
-    
-       
+
     protected String getClientKeyStorePassword() {
         return configurationService.find().getKeyStoreSecret();
     }
 
-    
     protected String getClientKeyStoreFile() {
         return configurationService.find().getKeyStoreFile();
     }
-    
+
     private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
@@ -71,10 +67,8 @@ public abstract class AuthorizationService implements Serializable {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
     }
-    
-    
+
     protected long computeAccessTokenExpirationTime(Integer expiresIn) {
-        // Compute "accessToken" expiration timestamp
         Calendar calendar = Calendar.getInstance();
         if (expiresIn != null) {
             calendar.add(Calendar.SECOND, expiresIn);
@@ -83,6 +77,5 @@ public abstract class AuthorizationService implements Serializable {
 
         return calendar.getTimeInMillis();
     }
-    
 
 }
