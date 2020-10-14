@@ -12,6 +12,7 @@ import traceback
 import code
 
 from queue import Queue
+queue = Queue()
 
 os.environ['LC_ALL'] = 'C'
 
@@ -46,16 +47,10 @@ from setup_app.installers.couchbase import CouchbaseInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
-from setup_app.installers.node import NodeInstaller
 from setup_app.installers.oxauth import OxauthInstaller
-from setup_app.installers.oxtrust import OxtrustInstaller
 from setup_app.installers.scim import ScimInstaller
-from setup_app.installers.passport import PassportInstaller
 from setup_app.installers.fido import FidoInstaller
-from setup_app.installers.saml import SamlInstaller
-from setup_app.installers.radius import RadiusInstaller
-from setup_app.installers.oxd import OxdInstaller
-from setup_app.installers.casa import CasaInstaller
+#from setup_app.installers.oxd import OxdInstaller
 
 if base.snap:
     try:
@@ -77,19 +72,8 @@ argsp, setupOptions = get_setup_options()
 terminal_size = shutil.get_terminal_size()
 tty_rows=terminal_size.lines 
 tty_columns = terminal_size.columns
-queue = Queue()
-GSA = None
 
-if (not argsp.c) and sys.stdout.isatty() and (int(tty_rows) > 24) and (int(tty_columns) > 79):
-    try:
-        import npyscreen
-    except:
-        print("Can't start TUI, continuing command line")
-    else:
-        from setup_app.utils.tui import GSA
-        on_tui = True
-
-if not argsp.n and not GSA:
+if not argsp.n:
     base.check_resources()
 
 
@@ -100,19 +84,16 @@ Config.pbar = jansProgress
 for key in setupOptions:
     setattr(Config, key, setupOptions[key])
 
-
 jansInstaller = JansInstaller()
 jansInstaller.initialize()
 
-
-if not GSA:
-    print()
-    print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
-    print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
-    print("Janssen Version    :  {}".format(Config.oxVersion))
-    print("Detected init   :  {}".format(base.os_initdaemon))
-    print("Detected Apache :  {}".format(base.determineApacheVersion()))
-    print()
+print()
+print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
+print("Janssen Version    :  {}".format(Config.oxVersion))
+print("Detected init   :  {}".format(base.os_initdaemon))
+print("Detected Apache :  {}".format(base.determineApacheVersion()))
+print()
 
 setup_loaded = {}
 if setupOptions['setup_properties']:
@@ -137,48 +118,40 @@ if os.path.exists(Config.jans_properties_fn):
         sys.exit()
 
 
-if not Config.noPrompt and not GSA and not Config.installed_instance and not setup_loaded:
+if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 
-if not GSA:
-    propertiesUtils.check_properties()
+propertiesUtils.check_properties()
 
 # initialize installers, order is important!
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
-nodeInstaller = NodeInstaller()
 openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
 httpdinstaller = HttpdInstaller()
 oxauthInstaller = OxauthInstaller()
-oxtrustInstaller = OxtrustInstaller()
 fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
-samlInstaller = SamlInstaller()
-oxdInstaller = OxdInstaller()
-casaInstaller = CasaInstaller()
-passportInstaller = PassportInstaller()
-radiusInstaller = RadiusInstaller()
+#oxdInstaller = OxdInstaller()
+
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
-                        oxauthInstaller, passportInstaller, scimInstaller, 
-                        fidoInstaller, samlInstaller, oxdInstaller, 
-                        casaInstaller, radiusInstaller):
+                        oxauthInstaller, scimInstaller, fidoInstaller,
+                        #oxdInstaller
+                        ):
 
         setattr(Config, installer.install_var, installer.installed())
 
-    if not GSA:
-        propertiesUtils.promptForProperties()
+    propertiesUtils.promptForProperties()
 
-        if not Config.addPostSetupService:
-            print("No service was selected to install. Exiting ...")
-            sys.exit()
+    if not Config.addPostSetupService:
+        print("No service was selected to install. Exiting ...")
+        sys.exit()
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
-    testDataLoader.passportInstaller = passportInstaller
     testDataLoader.scimInstaller = scimInstaller
 
 if argsp.x:
@@ -191,15 +164,15 @@ if argsp.x:
     sys.exit()
 
 
-if not GSA:
-    print()
-    print(jansInstaller)
 
-    proceed = True
-    if not Config.noPrompt:
-        proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
-        if proceed_prompt and proceed_prompt[0] !='y':
-            proceed = False
+print()
+print(jansInstaller)
+
+proceed = True
+if not Config.noPrompt:
+    proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
+    if proceed_prompt and proceed_prompt[0] !='y':
+        proceed = False
 
 #register post setup progress
 class PostSetup:
@@ -218,9 +191,8 @@ if argsp.shell:
 
 def do_installation():
 
-    if not GSA:
-        jansProgress.before_start()
-        jansProgress.start()
+    jansProgress.before_start()
+    jansProgress.start()
 
     try:
         jettyInstaller.calculate_selected_aplications_memory()
@@ -234,17 +206,13 @@ def do_installation():
                 jreInstaller.start_installation()
                 jettyInstaller.start_installation()
                 jythonInstaller.start_installation()
-                nodeInstaller.start_installation()
 
             jansInstaller.copy_scripts()
             jansInstaller.encode_passwords()
 
-            oxtrustInstaller.generate_api_configuration()
-
             Config.ldapCertFn = Config.opendj_cert_fn
             Config.ldapTrustStoreFn = Config.opendj_p12_fn
             Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
-            Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
 
             jansInstaller.prepare_base64_extension_scripts()
             jansInstaller.render_templates()
@@ -272,36 +240,15 @@ def do_installation():
         if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuth):
             oxauthInstaller.start_installation()
 
-        if (Config.installed_instance and 'installOxAuthRP' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuthRP):
-            oxauthInstaller.install_oxauth_rp()
-
-        if (Config.installed_instance and 'installOxTrust' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxTrust):
-            oxtrustInstaller.start_installation()
-
         if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
             fidoInstaller.start_installation()
 
         if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
 
-        if (Config.installed_instance and 'installSaml' in Config.addPostSetupService) or (not Config.installed_instance and Config.installSaml):
-            samlInstaller.start_installation()
+        #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
+        #    oxdInstaller.start_installation()
 
-        if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
-            oxdInstaller.start_installation()
-
-        if (Config.installed_instance and 'installCasa' in Config.addPostSetupService) or (not Config.installed_instance and Config.installCasa):
-            casaInstaller.start_installation()
-
-        if (Config.installed_instance and 'installPassport' in Config.addPostSetupService) or (not Config.installed_instance and Config.installPassport):
-            passportInstaller.start_installation()
-
-        if not Config.installed_instance:
-            # this will install only base
-            radiusInstaller.start_installation()
-
-        if (Config.installed_instance and 'installJansRadius' in Config.addPostSetupService) or (not Config.installed_instance and Config.installJansRadius):
-            radiusInstaller.install_jans_radius()
 
         jansProgress.progress(PostSetup.service_name, "Saving properties")
         propertiesUtils.save_properties()
@@ -313,26 +260,20 @@ def do_installation():
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
-                if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
-                    jansProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
-                    service['object'].start('oxauth-rp')
 
         jansInstaller.post_install_tasks()
 
         jansProgress.progress(static.COMPLETED)
 
-        if not GSA:
-            print()
-            for m in Config.post_messages:
-                print(m)
+        print()
+        for m in Config.post_messages:
+            print(m)
 
     except:
-        if GSA:
-            jansProgress.progress(static.ERROR  , str(traceback.format_exc()))
 
         base.logIt("FATAL", True, True)
 
-if not GSA and proceed:
+if proceed:
     do_installation()
     print('\n', static.colors.OKGREEN)
     msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
@@ -340,13 +281,4 @@ if not GSA and proceed:
     print('\n', static.colors.ENDC)
     # we need this for progress write last line
     time.sleep(2)
-else:
-    Config.thread_queue = queue
-    GSA.do_installation = do_installation
-    GSA.jettyInstaller = jettyInstaller
-    GSA.setup_loaded = setup_loaded
-    GSA.run()
-    print('\033c')
-    print()
-    for m in Config.post_messages:
-        print(m)
+
