@@ -126,8 +126,8 @@ running()
       if ! ps aux | grep -w $PID | grep -v 'grep' > /dev/null 2>&1; then
         kill -9 $PID > /dev/null 2>&1
         rm -rf $1
-        if ps aux | grep "/opt/jre/bin/java.*./opt/gluu/jetty/$NAME" | grep -v 'grep' > /dev/null 2>&1; then
-          PID_2=`ps aux | grep "/opt/jre/bin/java.*./opt/gluu/jetty/$NAME" | grep -v 'grep' | awk {'print $2'}`
+        if ps aux | grep "/opt/jre/bin/java.*./opt/jans/jetty/$NAME" | grep -v 'grep' > /dev/null 2>&1; then
+          PID_2=`ps aux | grep "/opt/jre/bin/java.*./opt/jans/jetty/$NAME" | grep -v 'grep' | awk {'print $2'}`
           if [ -n "$PID_2" ]; then
             kill -9 $PID_2
           fi
@@ -140,8 +140,8 @@ running()
   fi
 
   rm -f "$1"
-  if ps aux | grep "/opt/jre/bin/java.*./opt/gluu/jetty/$NAME" | grep -v 'grep' > /dev/null 2>&1; then
-    PID_2=`ps aux | grep "/opt/jre/bin/java.*./opt/gluu/jetty/$NAME" | grep -v 'grep' | awk {'print $2'}`
+  if ps aux | grep "/opt/jre/bin/java.*./opt/jans/jetty/$NAME" | grep -v 'grep' > /dev/null 2>&1; then
+    PID_2=`ps aux | grep "/opt/jre/bin/java.*./opt/jans/jetty/$NAME" | grep -v 'grep' | awk {'print $2'}`
     if [ -n "$PID_2" ]; then
       kill -9 $PID_2
     fi

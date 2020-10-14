@@ -1,4 +1,4 @@
-dn: inum=D40C-1CA4,ou=scripts,o=gluu
+dn: inum=D40C-1CA4,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 description: Passport SAML authentication module
@@ -15,7 +15,7 @@ oxScript::%(person_authentication_samlpassportauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=2FDB-CF02,ou=scripts,o=gluu
+dn: inum=2FDB-CF02,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module

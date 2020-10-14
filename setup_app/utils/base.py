@@ -1,4 +1,4 @@
-# Gluu CE setup base utilities
+# Jans CE setup base utilities
 
 import os
 import sys

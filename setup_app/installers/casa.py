@@ -24,14 +24,14 @@ class CasaInstaller(JettyInstaller):
         self.register_progess()
         
         self.source_files = [
-                (os.path.join(Config.distGluuFolder, 'casa.war'), 'https://ox.gluu.org/maven/org/gluu/casa/{0}/casa-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'casa.war'), 'https://ox.gluu.org/maven/org/gluu/casa/{0}/casa-{0}.war'.format(Config.oxVersion))
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'casa')
         self.output_folder = os.path.join(Config.outputFolder, 'casa')
         self.ldif = os.path.join(Config.outputFolder, 'casa/casa.ldif')
         self.ldif_scripts = os.path.join(Config.outputFolder, 'casa/scripts.ldif')
-        self.pylib_folder = os.path.join(Config.gluuOptPythonFolder, 'libs')
+        self.pylib_folder = os.path.join(Config.jansOptPythonFolder, 'libs')
         self.casa_jetty_dir = os.path.join(self.jetty_base, 'casa')
 
     def install(self):
@@ -48,10 +48,10 @@ class CasaInstaller(JettyInstaller):
                                                         "custom/libs"
                                                         )
 
-        twillo_package = base.determine_package(os.path.join(Config.distGluuFolder, 'twilio-*.jar'))
+        twillo_package = base.determine_package(os.path.join(Config.distJansFolder, 'twilio-*.jar'))
         self.copyFile(twillo_package, jettyServiceOxAuthCustomLibsPath)
 
-        jsmpp_package = base.determine_package(os.path.join(Config.distGluuFolder, 'jsmpp-*.jar'))
+        jsmpp_package = base.determine_package(os.path.join(Config.distJansFolder, 'jsmpp-*.jar'))
         self.copyFile(jsmpp_package, jettyServiceOxAuthCustomLibsPath)
 
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceOxAuthCustomLibsPath])

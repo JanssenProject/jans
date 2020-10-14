@@ -2,7 +2,7 @@ I. Install CE with `-t` option to load data
 
 II. Client keys deployment.
 - cd /var/www/html/
-- wget --no-check-certificate https://raw.githubusercontent.com/GluuFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
+- wget --no-check-certificate https://raw.githubusercontent.com/JansFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
 - unzip oxauth_test_client_keys.zip
 - rm -rf oxauth_test_client_keys.zip
 - chown -R root.www-data oxauth-client
@@ -69,19 +69,19 @@ VII. Update LDAP schema (this is not needed for Couchbase)
 9. Remove /home/ldap/.pw
 
 VIII. Update oxIDPAuthentication
-1. Update property https://github.com/GluuFederation/community-edition-setup/blob/master/templates/configuration.ldif#L26 in DB.
+1. Update property https://github.com/JansFederation/community-edition-setup/blob/master/templates/configuration.ldif#L26 in DB.
    We need to put DNS name instead of localhost to allow access it remotelly. This needed if we are plannign to run server side on another server.
 
 IX. Prepare for tests run
-- git clone https://github.com/GluuFederation/oxAuth
+- git clone https://github.com/JansFederation/oxAuth
 - Download and unzip file test_data.zip from CE server.
 - Create test profile folders oxAuth/Client/profiles/ce_test and oxAuth/Server/profiles/ce_test
 - Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
 - Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
 - Import HTTP SSL CE Server cert (/etc/certs/httpd.crt) into default java truststore.
-  Sample command: keytool -import -alias seed22.gluu.org_httpd -keystore cacerts -file httpd.crt
+  Sample command: keytool -import -alias seed22.jans.org_httpd -keystore cacerts -file httpd.crt
 - Import OpenDJ SSL CE Server cert (/etc/certs/opendj.crt) into default java truststore.
-  Sample command: keytool -import -alias seed22.gluu.org_opendj -keystore cacerts -file opendj.crt
+  Sample command: keytool -import -alias seed22.jans.org_opendj -keystore cacerts -file opendj.crt
 
 X. Run oxAuth client tests
 - cd into oxAuth/Client

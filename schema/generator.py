@@ -6,6 +6,25 @@ A Module containing the classes which generate schema files from JSON.
 import json
 
 
+def cmp_to_key(mycmp):
+    'Convert a cmp= function into a key= function'
+    class K:
+        def __init__(self, obj, *args):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) < 0
+        def __gt__(self, other):
+            return mycmp(self.obj, other.obj) > 0
+        def __eq__(self, other):
+            return mycmp(self.obj, other.obj) == 0
+        def __le__(self, other):
+            return mycmp(self.obj, other.obj) <= 0
+        def __ge__(self, other):
+            return mycmp(self.obj, other.obj) >= 0
+        def __ne__(self, other):
+            return mycmp(self.obj, other.obj) != 0
+    return K
+
 class SchemaGenerator(object):
     def __init__(self, jsontext, header=None):
         self.data = json.loads(jsontext)
@@ -47,7 +66,7 @@ class SchemaGenerator(object):
     def __get_macro_order(self, macros, parent):
         children = [(k, v) for k, v in list(macros.items()) if parent in v]
         items = [parent]
-        for k, v in sorted(children, cmp=self.__compare_defs):
+        for k, v in sorted(children, key=cmp_to_key(self.__compare_defs)):
             items.extend(self.__get_macro_order(macros, k))
         return items
 

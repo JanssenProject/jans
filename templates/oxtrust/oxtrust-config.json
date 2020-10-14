@@ -2,7 +2,7 @@
     "orgIname":"",
     "orgSupportEmail":"%(admin_email)s",
 
-    "baseDN":"o=gluu",
+    "baseDN":"o=jans",
 
     "baseEndpoint":"https://%(hostname)s/identity/restv1",
 
@@ -10,13 +10,13 @@
     "applicationUrl":"https://%(hostname)s",
 
     "personObjectClassTypes":[
-        "gluuCustomPerson",
-        "gluuPerson",
+        "jansCustomPerson",
+        "jansPerson",
         "eduPerson"
     ],
     "personObjectClassDisplayNames":[
-        "gluuCustomPerson",
-        "gluuPerson",
+        "jansCustomPerson",
+        "jansPerson",
         "eduPerson"
     ],
 
@@ -29,7 +29,7 @@
 
     "clientAssociationAttribute":"inum",
 
-    "personCustomObjectClass":"gluuCustomPerson",
+    "personCustomObjectClass":"jansCustomPerson",
 
     "contactObjectClassTypes":[
 
@@ -38,7 +38,7 @@
 
     ],
 
-    "photoRepositoryRootDir":"/var/gluu/photos",
+    "photoRepositoryRootDir":"/var/jans/photos",
     "photoRepositoryThumbWidth":300,
     "photoRepositoryThumbHeight":300,
     "photoRepositoryCountLeveles":3,
@@ -46,9 +46,9 @@
 
     "spMetadataPath":"",
 
-    "logoLocation":"/var/gluu/photos",
+    "logoLocation":"/var/jans/photos",
 
-    "gluuSpAttributes":[
+    "jansSpAttributes":[
 
     ],
 
@@ -61,7 +61,7 @@
     "idpLdapServer":"%(ldap_hostname)s:%(ldaps_port)s",
     "idpUserFields":"",
 
-    "ldifStore":"/var/gluu/identity/removed",
+    "ldifStore":"/var/jans/identity/removed",
 
     "caCertsLocation":"/usr/java/latest/jre/lib/security/cacerts",
     "caCertsPassphrase":"",
@@ -73,7 +73,7 @@
 
     ],
 
-    "servicesRestartTrigger":"/opt/gluu/essential_files/trigger_restart_of_services_delete_me_to_do_so",
+    "servicesRestartTrigger":"/opt/jans/essential_files/trigger_restart_of_services_delete_me_to_do_so",
 
     "oxAuthIssuer":"https://%(hostname)s",
     "oxAuthSectorIdentifierUrl":"https://%(hostname)s/oxauth/sectoridentifier",

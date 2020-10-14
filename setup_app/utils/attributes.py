@@ -32,15 +32,15 @@ class AttribDataTypes:
         if 'json' not in self.attribTypes:
             self.attribTypes['json'] = []
 
-        self.processGluuSchema()
+        self.processJansSchema()
 
-    def processGluuSchema(self):
+    def processJansSchema(self):
 
-        gluuSchemaFn = os.path.join(paths.INSTALL_DIR, 'schema/gluu_schema.json')
-        gluuSchema = base.readJsonFile(gluuSchemaFn)
-        gluuAtrribs = gluuSchema['attributeTypes']
+        jansSchemaFn = os.path.join(paths.INSTALL_DIR, 'schema/jans_schema.json')
+        jansSchema = base.readJsonFile(jansSchemaFn)
+        jansAtrribs = jansSchema['attributeTypes']
 
-        for attrib in gluuAtrribs:
+        for attrib in jansAtrribs:
             if attrib.get('json'):
                 atype = 'json'
             elif  attrib['syntax'] in syntaxType:
@@ -52,7 +52,7 @@ class AttribDataTypes:
                 self.attribTypes[atype].append(name)
 
         for obj_type in ['objectClasses', 'attributeTypes']:
-            for obj in gluuSchema[obj_type]:
+            for obj in jansSchema[obj_type]:
                 if obj.get('multivalued'):
                     for name in obj['names']:
                         if not name in self.listAttributes:

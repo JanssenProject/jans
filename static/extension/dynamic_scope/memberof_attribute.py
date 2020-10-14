@@ -1,14 +1,14 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Sahil Arora
 #
 
-from org.gluu.model.custom.script.type.scope import DynamicScopeType
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper, ArrayHelper
+from org.jans.model.custom.script.type.scope import DynamicScopeType
+from org.jans.oxauth.service.common import UserService
+from org.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.gluu.service.cdi.util import CdiUtil
+from org.jans.service.cdi.util import CdiUtil
 
 import java
 
@@ -29,7 +29,7 @@ class DynamicScope(DynamicScopeType):
         return True   
 
     # Update Json Web token before signing/encrypring it
-    #   dynamicScopeContext is org.gluu.oxauth.service.external.context.DynamicScopeExternalContext
+    #   dynamicScopeContext is org.jans.oxauth.service.external.context.DynamicScopeExternalContext
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def update(self, dynamicScopeContext, configurationAttributes):
         print "Dynamic scope. Update method"

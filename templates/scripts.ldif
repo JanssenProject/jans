@@ -1,4 +1,4 @@
-dn: inum=2124-0CF1,ou=scripts,o=gluu
+dn: inum=2124-0CF1,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Cert authentication module
@@ -21,7 +21,7 @@ oxScript::%(person_authentication_usercertexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=CB5B-3211,ou=scripts,o=gluu
+dn: inum=CB5B-3211,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 description: Permission Dynamic Scope script
@@ -35,7 +35,7 @@ oxScript::%(dynamic_scope_dynamic_permission)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=031C-4A65,ou=scripts,o=gluu
+dn: inum=031C-4A65,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Id Generator script
@@ -49,7 +49,7 @@ oxScript::%(id_generator_samplescript)s
 oxScriptType: id_generator
 programmingLanguage: python
 
-dn: inum=031C-5621,ou=scripts,o=gluu
+dn: inum=031C-5621,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for org_name
@@ -63,7 +63,7 @@ oxScript::%(dynamic_scope_org_name)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=031C-5622,ou=scripts,o=gluu
+dn: inum=031C-5622,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for work_phone
@@ -77,7 +77,7 @@ oxScript::%(dynamic_scope_work_phone)s
 oxScriptType: dynamic_scope
 programmingLanguage: python
 
-dn: inum=13D3-E7AD,ou=scripts,o=gluu
+dn: inum=13D3-E7AD,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Cache Refresh script
@@ -91,7 +91,7 @@ oxScript::%(cache_refresh_samplescript)s
 oxScriptType: cache_refresh
 programmingLanguage: python
 
-dn: inum=24FD-B96E,ou=scripts,o=gluu
+dn: inum=24FD-B96E,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 description: OTP Validation of passwords using Yubicloud authentication module
@@ -109,7 +109,7 @@ oxScript::%(person_authentication_yubicloudexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=2DAF-F995,ou=scripts,o=gluu
+dn: inum=2DAF-F995,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA RPT Policy
@@ -124,7 +124,7 @@ oxScript::%(uma_rpt_policy_uma_rpt_policy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
-dn: inum=2DAF-F9A5,ou=scripts,o=gluu
+dn: inum=2DAF-F9A5,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
@@ -139,7 +139,7 @@ oxScript::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
-dn: inum=OO11-BAFE,ou=scripts,o=gluu
+dn: inum=OO11-BAFE,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for oxtrust api
@@ -154,7 +154,7 @@ oxScript::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
-dn: inum=2DAF-F996,ou=scripts,o=gluu
+dn: inum=2DAF-F996,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Claims Gathering
@@ -168,7 +168,7 @@ oxScript::%(uma_claims_gathering_uma_claims_gathering)s
 oxScriptType: uma_claims_gathering
 programmingLanguage: python
 
-dn: inum=2DAF-AA90,ou=scripts,o=gluu
+dn: inum=2DAF-AA90,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Introspection Sample Script
@@ -182,7 +182,7 @@ oxScript::%(introspection_introspection)s
 oxScriptType: introspection
 programmingLanguage: python
 
-dn: inum=2DAF-BA90,ou=scripts,o=gluu
+dn: inum=2DAF-BA90,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Introspection Custom Parameters Sample Script
@@ -196,7 +196,7 @@ oxScript::%(introspection_introspection_custom_params)s
 oxScriptType: introspection
 programmingLanguage: python
 
-dn: inum=2DAF-CA90,ou=scripts,o=gluu
+dn: inum=2DAF-CA90,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Frontchannel logout Sample
@@ -210,7 +210,7 @@ oxScript::%(end_session_end_session)s
 oxScriptType: end_session
 programmingLanguage: python
 
-dn: inum=2DAF-AA91,ou=scripts,o=gluu
+dn: inum=2DAF-AA91,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Example
@@ -224,7 +224,7 @@ oxScript::%(resource_owner_password_credentials_resource_owner_password_credenti
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
 
-dn: inum=2DAF-BA91,ou=scripts,o=gluu
+dn: inum=2DAF-BA91,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Resource Owner Password Credentials Custom Parameters Example
@@ -238,7 +238,7 @@ oxScript::%(resource_owner_password_credentials_resource_owner_password_credenti
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
 
-dn: inum=4BBE-C6A8,ou=scripts,o=gluu
+dn: inum=4BBE-C6A8,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Basic (with user locking) authentication module
@@ -256,7 +256,7 @@ oxScript::%(person_authentication_basiclockaccountexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=5018-AF9C,ou=scripts,o=gluu
+dn: inum=5018-AF9C,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: UAF authentication module
@@ -276,7 +276,7 @@ oxScript::%(person_authentication_uafexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=5018-D4BF,ou=scripts,o=gluu
+dn: inum=5018-D4BF,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: HOTP/TOPT authentication module
@@ -285,8 +285,8 @@ oxEnabled: false
 inum: 5018-D4BF
 oxConfigurationProperty: {"value1":"otp_type","value2":"totp","description":""}
 oxConfigurationProperty: {"value1":"otp_conf_file","value2":"/etc/certs/otp_configuration.json","description":""}
-oxConfigurationProperty: {"value1":"issuer","value2":"Gluu Inc","description":""}
-oxConfigurationProperty: {"value1":"label","value2":"Gluu OTP","description":""}
+oxConfigurationProperty: {"value1":"issuer","value2":"Janssen Project","description":""}
+oxConfigurationProperty: {"value1":"label","value2":"Janssen OTP","description":""}
 oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 400, mSize: 0.05 }","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 oxLevel: 40
@@ -297,7 +297,7 @@ oxScript::%(person_authentication_otpexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=5018-F9CF,ou=scripts,o=gluu
+dn: inum=5018-F9CF,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: DUO authentication module
@@ -314,7 +314,7 @@ oxScript::%(person_authentication_duoexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=522F-CDC5,ou=scripts,o=gluu
+dn: inum=522F-CDC5,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Update User script
@@ -328,7 +328,7 @@ oxScript::%(update_user_samplescript)s
 oxScriptType: update_user
 programmingLanguage: python
 
-dn: inum=6EA0-8F0C,ou=scripts,o=gluu
+dn: inum=6EA0-8F0C,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample User Registration script
@@ -343,7 +343,7 @@ oxScript::%(user_registration_samplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
-dn: inum=6EA0-8F0D,ou=scripts,o=gluu
+dn: inum=6EA0-8F0D,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Confirm User Registration  script
@@ -357,7 +357,7 @@ oxScript::%(user_registration_confirmregistrationsamplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
-dn: inum=8BAF-80D6,ou=scripts,o=gluu
+dn: inum=8BAF-80D6,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Fido U2F authentication module
@@ -374,7 +374,7 @@ oxScript::%(person_authentication_u2fexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=8BAF-80D7,ou=scripts,o=gluu
+dn: inum=8BAF-80D7,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Fido2 authentication module
@@ -390,30 +390,30 @@ oxScript::%(person_authentication_fido2externalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=92F0-BF9E,ou=scripts,o=gluu
+dn: inum=92F0-BF9E,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
-description: Super Gluu authentication module
-displayName: super_gluu
+description: Super Jannsen authentication module
+displayName: super_jans
 oxEnabled: false
 inum: 92F0-BF9E
 oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
-oxConfigurationProperty: {"value1":"label","value2":"Super Gluu","description":""}
+oxConfigurationProperty: {"value1":"label","value2":"Super Janssen","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 oxConfigurationProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
-oxConfigurationProperty: {"value1":"notification_service_mode","value2":"gluu","description":""}
-oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
-oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
-oxConfigurationProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
+oxConfigurationProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
+oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_jans_creds.json","description":""}
+oxConfigurationProperty: {"value1":"superjans_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
+oxConfigurationProperty: {"value1":"superjans_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
 oxLevel: 60
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 oxRevision: 1
-oxScript::%(person_authentication_supergluuexternalauthenticator)s
+oxScript::%(person_authentication_superjansexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=92F0-759E,ou=scripts,o=gluu
+dn: inum=92F0-759E,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: ThumbSignIn authentication module
@@ -431,7 +431,7 @@ oxScript::%(person_authentication_thumbsigninexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=A51E-76DA,ou=scripts,o=gluu
+dn: inum=A51E-76DA,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample authentication module
@@ -446,7 +446,7 @@ oxScript::%(person_authentication_basicexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=A910-56AB,ou=scripts,o=gluu
+dn: inum=A910-56AB,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample script for SCIM events
@@ -462,7 +462,7 @@ oxScript::%(scim_samplescript)s
 oxScriptType: scim
 programmingLanguage: python
 
-dn: inum=DAA9-B788,ou=scripts,o=gluu
+dn: inum=DAA9-B788,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Client Registration script
@@ -477,7 +477,7 @@ oxScript::%(client_registration_samplescript)s
 oxScriptType: client_registration
 programmingLanguage: python
 
-dn: inum=09A0-93D6,ou=scripts,o=gluu
+dn: inum=09A0-93D6,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Twilio SMS authentication module
@@ -495,7 +495,7 @@ oxScript::%(person_authentication_twilio2fa)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=09A0-93D7,ou=scripts,o=gluu
+dn: inum=09A0-93D7,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: SMPP SMS authentication module
@@ -516,7 +516,7 @@ oxScript::%(person_authentication_smpp2fa)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=DAA9-B789,ou=scripts,o=gluu
+dn: inum=DAA9-B789,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Application Session script
@@ -530,7 +530,7 @@ oxScript::%(application_session_samplescript)s
 oxScriptType: application_session
 programmingLanguage: python
 
-dn: inum=DAA9-BA60,ou=scripts,o=gluu
+dn: inum=DAA9-BA60,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Consent Gathering script
@@ -544,7 +544,7 @@ oxScript::%(consent_gathering_consentgatheringsample)s
 oxScriptType: consent_gathering
 programmingLanguage: python
 
-dn: inum=8AF7.D82A,ou=scripts,o=gluu
+dn: inum=8AF7.D82A,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 displayName: persistence_extension
@@ -557,7 +557,7 @@ oxScript::%(persistence_extension_samplescript)s
 oxScriptType: persistence_extension
 programmingLanguage: python
 
-dn: inum=8AF7.D82B,ou=scripts,o=gluu
+dn: inum=8AF7.D82B,ou=scripts,o=jans
 objectClass: oxCustomScript
 objectClass: top
 displayName: idp
@@ -570,7 +570,7 @@ oxScript::%(idp_samplescript)s
 oxScriptType: idp
 programmingLanguage: python
 
-dn: inum=C1BA-C1BA,ou=scripts,o=gluu
+dn: inum=C1BA-C1BA,ou=scripts,o=jans
 objectClass: top
 objectClass: oxCustomScript
 description: Firebase notification sender

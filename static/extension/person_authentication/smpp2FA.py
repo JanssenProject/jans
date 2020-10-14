@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 # Copyright (c) 2019, Tele2
 
 # Author: Jose Gonzalez
@@ -10,15 +10,15 @@ from java.util import Arrays, Date
 from java.io import IOException
 from java.lang import Enum
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.oxauth.security import Identity
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.oxauth.service import AuthenticationService
+from org.jans.oxauth.service.common import UserService
+from org.jans.oxauth.util import ServerUtil
+from org.jans.util import StringHelper, ArrayHelper
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from org.jans.jsf2.message import FacesMessages
 
 from org.jsmpp import InvalidResponseException, PDUException
 from org.jsmpp.bean import Alphabet, BindType, ESMClass, GeneralDataCoding, MessageClass, NumberingPlanIndicator, RegisteredDelivery, SMSCDeliveryReceipt, TypeOfNumber
@@ -83,7 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # TON (Type of Number), NPI (Number Plan Indicator)
         self.SRC_ADDR_TON = TypeOfNumber.ALPHANUMERIC    # Alphanumeric
         self.SRC_ADDR_NPI = NumberingPlanIndicator.ISDN  # ISDN (E163/E164)
-        self.SRC_ADDR = "Gluu OTP"
+        self.SRC_ADDR = "Janssen OTP"
 
         # Don't touch these unless you know what your doing, we don't handle number reformatting for
         # any other type than international.
