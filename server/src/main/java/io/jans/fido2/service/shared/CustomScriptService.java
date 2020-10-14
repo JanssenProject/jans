@@ -12,7 +12,7 @@ import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.interceptor.Interceptor;
 
-import io.jans.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.service.custom.script.AbstractCustomScriptService;
 
 /**

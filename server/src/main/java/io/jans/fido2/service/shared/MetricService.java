@@ -13,8 +13,8 @@ import javax.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
-import io.jans.oxauth.model.config.StaticConfiguration;
-import io.jans.oxauth.service.common.ApplicationFactory;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
@@ -26,7 +26,7 @@ import io.jans.service.net.NetworkService;
  */
 @ApplicationScoped
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-public class MetricService extends org.gluu.service.metric.MetricService {
+public class MetricService extends io.jans.service.metric.MetricService {
 	
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
@@ -58,7 +58,7 @@ public class MetricService extends org.gluu.service.metric.MetricService {
 		return staticConfiguration.getBaseDn().getMetric();
 	}
 
-	public org.gluu.service.metric.MetricService getMetricServiceInstance() {
+	public io.jans.service.metric.MetricService getMetricServiceInstance() {
 		return instance.get();
 	}
 

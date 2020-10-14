@@ -26,7 +26,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import io.jans.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 /*
  * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
@@ -34,7 +34,7 @@ import io.jans.oxauth.model.config.StaticConfiguration;
  * Copyright (c) 2020, Janssen Project
  */
 
-import io.jans.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
