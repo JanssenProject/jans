@@ -1,12 +1,12 @@
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper,ArrayHelper
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.service import UserService, AuthenticationService,SessionIdService
-from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.service.common import EncryptionService 
+from io.jans.as.server.service import UserService, AuthenticationService,SessionIdService
+from io.jans.as.server.service.net import HttpService
+from io.jans.as.server.service.common import EncryptionService
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
 from io.jans.jsf2.service import FacesService

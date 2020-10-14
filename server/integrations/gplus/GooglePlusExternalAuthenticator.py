@@ -12,8 +12,8 @@ from org.gluu.oxauth.client import TokenClient, TokenRequest, UserInfoClient
 from org.gluu.oxauth.model.common import GrantType, AuthenticationMethod
 from org.gluu.oxauth.model.common import User
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, ClientService, AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
 

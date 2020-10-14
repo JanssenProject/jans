@@ -10,9 +10,9 @@ from com.toopher import RequestError
 from com.toopher import ToopherAPI
 from java.util import Arrays
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import EncryptionService
-from org.gluu.oxauth.service import UserService, AuthenticationService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import EncryptionService
+from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
 

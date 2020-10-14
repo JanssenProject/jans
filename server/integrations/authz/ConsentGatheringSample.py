@@ -5,7 +5,7 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.authz import ConsentGatheringType
 from io.jans.util import StringHelper
 
@@ -37,7 +37,7 @@ class ConsentGathering(ConsentGatheringType):
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): # context is reference of org.gluu.oxauth.service.external.context.ConsentGatheringContext
+    def authorize(self, step, context): # context is reference of io.jans.as.server.service.external.context.ConsentGatheringContext
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:

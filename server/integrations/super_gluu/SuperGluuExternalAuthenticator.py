@@ -9,17 +9,17 @@ from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.model.config import ConfigurationFactory
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.server.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.util import StringHelper
-from org.gluu.oxauth.service.common import EncryptionService, UserService
+from io.jans.as.server.service.common import EncryptionService, UserService
 from io.jans.service import MailService
-from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService 
+from io.jans.as.server.service.push.sns import PushPlatform, PushSnsService
 from org.gluu.oxnotify.client import NotifyClientFactory 
 from java.util import Arrays, HashMap, IdentityHashMap, Date
 from java.time import ZonedDateTime
