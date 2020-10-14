@@ -26,7 +26,7 @@ def get_key_from(dn):
     dns = []
     for rd in dnutils.parse_dn(dn):
 
-        if rd[0] == 'o' and rd[1] == 'gluu':
+        if rd[0] == 'o' and rd[1] == 'jans':
             continue
         dns.append(rd[1])
 
@@ -72,7 +72,7 @@ def get_document_from_entry(dn, entry):
                     if 'Custom' in oc and len(oc_list) > 1:
                         oc_list.remove(oc)
 
-                    if not 'gluu' in oc.lower() and len(oc_list) > 1:
+                    if not 'jans' in oc.lower() and len(oc_list) > 1:
                         oc_list.remove(oc)
 
                 document[k] = oc_list[0]

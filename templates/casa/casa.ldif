@@ -1,4 +1,4 @@
-dn: ou=casa,ou=configuration,o=gluu
+dn: ou=casa,ou=configuration,o=jans
 objectClass: top
 objectClass: oxApplicationConfiguration
 ou: casa

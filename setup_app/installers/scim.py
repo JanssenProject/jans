@@ -18,7 +18,7 @@ class ScimInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distGluuFolder, 'scim.war'), 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'scim.war'), 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
                 ]
 
     def install(self):

@@ -30,10 +30,10 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.output_folder = os.path.join(Config.outputFolder, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
-        self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_gluu.conf')
+        self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
-        self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_gluu.conf')
-        self.https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if base.clone_type == 'rpm' else '/etc/apache2/sites-available/https_gluu.conf'
+        self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
+        self.https_jans_fn = '/etc/httpd/conf.d/https_jans.conf' if base.clone_type == 'rpm' else '/etc/apache2/sites-available/https_jans.conf'
 
     def configure(self):
         self.logIt(self.pbar_text, pbar=self.service_name)
@@ -144,16 +144,16 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         # CentOS 7.* + systemd + apache 2.4
         if self.service_name == 'httpd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
+            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_jans.conf')
 
         if base.clone_type == 'rpm' and base.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
 
         if base.clone_type == 'deb':
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
-            self.run([paths.cmd_ln, '-s', self.https_gluu_fn,
-                      '/etc/apache2/sites-enabled/https_gluu.conf'])
+            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
+            self.run([paths.cmd_ln, '-s', self.https_jans_fn,
+                      '/etc/apache2/sites-enabled/https_jans.conf'])
 
     def installed(self):
-        return os.path.exists(self.https_gluu_fn)
+        return os.path.exists(self.https_jans_fn)

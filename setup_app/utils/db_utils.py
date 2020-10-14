@@ -49,7 +49,7 @@ class DBUtils:
     def get_oxAuthConfDynamic(self):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
-                        search_base='o=gluu', 
+                        search_base='o=jans', 
                         search_scope=ldap3.SUBTREE,
                         search_filter='(objectClass=oxAuthConfiguration)',
                         attributes=["oxAuthConfDynamic"]
@@ -70,7 +70,7 @@ class DBUtils:
     def get_oxTrustConfApplication(self):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
-                        search_base='o=gluu',
+                        search_base='o=jans',
                         search_scope=ldap3.SUBTREE,
                         search_filter='(objectClass=oxTrustConfiguration)',
                         attributes=['oxTrustConfApplication']
@@ -119,7 +119,7 @@ class DBUtils:
     def enable_script(self, inum):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
-                    'inum={},ou=scripts,o=gluu'.format(inum),
+                    'inum={},ou=scripts,o=jans'.format(inum),
                     {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
         elif self.moddb == BackendTypes.COUCHBASE:
@@ -129,7 +129,7 @@ class DBUtils:
     def enable_service(self, service):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
-                'ou=configuration,o=gluu',
+                'ou=configuration,o=jans',
                 {service: [ldap3.MODIFY_REPLACE, 'true']}
                 )
         elif self.moddb == BackendTypes.COUCHBASE:
@@ -140,7 +140,7 @@ class DBUtils:
         
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
-                'ou=configuration,o=gluu',
+                'ou=configuration,o=jans',
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
 
@@ -196,7 +196,7 @@ class DBUtils:
         return  ','.join(value2)
     
     def add_client2script(self, script_inum, client_id):
-        dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
+        dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
         backend_location = self.get_backend_location_for_dn(dn)
 

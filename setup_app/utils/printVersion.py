@@ -25,7 +25,7 @@ repos = {
 
 
 def get_latest_commit(service, branch):
-    url = 'https://api.github.com/repos/GluuFederation/{0}/commits/{1}'.format(repos[service], branch)
+    url = 'https://api.github.com/repos/JanssenProject/{0}/commits/{1}'.format(repos[service], branch)
     try:
         f = urlopen(url)
         content = f.read()
@@ -54,7 +54,7 @@ def get_war_info(war_fn):
             
 
     for f in war_zip.filelist:
-        if f.filename.startswith('META-INF/maven/org.gluu') and f.filename.endswith('pom.properties'):
+        if f.filename.startswith('META-INF/maven/org.jans') and f.filename.endswith('pom.properties'):
             pom_prop = war_zip.read(f.filename)
             for l in pom_prop.splitlines():
                 build_date = re.findall("\w{3}\s\w{3}\s{1,2}\w{1,2}\s\w{2}:\w{2}:\w{2}\s[+\w]{3}\s\w{4}", l.decode('utf-8'))
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--show-latest-commit", help="Gets latest commit from githbub", action='store_true')
-    parser.add_argument("-target", help="Target directory", default='/opt/gluu/jetty/*/webapps')
+    parser.add_argument("-target", help="Target directory", default='/opt/jans/jetty/*/webapps')
     parser.add_argument("--json", help="Print output in json format", action='store_true')
     args = parser.parse_args()
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         if args.show_latest_commit and (service in repos):
             latest_commit = get_latest_commit(service, info['branch'])
             if not 'ERROR:' in latest_commit and info['build'] != latest_commit:
-                compare_build = 'diff: https://github.com/GluuFederation/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
+                compare_build = 'diff: https://github.com/JanssenProject/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
             else:
                 compare_build = ''
             if not args.json:

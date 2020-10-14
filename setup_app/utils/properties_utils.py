@@ -232,9 +232,9 @@ class PropertiesUtils(SetupUtils):
                 sys.exit(1)
 
         for si, se in ( 
-                        ('installPassport', 'gluuPassportEnabled'),
-                        ('gluuRadiusEnabled', 'gluuRadiusEnabled'),
-                        ('installSaml', 'gluuSamlEnabled'),
+                        ('installPassport', 'jansPassportEnabled'),
+                        ('jansRadiusEnabled', 'jansRadiusEnabled'),
+                        ('installSaml', 'jansSamlEnabled'),
                         ):
             if Config.get(si):
                 setattr(Config, se, 'true')
@@ -469,7 +469,7 @@ class PropertiesUtils(SetupUtils):
         Config.installCasa = True if promptForCasa == 'y' else False
 
         if Config.installCasa:
-            print ("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
+            print ("Please enter URL of oxd-server if you have one, for example: https://oxd.myjans.org:8443")
             if Config.oxd_package:
                 print ("Else leave blank to install oxd server locally.")
                 while True:
@@ -582,7 +582,7 @@ class PropertiesUtils(SetupUtils):
         if promptForShibIDP == 'y':
             Config.shibboleth_version = 'v3'
             Config.installSaml = True
-            Config.gluuSamlEnabled = 'true'
+            Config.jansSamlEnabled = 'true'
             if Config.persistence_type in ('couchbase','hybrid'):
                 Config.couchbaseShibUserPassword = self.getPW()
         else:
@@ -604,10 +604,10 @@ class PropertiesUtils(SetupUtils):
         Config.installOxd = True if promptForOxd == 'y' else False
 
         if Config.installOxd:
-            promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
-                                                self.getDefaultOption(Config.get('oxd_use_gluu_storage'))
+            promptForOxdJansStorage = self.getPrompt("  Use Janssen Storage for Oxd?",
+                                                self.getDefaultOption(Config.get('oxd_use_jans_storage'))
                                                 )[0].lower()
-            Config.oxd_use_gluu_storage = True if promptForOxdGluuStorage == 'y' else False
+            Config.oxd_use_jans_storage = True if promptForOxdJansStorage == 'y' else False
 
 
         if Config.installed_instance and Config.installOxd:
@@ -628,17 +628,17 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installOxAuthRP')
 
 
-    def promptForGluuRadius(self):
-        if Config.installed_instance and Config.installGluuRadius:
+    def promptForJansRadius(self):
+        if Config.installed_instance and Config.installJansRadius:
             return
         
-        promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
-                                            self.getDefaultOption(Config.installGluuRadius)
+        promptForJansRadius = self.getPrompt("Install Janssen Radius?", 
+                                            self.getDefaultOption(Config.installJansRadius)
                                             )[0].lower()
-        Config.installGluuRadius = True if promptForGluuRadius == 'y' else False
+        Config.installJansRadius = True if promptForJansRadius == 'y' else False
 
-        if Config.installed_instance and Config.installGluuRadius:
-            Config.addPostSetupService.append('installGluuRadius')
+        if Config.installed_instance and Config.installJansRadius:
+            Config.addPostSetupService.append('installJansRadius')
 
     def promptForProperties(self):
 
@@ -650,7 +650,7 @@ class PropertiesUtils(SetupUtils):
             print("This is previously installed instance. Available components will be prompted for installation.")
 
         else:
-            promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the Apache-2.0 license?", "N|y")[0].lower()
+            promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Janssen Server is under the Apache-2.0 license?", "N|y")[0].lower()
             if promptForMITLicense != 'y':
                 sys.exit(0)
 
@@ -814,9 +814,9 @@ class PropertiesUtils(SetupUtils):
             Config.installOxTrust = True if promptForOxTrust == 'y' else False
 
             couchbase_mappings_ = self.getMappingType('couchbase')
-            buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
+            buckets_ = [ 'jans_{}'.format(b) for b in couchbase_mappings_ ]
 
-            buckets_.append('gluu')
+            buckets_.append('jans')
 
             if Config.cb_install == InstallTypes.REMOTE:
                 dbUtils.set_cbm()
@@ -841,13 +841,13 @@ class PropertiesUtils(SetupUtils):
         self.promptForPassport()
 
 
-        if os.path.exists(os.path.join(Config.distGluuFolder, 'casa.war')):
+        if os.path.exists(os.path.join(Config.distJansFolder, 'casa.war')):
             self.promptForCasaInstallation()
 
         if (not Config.installOxd) and Config.oxd_package:
             self.promptForOxd()
             
-        self.promptForGluuRadius()
+        self.promptForJansRadius()
 
 
 propertiesUtils = PropertiesUtils()

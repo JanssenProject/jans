@@ -1,15 +1,15 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 #
 # Author: Milton BO
 #
 #
 
-from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingResponse
-from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingClient
-from org.gluu.oxauth.client.fcm import FirebaseCloudMessagingRequest
-from org.gluu.oxauth.util import RedirectUri
-from org.gluu.model.custom.script.type.ciba import EndUserNotificationType
+from org.jans.oxauth.client.fcm import FirebaseCloudMessagingResponse
+from org.jans.oxauth.client.fcm import FirebaseCloudMessagingClient
+from org.jans.oxauth.client.fcm import FirebaseCloudMessagingRequest
+from org.jans.oxauth.util import RedirectUri
+from org.jans.model.custom.script.type.ciba import EndUserNotificationType
 from java.lang import String
 from java.util import UUID
 

@@ -8,7 +8,7 @@ from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
-from setup_app.utils.progress import gluuProgress
+from setup_app.utils.progress import jansProgress
 from setup_app.utils.printVersion import get_war_info
 
 class BaseInstaller:
@@ -16,7 +16,7 @@ class BaseInstaller:
     dbUtils = dbUtils
 
     def register_progess(self):
-        gluuProgress.register(self)
+        jansProgress.register(self)
 
     def start_installation(self):
         if not hasattr(self, 'pbar_text'):
@@ -61,7 +61,7 @@ class BaseInstaller:
         for client_var_name, client_id_prefix in client_var_id_list:
             self.logIt("Checking ID for client {}".format(client_var_name))
             if not Config.get(client_var_name):
-                result = self.dbUtils.search('ou={},o=gluu'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
+                result = self.dbUtils.search('ou={},o=jans'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
@@ -146,7 +146,7 @@ class BaseInstaller:
                     continue
 
                 if force or self.check_download_needed(src):
-                    src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src_name)
+                    src = os.path.join('/tmp' if base.snap else Config.distJansFolder, src_name)
                     self.source_files[i] = (src, url)
                     self.download_file(url, src)
 

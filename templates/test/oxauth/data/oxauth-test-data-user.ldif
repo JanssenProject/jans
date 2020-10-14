@@ -1,29 +1,29 @@
 ######################################
 # Groups
 ######################################
-dn: inum=7890,ou=groups,o=gluu
+dn: inum=7890,ou=groups,o=jans
 objectClass: top
-objectClass: gluuGroup
-gluuGroupType: gluuTestGroup1
+objectClass: jansGroup
+jansGroupType: jansTestGroup1
 inum: 7890
-gluuStatus: active
-displayName: Gluu Test Group 1
+jansStatus: active
+displayName: Jans Test Group 1
 
-dn: inum=7891,ou=groups,o=gluu
+dn: inum=7891,ou=groups,o=jans
 objectClass: top
-objectClass: gluuGroup
-gluuGroupType: gluuTestGroup2
+objectClass: jansGroup
+jansGroupType: jansTestGroup2
 inum: 7891
-gluuStatus: active
-displayName: Gluu Test Group 2
+jansStatus: active
+displayName: Jans Test Group 2
 
 ######################################
 # People
 ######################################
-dn: inum=B1F3-AEAE-B798,ou=people,o=gluu
+dn: inum=B1F3-AEAE-B798,ou=people,o=jans
 objectClass: top
-objectClass: gluuPerson
-objectClass: gluuCustomPerson
+objectClass: jansPerson
+objectClass: jansCustomPerson
 cn: Test User
 sn: User
 o: Test
@@ -32,7 +32,7 @@ displayName: oxAuth Test User
 emailVerified: true
 gender: Male
 givenName: Test
-gluuStatus: active
+jansStatus: active
 iname: @test*person*test_user
 inum: B1F3-AEAE-B798
 locale: en-US
@@ -40,7 +40,7 @@ mail: test_user@test.org
 middleName: User
 nickname: user
 phoneNumberVerified: true
-picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredUsername: user
 preferredLanguage: en_US
 profile: http://www.mywebsite.com/profile
@@ -53,18 +53,18 @@ mobile: (512) 516-2413
 uid: test_user
 updatedAt: 20170213135512.220Z
 userPassword: test_user_password
-website: http://www.gluu.org
+website: http://www.jans.org
 zoneinfo: America/Chicago
-memberOf: inum=7890,ou=groups,o=gluu
-memberOf: inum=7891,ou=groups,o=gluu
-memberOf: inum=60B7,ou=groups,o=gluu
+memberOf: inum=7890,ou=groups,o=jans
+memberOf: inum=7891,ou=groups,o=jans
+memberOf: inum=60B7,ou=groups,o=jans
 oxAuthBackchannelUserCode: 59b335fb-a2df-4275-be43-1b8d3cc9a5c5
 oxAuthBackchannelDeviceRegistrationToken: dv95B2zWvZBEGbcAf3byKO
 
-dn: inum=B1F3-AEAE-B799,ou=people,o=gluu
+dn: inum=B1F3-AEAE-B799,ou=people,o=jans
 objectClass: top
-objectClass: gluuPerson
-objectClass: gluuCustomPerson
+objectClass: jansPerson
+objectClass: jansCustomPerson
 cn: Test User2
 sn: User2
 o: Test
@@ -73,7 +73,7 @@ displayName: oxAuth Test User2
 emailVerified: true
 gender: Male
 givenName: Test2
-gluuStatus: active
+jansStatus: active
 iname: @test*person*test_user2
 inum: B1F3-AEAE-B799
 locale: en-US
@@ -81,7 +81,7 @@ mail: test_user2@test.org
 middleName: User2
 nickname: user2
 phoneNumberVerified: true
-picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredUsername: user2
 preferredLanguage: en_US
 profile: http://www.mywebsite.com/profile
@@ -94,26 +94,26 @@ mobile: (512) 516-2414
 uid: test_user2
 updatedAt: 20170213135512.220Z
 userPassword: test_user_password2
-website: http://www.gluu.org
+website: http://www.jans.org
 zoneinfo: America/Chicago
-memberOf: inum=7890,ou=groups,o=gluu
-memberOf: inum=7891,ou=groups,o=gluu
-memberOf: inum=60B7,ou=groups,o=gluu
+memberOf: inum=7890,ou=groups,o=jans
+memberOf: inum=7891,ou=groups,o=jans
+memberOf: inum=60B7,ou=groups,o=jans
 
 ######################################
 # Groups
 ######################################
-dn: inum=60B7,ou=groups,o=gluu
+dn: inum=60B7,ou=groups,o=jans
 changetype: modify
 add: member
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans
 
-dn: inum=7890,ou=groups,o=gluu
+dn: inum=7890,ou=groups,o=jans
 changetype: modify
 add: member
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans
 
-dn: inum=7891,ou=groups,o=gluu
+dn: inum=7891,ou=groups,o=jans
 changetype: modify
 add: member
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans

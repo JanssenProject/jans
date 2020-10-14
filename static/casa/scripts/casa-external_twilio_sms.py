@@ -1,16 +1,16 @@
-# This is a modified version of original twilio_sms Gluu's script to work with Casa
+# This is a modified version of original twilio_sms Janssen.'s script to work with Casa
 
 from java.util import Arrays
 
 from javax.faces.application import FacesMessage
 
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from org.jans.jsf2.message import FacesMessages
+from org.jans.oxauth.security import Identity
+from org.jans.oxauth.service import UserService, AuthenticationService
+from org.jans.oxauth.util import ServerUtil
+from org.jans.model.custom.script.type.auth import PersonAuthenticationType
+from org.jans.service.cdi.util import CdiUtil
+from org.jans.util import StringHelper, ArrayHelper
 
 from com.google.common.base import Joiner
 

@@ -1,4 +1,4 @@
-dn: ou=oxauth,ou=configuration,o=gluu
+dn: ou=oxauth,ou=configuration,o=jans
 objectClass: oxAuthConfiguration
 objectClass: top
 ou: oxauth

@@ -15,8 +15,8 @@
       ["oxAuthUserId"]
     ],
     "static" : [
-      [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
-      [["LOWER(`mail`)"], "objectClass = \"gluuPerson\""], 
+      [["LOWER(`uid`)"], "objectClass = \"jansPerson\""], 
+      [["LOWER(`mail`)"], "objectClass = \"jansPerson\""], 
       [["exp"], "del=true"] 
     ]
   },
@@ -46,7 +46,7 @@
       ["objectClass","creationDate","oxStatus"]
     ],
     "static" : [
-      [["creationDate"], "objectClass = \"gluuPasswordResetRequest\""],
+      [["creationDate"], "objectClass = \"jansPasswordResetRequest\""],
       [["oxScriptType"], "objectClass = \"oxCustomScript\""],
       [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
       [["exp"], "del=true"],

@@ -13,12 +13,12 @@ from setup_app.utils import base
 class Config:
 
     # we define statics here so that is is acessible without construction
-    gluuOptFolder = '/opt/gluu'
+    jansOptFolder = '/opt/jans'
     distFolder = '/opt/dist'
     jre_home = '/opt/jre'
-    gluuBaseFolder = '/etc/gluu'
+    jansBaseFolder = '/etc/jans'
     certFolder = '/etc/certs'
-    oxBaseDataFolder = '/var/gluu'
+    oxBaseDataFolder = '/var/jans'
     etc_hosts = '/etc/hosts'
     etc_hostname = '/etc/hostname'
     osDefault = '/etc/default'
@@ -28,7 +28,7 @@ class Config:
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
-    jetty_base = os.path.join(gluuOptFolder, 'jetty')
+    jetty_base = os.path.join(jansOptFolder, 'jetty')
     installed_instance = False
 
     @classmethod
@@ -38,12 +38,12 @@ class Config:
 
     @classmethod
     def determine_version(self):
-        oxauth_info = get_war_info(os.path.join(self.distGluuFolder, 'oxauth.war'))
+        oxauth_info = get_war_info(os.path.join(self.distJansFolder, 'oxauth.war'))
         self.oxVersion = oxauth_info['version']
-        self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
+        self.currentJansVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = oxauth_info['branch']
 
-        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
+        self.ce_setup_zip = 'https://github.com/JansFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
     @classmethod
     def dump(self, dumpFile=False):
@@ -97,7 +97,7 @@ class Config:
         self.noPrompt = False
 
         self.distAppFolder = os.path.join(self.distFolder, 'app')
-        self.distGluuFolder = os.path.join(self.distFolder, 'gluu')
+        self.distJansFolder = os.path.join(self.distFolder, 'jans')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
 
         self.downloadWars = None
@@ -130,9 +130,9 @@ class Config:
         self.wrends_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
 
-        # Gluu components installation status
+        # Jans components installation status
         self.loadData = True
-        self.installGluu = True
+        self.installJans = True
         self.installJre = True
         self.installJetty = True
         self.installNode = True
@@ -143,7 +143,7 @@ class Config:
         self.installSaml = False
         self.installOxAuthRP = False
         self.installPassport = False
-        self.installGluuRadius = False
+        self.installJansRadius = False
         self.installScimServer = False
         self.installFido2 = False
         self.installCasa = False
@@ -161,13 +161,13 @@ class Config:
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
 
-        self.gluuOptBinFolder = os.path.join(self.gluuOptFolder, 'bin')
-        self.gluuOptSystemFolder = os.path.join(self.gluuOptFolder, 'system')
-        self.gluuOptPythonFolder = os.path.join(self.gluuOptFolder, 'python')
-        self.configFolder = os.path.join(self.gluuBaseFolder, 'conf') 
+        self.jansOptBinFolder = os.path.join(self.jansOptFolder, 'bin')
+        self.jansOptSystemFolder = os.path.join(self.jansOptFolder, 'system')
+        self.jansOptPythonFolder = os.path.join(self.jansOptFolder, 'python')
+        self.configFolder = os.path.join(self.jansBaseFolder, 'conf') 
 
-        self.gluu_properties_fn = os.path.join(self.configFolder,'gluu.properties')
-        self.gluu_hybrid_roperties_fn = os.path.join(self.configFolder, 'gluu-hybrid.properties')
+        self.jans_properties_fn = os.path.join(self.configFolder,'jans.properties')
+        self.jans_hybrid_roperties_fn = os.path.join(self.configFolder, 'jans-hybrid.properties')
 
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
@@ -198,7 +198,7 @@ class Config:
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
 
-        self.oxd_package = base.determine_package(os.path.join(Config.distGluuFolder, 'oxd-server*.tgz'))
+        self.oxd_package = base.determine_package(os.path.join(Config.distJansFolder, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
@@ -213,7 +213,7 @@ class Config:
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
 
-        self.gluuScriptFiles = [
+        self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
                             os.path.join(self.install_dir, 'static/scripts/testBind.py')
                             ]
@@ -228,9 +228,9 @@ class Config:
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         
-        self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
-        self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
-        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
+        self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
+        self.ox_ldap_properties = os.path.join(self.configFolder, 'jans-ldap.properties')
+        self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
         
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
@@ -264,7 +264,7 @@ class Config:
 
 
         self.ce_templates = {
-                             self.gluu_python_readme: True,
+                             self.jans_python_readme: True,
                              self.ox_ldap_properties: True,
                              self.ldap_setup_properties: False,
                              self.etc_hostname: False,
@@ -272,7 +272,7 @@ class Config:
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.network: False,
-                             self.gluu_properties_fn: True,
+                             self.jans_properties_fn: True,
                              }
 
         self.service_requirements = {
@@ -286,7 +286,7 @@ class Config:
                         'oxd-server': ['opendj oxauth', 80],
                         'passport': ['opendj oxauth', 82],
                         'oxauth-rp': ['opendj oxauth', 84],
-                        'gluu-radius': ['opendj oxauth', 86],
+                        'jans-radius': ['opendj oxauth', 86],
                         }
 
         self.install_time_ldap = None
@@ -339,6 +339,6 @@ class Config:
 
         self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
+            'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'oxauth-client-jar-with-dependencies.jar')
                 }
         Config.addPostSetupService = []

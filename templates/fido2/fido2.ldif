@@ -1,4 +1,4 @@
-dn: ou=fido2,ou=configuration,o=gluu
+dn: ou=fido2,ou=configuration,o=jans
 objectClass: gluuApplicationConfiguration
 objectClass: top
 ou: fido2
