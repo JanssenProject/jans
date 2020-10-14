@@ -12,7 +12,7 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
@@ -635,12 +635,12 @@ public class AppInitializer {
 	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(GluuConfiguration configuration) {
 		List<GluuLdapConfiguration> persistenceAuthConfigs = new ArrayList<GluuLdapConfiguration>();
 
-		List<oxIDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
+		List<IDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
 		if (persistenceIdpAuthConfigs == null) {
 			return persistenceAuthConfigs;
 		}
 
-		for (oxIDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
+		for (IDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
 			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.asLdapConfiguration();
 			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
 				persistenceAuthConfigs.add(persistenceAuthConfig);
@@ -650,13 +650,13 @@ public class AppInitializer {
 		return persistenceAuthConfigs;
 	}
 
-	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
+	private List<IDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
 		if ((configuration == null) || (configuration.getOxIDPAuthentication() == null)) {
 			return null;
 		}
 
-		List<oxIDPAuthConf> configurations = new ArrayList<oxIDPAuthConf>();
-		for (oxIDPAuthConf authConf : configuration.getOxIDPAuthentication()) {
+		List<IDPAuthConf> configurations = new ArrayList<IDPAuthConf>();
+		for (IDPAuthConf authConf : configuration.getOxIDPAuthentication()) {
 			if (authConf.getType().equalsIgnoreCase("ldap") || authConf.getType().equalsIgnoreCase("auth")) {
 				configurations.add(authConf);
 			}

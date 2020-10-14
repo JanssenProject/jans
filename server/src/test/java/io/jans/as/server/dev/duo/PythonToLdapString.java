@@ -8,7 +8,7 @@ package io.jans.as.server.dev.duo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.persistence.model.configuration.CustomProperty;
-import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
@@ -58,7 +58,7 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
 		fields.add(createAttribute("property.duo_akey", "6f88ca3dea7ac88a514cdef7c18021678ccaf0e1"));
 		fields.add(createAttribute(SCRIPT_FIELD_NAME, pythonScript));
 
-		final oxIDPAuthConf c = new oxIDPAuthConf();
+		final IDPAuthConf c = new IDPAuthConf();
 		c.setType("customAuthentication");
 		c.setName("duo");
 		c.setEnabled(true);
@@ -69,7 +69,7 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
 		final String json = getJSONString(c);
 		System.out.println("JSON: \n" + json);
 
-		final oxIDPAuthConf fromJson = fromJSON(json);
+		final IDPAuthConf fromJson = fromJSON(json);
 		for (CustomProperty attr : fromJson.getFields()) {
 			if (attr.getName().equals(SCRIPT_FIELD_NAME)) {
 				System.out.println("Script from json: \n" + attr.getValues().get(0));
@@ -87,15 +87,15 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
 		return result;
 	}
 
-	private String getJSONString(oxIDPAuthConf conf) throws IOException {
+	private String getJSONString(IDPAuthConf conf) throws IOException {
 		StringWriter sw = new StringWriter();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(sw, conf);
 		return sw.toString();
 	}
 
-	private oxIDPAuthConf fromJSON(String p_json) throws IOException {
+	private IDPAuthConf fromJSON(String p_json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(p_json, oxIDPAuthConf.class);
+		return mapper.readValue(p_json, IDPAuthConf.class);
 	}
 }
