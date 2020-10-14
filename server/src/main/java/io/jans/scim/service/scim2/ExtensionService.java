@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.scim.service.scim2;
 
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_DESCRIPTION;

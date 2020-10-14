@@ -1,8 +1,9 @@
 /*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2017, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
+
 /**
  * Holds POJOs used to model the information of the <code>/Schemas</code> endpoint.
  * See section 4 of RFC 7644.
