@@ -77,22 +77,9 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-timer-weld</artifactId>
         </dependency>
-<!--
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxtrust-service</artifactId>
-            <version>${gluu.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.glassfish</groupId>
-                    <artifactId>jakarta.faces</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
- -->
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-scim-rest</artifactId>
+            <artifactId>jans-scim-service</artifactId>
             <version>${gluu.version}</version>
         </dependency>
 
