@@ -11,7 +11,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.model.JwtState;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -73,7 +73,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -140,7 +140,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -207,7 +207,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -275,7 +275,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -344,7 +344,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -413,7 +413,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -482,7 +482,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -551,7 +551,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -620,7 +620,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -689,7 +689,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -758,7 +758,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -827,7 +827,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -897,7 +897,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
 
         // 2. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -976,7 +976,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
 
         // 2. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1055,7 +1055,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
 
         // 2. Request authorization
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1271,7 +1271,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
     public void jwtStateHS256Test() throws Exception {
         showTitle("jwtStateHS256Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         String sharedKey = "shared_key";
 
         String rfp = UUID.randomUUID().toString();
@@ -1296,7 +1296,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
     public void jwtStateHS384Test() throws Exception {
         showTitle("jwtStateHS384Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         String sharedKey = "shared_key";
 
         String rfp = UUID.randomUUID().toString();
@@ -1321,7 +1321,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
     public void jwtStateHS512Test() throws Exception {
         showTitle("jwtStateHS512Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
         String sharedKey = "shared_key";
 
         String rfp = UUID.randomUUID().toString();
@@ -1348,7 +1348,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateRS256Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1375,7 +1375,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateRS384Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1402,7 +1402,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateRS512Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1429,7 +1429,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateES256Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1456,7 +1456,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateES384Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1483,7 +1483,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStateES512Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1510,7 +1510,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStatePS256Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1537,7 +1537,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStatePS384Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1564,7 +1564,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
                                   final String dnName, final String keyId) throws Exception {
         showTitle("jwtStatePS512Test");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1593,7 +1593,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         showTitle("jwtStateAlgRSAOAEPEncA256GCMTest");
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1631,7 +1631,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         showTitle("jwtStateAlgRSA15EncA128CBCPLUSHS256Test");
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
@@ -1669,7 +1669,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         showTitle("jwtStateAlgRSA15EncA256CBCPLUSHS512Test");
 
         JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();

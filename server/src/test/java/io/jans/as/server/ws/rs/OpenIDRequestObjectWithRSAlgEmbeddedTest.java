@@ -16,7 +16,7 @@ import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -102,7 +102,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");
@@ -206,7 +206,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");
@@ -310,7 +310,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");
@@ -414,7 +414,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");
@@ -519,7 +519,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");
@@ -623,7 +623,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			final String keyStoreFile, final String keyStoreSecret) throws Exception {
 		Builder request = null;
 		try {
-			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+			AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 			List<String> scopes = Arrays.asList("openid");

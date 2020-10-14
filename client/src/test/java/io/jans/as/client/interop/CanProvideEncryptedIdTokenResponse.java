@@ -9,7 +9,7 @@ package io.jans.as.client.interop;
 import io.jans.as.client.*;
 import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.jwe.Jwe;
@@ -233,7 +233,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -308,7 +308,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -383,7 +383,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);

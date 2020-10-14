@@ -16,7 +16,7 @@ import io.jans.as.model.common.WebKeyStorage;
  */
 public class CryptoProviderFactory {
 
-    private static OxAuthCryptoProvider keyStoreProvider = null;
+    private static AuthCryptoProvider keyStoreProvider = null;
 
     public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
@@ -57,7 +57,7 @@ public class CryptoProviderFactory {
             return keyStoreProvider;
         }
 
-        return keyStoreProvider = new OxAuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg());
+        return keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg());
     }
 
     public static void reset() {

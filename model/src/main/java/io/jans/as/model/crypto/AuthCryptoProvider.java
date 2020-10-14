@@ -64,9 +64,9 @@ import static io.jans.as.model.jwk.JWKParameter.*;
  * @author Yuriy Movchan
  * @version February 12, 2019
  */
-public class OxAuthCryptoProvider extends AbstractCryptoProvider {
+public class AuthCryptoProvider extends AbstractCryptoProvider {
 
-    protected static final Logger LOG = Logger.getLogger(OxAuthCryptoProvider.class);
+    protected static final Logger LOG = Logger.getLogger(AuthCryptoProvider.class);
 
     private KeyStore keyStore;
     private String keyStoreFile;
@@ -74,15 +74,15 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     private String dnName;
     private final boolean rejectNoneAlg;
 
-    public OxAuthCryptoProvider() throws Exception {
+    public AuthCryptoProvider() throws Exception {
         this(null, null, null);
     }
 
-    public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
         this(keyStoreFile, keyStoreSecret, dnName, false);
     }
 
-    public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
         this.rejectNoneAlg = rejectNoneAlg;
         if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
             this.keyStoreFile = keyStoreFile;

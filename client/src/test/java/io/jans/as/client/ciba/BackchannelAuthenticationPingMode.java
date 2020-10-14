@@ -14,7 +14,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
@@ -524,7 +524,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -593,7 +593,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -662,7 +662,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -731,7 +731,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -800,7 +800,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -869,7 +869,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -938,7 +938,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -1007,7 +1007,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -1076,7 +1076,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Authentication Request
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -3221,7 +3221,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -3295,7 +3295,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -3369,7 +3369,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
@@ -3402,7 +3402,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS256);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3425,7 +3425,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS384);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3448,7 +3448,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.RS512);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3471,7 +3471,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES256);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3494,7 +3494,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES384);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3517,7 +3517,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.ES512);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3540,7 +3540,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS256);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3563,7 +3563,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS384);
         jwt.setEncodedSignature(encodedSignature);
 
@@ -3586,7 +3586,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         jwt.getHeader().setKeyId(keyId);
         jwt.getClaims().setClaim("subject", subjectValue);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String encodedSignature = cryptoProvider.sign(jwt.getSigningInput(), keyId, null, SignatureAlgorithm.PS512);
         jwt.setEncodedSignature(encodedSignature);
 
