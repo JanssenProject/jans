@@ -12,7 +12,7 @@ import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -81,7 +81,7 @@ public class SupportRequestFile extends BaseTest {
         authorizationRequest.setState(state);
 
         try {
-            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
             JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                     authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
