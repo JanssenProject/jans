@@ -22,14 +22,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Date;
 @WebServlet(urlPatterns = "/servlet/favicon")
-public class OxAuthFaviconServlet extends HttpServlet {
+public class FaviconServlet extends HttpServlet {
 
 	@Inject
 	private OrganizationService organizationService;
 
 	private static final long serialVersionUID = 5445488800130871634L;
 
-	private static final Logger log = LoggerFactory.getLogger(OxAuthFaviconServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(FaviconServlet.class);
 	public static final String BASE_OXAUTH_FAVICON_PATH = "/opt/gluu/jetty/oxauth/custom/static/favicon/";
 
 	@Override
