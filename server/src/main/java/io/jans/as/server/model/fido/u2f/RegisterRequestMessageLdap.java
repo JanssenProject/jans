@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.as.server.model.fido.u2f;
 
 import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
