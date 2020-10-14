@@ -36,7 +36,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll1");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -100,7 +100,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll2");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
@@ -169,7 +169,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll3");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -232,7 +232,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll4");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -318,7 +318,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwks(jwkResponse.getJwks().toString());
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -404,7 +404,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing1");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -472,7 +472,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing2");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
@@ -545,7 +545,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing3");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -612,7 +612,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing4");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -701,7 +701,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwks(jwkResponse.getJwks().toString());
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -787,7 +787,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush1");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -852,7 +852,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush2");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -921,7 +921,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush3");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -987,7 +987,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush4");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1069,7 +1069,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail1(final String clientJwksUri) {
         showTitle("registrationFail1");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1093,7 +1093,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail2(final String clientJwksUri) {
         showTitle("registrationFail2");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1118,7 +1118,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail3(final String clientJwksUri) {
         showTitle("registration3");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1143,7 +1143,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail4(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail4");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList()); // Missing  grant type urn:openid:params:grant-type:ciba
 
@@ -1168,7 +1168,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail5(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail5");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList()); // Missing  grant type urn:openid:params:grant-type:ciba
 
@@ -1193,7 +1193,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail6(final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail6");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(null); // Missing jwks_uri
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1218,7 +1218,7 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail7(final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail7");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(null); // Missing jwks_uri
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 

@@ -114,7 +114,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // Register client with Sector Identifier URL
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setResponseTypes(responseTypes);
@@ -250,7 +250,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client with Sector Identifier URL
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setResponseTypes(responseTypes);
@@ -367,7 +367,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
     public void sectorIdentifierUrlVerificationFail1(final String redirectUris) throws Exception {
         showTitle("sectorIdentifierUrlVerificationFail1");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
@@ -390,7 +390,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         String redirectUris = "https://INVALID_REDIRECT_URI https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -415,7 +415,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
     public void sectorIdentifierUrlVerificationFail3(final String redirectUris) throws Exception {
         showTitle("sectorIdentifierUrlVerificationFail3");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(null);

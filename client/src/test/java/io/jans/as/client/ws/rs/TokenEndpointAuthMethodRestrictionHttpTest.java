@@ -41,7 +41,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("omittedTokenEndpointAuthMethod");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -99,7 +99,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretBasic");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -200,7 +200,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -298,7 +298,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -398,7 +398,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -506,7 +506,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretPost");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -607,7 +607,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -705,7 +705,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -805,7 +805,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -914,7 +914,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwt");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1021,7 +1021,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1129,7 +1129,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1237,7 +1237,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1346,7 +1346,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtRS256Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1453,7 +1453,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtRS384Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1560,7 +1560,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtRS512Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1667,7 +1667,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtES256Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1774,7 +1774,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtES384Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1881,7 +1881,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtES512Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1988,7 +1988,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtPS256Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2095,7 +2095,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtPS384Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2202,7 +2202,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtPS512Fail");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2304,7 +2304,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
@@ -2412,7 +2412,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
@@ -2517,7 +2517,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
@@ -2622,7 +2622,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
@@ -2730,7 +2730,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
@@ -2835,7 +2835,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
@@ -2940,7 +2940,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
@@ -3048,7 +3048,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
@@ -3153,7 +3153,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
@@ -3260,7 +3260,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3358,7 +3358,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3457,7 +3457,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3567,7 +3567,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwt");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -3673,7 +3673,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -3772,7 +3772,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -3871,7 +3871,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -3970,7 +3970,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4075,7 +4075,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4180,7 +4180,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4285,7 +4285,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtES256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4390,7 +4390,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtES384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4495,7 +4495,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtES512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4600,7 +4600,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtPS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4705,7 +4705,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtPS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4810,7 +4810,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtPS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
@@ -4915,7 +4915,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5024,7 +5024,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5130,7 +5130,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5236,7 +5236,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5342,7 +5342,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5448,7 +5448,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -5554,7 +5554,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -5663,7 +5663,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -5769,7 +5769,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -5875,7 +5875,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -5981,7 +5981,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -6087,7 +6087,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -6193,7 +6193,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6302,7 +6302,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6408,7 +6408,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6514,7 +6514,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6620,7 +6620,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6726,7 +6726,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -6832,7 +6832,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -6941,7 +6941,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -7047,7 +7047,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -7153,7 +7153,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -7259,7 +7259,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -7365,7 +7365,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -7471,7 +7471,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -7580,7 +7580,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -7686,7 +7686,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -7792,7 +7792,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -7898,7 +7898,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -8004,7 +8004,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -8110,7 +8110,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8219,7 +8219,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8325,7 +8325,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8431,7 +8431,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8537,7 +8537,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8643,7 +8643,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -8749,7 +8749,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -8858,7 +8858,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -8964,7 +8964,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -9070,7 +9070,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -9176,7 +9176,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -9282,7 +9282,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS256Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -9388,7 +9388,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -9497,7 +9497,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -9602,7 +9602,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -9708,7 +9708,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -9814,7 +9814,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -9920,7 +9920,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -10026,7 +10026,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -10135,7 +10135,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512Fail1");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -10241,7 +10241,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512Fail2");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -10347,7 +10347,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512Fail3");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -10453,7 +10453,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512Fail4");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -10559,7 +10559,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS512Fail5");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);

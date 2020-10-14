@@ -36,7 +36,7 @@ public class RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues ext
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList("https://not_registered"));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setResponseTypes(responseTypes);

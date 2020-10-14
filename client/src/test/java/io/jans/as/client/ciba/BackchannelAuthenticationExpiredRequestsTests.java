@@ -40,7 +40,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         showTitle("backchannelTokenDeliveryModePollExpiredRequest");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -132,7 +132,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         showTitle("backchannelTokenDeliveryModePingExpiredRequest");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -226,7 +226,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         showTitle("backchannelBigExpirationTimeAreNotAlloed");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 

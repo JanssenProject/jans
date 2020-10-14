@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.*;
 import io.jans.as.client.client.Asserter;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -51,7 +50,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);

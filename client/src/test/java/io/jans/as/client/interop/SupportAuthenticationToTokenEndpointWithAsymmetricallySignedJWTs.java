@@ -43,7 +43,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS256)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -116,7 +116,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS384)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -189,7 +189,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS512)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -262,7 +262,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES256)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -335,7 +335,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES384)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -408,7 +408,7 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES512)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

@@ -38,7 +38,7 @@ public class RejectsRedirectUriWhenQueryParameterDoesNotMatch extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri + "?foo1=bar"));
         registerRequest.setResponseTypes(responseTypes);
 

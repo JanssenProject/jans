@@ -61,7 +61,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequest.setClaimsRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
@@ -101,7 +101,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         try {
             List<String> contacts = Arrays.asList(contactEmail1, contactEmail2);
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setContacts(contacts);
             registerRequest.setScope(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
@@ -202,7 +202,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequest.setContacts(Arrays.asList(contactEmail1, contactEmailNewValue));
@@ -268,7 +268,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         String registerRequestContent = null;
         try {
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());

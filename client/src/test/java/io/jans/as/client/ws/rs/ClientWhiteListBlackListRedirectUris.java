@@ -63,7 +63,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final String redirectUris = "https://www.attacker.com";
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
@@ -78,7 +78,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
     public void requestClientAssociate(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientAssociate");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 

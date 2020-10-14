@@ -61,7 +61,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
-        softwareStatement.getClaims().put(CLIENT_NAME.toString(), "oxAuth test app");
+        softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
         softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));
         softwareStatement.getClaims().put(CONTACTS.toString(), Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         softwareStatement.getClaims().put(SCOPE.toString(), Util.listAsString(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope")));
@@ -180,7 +180,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
         softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
-        softwareStatement.getClaims().put(CLIENT_NAME.toString(), "oxAuth test app");
+        softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
         softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));
         softwareStatement.getClaims().put(CONTACTS.toString(), Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         softwareStatement.getClaims().put(SCOPE.toString(), Util.listAsString(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope")));
