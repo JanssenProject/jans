@@ -236,7 +236,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
      */
     private void registerPingClient(final String clientJwksUri, final BackchannelTokenDeliveryMode mode,
                                     final AsymmetricSignatureAlgorithm algorithm, final String backchannelClientNotificationEndpoint) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
@@ -358,7 +358,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

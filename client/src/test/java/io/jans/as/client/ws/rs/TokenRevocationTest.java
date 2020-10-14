@@ -915,7 +915,7 @@ public class TokenRevocationTest extends BaseTest {
 
     private RegisterResponse registerClient(
             final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);
@@ -937,7 +937,7 @@ public class TokenRevocationTest extends BaseTest {
     }
 
     private RegisterResponse registerPublicClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);

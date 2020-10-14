@@ -66,7 +66,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 					ResponseType.ID_TOKEN);
 
 			customAttrValue1 = UUID.randomUUID().toString();
-			io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");

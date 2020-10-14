@@ -39,7 +39,7 @@ public class RevokeSessionHttpTest extends BaseTest {
         // 1. Register client
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         registerRequest.setTokenEndpointAuthMethod(authnMethod);

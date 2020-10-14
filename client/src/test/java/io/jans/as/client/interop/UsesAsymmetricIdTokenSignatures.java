@@ -45,7 +45,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
@@ -100,7 +100,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
@@ -155,7 +155,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
@@ -210,7 +210,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
@@ -265,7 +265,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
@@ -320,7 +320,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);

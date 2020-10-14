@@ -111,7 +111,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
@@ -934,7 +934,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
@@ -1143,7 +1143,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
@@ -1245,7 +1245,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
@@ -1347,7 +1347,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
@@ -1449,7 +1449,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
@@ -1552,7 +1552,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
@@ -1656,7 +1656,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
@@ -1759,7 +1759,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
@@ -1862,7 +1862,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);

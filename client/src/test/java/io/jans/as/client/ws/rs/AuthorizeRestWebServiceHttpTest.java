@@ -54,7 +54,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -122,7 +122,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -190,7 +190,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -283,7 +283,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -382,7 +382,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -452,7 +452,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -523,7 +523,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -619,7 +619,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -696,7 +696,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -783,7 +783,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -870,7 +870,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -956,7 +956,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1042,7 +1042,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1114,7 +1114,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1187,7 +1187,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1278,7 +1278,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1366,7 +1366,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1434,7 +1434,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1504,7 +1504,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1573,7 +1573,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1646,7 +1646,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1718,7 +1718,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1787,7 +1787,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1856,7 +1856,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1926,7 +1926,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1996,7 +1996,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2067,7 +2067,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2140,7 +2140,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeWithoutRedirectUri");
 
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", redirectUriList);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2178,7 +2178,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeWithoutRedirectUriUserBasicAuth");
 
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", redirectUriList);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
@@ -2223,7 +2223,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             final String redirectUris, final String userId, final String userSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeWithoutRedirectUriFail");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2274,7 +2274,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2402,7 +2402,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2527,7 +2527,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2601,7 +2601,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2694,7 +2694,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2765,7 +2765,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2845,7 +2845,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2928,7 +2928,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setResponseTypes(responseTypes);

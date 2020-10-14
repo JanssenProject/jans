@@ -59,7 +59,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
-            io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -959,7 +959,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         try {
             request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-            io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     Arrays.asList(redirectUri));
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 

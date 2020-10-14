@@ -39,7 +39,7 @@ public class SupportCombinationOfIdTokenTokenResponseTypes extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

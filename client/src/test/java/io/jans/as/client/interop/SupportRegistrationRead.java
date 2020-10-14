@@ -44,7 +44,7 @@ public class SupportRegistrationRead extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest1 = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest1 = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest1.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest1.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");

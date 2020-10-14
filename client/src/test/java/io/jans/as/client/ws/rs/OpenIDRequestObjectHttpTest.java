@@ -64,7 +64,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -146,7 +146,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -225,7 +225,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -278,7 +278,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -333,7 +333,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -388,7 +388,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -457,7 +457,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -545,7 +545,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -634,7 +634,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -721,7 +721,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -810,7 +810,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -903,7 +903,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -991,7 +991,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1079,7 +1079,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1167,7 +1167,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1255,7 +1255,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1343,7 +1343,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1431,7 +1431,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1519,7 +1519,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1608,7 +1608,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1697,7 +1697,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
@@ -1784,7 +1784,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -1840,7 +1840,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -1910,7 +1910,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -1981,7 +1981,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -2049,7 +2049,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2139,7 +2139,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     ResponseType.ID_TOKEN);
 
             // 1. Register client
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2199,7 +2199,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     ResponseType.ID_TOKEN);
 
             // 1. Register client
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2259,7 +2259,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2344,7 +2344,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
@@ -2433,7 +2433,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -2530,7 +2530,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -2627,7 +2627,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -2724,7 +2724,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -2812,7 +2812,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
             // 1. Dynamic Client Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");

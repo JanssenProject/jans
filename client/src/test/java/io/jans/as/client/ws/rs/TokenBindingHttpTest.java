@@ -106,7 +106,7 @@ public class TokenBindingHttpTest extends BaseTest {
 
     private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
                                             final List<GrantType> grantTypes, final String sectorIdentifierUri) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);

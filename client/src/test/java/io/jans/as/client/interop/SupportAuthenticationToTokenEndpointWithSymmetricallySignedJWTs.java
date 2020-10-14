@@ -41,7 +41,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs (HS256)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -111,7 +111,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs (HS384)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -182,7 +182,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs (HS512)");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

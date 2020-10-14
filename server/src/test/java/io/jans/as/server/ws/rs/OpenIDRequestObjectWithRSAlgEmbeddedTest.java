@@ -71,7 +71,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
@@ -175,7 +175,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
@@ -279,7 +279,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
@@ -383,7 +383,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
@@ -488,7 +488,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
@@ -592,7 +592,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);

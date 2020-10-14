@@ -59,7 +59,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
                     ResponseType.ID_TOKEN);
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
