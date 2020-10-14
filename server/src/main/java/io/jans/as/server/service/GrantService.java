@@ -166,17 +166,10 @@ public class GrantService {
     }
 
     public TokenLdap getGrantByCode(String p_code) {
-        return getGrantByCode(p_code, false);
-    }
-
-    public TokenLdap getGrantByCode(String p_code, boolean onlyFromCache) {
         Object grant = cacheService.get(TokenHashUtil.hash(p_code));
         if (grant instanceof TokenLdap) {
             return (TokenLdap) grant;
         } else {
-            if (onlyFromCache) {
-                return null;
-            }
             return load(buildDn(TokenHashUtil.hash(p_code)));
         }
     }
@@ -246,14 +239,14 @@ public class GrantService {
     /**
      * Removes grant with particular code.
      *
-     * @param p_code code
+     * @param code code
      */
-    public void removeByCode(String p_code) {
-        final TokenLdap t = getGrantByCode(p_code, true);
+    public void removeByCode(String code) {
+        final TokenLdap t = getGrantByCode(code);
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(CacheGrant.cacheKey(p_code, null));
+        cacheService.remove(CacheGrant.cacheKey(code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
