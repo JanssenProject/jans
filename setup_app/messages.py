@@ -107,7 +107,7 @@ class msg:
                    "Hostname: hostname of this server. Detected hostname will be provided.\n"
                    "Organization Name: ......")
 
-    installation_completed = "Janssen Server installation successful! Point your browser to https://{}"
+    installation_completed = "Janssen Server installation successful!"
     post_installation = "Please exit from container and restart Janssen Server."
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."

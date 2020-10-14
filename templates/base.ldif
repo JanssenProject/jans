@@ -87,14 +87,6 @@ ou: scripts
 
 ################################
 
-# Reset password requests - LEVEL 2
-dn: ou=resetPasswordRequests,o=jans
-objectClass: top
-objectClass: organizationalUnit
-ou: resetPasswordRequests
-
-################################
-
 # UMA data - LEVEL 2
 # Perhaps this should be under ou=uma,o=<org-inum>,o=jans
 dn: ou=uma,o=jans
@@ -187,10 +179,3 @@ ou: ciba
 
 ######################################
 
-# SAML Trust Relationships - Level 2
-dn: ou=trustRelationships,o=jans
-objectClass: top
-objectClass: organizationalUnit
-ou: trustRelationships
-
-######################################

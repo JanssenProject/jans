@@ -83,9 +83,6 @@ class ScimInstaller(JettyInstaller):
         self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
 
     def update_backend(self):
-        oxtrust_config = base.readJsonFile(self.oxtrust_config_fn)
-        self.dbUtils.set_oxTrustConfApplication(oxtrust_config)
-
         self.dbUtils.add_client2script('2DAF-F9A5', Config.scim_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.scim_rp_client_id)
         self.dbUtils.enable_service('gluuScimEnabled')
