@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.as.client.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
+
 package io.jans.as.model.crypto;
 
 import com.google.common.collect.Lists;
