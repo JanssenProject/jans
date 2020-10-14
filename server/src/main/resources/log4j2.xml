@@ -132,7 +132,7 @@
 			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.as.server.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
 		</Logger>
 
@@ -144,7 +144,7 @@
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
-		<Logger name="org.gluu.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.as.server.service.custom" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
 		</Logger>
 
