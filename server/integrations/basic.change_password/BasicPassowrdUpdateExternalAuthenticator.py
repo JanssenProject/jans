@@ -9,7 +9,7 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper, ArrayHelper
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 
 import java
 

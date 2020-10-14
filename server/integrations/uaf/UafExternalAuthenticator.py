@@ -19,7 +19,7 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service.common import UserService
 from io.jans.util import StringHelper, ArrayHelper
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from org.gluu.oxauth.model.config import Constants
 from javax.ws.rs.core import Response
 from java.util import Arrays

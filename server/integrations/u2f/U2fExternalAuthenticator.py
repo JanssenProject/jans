@@ -16,7 +16,7 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service.common import UserService
 from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 

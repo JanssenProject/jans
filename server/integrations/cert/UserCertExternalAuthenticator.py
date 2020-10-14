@@ -12,13 +12,13 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service.common import UserService
 from io.jans.util import StringHelper
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.as.server.service.common import EncryptionService
 from java.util import Arrays
 from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
 from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
 from org.gluu.oxauth.cert.validation.model import ValidationStatus
-from org.gluu.oxauth.util import CertUtil
+from io.jans.as.server.util import CertUtil
 from org.gluu.oxauth.model.util import CertUtils
 from io.jans.as.server.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
