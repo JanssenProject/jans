@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.secret.kubernetes_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains secret adapter class to interact with
 Kubernetes Secret.
@@ -8,9 +8,7 @@ Kubernetes Secret.
 
 import base64
 import os
-from typing import (
-    Any,
-)
+from typing import Any
 
 import kubernetes.client
 import kubernetes.config
@@ -42,7 +40,7 @@ class KubernetesSecret(BaseSecret):
             "JANS_SECRET_KUBERNETES_NAMESPACE", "default",
         )
         self.settings.setdefault(
-            "JANS_SECRET_KUBERNETES_SECRET", "gluu",
+            "JANS_SECRET_KUBERNETES_SECRET", "jans",
         )
         self.settings.setdefault("JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG", False)
 

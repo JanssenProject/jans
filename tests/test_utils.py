@@ -146,8 +146,8 @@ def test_cert_to_truststore(tmpdir):
     from jans.pycloudlib.utils import cert_to_truststore
 
     tmp = tmpdir.mkdir("jans")
-    keystore_file = tmp.join("gluu.jks")
-    cert_file = tmp.join("gluu.crt")
+    keystore_file = tmp.join("jans.jks")
+    cert_file = tmp.join("jans.crt")
 
     # dummy cert
     cert_file.write("""-----BEGIN CERTIFICATE-----
@@ -176,7 +176,7 @@ FRnpMhUJ4+bn+h0kxS4agwb2uCSO4Ge7edViq6ZFZnnfOG6zsz3VJRV71Zw2CQAL
 -----END CERTIFICATE-----""")
 
     _, _, code = cert_to_truststore(
-        "gluu_https", str(cert_file), str(keystore_file), "secret",
+        "jans_https", str(cert_file), str(keystore_file), "secret",
     )
     assert code == 0
 
@@ -185,7 +185,7 @@ def test_get_server_certificate(tmpdir, httpsserver):
     from jans.pycloudlib.utils import get_server_certificate
 
     host, port = httpsserver.server_address
-    filepath = tmpdir.mkdir("jans").join("gluu.crt")
+    filepath = tmpdir.mkdir("jans").join("jans.crt")
 
     cert = get_server_certificate(host, port, str(filepath))
     assert cert == filepath.read()

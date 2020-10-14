@@ -41,27 +41,27 @@ def test_render_salt(tmpdir, gmanager, monkeypatch):
     assert dest.read() == f"encodeSalt = {gmanager.secret.get('encoded_salt')}"
 
 
-def test_render_gluu_properties(tmpdir):
-    from jans.pycloudlib.persistence import render_gluu_properties
+def test_render_jans_properties(tmpdir):
+    from jans.pycloudlib.persistence import render_jans_properties
 
     persistence_type = "ldap"
     os.environ["JANS_PERSISTENCE_TYPE"] = persistence_type
 
-    src = tmpdir.join("gluu.properties.tmpl")
+    src = tmpdir.join("jans.properties.tmpl")
     src.write("""
 persistence.type=%(persistence_type)s
 certsDir=%(certFolder)s
 pythonModulesDir=%(gluuOptPythonFolder)s/libs
 """.strip())
-    dest = tmpdir.join("gluu.properties")
+    dest = tmpdir.join("jans.properties")
 
     expected = f"""
 persistence.type={persistence_type}
 certsDir=/etc/certs
-pythonModulesDir=/opt/gluu/python/libs
+pythonModulesDir=/opt/jans/python/libs
 """.strip()
 
-    render_gluu_properties(str(src), str(dest))
+    render_jans_properties(str(src), str(dest))
     assert dest.read() == expected
     os.environ["JANS_PERSISTENCE_TYPE"] = ""
 
@@ -90,9 +90,9 @@ ssl.trustStoreFile: {gmanager.config.get("ldapTrustStoreFn")}
 ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
 """.strip()
 
-    src = tmpdir.join("gluu-ldap.properties.tmpl")
+    src = tmpdir.join("jans-ldap.properties.tmpl")
     src.write(tmpl)
-    dest = tmpdir.join("gluu-ldap.properties")
+    dest = tmpdir.join("jans-ldap.properties")
 
     render_ldap_properties(gmanager, str(src), str(dest))
     assert dest.read() == expected
@@ -294,7 +294,7 @@ def test_n1ql_request_body_positional_params():
     from jans.pycloudlib.persistence.couchbase import build_n1ql_request_body
 
     body = build_n1ql_request_body(
-        "SELECT * FROM gluu WHERE del = $1 and active = $2",
+        "SELECT * FROM jans WHERE del = $1 and active = $2",
         False,
         True,
     )
@@ -305,7 +305,7 @@ def test_n1ql_request_body_named_params():
     from jans.pycloudlib.persistence.couchbase import build_n1ql_request_body
 
     body = build_n1ql_request_body(
-        "SELECT * FROM gluu WHERE del = $deleted and active = $active",
+        "SELECT * FROM jans WHERE del = $deleted and active = $active",
         deleted=False,
         active=True,
     )
@@ -330,7 +330,7 @@ storage.ldap.mapping: default
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
     os.environ.pop("JANS_PERSISTENCE_TYPE", None)
@@ -349,7 +349,7 @@ storage.ldap.mapping: people, groups, authorizations
 storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
@@ -370,7 +370,7 @@ storage.ldap.mapping: tokens
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
@@ -391,7 +391,7 @@ storage.ldap.mapping: sessions
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
@@ -412,7 +412,7 @@ storage.ldap.mapping: cache
 storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
@@ -433,7 +433,7 @@ storage.ldap.mapping: cache-refresh
 storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 

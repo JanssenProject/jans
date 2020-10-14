@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.config.kubernetes_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains config adapter class to interact with
 Kubernetes ConfigMap.
@@ -40,7 +40,7 @@ class KubernetesConfig(BaseConfig):
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_KUBERNETES_CONFIGMAP", "gluu",
+            "JANS_CONFIG_KUBERNETES_CONFIGMAP", "jans",
         )
 
         self.settings.setdefault("JANS_CONFIG_KUBERNETES_USE_KUBE_CONFIG", False)

@@ -178,11 +178,12 @@ def wait_for_ldap(manager, **kwargs):
     persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
+    base_dn = os.environ.get("JANS_LDAP_BASE_DN", "o=jans")
 
     # a minimum service stack is having oxTrust, hence check whether entry
     # for oxTrust exists in LDAP
     default_search = (
-        "ou=oxtrust,ou=configuration,o=gluu",
+        f"ou=oxtrust,ou=configuration,{base_dn}",
         "(objectClass=oxTrustConfiguration)",
     )
 
@@ -190,11 +191,11 @@ def wait_for_ldap(manager, **kwargs):
         # `cache` and `token` mapping only have base entries
         search_mapping = {
             "default": default_search,
-            "user": ("inum=60B7,ou=groups,o=gluu", "(objectClass=gluuGroup)"),
+            "user": (f"inum=60B7,ou=groups,{base_dn}", "(objectClass=gluuGroup)"),
             "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
-            "cache": ("ou=cache,o=gluu", "(ou=cache)"),
-            "token": ("ou=tokens,o=gluu", "(ou=tokens)"),
-            "session": ("ou=sessions,o=gluu", "(ou=sessions)"),
+            "cache": (f"ou=cache,{base_dn}", "(ou=cache)"),
+            "token": (f"ou=tokens,{base_dn}", "(ou=tokens)"),
+            "session": (f"ou=sessions,{base_dn}", "(ou=sessions)"),
         }
         search = search_mapping[ldap_mapping]
     else:
@@ -252,16 +253,16 @@ def wait_for_couchbase(manager, **kwargs):
 
     persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "couchbase")
     ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
+    bucket_prefix = os.environ.get("JANS_COUCHBASE_BUCKET_PREFIX", "jans")
 
-    # only `gluu` and `gluu_user` buckets that may have initial data;
+    # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;
-    # by default we will choose the `gluu` bucket
-    bucket, key = "gluu", "configuration_oxtrust"
+    bucket, key = bucket_prefix, "configuration_oxtrust"
 
     # if `hybrid` is selected and default mapping is stored in LDAP,
-    # the `gluu` bucket won't have data, hence we check the `gluu_user` instead
+    # the default bucket won't have data, hence we check the user bucket instead
     if persistence_type == "hybrid" and ldap_mapping == "default":
-        bucket, key = "gluu_user", "groups_60B7"
+        bucket, key = f"{bucket_prefix}_user", "groups_60B7"
 
     cb_client = CouchbaseClient(host, user, password)
 

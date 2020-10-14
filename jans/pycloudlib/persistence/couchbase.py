@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.persistence.couchbase
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains various helpers related to Couchbase persistence.
 """
@@ -19,7 +19,7 @@ from jans.pycloudlib.utils import (
     cert_to_truststore,
     as_boolean,
 )
-from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
+# from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
 
 JANS_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
@@ -37,8 +37,8 @@ def get_couchbase_user(manager=None) -> str:
 
 
 def get_couchbase_password(manager, plaintext: bool = True) -> str:
-    """Get Couchbase user's password from file (default to
-    ``/etc/gluu/conf/couchbase_password``).
+    """Get Couchbase user's password from file
+    (default to ``/etc/jans/conf/couchbase_password``).
 
     To change the location, simply pass ``JANS_COUCHBASE_PASSWORD_FILE`` environment variable.
 
@@ -47,7 +47,7 @@ def get_couchbase_password(manager, plaintext: bool = True) -> str:
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "JANS_COUCHBASE_PASSWORD_FILE", "/etc/gluu/conf/couchbase_password"
+        "JANS_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password"
     )
 
     with open(password_file) as f:
@@ -76,7 +76,7 @@ def get_couchbase_superuser(manager=None) -> str:
 
 def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
     """Get Couchbase superuser's password from file (default to
-    ``/etc/gluu/conf/couchbase_superuser_password``).
+    ``/etc/jans/conf/couchbase_superuser_password``).
 
     To change the location, simply pass ``JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
 
@@ -85,7 +85,7 @@ def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/gluu/conf/couchbase_superuser_password"
+        "JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password"
     )
 
     with open(password_file) as f:
@@ -100,6 +100,19 @@ def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
 #: This is a shortcut of :func:`get_couchbase_superuser_password` with ``plaintext``
 #: argument set as ``False``.
 get_encoded_couchbase_superuser_password = partial(get_couchbase_superuser_password, plaintext=False)
+
+
+def prefixed_couchbase_mappings():
+    prefix = os.environ.get("JANS_COUCHBASE_BUCKET_PREFIX", "jans")
+    mappings = {
+        "default": {"bucket": prefix, "mapping": ""},
+        "user": {"bucket": f"{prefix}_user", "mapping": "people, groups, authorizations"},
+        "cache": {"bucket": f"{prefix}_cache", "mapping": "cache"},
+        "site": {"bucket": f"{prefix}_site", "mapping": "cache-refresh"},
+        "token": {"bucket": f"{prefix}_token", "mapping": "tokens"},
+        "session": {"bucket": f"{prefix}_session", "mapping": "sessions"},
+    }
+    return mappings
 
 
 def get_couchbase_mappings(persistence_type: str, ldap_mapping: str) -> dict:
@@ -124,13 +137,15 @@ def get_couchbase_mappings(persistence_type: str, ldap_mapping: str) -> dict:
     :params ldap_mapping: Mapping that stored in LDAP persistence.
     :returns: A map of Couchbase buckets.
     """
+    mappings = prefixed_couchbase_mappings()
+
     if persistence_type == "hybrid":
         return {
             name: mapping
-            for name, mapping in COUCHBASE_MAPPINGS.items()
+            for name, mapping in mappings.items()
             if name != ldap_mapping
         }
-    return COUCHBASE_MAPPINGS
+    return mappings
 
 
 def get_couchbase_conn_timeout() -> int:
@@ -188,7 +203,7 @@ def get_couchbase_scan_consistency() -> str:
 
 def render_couchbase_properties(manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Couchbase server,
-    i.e. ``/etc/gluu/conf/gluu-couchbase.properties``.
+    i.e. ``/etc/jans/conf/jans-couchbase.properties``.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params src: Absolute path to the template.
@@ -212,9 +227,9 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
             f"bucket.{mapping['bucket']}.mapping: {mapping['mapping']}"
         )
 
-    # always have `gluu` as default bucket
-    if "gluu" not in couchbase_buckets:
-        couchbase_buckets.insert(0, "gluu")
+    bucket_prefix = os.environ.get("JANS_COUCHBASE_BUCKET_PREFIX", "jans")
+    if bucket_prefix not in couchbase_buckets:
+        couchbase_buckets.insert(0, bucket_prefix)
 
     with open(src) as fr:
         txt = fr.read()
@@ -225,7 +240,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "couchbase_server_user": get_couchbase_user(manager),
                 "encoded_couchbase_server_pw": get_encoded_couchbase_password(manager),
                 "couchbase_buckets": ", ".join(couchbase_buckets),
-                "default_bucket": "gluu",
+                "default_bucket": bucket_prefix,
                 "couchbase_mappings": "\n".join(couchbase_mappings),
                 "encryption_method": "SSHA-256",
                 "ssl_enabled": "true",
@@ -258,7 +273,7 @@ def sync_couchbase_truststore(manager, dest: str = "") -> None:
     cert_file = os.environ.get("JANS_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
-        "gluu_couchbase", cert_file, dest, JANS_COUCHBASE_TRUSTSTORE_PASSWORD,
+        "couchbase", cert_file, dest, JANS_COUCHBASE_TRUSTSTORE_PASSWORD,
     )
 
 

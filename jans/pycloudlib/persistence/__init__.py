@@ -12,7 +12,7 @@ from jans.pycloudlib.persistence.ldap import (  # noqa: F401
 
 
 def render_salt(manager, src: str, dest: str) -> None:
-    """Render file contains salt string, i.e. ``/etc/gluu/conf/salt``.
+    """Render file contains salt string.
 
     The generated file has the following contents:
 
@@ -34,9 +34,8 @@ def render_salt(manager, src: str, dest: str) -> None:
         f.write(rendered_txt)
 
 
-def render_gluu_properties(src: str, dest: str) -> None:
-    """Render file contains properties for Gluu Server,
-    i.e. ``/etc/gluu/conf/gluu.properties``.
+def render_jans_properties(src: str, dest: str) -> None:
+    """Render file contains properties for Gluu Server.
 
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
@@ -46,7 +45,7 @@ def render_gluu_properties(src: str, dest: str) -> None:
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
-            "gluuOptPythonFolder": "/opt/gluu/python",
+            "gluuOptPythonFolder": "/opt/jans/python",
             "certFolder": "/etc/certs",
             "persistence_type": os.environ.get("JANS_PERSISTENCE_TYPE", "ldap"),
         }
