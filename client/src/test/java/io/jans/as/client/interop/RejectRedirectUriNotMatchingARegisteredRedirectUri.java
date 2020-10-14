@@ -37,7 +37,7 @@ public class RejectRedirectUriNotMatchingARegisteredRedirectUri extends BaseTest
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setResponseTypes(responseTypes);
 

@@ -49,7 +49,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -135,7 +135,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -203,7 +203,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -271,7 +271,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -339,7 +339,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -409,7 +409,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -479,7 +479,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -549,7 +549,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -612,7 +612,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -675,7 +675,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -738,7 +738,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -808,7 +808,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -878,7 +878,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
         // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);

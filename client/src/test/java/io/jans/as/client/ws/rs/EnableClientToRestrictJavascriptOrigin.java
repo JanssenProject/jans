@@ -54,7 +54,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         // 1. Register client
         List<String> authorizedOrigins = Arrays.asList("https://ce.gluu.info:8443");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);

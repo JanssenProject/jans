@@ -37,7 +37,7 @@ public class Supports3rdPartyInitLoginNoHttps extends BaseTest {
         showTitle("supports3rdPartyInitLoginNoHttps");
 
         // 1. Register Client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org"));
         registerRequest.setGrantTypes(Arrays.asList(AUTHORIZATION_CODE));

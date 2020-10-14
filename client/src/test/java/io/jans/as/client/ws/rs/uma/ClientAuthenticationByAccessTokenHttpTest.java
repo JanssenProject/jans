@@ -101,7 +101,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", Collections.singletonList(REDIRECT_URI));
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", Collections.singletonList(REDIRECT_URI));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);

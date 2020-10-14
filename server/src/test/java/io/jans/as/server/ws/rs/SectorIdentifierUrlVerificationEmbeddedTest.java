@@ -69,7 +69,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.setResponseTypes(responseTypes);
@@ -180,7 +180,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 		String registerRequestContent = null;
 		try {
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
@@ -220,7 +220,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 		try {
 			String redirectUris = "https://INVALID_REDIRECT_URI https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

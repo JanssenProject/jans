@@ -46,7 +46,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         showTitle("omittedApplicationType");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(null, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(null, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -99,7 +99,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         showTitle("applicationTypeWeb");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -152,7 +152,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         final String redirectUris = "http://client.example.com/cb";
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
@@ -178,7 +178,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);
@@ -322,7 +322,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);
@@ -465,7 +465,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         final String redirectUris = "https://client.example.com/cb";
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.NATIVE, "oxAuth test app",
+        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.NATIVE, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
@@ -485,7 +485,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         showTitle("applicationTypeNativeFail2");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.NATIVE, "oxAuth test app",
+        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.NATIVE, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);

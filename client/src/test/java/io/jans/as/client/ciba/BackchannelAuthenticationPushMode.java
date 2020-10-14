@@ -80,7 +80,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHint1");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -143,7 +143,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHint2");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -203,7 +203,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHint3");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -263,7 +263,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHint4");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -322,7 +322,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHint5");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -380,7 +380,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -449,7 +449,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -518,7 +518,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -587,7 +587,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -656,7 +656,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -725,7 +725,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -794,7 +794,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -863,7 +863,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -932,7 +932,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -999,7 +999,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgA128KWEncA128GCM");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1060,7 +1060,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgA256KWEncA256GCM");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1121,7 +1121,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA128CBCPLUSHS256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1182,7 +1182,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA256CBCPLUSHS512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1243,7 +1243,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSAOAEPEncA256GCM");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1304,7 +1304,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1365,7 +1365,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1426,7 +1426,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1487,7 +1487,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1548,7 +1548,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1609,7 +1609,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1670,7 +1670,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS256");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1731,7 +1731,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS384");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1792,7 +1792,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS512");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
@@ -1852,7 +1852,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail1");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -1900,7 +1900,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail2");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -1952,7 +1952,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail3");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2006,7 +2006,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail4");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2063,7 +2063,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail5");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2119,7 +2119,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail6");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2178,7 +2178,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail7");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2238,7 +2238,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         showTitle("backchannelTokenDeliveryModePushFail8");
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
@@ -2304,7 +2304,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2378,7 +2378,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2452,7 +2452,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2526,7 +2526,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2600,7 +2600,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2674,7 +2674,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2748,7 +2748,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2822,7 +2822,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2896,7 +2896,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -2970,7 +2970,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3039,7 +3039,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3110,7 +3110,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3184,7 +3184,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -3258,7 +3258,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

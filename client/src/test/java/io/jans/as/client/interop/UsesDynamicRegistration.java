@@ -36,7 +36,7 @@ public class UsesDynamicRegistration extends BaseTest {
                                            final String clientJwksUri) throws Exception {
         showTitle("OC5:FeatureTest-Uses Dynamic Registration");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");

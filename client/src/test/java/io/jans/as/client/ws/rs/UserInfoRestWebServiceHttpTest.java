@@ -404,7 +404,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
@@ -477,7 +477,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         );
 
         // 1. Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
@@ -607,7 +607,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         );
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
@@ -705,7 +705,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
@@ -761,7 +761,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
@@ -817,7 +817,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
@@ -873,7 +873,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
@@ -928,7 +928,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
@@ -983,7 +983,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
@@ -1038,7 +1038,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
@@ -1093,7 +1093,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
@@ -1148,7 +1148,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
@@ -1203,7 +1203,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
@@ -1258,7 +1258,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
@@ -1313,7 +1313,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
@@ -1372,7 +1372,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.ID_TOKEN);
 
             // 1. Dynamic Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setResponseTypes(responseTypes);
@@ -1440,7 +1440,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.ID_TOKEN);
 
             // 1. Dynamic Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setResponseTypes(responseTypes);
@@ -1508,7 +1508,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                     ResponseType.ID_TOKEN);
 
             // 1. Dynamic Registration
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setResponseTypes(responseTypes);
@@ -1572,7 +1572,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
@@ -1630,7 +1630,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
@@ -1678,7 +1678,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
     private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
                                             final List<GrantType> grantTypes, final String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
@@ -1742,7 +1742,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         );
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -1807,7 +1807,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.ID_TOKEN);
 
         // 1. Dynamic Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth Test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);

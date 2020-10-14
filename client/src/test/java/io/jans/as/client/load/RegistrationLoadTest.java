@@ -33,7 +33,7 @@ public class RegistrationLoadTest extends BaseTest {
         showTitle("requestClientAssociate1");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
