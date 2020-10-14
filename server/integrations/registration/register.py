@@ -14,7 +14,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import UserService, ClientService, AuthenticationService
 from io.jans.util import StringHelper
 from org.gluu.oxauth.model.common import User
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.jsf2.service import FacesService
 from org.gluu.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
