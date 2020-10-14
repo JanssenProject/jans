@@ -50,7 +50,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
     @Test
     public void requestEndSessionStep1(final String redirectUris, final String postLogoutRedirectUri) throws Exception {
 
-        io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", StringUtils.spaceSeparatedToList(redirectUris));
+        io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));

@@ -40,7 +40,7 @@ public class CanMakeAccessTokenRequestWithClientSecretJwtAuthentication extends 
         showTitle("OC5:FeatureTest-Can Make Access Token Request with client secret jwt Authentication");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

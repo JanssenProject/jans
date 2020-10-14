@@ -58,7 +58,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
         String registerRequestContent = null;
         try {
 
-            RegisterRequest registerRequest = new RegisterRequest(null, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(null, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -144,7 +144,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -233,7 +233,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
         try {
             final String redirectUris = "http://client.example.com/cb";
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -271,7 +271,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
         try {
             final String redirectUris = "http://localhost/cb";
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -362,7 +362,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
         try {
             final String redirectUris = "https://client.example.com/cb";
 
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -400,7 +400,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
         String registerRequestContent = null;
         try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());

@@ -48,7 +48,7 @@ public class OPRegistrationJwks extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setResponseTypes(responseTypes);
@@ -139,7 +139,7 @@ public class OPRegistrationJwks extends BaseTest {
         List<String> contacts = Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setResponseTypes(responseTypes);

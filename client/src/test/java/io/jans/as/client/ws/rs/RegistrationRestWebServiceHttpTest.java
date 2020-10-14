@@ -57,7 +57,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         showTitle("requestClientAssociate1");
 
         // 1. Register Client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(Arrays.asList(
@@ -137,7 +137,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                                         final String logoutUri) throws Exception {
         showTitle("requestClientAssociate2");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setScope(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
@@ -237,7 +237,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         showTitle("requestClientAssociate3");
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSoftwareId(softwareId);
@@ -324,7 +324,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                                         final String logoutUri) throws Exception {
         showTitle("requestClientAssociate3");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setPostLogoutRedirectUris(Lists.newArrayList(logoutUri));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri); //
@@ -421,7 +421,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
             final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientRegistrationWithCustomAttributes");
 
-        final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         // custom attribute must be declared in oxauth-config.xml in dynamic-registration-custom-attribute tag
@@ -465,7 +465,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         showTitle("requestClientRegistrationFail3");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "jans test app",
                 Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
         showClient(registerClient);
@@ -480,7 +480,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     public void requestClientRegistrationFail4(final String redirectUris) throws Exception {
         showTitle("requestClientRegistrationFail4");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE); // id_token signature cannot be none
 

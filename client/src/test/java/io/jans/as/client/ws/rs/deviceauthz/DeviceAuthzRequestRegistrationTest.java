@@ -214,7 +214,7 @@ public class DeviceAuthzRequestRegistrationTest extends BaseTest {
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
