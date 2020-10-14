@@ -8,7 +8,7 @@ package io.jans.as.client.util;
 
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.OxAuthCryptoProvider;
-import io.jans.as.model.crypto.OxElevenCryptoProvider;
+import io.jans.as.model.crypto.ElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.*;
@@ -124,7 +124,7 @@ public class KeyGenerator {
                     String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
 
                     try {
-                        OxElevenCryptoProvider cryptoProvider = new OxElevenCryptoProvider(generateKeyEndpoint,
+                        ElevenCryptoProvider cryptoProvider = new ElevenCryptoProvider(generateKeyEndpoint,
                                 null, null, null, accessToken);
 
                         generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expiration_hours);

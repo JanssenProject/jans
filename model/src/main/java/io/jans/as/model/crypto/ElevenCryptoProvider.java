@@ -19,7 +19,7 @@ import java.security.PrivateKey;
  * @author Javier Rojas Blum
  * @version February 12, 2019
  */
-public class OxElevenCryptoProvider extends AbstractCryptoProvider {
+public class ElevenCryptoProvider extends AbstractCryptoProvider {
 
     private String generateKeyEndpoint;
     private String signEndpoint;
@@ -27,8 +27,8 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     private String deleteKeyEndpoint;
     private String accessToken;
 
-    public OxElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint,
-                                  String deleteKeyEndpoint, String accessToken) {
+    public ElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint,
+                                String deleteKeyEndpoint, String accessToken) {
         this.generateKeyEndpoint = generateKeyEndpoint;
         this.signEndpoint = signEndpoint;
         this.verifySignatureEndpoint = verifySignatureEndpoint;
