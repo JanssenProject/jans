@@ -5,7 +5,7 @@
 dn: o=jans
 objectClass: top
 objectClass: gluuOrganization
-o: gluu
+o: jans
 gluuThemeColor: 166309
 gluuManagerGroup: inum=60B7,ou=groups,o=jans
 gluuOrgShortName: %(orgName)s
