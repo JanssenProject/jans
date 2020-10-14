@@ -53,7 +53,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         );
 
         customAttrValue1 = UUID.randomUUID().toString();
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);

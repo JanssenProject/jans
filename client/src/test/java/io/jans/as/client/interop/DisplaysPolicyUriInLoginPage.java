@@ -37,7 +37,7 @@ public class DisplaysPolicyUriInLoginPage extends BaseTest {
         String policyUri = "http://www.gluu.org/policy";
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setPolicyUri(policyUri);

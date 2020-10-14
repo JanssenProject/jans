@@ -95,7 +95,7 @@ public class ClientSecretBasicTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);

@@ -71,7 +71,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                                                                 final String jwksUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -163,7 +163,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                                                                 final String jwksUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -256,7 +256,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -349,7 +349,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -442,7 +442,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
@@ -535,7 +535,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);

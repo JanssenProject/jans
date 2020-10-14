@@ -39,7 +39,7 @@ public class SupportAuthenticationToTokenEndpointUsingFormEncodedClientCredentia
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);

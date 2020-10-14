@@ -58,7 +58,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
         responseTypes.add(ResponseType.CODE);
         responseTypes.add(ResponseType.ID_TOKEN);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                         StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

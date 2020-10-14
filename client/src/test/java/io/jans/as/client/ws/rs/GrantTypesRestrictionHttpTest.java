@@ -50,7 +50,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
