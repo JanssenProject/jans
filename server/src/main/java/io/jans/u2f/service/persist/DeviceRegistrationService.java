@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.u2f.service.persist;
 
 import java.io.IOException;
@@ -23,9 +29,9 @@ import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.oxauth.model.config.StaticConfiguration;
 
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 import io.jans.oxauth.service.common.UserService;
