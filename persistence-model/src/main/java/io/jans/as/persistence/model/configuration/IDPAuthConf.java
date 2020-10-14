@@ -30,7 +30,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonPropertyOrder({ "type", "name", "level", "priority", "enabled", "version", "fields", "config" })
 @XmlType(propOrder = { "type", "name", "level", "priority", "enabled", "version", "fields", "config" })
-public class oxIDPAuthConf {
+public class IDPAuthConf {
 	private String type;
 	private String name;
 
@@ -42,7 +42,7 @@ public class oxIDPAuthConf {
 
 	private JsonNode config;
 
-	public oxIDPAuthConf() {
+	public IDPAuthConf() {
 		this.fields = new ArrayList<CustomProperty>();
 	}
 
