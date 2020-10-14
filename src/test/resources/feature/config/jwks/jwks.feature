@@ -1,7 +1,7 @@
 Feature: JWKS endpoint
 
   Background:
-    * def jwksUrl = baseUrl + '/api/v1/oxauth/config/jwks'
+    * def jwksUrl = baseUrl + '/api/v1/config/jwks'
 
   Scenario: Retrieve JWKS
     Given url  jwksUrl
