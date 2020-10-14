@@ -10,7 +10,7 @@ import io.jans.model.GluuAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.service.BaseCacheService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
@@ -125,9 +125,9 @@ public class AttributeService extends io.jans.service.AttributeService {
 
     public List<GluuAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
         String[] targetArray = new String[]{pattern};
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
-        Filter nameFilter = Filter.createSubstringFilter(OxConstants.attributeName, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
+        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
         return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
                 searchFilter, sizeLimit);
@@ -139,9 +139,9 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public List<GluuAttribute> searchAttributes(int sizeLimit, boolean active) throws Exception {
-        Filter activeFilter = Filter.createEqualityFilter(OxConstants.gluuStatus, "active");
+        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "active");
         if (!active) {
-            activeFilter = Filter.createEqualityFilter(OxConstants.gluuStatus, "inactive");
+            activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "inactive");
         }
         return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
                 activeFilter, sizeLimit);
@@ -149,14 +149,14 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public List<GluuAttribute> findAttributes(String pattern, int sizeLimit, boolean active) throws Exception {
-        Filter activeFilter = Filter.createEqualityFilter(OxConstants.gluuStatus, "active");
+        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "active");
         if (!active) {
-            activeFilter = Filter.createEqualityFilter(OxConstants.gluuStatus, "inactive");
+            activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "inactive");
         }
         String[] targetArray = new String[]{pattern};
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
-        Filter nameFilter = Filter.createSubstringFilter(OxConstants.attributeName, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
+        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
         return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
                 Filter.createANDFilter(searchFilter, activeFilter), sizeLimit);
