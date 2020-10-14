@@ -178,12 +178,12 @@ def wait_for_ldap(manager, **kwargs):
     persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
-    base_dn = os.environ.get("JANS_LDAP_BASE_DN", "o=jans")
+    namespace = os.environ.get("JANS_NAMESPACE", "jans")
 
     # a minimum service stack is having oxTrust, hence check whether entry
     # for oxTrust exists in LDAP
     default_search = (
-        f"ou=oxtrust,ou=configuration,{base_dn}",
+        f"ou=oxtrust,ou=configuration,o={namespace}",
         "(objectClass=oxTrustConfiguration)",
     )
 
@@ -191,11 +191,11 @@ def wait_for_ldap(manager, **kwargs):
         # `cache` and `token` mapping only have base entries
         search_mapping = {
             "default": default_search,
-            "user": (f"inum=60B7,ou=groups,{base_dn}", "(objectClass=gluuGroup)"),
+            "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=gluuGroup)"),
             "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
-            "cache": (f"ou=cache,{base_dn}", "(ou=cache)"),
-            "token": (f"ou=tokens,{base_dn}", "(ou=tokens)"),
-            "session": (f"ou=sessions,{base_dn}", "(ou=sessions)"),
+            "cache": (f"ou=cache,o={namespace}", "(ou=cache)"),
+            "token": (f"ou=tokens,o={namespace}", "(ou=tokens)"),
+            "session": (f"ou=sessions,o={namespace}", "(ou=sessions)"),
         }
         search = search_mapping[ldap_mapping]
     else:
@@ -253,7 +253,7 @@ def wait_for_couchbase(manager, **kwargs):
 
     persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "couchbase")
     ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
-    bucket_prefix = os.environ.get("JANS_COUCHBASE_BUCKET_PREFIX", "jans")
+    bucket_prefix = os.environ.get("JANS_NAMESPACE", "jans")
 
     # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;

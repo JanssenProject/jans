@@ -45,8 +45,7 @@ def render_jans_properties(src: str, dest: str) -> None:
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
-            "gluuOptPythonFolder": "/opt/jans/python",
-            "certFolder": "/etc/certs",
             "persistence_type": os.environ.get("JANS_PERSISTENCE_TYPE", "ldap"),
+            "namespace": os.environ.get("JANS_NAMESPACE", "jans"),
         }
         f.write(rendered_txt)

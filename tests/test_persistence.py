@@ -45,25 +45,25 @@ def test_render_jans_properties(tmpdir):
     from jans.pycloudlib.persistence import render_jans_properties
 
     persistence_type = "ldap"
+    namespace = "jans"
     os.environ["JANS_PERSISTENCE_TYPE"] = persistence_type
+    os.environ["JANS_NAMESPACE"] = namespace
 
     src = tmpdir.join("jans.properties.tmpl")
     src.write("""
 persistence.type=%(persistence_type)s
-certsDir=%(certFolder)s
-pythonModulesDir=%(gluuOptPythonFolder)s/libs
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=%(namespace)s
 """.strip())
     dest = tmpdir.join("jans.properties")
 
     expected = f"""
 persistence.type={persistence_type}
-certsDir=/etc/certs
-pythonModulesDir=/opt/jans/python/libs
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o={namespace}
 """.strip()
 
     render_jans_properties(str(src), str(dest))
     assert dest.read() == expected
-    os.environ["JANS_PERSISTENCE_TYPE"] = ""
+    os.environ.clear()
 
 # ====
 # LDAP
@@ -115,7 +115,7 @@ def test_get_couchbase_user(gmanager):
 
     os.environ["JANS_COUCHBASE_USER"] = "root"
     assert get_couchbase_user(gmanager) == "root"
-    os.environ.pop("JANS_COUCHBASE_USER", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_password(tmpdir, gmanager):
@@ -126,7 +126,7 @@ def test_get_couchbase_password(tmpdir, gmanager):
 
     os.environ["JANS_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_password(gmanager) == "secret"
-    os.environ.pop("JANS_COUCHBASE_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_encoded_couchbase_password(tmpdir, gmanager):
@@ -137,7 +137,7 @@ def test_get_encoded_couchbase_password(tmpdir, gmanager):
 
     os.environ["JANS_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_password(gmanager) != "secret"
-    os.environ.pop("JANS_COUCHBASE_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_superuser(gmanager):
@@ -145,7 +145,7 @@ def test_get_couchbase_superuser(gmanager):
 
     os.environ["JANS_COUCHBASE_SUPERUSER"] = ""
     assert get_couchbase_superuser(gmanager) == ""
-    os.environ.pop("JANS_COUCHBASE_SUPERUSER", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_superuser_password(tmpdir, gmanager):
@@ -156,7 +156,7 @@ def test_get_couchbase_superuser_password(tmpdir, gmanager):
 
     os.environ["JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_superuser_password(gmanager) == "secret"
-    os.environ.pop("JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
@@ -167,7 +167,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 
     os.environ["JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_superuser_password(gmanager) != "secret"
-    os.environ.pop("JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 # @pytest.mark.skipif(
@@ -187,7 +187,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 #     # gmanager.config.set("couchbaseTrustStoreFn", str(keystore_file))
 #     sync_couchbase_truststore(gmanager)
 #     assert os.path.exists(str(keystore_file))
-#     os.environ.pop("JANS_COUCHBASE_CERT_FILE", None)
+#     os.environ.clear()
 
 
 @pytest.mark.parametrize("timeout, expected", [
