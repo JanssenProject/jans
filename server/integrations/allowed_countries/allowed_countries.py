@@ -12,7 +12,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.model.config import ConfigurationFactory
 from io.jans.as.server.service import UserService, AuthenticationService, SessionIdService
 from io.jans.as.server.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.as.server.service.common import EncryptionService
 from java.util import Arrays, HashMap, IdentityHashMap
