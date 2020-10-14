@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID;
+import static io.jans.as.server.BaseTest.showResponse;
 import static org.testng.Assert.*;
 
 /**
@@ -198,7 +199,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     // }
 
     @Parameters({"endSessionPath"})
-    @Test(enabled = true) // switched off test : WebApplicationException seems to not translated correctly into response by container and results in 500 error. See org.gluu.oxauth.session.ws.rs.EndSessionRestWebServiceImpl.endSession()
+    @Test(enabled = true) // switched off test : WebApplicationException seems to not translated correctly into response by container and results in 500 error. See EndSessionRestWebServiceImpl.endSession()
     public void requestEndSessionFail1(final String endSessionPath) throws Exception {
         EndSessionRequest endSessionRequest = new EndSessionRequest(null, null, null);
 

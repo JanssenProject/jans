@@ -11,7 +11,7 @@ from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.as.server.service.common import EncryptionService
 from io.jans.as.server.service.custom import CustomScriptService
 from io.jans.as.server.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.model import SimpleCustomProperty
 from io.jans.model.casa import ApplicationConfiguration
 from io.jans.model.custom.script import CustomScriptType
