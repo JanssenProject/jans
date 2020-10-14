@@ -11,10 +11,10 @@ from java.io import IOException
 from java.lang import Enum
 
 from io.jans.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.util import StringHelper, ArrayHelper
 from javax.faces.application import FacesMessage

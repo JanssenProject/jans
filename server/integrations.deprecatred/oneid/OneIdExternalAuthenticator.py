@@ -9,9 +9,9 @@ from java.util import Arrays
 from oneid import OneID
 from org.apache.http.entity import ContentType
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.service.net import HttpService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import ArrayHelper
 from io.jans.util import StringHelper

@@ -15,9 +15,9 @@ from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from org.gluu.ldap.model import CustomAttribute
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.model.common import User
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, ClientService, AuthenticationService, AttributeService
+from io.jans.as.server.service.net import HttpService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper, Util
 from io.jans.jsf2.service import FacesService
