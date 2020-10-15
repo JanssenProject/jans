@@ -65,6 +65,10 @@ if not argsp.u:
     download(urljoin(maven_base_url, 'scim-server/{0}{1}/scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim.war'))
     download(urljoin(maven_base_url, 'fido2-server/{0}{1}/fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'fido2.war'))
 
+    for unit_file in ('oxauth.service', 'scim.service', 'fido2.service'):
+        unit_file_url = urljoin('https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/', unit_file)
+        download(unit_file_url, os.path.join(scripts_dir, unit_file))
+
 if os.path.exists(setup_dir):
     shutil.move(setup_dir, setup_dir+'-back.'+time.ctime())
 
@@ -79,4 +83,9 @@ for filename in setup_zip.namelist():
 shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
 
 print("Launcing Janssen Setup")
-os.system('python3 {}/setup.py {}'.format(setup_dir, argsp.args))
+setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
+
+if argsp.args:
+    setup_cmd += ' ' + setup_cmd
+
+os.system(setup_cmd)
