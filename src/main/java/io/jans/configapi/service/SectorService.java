@@ -2,7 +2,7 @@ package io.jans.configapi.service;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.persistence.model.SectorIdentifier;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -44,7 +44,7 @@ public class SectorService implements Serializable {
 
     public List<SectorIdentifier> searchSectorIdentifiers(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter searchFilter = Filter.createSubstringFilter(OxConstants.oxId, null, targetArray, null);
+        Filter searchFilter = Filter.createSubstringFilter(AttributeConstants.oxId, null, targetArray, null);
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, searchFilter,
                 sizeLimit);
     }

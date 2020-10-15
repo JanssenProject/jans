@@ -1,7 +1,7 @@
 package io.jans.configapi.service;
 
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
@@ -86,8 +86,8 @@ public class ScopeService {
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         if (StringHelper.isNotEmpty(scopeType)) {
             searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("oxScopeType", scopeType), searchFilter);

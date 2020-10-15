@@ -3,7 +3,7 @@ package io.jans.configapi.service;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.service.common.InumService;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
@@ -66,9 +66,9 @@ public class ClientService implements Serializable {
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
-        Filter inumFilter = Filter.createSubstringFilter(OxConstants.inum, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
+        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, searchFilter, sizeLimit);
     }
