@@ -10,7 +10,7 @@ from setup_app.installers.jetty import JettyInstaller
 class ScimInstaller(JettyInstaller):
 
     def __init__(self):
-        self.service_name = 'scim'
+        self.service_name = 'jans-scim'
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -18,7 +18,7 @@ class ScimInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'scim.war'), 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-scim.war'), 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
                 ]
 
     def install(self):
