@@ -1,8 +1,6 @@
 {
-  "proStoresToken " : "excludeProStoresToken",
   "researchAndScholarshipEnabled" : "excludeResearchAndScholarshipEnabled",
   "gluuProStoresUser" : "excludeGluuProStoresUser",
-  "proStoresToken" : "excludeProStoresToken",
   "proStoresToken" : "excludeProStoresToken",
   "oxTrust" : "exclude",
   "oxLink" : "exclude",
@@ -22,6 +20,7 @@
   "Gluu": "Js",
   "gluu": "js",
   "ox": "js",
+  "scimGroup" : "jsScimGroup",
   "Username" : "UsrName",
   "User": "Usr",
   "UserDN": "UsrDn",
