@@ -59,6 +59,11 @@
   "Session" : "Sess",
   "Software" : "Soft",
   "Group" : "Grp",
-  "Object": "Obj"
-
+  "Object": "Obj",
+  "Deletable": "del",
+  "description" : "desc",
+  "uniqueIdentifier": "_id",
+  "Password": "Pass",
+  "Address": "Addr",
+  "Lifetime": "Life"
 }
