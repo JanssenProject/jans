@@ -1,0 +1,8 @@
+# exclude everything
+*
+scripts/*.pyc
+
+# include required files/directories
+!scripts
+!LICENSE
+!requirements.txt
