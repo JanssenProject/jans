@@ -229,28 +229,26 @@
     </ui:define>
 
     <ui:define name="body">
-      <h:panelGroup rendered="#{sessionIdService.notSessionIdAuthenticated}">
-        <div class="content">
-          <div class="content__element content__element--first content--center  content--narrow">
-            <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Scan the QR code</h2>
-            <p class="text text--marginTop-0">
-              with WWPass<sup class="text__sup">TM</sup><h:outputText value="&#160;" />PassKey<h:outputText value="&#160;" />App to<h:outputText value="&#160;" />log in<h:outputText value="&#160;" />
-            </p>
-            <div class="loginMain__code-qr qrtap" id="qrcode" style="height: 196px; width: 196px; margin: auto">
-              <canvas width="256" height="256"></canvas>
-            </div>
-            <div id="passkey" style="display:none">
-              <button class="button button--action">Log in with PassKey</button>
-            </div>
-
-            <div class="hr"></div>
-            <p class="text text--sm">Download WWPass<sup class="text__sup">TM</sup><h:outputText value="&#160;" />PassKey<h:outputText value="&#160;" />App from
-            </p>
-            <a class="button button--store button--store-ios" href="https://itunes.apple.com/us/app/wwpass-passkey-lite/id984532938">AppStore</a>
-            <a class="button button--store button--store-google" href="https://play.google.com/store/apps/details?id=com.wwpass.android.passkey">Google Play</a>
+      <div class="content">
+        <div class="content__element content__element--first content--center  content--narrow">
+          <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Scan the QR code</h2>
+          <p class="text text--marginTop-0">
+            with WWPass<sup class="text__sup">TM</sup><h:outputText value="&#160;" />PassKey<h:outputText value="&#160;" />App to<h:outputText value="&#160;" />log in<h:outputText value="&#160;" />
+          </p>
+          <div class="loginMain__code-qr qrtap" id="qrcode" style="height: 196px; width: 196px; margin: auto">
+            <canvas width="256" height="256"></canvas>
           </div>
+          <div id="passkey" style="display:none">
+            <button class="button button--action">Log in with PassKey</button>
+          </div>
+
+          <div class="hr"></div>
+          <p class="text text--sm">Download WWPass<sup class="text__sup">TM</sup><h:outputText value="&#160;" />PassKey<h:outputText value="&#160;" />App from
+          </p>
+          <a class="button button--store button--store-ios" href="https://itunes.apple.com/us/app/wwpass-passkey-lite/id984532938">AppStore</a>
+          <a class="button button--store button--store-google" href="https://play.google.com/store/apps/details?id=com.wwpass.android.passkey">Google Play</a>
         </div>
-      </h:panelGroup>
+      </div>
 
       <script type="text/javascript" src="/oxauth/ext/resources/js/wwpass-frontend.js" />
       <script type="text/javascript">
