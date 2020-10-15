@@ -11,7 +11,6 @@ import json
 import string
 import random
 import hashlib
-import ruamel.yaml
 
 from pathlib import Path
 from urllib.parse import urlparse
@@ -503,6 +502,8 @@ class SetupUtils(Crypto64):
                 fullOutputFile.write_text(rendered_text)
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
+        import ruamel.yaml
+
         if not name:
             name = command
 
