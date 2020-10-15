@@ -36,8 +36,9 @@ class JreInstaller(BaseInstaller, SetupUtils):
         try:
             self.logIt("Extracting %s into /opt/" % os.path.basename(self.jreArchive))
             self.run([paths.cmd_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except:
+        except Exception as e:
             self.logIt("Error encountered while extracting archive %s" % self.jreArchive)
+            self.logIt(str(e), True)
             Config.java_type = 'jdk'
 
         if Config.java_type == 'jdk':
