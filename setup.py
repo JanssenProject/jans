@@ -27,6 +27,10 @@ from setup_app import static
 # second import module base, this makes some initial settings
 from setup_app.utils import base
 
+from setup_app.utils.package_utils import PackageUtils
+packageUtils = PackageUtils()
+packageUtils.check_and_install_packages()
+
 from setup_app.messages import msg
 from setup_app.config import Config
 from setup_app.utils.progress import jansProgress
