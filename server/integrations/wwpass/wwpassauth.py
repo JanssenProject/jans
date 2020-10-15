@@ -1,11 +1,11 @@
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
 from org.gluu.oxauth.model.configuration import AppConfiguration
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.server.service import AuthenticationService
 from org.xdi.oxauth.service import UserService
-from org.gluu.util import StringHelper
-from org.gluu.service import MailService
+from io.jans.util import StringHelper
+from io.jans.service import MailService
 from org.gluu.oxauth.model.configuration import AppConfiguration
 
 from javax.faces.context import FacesContext
