@@ -67,7 +67,7 @@ if not argsp.u:
 
     for unit_file in ('oxauth.service', 'scim.service', 'fido2.service'):
         unit_file_url = urljoin('https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/', unit_file)
-        download(unit_file_url, os.path.join(scripts_dir, unit_file))
+        download(unit_file_url, os.path.join('/etc/systemd/system', unit_file))
 
 if os.path.exists(setup_dir):
     shutil.move(setup_dir, setup_dir+'-back.'+time.ctime())
