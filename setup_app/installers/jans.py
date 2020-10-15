@@ -33,8 +33,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
 
-                txt += 'Install oxAuth'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-                txt += 'Install oxTrust'.ljust(30) + repr(Config.installOxTrust).rjust(35) + "\n"
+                txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
 
                 bc = []
                 if Config.wrends_install:

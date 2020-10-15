@@ -6,13 +6,14 @@ import argparse
 import zipfile
 import shutil
 import time
+import ssl
 
 from urllib.request import urlretrieve
 from urllib.parse import urljoin
 
 
 setup_package_name = 'master.zip'
-maven_base_url = 'https://ox.gluu.org/maven/org/gluu/'
+maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 
 app_versions = {
   "JANS_APP_VERSION": "5.0.0",
@@ -40,7 +41,10 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 argsp = parser.parse_args()
 
 
+ssl._create_default_https_context = ssl._create_unverified_context
+
 def download(url, target_fn):
+    
     dst = os.path.join(app_dir, target_fn)
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
@@ -60,14 +64,12 @@ if not argsp.u:
     download('https://repo1.maven.org/maven2/org/python/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
     download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
     
-    download(urljoin(maven_base_url, 'oxauth-server/{0}{1}/oxauth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth.war'))
-    download(urljoin(maven_base_url, 'oxauth-client/{0}{1}/oxauth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth-client-jar-with-dependencies.jar'))
-    download(urljoin(maven_base_url, 'scim-server/{0}{1}/scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim.war'))
-    download(urljoin(maven_base_url, 'fido2-server/{0}{1}/fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'fido2.war'))
-
-    for unit_file in ('oxauth.service', 'scim.service', 'fido2.service'):
-        unit_file_url = urljoin('https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/', unit_file)
-        download(unit_file_url, os.path.join('/etc/systemd/system', unit_file))
+    download('https://ox.gluu.org/maven/io/jans/jans-auth-server/5.0.0-SNAPSHOT/jans-auth-server-5.0.0-SNAPSHOT.war', os.path.join(jans_app_dir, 'jans-auth.war'))
+    download('https://ox.gluu.org/maven/io/jans/jans-auth-client/5.0.0-SNAPSHOT/jans-auth-client-5.0.0-SNAPSHOT-jar-with-dependencies.jar', os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
+    #download(urljoin(maven_base_url, 'oxauth-server/{0}{1}/oxauth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth.war'))
+    #download(urljoin(maven_base_url, 'oxauth-client/{0}{1}/oxauth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth-client-jar-with-dependencies.jar'))
+    download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
+    download(urljoin(maven_base_url, 'jans-fido2-server/{0}{1}/jans-fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-fido2.war'))
 
 if os.path.exists(setup_dir):
     shutil.move(setup_dir, setup_dir+'-back.'+time.ctime())

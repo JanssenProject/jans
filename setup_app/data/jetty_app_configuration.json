@@ -1,5 +1,5 @@
 {
-  "oxauth": {
+  "jans-auth": {
     "memory": {
       "max_allowed_mb": 2048,
       "metaspace_mb": 128,
@@ -10,7 +10,7 @@
       "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
     },
     "installed": false,
-    "name": "oxauth"
+    "name": "jans-auth"
   },
   "identity": {
     "memory": {
@@ -74,7 +74,7 @@
     "installed": false,
     "name": "casa"
   },
-  "fido2": {
+  "jans-fido2": {
     "memory": {
       "max_allowed_mb": 512,
       "metaspace_mb": 128,
@@ -85,9 +85,9 @@
       "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
     },
     "installed": false,
-    "name": "fido2"
+    "name": "jans-fido2"
   },
-  "scim": {
+  "jans-scim": {
     "memory": {
       "max_allowed_mb": 1024,
       "metaspace_mb": 128,
@@ -98,6 +98,6 @@
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
     },
     "installed": false,
-    "name": "scim"
+    "name": "jans-scim"
   }
 }

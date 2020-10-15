@@ -677,7 +677,7 @@ class PropertiesUtils(SetupUtils):
                     Config.java_type = 'jdk'
                     Config.defaultTrustStoreFN = '%s/lib/security/cacerts' % Config.jre_home
 
-            promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", 
+            promptForOxAuth = self.getPrompt("Install OAuth2 Authorization Server?", 
                                             self.getDefaultOption(Config.installOxAuth)
                                                 )[0].lower()
             self.installOxAuth = True if promptForOxAuth == 'y' else False

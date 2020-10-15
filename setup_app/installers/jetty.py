@@ -286,10 +286,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         installedComponents = []
 
         # Jetty apps
-        for config_var, service in (
-                    ('installOxAuth', 'oxauth'), ('installOxTrust', 'identity'),
-                    ('installSaml', 'idp'), ('installOxAuthRP', 'oxauth-rp'),
-                    ('installCasa', 'casa'), ('installPassport', 'passport')):
+        for config_var, service in [('installOxAuth', 'jans-auth')]:
             if Config.get(config_var):
                 installedComponents.append(self.jetty_app_configuration[service])
 
