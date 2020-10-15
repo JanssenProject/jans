@@ -10,7 +10,7 @@ from setup_app.installers.jetty import JettyInstaller
 class FidoInstaller(JettyInstaller):
 
     def __init__(self):
-        self.service_name = 'fido2'
+        self.service_name = 'jans-fido2'
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -18,12 +18,12 @@ class FidoInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'fido2.war'), 'https://ox.gluu.org/maven/org/gluu/fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), 'https://ox.gluu.org/maven/org/gluu/fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
                 ]
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
-        self.output_folder = os.path.join(Config.outputFolder, 'fido2')
-        self.template_folder = os.path.join(Config.templateFolder, 'fido2')
+        self.output_folder = os.path.join(Config.outputFolder, 'jans-fido2')
+        self.template_folder = os.path.join(Config.templateFolder, 'jans-fido2')
         self.fido2_dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')
         self.ldif_fido2 = os.path.join(self.output_folder, 'fido2.ldif')

@@ -11,14 +11,14 @@ from setup_app.static import AppType, InstallOption
 class OxauthInstaller(JettyInstaller):
 
     def __init__(self):
-        self.service_name = 'oxauth'
+        self.service_name = 'jans-auth'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installOxAuth'
         self.register_progess()
 
         self.source_files = [
-                    (os.path.join(Config.distJansFolder, 'oxauth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
+                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
                     (os.path.join(Config.distJansFolder, 'oxauth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
                     ]
 
@@ -35,7 +35,7 @@ class OxauthInstaller(JettyInstaller):
 
 
     def install(self):
-        self.logIt("Copying oxauth.war into jetty webapps folder...")
+        self.logIt("Copying auth.war into jetty webapps folder...")
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
@@ -53,7 +53,7 @@ class OxauthInstaller(JettyInstaller):
             Config.oxauthClient_pw = self.getPW()
             Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
 
-        self.logIt("Generating oxauth openid keys", pbar=self.service_name)
+        self.logIt("Generating OAuth openid keys", pbar=self.service_name)
         sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
