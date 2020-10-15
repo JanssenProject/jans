@@ -198,6 +198,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
                 self.run([paths.cmd_chown, 'root:root', jetty_tmpfiles_dst])
                 self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
+            
+            self.copyFile(os.path.join(self.jetty_home, 'bin/jetty.sh'), os.path.join(Config.distAppFolder, serviceName))
 
         serviceConfiguration['installed'] = True
 
