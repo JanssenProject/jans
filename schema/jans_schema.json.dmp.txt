@@ -349,5 +349,5 @@ oxdId --> jsdId
 preferredUsername --> jsPrefUsrName
 proStoresToken --> excludeProStoresTkn
 researchAndScholarshipEnabled --> excludeResearchAndScholarshipEnabled
-scimGroup --> scimgrp
+scimGroup --> jsScimgrp
 softwareVersion --> jsSoftVer
