@@ -83,6 +83,10 @@ class PackageUtils(SetupUtils):
             if os.path.exists(default_site):
                 os.remove(default_site)
 
+        paths.cmd_wget = shutil.which('wget')
+        paths.cmd_tar = shutil.which('tar')
+        paths.cmd_unzip = shutil.which('unzip')
+
 
     def installPackage(self, packageName):
         if base.clone_type == 'deb':
