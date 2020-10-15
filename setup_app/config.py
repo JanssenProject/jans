@@ -38,12 +38,12 @@ class Config:
 
     @classmethod
     def determine_version(self):
-        oxauth_info = get_war_info(os.path.join(self.distJansFolder, 'oxauth.war'))
+        oxauth_info = get_war_info(os.path.join(self.distJansFolder, 'jans-auth.war'))
         self.oxVersion = oxauth_info['version']
         self.currentJansVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = oxauth_info['branch']
 
-        self.ce_setup_zip = 'https://github.com/JansFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
+        self.ce_setup_zip = 'https://github.com/JanssenProject/jans-setup/archive/%s.zip' % self.githubBranchName
 
     @classmethod
     def dump(self, dumpFile=False):
@@ -277,10 +277,10 @@ class Config:
 
         self.service_requirements = {
                         'opendj': ['', 70],
-                        'oxauth': ['opendj', 72],
-                        'fido2': ['opendj', 73],
+                        'jans-auth': ['opendj', 72],
+                        'jans-fido2': ['opendj', 73],
                         'identity': ['opendj oxauth', 74],
-                        'scim': ['opendj oxauth', 75],
+                        'jans-scim': ['opendj oxauth', 75],
                         'idp': ['opendj oxauth', 76],
                         'casa': ['opendj oxauth', 78],
                         'oxd-server': ['opendj oxauth', 80],
@@ -339,6 +339,6 @@ class Config:
 
         self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'oxauth-client-jar-with-dependencies.jar')
+            'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar')
                 }
         Config.addPostSetupService = []

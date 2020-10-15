@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Fido2 Service
+After=opendj.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-fido2 start
+ExecStop=/opt/dist/scripts/jans-fido2 stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
