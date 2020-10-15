@@ -28,9 +28,9 @@
   },
   "centos 7": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl wget tar xz unzip python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2"
+    "mondatory": "httpd mod_ssl curl wget tar xz unzip python3 python3-ldap3 python3-requests python3-ruamel-yaml rsyslog bzip2"
   },
   "centos 8": {
       "optional": "",
-      "mondatory": "httpd mod_ssl curl wget tar xz unzip python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2"}
+      "mondatory": "httpd mod_ssl curl wget tar xz unzip python3 python3-ldap3 python3-requests python3-ruamel-yaml rsyslog bzip2"}
 }
