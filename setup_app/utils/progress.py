@@ -1,5 +1,6 @@
 import sys
 import time
+import os
 
 from setup_app import static
 from setup_app.config import Config
@@ -7,12 +8,18 @@ from threading import Thread
 
 # credit https://github.com/verigak/progress/blob/master/progress/spinner.py
 phases = ['◑', '◒', '◐', '◓']
-phases = ('-', '\\', '|', '/')
+
 phases = ['◷', '◶', '◵', '◴']
 phases = ['⎺', '⎻', '⎼', '⎽', '⎼', '⎻']
 phases = ['⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽']
-
 finished_char = '✓'
+try:
+    with open(os.devnull, 'w') as w:
+        w.write(phases[0])
+except:
+    phases = ('-', '\\', '|', '/')
+    finished_char = '@'
+
 
 class ShowProgress(Thread):
     def __init__(self, services, queue, timeout=15):
