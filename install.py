@@ -1,125 +1,82 @@
 #!/usr/bin/python3
 
-import site
-import re
-import glob
 import sys
 import os
-import subprocess
 import argparse
-import time
 import zipfile
 import shutil
-import distutils
-import requests
+import time
 
+from urllib.request import urlretrieve
 from urllib.parse import urljoin
 
 
-run_time = time.strftime("%Y-%m-%d_%H-%M-%S")
-ces_dir = '/install/community-edition-setup'
+setup_package_name = 'master.zip'
+maven_base_url = 'https://ox.gluu.org/maven/org/gluu/'
 
-parser = argparse.ArgumentParser(description="This script extracts community-edition-setup package and runs setup.py without arguments")
-parser.add_argument('-o', help="download latest package from github and override current community-edition-setup", action='store_true')
+app_versions = {
+  "JANS_APP_VERSION": "5.0.0",
+  "JANS_BUILD": "-SNAPSHOT", 
+  "JETTY_VERSION": "9.4.31.v20200723", 
+  "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
+  "JYTHON_VERSION": "2.7.2",
+  "OPENDJ_VERSION": "4.0.0.gluu",
+  "SETUP_BRANCH": "master",
+}
+
+jans_dir = '/opt/jans'
+app_dir = '/opt/dist/app'
+jans_app_dir = '/opt/dist/jans'
+scripts_dir = '/opt/dist/scripts'
+setup_dir = os.path.join(jans_dir, 'jans-setup')
+
+for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
+    if not os.path.exists(d):
+        os.makedirs(d)
+
+parser = argparse.ArgumentParser(description="This script downloads Janssen Server components and fires setup")
+parser.add_argument('-u', help="Use downloaded components", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
-parser.add_argument('-b', help="Github branch name, e.g. version_4.0.b4")
-
 argsp = parser.parse_args()
 
-npyscreen_package = '/opt/dist/app/npyscreen-master.zip'
 
-if argsp.o:
-    for cep in glob.glob('/opt/dist/jans/community-edition-setup*.zip'):
-        os.remove(cep)
-    if os.path.exists(ces_dir):
-        back_dir = ces_dir+'.back.'+run_time
-        print("Backing up", ces_dir, "to", back_dir)
-        os.rename(ces_dir, back_dir)
-
+def download(url, target_fn):
+    dst = os.path.join(app_dir, target_fn)
+    pardir, fn = os.path.split(dst)
+    if not os.path.exists(pardir):
+        os.makedirs(pardir)
+    print("Downloading", url, "to", dst)
+    urlretrieve(url, dst)
 
 
-github_base_url = 'https://github.com/JanssenProject/jans-setup/archive/'
-arhchive_name = 'master.zip'
+setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
 
+if not argsp.u:
+    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
+    download(setup_url, setup_zip_file)
 
-if argsp.b:
-    arhchive_name = argsp.b+'.zip'
+    download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto.tar.gz'))
+    download('https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/{0}/jetty-distribution-{0}.tar.gz'.format(app_versions['JETTY_VERSION']), os.path.join(app_dir,'jetty.tar.gz'))
+    download('https://repo1.maven.org/maven2/org/python/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer.jar'))
 
-download_link = urljoin(github_base_url, arhchive_name)
+    download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), 'opendj-server.zip')
+    download(urljoin(maven_base_url, 'oxauth-server/{0}{1}/oxauth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth.war'))
+    download(urljoin(maven_base_url, 'oxauth-client/{0}{1}/oxauth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'oxauth-client-jar-with-dependencies.jar'))
+    download(urljoin(maven_base_url, 'scim-server/{0}{1}/scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim.war'))
+    download(urljoin(maven_base_url, 'fido2-server/{0}{1}/fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'fido2.war'))
 
-ces_list = glob.glob('/opt/dist/jans/community-edition-setup*.zip')
+if os.path.exists(setup_dir):
+    shutil.move(setup_dir, setup_dir+'-back.'+time.ctime())
 
-if not ces_list:
-    if not argsp.o:
-        print("community-edition-setup package was not found")
-        dl = input("Download from github? (Y/n) ")
-    else:
-        dl = 'y'
-    
-    if not dl.strip() or dl.lower()[0]=='y':
-        print("Downloading ", download_link)
-        result = requests.get(download_link, allow_redirects=True)
-        with open('/opt/dist/jans/community-edition-setup.zip', 'wb') as w:
-            w.write(result.content)
-        ces_list = [os.path.join('/opt/dist/jans', arhchive_name)]
-    else:
-        print("Exiting...")
-        sys.exit()
+print("Extracting jans-setup package")
 
-ces = max(ces_list)
+setup_zip = zipfile.ZipFile(setup_zip_file, "r")
+setup_par_dir = setup_zip.namelist()[0]
 
-ces_zip = zipfile.ZipFile(ces)
-parent_dir = ces_zip.filelist[0].filename
-target_dir = '/tmp/ces_tmp'
-ces_zip.extractall(target_dir)
-        
+for filename in setup_zip.namelist():
+    setup_zip.extract(filename, jans_dir)
 
+shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
 
-if not os.path.exists(ces_dir):
-    os.makedirs(ces_dir)
-
-print("Extracting community-edition-setup package")
-
-source_dir = os.path.join(target_dir, parent_dir)
-ces_zip.close()
-
-if not os.path.exists(source_dir):
-    sys.exit("Unzip failed. Exting")
-
-cmd = 'cp -r -f {}* /install/community-edition-setup'.format(source_dir)
-os.system(cmd)
-os.system('rm -r -f '+source_dir)
-
-shutil.rmtree(target_dir)
-
-os.chmod('/install/community-edition-setup/setup.py', 33261)
-
-post_setup = '/install/community-edition-setup/post-setup-add-components.py'
-if os.path.exists(post_setup):
-    os.chmod(post_setup, 33261)
-
-if argsp.o:
-    npy_download_link = 'https://github.com/npcole/npyscreen/archive/master.zip'
-    result = requests.get(npy_download_link, allow_redirects=True)
-    with open(npyscreen_package, 'wb') as w:
-        w.write(result.content)
-
-if os.path.exists(npyscreen_package):
-    site_libdir = site.getsitepackages()[0]
-    dest_dir = os.path.join(site_libdir, 'npyscreen')
-
-    if not os.path.exists(dest_dir):
-        print("Extracting npyscreen to", dest_dir)
-        npyzip = zipfile.ZipFile(npyscreen_package)
-        parent_dir = npyzip.filelist[0].filename
-        target_dir = '/tmp/npyscreen_tmp'
-        npyzip.extractall(target_dir)
-        npyzip.close()
-        
-        shutil.copytree(
-            os.path.join(target_dir, parent_dir, 'npyscreen'),
-            dest_dir
-            )
-
-        shutil.rmtree(target_dir)
-
+print("Launcing Janssen Setup")
+os.system('python3 {}/setup.py {}'.format(setup_dir, argsp.args))
