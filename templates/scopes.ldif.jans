@@ -1,0 +1,166 @@
+dn: inum=F0C4,ou=scopes,o=jans
+Desc: Authenticate using OpenID Connect.
+inum: F0C4
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: true
+jsId: openid
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=43F1,ou=scopes,o=jans
+Desc: View your basic profile info.
+inum: 43F1
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=2B29,ou=attributes,o=jans
+jsAuthClaim: inum=0C85,ou=attributes,o=jans
+jsAuthClaim: inum=B4B0,ou=attributes,o=jans
+jsAuthClaim: inum=A0E8,ou=attributes,o=jans
+jsAuthClaim: inum=5EC6,ou=attributes,o=jans
+jsAuthClaim: inum=B52A,ou=attributes,o=jans
+jsAuthClaim: inum=64A0,ou=attributes,o=jans
+jsAuthClaim: inum=EC3A,ou=attributes,o=jans
+jsAuthClaim: inum=3B47,ou=attributes,o=jans
+jsAuthClaim: inum=3692,ou=attributes,o=jans
+jsAuthClaim: inum=98FC,ou=attributes,o=jans
+jsAuthClaim: inum=A901,ou=attributes,o=jans
+jsAuthClaim: inum=36D9,ou=attributes,o=jans
+jsAuthClaim: inum=BE64,ou=attributes,o=jans
+jsAuthClaim: inum=6493,ou=attributes,o=jans
+jsDefScope: false
+jsId: profile
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=764C,ou=scopes,o=jans
+Desc: View your email address.
+inum: 764C
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=8F88,ou=attributes,o=jans
+jsAuthClaim: inum=CAE3,ou=attributes,o=jans
+jsDefScope: false
+jsId: email
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=C17A,ou=scopes,o=jans
+Desc: View your address.
+inum: C17A
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=27DB,ou=attributes,o=jans
+jsAuthClaim: inum=2A3D,ou=attributes,o=jans
+jsAuthClaim: inum=6609,ou=attributes,o=jans
+jsAuthClaim: inum=6EEB,ou=attributes,o=jans
+jsAuthClaim: inum=BCE8,ou=attributes,o=jans
+jsAuthClaim: inum=D90B,ou=attributes,o=jans
+jsAuthClaim: inum=E6B8,ou=attributes,o=jans
+jsAuthClaim: inum=E999,ou=attributes,o=jans
+jsAuthGrpClaims: true
+jsDefScope: false
+jsId: address
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=D491,ou=scopes,o=jans
+Desc: View your phone number.
+inum: D491
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=B17A,ou=attributes,o=jans
+jsAuthClaim: inum=0C18,ou=attributes,o=jans
+jsDefScope: false
+jsId: phone
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=341A,ou=scopes,o=jans
+Desc: View the client info.
+inum: 341A
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=2B29,ou=attributes,o=jans
+jsAuthClaim: inum=29DA,ou=attributes,o=jans
+jsDefScope: false
+jsId: clientinfo
+jsScopeTyp: openid
+objectClass: jsAuthCustomScope
+objectClass: top
+
+dn: inum=10B2,ou=scopes,o=jans
+Desc: View your local username in the Gluu Server.
+inum: 10B2
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=42E0,ou=attributes,o=jans
+jsDefScope: false
+jsId: user_name
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=6D99,ou=scopes,o=jans
+Desc: Obtain UMA PAT.
+displayName: UMA Protection
+inum: 6D99
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: true
+jsId: uma_protection
+jsScopeTyp: openid
+objectClass: jsAuthCustomScope
+objectClass: top
+
+dn: inum=6D90,ou=scopes,o=jans
+Desc: oxd scope which is required to call oxd API
+displayName: oxd
+inum: 6D90
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: true
+jsId: oxd
+jsScopeTyp: openid
+objectClass: jsAuthCustomScope
+objectClass: top
+
+dn: inum=7D90,ou=scopes,o=jans
+Desc: revoke_session scope which is required to be able call /revoke_session endpoint
+displayName: revoke_session
+inum: 7D90
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: false
+jsId: revoke_session
+jsScopeTyp: openid
+objectClass: jsAuthCustomScope
+objectClass: top
+
+dn: inum=8A01,ou=scopes,o=jans
+Desc: View your mobile phone number.
+inum: 8A01
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsAuthClaim: inum=6DA6,ou=attributes,o=jans
+jsDefScope: false
+jsId: mobile_phone
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+
+dn: inum=C4F5,ou=scopes,o=jans
+Desc: View your user permission and roles.
+inum: C4F5
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: true
+jsId: permission
+jsScopeTyp: dynamic
+jsScrDn: inum=CB5B-3211,ou=scripts,o=jans
+objectClass: jsAuthCustomScope
+objectClass: top
+
+dn: inum=C4F6,ou=scopes,o=jans
+Desc: This scope value requests that an OAuth 2.0 Refresh Token be issued.
+inum: C4F6
+jsAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jsDefScope: true
+jsId: offline_access
+jsScopeTyp: openid
+objectClass: top
+objectClass: jsAuthCustomScope
+

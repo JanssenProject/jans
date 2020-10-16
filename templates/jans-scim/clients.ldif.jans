@@ -1,0 +1,29 @@
+dn: inum=%(scim_rs_client_id)s,ou=clients,o=jans
+displayName: SCIM Resource Server Client
+inum: %(scim_rs_client_id)s
+jsAppTyp: native
+jsGrantTyp: client_credentials
+jsIdTknSignedRespAlg: HS256
+jsJwks::%(scim_rs_client_base64_jwks)s
+jsLogoutSessRequired: false
+jsPersistClntAuthzs: false
+jsRequireAuthTime: false
+jsScope: inum=6D99,ou=scopes,o=jans
+jsTknEndpointAuthMethod: private_key_jwt
+objectClass: jsClnt
+objectClass: top
+
+dn: inum=%(scim_rp_client_id)s,ou=clients,o=jans
+displayName: SCIM Requesting Party Client
+inum: %(scim_rp_client_id)s
+jsAppTyp: native
+jsGrantTyp: client_credentials
+jsIdTknSignedRespAlg: HS256
+jsJwks::%(scim_rp_client_base64_jwks)s
+jsLogoutSessRequired: false
+jsPersistClntAuthzs: false
+jsRequireAuthTime: false
+jsTknEndpointAuthMethod: private_key_jwt
+objectClass: jsClnt
+objectClass: top
+
