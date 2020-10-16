@@ -60,17 +60,11 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName(name = "jsManagerGroup")
 	private String managerGroup;
 
-	@AttributeName(name = "excludeLogoPath")
-	private String excludeLogoPath;
-
-	@AttributeName(name = "excludeFaviconPath")
-	private String excludeFaviconPath;
-
 	@AttributeName(name = "jsLogoPath")
-	private String jsLogoPath;
+	private String logoPath;
 
 	@AttributeName(name = "jsFaviconPath")
-	private String jsFaviconPath;
+	private String faviconPath;
 	
 	@AttributeName(name = "idpLogoPath")
 	private String idpLogoPath;
@@ -204,36 +198,20 @@ public class GluuOrganization extends Entry implements Serializable {
 		this.title = title;
 	}
 
-	public String getOxTrustLogoPath() {
-		return excludeLogoPath;
+	public String getLogoPath() {
+		return logoPath;
 	}
 
-	public void setOxTrustLogoPath(String excludeLogoPath) {
-		this.excludeLogoPath = excludeLogoPath;
+	public void setLogoPath(String logoPath) {
+		this.logoPath = logoPath;
 	}
 
-	public String getOxTrustFaviconPath() {
-		return excludeFaviconPath;
+	public String getFaviconPath() {
+		return faviconPath;
 	}
 
-	public void setOxTrustFaviconPath(String excludeFaviconPath) {
-		this.excludeFaviconPath = excludeFaviconPath;
-	}
-
-	public String getOxAuthLogoPath() {
-		return jsLogoPath;
-	}
-
-	public void setOxAuthLogoPath(String jsLogoPath) {
-		this.jsLogoPath = jsLogoPath;
-	}
-
-	public String getOxAuthFaviconPath() {
-		return jsFaviconPath;
-	}
-
-	public void setOxAuthFaviconPath(String jsFaviconPath) {
-		this.jsFaviconPath = jsFaviconPath;
+	public void setFaviconPath(String faviconPath) {
+		this.faviconPath = faviconPath;
 	}
 
 	public String getIdpLogoPath() {

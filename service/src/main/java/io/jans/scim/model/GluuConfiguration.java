@@ -68,7 +68,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	private String gluuVDSStatus;
 
 	@AttributeName(name = "jsSPTR")
-	private String jsSPTR;
+	private String sptr;
 
 	@AttributeName(name = "jsSslExpiry", updateOnly = true)
 	private String sslExpiry;
@@ -125,11 +125,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jsenticationMode")
 	private String authenticationMode;
 
-	@AttributeName(name = "excludeAuthnMode")
-	private String excludeAuthnMode;
-
 	@AttributeName(name = "jsLogConfigLocation")
-	private String jsLogConfigLocation;
+	private String logConfigLocation;
 
 	@AttributeName(name = "passwordResetAllowed")
 	private boolean passwordResetAllowed;
@@ -167,14 +164,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setAuthenticationMode(String authenticationMode) {
 		this.authenticationMode = authenticationMode;
-	}
-
-	public String getOxTrustAuthenticationMode() {
-		return excludeAuthnMode;
-	}
-
-	public void setOxTrustAuthenticationMode(String excludeAuthnMode) {
-		this.excludeAuthnMode = excludeAuthnMode;
 	}
 
 	public String getCacheRefreshServerIpAddress() {
@@ -225,12 +214,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.gluuVDSStatus = gluuVDSStatus;
 	}
 
-	public String getGluuSPTR() {
-		return jsSPTR;
+	public String getSPTR() {
+		return sptr;
 	}
 
-	public void setGluuSPTR(String jsSPTR) {
-		this.jsSPTR = jsSPTR;
+	public void setSPTR(String sptr) {
+		this.sptr = sptr;
 	}
 
 	public String getHostname() {
@@ -265,12 +254,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.maxLogSize = maxLogSize;
 	}
 
-	public String getOxLogConfigLocation() {
-		return jsLogConfigLocation;
+	public String getLogConfigLocation() {
+		return logConfigLocation;
 	}
 
-	public void setOxLogConfigLocation(String jsLogConfigLocation) {
-		this.jsLogConfigLocation = jsLogConfigLocation;
+	public void setLogConfigLocation(String logConfigLocation) {
+		this.logConfigLocation = logConfigLocation;
 	}
 
 	public boolean isPasswordResetAllowed() {
@@ -433,7 +422,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		return "GluuConfiguration [description=" + description + ", displayName=" + displayName + ", hostname="
 				+ hostname + ", lastUpdate=" + lastUpdate + ", pollingInterval=" + pollingInterval + ", status="
 				+ status + ", userPassword=" + userPassword + ", gluuHttpStatus=" + gluuHttpStatus + ", gluuDSStatus="
-				+ gluuDSStatus + ", gluuVDSStatus=" + gluuVDSStatus + ", jsSPTR=" + jsSPTR + ", sslExpiry="
+				+ gluuDSStatus + ", gluuVDSStatus=" + gluuVDSStatus + ", sptr=" + sptr + ", sslExpiry="
 				+ sslExpiry + ", profileManagment=" + profileManagment + ", manageIdentityPermission="
 				+ manageIdentityPermission + ", vdsCacheRefreshEnabled=" + vdsCacheRefreshEnabled
 				+ ", cacheRefreshServerIpAddress=" + cacheRefreshServerIpAddress + ", vdsCacheRefreshPollingInterval="
@@ -443,8 +432,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 				+ ", passportEnabled=" + passportEnabled + ", radiusEnabled=" + radiusEnabled + ", samlEnabled="
 				+ samlEnabled + ", contactEmail=" + contactEmail + ", smtpConfiguration=" + smtpConfiguration
 				+ ", configurationDnsServer=" + configurationDnsServer + ", maxLogSize=" + maxLogSize
-				+ ", authenticationMode=" + authenticationMode + ", excludeAuthnMode="
-				+ excludeAuthnMode + ", jsLogConfigLocation=" + jsLogConfigLocation + ", passwordResetAllowed="
+				+ ", authenticationMode=" + authenticationMode
+				+ ", jsLogConfigLocation=" + logConfigLocation + ", passwordResetAllowed="
 				+ passwordResetAllowed + ", cacheConfiguration=" + cacheConfiguration + ", documentStoreConfiguration="
 				+ documentStoreConfiguration + ", customObjectClasses=" + Arrays.toString(customObjectClasses) + "]";
 	}
