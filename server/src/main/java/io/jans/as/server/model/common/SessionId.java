@@ -29,7 +29,7 @@ import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
  */
 @Named("sessionUser")
 @DataEntry
-@ObjectClass(value = "oxAuthSessionId")
+@ObjectClass(value = "jsSessId")
 public class SessionId implements Deletable, Serializable {
 
     public static final String OLD_SESSION_ID_ATTR_KEY = "old_session_id";
@@ -39,42 +39,42 @@ public class SessionId implements Deletable, Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "oxId")
+    @AttributeName(name = "jsId")
     private String id;
 
     @AttributeName(name = "sid")
     private String outsideSid;
 
-    @AttributeName(name = "oxLastAccessTime")
+    @AttributeName(name = "jsLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "oxAuthUserDN")
+    @AttributeName(name = "jsUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "oxState")
+    @AttributeName(name = "jsState")
     private SessionIdState state;
 
-    @AttributeName(name = "oxSessionState")
+    @AttributeName(name = "jsSessState")
     private String sessionState;
 
-    @AttributeName(name = "oxAuthPermissionGranted")
+    @AttributeName(name = "jsPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "oxAsJwt")
+    @AttributeName(name = "jsAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "oxJwt")
+    @AttributeName(name = "jsJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "oxAuthPermissionGrantedMap")
+    @AttributeName(name = "jsPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
 
     @JsonObject
-    @AttributeName(name = "oxAuthSessionAttribute")
+    @AttributeName(name = "jsSessAttr")
     private Map<String, String> sessionAttributes;
 
     @AttributeName(name = "exp")

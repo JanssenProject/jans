@@ -190,7 +190,7 @@ public class AppInitializer {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "jsIDPAuthn", "jsAuthMode");
 
 		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 
@@ -291,7 +291,7 @@ public class AppInitializer {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "jsIDPAuthn", "jsAuthMode");
 
 		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 

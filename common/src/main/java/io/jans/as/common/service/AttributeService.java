@@ -54,7 +54,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, staticConfiguration.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jsAttrName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
@@ -66,7 +66,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public GluuAttribute getByClaimName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, staticConfiguration.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jsClaimName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
@@ -139,9 +139,9 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public List<GluuAttribute> searchAttributes(int sizeLimit, boolean active) throws Exception {
-        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "active");
+        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.jsStatus, "active");
         if (!active) {
-            activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "inactive");
+            activeFilter = Filter.createEqualityFilter(AttributeConstants.jsStatus, "inactive");
         }
         return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
                 activeFilter, sizeLimit);
@@ -149,9 +149,9 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public List<GluuAttribute> findAttributes(String pattern, int sizeLimit, boolean active) throws Exception {
-        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "active");
+        Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.jsStatus, "active");
         if (!active) {
-            activeFilter = Filter.createEqualityFilter(AttributeConstants.gluuStatus, "inactive");
+            activeFilter = Filter.createEqualityFilter(AttributeConstants.jsStatus, "inactive");
         }
         String[] targetArray = new String[]{pattern};
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);

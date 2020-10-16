@@ -34,7 +34,7 @@ public class UmaPCT extends AbstractToken {
     private String dn;
     @AttributeName(name = "clnId")
     private String clientId;
-    @AttributeName(name = "oxClaimValues")
+    @AttributeName(name = "jsClaimValues")
     private String claimValuesAsJson;
 
     public UmaPCT() {

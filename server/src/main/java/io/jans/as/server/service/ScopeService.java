@@ -65,15 +65,15 @@ public class ScopeService {
     }
 
     public List<String> getDefaultScopesDn() {
-        List<String> defaultScopes = new ArrayList<>();
+        List<String> jsDefScopes = new ArrayList<>();
 
         for (Scope scope : getAllScopesList()) {
             if (Boolean.TRUE.equals(scope.isDefaultScope())) {
-                defaultScopes.add(scope.getDn());
+                jsDefScopes.add(scope.getDn());
             }
         }
 
-        return defaultScopes;
+        return jsDefScopes;
     }
 
     public List<String> getScopesDn(List<String> scopeNames) {
@@ -147,7 +147,7 @@ public class ScopeService {
 
         try {
             List<Scope> scopes = ldapEntryManager.findEntries(
-                    staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("oxId", id));
+                    staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("jsId", id));
             if ((scopes != null) && (scopes.size() > 0)) {
                 final Scope scope = scopes.get(0);
                 usedCacheService.put(id, scope);
@@ -161,7 +161,7 @@ public class ScopeService {
     }
     
     /**
-     * Get scope by oxAuthClaims
+     * Get scope by jsClaims
      *
      * @param claimDn
      * @return List of scope
@@ -169,7 +169,7 @@ public class ScopeService {
     public List<Scope> getScopeByClaim(String claimDn) {
     	List<Scope> scopes = fromCacheByClaimDn(claimDn);
     	if (scopes == null) {
-	        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
+	        Filter filter = Filter.createEqualityFilter("jsClaim", claimDn);
 	        
 	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 	        scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);

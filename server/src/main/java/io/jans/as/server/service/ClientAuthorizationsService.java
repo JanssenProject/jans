@@ -136,11 +136,11 @@ public class ClientAuthorizationsService {
         return userId + "_" + clientId;
     }
 
-    public String createDn(String oxId) {
+    public String createDn(String jsId) {
         String baseDn = staticConfiguration.getBaseDn().getAuthorizations();
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("oxId=%s,%s", oxId, baseDn);
+        return String.format("jsId=%s,%s", jsId, baseDn);
     }
 }

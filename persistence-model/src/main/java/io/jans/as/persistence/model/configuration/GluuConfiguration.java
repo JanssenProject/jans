@@ -32,26 +32,26 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName(name = "oxSmtpConfiguration")
+	@AttributeName(name = "jsSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "oxCacheConfiguration")
+	@AttributeName(name = "jsCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 
-	@AttributeName(name = "oxDocumentStoreConfiguration")
+	@AttributeName(name = "jsDocStoreConf")
 	@JsonObject
 	private DocumentStoreConfiguration documentStoreConfiguration;
 
-	@AttributeName(name = "oxIDPAuthentication")
+	@AttributeName(name = "jsIDPAuthn")
 	@JsonObject
-	private List<IDPAuthConf> oxIDPAuthentication;
+	private List<IDPAuthConf> jsIDPAuthn;
 
-	@AttributeName(name = "oxAuthenticationMode")
+	@AttributeName(name = "jsenticationMode")
 	private String authenticationMode;
 	
-	@AttributeName(name = "gluuPassportEnabled")
+	@AttributeName(name = "jsPassportEnabled")
 	private Boolean passportEnabled;
 
 	public Boolean getPassportEnabled() {
@@ -95,11 +95,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	}
 
 	public List<IDPAuthConf> getOxIDPAuthentication(){
-		return this.oxIDPAuthentication;
+		return this.jsIDPAuthn;
 	}
 	
-	public void setOxIDPAuthentication(List<IDPAuthConf> oxIDPAuthentication){
-		this.oxIDPAuthentication = oxIDPAuthentication;
+	public void setOxIDPAuthentication(List<IDPAuthConf> jsIDPAuthn){
+		this.jsIDPAuthn = jsIDPAuthn;
 	}
 
 	public String getAuthenticationMode() {
@@ -113,8 +113,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", oxIDPAuthentication=")
-				.append(oxIDPAuthentication).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
+		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", jsIDPAuthn=")
+				.append(jsIDPAuthn).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
 				.append("]");
 		return builder.toString();
 	}
