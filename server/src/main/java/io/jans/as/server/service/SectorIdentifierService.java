@@ -51,17 +51,17 @@ public class SectorIdentifierService {
     protected AppConfiguration appConfiguration;
 
     /**
-     * Get sector identifier by oxId
+     * Get sector identifier by jsId
      *
-     * @param oxId Sector identifier oxId
+     * @param jsId Sector identifier jsId
      * @return Sector identifier
      */
-    public SectorIdentifier getSectorIdentifierById(String oxId) {
+    public SectorIdentifier getSectorIdentifierById(String jsId) {
         SectorIdentifier result = null;
         try {
-            result = ldapEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(oxId));
+            result = ldapEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(jsId));
         } catch (Exception e) {
-            log.error("Failed to find sector identifier by oxId " + oxId, e);
+            log.error("Failed to find sector identifier by jsId " + jsId, e);
         }
         return result;
     }
@@ -69,17 +69,17 @@ public class SectorIdentifierService {
     /**
      * Build DN string for sector identifier
      *
-     * @param oxId Sector Identifier oxId
-     * @return DN string for specified sector identifier or DN for sector identifiers branch if oxId is null
+     * @param jsId Sector Identifier jsId
+     * @return DN string for specified sector identifier or DN for sector identifiers branch if jsId is null
      * @throws Exception
      */
-    public String getDnForSectorIdentifier(String oxId) {
+    public String getDnForSectorIdentifier(String jsId) {
         String sectorIdentifierDn = staticConfiguration.getBaseDn().getSectorIdentifiers();
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return sectorIdentifierDn;
         }
 
-        return String.format("oxId=%s,%s", oxId, sectorIdentifierDn);
+        return String.format("jsId=%s,%s", jsId, sectorIdentifierDn);
     }
 
     public String getSub(IAuthorizationGrant grant) {

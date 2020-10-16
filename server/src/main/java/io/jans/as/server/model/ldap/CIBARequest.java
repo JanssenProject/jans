@@ -42,7 +42,7 @@ public class CIBARequest implements Serializable {
     @AttributeName(name = "exp")
     private Date expirationDate;
 
-    @AttributeName(name = "oxStatus")
+    @AttributeName(name = "jsStatus")
     private String status;
 
 

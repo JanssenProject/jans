@@ -128,12 +128,12 @@ public class UmaResourceService {
      *
      * @return List of resource descriptions
      */
-    public List<UmaResource> getResourcesByAssociatedClient(String associatedClientDn) {
+    public List<UmaResource> getResourcesByAssociatedClient(String jsAssociatedClntDn) {
         try {
             prepareBranch();
 
-            if (StringUtils.isNotBlank(associatedClientDn)) {
-                final Filter filter = Filter.createEqualityFilter("oxAssociatedClient", associatedClientDn);
+            if (StringUtils.isNotBlank(jsAssociatedClntDn)) {
+                final Filter filter = Filter.createEqualityFilter("jsAssociatedClnt", jsAssociatedClntDn);
                 return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, filter);
             }
         } catch (Exception e) {
@@ -195,11 +195,11 @@ public class UmaResourceService {
     /**
      * Build DN string for resource description
      */
-    public String getDnForResource(String oxId) {
-        if (StringHelper.isEmpty(oxId)) {
+    public String getDnForResource(String jsId) {
+        if (StringHelper.isEmpty(jsId)) {
             return getBaseDnForResource();
         }
-        return String.format("oxId=%s,%s", oxId, getBaseDnForResource());
+        return String.format("jsId=%s,%s", jsId, getBaseDnForResource());
     }
 
     public String getBaseDnForResource() {

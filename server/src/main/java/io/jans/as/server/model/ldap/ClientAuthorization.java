@@ -22,16 +22,16 @@ public class ClientAuthorization implements Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "oxId")
+    @AttributeName(name = "jsId")
     private String id;
 
-    @AttributeName(name = "oxAuthClientId", consistency = true)
+    @AttributeName(name = "jsClntId", consistency = true)
     private String clientId;
 
-    @AttributeName(name = "oxAuthUserId", consistency = true)
+    @AttributeName(name = "jsUsrId", consistency = true)
     private String userId;
 
-    @AttributeName(name = "oxAuthScope")
+    @AttributeName(name = "jsScope")
     private String[] scopes;
 
     @AttributeName(name = "exp")
