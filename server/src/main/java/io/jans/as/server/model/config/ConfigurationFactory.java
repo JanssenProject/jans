@@ -255,7 +255,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean isRevisionIncreased() {
-        final io.jans.as.model.config.Conf conf = loadConfigurationFromLdap("oxRevision");
+        final io.jans.as.model.config.Conf conf = loadConfigurationFromLdap("jsRevision");
         if (conf == null) {
             return false;
         }

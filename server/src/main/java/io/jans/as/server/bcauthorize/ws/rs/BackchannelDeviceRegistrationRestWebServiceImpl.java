@@ -109,7 +109,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
             return builder.build();
         }
 
-        userService.setCustomAttribute(user, "oxAuthBackchannelDeviceRegistrationToken", deviceRegistrationToken);
+        userService.setCustomAttribute(user, "jsBackchannelDeviceRegistrationTkn", deviceRegistrationToken);
         userService.updateUser(user);
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);

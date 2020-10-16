@@ -22,21 +22,21 @@ import javax.validation.constraints.Size;
  * @version March 20, 2018
  */
 @DataEntry(sortBy = {"id","description"})
-@ObjectClass(value = "oxSectorIdentifier")
+@ObjectClass(value = "jsSectorIdentifier")
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
     private static final long serialVersionUID = -2812480357430436514L;
 
-    @AttributeName(name = "oxId", ignoreDuringUpdate = true)
+    @AttributeName(name = "jsId", ignoreDuringUpdate = true)
     private String id;
     @NotNull
     @Size(min = 0, max = 250, message = "Length of the Description should not exceed 250")
     @AttributeName(name = "description")
     private String description;
-    @AttributeName(name = "oxAuthRedirectURI")
+    @AttributeName(name = "jsRedirectURI")
     private List<String> redirectUris;
 
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "jsClntId")
     private List<String> clientIds;
 
     public String getId() {

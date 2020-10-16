@@ -84,7 +84,7 @@ public class DeviceRegistrationService {
 
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
 		Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
+		Filter appIdFilter = Filter.createEqualityFilter("jsApp", appId);
 
 		Filter filter = Filter.createANDFilter(userInumFilter, appIdFilter);
 
@@ -101,9 +101,9 @@ public class DeviceRegistrationService {
 		String baseDn = userService.getDnForUser(null);
 
 		Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "oxDeviceRegistration");
-		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", getKeyHandleHashCode(keyHandleDecoded));
-		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("oxDeviceKeyHandle", keyHandle);
-		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
+		Filter deviceHashCodeFilter = Filter.createEqualityFilter("jsDeviceHashCode", getKeyHandleHashCode(keyHandleDecoded));
+		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("jsDeviceKeyHandle", keyHandle);
+		Filter appIdFilter = Filter.createEqualityFilter("jsApp", appId);
 
 		Filter filter = Filter.createANDFilter(deviceObjectClassFilter, deviceHashCodeFilter, appIdFilter, deviceKeyHandleFilter);
 
@@ -185,8 +185,8 @@ public class DeviceRegistrationService {
     public int getCountDeviceRegistrations(String appId) {
         String baseDn = userService.getDnForUser(null);
         
-        Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
-        Filter activeDeviceFilter = Filter.createEqualityFilter("oxStatus", DeviceRegistrationStatus.ACTIVE.getValue());
+        Filter appIdFilter = Filter.createEqualityFilter("jsApp", appId);
+        Filter activeDeviceFilter = Filter.createEqualityFilter("jsStatus", DeviceRegistrationStatus.ACTIVE.getValue());
         Filter resultFilter = Filter.createANDFilter(appIdFilter, activeDeviceFilter);
         
         return ldapEntryManager.countEntries(baseDn, DeviceRegistration.class, resultFilter);
@@ -195,12 +195,12 @@ public class DeviceRegistrationService {
 	/**
 	 * Build DN string for U2F user device
 	 */
-	public String getDnForU2fDevice(String userInum, String oxId) {
+	public String getDnForU2fDevice(String userInum, String jsId) {
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
-		if (StringHelper.isEmpty(oxId)) {
+		if (StringHelper.isEmpty(jsId)) {
 			return baseDnForU2fDevices;
 		}
-		return String.format("oxId=%s,%s", oxId, baseDnForU2fDevices);
+		return String.format("jsId=%s,%s", jsId, baseDnForU2fDevices);
 	}
 
 	public String getBaseDnForU2fUserDevices(String userInum) {

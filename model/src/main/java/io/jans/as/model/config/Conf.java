@@ -25,22 +25,22 @@ public class Conf {
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "oxAuthConfDynamic")
+    @AttributeName(name = "jsConfDyn")
     private AppConfiguration dynamic;
 
     @JsonObject
-    @AttributeName(name = "oxAuthConfStatic")
+    @AttributeName(name = "jsConfStatic")
     private StaticConfiguration statics;
 
     @JsonObject
-    @AttributeName(name = "oxAuthConfErrors")
+    @AttributeName(name = "jsConfErrors")
     private ErrorMessages errors;
 
     @JsonObject
-    @AttributeName(name = "oxAuthConfWebKeys")
+    @AttributeName(name = "jsConfWebKeys")
     private WebKeysConfiguration webKeys;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     public Conf() {

@@ -130,7 +130,7 @@ public class SessionIdService {
     private CacheService cacheService;
 
     private String buildDn(String sessionId) {
-        return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
+        return String.format("jsId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
 
     public Set<SessionId> getCurrentSessions() {
@@ -921,7 +921,7 @@ public class SessionIdService {
         if (appConfiguration.getSessionIdPersistInCache()) {
             throw new UnsupportedOperationException("Operation is not supported with sessionIdPersistInCache=true. Set it to false to avoid this exception.");
         }
-        Filter filter = Filter.createEqualityFilter("oxAuthUserDN", userDn);
+        Filter filter = Filter.createEqualityFilter("jsUsrDN", userDn);
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
     }
 

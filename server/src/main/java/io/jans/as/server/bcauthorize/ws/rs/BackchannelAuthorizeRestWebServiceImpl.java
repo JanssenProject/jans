@@ -278,7 +278,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         }
 
         try {
-            String userCode = (String) user.getAttribute("oxAuthBackchannelUserCode", true, false);
+            String userCode = (String) user.getAttribute("jsBackchannelUsrCode", true, false);
             DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorService.validateParams(
                     scopes, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
                     loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
@@ -290,7 +290,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 return builder.build();
             }
 
-            String deviceRegistrationToken = (String) user.getAttribute("oxAuthBackchannelDeviceRegistrationToken", true, false);
+            String deviceRegistrationToken = (String) user.getAttribute("jsBackchannelDeviceRegistrationTkn", true, false);
             if (deviceRegistrationToken == null) {
                 builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode()); // 401
                 builder.entity(errorResponseFactory.getErrorAsJson(UNAUTHORIZED_END_USER_DEVICE));
