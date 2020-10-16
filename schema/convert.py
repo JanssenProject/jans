@@ -69,6 +69,10 @@ if argsp.outfile:
 if argsp.dump:
     conversions.sort()
     print('{')
+    idx = 0
     for cur, new in conversions: 
-        print('"' + cur + '"', ':', '"' + new + '",')
-    print('}')
+        if idx > 0:
+            print(',')
+        print('"' + cur + '"', ':', '"' + new + '"', end = "")
+        idx = idx + 1
+    print('\n}')
