@@ -64,11 +64,11 @@ public class OIDSectorResource extends BaseResource {
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response createNewOpenIDSector(@Valid SectorIdentifier sectorIdentifier) {
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
-        String oxId = UUID.randomUUID().toString();
-        sectorIdentifier.setId(oxId);
-        sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(oxId));
+        String jsId = UUID.randomUUID().toString();
+        sectorIdentifier.setId(jsId);
+        sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(jsId));
         sectorIdentifierService.addSectorIdentifier(sectorIdentifier);
-        SectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(oxId);
+        SectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(jsId);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
