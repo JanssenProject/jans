@@ -1,0 +1,23 @@
+dn: ou=configuration,o=jans
+excludeAuthnMode: simple_password_auth
+excludeCacheRefreshServerIpAddr: 255.255.255.255
+excludeStoreConf: {"useJreCertificates":true}
+jsCacheConf: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
+jsCacheRefreshEnabled: false
+jsDocStoreConf: {"documentStoreType":"LOCAL","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
+jsFedHostingEnabled: disabled
+jsIDPAuthn: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled": false, "version": 0, "config": {"configId": "auth_ldap_server",           "servers": ["%(ldap_hostname)s:%(ldaps_port)s"],           "maxConnections": 1000,           "bindDN": "%(ldap_binddn)s",           "bindPassword": "%(encoded_ox_ldap_pw)s",           "useSSL": "true",           "baseDNs": ["ou=people,o=jans"],           "primaryKey": "uid",           "localPrimaryKey": "uid",           "useAnonymousBind": false,           "enabled": false} }
+jsLogViewerConfig: { "log_template":[   {     "value1":"oxAuth logs",     "value2":"%(jetty_base)s/oxauth/logs/*.log",     "description":""   },   {     "value1":"oxTrust logs",     "value2":"%(jetty_base)s/identity/logs/*.log",     "description":""   } ]}
+jsManageIdentityPermission: true
+jsMaxLogSize: 200
+jsOrgProfileMgt: false
+jsPassportEnabled: false
+jsRadiusEnabled: false
+jsSamlEnabled: false
+jsScimEnabled: false
+jsWhitePagesEnabled: disabled
+jsenticationMode: simple_password_auth
+objectClass: top
+objectClass: jsConf
+ou: configuration
+
