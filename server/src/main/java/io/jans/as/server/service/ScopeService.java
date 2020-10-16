@@ -65,15 +65,15 @@ public class ScopeService {
     }
 
     public List<String> getDefaultScopesDn() {
-        List<String> jsDefScopes = new ArrayList<>();
+        List<String> defaultScopes = new ArrayList<>();
 
         for (Scope scope : getAllScopesList()) {
             if (Boolean.TRUE.equals(scope.isDefaultScope())) {
-                jsDefScopes.add(scope.getDn());
+            	defaultScopes.add(scope.getDn());
             }
         }
 
-        return jsDefScopes;
+        return defaultScopes;
     }
 
     public List<String> getScopesDn(List<String> scopeNames) {

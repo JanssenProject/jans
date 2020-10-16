@@ -209,7 +209,7 @@ public class Client extends DeletableEntity implements Serializable {
     private String softwareId;
 
     @AttributeName(name = "jsSoftVer")
-    private String jsSoftVer;
+    private String softwareVersion;
 
     @AttributeName(name = "jsSoftStatement")
     private String softwareStatement;
@@ -1185,11 +1185,11 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getSoftwareVersion() {
-        return jsSoftVer;
+        return softwareVersion;
     }
 
     public void setSoftwareVersion(String jsSoftVer) {
-        this.jsSoftVer = jsSoftVer;
+        this.softwareVersion = jsSoftVer;
     }
 
     public String getSoftwareStatement() {
