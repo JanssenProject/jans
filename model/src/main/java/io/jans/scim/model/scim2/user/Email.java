@@ -30,7 +30,7 @@ public class Email {
             "e.g.  bjensen@example.com instead of bjensen@EXAMPLE.COM.",
             isRequired = true)  //specs says false but it doesn't make sense
     @Validator(value = Validations.EMAIL)
-    @StoreReference(ref="mail")    //Take advantage that oxTrustEmail's value is synced with mail attribute
+    @StoreReference(ref="mail")    //Take advantage that excludeEmail's value is synced with mail attribute
     private String value;
 
     @Attribute(description = "A human readable name, primarily used for  display purposes.")

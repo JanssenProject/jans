@@ -65,10 +65,10 @@ public class GluuGroup extends Entry implements Serializable {
 	@AttributeName
 	private String seeAlso;
 
-	@AttributeName(name = "gluuStatus")
+	@AttributeName(name = "jsStatus")
 	private GluuStatus status;
 
-	@AttributeName(name = "gluuGroupVisibility")
+	@AttributeName(name = "jsGrpVisibility")
 	private GluuGroupVisibility visibility;
 
 	@AttributesList(name = "name", value = "values", sortByName = true, attributesConfiguration = {

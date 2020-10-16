@@ -80,8 +80,8 @@ public class UserPersistenceHelper {
 
         Date updateDate = new Date();
         person.setUpdatedAt(updateDate);
-        if (person.getAttribute("oxTrustMetaLastModified") != null) {
-            person.setAttribute("oxTrustMetaLastModified",
+        if (person.getAttribute("excludeMetaLastMod") != null) {
+            person.setAttribute("excludeMetaLastMod",
                     ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
         }
         persistenceEntryManager.merge(person);
@@ -112,24 +112,24 @@ public class UserPersistenceHelper {
     }
 
     /**
-     * One-way sync from "oxTrustEmail" to "mail". Ultimately this is persisted so
-     * "mail" will be updated by values from "oxTrustEmail".
+     * One-way sync from "excludeEmail" to "mail". Ultimately this is persisted so
+     * "mail" will be updated by values from "excludeEmail".
      *
      * @param customPerson Represents the user object to be modified 
      * @return Modified user object
-     * @throws Exception If (json) values in oxTrustEmail cannot be parsed 
+     * @throws Exception If (json) values in excludeEmail cannot be parsed 
      */
     public ScimCustomPerson syncEmailForward(ScimCustomPerson customPerson) throws Exception {
 
         log.info("syncing email ...");
-        List<String> oxTrustEmails = customPerson.getAttributeList("oxTrustEmail");
+        List<String> excludeEmails = customPerson.getAttributeList("excludeEmail");
 
-        if (!oxTrustEmails.isEmpty()) {
+        if (!excludeEmails.isEmpty()) {
             ObjectMapper mapper = ServiceUtil.getObjectMapper();
-            String[] newMails = new String[oxTrustEmails.size()];
+            String[] newMails = new String[excludeEmails.size()];
 
             for (int i = 0; i < newMails.length; i++) {
-                newMails[i] = mapper.readValue(oxTrustEmails.get(i), Email.class).getValue();
+                newMails[i] = mapper.readValue(excludeEmails.get(i), Email.class).getValue();
             }
             customPerson.setAttribute("mail", newMails);
         } else {

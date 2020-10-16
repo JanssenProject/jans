@@ -212,7 +212,7 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 			return;
 		}
 
-		final C conf = loadConfigurationFromDb("oxRevision");
+		final C conf = loadConfigurationFromDb("jsRevision");
 		if (conf == null) {
 			return;
 		}

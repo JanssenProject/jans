@@ -54,7 +54,7 @@ public class PairwiseIdentifiersTest extends BaseTest {
             user=response.readEntity(UserResource.class);
             assertNull(user.getPairwiseIdentifiers());
 
-            //This test does not guarantee the ou=pairwiseIdentifiers sub-branch disappears... only the oxPPID LDAP attribute
+            //This test does not guarantee the ou=pairwiseIdentifiers sub-branch disappears... only the jsPPID LDAP attribute
         }
 
     }

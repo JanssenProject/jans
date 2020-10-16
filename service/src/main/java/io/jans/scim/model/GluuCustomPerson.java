@@ -38,49 +38,49 @@ public class GluuCustomPerson extends User
     private String sourceServerName;
     private String sourceServerUserDn;
 
-    @AttributeName(name = "gluuWhitePagesListed")
+    @AttributeName(name = "jsWhitePagesListed")
     private String gluuAllowPublication;
 
-    @AttributeName(name = "oxGuid")
+    @AttributeName(name = "jsGuid")
     private String guid;
 
-    @AttributeName(name = "gluuOptOuts")
-    private List<String> gluuOptOuts;
+    @AttributeName(name = "jsOptOuts")
+    private List<String> jsOptOuts;
 
-    @AttributeName(name = "associatedClient")
-    private List<String> associatedClient;
+    @AttributeName(name = "jsAssociatedClnt")
+    private List<String> jsAssociatedClnt;
     
-    @AttributeName(name = "oxPPID")
-    private List<String> oxPPID;
+    @AttributeName(name = "jsPPID")
+    private List<String> jsPPID;
 
    // @JsonObject
-    @AttributeName(name = "oxExternalUid")
-    private List<String> oxExternalUid;
+    @AttributeName(name = "jsExternalUid")
+    private List<String> jsExternalUid;
     
     @JsonObject
-    @AttributeName(name = "oxOTPDevices")
-    private OTPDevice  oxOTPDevices;
+    @AttributeName(name = "jsOTPDevices")
+    private OTPDevice  jsOTPDevices;
     
-    @AttributeName(name = "oxMobileDevices")
-    private String oxMobileDevices;
+    @AttributeName(name = "jsMobileDevices")
+    private String jsMobileDevices;
 
     public String getOxMobileDevices() {
-		return oxMobileDevices;
+		return jsMobileDevices;
 	}
 
-	public void setOxMobileDevices(String oxMobileDevices) {
-		this.oxMobileDevices = oxMobileDevices;
+	public void setOxMobileDevices(String jsMobileDevices) {
+		this.jsMobileDevices = jsMobileDevices;
 	}
 
 	public OTPDevice getOxOTPDevices() {
-		return oxOTPDevices;
+		return jsOTPDevices;
 	}
 
-	public void setOxOTPDevices(OTPDevice oxOTPDevices) {
-		this.oxOTPDevices = oxOTPDevices;
+	public void setOxOTPDevices(OTPDevice jsOTPDevices) {
+		this.jsOTPDevices = jsOTPDevices;
 	}
 
-	@AttributeName(name = "oxCreationTimestamp")
+	@AttributeName(name = "jsCreationTimestamp")
     private Date creationDate;
 
     @AttributeName
@@ -120,11 +120,11 @@ public class GluuCustomPerson extends User
     }
 
     public String getStatus() {
-        return getAttribute("gluuStatus");
+        return getAttribute("jsStatus");
     }
 
     public void setStatus(String value) {
-        setAttribute("gluuStatus", value);
+        setAttribute("jsStatus", value);
     }
 
     public String getUserPassword() {
@@ -144,11 +144,11 @@ public class GluuCustomPerson extends User
     }
 
     public Boolean getSLAManager() {
-        return Boolean.valueOf(getAttribute("gluuSLAManager"));
+        return Boolean.valueOf(getAttribute("jsSLAManager"));
     }
 
     public void setSLAManager(Boolean value) {
-        setAttribute("gluuSLAManager", value.toString());
+        setAttribute("jsSLAManager", value.toString());
     }
 
     public List<String> getMemberOf() {
@@ -291,19 +291,19 @@ public class GluuCustomPerson extends User
     }
 
     public void setGluuOptOuts(List<String> optOuts) {
-        this.gluuOptOuts = optOuts;
+        this.jsOptOuts = optOuts;
     }
 
     public List<String> getGluuOptOuts() {
-        return gluuOptOuts;
+        return jsOptOuts;
     }
 
     public List<String> getAssociatedClient() {
-        return this.associatedClient;
+        return this.jsAssociatedClnt;
     }
 
-    public void setAssociatedClient(List<String> associatedClientDNs) {
-        this.associatedClient = associatedClientDNs;
+    public void setAssociatedClient(List<String> jsAssociatedClntDNs) {
+        this.jsAssociatedClnt = jsAssociatedClntDNs;
     }
 
     public String getSourceServerName() {
@@ -339,19 +339,19 @@ public class GluuCustomPerson extends User
 	}
 
     public List<String> getOxExternalUid() {
-        return oxExternalUid;
+        return jsExternalUid;
     }
 
-    public void setOxExternalUid(List<String> oxExternalUid) {
-        this.oxExternalUid = oxExternalUid;
+    public void setOxExternalUid(List<String> jsExternalUid) {
+        this.jsExternalUid = jsExternalUid;
     }
 
     public List<String> getOxPPID() {
-        return oxPPID;
+        return jsPPID;
     }
 
-    public void setOxPPID(List<String> oxPPID) {
-        this.oxPPID = oxPPID;
+    public void setOxPPID(List<String> jsPPID) {
+        this.jsPPID = jsPPID;
     }
 
 	/* (non-Javadoc)

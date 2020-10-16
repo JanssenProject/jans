@@ -31,26 +31,26 @@ public class Meta {
             mutability = AttributeDefinition.Mutability.READ_ONLY,
             type = AttributeDefinition.Type.DATETIME)
     @StoreReference(resourceType = {UserResource.class, FidoDeviceResource.class, Fido2DeviceResource.class},
-            refs = {"oxCreationTimestamp", "creationDate", "creationDate"})
-    //For effects of filters we don't use "oxTrustMetaCreated" but "oxCreationTimestamp" which has generalizedTime data type)
+            refs = {"jsCreationTimestamp", "creationDate", "creationDate"})
+    //For effects of filters we don't use "excludeMetaCreated" but "jsCreationTimestamp" which has generalizedTime data type)
     private String created;
 
     @Attribute(description = "Date and time the resource was last modified",
             mutability = AttributeDefinition.Mutability.READ_ONLY,
             type = AttributeDefinition.Type.DATETIME)
     @StoreReference(resourceType = {UserResource.class}, refs={"updatedAt"})
-    //For effects of filters we don't use "oxTrustMetaLastModified" but "updatedAt" which has generalizedTime data type)
+    //For effects of filters we don't use "excludeMetaLastMod" but "updatedAt" which has generalizedTime data type)
     private String lastModified;
 
     @Attribute(description = "The location (URI) of the resource",
             mutability = AttributeDefinition.Mutability.READ_ONLY)
-    @StoreReference(ref = "oxTrustMetaLocation")
+    @StoreReference(ref = "excludeMetaLocation")
     private String location;
 
     @Attribute(description = "The version of the resource",
             isCaseExact = true,
             mutability = AttributeDefinition.Mutability.READ_ONLY)
-    @StoreReference(ref = "oxTrustMetaVersion")
+    @StoreReference(ref = "excludeMetaVer")
     private String version;
 
     /**

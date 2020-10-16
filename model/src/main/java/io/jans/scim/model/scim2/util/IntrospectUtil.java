@@ -304,7 +304,7 @@ public class IntrospectUtil {
      * <code>Map</code> that stores paths (as stored in {@link #allAttrs}) vs. LDAP attribute names corresponding to such
      * paths.
      * <p>As an example, for {@link UserResource} this map will contain pairs like <code>(userName, uid); (displayName, displayName);
-     * (meta.created, oxCreationTimestamp); (addresses, oxTrustAddresses); (addresses.value, oxTrustAddresses)...</code></p>
+     * (meta.created, jsCreationTimestamp); (addresses, excludeAddres); (addresses.value, excludeAddres)...</code></p>
      */
     public static Map<Class <? extends BaseScimResource>, Map<String, String>> storeRefs;
 

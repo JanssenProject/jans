@@ -23,34 +23,34 @@ public class GluuCustomFidoDevice extends Entry {
 	 */
 	private static final long serialVersionUID = 4463359164739925541L;
 
-	@AttributeName(name = "oxId", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsId", ignoreDuringUpdate = true)
 	private String id;
 
 	@AttributeName(name = "creationDate", ignoreDuringUpdate = true)
 	private String creationDate;
 
-	@AttributeName(name = "oxApplication", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsApp", ignoreDuringUpdate = true)
 	private String application;
 
-	@AttributeName(name = "oxCounter", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsCounter", ignoreDuringUpdate = true)
 	private String counter;
 
-	@AttributeName(name = "oxDeviceData", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsDeviceData", ignoreDuringUpdate = true)
 	private String deviceData;
 
-	@AttributeName(name = "oxDeviceHashCode", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsDeviceHashCode", ignoreDuringUpdate = true)
 	private String deviceHashCode;
 
-	@AttributeName(name = "oxDeviceKeyHandle", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsDeviceKeyHandle", ignoreDuringUpdate = true)
 	private String deviceKeyHandle;
 
-	@AttributeName(name = "oxDeviceRegistrationConf", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsDeviceRegistrationConf", ignoreDuringUpdate = true)
 	private String deviceRegistrationConf;
 
-	@AttributeName(name = "oxLastAccessTime", ignoreDuringUpdate = true)
+	@AttributeName(name = "jsLastAccessTime", ignoreDuringUpdate = true)
 	private String lastAccessTime;
 
-	@AttributeName(name = "oxStatus")
+	@AttributeName(name = "jsStatus")
 	private String status;
 
 	@AttributeName(name = "displayName")
@@ -59,16 +59,16 @@ public class GluuCustomFidoDevice extends Entry {
 	@AttributeName(name = "description")
 	private String description;
 
-	@AttributeName(name = "oxNickName")
+	@AttributeName(name = "jsNickName")
 	private String nickname;
 
-	@AttributeName(name = "oxTrustMetaLastModified")
+	@AttributeName(name = "excludeMetaLastMod")
 	private String metaLastModified;
 
-	@AttributeName(name = "oxTrustMetaLocation")
+	@AttributeName(name = "excludeMetaLocation")
 	private String metaLocation;
 
-	@AttributeName(name = "oxTrustMetaVersion")
+	@AttributeName(name = "excludeMetaVer")
 	private String metaVersion;
 
 	public String getId() {

@@ -93,7 +93,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             } else {
                 log.info("Searching users updated or created after {} (starting at index {} - at most {} results)", date, start, itemsPerPage);
                 Filter filter = Filter.createORFilter(
-                        Filter.createGreaterOrEqualFilter("oxCreationTimestamp", date),
+                        Filter.createGreaterOrEqualFilter("jsCreationTimestamp", date),
                         Filter.createGreaterOrEqualFilter("updatedAt", date));
                 log.trace("Using filter {}", filter.toString());
 
@@ -232,7 +232,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
     }
 
 /*
-    //Groups endpoint not necessary, but if needed, we need to guarantee first that oxTrustMetaLastModified is refreshed
+    //Groups endpoint not necessary, but if needed, we need to guarantee first that excludeMetaLastMod is refreshed
     //whenever the group is updated in GUI or via SCIM (or cust script)
     //@Path("UpdatedGroups")
     //@GET
@@ -245,11 +245,11 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
         try {
             String date = ZonedDateTime.parse(isoDate).format(DateTimeFormatter.ISO_INSTANT);
-            //In database, oxTrustMetaLastModified is just a string (not date)
+            //In database, excludeMetaLastMod is just a string (not date)
 
             Filter filter = Filter.createORFilter(
-                    Filter.createNOTFilter(Filter.createPresenceFilter("oxTrustMetaLastModified")),
-                    Filter.createGreaterOrEqualFilter("oxTrustMetaLastModified", date));
+                    Filter.createNOTFilter(Filter.createPresenceFilter("excludeMetaLastMod")),
+                    Filter.createGreaterOrEqualFilter("excludeMetaLastMod", date));
             List<GluuGroup> list = entryManager.findEntries(groupService.getDnForGroup(null), GluuGroup.class, filter);
             response = Response.ok(getGroupResultsAsJson(list)).build();
 
@@ -269,11 +269,11 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
         long fresher = 0;
 
         for (GluuGroup group : list) {
-            GroupResource scimGroup = new GroupResource();
-            scim2GroupService.transferAttributesToGroupResource(group, scimGroup, userWebService.getEndpointUrl(), groupWebService.getEndpointUrl());
-            resources.add(scimGroup);
+            GroupResource jsScimGrp = new GroupResource();
+            scim2GroupService.transferAttributesToGroupResource(group, jsScimGrp, userWebService.getEndpointUrl(), groupWebService.getEndpointUrl());
+            resources.add(jsScimGrp);
 
-            String modified = group.getAttribute("oxTrustMetaLastModified");
+            String modified = group.getAttribute("excludeMetaLastMod");
             try {
                 if (modified != null) {
                     long updatedAt = ZonedDateTime.parse(modified).toInstant().toEpochMilli();

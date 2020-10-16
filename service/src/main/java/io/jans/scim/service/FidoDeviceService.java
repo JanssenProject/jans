@@ -43,7 +43,7 @@ public class FidoDeviceService implements Serializable {
 		if (userId != null && !userId.isEmpty()) {
 			baseDn = "ou=fido," + personService.getDnForPerson(userId);
 			if (id != null && !id.isEmpty()) {
-				baseDn = "oxId=" + id + "," + baseDn;
+				baseDn = "jsId=" + id + "," + baseDn;
 			}
 		} else {
 			baseDn = personService.getDnForPerson(null);
@@ -60,7 +60,7 @@ public class FidoDeviceService implements Serializable {
 			if (StringUtils.isNotEmpty(userId))
 				gluuCustomFidoDevice = ldapEntryManager.find(GluuCustomFidoDevice.class, dn);
 			else {
-				Filter filter = Filter.createEqualityFilter("oxId", id);
+				Filter filter = Filter.createEqualityFilter("jsId", id);
 				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, GluuCustomFidoDevice.class, filter).get(0);
 			}
 		} catch (Exception e) {

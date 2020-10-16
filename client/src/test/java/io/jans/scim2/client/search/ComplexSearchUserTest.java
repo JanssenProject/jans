@@ -212,7 +212,7 @@ public class ComplexSearchUserTest extends UserBaseTest {
         }
     }
 
-    //This test is disabled to avoid problems in attribute oxTrustMetaLastModified being inconsistent with updatedAt in testing server
+    //This test is disabled to avoid problems in attribute excludeMetaLastMod being inconsistent with updatedAt in testing server
     //@Test
     public void searchSortByDate() {
 
