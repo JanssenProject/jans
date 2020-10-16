@@ -2138,7 +2138,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsenticationMode"
+        "jsAuthMode"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4345,10 +4345,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "jsenticationData",
+      "desc": "jsAuthData",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsenticationData"
+        "jsAuthData"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4967,7 +4967,7 @@
         "inum",
         "inumFN",
         "o",
-        "jsenticationMode",
+        "jsAuthMode",
         "excludeAuthnMode",
         "jsIDPAuthn",
         "jsLogViewerConfig",
@@ -5875,7 +5875,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "_id",
+        "Uid",
         "jsStartDate",
         "jsEndDate",
         "jsAppTyp",
@@ -5963,7 +5963,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "ou",
-        "_id",
+        "Uid",
         "inum",
         "jsConfApp",
         "jsRevision"
@@ -6031,7 +6031,7 @@
         "jsSessStateId",
         "jsCodeChallenge",
         "personInum",
-        "jsenticationData",
+        "jsAuthData",
         "jsStatus"
       ],
       "must": [
@@ -6104,7 +6104,7 @@
         "jsLoadAvg",
         "jsPersonCount",
         "jsSystemUptime",
-        "_id"
+        "Uid"
       ],
       "must": [
         "objectclass"
