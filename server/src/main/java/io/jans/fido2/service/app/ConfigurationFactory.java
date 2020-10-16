@@ -206,7 +206,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean isRevisionIncreased() {
-        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        final Conf conf = loadConfigurationFromLdap("jsRevision");
         if (conf == null) {
             return false;
         }

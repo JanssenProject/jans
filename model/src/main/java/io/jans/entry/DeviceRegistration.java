@@ -31,7 +31,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;
 
-	@AttributeName(ignoreDuringUpdate = true, name = "oxId")
+	@AttributeName(ignoreDuringUpdate = true, name = "jsId")
 	private String id;
 
 	@AttributeName
@@ -40,40 +40,40 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	@AttributeName
 	private String description;
 
-	@AttributeName(name = "oxNickName")
+	@AttributeName(name = "jsNickName")
 	private String nickname;
 
     @JsonObject
-    @AttributeName(name = "oxDeviceRegistrationConf")
+    @AttributeName(name = "jsDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
     @JsonObject
-    @AttributeName(name = "oxDeviceNotificationConf")
+    @AttributeName(name = "jsDeviceNotificationConf")
     private String deviceNotificationConf;
 
-    @AttributeName(name = "oxCounter")
+    @AttributeName(name = "jsCounter")
 	private long counter;
 
-    @AttributeName(name = "oxStatus")
+    @AttributeName(name = "jsStatus")
 	private DeviceRegistrationStatus status;
 
-	@AttributeName(name = "oxApplication")
+	@AttributeName(name = "jsApp")
 	private String application;
 
-	@AttributeName(name = "oxDeviceKeyHandle")
+	@AttributeName(name = "jsDeviceKeyHandle")
 	private String keyHandle;
 
-	@AttributeName(name = "oxDeviceHashCode")
+	@AttributeName(name = "jsDeviceHashCode")
 	private Integer keyHandleHashCode;
 
     @JsonObject
-	@AttributeName(name = "oxDeviceData")
+	@AttributeName(name = "jsDeviceData")
 	private DeviceData deviceData;
 
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-    @AttributeName(name = "oxLastAccessTime")
+    @AttributeName(name = "jsLastAccessTime")
     private Date lastAccessTime;
 
     @AttributeName(name = "exp")
