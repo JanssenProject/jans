@@ -33,7 +33,7 @@ public class SharedConfigurationEntry extends InumEntry implements Serializable 
 	@AttributeName
 	private String displayName;
 
-	@AttributeName(name = "gluuLastUpdate", updateOnly = true)
+	@AttributeName(name = "jsLastUpd", updateOnly = true)
 	private Date lastUpdate;
 
 	@AttributeName(name = "gluuConfigurationPollingInterval")
@@ -42,11 +42,11 @@ public class SharedConfigurationEntry extends InumEntry implements Serializable 
 	@AttributeName(name = "Janssen ProjectEmail")
 	private String contactEmail;
 
-	@AttributeName(name = "oxSmtpConfiguration")
+	@AttributeName(name = "jsSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "oxCacheConfiguration")
+	@AttributeName(name = "jsCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 

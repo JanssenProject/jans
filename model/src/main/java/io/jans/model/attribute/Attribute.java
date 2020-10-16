@@ -44,19 +44,19 @@ public class Attribute extends Entry implements Serializable {
     @AttributeName
     private String lifetime;
 
-    @AttributeName(name = "oxSourceAttribute")
+    @AttributeName(name = "jsSourceAttr")
     private String sourceAttribute;
 
     @AttributeName
     private String salt;
 
-    @AttributeName(name = "oxNameIdType")
+    @AttributeName(name = "jsNameIdType")
     private String nameIdType;
 
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
     @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-    @AttributeName(name = "gluuAttributeName")
+    @AttributeName(name = "jsAttrName")
     private String name;
 
     @NotNull
@@ -69,54 +69,54 @@ public class Attribute extends Entry implements Serializable {
     @AttributeName
     private String description;
 
-    @AttributeName(name = "gluuAttributeOrigin")
+    @AttributeName(name = "jsAttrOrigin")
     private String origin;
 
     @NotNull
-    @AttributeName(name = "gluuAttributeType")
+    @AttributeName(name = "jsAttrTyp")
     private AttributeDataType dataType;
 
     @NotNull
-    @AttributeName(name = "gluuAttributeEditType")
+    @AttributeName(name = "jsAttrEditTyp")
     private UserRole[] editType;
 
     @NotNull
-    @AttributeName(name = "gluuAttributeViewType")
+    @AttributeName(name = "jsAttrViewTyp")
     private UserRole[] viewType;
 
-    @AttributeName(name = "gluuAttributeUsageType")
+    @AttributeName(name = "jsAttrUsgTyp")
     private AttributeUsageType[] usageType;
 
-    @AttributeName(name = "oxAuthClaimName")
-    private String oxAuthClaimName;
+    @AttributeName(name = "jsClaimName")
+    private String jsClaimName;
 
     @AttributeName(name = "seeAlso")
     private String seeAlso;
 
-    @AttributeName(name = "gluuStatus")
+    @AttributeName(name = "jsStatus")
     private GluuStatus status;
 
-    @AttributeName(name = "gluuSAML1URI")
+    @AttributeName(name = "jsSAML1URI")
     private String saml1Uri;
 
-    @AttributeName(name = "gluuSAML2URI")
+    @AttributeName(name = "jsSAML2URI")
     private String saml2Uri;
 
     @AttributeName(ignoreDuringUpdate = true)
     private String urn;
 
-    @AttributeName(name = "oxSCIMCustomAttribute")
-    private Boolean oxSCIMCustomAttribute;
+    @AttributeName(name = "jsSCIMCustomAttr")
+    private Boolean jsSCIMCustomAttr;
 
-    @AttributeName(name = "oxMultivaluedAttribute")
+    @AttributeName(name = "jsMultivaluedAttr")
     private Boolean multiValuedAttribute;
 
     @JsonObject
-    @AttributeName(name = "oxValidation")
+    @AttributeName(name = "jsValidation")
     private AttributeValidation attributeValidation;
 
-    @AttributeName(name = "gluuTooltip")
-    private String gluuTooltip;
+    @AttributeName(name = "jsTooltip")
+    private String jsTooltip;
 
     public String getInum() {
         return inum;
@@ -231,11 +231,11 @@ public class Attribute extends Entry implements Serializable {
     }
 
     public String getOxAuthClaimName() {
-        return oxAuthClaimName;
+        return jsClaimName;
     }
 
-    public void setOxAuthClaimName(String oxAuthClaimName) {
-        this.oxAuthClaimName = oxAuthClaimName;
+    public void setOxAuthClaimName(String jsClaimName) {
+        this.jsClaimName = jsClaimName;
     }
 
     public String getSeeAlso() {
@@ -279,11 +279,11 @@ public class Attribute extends Entry implements Serializable {
     }
 
     public Boolean getOxSCIMCustomAttribute() {
-        return oxSCIMCustomAttribute;
+        return jsSCIMCustomAttr;
     }
 
-    public void setOxSCIMCustomAttribute(Boolean oxSCIMCustomAttribute) {
-        this.oxSCIMCustomAttribute = oxSCIMCustomAttribute;
+    public void setOxSCIMCustomAttribute(Boolean jsSCIMCustomAttr) {
+        this.jsSCIMCustomAttr = jsSCIMCustomAttr;
     }
 
     public Boolean getMultiValuedAttribute() {
@@ -295,11 +295,11 @@ public class Attribute extends Entry implements Serializable {
     }
 
     public String getGluuTooltip() {
-        return gluuTooltip;
+        return jsTooltip;
     }
 
-    public void setGluuTooltip(String gluuTooltip) {
-        this.gluuTooltip = gluuTooltip;
+    public void setGluuTooltip(String jsTooltip) {
+        this.jsTooltip = jsTooltip;
     }
 
     public AttributeValidation getAttributeValidation() {
@@ -323,15 +323,15 @@ public class Attribute extends Entry implements Serializable {
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + Arrays.hashCode(editType);
-        result = prime * result + ((gluuTooltip == null) ? 0 : gluuTooltip.hashCode());
+        result = prime * result + ((jsTooltip == null) ? 0 : jsTooltip.hashCode());
         result = prime * result + ((inum == null) ? 0 : inum.hashCode());
         result = prime * result + ((lifetime == null) ? 0 : lifetime.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
         result = prime * result + ((origin == null) ? 0 : origin.hashCode());
-        result = prime * result + ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
+        result = prime * result + ((jsClaimName == null) ? 0 : jsClaimName.hashCode());
         result = prime * result + ((multiValuedAttribute == null) ? 0 : multiValuedAttribute.hashCode());
-        result = prime * result + ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute.hashCode());
+        result = prime * result + ((jsSCIMCustomAttr == null) ? 0 : jsSCIMCustomAttr.hashCode());
         result = prime * result + ((salt == null) ? 0 : salt.hashCode());
         result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
         result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());

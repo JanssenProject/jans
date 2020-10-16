@@ -46,40 +46,40 @@ public class CustomScript extends BaseEntry {
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
     
-    @AttributeName(name = "oxAlias")
+    @AttributeName(name = "jsAlias")
     private List<String> aliases;
 
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "oxScript")
+    @AttributeName(name = "jsScr")
     private String script;
 
-    @AttributeName(name = "oxScriptType")
+    @AttributeName(name = "jsScrType")
     private CustomScriptType scriptType;
 
     @AttributeName(name = "programmingLanguage")
     private ProgrammingLanguage programmingLanguage;
 
     @JsonObject
-    @AttributeName(name = "oxModuleProperty")
+    @AttributeName(name = "jsModuleProperty")
     private List<SimpleCustomProperty> moduleProperties =new ArrayList<>();
 
     @JsonObject
-    @AttributeName(name = "oxConfigurationProperty")
+    @AttributeName(name = "jsConfProperty")
     private List<SimpleExtendedCustomProperty> configurationProperties;
 
-    @AttributeName(name = "oxLevel")
+    @AttributeName(name = "jsLevel")
     private int level;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
-    @AttributeName(name = "oxEnabled")
+    @AttributeName(name = "jsEnabled")
     private boolean enabled;
 
     @JsonObject
-    @AttributeName(name = "oxScriptError")
+    @AttributeName(name = "jsScrError")
     private ScriptError scriptError;
 
     @Transient

@@ -20,9 +20,9 @@ public class OxConstants {
 	public static final String INUM = "inum";
 	public static final String INAME = "iname";
 	public static final String DISPLAY_NAME = "displayName";
-	public static final String SCRIPT_TYPE = "oxScriptType";
+	public static final String SCRIPT_TYPE = "jsScrType";
 	public static final String DESCRIPTION = "description";
-	public static final String ORIGIN = "gluuAttributeOrigin";
+	public static final String ORIGIN = "jsAttrOrigin";
 	public static final String MAIL = "mail";
 
 	public static final String CACHE_ORGANIZATION_KEY = "organization";
