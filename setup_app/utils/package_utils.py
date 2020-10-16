@@ -55,7 +55,7 @@ class PackageUtils(SetupUtils):
 
 
                 if install_type == 'mondatory':
-                    print("The following packages are required for Jans Server")
+                    print("The following packages are required for Janssen Server")
                     print(packages)
                     r = input("Do you want to install these now? [Y/n] ")
                     if r and r.lower()=='n':
