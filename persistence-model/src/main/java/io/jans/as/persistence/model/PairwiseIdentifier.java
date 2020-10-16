@@ -21,16 +21,16 @@ import java.net.URI;
 @ObjectClass(value = "pairwiseIdentifier")
 public class PairwiseIdentifier extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     private String id;
 
-    @AttributeName(name = "oxSectorIdentifier")
+    @AttributeName(name = "jsSectorIdentifier")
     private String sectorIdentifier;
 
-    @AttributeName(name = "oxAuthClientId")
+    @AttributeName(name = "jsClntId")
     private String clientId;
 
-    @AttributeName(name = "oxAuthUserId")
+    @AttributeName(name = "jsUsrId")
     private String userInum;
 
     public PairwiseIdentifier() {

@@ -203,8 +203,8 @@ public class AuthenticationService extends RequestService {
         ldapEntryManager.persist(authenticateRequestMessageLdap);
     }
 
-    public AuthenticateRequestMessage getAuthenticationRequestMessage(String oxId) {
-        String requestDn = getDnForAuthenticateRequestMessage(oxId);
+    public AuthenticateRequestMessage getAuthenticationRequestMessage(String jsId) {
+        String requestDn = getDnForAuthenticateRequestMessage(jsId);
 
         AuthenticateRequestMessageLdap authenticateRequestMessageLdap = ldapEntryManager.find(AuthenticateRequestMessageLdap.class, requestDn);
         if (authenticateRequestMessageLdap == null) {
@@ -216,7 +216,7 @@ public class AuthenticationService extends RequestService {
 
     public AuthenticateRequestMessageLdap getAuthenticationRequestMessageByRequestId(String requestId) {
         String baseDn = getDnForAuthenticateRequestMessage(null);
-        Filter requestIdFilter = Filter.createEqualityFilter("oxRequestId", requestId);
+        Filter requestIdFilter = Filter.createEqualityFilter("jsReqId", requestId);
 
         List<AuthenticateRequestMessageLdap> authenticateRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, AuthenticateRequestMessageLdap.class,
                 requestIdFilter);
@@ -236,7 +236,7 @@ public class AuthenticationService extends RequestService {
             return null;
         }
 
-        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "oxId");
+        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "jsId");
         if (deviceRegistrations.isEmpty()) {
             throw new InvalidKeyHandleDeviceException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
         }
@@ -253,13 +253,13 @@ public class AuthenticationService extends RequestService {
     /**
      * Build DN string for U2F authentication request
      */
-    public String getDnForAuthenticateRequestMessage(String oxId) {
+    public String getDnForAuthenticateRequestMessage(String jsId) {
         final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=gluu
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=authentication_requests,%s", u2fBaseDn);
         }
 
-        return String.format("oxid=%s,ou=authentication_requests,%s", oxId, u2fBaseDn);
+        return String.format("oxid=%s,ou=authentication_requests,%s", jsId, u2fBaseDn);
     }
 
 }

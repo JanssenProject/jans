@@ -43,9 +43,9 @@ public class SectorIdentifier extends HttpServlet {
         PrintWriter out = httpResponse.getWriter();
         try {
             String urlPath = httpRequest.getPathInfo();
-            String oxId = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
+            String jsId = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
 
-            io.jans.as.persistence.model.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(oxId);
+            io.jans.as.persistence.model.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(jsId);
 
             JSONArray jsonArray = new JSONArray();
 

@@ -27,16 +27,16 @@ import java.util.TimeZone;
 @ObjectClass(value = "oxU2fRequest")
 public class RequestMessageLdap extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     protected String id;
 
-    @AttributeName(name = "oxRequestId")
+    @AttributeName(name = "jsReqId")
     protected String requestId;
 
     @AttributeName(name = "creationDate")
     protected Date creationDate;
 
-    @AttributeName(name = "oxSessionStateId")
+    @AttributeName(name = "jsSessStateId")
     protected String sessionId;
 
     @AttributeName(name = "personInum")

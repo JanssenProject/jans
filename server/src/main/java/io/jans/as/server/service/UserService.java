@@ -65,7 +65,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         }
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-        Filter registeredFilter = Filter.createEqualityFilter("oxStatus", "registered");
+        Filter registeredFilter = Filter.createEqualityFilter("jsStatus", "registered");
         Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
 
         long countEntries = persistenceEntryManager.countEntries(baseDn, CustomEntry.class, filter);
@@ -86,7 +86,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         	}
         }
 		
-        Filter resultFilter = Filter.createEqualityFilter("oxStatus", DeviceRegistrationStatus.ACTIVE.getValue());
+        Filter resultFilter = Filter.createEqualityFilter("jsStatus", DeviceRegistrationStatus.ACTIVE.getValue());
 
 		List<DeviceRegistration> fidoRegistrations = persistenceEntryManager.findEntries(baseDn, DeviceRegistration.class, resultFilter);
 		if (StringUtils.isEmpty(domain)) {

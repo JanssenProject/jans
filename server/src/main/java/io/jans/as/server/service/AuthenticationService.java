@@ -257,7 +257,7 @@ public class AuthenticationService {
 
 	private Pair<Boolean, User> localAuthenticate(String nameValue, String password, String ... nameAttributes) {
 		String lowerNameValue = StringHelper.toString(nameValue);
-		User user = userService.getUserByAttributes(lowerNameValue, nameAttributes, new String[] {"uid", "gluuStatus"});
+		User user = userService.getUserByAttributes(lowerNameValue, nameAttributes, new String[] {"uid", "jsStatus"});
 		if (user != null) {
 			if (!checkUserStatus(user)) {
 				return new Pair<Boolean, User>(false, user);
@@ -541,7 +541,7 @@ public class AuthenticationService {
 	}
 
 	private boolean checkUserStatus(User user) {
-		CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
+		CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jsStatus");
 
 		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(StringHelper.toString(userStatus.getValue())))) {
 			return true;
@@ -577,13 +577,13 @@ public class AuthenticationService {
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
-		CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", nowDateString);
+		CustomAttribute customAttribute = new CustomAttribute("jsLastLogonTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttribute);
 
 		try {
 			ldapEntryManager.merge(customEntry);
 		} catch (EntryPersistenceException epe) {
-			log.error("Failed to update oxLastLogonTime of user '{}'", user.getUserId());
+			log.error("Failed to update jsLastLogonTime of user '{}'", user.getUserId());
 		}
 	}
 

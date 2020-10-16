@@ -158,7 +158,7 @@ public class RegistrationService extends RequestService {
             deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
 
             // Check if there is device registration with keyHandle in LDAP already
-            List<DeviceRegistration> foundDeviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, deviceRegistration.getKeyHandle(), "oxId");
+            List<DeviceRegistration> foundDeviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, deviceRegistration.getKeyHandle(), "jsId");
             if (foundDeviceRegistrations.size() != 0) {
                 throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
             }
@@ -183,8 +183,8 @@ public class RegistrationService extends RequestService {
         return registerRequestMessageLdap;
     }
 
-    public io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage getRegisterRequestMessage(String oxId) {
-        String requestDn = getDnForRegisterRequestMessage(oxId);
+    public io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage getRegisterRequestMessage(String jsId) {
+        String requestDn = getDnForRegisterRequestMessage(jsId);
 
         RegisterRequestMessageLdap registerRequestMessageLdap = ldapEntryManager.find(RegisterRequestMessageLdap.class, requestDn);
         if (registerRequestMessageLdap == null) {
@@ -196,7 +196,7 @@ public class RegistrationService extends RequestService {
 
     public RegisterRequestMessageLdap getRegisterRequestMessageByRequestId(String requestId) {
         String baseDn = getDnForRegisterRequestMessage(null);
-        Filter requestIdFilter = Filter.createEqualityFilter("oxRequestId", requestId);
+        Filter requestIdFilter = Filter.createEqualityFilter("jsReqId", requestId);
 
         List<RegisterRequestMessageLdap> registerRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, RegisterRequestMessageLdap.class,
                 requestIdFilter);
@@ -214,13 +214,13 @@ public class RegistrationService extends RequestService {
     /**
      * Build DN string for U2F register request
      */
-    public String getDnForRegisterRequestMessage(String oxId) {
+    public String getDnForRegisterRequestMessage(String jsId) {
         final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=gluu
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=registration_requests,%s", u2fBaseDn);
         }
 
-        return String.format("oxid=%s,ou=registration_requests,%s", oxId, u2fBaseDn);
+        return String.format("oxid=%s,ou=registration_requests,%s", jsId, u2fBaseDn);
     }
 
     public void merge(RequestMessageLdap request) {

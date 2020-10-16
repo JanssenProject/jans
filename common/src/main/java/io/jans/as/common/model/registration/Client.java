@@ -40,40 +40,40 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String clientId;
 
-    @AttributeName(name = "oxAuthClientSecret")
+    @AttributeName(name = "jsClntSecret")
     private String clientSecret;
 
-    @AttributeName(name = "oxAuthLogoutURI")
+    @AttributeName(name = "jsLogoutURI")
     private String frontChannelLogoutUri;
 
-    @AttributeName(name = "oxAuthLogoutSessionRequired")
+    @AttributeName(name = "jsLogoutSessRequired")
     private Boolean frontChannelLogoutSessionRequired;
 
-    @AttributeName(name = "oxAuthRegistrationAccessToken")
+    @AttributeName(name = "jsRegistrationAccessTkn")
     private String registrationAccessToken;
 
-    @AttributeName(name = "oxAuthClientIdIssuedAt")
+    @AttributeName(name = "jsClntIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @AttributeName(name = "oxAuthClientSecretExpiresAt")
+    @AttributeName(name = "jsClntSecretExpiresAt")
     private Date clientSecretExpiresAt;
 
-    @AttributeName(name = "oxAuthRedirectURI")
+    @AttributeName(name = "jsRedirectURI")
     private String[] redirectUris;
 
-    @AttributeName(name = "oxClaimRedirectURI")
+    @AttributeName(name = "jsClaimRedirectURI")
     private String[] claimRedirectUris;
 
-    @AttributeName(name = "oxAuthResponseType")
+    @AttributeName(name = "jsRespTyp")
     private ResponseType[] responseTypes;
 
-    @AttributeName(name = "oxAuthGrantType")
+    @AttributeName(name = "jsGrantTyp")
     private GrantType[] grantTypes;
 
-    @AttributeName(name = "oxAuthAppType")
+    @AttributeName(name = "jsAppTyp")
     private ApplicationType applicationType = ApplicationType.WEB;
 
-    @AttributeName(name = "oxAuthContact")
+    @AttributeName(name = "jsContact")
     private String[] contacts;
 
     @AttributeName(name = "displayName")
@@ -82,106 +82,106 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "tknBndCnf")
     private String idTokenTokenBindingCnf;
 
-    @AttributeName(name = "oxAuthLogoURI")
+    @AttributeName(name = "jsLogoURI")
     private String logoUri;
 
-    @AttributeName(name = "oxAuthClientURI")
+    @AttributeName(name = "jsClntURI")
     private String clientUri;
 
-    @AttributeName(name = "oxAuthPolicyURI")
+    @AttributeName(name = "jsPolicyURI")
     private String policyUri;
 
-    @AttributeName(name = "oxAuthTosURI")
+    @AttributeName(name = "jsTosURI")
     private String tosUri;
 
-    @AttributeName(name = "oxAuthJwksURI")
+    @AttributeName(name = "jsJwksURI")
     private String jwksUri;
 
-    @AttributeName(name = "oxAuthJwks")
+    @AttributeName(name = "jsJwks")
     private String jwks;
 
-    @AttributeName(name = "oxAuthSectorIdentifierURI")
+    @AttributeName(name = "jsSectorIdentifierURI")
     private String sectorIdentifierUri;
 
-    @AttributeName(name = "oxAuthSubjectType")
+    @AttributeName(name = "jsSubjectTyp")
     private SubjectType subjectType = SubjectType.PUBLIC;
 
-    @AttributeName(name = "oxAuthIdTokenSignedResponseAlg")
+    @AttributeName(name = "jsIdTknSignedRespAlg")
     private String idTokenSignedResponseAlg;
 
-    @AttributeName(name = "oxAuthIdTokenEncryptedResponseAlg")
+    @AttributeName(name = "jsIdTknEncRespAlg")
     private String idTokenEncryptedResponseAlg;
 
-    @AttributeName(name = "oxAuthIdTokenEncryptedResponseEnc")
+    @AttributeName(name = "jsIdTknEncRespEnc")
     private String idTokenEncryptedResponseEnc;
 
-    @AttributeName(name = "oxAuthSignedResponseAlg")
+    @AttributeName(name = "jsSignedRespAlg")
     private String userInfoSignedResponseAlg;
 
-    @AttributeName(name = "oxAuthUserInfoEncryptedResponseAlg")
+    @AttributeName(name = "jsUsrInfEncRespAlg")
     private String userInfoEncryptedResponseAlg;
 
-    @AttributeName(name = "oxAuthUserInfoEncryptedResponseEnc")
+    @AttributeName(name = "jsUsrInfEncRespEnc")
     private String userInfoEncryptedResponseEnc;
 
-    @AttributeName(name = "oxAuthRequestObjectSigningAlg")
+    @AttributeName(name = "jsReqObjSigAlg")
     private String requestObjectSigningAlg;
 
-    @AttributeName(name = "oxAuthRequestObjectEncryptionAlg")
+    @AttributeName(name = "jsReqObjEncAlg")
     private String requestObjectEncryptionAlg;
 
-    @AttributeName(name = "oxAuthRequestObjectEncryptionEnc")
+    @AttributeName(name = "jsReqObjEncEnc")
     private String requestObjectEncryptionEnc;
 
-    @AttributeName(name = "oxAuthTokenEndpointAuthMethod")
+    @AttributeName(name = "jsTknEndpointAuthMethod")
     private String tokenEndpointAuthMethod;
 
-    @AttributeName(name = "oxAuthTokenEndpointAuthSigningAlg")
+    @AttributeName(name = "jsTknEndpointAuthSigAlg")
     private String tokenEndpointAuthSigningAlg;
 
-    @AttributeName(name = "oxAuthDefaultMaxAge")
+    @AttributeName(name = "jsDefMaxAge")
     private Integer defaultMaxAge;
 
-    @AttributeName(name = "oxAuthRequireAuthTime")
+    @AttributeName(name = "jsRequireAuthTime")
     private boolean requireAuthTime;
 
-    @AttributeName(name = "oxAuthDefaultAcrValues")
+    @AttributeName(name = "jsDefAcrValues")
     private String[] defaultAcrValues;
 
-    @AttributeName(name = "oxAuthInitiateLoginURI")
+    @AttributeName(name = "jsInitiateLoginURI")
     private String initiateLoginUri;
 
-    @AttributeName(name = "oxAuthPostLogoutRedirectURI")
+    @AttributeName(name = "jsPostLogoutRedirectURI")
     private String[] postLogoutRedirectUris;
 
-    @AttributeName(name = "oxAuthRequestURI")
+    @AttributeName(name = "jsReqURI")
     private String[] requestUris;
 
-    @AttributeName(name = "oxAuthScope")
+    @AttributeName(name = "jsScope")
     private String[] scopes;
 
-    @AttributeName(name = "oxAuthClaim")
+    @AttributeName(name = "jsClaim")
     private String[] claims;
 
-    @AttributeName(name = "oxAuthTrustedClient")
+    @AttributeName(name = "jsTrustedClnt")
     private boolean trustedClient;
 
-    @AttributeName(name = "oxLastAccessTime")
+    @AttributeName(name = "jsLastAccessTime")
     private Date lastAccessTime;
 
-    @AttributeName(name = "oxLastLogonTime")
+    @AttributeName(name = "jsLastLogonTime")
     private Date lastLogonTime;
 
-    @AttributeName(name = "oxPersistClientAuthorizations")
+    @AttributeName(name = "jsPersistClntAuthzs")
     private boolean persistClientAuthorizations;
 
-    @AttributeName(name = "oxIncludeClaimsInIdToken")
+    @AttributeName(name = "jsInclClaimsInIdTkn")
     private boolean includeClaimsInIdToken;
 
-    @AttributeName(name = "oxRefreshTokenLifetime")
+    @AttributeName(name = "jsRefreshTknLife")
     private Integer refreshTokenLifetime;
 
-    @AttributeName(name = "oxAccessTokenLifetime")
+    @AttributeName(name = "jsAccessTknLife")
     private Integer accessTokenLifetime;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
@@ -190,44 +190,44 @@ public class Client extends DeletableEntity implements Serializable {
     @CustomObjectClass
     private String[] customObjectClasses;
 
-    @AttributeName(name = "oxRptAsJwt")
+    @AttributeName(name = "jsRptAsJwt")
     private boolean rptAsJwt = false;
 
-    @AttributeName(name = "oxAccessTokenAsJwt")
+    @AttributeName(name = "jsAccessTknAsJwt")
     private boolean accessTokenAsJwt = false;
 
-    @AttributeName(name = "oxAccessTokenSigningAlg")
+    @AttributeName(name = "jsAccessTknSigAlg")
     private String accessTokenSigningAlg;
 
-    @AttributeName(name = "oxDisabled")
+    @AttributeName(name = "jsDisabled")
     private boolean disabled;
 
-    @AttributeName(name = "oxAuthAuthorizedOrigins")
+    @AttributeName(name = "jsAuthorizedOrigins")
     private String[] authorizedOrigins;
 
-    @AttributeName(name = "oxSoftwareId")
+    @AttributeName(name = "jsSoftId")
     private String softwareId;
 
-    @AttributeName(name = "oxSoftwareVersion")
-    private String softwareVersion;
+    @AttributeName(name = "jsSoftVer")
+    private String jsSoftVer;
 
-    @AttributeName(name = "oxSoftwareStatement")
+    @AttributeName(name = "jsSoftStatement")
     private String softwareStatement;
 
-    @AttributeName(name = "oxAttributes")
+    @AttributeName(name = "jsAttrs")
     @JsonObject
     private ClientAttributes attributes;
 
-    @AttributeName(name = "oxAuthBackchannelTokenDeliveryMode")
+    @AttributeName(name = "jsBackchannelTknDeliveryMode")
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
 
-    @AttributeName(name = "oxAuthBackchannelClientNotificationEndpoint")
+    @AttributeName(name = "jsBackchannelClntNotificationEndpoint")
     private String backchannelClientNotificationEndpoint;
 
-    @AttributeName(name = "oxAuthBackchannelAuthenticationRequestSigningAlg")
+    @AttributeName(name = "jsBackchannelAuthnReqSigAlg")
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
 
-    @AttributeName(name = "oxAuthBackchannelUserCodeParameter")
+    @AttributeName(name = "jsBackchannelUsrCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
     @Expiration
@@ -1185,11 +1185,11 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getSoftwareVersion() {
-        return softwareVersion;
+        return jsSoftVer;
     }
 
-    public void setSoftwareVersion(String softwareVersion) {
-        this.softwareVersion = softwareVersion;
+    public void setSoftwareVersion(String jsSoftVer) {
+        this.jsSoftVer = jsSoftVer;
     }
 
     public String getSoftwareStatement() {
