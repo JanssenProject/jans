@@ -62,8 +62,9 @@
   "Object": "Obj",
   "Deletable": "Del",
   "description" : "Desc",
-  "uniqueIdentifier": "_id",
+  "uniqueIdentifier": "Uid",
   "Password": "Pass",
   "Address": "Addr",
-  "Lifetime": "Life"
+  "Lifetime": "Life",
+  "Default" : "Def"
 }
