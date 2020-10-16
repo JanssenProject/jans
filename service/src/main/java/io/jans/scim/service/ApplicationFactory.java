@@ -61,7 +61,7 @@ public class ApplicationFactory {
    	public CacheConfiguration getCacheConfiguration() {
    		CacheConfiguration cacheConfiguration = configurationService.getConfiguration().getCacheConfiguration();
    		if ((cacheConfiguration == null) || (cacheConfiguration.getCacheProviderType() == null)) {
-   			log.error("Failed to read cache configuration from DB. Please check configuration oxCacheConfiguration attribute " +
+   			log.error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute " +
    					"that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
    			log.info("Creating fallback IN-MEMORY cache configuration ... ");
 
@@ -80,7 +80,7 @@ public class ApplicationFactory {
    	public DocumentStoreConfiguration getDocumentStoreConfiguration() {
     	DocumentStoreConfiguration documentStoreConfiguration = configurationService.getConfiguration().getDocumentStoreConfiguration();
    		if ((documentStoreConfiguration == null) || (documentStoreConfiguration.getDocumentStoreType() == null)) {
-   			log.error("Failed to read document store configuration from DB. Please check configuration oxDocumentStoreConfiguration attribute " +
+   			log.error("Failed to read document store configuration from DB. Please check configuration jsDocStoreConf attribute " +
    					"that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
    			log.info("Creating fallback LOCAL document store configuration ... ");
 

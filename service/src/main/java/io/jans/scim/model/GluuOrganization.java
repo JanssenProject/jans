@@ -54,23 +54,23 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName
 	private String seeAlso;
 
-	@AttributeName(name = "gluuStatus")
+	@AttributeName(name = "jsStatus")
 	private GluuStatus status;
 
-	@AttributeName(name = "gluuManagerGroup")
+	@AttributeName(name = "jsManagerGroup")
 	private String managerGroup;
 
-	@AttributeName(name = "oxTrustLogoPath")
-	private String oxTrustLogoPath;
+	@AttributeName(name = "excludeLogoPath")
+	private String excludeLogoPath;
 
-	@AttributeName(name = "oxTrustFaviconPath")
-	private String oxTrustFaviconPath;
+	@AttributeName(name = "excludeFaviconPath")
+	private String excludeFaviconPath;
 
-	@AttributeName(name = "oxAuthLogoPath")
-	private String oxAuthLogoPath;
+	@AttributeName(name = "jsLogoPath")
+	private String jsLogoPath;
 
-	@AttributeName(name = "oxAuthFaviconPath")
-	private String oxAuthFaviconPath;
+	@AttributeName(name = "jsFaviconPath")
+	private String jsFaviconPath;
 	
 	@AttributeName(name = "idpLogoPath")
 	private String idpLogoPath;
@@ -78,13 +78,13 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName(name = "idpFaviconPath")
 	private String idpFaviconPath;
 
-	@AttributeName(name = "gluuThemeColor")
+	@AttributeName(name = "jsThemeColor")
 	private String themeColor;
 
-	@AttributeName(name = "gluuOrgShortName")
+	@AttributeName(name = "jsOrgShortName")
 	private String shortName;
 
-	@AttributeName(name = "gluuCustomMessage")
+	@AttributeName(name = "jsCustomMessage")
 	private String[] customMessages;
 
 	@AttributeName(name = "oxInumConfig")
@@ -205,35 +205,35 @@ public class GluuOrganization extends Entry implements Serializable {
 	}
 
 	public String getOxTrustLogoPath() {
-		return oxTrustLogoPath;
+		return excludeLogoPath;
 	}
 
-	public void setOxTrustLogoPath(String oxTrustLogoPath) {
-		this.oxTrustLogoPath = oxTrustLogoPath;
+	public void setOxTrustLogoPath(String excludeLogoPath) {
+		this.excludeLogoPath = excludeLogoPath;
 	}
 
 	public String getOxTrustFaviconPath() {
-		return oxTrustFaviconPath;
+		return excludeFaviconPath;
 	}
 
-	public void setOxTrustFaviconPath(String oxTrustFaviconPath) {
-		this.oxTrustFaviconPath = oxTrustFaviconPath;
+	public void setOxTrustFaviconPath(String excludeFaviconPath) {
+		this.excludeFaviconPath = excludeFaviconPath;
 	}
 
 	public String getOxAuthLogoPath() {
-		return oxAuthLogoPath;
+		return jsLogoPath;
 	}
 
-	public void setOxAuthLogoPath(String oxAuthLogoPath) {
-		this.oxAuthLogoPath = oxAuthLogoPath;
+	public void setOxAuthLogoPath(String jsLogoPath) {
+		this.jsLogoPath = jsLogoPath;
 	}
 
 	public String getOxAuthFaviconPath() {
-		return oxAuthFaviconPath;
+		return jsFaviconPath;
 	}
 
-	public void setOxAuthFaviconPath(String oxAuthFaviconPath) {
-		this.oxAuthFaviconPath = oxAuthFaviconPath;
+	public void setOxAuthFaviconPath(String jsFaviconPath) {
+		this.jsFaviconPath = jsFaviconPath;
 	}
 
 	public String getIdpLogoPath() {

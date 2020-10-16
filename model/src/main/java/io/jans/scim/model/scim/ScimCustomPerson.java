@@ -30,14 +30,14 @@ public class ScimCustomPerson extends Entry implements Serializable {
     @CustomObjectClass
     private String[] customObjectClasses;
 
-    @AttributeName(name = "oxCreationTimestamp")
+    @AttributeName(name = "jsCreationTimestamp")
     private Date creationDate;
 
     @AttributeName
     private Date updatedAt;
 
-    @AttributeName(name = "oxPPID")
-    private List<String> oxPPID;
+    @AttributeName(name = "jsPPID")
+    private List<String> jsPPID;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true, attributesConfiguration = {
             @AttributeName(name = "inum", ignoreDuringUpdate = true),
@@ -66,7 +66,7 @@ public class ScimCustomPerson extends Entry implements Serializable {
     }
 
     public List<String> getOxPPID() {
-        return oxPPID;
+        return jsPPID;
     }
 
     public String getPreferredLanguage() {
@@ -156,8 +156,8 @@ public class ScimCustomPerson extends Entry implements Serializable {
         setAttribute("inum", value);
     }
 
-    public void setOxPPID(List<String> oxPPID) {
-        this.oxPPID = oxPPID;
+    public void setOxPPID(List<String> jsPPID) {
+        this.jsPPID = jsPPID;
     }
 
     public void setUid(String value) {

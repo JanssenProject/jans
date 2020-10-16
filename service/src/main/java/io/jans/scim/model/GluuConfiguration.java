@@ -43,102 +43,102 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName
 	private String displayName;
 
-	@AttributeName(name = "gluuHostname", updateOnly = true)
+	@AttributeName(name = "jsHostname", updateOnly = true)
 	private String hostname;
 
-	@AttributeName(name = "gluuLastUpdate", updateOnly = true)
+	@AttributeName(name = "jsLastUpd", updateOnly = true)
 	private Date lastUpdate;
 
 	@AttributeName(name = "gluuConfigurationPollingInterval")
 	private String pollingInterval;
 
-	@AttributeName(name = "gluuStatus", updateOnly = true)
+	@AttributeName(name = "jsStatus", updateOnly = true)
 	private GluuStatus status;
 
 	@AttributeName(name = "userPassword", ignoreDuringRead = true)
 	private String userPassword;
 
-	@AttributeName(name = "gluuHTTPstatus", updateOnly = true)
+	@AttributeName(name = "jsHTTPstatus", updateOnly = true)
 	private String gluuHttpStatus;
 
-	@AttributeName(name = "gluuDSstatus", updateOnly = true)
+	@AttributeName(name = "jsDSstatus", updateOnly = true)
 	private String gluuDSStatus;
 
-	@AttributeName(name = "gluuVDSstatus", updateOnly = true)
+	@AttributeName(name = "jsStatus", updateOnly = true)
 	private String gluuVDSStatus;
 
-	@AttributeName(name = "gluuSPTR")
-	private String gluuSPTR;
+	@AttributeName(name = "jsSPTR")
+	private String jsSPTR;
 
-	@AttributeName(name = "gluuSslExpiry", updateOnly = true)
+	@AttributeName(name = "jsSslExpiry", updateOnly = true)
 	private String sslExpiry;
 
-	@AttributeName(name = "gluuOrgProfileMgt")
+	@AttributeName(name = "jsOrgProfileMgt")
 	private boolean profileManagment;
 
-	@AttributeName(name = "gluuManageIdentityPermission")
+	@AttributeName(name = "jsManageIdentityPermission")
 	private boolean manageIdentityPermission;
 
-	@AttributeName(name = "gluuVdsCacheRefreshEnabled")
+	@AttributeName(name = "jsCacheRefreshEnabled")
 	private boolean vdsCacheRefreshEnabled;
 
-	@AttributeName(name = "oxTrustCacheRefreshServerIpAddress")
+	@AttributeName(name = "excludeCacheRefreshServerIpAddr")
 	private String cacheRefreshServerIpAddress;
 
-	@AttributeName(name = "gluuVdsCacheRefreshPollingInterval")
+	@AttributeName(name = "jsCacheRefreshPollingInterval")
 	private String vdsCacheRefreshPollingInterval;
 
-	@AttributeName(name = "gluuVdsCacheRefreshLastUpdate")
+	@AttributeName(name = "jsCacheRefreshLastUpd")
 	private Date vdsCacheRefreshLastUpdate;
 
-	@AttributeName(name = "gluuVdsCacheRefreshLastUpdateCount")
+	@AttributeName(name = "jsCacheRefreshLastUpdCount")
 	private String vdsCacheRefreshLastUpdateCount;
 
-	@AttributeName(name = "gluuVdsCacheRefreshProblemCount")
+	@AttributeName(name = "jsCacheRefreshProblemCount")
 	private String vdsCacheRefreshProblemCount;
 
-	@AttributeName(name = "gluuScimEnabled")
+	@AttributeName(name = "jsScimEnabled")
 	private boolean scimEnabled;
 
-	@AttributeName(name = "gluuPassportEnabled")
+	@AttributeName(name = "jsPassportEnabled")
 	private boolean passportEnabled;
 
-	@AttributeName(name = "gluuRadiusEnabled")
+	@AttributeName(name = "jsRadiusEnabled")
 	private boolean radiusEnabled;
 
-	@AttributeName(name = "gluuSamlEnabled")
+	@AttributeName(name = "jsSamlEnabled")
 	private boolean samlEnabled;
 
-	@AttributeName(name = "oxTrustEmail")
+	@AttributeName(name = "excludeEmail")
 	private String contactEmail;
 
-	@AttributeName(name = "oxSmtpConfiguration")
+	@AttributeName(name = "jsSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
 	@AttributeName(name = "gluuConfigurationDnsServer")
 	private String configurationDnsServer;
 
-	@AttributeName(name = "gluuMaxLogSize")
+	@AttributeName(name = "jsMaxLogSize")
 	private int maxLogSize;
 
-	@AttributeName(name = "oxAuthenticationMode")
+	@AttributeName(name = "jsenticationMode")
 	private String authenticationMode;
 
-	@AttributeName(name = "oxTrustAuthenticationMode")
-	private String oxTrustAuthenticationMode;
+	@AttributeName(name = "excludeAuthnMode")
+	private String excludeAuthnMode;
 
-	@AttributeName(name = "oxLogConfigLocation")
-	private String oxLogConfigLocation;
+	@AttributeName(name = "jsLogConfigLocation")
+	private String jsLogConfigLocation;
 
 	@AttributeName(name = "passwordResetAllowed")
 	private boolean passwordResetAllowed;
 
-	@AttributeName(name = "oxCacheConfiguration")
+	@AttributeName(name = "jsCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 
-	@AttributeName(name = "oxDocumentStoreConfiguration")
+	@AttributeName(name = "jsDocStoreConf")
 	@JsonObject
 	private DocumentStoreConfiguration documentStoreConfiguration;
 
@@ -170,11 +170,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	}
 
 	public String getOxTrustAuthenticationMode() {
-		return oxTrustAuthenticationMode;
+		return excludeAuthnMode;
 	}
 
-	public void setOxTrustAuthenticationMode(String oxTrustAuthenticationMode) {
-		this.oxTrustAuthenticationMode = oxTrustAuthenticationMode;
+	public void setOxTrustAuthenticationMode(String excludeAuthnMode) {
+		this.excludeAuthnMode = excludeAuthnMode;
 	}
 
 	public String getCacheRefreshServerIpAddress() {
@@ -226,11 +226,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	}
 
 	public String getGluuSPTR() {
-		return gluuSPTR;
+		return jsSPTR;
 	}
 
-	public void setGluuSPTR(String gluuSPTR) {
-		this.gluuSPTR = gluuSPTR;
+	public void setGluuSPTR(String jsSPTR) {
+		this.jsSPTR = jsSPTR;
 	}
 
 	public String getHostname() {
@@ -266,11 +266,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	}
 
 	public String getOxLogConfigLocation() {
-		return oxLogConfigLocation;
+		return jsLogConfigLocation;
 	}
 
-	public void setOxLogConfigLocation(String oxLogConfigLocation) {
-		this.oxLogConfigLocation = oxLogConfigLocation;
+	public void setOxLogConfigLocation(String jsLogConfigLocation) {
+		this.jsLogConfigLocation = jsLogConfigLocation;
 	}
 
 	public boolean isPasswordResetAllowed() {
@@ -433,7 +433,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		return "GluuConfiguration [description=" + description + ", displayName=" + displayName + ", hostname="
 				+ hostname + ", lastUpdate=" + lastUpdate + ", pollingInterval=" + pollingInterval + ", status="
 				+ status + ", userPassword=" + userPassword + ", gluuHttpStatus=" + gluuHttpStatus + ", gluuDSStatus="
-				+ gluuDSStatus + ", gluuVDSStatus=" + gluuVDSStatus + ", gluuSPTR=" + gluuSPTR + ", sslExpiry="
+				+ gluuDSStatus + ", gluuVDSStatus=" + gluuVDSStatus + ", jsSPTR=" + jsSPTR + ", sslExpiry="
 				+ sslExpiry + ", profileManagment=" + profileManagment + ", manageIdentityPermission="
 				+ manageIdentityPermission + ", vdsCacheRefreshEnabled=" + vdsCacheRefreshEnabled
 				+ ", cacheRefreshServerIpAddress=" + cacheRefreshServerIpAddress + ", vdsCacheRefreshPollingInterval="
@@ -443,8 +443,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 				+ ", passportEnabled=" + passportEnabled + ", radiusEnabled=" + radiusEnabled + ", samlEnabled="
 				+ samlEnabled + ", contactEmail=" + contactEmail + ", smtpConfiguration=" + smtpConfiguration
 				+ ", configurationDnsServer=" + configurationDnsServer + ", maxLogSize=" + maxLogSize
-				+ ", authenticationMode=" + authenticationMode + ", oxTrustAuthenticationMode="
-				+ oxTrustAuthenticationMode + ", oxLogConfigLocation=" + oxLogConfigLocation + ", passwordResetAllowed="
+				+ ", authenticationMode=" + authenticationMode + ", excludeAuthnMode="
+				+ excludeAuthnMode + ", jsLogConfigLocation=" + jsLogConfigLocation + ", passwordResetAllowed="
 				+ passwordResetAllowed + ", cacheConfiguration=" + cacheConfiguration + ", documentStoreConfiguration="
 				+ documentStoreConfiguration + ", customObjectClasses=" + Arrays.toString(customObjectClasses) + "]";
 	}

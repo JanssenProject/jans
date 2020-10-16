@@ -76,11 +76,11 @@ public class Scim2GroupService implements Serializable {
 
 	private void transferAttributesToGroup(GroupResource res, GluuGroup group, String usersUrl) {
 
-		// externalId (so oxTrustExternalId) not part of LDAP schema
-		group.setAttribute("oxTrustMetaCreated", res.getMeta().getCreated());
-		group.setAttribute("oxTrustMetaLastModified", res.getMeta().getLastModified());
+		// externalId (so excludeExternalId) not part of LDAP schema
+		group.setAttribute("excludeMetaCreated", res.getMeta().getCreated());
+		group.setAttribute("excludeMetaLastMod", res.getMeta().getLastModified());
 		// When creating group, location will be set again when having an inum
-		group.setAttribute("oxTrustMetaLocation", res.getMeta().getLocation());
+		group.setAttribute("excludeMetaLocation", res.getMeta().getLocation());
 
 		group.setDisplayName(res.getDisplayName());
 		group.setStatus(GluuStatus.ACTIVE);
@@ -133,9 +133,9 @@ public class Scim2GroupService implements Serializable {
 
 		Meta meta = new Meta();
 		meta.setResourceType(ScimResourceUtil.getType(res.getClass()));
-		meta.setCreated(gluuGroup.getAttribute("oxTrustMetaCreated"));
-		meta.setLastModified(gluuGroup.getAttribute("oxTrustMetaLastModified"));
-		meta.setLocation(gluuGroup.getAttribute("oxTrustMetaLocation"));
+		meta.setCreated(gluuGroup.getAttribute("excludeMetaCreated"));
+		meta.setLastModified(gluuGroup.getAttribute("excludeMetaLastMod"));
+		meta.setLocation(gluuGroup.getAttribute("excludeMetaLocation"));
 		if (meta.getLocation() == null)
 			meta.setLocation(groupsUrl + "/" + gluuGroup.getInum());
 
@@ -190,7 +190,7 @@ public class Scim2GroupService implements Serializable {
 		assignComputedAttributesToGroup(gluuGroup);
 
 		String location = groupsUrl + "/" + gluuGroup.getInum();
-		gluuGroup.setAttribute("oxTrustMetaLocation", location);
+		gluuGroup.setAttribute("excludeMetaLocation", location);
 
 		log.info("Persisting group {}", groupName);
 
@@ -298,9 +298,9 @@ public class Scim2GroupService implements Serializable {
 		}
 
 		for (GluuGroup group : list.getEntries()) {
-			GroupResource scimGroup = new GroupResource();
-			transferAttributesToGroupResource(group, scimGroup, groupsUrl, usersUrl);
-			resources.add(scimGroup);
+			GroupResource jsScimGrp = new GroupResource();
+			transferAttributesToGroupResource(group, jsScimGrp, groupsUrl, usersUrl);
+			resources.add(jsScimGrp);
 		}
 		log.info("Found {} matching entries - returning {}", list.getTotalEntriesCount(), list.getEntries().size());
 

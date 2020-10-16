@@ -33,20 +33,20 @@ public final class OxTrustConstants extends OxConstants {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
-	public static final String origin = "gluuAttributeOrigin";
+	public static final String origin = "jsAttrOrigin";
 	public static final String mail = "mail";
-	public static final String ppid = "oxPPID";
-	public static final String oxId = "oxId";
-	public static final String SCRYPT_TYPE = "oxScriptType";
+	public static final String ppid = "jsPPID";
+	public static final String jsId = "jsId";
+	public static final String SCRYPT_TYPE = "jsScrType";
 
 	public static final String status = "status";
-	public static final String gluuStatus = "gluuStatus";
+	public static final String jsStatus = "jsStatus";
 	public static final String sn = "sn";
 	public static final String cn = "cn";
 	public static final String owner = "owner";
 	public static final String member = "member";
 
-	public static final String attributeName = "gluuAttributeName";
+	public static final String attributeName = "jsAttrName";
 
 	/**
 	 * oxAsimba fields

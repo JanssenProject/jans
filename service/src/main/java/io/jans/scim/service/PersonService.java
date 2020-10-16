@@ -105,8 +105,8 @@ public class PersonService implements Serializable {
 		try {
 			Date updateDate = new Date();
 			person.setUpdatedAt(updateDate);
-			if (person.getAttribute("oxTrustMetaLastModified") != null) {
-				person.setAttribute("oxTrustMetaLastModified",
+			if (person.getAttribute("excludeMetaLastMod") != null) {
+				person.setAttribute("excludeMetaLastMod",
 						ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
 			}
 			persistenceEntryManager.merge(person);
@@ -298,7 +298,7 @@ public class PersonService implements Serializable {
 			mandatoryAttributes.add(new GluuCustomAttribute("sn", "", true, true));
 			mandatoryAttributes.add(new GluuCustomAttribute("mail", "", true, true));
 			mandatoryAttributes.add(new GluuCustomAttribute("userPassword", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("gluuStatus", "", true, true));
+			mandatoryAttributes.add(new GluuCustomAttribute("jsStatus", "", true, true));
 		}
 		return mandatoryAttributes;
 	}

@@ -40,49 +40,49 @@ public class FidoDeviceResource extends BaseScimResource {
     @Attribute(description = "Application ID that enrolled the device",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "oxApplication")
+    @StoreReference(ref = "jsApp")
     private String application;
 
     @Attribute(description = "A counter aimed at being used by the FIDO endpoint",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.INTEGER)
-    @StoreReference(ref = "oxCounter")
+    @StoreReference(ref = "jsCounter")
     private String counter;
 
     @Attribute(description = "A Json representation of low-level attributes of this device",
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "oxDeviceData")
+    @StoreReference(ref = "jsDeviceData")
     private String deviceData;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.INTEGER)
-    @StoreReference(ref = "oxDeviceHashCode")
+    @StoreReference(ref = "jsDeviceHashCode")
     private String deviceHashCode;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "oxDeviceKeyHandle")
+    @StoreReference(ref = "jsDeviceKeyHandle")
     private String deviceKeyHandle;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "oxDeviceRegistrationConf")
+    @StoreReference(ref = "jsDeviceRegistrationConf")
     private String deviceRegistrationConf;
 
     @Attribute(description = "The most recent dateTime when this device was used for authentication",
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.DATETIME)
-    @StoreReference(ref = "oxLastAccessTime")
+    @StoreReference(ref = "jsLastAccessTime")
     private String lastAccessTime;
 
     @Attribute(isRequired = true,
             canonicalValues = {"active", "compromised"})
-    @StoreReference(ref = "oxStatus")
+    @StoreReference(ref = "jsStatus")
     private String status;
 
     @Attribute
@@ -94,7 +94,7 @@ public class FidoDeviceResource extends BaseScimResource {
     private String description;
 
     @Attribute
-    @StoreReference(ref = "oxNickName")
+    @StoreReference(ref = "jsNickName")
     private String nickname;
 
     public String getUserId() {

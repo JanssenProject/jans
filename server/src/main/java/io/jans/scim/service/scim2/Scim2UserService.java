@@ -159,11 +159,11 @@ public class Scim2UserService implements Serializable {
 		// NOTE: calling person.setAttribute("ATTR", null) is not changing the attribute in LDAP :(
 
 		// Set values trying to follow the order found in BaseScimResource class
-		person.setAttribute("oxTrustExternalId", res.getExternalId());
-		person.setCustomAttribute("oxTrustMetaCreated", res.getMeta().getCreated());
-		person.setCustomAttribute("oxTrustMetaLastModified", res.getMeta().getLastModified());
+		person.setAttribute("excludeExternalId", res.getExternalId());
+		person.setCustomAttribute("excludeMetaCreated", res.getMeta().getCreated());
+		person.setCustomAttribute("excludeMetaLastMod", res.getMeta().getLastModified());
 		// When creating user, location will be set again when having an inum
-		person.setCustomAttribute("oxTrustMetaLocation", res.getMeta().getLocation());
+		person.setCustomAttribute("excludeMetaLocation", res.getMeta().getLocation());
 
 		// Set values trying to follow the order found in UserResource class
 		person.setUid(res.getUserName());
@@ -172,47 +172,47 @@ public class Scim2UserService implements Serializable {
 			person.setAttribute("givenName", res.getName().getGivenName());
 			person.setAttribute("sn", res.getName().getFamilyName());
 			person.setAttribute("middleName", res.getName().getMiddleName());
-			person.setAttribute("oxTrusthonorificPrefix", res.getName().getHonorificPrefix());
-			person.setAttribute("oxTrusthonorificSuffix", res.getName().getHonorificSuffix());
-			person.setAttribute("oxTrustNameFormatted", res.getName().computeFormattedName());
+			person.setAttribute("excludehonorificPrefix", res.getName().getHonorificPrefix());
+			person.setAttribute("excludehonorificSuffix", res.getName().getHonorificSuffix());
+			person.setAttribute("excludeNameFormatted", res.getName().computeFormattedName());
 		}
 		person.setAttribute("displayName", res.getDisplayName());
 
 		person.setAttribute("nickname", res.getNickName());
-		person.setAttribute("oxTrustProfileURL", res.getProfileUrl());
-		person.setAttribute("oxTrustTitle", res.getTitle());
-		person.setAttribute("oxTrustUserType", res.getUserType());
+		person.setAttribute("excludeProfileURL", res.getProfileUrl());
+		person.setAttribute("excludeTitle", res.getTitle());
+		person.setAttribute("excludeUsrTyp", res.getUserType());
 
 		person.setAttribute("preferredLanguage", res.getPreferredLanguage());
 		person.setAttribute("locale", res.getLocale());
 		person.setAttribute("zoneinfo", res.getTimezone());
 
-		// Why both gluuStatus and oxTrustActive used for active? it's for active being used in filter queries?
-		// Also it seems gluuStatus can have several values, see org.gluu.model.GluuStatus
+		// Why both jsStatus and excludeActive used for active? it's for active being used in filter queries?
+		// Also it seems jsStatus can have several values, see org.gluu.model.GluuStatus
 		Boolean active = Optional.ofNullable(res.getActive()).orElse(false);
-		person.setCustomAttribute("oxTrustActive", active);
-		person.setAttribute("gluuStatus",
+		person.setCustomAttribute("excludeActive", active);
+		person.setAttribute("jsStatus",
 				active ? GluuStatus.ACTIVE.getValue() : GluuStatus.INACTIVE.getValue());
 		person.setUserPassword(res.getPassword());
 
-		person.setAttribute("oxTrustEmail", getComplexMultivaluedAsArray(res.getEmails()));
+		person.setAttribute("excludeEmail", getComplexMultivaluedAsArray(res.getEmails()));
 		try {
 			person = userPersistenceHelper.syncEmailForward(person);
 		} catch (Exception e) {
 			log.error("Problem syncing emails forward", e);
 		}
 
-		person.setAttribute("oxTrustPhoneValue", getComplexMultivaluedAsArray(res.getPhoneNumbers()));
-		person.setAttribute("oxTrustImsValue", getComplexMultivaluedAsArray(res.getIms()));
-		person.setAttribute("oxTrustPhotos", getComplexMultivaluedAsArray(res.getPhotos()));
-		person.setAttribute("oxTrustAddresses", getComplexMultivaluedAsArray(res.getAddresses()));
+		person.setAttribute("excludePhoneValue", getComplexMultivaluedAsArray(res.getPhoneNumbers()));
+		person.setAttribute("excludeImsValue", getComplexMultivaluedAsArray(res.getIms()));
+		person.setAttribute("excludePhotos", getComplexMultivaluedAsArray(res.getPhotos()));
+		person.setAttribute("excludeAddres", getComplexMultivaluedAsArray(res.getAddresses()));
 
 		// group membership changes MUST be applied via the "Group" Resource (Section
 		// 4.1.2 & 8.7.1 RFC 7643) only
 
-		person.setAttribute("oxTrustEntitlements", getComplexMultivaluedAsArray(res.getEntitlements()));
-		person.setAttribute("oxTrustRole", getComplexMultivaluedAsArray(res.getRoles()));
-		person.setAttribute("oxTrustx509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
+		person.setAttribute("excludeEntitlements", getComplexMultivaluedAsArray(res.getEntitlements()));
+		person.setAttribute("excludeRole", getComplexMultivaluedAsArray(res.getRoles()));
+		person.setAttribute("excludex509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
 
 		// Pairwise identifiers must not be supplied here... (they are mutability = readOnly)
 		transferExtendedAttributesToPerson(res, person);
@@ -276,24 +276,24 @@ public class Scim2UserService implements Serializable {
 		log.debug("transferAttributesToUserResource");
 
 		res.setId(person.getInum());
-		res.setExternalId(person.getAttribute("oxTrustExternalId"));
+		res.setExternalId(person.getAttribute("excludeExternalId"));
 
 		Meta meta = new Meta();
 		meta.setResourceType(ScimResourceUtil.getType(res.getClass()));
 
-		meta.setCreated(person.getAttribute("oxTrustMetaCreated"));
+		meta.setCreated(person.getAttribute("excludeMetaCreated"));
 		if (meta.getCreated() == null) {
 			Date date = person.getCreationDate();
 			meta.setCreated(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
 		}
 
-		meta.setLastModified(person.getAttribute("oxTrustMetaLastModified"));
+		meta.setLastModified(person.getAttribute("excludeMetaLastMod"));
 		if (meta.getLastModified() == null) {
 			Date date = person.getUpdatedAt();
 			meta.setLastModified(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
 		}
 
-		meta.setLocation(person.getAttribute("oxTrustMetaLocation"));
+		meta.setLocation(person.getAttribute("excludeMetaLocation"));
 		if (meta.getLocation() == null) {
             meta.setLocation(url + "/" + person.getInum());
         }
@@ -307,10 +307,10 @@ public class Scim2UserService implements Serializable {
 		name.setGivenName(person.getGivenName());
 		name.setFamilyName(person.getSurname());
 		name.setMiddleName(person.getAttribute("middleName"));
-		name.setHonorificPrefix(person.getAttribute("oxTrusthonorificPrefix"));
-		name.setHonorificSuffix(person.getAttribute("oxTrusthonorificSuffix"));
+		name.setHonorificPrefix(person.getAttribute("excludehonorificPrefix"));
+		name.setHonorificSuffix(person.getAttribute("excludehonorificSuffix"));
 
-		String formatted = person.getAttribute("oxTrustNameFormatted");
+		String formatted = person.getAttribute("excludeNameFormatted");
 		if (formatted == null) { // recomputes the formatted name if absent in LDAP
             name.computeFormattedName();
         } else {
@@ -321,21 +321,21 @@ public class Scim2UserService implements Serializable {
 		res.setDisplayName(person.getDisplayName());
 
 		res.setNickName(person.getAttribute("nickname"));
-		res.setProfileUrl(person.getAttribute("oxTrustProfileURL"));
-		res.setTitle(person.getAttribute("oxTrustTitle"));
-		res.setUserType(person.getAttribute("oxTrustUserType"));
+		res.setProfileUrl(person.getAttribute("excludeProfileURL"));
+		res.setTitle(person.getAttribute("excludeTitle"));
+		res.setUserType(person.getAttribute("excludeUsrTyp"));
 
 		res.setPreferredLanguage(person.getPreferredLanguage());
 		res.setLocale(person.getAttribute("locale"));
 		res.setTimezone(person.getTimezone());
 
-		res.setActive(Boolean.valueOf(person.getAttribute("oxTrustActive"))
-				|| GluuBoolean.getByValue(person.getAttribute("gluuStatus")).isBooleanValue());
+		res.setActive(Boolean.valueOf(person.getAttribute("excludeActive"))
+				|| GluuBoolean.getByValue(person.getAttribute("jsStatus")).isBooleanValue());
 		res.setPassword(person.getUserPassword());
 
-		res.setEmails(getAttributeListValue(person, Email.class, "oxTrustEmail"));
+		res.setEmails(getAttributeListValue(person, Email.class, "excludeEmail"));
         if (res.getEmails() == null) {
-            //There can be cases where oxTrustEmail is not synced with mail attribute....
+            //There can be cases where excludeEmail is not synced with mail attribute....
             List<Email> emails = person.getAttributeList("mail").stream()
                     .map(m -> {
                         Email email = new Email();
@@ -346,10 +346,10 @@ public class Scim2UserService implements Serializable {
             res.setEmails(emails.size() == 0 ? null : emails);
         }
 
-        res.setPhoneNumbers(getAttributeListValue(person, PhoneNumber.class, "oxTrustPhoneValue"));
-		res.setIms(getAttributeListValue(person, InstantMessagingAddress.class, "oxTrustImsValue"));
-		res.setPhotos(getAttributeListValue(person, Photo.class, "oxTrustPhotos"));
-		res.setAddresses(getAttributeListValue(person, Address.class, "oxTrustAddresses"));
+        res.setPhoneNumbers(getAttributeListValue(person, PhoneNumber.class, "excludePhoneValue"));
+		res.setIms(getAttributeListValue(person, InstantMessagingAddress.class, "excludeImsValue"));
+		res.setPhotos(getAttributeListValue(person, Photo.class, "excludePhotos"));
+		res.setAddresses(getAttributeListValue(person, Address.class, "excludeAddres"));
 
 		List<String> listOfGroups = person.getMemberOf();
 		if (listOfGroups != null && listOfGroups.size() > 0) {
@@ -379,9 +379,9 @@ public class Scim2UserService implements Serializable {
             }
 		}
 
-		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "oxTrustEntitlements"));
-		res.setRoles(getAttributeListValue(person, Role.class, "oxTrustRole"));
-		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "oxTrustx509Certificate"));
+		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "excludeEntitlements"));
+		res.setRoles(getAttributeListValue(person, Role.class, "excludeRole"));
+		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "excludex509Certificate"));
 
 		res.setPairwiseIdentifiers(person.getOxPPID());
 
@@ -476,7 +476,7 @@ public class Scim2UserService implements Serializable {
 		assignComputedAttributesToPerson(gluuPerson);
 
 		String location = url + "/" + gluuPerson.getInum();
-		gluuPerson.setAttribute("oxTrustMetaLocation", location);
+		gluuPerson.setAttribute("excludeMetaLocation", location);
 
 		log.info("Persisting user {}", userName);
 		userPersistenceHelper.addCustomObjectClass(gluuPerson);

@@ -25,28 +25,28 @@ public class GluuOxTrustStat extends InumEntry implements Serializable {
 	 */
 	private static final long serialVersionUID = 2684923415744323028L;
 
-	@AttributeName(name = "gluuFreeDiskSpace", updateOnly = true)
+	@AttributeName(name = "jsFreeDiskSpace", updateOnly = true)
 	private String freeDiskSpace;
 
-	@AttributeName(name = "gluuFreeMemory", updateOnly = true)
+	@AttributeName(name = "jsFreeMem", updateOnly = true)
 	private String freeMemory;
 
-	@AttributeName(name = "gluuFreeSwap", updateOnly = true)
+	@AttributeName(name = "jsFreeSwap", updateOnly = true)
 	private String freeSwap;
 
-	@AttributeName(name = "gluuGroupCount", updateOnly = true)
+	@AttributeName(name = "jsGrpCount", updateOnly = true)
 	private String groupCount;
 
-	@AttributeName(name = "gluuPersonCount", updateOnly = true)
+	@AttributeName(name = "jsPersonCount", updateOnly = true)
 	private String personCount;
 
-	@AttributeName(name = "gluuIpAddress", updateOnly = true)
+	@AttributeName(name = "jsIpAddr", updateOnly = true)
 	private String ipAddress;
 
-	@AttributeName(name = "gluuSystemUptime", updateOnly = true)
+	@AttributeName(name = "jsSystemUptime", updateOnly = true)
 	private String systemUptime;
 
-	@AttributeName(name = "gluuLoadAvg", updateOnly = true)
+	@AttributeName(name = "jsLoadAvg", updateOnly = true)
 	private String loadAvg;
 
 	public String getFreeDiskSpace() {
