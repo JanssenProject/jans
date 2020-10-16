@@ -30,7 +30,7 @@ public class UmaRPT extends AbstractToken {
     private String userId;
     @AttributeName(name = "clnId")
     private String clientId;
-    @AttributeName(name = "oxUmaPermission")
+    @AttributeName(name = "jsUmaPermission")
     private List<String> permissions;
 
     private String notHashedCode;

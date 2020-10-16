@@ -268,18 +268,18 @@ public class ClientService {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
 
-		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", nowDateString);
+		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("jsLastAccessTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
 
 		if (isUpdateLogonTime) {
-			CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", nowDateString);
+			CustomAttribute customAttributeLastLogonTime = new CustomAttribute("jsLastLogonTime", nowDateString);
 			customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
 		}
 
 		try {
 			ldapEntryManager.merge(customEntry);
 		} catch (EntryPersistenceException epe) {
-			log.error("Failed to update oxLastAccessTime and oxLastLogonTime of client '{}'", clientDn);
+			log.error("Failed to update jsLastAccessTime and jsLastLogonTime of client '{}'", clientDn);
 		}
 
 		removeFromCache(client);
@@ -293,17 +293,17 @@ public class ClientService {
 				attribute = client.getClientName();
 			} else if (clientAttribute.equals("inum")) {
 				attribute = client.getClientId();
-			} else if (clientAttribute.equals("oxAuthAppType")) {
+			} else if (clientAttribute.equals("jsAppTyp")) {
 				attribute = client.getApplicationType();
-			} else if (clientAttribute.equals("oxAuthIdTokenSignedResponseAlg")) {
+			} else if (clientAttribute.equals("jsIdTknSignedRespAlg")) {
 				attribute = client.getIdTokenSignedResponseAlg();
-			} else if (clientAttribute.equals("oxAuthRedirectURI") && client.getRedirectUris() != null) {
+			} else if (clientAttribute.equals("jsRedirectURI") && client.getRedirectUris() != null) {
 				JSONArray array = new JSONArray();
 				for (String redirectUri : client.getRedirectUris()) {
 					array.put(redirectUri);
 				}
 				attribute = array;
-			} else if (clientAttribute.equals("oxAuthScope") && client.getScopes() != null) {
+			} else if (clientAttribute.equals("jsScope") && client.getScopes() != null) {
 				JSONArray array = new JSONArray();
 				for (String scopeDN : client.getScopes()) {
 					Scope s = scopeService.getScopeByDn(scopeDN);

@@ -24,7 +24,7 @@ public class AuthenticateRequestMessageLdap extends RequestMessageLdap implement
     private static final long serialVersionUID = -1142931562244920584L;
 
     @JsonObject
-    @AttributeName(name = "oxRequest")
+    @AttributeName(name = "jsReq")
     private AuthenticateRequestMessage authenticateRequestMessage;
 
     public AuthenticateRequestMessageLdap() {

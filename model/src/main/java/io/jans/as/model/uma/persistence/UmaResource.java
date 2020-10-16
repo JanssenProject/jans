@@ -31,29 +31,29 @@ public class UmaResource implements Serializable {
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @AttributeName(name = "oxId")
+    @AttributeName(name = "jsId")
     private String id;
 
     @NotNull(message = "Display name should be not empty")
     @AttributeName(name = "displayName")
     private String name;
 
-    @AttributeName(name = "oxFaviconImage")
+    @AttributeName(name = "jsFaviconImage")
     private String iconUri;
 
-    @AttributeName(name = "oxAuthUmaScope", consistency = true)
+    @AttributeName(name = "jsUmaScope", consistency = true)
     private List<String> scopes;
 
-    @AttributeName(name = "oxScopeExpression", consistency = true)
+    @AttributeName(name = "jsScopeExpression", consistency = true)
     private String scopeExpression;
 
-    @AttributeName(name = "oxAssociatedClient", consistency = true)
+    @AttributeName(name = "jsAssociatedClnt", consistency = true)
     private List<String> clients;
 
-    @AttributeName(name = "oxResource")
+    @AttributeName(name = "jsResource")
     private List<String> resources;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private String rev;
 
     @AttributeName(name = "owner")
@@ -62,7 +62,7 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "oxType")
+    @AttributeName(name = "jsTyp")
     private String type;
 
     @AttributeName(name = "iat")

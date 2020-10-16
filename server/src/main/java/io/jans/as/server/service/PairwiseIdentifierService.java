@@ -77,14 +77,14 @@ public class PairwiseIdentifierService {
 
             Filter filter = null;
             if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
-            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
-                Filter userInumFilter = Filter.createEqualityFilter("oxAuthUserId", userInum);
+            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("jsSectorIdentifier", sectorIdentifier);
+                Filter userInumFilter = Filter.createEqualityFilter("jsUsrId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, userInumFilter);
             } else {
-                Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
-                Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
-                Filter userInumFilter = Filter.createEqualityFilter("oxAuthUserId", userInum);
+                Filter sectorIdentifierFilter = Filter.createEqualityFilter("jsSectorIdentifier", sectorIdentifier);
+                Filter clientIdFilter = Filter.createEqualityFilter("jsClntId", clientId);
+                Filter userInumFilter = Filter.createEqualityFilter("jsUsrId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter, userInumFilter);
             }
@@ -120,17 +120,17 @@ public class PairwiseIdentifierService {
 
     public void addPairwiseIdentifier(String userInum, PairwiseIdentifier pairwiseIdentifier) {
         prepareBranch(userInum);
-        userService.addUserAttributeByUserInum(userInum, "oxPPID", pairwiseIdentifier.getId());
+        userService.addUserAttributeByUserInum(userInum, "jsPPID", pairwiseIdentifier.getId());
 
         ldapEntryManager.persist(pairwiseIdentifier);
     }
 
-    public String getDnForPairwiseIdentifier(String oxId, String userInum) {
+    public String getDnForPairwiseIdentifier(String jsId, String userInum) {
         String baseDn = getBaseDnForPairwiseIdentifiers(userInum);
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("oxId=%s,%s", oxId, baseDn);
+        return String.format("jsId=%s,%s", jsId, baseDn);
     }
 
     public String getBaseDnForPairwiseIdentifiers(String userInum) {

@@ -638,12 +638,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (scopes != null && !scopes.isEmpty()
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled()) {
-            List<String> defaultScopes = scopeService.getDefaultScopesDn();
+            List<String> jsDefScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
             Set<String> allowedScopes = new HashSet<String>();
 
             for (String requestedScope : requestedScopes) {
-                if (defaultScopes.contains(requestedScope)) {
+                if (jsDefScopes.contains(requestedScope)) {
                     allowedScopes.add(requestedScope);
                 }
             }
@@ -975,12 +975,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
-        if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
+        if (StringHelper.equalsIgnoreCase("jsTrustedClnt", attr)) {
             boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setTrustedClient(trustedClient);
 
             return true;
-        } else if (StringHelper.equalsIgnoreCase("oxIncludeClaimsInIdToken", attr)) {
+        } else if (StringHelper.equalsIgnoreCase("jsInclClaimsInIdTkn", attr)) {
             boolean includeClaimsInIdToken = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
 
