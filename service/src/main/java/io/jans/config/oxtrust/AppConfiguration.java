@@ -83,7 +83,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String oxAuthSectorIdentifierUrl;
 
-    private String jsClntId;
+    private String oxAuthClientId;
     private String oxAuthClientPassword;
     private String oxAuthClientScope;
 
@@ -457,11 +457,11 @@ public class AppConfiguration implements Configuration, Serializable {
     }
 
     public String getOxAuthClientId() {
-        return jsClntId;
+        return oxAuthClientId;
     }
 
-    public void setOxAuthClientId(String jsClntId) {
-        this.jsClntId = jsClntId;
+    public void setOxAuthClientId(String oxAuthClientId) {
+        this.oxAuthClientId = oxAuthClientId;
     }
 
     public String getOxAuthClientPassword() {

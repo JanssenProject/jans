@@ -87,7 +87,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	private GluuAttributeUsageType[] usageType;
 
 	@AttributeName(name = "jsClaimName")
-	private String jsClaimName;
+	private String claimName;
 
 	@AttributeName(name = "seeAlso")
 	private String seeAlso;
@@ -105,7 +105,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	private String urn;
 
 	@AttributeName(name = "jsSCIMCustomAttr")
-	private Boolean jsSCIMCustomAttr;
+	private Boolean scimCustomAttr;
 
 	@AttributeName(name = "jsMultivaluedAttr")
 	private Boolean oxMultiValuedAttribute;
@@ -121,7 +121,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	private AttributeValidation attributeValidation;
 
 	@AttributeName(name = "jsTooltip")
-	private String jsTooltip;
+	private String tooltip;
 
 	public boolean isSelected() {
 		return selected;
@@ -235,12 +235,12 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.usageType = usageType;
 	}
 
-	public String getOxAuthClaimName() {
-		return jsClaimName;
+	public String getClaimName() {
+		return claimName;
 	}
 
-	public void setOxAuthClaimName(String jsClaimName) {
-		this.jsClaimName = jsClaimName;
+	public void setClaimName(String claimName) {
+		this.claimName = claimName;
 	}
 
 	public String getSeeAlso() {
@@ -283,12 +283,12 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.urn = urn;
 	}
 
-	public Boolean getOxSCIMCustomAttribute() {
-		return jsSCIMCustomAttr;
+	public Boolean getScimCustomAttr() {
+		return scimCustomAttr;
 	}
 
-	public void setOxSCIMCustomAttribute(Boolean jsSCIMCustomAttr) {
-		this.jsSCIMCustomAttr = jsSCIMCustomAttr;
+	public void setScimCustomAttr(Boolean scimCustomAttr) {
+		this.scimCustomAttr = scimCustomAttr;
 	}
 
 	public Boolean getOxMultiValuedAttribute() {
@@ -315,12 +315,12 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.requred = requred;
 	}
 
-	public String getGluuTooltip() {
-		return jsTooltip;
+	public String getTooltip() {
+		return tooltip;
 	}
 
-	public void setGluuTooltip(String jsTooltip) {
-		this.jsTooltip = jsTooltip;
+	public void setTooltip(String tooltip) {
+		this.tooltip = tooltip;
 	}
 
 	public boolean allowEditBy(GluuUserRole role) {
@@ -380,15 +380,15 @@ public class GluuAttribute extends Entry implements Serializable {
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
 		result = prime * result + Arrays.hashCode(editType);
-		result = prime * result + ((jsTooltip == null) ? 0 : jsTooltip.hashCode());
+		result = prime * result + ((tooltip == null) ? 0 : tooltip.hashCode());
 		result = prime * result + ((inum == null) ? 0 : inum.hashCode());
 		result = prime * result + ((lifetime == null) ? 0 : lifetime.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
-		result = prime * result + ((jsClaimName == null) ? 0 : jsClaimName.hashCode());
+		result = prime * result + ((claimName == null) ? 0 : claimName.hashCode());
 		result = prime * result + ((oxMultiValuedAttribute == null) ? 0 : oxMultiValuedAttribute.hashCode());
-		result = prime * result + ((jsSCIMCustomAttr == null) ? 0 : jsSCIMCustomAttr.hashCode());
+		result = prime * result + ((scimCustomAttr == null) ? 0 : scimCustomAttr.hashCode());
 		result = prime * result + (requred ? 1231 : 1237);
 		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
 		result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
