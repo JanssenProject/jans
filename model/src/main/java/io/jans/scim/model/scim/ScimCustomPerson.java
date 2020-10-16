@@ -37,7 +37,7 @@ public class ScimCustomPerson extends Entry implements Serializable {
     private Date updatedAt;
 
     @AttributeName(name = "jsPPID")
-    private List<String> jsPPID;
+    private List<String> ppid;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true, attributesConfiguration = {
             @AttributeName(name = "inum", ignoreDuringUpdate = true),
@@ -65,11 +65,15 @@ public class ScimCustomPerson extends Entry implements Serializable {
         return getAttributeList("memberOf");
     }
 
-    public List<String> getOxPPID() {
-        return jsPPID;
-    }
+    public List<String> getPpid() {
+		return ppid;
+	}
 
-    public String getPreferredLanguage() {
+	public void setPpid(List<String> ppid) {
+		this.ppid = ppid;
+	}
+
+	public String getPreferredLanguage() {
         return getAttribute("preferredLanguage");
     }
 
@@ -154,10 +158,6 @@ public class ScimCustomPerson extends Entry implements Serializable {
 
     public void setInum(String value) {
         setAttribute("inum", value);
-    }
-
-    public void setOxPPID(List<String> jsPPID) {
-        this.jsPPID = jsPPID;
     }
 
     public void setUid(String value) {

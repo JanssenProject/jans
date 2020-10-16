@@ -45,39 +45,39 @@ public class GluuCustomPerson extends User
     private String guid;
 
     @AttributeName(name = "jsOptOuts")
-    private List<String> jsOptOuts;
+    private List<String> optOuts;
 
     @AttributeName(name = "jsAssociatedClnt")
-    private List<String> jsAssociatedClnt;
+    private List<String> associatedClient;
     
     @AttributeName(name = "jsPPID")
-    private List<String> jsPPID;
+    private List<String> ppid;
 
    // @JsonObject
     @AttributeName(name = "jsExternalUid")
-    private List<String> jsExternalUid;
+    private List<String> externalUid;
     
     @JsonObject
     @AttributeName(name = "jsOTPDevices")
-    private OTPDevice  jsOTPDevices;
+    private OTPDevice  otpDevices;
     
     @AttributeName(name = "jsMobileDevices")
-    private String jsMobileDevices;
+    private String mobileDevices;
 
-    public String getOxMobileDevices() {
-		return jsMobileDevices;
+	public String getMobileDevices() {
+		return mobileDevices;
 	}
 
-	public void setOxMobileDevices(String jsMobileDevices) {
-		this.jsMobileDevices = jsMobileDevices;
+	public void setMobileDevices(String mobileDevices) {
+		this.mobileDevices = mobileDevices;
 	}
 
-	public OTPDevice getOxOTPDevices() {
-		return jsOTPDevices;
+	public OTPDevice getOtpDevices() {
+		return otpDevices;
 	}
 
-	public void setOxOTPDevices(OTPDevice jsOTPDevices) {
-		this.jsOTPDevices = jsOTPDevices;
+	public void setOtpDevices(OTPDevice otpDevices) {
+		this.otpDevices = otpDevices;
 	}
 
 	@AttributeName(name = "jsCreationTimestamp")
@@ -290,20 +290,20 @@ public class GluuCustomPerson extends User
         this.gluuAllowPublication = Boolean.toString(allowPublication);
     }
 
-    public void setGluuOptOuts(List<String> optOuts) {
-        this.jsOptOuts = optOuts;
-    }
+    public List<String> getOptOuts() {
+		return optOuts;
+	}
 
-    public List<String> getGluuOptOuts() {
-        return jsOptOuts;
-    }
+	public void setOptOuts(List<String> optOuts) {
+		this.optOuts = optOuts;
+	}
 
-    public List<String> getAssociatedClient() {
-        return this.jsAssociatedClnt;
+	public List<String> getAssociatedClient() {
+        return this.associatedClient;
     }
 
     public void setAssociatedClient(List<String> jsAssociatedClntDNs) {
-        this.jsAssociatedClnt = jsAssociatedClntDNs;
+        this.associatedClient = jsAssociatedClntDNs;
     }
 
     public String getSourceServerName() {
@@ -338,21 +338,21 @@ public class GluuCustomPerson extends User
 		this.updatedAt = updatedAt;
 	}
 
-    public List<String> getOxExternalUid() {
-        return jsExternalUid;
-    }
+	public List<String> getExternalUid() {
+		return externalUid;
+	}
 
-    public void setOxExternalUid(List<String> jsExternalUid) {
-        this.jsExternalUid = jsExternalUid;
-    }
+	public void setExternalUid(List<String> externalUid) {
+		this.externalUid = externalUid;
+	}
 
-    public List<String> getOxPPID() {
-        return jsPPID;
-    }
+	public List<String> getPpid() {
+		return ppid;
+	}
 
-    public void setOxPPID(List<String> jsPPID) {
-        this.jsPPID = jsPPID;
-    }
+	public void setPpid(List<String> ppid) {
+		this.ppid = ppid;
+	}
 
 	/* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
