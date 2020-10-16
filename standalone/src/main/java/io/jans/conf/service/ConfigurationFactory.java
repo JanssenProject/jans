@@ -169,7 +169,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 
 		CacheConfiguration cacheConfiguration = sharedConfigurationEntry.getCacheConfiguration();
 		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-			LOG.error("Failed to read cache configuration from DB. Please check configuration oxCacheConfiguration attribute " +
+			LOG.error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute " +
 					"that must contain cache configuration JSON represented by CacheConfiguration.class. Shared configuration DN: " + SHARED_CONFIGURATION_DN);
 			LOG.info("Creating fallback IN-MEMORY cache configuration ... ");
 

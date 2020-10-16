@@ -23,10 +23,10 @@ public class DbApplicationConfiguration {
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "gluuConfDynamic")
+    @AttributeName(name = "jsConfDyn")
     private String dynamicConf;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     public DbApplicationConfiguration() {

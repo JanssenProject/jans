@@ -24,10 +24,10 @@ public class LdapOxAsimbaConfiguration extends Entry {
     private static final long serialVersionUID = -12489397651302948L;
 
     @JsonObject
-    @AttributeName(name = "oxConfApplication")
+    @AttributeName(name = "jsConfApp")
     private AsimbaConfiguration applicationConfiguration;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     public LdapOxAsimbaConfiguration() {
