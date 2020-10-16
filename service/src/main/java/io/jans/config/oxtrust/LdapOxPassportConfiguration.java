@@ -26,7 +26,7 @@ public class LdapOxPassportConfiguration extends Entry {
 	private static final long serialVersionUID = -8451013277721189767L;
 
 	@JsonObject
-	@AttributeName(name = "gluuPassportConfiguration")
+	@AttributeName(name = "jsPassportConf")
 	private PassportConfiguration passportConfiguration;
 
 	public PassportConfiguration getPassportConfiguration() {

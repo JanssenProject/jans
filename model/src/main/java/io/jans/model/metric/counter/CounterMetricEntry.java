@@ -20,7 +20,7 @@ import io.jans.orm.annotation.JsonObject;
 public class CounterMetricEntry extends MetricEntry {
 
     @JsonObject
-    @AttributeName(name = "oxData")
+    @AttributeName(name = "jsData")
     private CounterMetricData metricData;
 
     public CounterMetricEntry() { }

@@ -30,22 +30,22 @@ public class MetricEntry {
     @AttributeName(name = "uniqueIdentifier", ignoreDuringUpdate = true)
     private String id;
 
-    @AttributeName(name = "oxStartDate")
+    @AttributeName(name = "jsStartDate")
     private Date startDate;
 
-    @AttributeName(name = "oxEndDate")
+    @AttributeName(name = "jsEndDate")
     private Date endDate;
 
-    @AttributeName(name = "oxApplicationType")
+    @AttributeName(name = "jsAppType")
     private ApplicationType applicationType;
 
-    @AttributeName(name = "oxMetricType")
+    @AttributeName(name = "jsMetricTyp")
     private MetricType metricType;
 
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(name = "oxHost")
+    @AttributeName(name = "jsHost")
     private String nodeIndetifier;
 
     @AttributeName(name = "exp")

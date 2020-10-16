@@ -34,7 +34,7 @@ public class LdapOxTrustConfiguration extends Entry {
     @AttributeName(name = "Janssen ProjectConfCacheRefresh")
     private CacheRefreshConfiguration cacheRefresh;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     @JsonObject

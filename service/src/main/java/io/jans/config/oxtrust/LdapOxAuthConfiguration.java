@@ -27,34 +27,34 @@ public class LdapOxAuthConfiguration extends Entry {
     @DN
     private String dn;
 
-    @AttributeName(name = "oxAuthConfDynamic")
+    @AttributeName(name = "jsConfDyn")
     private String oxAuthConfigDynamic;
 
-    @AttributeName(name = "oxAuthConfStatic")
+    @AttributeName(name = "jsConfStatic")
     private String oxAuthConfstatic;
 
-    @AttributeName(name = "oxAuthConfErrors")
-    private String oxAuthConfErrors;
+    @AttributeName(name = "jsConfErrors")
+    private String jsConfErrors;
 
-    @AttributeName(name = "oxAuthConfWebKeys")
-    private String oxAuthConfWebKeys;
+    @AttributeName(name = "jsConfWebKeys")
+    private String jsConfWebKeys;
 
     @JsonObject
-    @AttributeName(name = "oxWebKeysSettings")
-    private WebKeysSettings oxWebKeysSettings;
+    @AttributeName(name = "jsWebKeysSettings")
+    private WebKeysSettings jsWebKeysSettings;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     public LdapOxAuthConfiguration() {
     }
 
     public WebKeysSettings getOxWebKeysSettings() {
-        return oxWebKeysSettings;
+        return jsWebKeysSettings;
     }
 
-    public void setOxWebKeysSettings(WebKeysSettings oxWebKeysSettings) {
-        this.oxWebKeysSettings = oxWebKeysSettings;
+    public void setOxWebKeysSettings(WebKeysSettings jsWebKeysSettings) {
+        this.jsWebKeysSettings = jsWebKeysSettings;
     }
 
     public String getOxAuthConfigDynamic() {
@@ -74,19 +74,19 @@ public class LdapOxAuthConfiguration extends Entry {
     }
 
     public String getOxAuthConfErrors() {
-        return oxAuthConfErrors;
+        return jsConfErrors;
     }
 
-    public void setOxAuthConfErrors(String oxAuthConfErrors) {
-        this.oxAuthConfErrors = oxAuthConfErrors;
+    public void setOxAuthConfErrors(String jsConfErrors) {
+        this.jsConfErrors = jsConfErrors;
     }
 
     public String getOxAuthConfWebKeys() {
-        return oxAuthConfWebKeys;
+        return jsConfWebKeys;
     }
 
-    public void setOxAuthConfWebKeys(String oxAuthConfWebKeys) {
-        this.oxAuthConfWebKeys = oxAuthConfWebKeys;
+    public void setOxAuthConfWebKeys(String jsConfWebKeys) {
+        this.jsConfWebKeys = jsConfWebKeys;
     }
 
     public long getRevision() {
