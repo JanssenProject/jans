@@ -25,9 +25,19 @@ with open(schema_file) as f:
 with open('mapping.json') as f:
     mapping = json.load(f)
 
+with open('opendj_types.json') as f:
+    opendj_types = json.load(f)
+
+opendj_attributes = []
+for k in opendj_types:
+    opendj_attributes += opendj_types[k]
+
+
 conversions = []
 
 def do_replace(eVal):
+    if eVal in opendj_attributes:
+        return eVal
     for m in mapping:
         if m in eVal:
             eVal = eVal.replace(m, mapping[m])
@@ -46,7 +56,7 @@ for attribute in schema['attributeTypes']:
             conversions.append((cur, new))
         attribute['names'][i] = new
 
-
+obj_conversions = []
 for obj in schema['objectClasses']:
     for e in ('oid',  'x_origin'):
         if e in obj:
@@ -54,7 +64,11 @@ for obj in schema['objectClasses']:
 
     for lt in ('may', 'names'):
         for i in range(len((obj[lt]))):
-            obj[lt][i] = do_replace(obj[lt][i])
+            cur = obj[lt][i]
+            new = do_replace(obj[lt][i])
+            if cur != new:
+                obj_conversions.append((cur, new))
+                obj[lt][i] = new
 
 macrkeys = list(schema['oidMacros'].keys())
 for macr in macrkeys:
@@ -68,6 +82,9 @@ if argsp.outfile:
 
 if argsp.dump:
     conversions.sort()
-    dump_dict = OrderedDict(conversions)
-    print(json.dumps(dump_dict, indent=2))
+    obj_conversions.sort()
+    attr_dict = OrderedDict(conversions)
+    obj_dict = OrderedDict(obj_conversions)
+    
+    print(json.dumps({'attribute': attr_dict, 'objectClass':obj_dict}, indent=2))
 
