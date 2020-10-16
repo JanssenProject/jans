@@ -18,7 +18,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @version May 12, 2020
  */
 @DataEntry
-@ObjectClass(value = "gluuApplicationConfiguration")
+@ObjectClass(value = "jsAppConfiguration")
 public class Conf {
     @DN
     private String dn;
