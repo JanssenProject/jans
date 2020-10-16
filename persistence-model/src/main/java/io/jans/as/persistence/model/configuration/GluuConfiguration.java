@@ -48,7 +48,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@JsonObject
 	private List<IDPAuthConf> jsIDPAuthn;
 
-	@AttributeName(name = "jsenticationMode")
+	@AttributeName(name = "jsAuthMode")
 	private String authenticationMode;
 	
 	@AttributeName(name = "jsPassportEnabled")
