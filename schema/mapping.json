@@ -7,6 +7,9 @@
   "oxProxy" : "exclude",
 
 
+  "oxAuthenticationData" : "jsAuthData",
+  "oxAuthenticationMode" : "jsAuthMode",
+
   "associatedClient" : "jsAssociatedClient",
   "softwareVersion" : "jsSoftVersion",
   "defaultScope": "jsDefScope",

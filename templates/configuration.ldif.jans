@@ -16,7 +16,7 @@ jsRadiusEnabled: false
 jsSamlEnabled: false
 jsScimEnabled: false
 jsWhitePagesEnabled: disabled
-jsenticationMode: simple_password_auth
+jsAuthMode: simple_password_auth
 objectClass: top
 objectClass: jsConf
 ou: configuration
