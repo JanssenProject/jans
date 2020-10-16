@@ -638,12 +638,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (scopes != null && !scopes.isEmpty()
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled()) {
-            List<String> jsDefScopes = scopeService.getDefaultScopesDn();
+            List<String> defaultScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
             Set<String> allowedScopes = new HashSet<String>();
 
             for (String requestedScope : requestedScopes) {
-                if (jsDefScopes.contains(requestedScope)) {
+                if (defaultScopes.contains(requestedScope)) {
                     allowedScopes.add(requestedScope);
                 }
             }

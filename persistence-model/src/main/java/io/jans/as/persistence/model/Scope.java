@@ -44,13 +44,13 @@ public class Scope extends DeletableEntity implements Serializable {
     private ScopeType scopeType;
 
     @AttributeName(name = "jsClaim")
-    private List<String> jsClaims;
+    private List<String> claims;
 
     @AttributeName(name = "jsDefScope")
-    private Boolean jsDefScope;
+    private Boolean defaultScope;
 
     @AttributeName(name = "jsGrpClaims")
-    private Boolean jsGrpClaims;
+    private Boolean groupClaims;
 
     @AttributeName(name = "jsScrDn")
     private List<String> dynamicScopeScripts;
@@ -113,28 +113,28 @@ public class Scope extends DeletableEntity implements Serializable {
         this.scopeType = scopeType;
     }
 
-    public List<String> getOxAuthClaims() {
-        return this.jsClaims;
+    public List<String> getClaims() {
+        return this.claims;
     }
 
-    public void setOxAuthClaims(List<String> jsClaims) {
-        this.jsClaims = jsClaims;
+    public void setClaims(List<String> claims) {
+        this.claims = claims;
     }
 
     public Boolean isDefaultScope() {
-        return this.jsDefScope;
+        return this.defaultScope;
     }
 
-    public void setDefaultScope(Boolean jsDefScope) {
-        this.jsDefScope = jsDefScope;
+    public void setDefaultScope(Boolean defaultScope) {
+        this.defaultScope = defaultScope;
     }
 
-    public Boolean isOxAuthGroupClaims() {
-        return jsGrpClaims;
+    public Boolean isGroupClaims() {
+        return groupClaims;
     }
 
-    public void setOxAuthGroupClaims(boolean jsGrpClaims) {
-        this.jsGrpClaims = jsGrpClaims;
+    public void setGroupClaims(boolean groupClaims) {
+        this.groupClaims = groupClaims;
     }
 
     public List<String> getDynamicScopeScripts() {
@@ -170,11 +170,11 @@ public class Scope extends DeletableEntity implements Serializable {
     }
 
     public Boolean getOxAuthGroupClaims() {
-        return jsGrpClaims;
+        return groupClaims;
     }
 
     public Boolean getDefaultScope() {
-        return jsDefScope;
+        return defaultScope;
     }
 
     public boolean isUmaType() {
@@ -191,9 +191,9 @@ public class Scope extends DeletableEntity implements Serializable {
                 ", iconUrl='" + iconUrl + '\'' +
                 ", description='" + description + '\'' +
                 ", scopeType=" + scopeType +
-                ", jsClaims=" + jsClaims +
-                ", jsDefScope=" + jsDefScope +
-                ", jsGrpClaims=" + jsGrpClaims +
+                ", claims=" + claims +
+                ", defaultScope=" + defaultScope +
+                ", groupClaims=" + groupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
                 ", deletable=" + isDeletable() +

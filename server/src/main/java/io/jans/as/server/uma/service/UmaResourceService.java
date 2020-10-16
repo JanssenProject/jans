@@ -128,12 +128,12 @@ public class UmaResourceService {
      *
      * @return List of resource descriptions
      */
-    public List<UmaResource> getResourcesByAssociatedClient(String jsAssociatedClntDn) {
+    public List<UmaResource> getResourcesByAssociatedClient(String associatedClientDn) {
         try {
             prepareBranch();
 
-            if (StringUtils.isNotBlank(jsAssociatedClntDn)) {
-                final Filter filter = Filter.createEqualityFilter("jsAssociatedClnt", jsAssociatedClntDn);
+            if (StringUtils.isNotBlank(associatedClientDn)) {
+                final Filter filter = Filter.createEqualityFilter("jsAssociatedClnt", associatedClientDn);
                 return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, filter);
             }
         } catch (Exception e) {
