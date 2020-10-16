@@ -68,7 +68,5 @@ if argsp.outfile:
 
 if argsp.dump:
     conversions.sort()
-    print('{')
-    for cur, new in conversions: 
-        print('"' + cur + '"', ':', '"' + new + '",')
-    print('}')
+    dump_dict = OrderedDict(conversions)
+    print(json.dumps(dump_dict, indent=2))
