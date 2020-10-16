@@ -27,7 +27,7 @@
       "desc": "Blowfish crypted text",
       "equality": "caseIgnoreMatch",
       "names": [
-        "blowfishPassword"
+        "blowfishPass"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -392,7 +392,7 @@
       "desc": "Monitor the number of groups. TODO - Remove?",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsgrpCount"
+        "jsGrpCount"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -400,10 +400,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Typ of grp. Not used.",
+      "desc": "Typ of Grp. Not used.",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsgrpTyp"
+        "jsGrpTyp"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -411,10 +411,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "grp visibility. Not used.",
+      "desc": "Grp visibility. Not used.",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsgrpVisibility"
+        "jsGrpVisibility"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -524,7 +524,7 @@
       "desc": "IP address of the Js Server instance",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsIpAddress"
+        "jsIpAddr"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -622,7 +622,7 @@
       "desc": "Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in exclude.",
       "equality": "distinguishedNameMatch",
       "names": [
-        "jsManagergrp"
+        "jsManagerGrp"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
@@ -661,7 +661,7 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Short description, as few letters as possible, no spaces.",
+      "desc": "Short Desc, as few letters as possible, no spaces.",
       "equality": "caseIgnoreMatch",
       "names": [
         "jsOrgShortName"
@@ -952,7 +952,7 @@
       "desc": "Js Server SMTP configuration",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsSmtpFromEmailAddress"
+        "jsSmtpFromEmailAddr"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -982,10 +982,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "SMTP Usr Password",
+      "desc": "SMTP Usr Pass",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsSmtpPassword"
+        "jsSmtpPass"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1004,10 +1004,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "SMTP Requires Auth",
+      "desc": "SMTP Requires Authn",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsSmtpRequiresAuth"
+        "jsSmtpRequiresAuthn"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1378,7 +1378,7 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Auth Time",
+      "desc": "js Authn Time",
       "equality": "generalizedTimeMatch",
       "names": [
         "authnTime"
@@ -1412,10 +1412,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js grp Attr Claims (true or false)",
+      "desc": "js Grp Attr Claims (true or false)",
       "equality": "booleanMatch",
       "names": [
-        "jsgrpClaims"
+        "jsGrpClaims"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
@@ -1561,10 +1561,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Default Acr Values",
+      "desc": "js Def Acr Values",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsDefaultAcrValues"
+        "jsDefAcrValues"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1572,10 +1572,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Default Max Age",
+      "desc": "js Def Max Age",
       "equality": "integerMatch",
       "names": [
-        "jsDefaultMaxAge"
+        "jsDefMaxAge"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
@@ -1839,10 +1839,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Req Object Sig Alg",
+      "desc": "js Req Obj Sig Alg",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsReqObjectSigAlg"
+        "jsReqObjSigAlg"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1850,10 +1850,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Req Object Encryption Alg",
+      "desc": "js Req Obj Enc Alg",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsReqObjectEncryptionAlg"
+        "jsReqObjEncAlg"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1861,10 +1861,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Req Object Encryption Enc",
+      "desc": "js Req Obj Enc Enc",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsReqObjectEncryptionEnc"
+        "jsReqObjEncEnc"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1883,7 +1883,7 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Require Auth Time",
+      "desc": "js Require Authn Time",
       "equality": "booleanMatch",
       "names": [
         "jsRequireAuthTime"
@@ -1964,7 +1964,7 @@
       "desc": "js skip authorization attribute",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsSkipAuthorization"
+        "jsSkipAuthz"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2158,7 +2158,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "excludeAuthMode"
+        "excludeAuthnMode"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2236,7 +2236,7 @@
       "desc": "Usr group",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsgrp"
+        "jsGrp"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2280,7 +2280,7 @@
       "desc": "Custom IDP authentication configuration",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsIDPAuth"
+        "jsIDPAuthn"
       ],
       "json": true,
       "oid": "jsAttr",
@@ -2468,7 +2468,7 @@
       "desc": "Linktrack API password",
       "equality": "caseIgnoreMatch",
       "names": [
-        "excludetrackPassword"
+        "excludetrackPass"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2907,7 +2907,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "excludeCacheRefreshServerIpAddress"
+        "excludeCacheRefreshServerIpAddr"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2917,7 +2917,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "excludeAddresses"
+        "excludeAddres"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3337,7 +3337,7 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "SCIM Authorization mode",
+      "desc": "SCIM Authz mode",
       "equality": "caseIgnoreMatch",
       "names": [
         "scimAuthMode"
@@ -3348,10 +3348,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "scim grp",
+      "desc": "scim Grp",
       "equality": "distinguishedNameMatch",
       "names": [
-        "jsScimgrp"
+        "jsScimGrp"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
@@ -3868,10 +3868,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Persist Clnt Authorizations",
+      "desc": "js Persist Clnt Authzs",
       "equality": "booleanMatch",
       "names": [
-        "jsPersistClntAuthorizations"
+        "jsPersistClntAuthzs"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
@@ -3912,10 +3912,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Password Exp date, represented as an ISO 8601 (YYYY-MM-DD) format",
+      "desc": "Pass Exp date, represented as an ISO 8601 (YYYY-MM-DD) format",
       "equality": "generalizedTimeMatch",
       "names": [
-        "jsPasswordExpDate"
+        "jsPassExpDate"
       ],
       "oid": "jsAttr",
       "ordering": "generalizedTimeOrderingMatch",
@@ -4118,10 +4118,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Lifetime of refresh token",
+      "desc": "Life of refresh token",
       "equality": "integerMatch",
       "names": [
-        "jsRefreshTknLifetime"
+        "jsRefreshTknLife"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
@@ -4367,10 +4367,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Lifetime of access token",
+      "desc": "Life of access token",
       "equality": "integerMatch",
       "names": [
-        "jsAccessTknLifetime"
+        "jsAccessTknLife"
       ],
       "oid": "jsAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
@@ -4593,10 +4593,10 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "js Backchannel Auth Req Sig Alg",
+      "desc": "js Backchannel Authn Req Sig Alg",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jsBackchannelAuthReqSigAlg"
+        "jsBackchannelAuthnReqSigAlg"
       ],
       "oid": "jsAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4672,7 +4672,7 @@
       "x_origin": "Js created attribute"
     },
     {
-      "desc": "Auth request id",
+      "desc": "Authn request id",
       "equality": "caseIgnoreMatch",
       "names": [
         "authReqId"
@@ -4698,7 +4698,7 @@
       "names": [
         "pairwiseIdentifier"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -4727,7 +4727,7 @@
         "jsOTPCache",
         "jsLastLogonTime",
         "excludeActive",
-        "excludeAddresses",
+        "excludeAddres",
         "excludeEmail",
         "excludeEntitlements",
         "excludeExternalId",
@@ -4746,7 +4746,7 @@
         "excludehonorificPrefix",
         "excludehonorificSuffix",
         "excludex509Certificate",
-        "jsPasswordExpDate",
+        "jsPassExpDate",
         "persistentId",
         "middleName",
         "nickname",
@@ -4771,7 +4771,7 @@
         "cn",
         "transientId",
         "uid",
-        "userPassword",
+        "userPass",
         "st",
         "street",
         "l",
@@ -4797,7 +4797,7 @@
       "names": [
         "jsPerson"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -4807,10 +4807,10 @@
       "kind": "STRUCTURAL",
       "may": [
         "c",
-        "description",
+        "Desc",
         "displayName",
-        "jsgrpTyp",
-        "jsgrpVisibility",
+        "jsGrpTyp",
+        "jsGrpVisibility",
         "jsStatus",
         "iname",
         "inum",
@@ -4827,9 +4827,9 @@
         "objectclass"
       ],
       "names": [
-        "jsgrp"
+        "jsGrp"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -4841,7 +4841,7 @@
         "c",
         "county",
         "jsDeplAppliances",
-        "description",
+        "Desc",
         "displayName",
         "jsAddPersonCap",
         "jsAdditionalUsrs",
@@ -4853,7 +4853,7 @@
         "jsLogoImage",
         "jsManageIdentityPermission",
         "jsManager",
-        "jsManagergrp",
+        "jsManagerGrp",
         "jsOrgShortName",
         "jsPaidUntil",
         "jsPaymentProcessorTimestamp",
@@ -4873,20 +4873,20 @@
         "excludeLinktrack",
         "excludetrackEnabled",
         "excludetrackLogin",
-        "excludetrackPassword",
+        "excludetrackPass",
         "jsRegistrationConf",
         "postalCode",
         "excludeProStoresTkn",
         "prostoresTimestamp",
         "scimAuthMode",
-        "jsScimgrp",
+        "jsScimGrp",
         "scimStatus",
         "st",
         "street",
         "telephoneNumber",
         "title",
         "uid",
-        "userPassword",
+        "userPass",
         "excludeLogoPath",
         "excludeFaviconPath",
         "jsLogoPath",
@@ -4900,7 +4900,7 @@
       "names": [
         "jsOrganization"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -4909,10 +4909,10 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "blowfishPassword",
+        "blowfishPass",
         "c",
         "ou",
-        "description",
+        "Desc",
         "displayName",
         "jsAdditionalBandwidth",
         "jsAdditionalMem",
@@ -4943,12 +4943,12 @@
         "jsShibSecurityEvents",
         "jsShibSuccessfulAuths",
         "excludeEmail",
-        "jsSmtpFromEmailAddress",
+        "jsSmtpFromEmailAddr",
         "jsSmtpFromName",
         "jsSmtpHost",
-        "jsSmtpPassword",
+        "jsSmtpPass",
         "jsSmtpPort",
-        "jsSmtpRequiresAuth",
+        "jsSmtpRequiresAuthn",
         "jsSmtpRequiresSsl",
         "jsSmtpUsrName",
         "jsSslExpiry",
@@ -4968,8 +4968,8 @@
         "inumFN",
         "o",
         "jsenticationMode",
-        "excludeAuthMode",
-        "jsIDPAuth",
+        "excludeAuthnMode",
+        "jsIDPAuthn",
         "jsLogViewerConfig",
         "jsLogConfigLocation",
         "jsSmtpConf",
@@ -4979,8 +4979,8 @@
         "excludeStoreConf",
         "passwordResetAllowed",
         "jsSoftVer",
-        "userPassword",
-        "excludeCacheRefreshServerIpAddress",
+        "userPass",
+        "excludeCacheRefreshServerIpAddr",
         "jsPassportEnabled",
         "jsRadiusEnabled",
         "jsSamlEnabled",
@@ -4992,7 +4992,7 @@
       "names": [
         "jsConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5001,7 +5001,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "description",
+        "Desc",
         "displayName",
         "jsAttrEditTyp",
         "jsAttrName",
@@ -5033,7 +5033,7 @@
       "names": [
         "jsAttr"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5042,7 +5042,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "description",
+        "Desc",
         "displayName",
         "federationRules",
         "jsContainerFed",
@@ -5077,7 +5077,7 @@
       "names": [
         "jsSAMLconfig"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5101,7 +5101,7 @@
       "names": [
         "jsInumMap"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5125,7 +5125,7 @@
       "names": [
         "jsInvc"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5142,9 +5142,9 @@
         "objectclass"
       ],
       "names": [
-        "jsPasswordResetReq"
+        "jsPassResetReq"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5153,7 +5153,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "description",
+        "Desc",
         "jsGuid",
         "excludeCreator",
         "excludeExpDate",
@@ -5168,7 +5168,7 @@
       "names": [
         "exclude"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5185,7 +5185,7 @@
       "names": [
         "vdapcontainer"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5202,7 +5202,7 @@
       "names": [
         "vdDirectoryView"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5219,7 +5219,7 @@
       "names": [
         "vdlabel"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5238,7 +5238,7 @@
       "names": [
         "jsEntry"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5261,7 +5261,7 @@
       "names": [
         "jsNode"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5272,7 +5272,7 @@
       "may": [
         "associatedPerson",
         "displayName",
-        "description",
+        "Desc",
         "inum",
         "jsAppTyp",
         "jsClntIdIssuedAt",
@@ -5282,8 +5282,8 @@
         "del",
         "jsClntURI",
         "jsContact",
-        "jsDefaultAcrValues",
-        "jsDefaultMaxAge",
+        "jsDefAcrValues",
+        "jsDefMaxAge",
         "jsGrantTyp",
         "jsIdTknEncRespAlg",
         "jsIdTknEncRespEnc",
@@ -5296,9 +5296,9 @@
         "jsPostLogoutRedirectURI",
         "jsRedirectURI",
         "jsRegistrationAccessTkn",
-        "jsReqObjectSigAlg",
-        "jsReqObjectEncryptionAlg",
-        "jsReqObjectEncryptionEnc",
+        "jsReqObjSigAlg",
+        "jsReqObjEncAlg",
+        "jsReqObjEncEnc",
         "jsReqURI",
         "jsRequireAuthTime",
         "jsRespTyp",
@@ -5317,9 +5317,9 @@
         "jsClaimRedirectURI",
         "jsLastAccessTime",
         "jsLastLogonTime",
-        "jsPersistClntAuthorizations",
+        "jsPersistClntAuthzs",
         "jsInclClaimsInIdTkn",
-        "jsRefreshTknLifetime",
+        "jsRefreshTknLife",
         "jsDisabled",
         "jsLogoutURI",
         "jsLogoutSessRequired",
@@ -5328,7 +5328,7 @@
         "tknBndCnf",
         "jsAccessTknAsJwt",
         "jsAccessTknSigAlg",
-        "jsAccessTknLifetime",
+        "jsAccessTknLife",
         "jsSoftId",
         "jsSoftVer",
         "jsSoftStatement",
@@ -5336,7 +5336,7 @@
         "jsAttrs",
         "jsBackchannelTknDeliveryMode",
         "jsBackchannelClntNotificationEndpoint",
-        "jsBackchannelAuthReqSigAlg",
+        "jsBackchannelAuthnReqSigAlg",
         "jsBackchannelUsrCodeParameter"
       ],
       "must": [
@@ -5345,7 +5345,7 @@
       "names": [
         "jsClnt"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5355,13 +5355,13 @@
       "kind": "STRUCTURAL",
       "may": [
         "jsDefScope",
-        "description",
+        "Desc",
         "displayName",
         "inum",
         "jsScopeTyp",
         "jsClaim",
         "jsScrDn",
-        "jsgrpClaims",
+        "jsGrpClaims",
         "jsId",
         "jsIconUrl",
         "jsUmaPolicyScrDn",
@@ -5375,7 +5375,7 @@
       "names": [
         "jsCustomScope"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5407,7 +5407,7 @@
       "names": [
         "jsSessId"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5430,7 +5430,7 @@
       "names": [
         "jsConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5452,7 +5452,7 @@
       "names": [
         "excludeConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5471,7 +5471,7 @@
       "names": [
         "jsAppConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5486,7 +5486,7 @@
         "jsAssociatedClnt",
         "jsUmaScope",
         "jsFaviconImage",
-        "jsgrp",
+        "jsGrp",
         "jsId",
         "jsResource",
         "jsRevision",
@@ -5495,7 +5495,7 @@
         "iat",
         "exp",
         "del",
-        "description"
+        "Desc"
       ],
       "must": [
         "objectclass"
@@ -5503,7 +5503,7 @@
       "names": [
         "jsUmaResource"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5527,7 +5527,7 @@
       "names": [
         "jsUmaResourcePermission"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5545,7 +5545,7 @@
       "names": [
         "jsGrant"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5583,7 +5583,7 @@
       "names": [
         "token"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5608,7 +5608,7 @@
       "names": [
         "jsUmaRPT"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5632,7 +5632,7 @@
       "names": [
         "jsLiteralNode"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5651,7 +5651,7 @@
       "names": [
         "jsPrjsConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5675,7 +5675,7 @@
       "names": [
         "jsPrjsOp"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5696,7 +5696,7 @@
       "names": [
         "jsPrjsClnt"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5717,7 +5717,7 @@
       "names": [
         "jsPrjsAccessTkn"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5736,7 +5736,7 @@
       "names": [
         "jsScr"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5756,7 +5756,7 @@
       "names": [
         "jsPushApp"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5777,7 +5777,7 @@
       "names": [
         "jsPushDevice"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5788,7 +5788,7 @@
       "may": [
         "inum",
         "displayName",
-        "description",
+        "Desc",
         "jsScr",
         "jsScrTyp",
         "programmingLanguage",
@@ -5806,7 +5806,7 @@
       "names": [
         "jsCustomScr"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5817,7 +5817,7 @@
       "may": [
         "jsId",
         "displayName",
-        "description",
+        "Desc",
         "jsDeviceKeyHandle",
         "jsDeviceHashCode",
         "jsApp",
@@ -5842,7 +5842,7 @@
       "names": [
         "jsDeviceRegistration"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5866,7 +5866,7 @@
       "names": [
         "jsU2fReq"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5875,7 +5875,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "uniqueIdentifier",
+        "_id",
         "jsStartDate",
         "jsEndDate",
         "jsAppTyp",
@@ -5892,7 +5892,7 @@
       "names": [
         "jsMetric"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5912,9 +5912,9 @@
         "objectclass"
       ],
       "names": [
-        "jsClntAuthorization"
+        "jsClntAuthz"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5924,7 +5924,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "jsId",
-        "description",
+        "Desc",
         "jsRedirectURI",
         "jsClntId"
       ],
@@ -5934,7 +5934,7 @@
       "names": [
         "jsSectorIdentifier"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5953,7 +5953,7 @@
       "names": [
         "jsPassportConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5963,7 +5963,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "ou",
-        "uniqueIdentifier",
+        "_id",
         "inum",
         "jsConfApp",
         "jsRevision"
@@ -5974,7 +5974,7 @@
       "names": [
         "jsShibbolethCASProtocolConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -5996,7 +5996,7 @@
       "names": [
         "jsUmaPCT"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6017,7 +6017,7 @@
       "names": [
         "cache"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6038,9 +6038,9 @@
         "objectclass"
       ],
       "names": [
-        "jsFido2AuthEntry"
+        "jsFido2AuthnEntry"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6068,7 +6068,7 @@
       "names": [
         "jsFido2RegistrationEntry"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6087,7 +6087,7 @@
       "names": [
         "samlAcr"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6099,12 +6099,12 @@
         "jsFreeDiskSpace",
         "jsFreeMem",
         "jsFreeSwap",
-        "jsgrpCount",
-        "jsIpAddress",
+        "jsGrpCount",
+        "jsIpAddr",
         "jsLoadAvg",
         "jsPersonCount",
         "jsSystemUptime",
-        "uniqueIdentifier"
+        "_id"
       ],
       "must": [
         "objectclass"
@@ -6112,7 +6112,7 @@
       "names": [
         "jsOxtrustStat"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6132,7 +6132,7 @@
       "names": [
         "jsAppConf"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6151,9 +6151,9 @@
         "objectclass"
       ],
       "names": [
-        "jsExpiredObject"
+        "jsExpiredObj"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6171,7 +6171,7 @@
       "names": [
         "jsRp"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6193,7 +6193,7 @@
       "names": [
         "cibaReq"
       ],
-      "oid": "jsObjectClass",
+      "oid": "jsObjClass",
       "sup": [
         "top"
       ],
@@ -6203,7 +6203,7 @@
   "oidMacros": {
     "jsAttr": "jsPublished:3",
     "jsMatchRules": "jsPublished:2",
-    "jsObjectClass": "jsPublished:4",
+    "jsObjClass": "jsPublished:4",
     "jsOrgOID": "1.3.6.1.4.1.48710",
     "jsPublished": "jsOrgOID:1",
     "jsReserved": "jsOrgOID:0",
