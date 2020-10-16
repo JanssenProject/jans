@@ -46,7 +46,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	@AttributeName(name = "jsIDPAuthn")
 	@JsonObject
-	private List<IDPAuthConf> jsIDPAuthn;
+	private List<IDPAuthConf> idpAuthn;
 
 	@AttributeName(name = "jsAuthMode")
 	private String authenticationMode;
@@ -94,12 +94,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.smtpConfiguration = smtpConfiguration;
 	}
 
-	public List<IDPAuthConf> getOxIDPAuthentication(){
-		return this.jsIDPAuthn;
+	public List<IDPAuthConf> getIDPAuthn(){
+		return this.idpAuthn;
 	}
 	
-	public void setOxIDPAuthentication(List<IDPAuthConf> jsIDPAuthn){
-		this.jsIDPAuthn = jsIDPAuthn;
+	public void setIDPAuthn(List<IDPAuthConf> idpAuthn){
+		this.idpAuthn = idpAuthn;
 	}
 
 	public String getAuthenticationMode() {
@@ -113,8 +113,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", jsIDPAuthn=")
-				.append(jsIDPAuthn).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
+		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", idpAuthn=")
+				.append(idpAuthn).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
 				.append("]");
 		return builder.toString();
 	}
