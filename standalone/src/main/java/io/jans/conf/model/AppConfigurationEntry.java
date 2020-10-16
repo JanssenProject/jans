@@ -31,7 +31,7 @@ public class AppConfigurationEntry implements Serializable {
     private long revision;
 
     @JsonObject
-	@AttributeName(name = "jsConfApp")
+	@AttributeName(name = "jsConfDyn")
     private AppConfiguration application;
 
     public AppConfigurationEntry() {}
