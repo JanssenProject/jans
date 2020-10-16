@@ -124,20 +124,20 @@ public class AuthenticationPersistenceService {
     public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2AuthenticationEntries(null);
 
-        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
+        Filter codeChallengFilter = Filter.createEqualityFilter("jsCodeChallenge", challenge);
 
         List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
 
         return fido2AuthenticationEntries;
     }
 
-    public String getDnForAuthenticationEntry(String userInum, String oxId) {
+    public String getDnForAuthenticationEntry(String userInum, String jsId) {
         // Build DN string for Fido2 authentication entry
         String baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("oxId=%s,%s", oxId, baseDn);
+        return String.format("jsId=%s,%s", jsId, baseDn);
     }
 
     public String getBaseDnForFido2AuthenticationEntries(String userInum) {
@@ -175,7 +175,7 @@ public class AuthenticationPersistenceService {
         };
         
         String baseDn = getDnForUser(null);
-        persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(baseDn), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
+        persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(baseDn), SearchScope.SUB, new String[] {"jsCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
 
         String branchDn = getDnForUser(null);
         if (persistenceEntryManager.hasBranchesSupport(branchDn)) {
@@ -212,7 +212,7 @@ public class AuthenticationPersistenceService {
         final Date authenticationHistoryExpirationDate = calendar2.getTime();
 
         // Build unfinished request expiration filter
-        Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue()));
+        Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("jsStatus", Fido2AuthenticationStatus.authenticated.getValue()));
 
         Filter exirationDateFilter1 = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
@@ -220,7 +220,7 @@ public class AuthenticationPersistenceService {
         Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter1, exirationDateFilter1);
 
         // Build authentication history expiration filter
-        Filter authenticationStatusFilter2 = Filter.createEqualityFilter("oxStatus", Fido2AuthenticationStatus.authenticated.getValue());
+        Filter authenticationStatusFilter2 = Filter.createEqualityFilter("jsStatus", Fido2AuthenticationStatus.authenticated.getValue());
 
         Filter exirationDateFilter2 = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, authenticationHistoryExpirationDate));

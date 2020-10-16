@@ -24,14 +24,14 @@ public class Conf {
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "gluuConfDynamic")
+    @AttributeName(name = "jsConfDyn")
     private AppConfiguration dynamicConf;
 
     @JsonObject
-    @AttributeName(name = "gluuConfStatic")
+    @AttributeName(name = "jsConfStatic")
     private StaticConfiguration staticConf;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jsRevision")
     private long revision;
 
     public Conf() {

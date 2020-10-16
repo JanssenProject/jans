@@ -23,13 +23,13 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass
 public class Fido2Entry extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     private String id;
 
-    @AttributeName(name = "oxCodeChallenge")
+    @AttributeName(name = "jsCodeChallenge")
     private String challange;
 
-    @AttributeName(name = "oxCodeChallengeHash")
+    @AttributeName(name = "jsCodeChallengeHash")
     private String challangeHash;
 
     @AttributeName(name = "creationDate")
