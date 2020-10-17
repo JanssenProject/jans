@@ -95,7 +95,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         cacheService.put(grant.getAuthorizationCode().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
         
-        metricService.incCounter(MetricType.OXAUTH_TOKEN_AUTHORIZATION_CODE_COUNT);
+        metricService.incCounter(MetricType.TOKEN_AUTHORIZATION_CODE_COUNT);
         return grant;
     }
 
