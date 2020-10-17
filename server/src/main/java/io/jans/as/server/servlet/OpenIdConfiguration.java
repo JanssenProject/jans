@@ -357,7 +357,7 @@ public class OpenIdConfiguration extends HttpServlet {
 						}
 					}
 				} else {
-					final List<String> claimIdList = scope.getOxAuthClaims();
+					final List<String> claimIdList = scope.getClaims();
 					if (claimIdList != null && !claimIdList.isEmpty()) {
 						for (String claimDn : claimIdList) {
 							final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
