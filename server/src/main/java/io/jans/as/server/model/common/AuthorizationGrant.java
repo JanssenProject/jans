@@ -182,7 +182,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(asToken(accessToken));
             }
 
-            metricService.incCounter(MetricType.OXAUTH_TOKEN_ACCESS_TOKEN_COUNT);
+            metricService.incCounter(MetricType.TOKEN_ACCESS_TOKEN_COUNT);
 
             return accessToken;
         } catch (Exception e) {
@@ -246,7 +246,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(asToken(refreshToken));
             }
 
-            metricService.incCounter(MetricType.OXAUTH_TOKEN_REFRESH_TOKEN_COUNT);
+            metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
             return refreshToken;
         } catch (Exception e) {
@@ -264,7 +264,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
-                metricService.incCounter(MetricType.OXAUTH_TOKEN_REFRESH_TOKEN_COUNT);
+                metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
                 return refreshToken;
             }
 
@@ -295,7 +295,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             setAcrValues(acrValues);
             setSessionDn(sessionDn);
 
-            metricService.incCounter(MetricType.OXAUTH_TOKEN_ID_TOKEN_COUNT);
+            metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT);
 
             return idToken;
         } catch (Exception e) {

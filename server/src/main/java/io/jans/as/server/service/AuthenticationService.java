@@ -127,7 +127,7 @@ public class AuthenticationService {
 
 		com.codahale.metrics.Timer.Context timerContext = null;
 		timerContext = metricService
-				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+				.getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
 		try {
 			if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
 				authenticated = localAuthenticate(userName, password);
@@ -146,9 +146,9 @@ public class AuthenticationService {
 
 		MetricType metricType;
 		if (authenticated) {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
@@ -182,7 +182,7 @@ public class AuthenticationService {
 		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
 		com.codahale.metrics.Timer.Context timerContext = metricService
-				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+				.getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
 		try {
 			authenticatedPair = localAuthenticate(nameValue, password, nameAttributes);
 		} finally {
@@ -198,9 +198,9 @@ public class AuthenticationService {
 
 		MetricType metricType;
 		if (authenticated) {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
@@ -313,7 +313,7 @@ public class AuthenticationService {
 		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
 		com.codahale.metrics.Timer.Context timerContext = metricService
-				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+				.getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
 		try {
 			for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 				GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
@@ -336,9 +336,9 @@ public class AuthenticationService {
 
 		MetricType metricType;
 		if (authenticated) {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
@@ -371,7 +371,7 @@ public class AuthenticationService {
 		com.codahale.metrics.Timer.Context timerContext = null;
 		
 		if (updateMetrics) {
-			timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+			timerContext = metricService.getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
 		}
 
 		try {
@@ -391,9 +391,9 @@ public class AuthenticationService {
 		if (updateMetrics) {
 			MetricType metricType;
 			if (authenticated) {
-				metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+				metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
 			} else {
-				metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+				metricType = MetricType.USER_AUTHENTICATION_FAILURES;
 			}
 	
 			metricService.incCounter(metricType);
@@ -474,7 +474,7 @@ public class AuthenticationService {
 		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
 		com.codahale.metrics.Timer.Context timerContext = metricService
-				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+				.getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
 		try {
 			User user = userService.getUser(userName);
 			if ((user != null) && checkUserStatus(user)) {
@@ -495,9 +495,9 @@ public class AuthenticationService {
 
 		MetricType metricType;
 		if (authenticated) {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
