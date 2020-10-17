@@ -362,7 +362,7 @@ public class IdTokenFactory {
         for (String claimDn : scope.getClaims()) {
             GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
-            String claimName = gluuAttribute.getOxAuthClaimName();
+            String claimName = gluuAttribute.getClaimName();
             String ldapName = gluuAttribute.getName();
             Object attribute = null;
 

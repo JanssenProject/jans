@@ -69,7 +69,7 @@ public class AttributeService extends io.jans.service.AttributeService {
         List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jsClaimName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
-                if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
+                if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
                     return gluuAttribute;
                 }
             }
