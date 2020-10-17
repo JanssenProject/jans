@@ -109,7 +109,7 @@ public class JansConfigurationWS {
                 if (claimIdList != null && !claimIdList.isEmpty()) {
                     for (String claimDn : claimIdList) {
                         final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
-                        final String claimName = attribute.getOxAuthClaimName();
+                        final String claimName = attribute.getClaimName();
                         if (StringUtils.isNotBlank(claimName)) {
                             claimsList.add(claimName);
                         }
