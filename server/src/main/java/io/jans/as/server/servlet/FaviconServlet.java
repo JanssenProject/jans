@@ -57,7 +57,7 @@ public class FaviconServlet extends HttpServlet {
 	}
 
 	private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
-		if (organization.getOxAuthFaviconPath() == null || StringUtils.isEmpty(organization.getOxAuthFaviconPath())) {
+		if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
 			return false;
 		}
 
@@ -65,7 +65,7 @@ public class FaviconServlet extends HttpServlet {
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File faviconPath = new File(organization.getOxAuthFaviconPath());
+		File faviconPath = new File(organization.getJsFaviconPath());
 		if (!faviconPath.exists()) {
 			return false;
 		}

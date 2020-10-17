@@ -651,12 +651,12 @@ public class AppInitializer {
 	}
 
 	private List<IDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
-		if ((configuration == null) || (configuration.getOxIDPAuthentication() == null)) {
+		if ((configuration == null) || (configuration.getIDPAuthn() == null)) {
 			return null;
 		}
 
 		List<IDPAuthConf> configurations = new ArrayList<IDPAuthConf>();
-		for (IDPAuthConf authConf : configuration.getOxIDPAuthentication()) {
+		for (IDPAuthConf authConf : configuration.getIDPAuthn()) {
 			if (authConf.getType().equalsIgnoreCase("ldap") || authConf.getType().equalsIgnoreCase("auth")) {
 				configurations.add(authConf);
 			}
