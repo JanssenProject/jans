@@ -1,11 +1,17 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.service;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.persistence.model.SectorIdentifier;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -34,17 +40,17 @@ public class SectorService implements Serializable {
     @Inject
     private ClientService clientService;
 
-    public String getDnForSectorIdentifier(String oxId) {
+    public String getDnForSectorIdentifier(String jsId) {
         String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=sector_identifiers,%s", orgDn);
         }
-        return String.format("oxId=%s,ou=sector_identifiers,%s", oxId, orgDn);
+        return String.format("jsId=%s,ou=sector_identifiers,%s", jsId, orgDn);
     }
 
     public List<SectorIdentifier> searchSectorIdentifiers(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter searchFilter = Filter.createSubstringFilter(OxConstants.oxId, null, targetArray, null);
+        Filter searchFilter = Filter.createSubstringFilter(AttributeConstants.jsId, null, targetArray, null);
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, searchFilter,
                 sizeLimit);
     }
@@ -53,11 +59,11 @@ public class SectorService implements Serializable {
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, null);
     }
 
-    public SectorIdentifier getSectorIdentifierById(String oxId) {
+    public SectorIdentifier getSectorIdentifierById(String jsId) {
         try {
-            return persistenceEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(oxId));
+            return persistenceEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(jsId));
         } catch (Exception e) {
-            log.trace("Failed to find sector identifier by oxId " + oxId, e);
+            log.trace("Failed to find sector identifier by jsId " + jsId, e);
             return null;
         }
     }

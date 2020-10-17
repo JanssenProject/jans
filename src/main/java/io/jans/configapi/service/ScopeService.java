@@ -1,11 +1,17 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.service;
 
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.OxConstants;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -86,11 +92,11 @@ public class ScopeService {
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("oxScopeType", scopeType), searchFilter);
+            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("jsScopeTyp", scopeType), searchFilter);
         }
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, sizeLimit);
@@ -107,7 +113,7 @@ public class ScopeService {
     public List<Scope> getAllScopesList(int size, String scopeType) {
         Filter searchFilter = null;
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createEqualityFilter("oxScopeType", scopeType);
+            searchFilter = Filter.createEqualityFilter("jsScopeTyp", scopeType);
         }
         return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, size);
     }

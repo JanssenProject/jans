@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.service;
 
 import com.github.fge.jackson.JacksonUtils;
@@ -5,7 +11,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +36,7 @@ public class LdapConfigurationService {
     private EncryptionService encryptionService;
 
     public List<GluuLdapConfiguration> findLdapConfigurations() {
-        return getOxIDPAuthConf().stream().map(oxIDPAuthConf::asLdapConfiguration).collect(Collectors.toList());
+        return getIDPAuthConf().stream().map(IDPAuthConf::asLdapConfiguration).collect(Collectors.toList());
     }
 
     public void save(GluuLdapConfiguration ldapConfiguration) {
@@ -41,7 +47,7 @@ public class LdapConfigurationService {
 
     public void save(List<GluuLdapConfiguration> ldapConfigurations) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
-        configuration.setOxIDPAuthentication(getOxIDPAuthConfs(ldapConfigurations));
+        configuration.setOxIDPAuthentication(getIDPAuthConfs(ldapConfigurations));
         configurationService.merge(configuration);
     }
 
@@ -67,16 +73,16 @@ public class LdapConfigurationService {
         return matchingLdapConfiguration.get();
     }
 
-    private List<oxIDPAuthConf> getOxIDPAuthConf() {
-        List<oxIDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
+    private List<IDPAuthConf> getIDPAuthConf() {
+        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
         return idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH)).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private List<oxIDPAuthConf> getOxIDPAuthConfs(List<GluuLdapConfiguration> ldapConfigurations) {
-        List<oxIDPAuthConf> idpConf = new ArrayList<oxIDPAuthConf>();
+    private List<IDPAuthConf> getIDPAuthConfs(List<GluuLdapConfiguration> ldapConfigurations) {
+        List<IDPAuthConf> idpConf = new ArrayList<IDPAuthConf>();
         for (GluuLdapConfiguration ldapConfig : ldapConfigurations) {
             if (shouldEncryptPassword(ldapConfig)) {
                 try {
@@ -89,7 +95,7 @@ public class LdapConfigurationService {
                 ldapConfig.setBindDN(null);
             }
 
-            oxIDPAuthConf ldapConfigIdpAuthConf = new oxIDPAuthConf();
+            IDPAuthConf ldapConfigIdpAuthConf = new IDPAuthConf();
             ldapConfig.updateStringsLists();
             ldapConfigIdpAuthConf.setType(AUTH);
             ldapConfigIdpAuthConf.setVersion(ldapConfigIdpAuthConf.getVersion() + 1);

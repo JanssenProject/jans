@@ -1,10 +1,16 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.service;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.search.filter.Filter;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,9 +39,9 @@ public class UmaResourceService {
 
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter oxIdFilter = Filter.createSubstringFilter("oxId", null, targetArray, null);
+        Filter jsIdFilter = Filter.createSubstringFilter("jsId", null, targetArray, null);
 
-        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, oxIdFilter, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, jsIdFilter, sizeLimit);
     }
 
     public List<UmaResource> getAllResources(int sizeLimit) {
@@ -75,11 +81,11 @@ public class UmaResourceService {
         }
     }
 
-    public String getDnForResource(String oxId) {
-        if (StringHelper.isEmpty(oxId)) {
+    public String getDnForResource(String jsId) {
+        if (StringHelper.isEmpty(jsId)) {
             return getBaseDnForResource();
         }
-        return String.format("oxId=%s,%s", oxId, getBaseDnForResource());
+        return String.format("jsId=%s,%s", jsId, getBaseDnForResource());
     }
 
     public String getBaseDnForResource() {
