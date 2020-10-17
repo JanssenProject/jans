@@ -105,7 +105,7 @@ public class JansConfigurationWS {
                 final Set<String> claimsList = new HashSet<String>();
                 result.put(scope.getId(), claimsList);
 
-                final List<String> claimIdList = scope.getOxAuthClaims();
+                final List<String> claimIdList = scope.getClaims();
                 if (claimIdList != null && !claimIdList.isEmpty()) {
                     for (String claimDn : claimIdList) {
                         final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
