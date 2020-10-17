@@ -57,14 +57,14 @@ public class LogoServlet extends HttpServlet {
 	}
 
 	private boolean readCustomLogo(HttpServletResponse response, GluuOrganization organization) {
-		if (organization.getOxAuthLogoPath() == null || StringUtils.isEmpty(organization.getOxAuthLogoPath())) {
+		if (organization.getJsLogoPath() == null || StringUtils.isEmpty(organization.getJsLogoPath())) {
 			return false;
 		}
 		File directory = new File(BASE_OXAUTH_LOGO_PATH);
 		if (!directory.exists()) {
 			directory.mkdir();
 		}
-		File logoPath = new File(organization.getOxAuthLogoPath());
+		File logoPath = new File(organization.getJsLogoPath());
 		if (!logoPath.exists()) {
 			return false;
 		}
