@@ -6,12 +6,6 @@
 
 package io.jans.as.persistence.model;
 
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.jans.model.GluuStatus;
@@ -30,7 +24,7 @@ import java.io.Serializable;
  * @author Yuriy Movchan Date: 11.02.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuOrganization")
+@ObjectClass(value = "jsOrganization")
 @JsonInclude(Include.NON_NULL)
 public class GluuOrganization extends Entry implements Serializable {
 
@@ -79,7 +73,29 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName(name = "title")
 	private String title;
 
-	public String getOrganizationTitle() {
+    @AttributeName(name = "jsLogoPath")
+    private String jsLogoPath;
+
+    @AttributeName(name = "jsFaviconPath")
+    private String jsFaviconPath;
+
+    public String getJsLogoPath() {
+        return jsLogoPath;
+    }
+
+    public void setJsLogoPath(String jsLogoPath) {
+        this.jsLogoPath = jsLogoPath;
+    }
+
+    public String getJsFaviconPath() {
+        return jsFaviconPath;
+    }
+
+    public void setJsFaviconPath(String jsFaviconPath) {
+        this.jsFaviconPath = jsFaviconPath;
+    }
+
+    public String getOrganizationTitle() {
 		if (title == null || title.trim().equals("")) {
 			return "Gluu";
 		}
