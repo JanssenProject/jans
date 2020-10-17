@@ -331,7 +331,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             Map<String, Object> claims = getClaims(user, scope);
 
-            if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
+            if (Boolean.TRUE.equals(scope.isGroupClaims())) {
                 JwtSubClaimObject groupClaim = new JwtSubClaimObject();
                 groupClaim.setName(scope.getId());
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
@@ -428,8 +428,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeById(scopeName);
 
-            if (scope != null && scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
+            if (scope != null && scope.getClaims() != null) {
+                for (String claimDn : scope.getClaims()) {
                     if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
                         return true;
                     }
@@ -448,7 +448,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             return claims;
         }
 
-        final List<String> scopeClaims = scope.getOxAuthClaims();
+        final List<String> scopeClaims = scope.getClaims();
         if (scopeClaims == null) {
             log.trace("No claims set for scope: " + scope.getId());
             return claims;
