@@ -299,7 +299,7 @@ class PersonAuthentication(PersonAuthenticationType):
         config = GluuConfiguration()
         config = entryManager.find(config.getClass(), "ou=configuration,o=gluu")
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
-        uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
+        uid_attr = config.getIDPAuthn().get(0).getConfig().getPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
 
