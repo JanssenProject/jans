@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -19,7 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
+@Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class LdapConfigurationResource extends BaseResource {

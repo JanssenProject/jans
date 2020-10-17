@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -21,7 +27,7 @@ import java.util.UUID;
 /**
  * @author Mougang T.Gasmyr
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.SECTORS)
+@Path(ApiConstants.OPENID + ApiConstants.SECTORS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {
@@ -58,11 +64,11 @@ public class OIDSectorResource extends BaseResource {
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response createNewOpenIDSector(@Valid SectorIdentifier sectorIdentifier) {
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
-        String oxId = UUID.randomUUID().toString();
-        sectorIdentifier.setId(oxId);
-        sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(oxId));
+        String jsId = UUID.randomUUID().toString();
+        sectorIdentifier.setId(jsId);
+        sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(jsId));
         sectorIdentifierService.addSectorIdentifier(sectorIdentifier);
-        SectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(oxId);
+        SectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(jsId);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
