@@ -183,7 +183,7 @@ public class ScopeService {
 	public List<Scope> getScopesByClaim(List<Scope> scopes, String claimDn) {
 		List<Scope> result = new ArrayList<>();
 		for (Scope scope : scopes) {
-			List<String> claims = scope.getOxAuthClaims();
+			List<String> claims = scope.getClaims();
 			if ((claims != null) && claims.contains(claimDn)) {
 				result.add(scope);
 			}

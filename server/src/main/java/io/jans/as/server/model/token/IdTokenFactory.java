@@ -172,7 +172,7 @@ public class IdTokenFactory {
 
                 Map<String, Object> claims = getClaims(user, scope);
 
-                if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
+                if (Boolean.TRUE.equals(scope.isGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
                     groupClaim.setName(scope.getId());
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
@@ -341,8 +341,8 @@ public class IdTokenFactory {
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeById(scopeName);
 
-            if (scope != null && scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
+            if (scope != null && scope.getClaims() != null) {
+                for (String claimDn : scope.getClaims()) {
                     if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
                         return true;
                     }
@@ -355,11 +355,11 @@ public class IdTokenFactory {
     public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
         Map<String, Object> claims = new HashMap<>();
 
-        if (scope == null || scope.getOxAuthClaims() == null) {
+        if (scope == null || scope.getClaims() == null) {
             return claims;
         }
 
-        for (String claimDn : scope.getOxAuthClaims()) {
+        for (String claimDn : scope.getClaims()) {
             GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
             String claimName = gluuAttribute.getOxAuthClaimName();
