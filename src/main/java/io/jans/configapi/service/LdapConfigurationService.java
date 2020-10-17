@@ -47,7 +47,7 @@ public class LdapConfigurationService {
 
     public void save(List<GluuLdapConfiguration> ldapConfigurations) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
-        configuration.setOxIDPAuthentication(getIDPAuthConfs(ldapConfigurations));
+        configuration.setIDPAuthn(getIDPAuthConfs(ldapConfigurations));
         configurationService.merge(configuration);
     }
 
@@ -74,7 +74,7 @@ public class LdapConfigurationService {
     }
 
     private List<IDPAuthConf> getIDPAuthConf() {
-        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
+        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getIDPAuthn();
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
