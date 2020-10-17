@@ -924,7 +924,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             claimNames = new String[claimDns.length];
             for (int i = 0; i < claimDns.length; i++) {
                 GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDns[i]);
-                claimNames[i] = gluuAttribute.getOxAuthClaimName();
+                claimNames[i] = gluuAttribute.getClaimName();
             }
         }
 
