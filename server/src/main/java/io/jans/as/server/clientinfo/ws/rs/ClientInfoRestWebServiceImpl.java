@@ -113,8 +113,8 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
             for (String scopeName : scopes) {
                 Scope scope = scopeService.getScopeById(scopeName);
 
-                if (scope.getOxAuthClaims() != null) {
-                    for (String claimDn : scope.getOxAuthClaims()) {
+                if (scope.getClaims() != null) {
+                    for (String claimDn : scope.getClaims()) {
                         GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
                         String attributeName = attribute.getName();
