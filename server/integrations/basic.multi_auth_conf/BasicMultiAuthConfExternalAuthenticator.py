@@ -89,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
             credentials = identity.getCredentials()
 
             metricService = CdiUtil.bean(MetricService)
-            timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time()
+            timerContext = metricService.getTimer(MetricType.USER_AUTHENTICATION_RATE).time()
             try:
                 keyValue = credentials.getUsername()
                 userPassword = credentials.getPassword()
@@ -111,13 +111,13 @@ class PersonAuthentication(PersonAuthenticationType):
     
                             loggedIn = authenticationService.authenticate(ldapConfiguration, ldapEntryManager, keyValue, userPassword, primaryKey, localPrimaryKey)
                             if (loggedIn):
-                                metricService.incCounter(MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS)
+                                metricService.incCounter(MetricType.USER_AUTHENTICATION_SUCCESS)
                                 return True
                             idx += 1
             finally:
                 timerContext.stop()
                 
-            metricService.incCounter(MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES)
+            metricService.incCounter(MetricType.USER_AUTHENTICATION_FAILURES)
 
             return False
         else:
