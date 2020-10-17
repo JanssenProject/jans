@@ -6,15 +6,15 @@
 
 package io.jans.model.metric;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.model.metric.counter.CounterMetricData;
 import io.jans.model.metric.counter.CounterMetricEntry;
+import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.model.metric.timer.TimerMetricData;
 import io.jans.model.metric.timer.TimerMetricEntry;
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Metric event type declaration
@@ -23,25 +23,25 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum MetricType implements AttributeEnum {
 
-    OXAUTH_USER_AUTHENTICATION_SUCCESS("user_authentication_success",
-            "Count successfull oxAuth user authentications", CounterMetricData.class, CounterMetricEntry.class),
-    OXAUTH_USER_AUTHENTICATION_FAILURES("user_authentication_failure",
-            "Count failed oxAuth user authentications", CounterMetricData.class, CounterMetricEntry.class),
-    OXAUTH_USER_AUTHENTICATION_RATE("user_authentication_rate",
+    USER_AUTHENTICATION_SUCCESS("user_authentication_success",
+            "Count successfull user authentications", CounterMetricData.class, CounterMetricEntry.class),
+    USER_AUTHENTICATION_FAILURES("user_authentication_failure",
+            "Count failed user authentications", CounterMetricData.class, CounterMetricEntry.class),
+    USER_AUTHENTICATION_RATE("user_authentication_rate",
             "User authentication rate", TimerMetricData.class, TimerMetricEntry.class),
     DYNAMIC_CLIENT_REGISTRATION_RATE("dynamic_client_registration_rate",
             "Dynamic client registration rate", TimerMetricData.class, TimerMetricEntry.class),
 
-	OXAUTH_TOKEN_AUTHORIZATION_CODE_COUNT("tkn_authorization_code_count",
-            "Count successfull issued oxAuth authorization code tokens", CounterMetricData.class, CounterMetricEntry.class),
-	OXAUTH_TOKEN_ACCESS_TOKEN_COUNT("tkn_access_token_count",
-            "Count successfull issued oxAuth access tokens", CounterMetricData.class, CounterMetricEntry.class),
-	OXAUTH_TOKEN_ID_TOKEN_COUNT("tkn_id_token_count",
-            "Count successfull issued oxAuth id tokens", CounterMetricData.class, CounterMetricEntry.class),
-	OXAUTH_TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
-            "Count successfull issued oxAuth refresh tokens", CounterMetricData.class, CounterMetricEntry.class),
-	OXAUTH_TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
-            "Count successfull issued oxAuth long lived access tokens", CounterMetricData.class, CounterMetricEntry.class);
+	TOKEN_AUTHORIZATION_CODE_COUNT("tkn_authorization_code_count",
+            "Count successfull issued authorization code tokens", CounterMetricData.class, CounterMetricEntry.class),
+	TOKEN_ACCESS_TOKEN_COUNT("tkn_access_token_count",
+            "Count successfull issued access tokens", CounterMetricData.class, CounterMetricEntry.class),
+	TOKEN_ID_TOKEN_COUNT("tkn_id_token_count",
+            "Count successfull issued id tokens", CounterMetricData.class, CounterMetricEntry.class),
+	TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
+            "Count successfull issued refresh tokens", CounterMetricData.class, CounterMetricEntry.class),
+	TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
+            "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class);
 
     private String value;
     private String displayName;
