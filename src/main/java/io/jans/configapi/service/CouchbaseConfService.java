@@ -1,10 +1,16 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.service;
 
 import com.github.fge.jackson.JacksonUtils;
 import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +33,7 @@ public class CouchbaseConfService {
     private EncryptionService encryptionService;
 
     public List<CouchbaseConnectionConfiguration> findAll() {
-        return getOxIDPAuthConf().stream().filter(c -> c.asCouchbaseConfiguration() != null).map(oxIDPAuthConf::asCouchbaseConfiguration).collect(Collectors.toList());
+        return getIDPAuthConf().stream().filter(c -> c.asCouchbaseConfiguration() != null).map(IDPAuthConf::asCouchbaseConfiguration).collect(Collectors.toList());
     }
 
     public void save(CouchbaseConnectionConfiguration conf) {
@@ -37,14 +43,14 @@ public class CouchbaseConfService {
     public void save(List<CouchbaseConnectionConfiguration> confs) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
 
-        configuration.setOxIDPAuthentication(getOrCreateOxIDPAuthConfs(configuration.getOxIDPAuthentication(), confs));
+        configuration.setOxIDPAuthentication(getOrCreateIDPAuthConfs(configuration.getOxIDPAuthentication(), confs));
         configurationService.merge(configuration);
     }
 
     public void remove(String name) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
-        final List<oxIDPAuthConf> existing = gluuConfiguration.getOxIDPAuthentication();
-        Optional<oxIDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(name)).findFirst();
+        final List<IDPAuthConf> existing = gluuConfiguration.getOxIDPAuthentication();
+        Optional<IDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(name)).findFirst();
         if (existingConf.isEmpty())
             return; // does not exist, nothing to remove
 
@@ -59,25 +65,25 @@ public class CouchbaseConfService {
         return all.stream().filter(d -> d != null && d.getConfigId() != null && d.getConfigId().equals(name)).findFirst();
     }
 
-    private List<oxIDPAuthConf> getOxIDPAuthConf() {
-        List<oxIDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
+    private List<IDPAuthConf> getIDPAuthConf() {
+        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
         return idpConfList;
     }
 
-    private List<oxIDPAuthConf> getOrCreateOxIDPAuthConfs(List<oxIDPAuthConf> existing, List<CouchbaseConnectionConfiguration> confs) {
+    private List<IDPAuthConf> getOrCreateIDPAuthConfs(List<IDPAuthConf> existing, List<CouchbaseConnectionConfiguration> confs) {
         if (existing == null) {
             existing = Lists.newArrayList();
         }
 
         for (CouchbaseConnectionConfiguration conf : confs) {
-            Optional<oxIDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(conf.getConfigId())).findFirst();
+            Optional<IDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(conf.getConfigId())).findFirst();
 
-            final oxIDPAuthConf idpConf;
+            final IDPAuthConf idpConf;
             if (existingConf.isEmpty()) {
-                idpConf = new oxIDPAuthConf();
+                idpConf = new IDPAuthConf();
                 existing.add(idpConf);
             } else {
                 idpConf = existingConf.get();

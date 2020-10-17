@@ -1,9 +1,13 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.configapi.auth;
 
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.service.OpenIdService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -13,6 +17,9 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.apache.commons.lang.StringUtils;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -41,7 +48,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            logger.trace("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
+            logger.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
