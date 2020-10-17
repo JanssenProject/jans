@@ -361,7 +361,7 @@ public class OpenIdConfiguration extends HttpServlet {
 					if (claimIdList != null && !claimIdList.isEmpty()) {
 						for (String claimDn : claimIdList) {
 							final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
-							final String claimName = attribute.getOxAuthClaimName();
+							final String claimName = attribute.getClaimName();
 							if (StringUtils.isNotBlank(claimName)) {
 								claimsList.put(claimName);
 								claims.add(claimName);
