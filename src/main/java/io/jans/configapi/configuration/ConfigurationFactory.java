@@ -315,7 +315,7 @@ public class ConfigurationFactory {
         }
         try {
             String[] targetArray = new String[] { ConfigurationFactory.getApiResourceName() };
-            Filter jsIdFilter = Filter.createSubstringFilter("jsId", null, targetArray, null);
+            Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
             Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
             Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
 

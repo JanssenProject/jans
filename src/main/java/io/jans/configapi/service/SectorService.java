@@ -45,7 +45,7 @@ public class SectorService implements Serializable {
         if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=sector_identifiers,%s", orgDn);
         }
-        return String.format("jsId=%s,ou=sector_identifiers,%s", jsId, orgDn);
+        return String.format("jansId=%s,ou=sector_identifiers,%s", jsId, orgDn);
     }
 
     public List<SectorIdentifier> searchSectorIdentifiers(String pattern, int sizeLimit) {
