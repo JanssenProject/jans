@@ -158,7 +158,7 @@ public class RegistrationService extends RequestService {
             deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
 
             // Check if there is device registration with keyHandle in LDAP already
-            List<DeviceRegistration> foundDeviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, deviceRegistration.getKeyHandle(), "jsId");
+            List<DeviceRegistration> foundDeviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, deviceRegistration.getKeyHandle(), "jansId");
             if (foundDeviceRegistrations.size() != 0) {
                 throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
             }
@@ -196,7 +196,7 @@ public class RegistrationService extends RequestService {
 
     public RegisterRequestMessageLdap getRegisterRequestMessageByRequestId(String requestId) {
         String baseDn = getDnForRegisterRequestMessage(null);
-        Filter requestIdFilter = Filter.createEqualityFilter("jsReqId", requestId);
+        Filter requestIdFilter = Filter.createEqualityFilter("jansReqId", requestId);
 
         List<RegisterRequestMessageLdap> registerRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, RegisterRequestMessageLdap.class,
                 requestIdFilter);

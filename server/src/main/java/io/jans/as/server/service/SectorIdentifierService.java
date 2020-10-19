@@ -79,7 +79,7 @@ public class SectorIdentifierService {
             return sectorIdentifierDn;
         }
 
-        return String.format("jsId=%s,%s", jsId, sectorIdentifierDn);
+        return String.format("jansId=%s,%s", jsId, sectorIdentifierDn);
     }
 
     public String getSub(IAuthorizationGrant grant) {
