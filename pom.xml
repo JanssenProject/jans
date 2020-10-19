@@ -104,7 +104,7 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxauth-client</artifactId>
+                <artifactId>jans-auth-client</artifactId>
                 <version>${jans-auth-server.version}</version>
                 <exclusions>
                     <exclusion>
@@ -115,7 +115,7 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxauth-model</artifactId>
+                <artifactId>jans-auth-model</artifactId>
                 <version>${jans-auth-server.version}</version>
                 <exclusions>
                     <exclusion>
@@ -143,7 +143,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>io.jans</groupId>
-                        <artifactId>jans-core-persistence-ldap</artifactId>
+                        <artifactId>jans-orm-ldap</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.python</groupId>
