@@ -23,10 +23,10 @@ with open(schema_file) as f:
 
 
 with open('mapping.json') as f:
-    mapping = json.load(f)
+    mapping = json.load(f, object_pairs_hook=OrderedDict)
 
 with open('opendj_types.json') as f:
-    opendj_types = json.load(f)
+    opendj_types = json.load(f, object_pairs_hook=OrderedDict)
 
 opendj_attributes = []
 for k in opendj_types:
@@ -82,12 +82,14 @@ for obj in schema['objectClasses'][:]:
             obj[e] = do_replace(obj[e])
 
     for lt in ('may', 'names'):
-        for i in range(len((obj[lt]))):
-            cur = obj[lt][i]
-            new = do_replace(obj[lt][i])
-            if cur != new:
-                obj_conversions.append((cur, new))
-                obj[lt][i] = new
+        new_list = []
+        for name in obj[lt]:
+            new = do_replace(name)
+            if name != new:
+                obj_conversions.append((name, new))
+            if not new in new_list:
+                new_list.append(new)
+        obj[lt] = new_list
 
 macrkeys = list(schema['oidMacros'].keys())
 for macr in macrkeys:

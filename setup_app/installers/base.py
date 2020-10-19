@@ -61,7 +61,7 @@ class BaseInstaller:
 
 
     def check_clients(self, client_var_id_list, resource=False):
-        field_name, ou = ('oxId', 'resources') if resource else ('inum', 'clients')
+        field_name, ou = ('jansId', 'resources') if resource else ('inum', 'clients')
 
         for client_var_name, client_id_prefix in client_var_id_list:
             self.logIt("Checking ID for client {}".format(client_var_name))
