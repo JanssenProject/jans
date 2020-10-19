@@ -1,3 +1,4 @@
+import os
 import json
 import ldap3
 from ldap3.utils import dn as dnutils
@@ -255,6 +256,7 @@ class DBUtils:
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
         for ldif_fn in ldif_files:
+            base.logIt("Importing entries from " + ldif_fn)
             parser = ldif_utils.myLdifParser(ldif_fn)
             parser.parse()
 

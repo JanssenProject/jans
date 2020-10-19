@@ -100,7 +100,7 @@ class SchemaGenerator(object):
             elif len(attr['names']) == 1:
                 attr_str += "'{}'".format(attr['names'][0])
             else:
-                print("Invalid attribute data. Doesn't define a name")
+                print("Invalid attribute data. Doesn't define a name", attr)
             if 'desc' in attr:
                 attr_str += "\n\tDESC '{}'".format(attr['desc'])
             if 'equality' in attr:
@@ -127,7 +127,7 @@ class SchemaGenerator(object):
             elif len(obc['names']) == 1:
                 obc_str += "'{}'".format(obc['names'][0])
             else:
-                print("Invalid objectclass data. Doesn't define a name")
+                print("Invalid objectclass data. Doesn't define a name", obc)
             if 'desc' in obc:
                 obc_str += "\n\tDESC '{}'".format(obc['desc'])
             if 'sup' in obc:
@@ -178,7 +178,7 @@ class SchemaGenerator(object):
             elif len(attr['names']) == 1:
                 attr_str += "'{}'".format(attr['names'][0])
             else:
-                print("Invalid attribute data. Doesn't define a name")
+                print("Invalid attribute data. Doesn't define a name", attr)
             if 'desc' in attr:
                 attr_str += "\n  DESC '{}'".format(attr['desc'])
             if 'equality' in attr:
@@ -205,7 +205,7 @@ class SchemaGenerator(object):
             elif len(obc['names']) == 1:
                 obc_str += "'{}'".format(obc['names'][0])
             else:
-                print("Invalid objectclass data. Doesn't define a name")
+                print("Invalid objectclass data. Doesn't define a name", obc)
             if 'desc' in obc:
                 obc_str += "\n  DESC '{}'".format(obc['desc'])
             if 'sup' in obc:
