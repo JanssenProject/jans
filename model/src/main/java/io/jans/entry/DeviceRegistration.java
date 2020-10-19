@@ -31,7 +31,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;
 
-	@AttributeName(ignoreDuringUpdate = true, name = "jsId")
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
 	private String id;
 
 	@AttributeName

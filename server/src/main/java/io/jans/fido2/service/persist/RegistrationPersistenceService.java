@@ -136,7 +136,7 @@ public class RegistrationPersistenceService {
     public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
-        Filter publicKeyIdFilter = Filter.createEqualityFilter("jsPublicKeyId", publicKeyId);
+        Filter publicKeyIdFilter = Filter.createEqualityFilter("jansPublicKeyId", publicKeyId);
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
         
         if (fido2RegistrationnEntries.size() > 0) {
@@ -180,7 +180,7 @@ public class RegistrationPersistenceService {
         }
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-        Filter registeredFilter = Filter.createEqualityFilter("jsStatus", Fido2RegistrationStatus.registered.getValue());
+        Filter registeredFilter = Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue());
         Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
 
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
@@ -191,8 +191,8 @@ public class RegistrationPersistenceService {
     public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
-        Filter codeChallengFilter = Filter.createEqualityFilter("jsCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jsCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
@@ -206,7 +206,7 @@ public class RegistrationPersistenceService {
         if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("jsId=%s,%s", jsId, baseDn);
+        return String.format("jansId=%s,%s", jsId, baseDn);
     }
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
@@ -244,7 +244,7 @@ public class RegistrationPersistenceService {
             }
         };
         String baseDn = getDnForUser(null);
-        persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"jsCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
+        persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         String branchDn = getDnForUser(null);
         if (persistenceEntryManager.hasBranchesSupport(branchDn)) {
@@ -274,8 +274,8 @@ public class RegistrationPersistenceService {
         final Date unfinishedRequestExpirationDate = calendar.getTime();
 
         // Build unfinished request expiration filter
-        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jsStatus", Fido2RegistrationStatus.registered.getValue()));
-        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jsStatus", Fido2RegistrationStatus.compromised.getValue()));
+        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
+        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.compromised.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
