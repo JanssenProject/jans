@@ -51,9 +51,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     public void filter(ContainerRequestContext context) {
         logger.info("=======================================================================");
-        logger.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
+        logger.debug("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         logger.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
+
+        logger.debug("\n\n\n filter - authorizationHeader = " + authorizationHeader + "\n\n\n");
+
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             logger.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
@@ -61,7 +64,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         try {
             String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-            //this.authorizationService.validateAuthorization(token, resourceInfo); - //WIP ??
+            // this.authorizationService.validateAuthorization(token, resourceInfo); //-
+            // //WIP ??
             logger.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             logger.error("======AUTHORIZATION  FAILED ===========================================", ex);

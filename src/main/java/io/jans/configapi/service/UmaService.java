@@ -102,6 +102,8 @@ public class UmaService extends Initializable implements Serializable {
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds)
             throws UmaException {
+        logger.debug("\n\n\n UmaService::validateRptToken() - Entry - patToken = " + patToken + " , authorization = "
+                + authorization + " , resourceId = " + resourceId + " , scopeIds = " + scopeIds + "\n\n\n");
 
         if (patToken == null || patToken.getIdToken() == null) {
             throw new UmaException("PAT cannot be null");
@@ -114,12 +116,14 @@ public class UmaService extends Initializable implements Serializable {
             String rptToken = authorization.substring(7);
 
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
+            logger.debug("\n\n\n UmaService::validateRptToken() - rptStatusResponse = " + rptStatusResponse + "\n\n\n");
             logger.trace("RPT status response: {} ", rptStatusResponse);
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 logger.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
             } else {
                 boolean rptHasPermissions = isRptHasPermissions(rptStatusResponse);
-
+                logger.debug(
+                        "\n\n\n UmaService::validateRptToken() - rptHasPermissions = " + rptHasPermissions + "\n\n\n");
                 if (rptHasPermissions) {
                     // Collect all scopes
                     List<String> returnScopeIds = new LinkedList<String>();
