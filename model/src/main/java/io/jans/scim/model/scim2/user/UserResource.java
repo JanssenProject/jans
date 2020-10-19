@@ -154,7 +154,7 @@ public class UserResource extends BaseScimResource {
             mutability = AttributeDefinition.Mutability.READ_ONLY,
             returned = AttributeDefinition.Returned.REQUEST,
             multiValueClass = String.class)
-    @StoreReference(ref = "jsPPID")
+    @StoreReference(ref = "jansPPID")
     private List<String> pairwiseIdentifiers;
 
     public String getUserName() {

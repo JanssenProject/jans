@@ -40,49 +40,49 @@ public class FidoDeviceResource extends BaseScimResource {
     @Attribute(description = "Application ID that enrolled the device",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "jsApp")
+    @StoreReference(ref = "jansApp")
     private String application;
 
     @Attribute(description = "A counter aimed at being used by the FIDO endpoint",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.INTEGER)
-    @StoreReference(ref = "jsCounter")
+    @StoreReference(ref = "jansCounter")
     private String counter;
 
     @Attribute(description = "A Json representation of low-level attributes of this device",
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "jsDeviceData")
+    @StoreReference(ref = "jansDeviceData")
     private String deviceData;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.INTEGER)
-    @StoreReference(ref = "jsDeviceHashCode")
+    @StoreReference(ref = "jansDeviceHashCode")
     private String deviceHashCode;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "jsDeviceKeyHandle")
+    @StoreReference(ref = "jansDeviceKeyHandle")
     private String deviceKeyHandle;
 
     @Attribute(description = "",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
-    @StoreReference(ref = "jsDeviceRegistrationConf")
+    @StoreReference(ref = "jansDeviceRegistrationConf")
     private String deviceRegistrationConf;
 
     @Attribute(description = "The most recent dateTime when this device was used for authentication",
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.DATETIME)
-    @StoreReference(ref = "jsLastAccessTime")
+    @StoreReference(ref = "jansLastAccessTime")
     private String lastAccessTime;
 
     @Attribute(isRequired = true,
             canonicalValues = {"active", "compromised"})
-    @StoreReference(ref = "jsStatus")
+    @StoreReference(ref = "jansStatus")
     private String status;
 
     @Attribute
@@ -94,7 +94,7 @@ public class FidoDeviceResource extends BaseScimResource {
     private String description;
 
     @Attribute
-    @StoreReference(ref = "jsNickName")
+    @StoreReference(ref = "jansNickName")
     private String nickname;
 
     public String getUserId() {

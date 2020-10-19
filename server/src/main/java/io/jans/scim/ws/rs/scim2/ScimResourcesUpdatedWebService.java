@@ -93,7 +93,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             } else {
                 log.info("Searching users updated or created after {} (starting at index {} - at most {} results)", date, start, itemsPerPage);
                 Filter filter = Filter.createORFilter(
-                        Filter.createGreaterOrEqualFilter("jsCreationTimestamp", date),
+                        Filter.createGreaterOrEqualFilter("jansCreationTimestamp", date),
                         Filter.createGreaterOrEqualFilter("updatedAt", date));
                 log.trace("Using filter {}", filter.toString());
 

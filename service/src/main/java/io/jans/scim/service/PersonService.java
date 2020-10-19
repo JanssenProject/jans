@@ -298,7 +298,7 @@ public class PersonService implements Serializable {
 			mandatoryAttributes.add(new GluuCustomAttribute("sn", "", true, true));
 			mandatoryAttributes.add(new GluuCustomAttribute("mail", "", true, true));
 			mandatoryAttributes.add(new GluuCustomAttribute("userPassword", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("jsStatus", "", true, true));
+			mandatoryAttributes.add(new GluuCustomAttribute("jansStatus", "", true, true));
 		}
 		return mandatoryAttributes;
 	}

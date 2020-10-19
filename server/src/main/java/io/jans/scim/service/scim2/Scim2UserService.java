@@ -191,7 +191,7 @@ public class Scim2UserService implements Serializable {
 		// Also it seems jsStatus can have several values, see org.gluu.model.GluuStatus
 		Boolean active = Optional.ofNullable(res.getActive()).orElse(false);
 		person.setCustomAttribute("excludeActive", active);
-		person.setAttribute("jsStatus",
+		person.setAttribute("jansStatus",
 				active ? GluuStatus.ACTIVE.getValue() : GluuStatus.INACTIVE.getValue());
 		person.setUserPassword(res.getPassword());
 
@@ -330,7 +330,7 @@ public class Scim2UserService implements Serializable {
 		res.setTimezone(person.getTimezone());
 
 		res.setActive(Boolean.valueOf(person.getAttribute("excludeActive"))
-				|| GluuBoolean.getByValue(person.getAttribute("jsStatus")).isBooleanValue());
+				|| GluuBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
 		res.setPassword(person.getUserPassword());
 
 		res.setEmails(getAttributeListValue(person, Email.class, "excludeEmail"));

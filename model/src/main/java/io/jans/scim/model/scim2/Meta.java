@@ -31,8 +31,8 @@ public class Meta {
             mutability = AttributeDefinition.Mutability.READ_ONLY,
             type = AttributeDefinition.Type.DATETIME)
     @StoreReference(resourceType = {UserResource.class, FidoDeviceResource.class, Fido2DeviceResource.class},
-            refs = {"jsCreationTimestamp", "creationDate", "creationDate"})
-    //For effects of filters we don't use "excludeMetaCreated" but "jsCreationTimestamp" which has generalizedTime data type)
+            refs = {"jansCreationTimestamp", "creationDate", "creationDate"})
+    //For effects of filters we don't use "excludeMetaCreated" but "jansCreationTimestamp" which has generalizedTime data type)
     private String created;
 
     @Attribute(description = "Date and time the resource was last modified",

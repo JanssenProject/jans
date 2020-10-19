@@ -35,12 +35,12 @@ public class Fido2DeviceResource extends BaseScimResource {
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE,
             type = AttributeDefinition.Type.INTEGER)
-    @StoreReference(ref = "jsCounter")
+    @StoreReference(ref = "jansCounter")
     private int counter;
 
     @Attribute(isRequired = true,
             canonicalValues = {"registered", "pending"})
-    @StoreReference(ref = "jsStatus")
+    @StoreReference(ref = "jansStatus")
     private String status;
 
     @Attribute

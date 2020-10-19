@@ -120,11 +120,11 @@ public class GluuCustomPerson extends User
     }
 
     public String getStatus() {
-        return getAttribute("jsStatus");
+        return getAttribute("jansStatus");
     }
 
     public void setStatus(String value) {
-        setAttribute("jsStatus", value);
+        setAttribute("jansStatus", value);
     }
 
     public String getUserPassword() {
@@ -144,11 +144,11 @@ public class GluuCustomPerson extends User
     }
 
     public Boolean getSLAManager() {
-        return Boolean.valueOf(getAttribute("jsSLAManager"));
+        return Boolean.valueOf(getAttribute("jansSLAManager"));
     }
 
     public void setSLAManager(Boolean value) {
-        setAttribute("jsSLAManager", value.toString());
+        setAttribute("jansSLAManager", value.toString());
     }
 
     public List<String> getMemberOf() {
