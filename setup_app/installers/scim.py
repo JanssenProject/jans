@@ -85,4 +85,4 @@ class ScimInstaller(JettyInstaller):
     def update_backend(self):
         self.dbUtils.add_client2script('2DAF-F9A5', Config.scim_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.scim_rp_client_id)
-        self.dbUtils.enable_service('gluuScimEnabled')
+        self.dbUtils.enable_service('jansScimEnabled')

@@ -1,30 +1,29 @@
-# SCIM Resource Server Client
 dn: inum=%(scim_rs_client_id)s,ou=clients,o=jans
-objectClass: oxAuthClient
-objectClass: top
-inum: %(scim_rs_client_id)s
 displayName: SCIM Resource Server Client
-oxAuthAppType: native
-oxAuthGrantType: client_credentials
-oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=6D99,ou=scopes,o=jans
-oxAuthJwks:: %(scim_rs_client_base64_jwks)s
-oxAuthTokenEndpointAuthMethod: private_key_jwt
-oxPersistClientAuthorizations: false
-oxAuthLogoutSessionRequired: false
-oxAuthRequireAuthTime: false
-
-# SCIM Requesting Party Client
-dn: inum=%(scim_rp_client_id)s,ou=clients,o=jans
-objectClass: oxAuthClient
+inum: %(scim_rs_client_id)s
+jansAppTyp: native
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: HS256
+jansJwks::%(scim_rs_client_base64_jwks)s
+jansLogoutSessRequired: false
+jansPersistClntAuthzs: false
+jansRequireAuthTime: false
+jansScope: inum=6D99,ou=scopes,o=gluu
+jansTknEndpointAuthMethod: private_key_jwt
+objectClass: jansClnt
 objectClass: top
-inum: %(scim_rp_client_id)s
+
+dn: inum=%(scim_rp_client_id)s,ou=clients,o=jans
 displayName: SCIM Requesting Party Client
-oxAuthAppType: native
-oxAuthGrantType: client_credentials
-oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthJwks:: %(scim_rp_client_base64_jwks)s
-oxAuthTokenEndpointAuthMethod: private_key_jwt
-oxPersistClientAuthorizations: false
-oxAuthLogoutSessionRequired: false
-oxAuthRequireAuthTime: false
+inum: %(scim_rp_client_id)s
+jansAppTyp: native
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: HS256
+jansJwks::%(scim_rp_client_base64_jwks)s
+jansLogoutSessRequired: false
+jansPersistClntAuthzs: false
+jansRequireAuthTime: false
+jansTknEndpointAuthMethod: private_key_jwt
+objectClass: jansClnt
+objectClass: top
+
