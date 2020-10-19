@@ -27,18 +27,18 @@ public class AttributeConstants {
     public static final String inum = "inum";
     public static final String displayName = "displayName";
     public static final String description = "description";
-    public static final String origin = "jsAttrOrigin";
+    public static final String origin = "jansAttrOrigin";
     public static final String mail = "mail";
-    public static final String ppid = "jsPPID";
-    public static final String jsId = "jsId";
-    public static final String SCRYPT_TYPE = "jsScrType";
+    public static final String ppid = "jansPPID";
+    public static final String jsId = "jansId";
+    public static final String SCRYPT_TYPE = "jansScrType";
 
     public static final String status = "status";
-    public static final String jsStatus = "jsStatus";
+    public static final String jsStatus = "jansStatus";
     public static final String sn = "sn";
     public static final String cn = "cn";
     public static final String owner = "owner";
     public static final String member = "member";
 
-    public static final String attributeName = "jsAttrName";
+    public static final String attributeName = "jansAttrName";
 }

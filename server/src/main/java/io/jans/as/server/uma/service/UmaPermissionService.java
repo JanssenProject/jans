@@ -51,7 +51,7 @@ public class UmaPermissionService {
     private AppConfiguration appConfiguration;
 
     public static String getDn(String clientDn, String ticket) {
-        return String.format("jsTicket=%s,%s", ticket, getBranchDn(clientDn));
+        return String.format("jansTicket=%s,%s", ticket, getBranchDn(clientDn));
     }
 
     public static String getBranchDn(String clientDn) {
@@ -127,7 +127,7 @@ public class UmaPermissionService {
     public List<UmaPermission> getPermissionsByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
-            final Filter filter = Filter.createEqualityFilter("jsTicket", ticket);
+            final Filter filter = Filter.createEqualityFilter("jansTicket", ticket);
             return ldapEntryManager.findEntries(baseDn, UmaPermission.class, filter);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -169,7 +169,7 @@ public class UmaPermissionService {
         for (UmaPermission permission : permissions) {
             ldapEntryManager.remove(permission);
 
-            String dn = String.format("jsTicket=%s,%s", newTicket, StringUtils.substringAfter(permission.getDn(), ","));
+            String dn = String.format("jansTicket=%s,%s", newTicket, StringUtils.substringAfter(permission.getDn(), ","));
             permission.setTicket(newTicket);
             permission.setDn(dn);
             permission.setAttributes(attributes);

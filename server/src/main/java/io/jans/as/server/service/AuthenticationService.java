@@ -257,7 +257,7 @@ public class AuthenticationService {
 
 	private Pair<Boolean, User> localAuthenticate(String nameValue, String password, String ... nameAttributes) {
 		String lowerNameValue = StringHelper.toString(nameValue);
-		User user = userService.getUserByAttributes(lowerNameValue, nameAttributes, new String[] {"uid", "jsStatus"});
+		User user = userService.getUserByAttributes(lowerNameValue, nameAttributes, new String[] {"uid", "jansStatus"});
 		if (user != null) {
 			if (!checkUserStatus(user)) {
 				return new Pair<Boolean, User>(false, user);
@@ -541,7 +541,7 @@ public class AuthenticationService {
 	}
 
 	private boolean checkUserStatus(User user) {
-		CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jsStatus");
+		CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
 
 		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(StringHelper.toString(userStatus.getValue())))) {
 			return true;
@@ -577,7 +577,7 @@ public class AuthenticationService {
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
-		CustomAttribute customAttribute = new CustomAttribute("jsLastLogonTime", nowDateString);
+		CustomAttribute customAttribute = new CustomAttribute("jansLastLogonTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttribute);
 
 		try {

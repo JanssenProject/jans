@@ -78,7 +78,7 @@ public class UmaScopeService {
 
     public Scope getScope(String scopeId) {
         try {
-            final Filter filter = Filter.createEqualityFilter("jsId", scopeId);
+            final Filter filter = Filter.createEqualityFilter("jansId", scopeId);
             final List<Scope> entries = ldapEntryManager.findEntries(baseDn(), Scope.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 // if more then one scope then it's problem, non-deterministic behavior, id must be unique
@@ -199,7 +199,7 @@ public class UmaScopeService {
         if (scopeIds != null && !scopeIds.isEmpty()) {
         	List<Filter> filters = new ArrayList<Filter>();
             for (String url : scopeIds) {
-            	Filter filter = Filter.createEqualityFilter("jsId", url);
+            	Filter filter = Filter.createEqualityFilter("jansId", url);
             	filters.add(filter);
             }
             Filter filter = Filter.createORFilter(filters.toArray(new Filter[0]));
