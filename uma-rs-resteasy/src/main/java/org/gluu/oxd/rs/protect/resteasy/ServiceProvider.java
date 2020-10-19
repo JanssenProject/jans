@@ -1,12 +1,5 @@
 package org.gluu.oxd.rs.protect.resteasy;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
@@ -19,16 +12,17 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.client.uma.UmaClientFactory;
-import org.gluu.oxauth.client.uma.UmaMetadataService;
-import org.gluu.oxauth.client.uma.UmaPermissionService;
-import org.gluu.oxauth.client.uma.UmaResourceService;
-import org.gluu.oxauth.client.uma.UmaRptIntrospectionService;
-import org.gluu.oxauth.client.uma.UmaTokenService;
+import org.gluu.oxauth.client.uma.*;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author Yuriy Zabrovarnyy
