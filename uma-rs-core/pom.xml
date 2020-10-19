@@ -97,7 +97,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxauth-model</artifactId>
+            <artifactId>jans-auth-model</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

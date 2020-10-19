@@ -367,15 +367,11 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxauth-client</artifactId>
+            <artifactId>jans-auth-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxauth-model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-core-util</artifactId>
+            <artifactId>jans-auth-model</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
@@ -463,15 +459,15 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-core-persistence-ldap</artifactId>
+            <artifactId>jans-orm-ldap</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-core-persistence-standalone</artifactId>
+            <artifactId>jans-orm-standalone</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-core-persistence-couchbase</artifactId>
+            <artifactId>jans-orm-couchbase</artifactId>
         </dependency>
         <!-- Logging -->
         <dependency>
