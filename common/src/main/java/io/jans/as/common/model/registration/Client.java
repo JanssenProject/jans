@@ -40,40 +40,40 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String clientId;
 
-    @AttributeName(name = "jsClntSecret")
+    @AttributeName(name = "jansClntSecret")
     private String clientSecret;
 
-    @AttributeName(name = "jsLogoutURI")
+    @AttributeName(name = "jansLogoutURI")
     private String frontChannelLogoutUri;
 
-    @AttributeName(name = "jsLogoutSessRequired")
+    @AttributeName(name = "jansLogoutSessRequired")
     private Boolean frontChannelLogoutSessionRequired;
 
-    @AttributeName(name = "jsRegistrationAccessTkn")
+    @AttributeName(name = "jansRegistrationAccessTkn")
     private String registrationAccessToken;
 
-    @AttributeName(name = "jsClntIdIssuedAt")
+    @AttributeName(name = "jansClntIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @AttributeName(name = "jsClntSecretExpiresAt")
+    @AttributeName(name = "jansClntSecretExpiresAt")
     private Date clientSecretExpiresAt;
 
-    @AttributeName(name = "jsRedirectURI")
+    @AttributeName(name = "jansRedirectURI")
     private String[] redirectUris;
 
-    @AttributeName(name = "jsClaimRedirectURI")
+    @AttributeName(name = "jansClaimRedirectURI")
     private String[] claimRedirectUris;
 
-    @AttributeName(name = "jsRespTyp")
+    @AttributeName(name = "jansRespTyp")
     private ResponseType[] responseTypes;
 
-    @AttributeName(name = "jsGrantTyp")
+    @AttributeName(name = "jansGrantTyp")
     private GrantType[] grantTypes;
 
-    @AttributeName(name = "jsAppTyp")
+    @AttributeName(name = "jansAppTyp")
     private ApplicationType applicationType = ApplicationType.WEB;
 
-    @AttributeName(name = "jsContact")
+    @AttributeName(name = "jansContact")
     private String[] contacts;
 
     @AttributeName(name = "displayName")
@@ -82,106 +82,106 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "tknBndCnf")
     private String idTokenTokenBindingCnf;
 
-    @AttributeName(name = "jsLogoURI")
+    @AttributeName(name = "jansLogoURI")
     private String logoUri;
 
-    @AttributeName(name = "jsClntURI")
+    @AttributeName(name = "jansClntURI")
     private String clientUri;
 
-    @AttributeName(name = "jsPolicyURI")
+    @AttributeName(name = "jansPolicyURI")
     private String policyUri;
 
-    @AttributeName(name = "jsTosURI")
+    @AttributeName(name = "jansTosURI")
     private String tosUri;
 
-    @AttributeName(name = "jsJwksURI")
+    @AttributeName(name = "jansJwksURI")
     private String jwksUri;
 
-    @AttributeName(name = "jsJwks")
+    @AttributeName(name = "jansJwks")
     private String jwks;
 
-    @AttributeName(name = "jsSectorIdentifierURI")
+    @AttributeName(name = "jansSectorIdentifierURI")
     private String sectorIdentifierUri;
 
-    @AttributeName(name = "jsSubjectTyp")
+    @AttributeName(name = "jansSubjectTyp")
     private SubjectType subjectType = SubjectType.PUBLIC;
 
-    @AttributeName(name = "jsIdTknSignedRespAlg")
+    @AttributeName(name = "jansIdTknSignedRespAlg")
     private String idTokenSignedResponseAlg;
 
-    @AttributeName(name = "jsIdTknEncRespAlg")
+    @AttributeName(name = "jansIdTknEncRespAlg")
     private String idTokenEncryptedResponseAlg;
 
-    @AttributeName(name = "jsIdTknEncRespEnc")
+    @AttributeName(name = "jansIdTknEncRespEnc")
     private String idTokenEncryptedResponseEnc;
 
-    @AttributeName(name = "jsSignedRespAlg")
+    @AttributeName(name = "jansSignedRespAlg")
     private String userInfoSignedResponseAlg;
 
-    @AttributeName(name = "jsUsrInfEncRespAlg")
+    @AttributeName(name = "jansUsrInfEncRespAlg")
     private String userInfoEncryptedResponseAlg;
 
-    @AttributeName(name = "jsUsrInfEncRespEnc")
+    @AttributeName(name = "jansUsrInfEncRespEnc")
     private String userInfoEncryptedResponseEnc;
 
-    @AttributeName(name = "jsReqObjSigAlg")
+    @AttributeName(name = "jansReqObjSigAlg")
     private String requestObjectSigningAlg;
 
-    @AttributeName(name = "jsReqObjEncAlg")
+    @AttributeName(name = "jansReqObjEncAlg")
     private String requestObjectEncryptionAlg;
 
-    @AttributeName(name = "jsReqObjEncEnc")
+    @AttributeName(name = "jansReqObjEncEnc")
     private String requestObjectEncryptionEnc;
 
-    @AttributeName(name = "jsTknEndpointAuthMethod")
+    @AttributeName(name = "jansTknEndpointAuthMethod")
     private String tokenEndpointAuthMethod;
 
-    @AttributeName(name = "jsTknEndpointAuthSigAlg")
+    @AttributeName(name = "jansTknEndpointAuthSigAlg")
     private String tokenEndpointAuthSigningAlg;
 
-    @AttributeName(name = "jsDefMaxAge")
+    @AttributeName(name = "jansDefMaxAge")
     private Integer defaultMaxAge;
 
-    @AttributeName(name = "jsRequireAuthTime")
+    @AttributeName(name = "jansRequireAuthTime")
     private boolean requireAuthTime;
 
-    @AttributeName(name = "jsDefAcrValues")
+    @AttributeName(name = "jansDefAcrValues")
     private String[] defaultAcrValues;
 
-    @AttributeName(name = "jsInitiateLoginURI")
+    @AttributeName(name = "jansInitiateLoginURI")
     private String initiateLoginUri;
 
-    @AttributeName(name = "jsPostLogoutRedirectURI")
+    @AttributeName(name = "jansPostLogoutRedirectURI")
     private String[] postLogoutRedirectUris;
 
-    @AttributeName(name = "jsReqURI")
+    @AttributeName(name = "jansReqURI")
     private String[] requestUris;
 
-    @AttributeName(name = "jsScope")
+    @AttributeName(name = "jansScope")
     private String[] scopes;
 
-    @AttributeName(name = "jsClaim")
+    @AttributeName(name = "jansClaim")
     private String[] claims;
 
-    @AttributeName(name = "jsTrustedClnt")
+    @AttributeName(name = "jansTrustedClnt")
     private boolean trustedClient;
 
-    @AttributeName(name = "jsLastAccessTime")
+    @AttributeName(name = "jansLastAccessTime")
     private Date lastAccessTime;
 
-    @AttributeName(name = "jsLastLogonTime")
+    @AttributeName(name = "jansLastLogonTime")
     private Date lastLogonTime;
 
-    @AttributeName(name = "jsPersistClntAuthzs")
+    @AttributeName(name = "jansPersistClntAuthzs")
     private boolean persistClientAuthorizations;
 
-    @AttributeName(name = "jsInclClaimsInIdTkn")
+    @AttributeName(name = "jansInclClaimsInIdTkn")
     private boolean includeClaimsInIdToken;
 
-    @AttributeName(name = "jsRefreshTknLife")
+    @AttributeName(name = "jansRefreshTknLife")
     private Integer refreshTokenLifetime;
 
-    @AttributeName(name = "jsAccessTknLife")
+    @AttributeName(name = "jansAccessTknLife")
     private Integer accessTokenLifetime;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
@@ -190,44 +190,44 @@ public class Client extends DeletableEntity implements Serializable {
     @CustomObjectClass
     private String[] customObjectClasses;
 
-    @AttributeName(name = "jsRptAsJwt")
+    @AttributeName(name = "jansRptAsJwt")
     private boolean rptAsJwt = false;
 
-    @AttributeName(name = "jsAccessTknAsJwt")
+    @AttributeName(name = "jansAccessTknAsJwt")
     private boolean accessTokenAsJwt = false;
 
-    @AttributeName(name = "jsAccessTknSigAlg")
+    @AttributeName(name = "jansAccessTknSigAlg")
     private String accessTokenSigningAlg;
 
-    @AttributeName(name = "jsDisabled")
+    @AttributeName(name = "jansDisabled")
     private boolean disabled;
 
-    @AttributeName(name = "jsAuthorizedOrigins")
+    @AttributeName(name = "jansAuthorizedOrigins")
     private String[] authorizedOrigins;
 
-    @AttributeName(name = "jsSoftId")
+    @AttributeName(name = "jansSoftId")
     private String softwareId;
 
-    @AttributeName(name = "jsSoftVer")
+    @AttributeName(name = "jansSoftVer")
     private String softwareVersion;
 
-    @AttributeName(name = "jsSoftStatement")
+    @AttributeName(name = "jansSoftStatement")
     private String softwareStatement;
 
-    @AttributeName(name = "jsAttrs")
+    @AttributeName(name = "jansAttrs")
     @JsonObject
     private ClientAttributes attributes;
 
-    @AttributeName(name = "jsBackchannelTknDeliveryMode")
+    @AttributeName(name = "jansBackchannelTknDeliveryMode")
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
 
-    @AttributeName(name = "jsBackchannelClntNotificationEndpoint")
+    @AttributeName(name = "jansBackchannelClntNotificationEndpoint")
     private String backchannelClientNotificationEndpoint;
 
-    @AttributeName(name = "jsBackchannelAuthnReqSigAlg")
+    @AttributeName(name = "jansBackchannelAuthnReqSigAlg")
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
 
-    @AttributeName(name = "jsBackchannelUsrCodeParameter")
+    @AttributeName(name = "jansBackchannelUsrCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
     @Expiration

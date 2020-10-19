@@ -22,16 +22,16 @@ public class ClientAuthorization implements Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "jsId")
+    @AttributeName(name = "jansId")
     private String id;
 
-    @AttributeName(name = "jsClntId", consistency = true)
+    @AttributeName(name = "jansClntId", consistency = true)
     private String clientId;
 
-    @AttributeName(name = "jsUsrId", consistency = true)
+    @AttributeName(name = "jansUsrId", consistency = true)
     private String userId;
 
-    @AttributeName(name = "jsScope")
+    @AttributeName(name = "jansScope")
     private String[] scopes;
 
     @AttributeName(name = "exp")
