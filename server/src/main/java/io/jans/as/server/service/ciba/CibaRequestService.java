@@ -97,7 +97,7 @@ public class CibaRequestService {
         try {
             Date now = new Date();
             Filter filter = Filter.createANDFilter(
-                    Filter.createEqualityFilter("jsStatus", authorizationStatus.getValue()),
+                    Filter.createEqualityFilter("jansStatus", authorizationStatus.getValue()),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(this.cibaBaseDn(), now)));
             return entryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter, maxRequestsToGet);
         } catch (Exception e) {

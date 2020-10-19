@@ -133,7 +133,7 @@ public class UmaResourceService {
             prepareBranch();
 
             if (StringUtils.isNotBlank(associatedClientDn)) {
-                final Filter filter = Filter.createEqualityFilter("jsAssociatedClnt", associatedClientDn);
+                final Filter filter = Filter.createEqualityFilter("jansAssociatedClnt", associatedClientDn);
                 return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, filter);
             }
         } catch (Exception e) {
@@ -199,7 +199,7 @@ public class UmaResourceService {
         if (StringHelper.isEmpty(jsId)) {
             return getBaseDnForResource();
         }
-        return String.format("jsId=%s,%s", jsId, getBaseDnForResource());
+        return String.format("jansId=%s,%s", jsId, getBaseDnForResource());
     }
 
     public String getBaseDnForResource() {

@@ -147,7 +147,7 @@ public class ScopeService {
 
         try {
             List<Scope> scopes = ldapEntryManager.findEntries(
-                    staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("jsId", id));
+                    staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("jansId", id));
             if ((scopes != null) && (scopes.size() > 0)) {
                 final Scope scope = scopes.get(0);
                 usedCacheService.put(id, scope);
@@ -169,7 +169,7 @@ public class ScopeService {
     public List<Scope> getScopeByClaim(String claimDn) {
     	List<Scope> scopes = fromCacheByClaimDn(claimDn);
     	if (scopes == null) {
-	        Filter filter = Filter.createEqualityFilter("jsClaim", claimDn);
+	        Filter filter = Filter.createEqualityFilter("jansClaim", claimDn);
 	        
 	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 	        scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);

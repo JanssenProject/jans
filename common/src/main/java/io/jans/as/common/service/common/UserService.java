@@ -119,7 +119,7 @@ public abstract class UserService {
         user.setDn("inum=" + inum + "," + peopleBaseDN);
     	user.setCustomAttributes(Arrays.asList(
     			new CustomObjectAttribute("inum", inum),
-    			new CustomObjectAttribute("jsStatus", GluuStatus.ACTIVE.getValue()),
+    			new CustomObjectAttribute("jansStatus", GluuStatus.ACTIVE.getValue()),
 				new CustomObjectAttribute("displayName", "User " + uid + " added via oxAuth custom plugin")));
     	user.setUserId(uid);
 
@@ -143,7 +143,7 @@ public abstract class UserService {
         user.setAttribute("inum", inum);
 
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
-        user.setAttribute("jsStatus",  status.getValue());
+        user.setAttribute("jansStatus",  status.getValue());
 
         List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
@@ -498,7 +498,7 @@ public abstract class UserService {
 
     public List<User> getUsersWithPersistentJwts() {
         String baseDN = getPeopleBaseDn();
-        Filter filter = Filter.createPresenceFilter("jsPersistentJWT");
+        Filter filter = Filter.createPresenceFilter("jansPersistentJWT");
 
         return persistenceEntryManager.findEntries(baseDN, User.class, filter);
     }

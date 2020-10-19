@@ -77,14 +77,14 @@ public class PairwiseIdentifierService {
 
             Filter filter = null;
             if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
-            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("jsSectorIdentifier", sectorIdentifier);
-                Filter userInumFilter = Filter.createEqualityFilter("jsUsrId", userInum);
+            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
+                Filter userInumFilter = Filter.createEqualityFilter("jansUsrId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, userInumFilter);
             } else {
-                Filter sectorIdentifierFilter = Filter.createEqualityFilter("jsSectorIdentifier", sectorIdentifier);
-                Filter clientIdFilter = Filter.createEqualityFilter("jsClntId", clientId);
-                Filter userInumFilter = Filter.createEqualityFilter("jsUsrId", userInum);
+                Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
+                Filter clientIdFilter = Filter.createEqualityFilter("jansClntId", clientId);
+                Filter userInumFilter = Filter.createEqualityFilter("jansUsrId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter, userInumFilter);
             }
@@ -120,7 +120,7 @@ public class PairwiseIdentifierService {
 
     public void addPairwiseIdentifier(String userInum, PairwiseIdentifier pairwiseIdentifier) {
         prepareBranch(userInum);
-        userService.addUserAttributeByUserInum(userInum, "jsPPID", pairwiseIdentifier.getId());
+        userService.addUserAttributeByUserInum(userInum, "jansPPID", pairwiseIdentifier.getId());
 
         ldapEntryManager.persist(pairwiseIdentifier);
     }
@@ -130,7 +130,7 @@ public class PairwiseIdentifierService {
         if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("jsId=%s,%s", jsId, baseDn);
+        return String.format("jansId=%s,%s", jsId, baseDn);
     }
 
     public String getBaseDnForPairwiseIdentifiers(String userInum) {

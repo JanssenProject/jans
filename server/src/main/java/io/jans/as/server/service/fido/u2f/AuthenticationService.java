@@ -216,7 +216,7 @@ public class AuthenticationService extends RequestService {
 
     public AuthenticateRequestMessageLdap getAuthenticationRequestMessageByRequestId(String requestId) {
         String baseDn = getDnForAuthenticateRequestMessage(null);
-        Filter requestIdFilter = Filter.createEqualityFilter("jsReqId", requestId);
+        Filter requestIdFilter = Filter.createEqualityFilter("jansReqId", requestId);
 
         List<AuthenticateRequestMessageLdap> authenticateRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, AuthenticateRequestMessageLdap.class,
                 requestIdFilter);
@@ -236,7 +236,7 @@ public class AuthenticationService extends RequestService {
             return null;
         }
 
-        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "jsId");
+        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "jansId");
         if (deviceRegistrations.isEmpty()) {
             throw new InvalidKeyHandleDeviceException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
         }

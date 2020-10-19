@@ -141,6 +141,6 @@ public class ClientAuthorizationsService {
         if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("jsId=%s,%s", jsId, baseDn);
+        return String.format("jansId=%s,%s", jsId, baseDn);
     }
 }
