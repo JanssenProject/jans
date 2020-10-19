@@ -31,99 +31,99 @@ public class GluuConfiguration extends InumEntry implements Serializable {
     @AttributeName
     private String displayName;
 
-    @AttributeName(name = "jsHostname", updateOnly = true)
+    @AttributeName(name = "jansHostname", updateOnly = true)
     private String hostname;
 
-    @AttributeName(name = "jsLastUpd", updateOnly = true)
+    @AttributeName(name = "jansLastUpd", updateOnly = true)
     private Date lastUpdate;
 
     @AttributeName(name = "gluuConfigurationPollingInterval")
     private String pollingInterval;
 
-    @AttributeName(name = "jsStatus", updateOnly = true)
+    @AttributeName(name = "jansStatus", updateOnly = true)
     private GluuStatus status;
 
     @AttributeName(name = "userPassword", ignoreDuringRead = true)
     private String userPassword;
 
-    @AttributeName(name = "jsHTTPstatus", updateOnly = true)
+    @AttributeName(name = "jansHTTPstatus", updateOnly = true)
     private String gluuHttpStatus;
 
-    @AttributeName(name = "jsDSstatus", updateOnly = true)
+    @AttributeName(name = "jansDSstatus", updateOnly = true)
     private String gluuDSStatus;
 
-    @AttributeName(name = "jsStatus", updateOnly = true)
+    @AttributeName(name = "jansStatus", updateOnly = true)
     private String gluuVDSStatus;
 
-    @AttributeName(name = "jsSPTR")
+    @AttributeName(name = "jansSPTR")
     private String sptr;
 
-    @AttributeName(name = "jsSslExpiry", updateOnly = true)
+    @AttributeName(name = "jansSslExpiry", updateOnly = true)
     private String sslExpiry;
 
-    @AttributeName(name = "jsOrgProfileMgt")
+    @AttributeName(name = "jansOrgProfileMgt")
     private boolean profileManagment;
 
-    @AttributeName(name = "jsManageIdentityPermission")
+    @AttributeName(name = "jansManageIdentityPermission")
     private boolean manageIdentityPermission;
 
-    @AttributeName(name = "jsCacheRefreshEnabled")
+    @AttributeName(name = "jansCacheRefreshEnabled")
     private boolean vdsCacheRefreshEnabled;
 
     @AttributeName(name = "excludeCacheRefreshServerIpAddr")
     private String cacheRefreshServerIpAddress;
 
-    @AttributeName(name = "jsCacheRefreshPollingInterval")
+    @AttributeName(name = "jansCacheRefreshPollingInterval")
     private String vdsCacheRefreshPollingInterval;
 
-    @AttributeName(name = "jsCacheRefreshLastUpd")
+    @AttributeName(name = "jansCacheRefreshLastUpd")
     private Date vdsCacheRefreshLastUpdate;
 
-    @AttributeName(name = "jsCacheRefreshLastUpdCount")
+    @AttributeName(name = "jansCacheRefreshLastUpdCount")
     private String vdsCacheRefreshLastUpdateCount;
 
-    @AttributeName(name = "jsCacheRefreshProblemCount")
+    @AttributeName(name = "jansCacheRefreshProblemCount")
     private String vdsCacheRefreshProblemCount;
 
-    @AttributeName(name = "jsScimEnabled")
+    @AttributeName(name = "jansScimEnabled")
     private boolean scimEnabled;
 
-    @AttributeName(name = "jsPassportEnabled")
+    @AttributeName(name = "jansPassportEnabled")
     private boolean passportEnabled;
 
-    @AttributeName(name = "jsRadiusEnabled")
+    @AttributeName(name = "jansRadiusEnabled")
     private boolean radiusEnabled;
 
-    @AttributeName(name = "jsSamlEnabled")
+    @AttributeName(name = "jansSamlEnabled")
     private boolean samlEnabled;
 
     @AttributeName(name = "excludeEmail")
     private String contactEmail;
 
-    @AttributeName(name = "jsSmtpConf")
+    @AttributeName(name = "jansSmtpConf")
     @JsonObject
     private SmtpConfiguration smtpConfiguration;
 
     @AttributeName(name = "gluuConfigurationDnsServer")
     private String configurationDnsServer;
 
-    @AttributeName(name = "jsMaxLogSize")
+    @AttributeName(name = "jansMaxLogSize")
     private int maxLogSize;
 
-    @AttributeName(name = "jsenticationMode")
+    @AttributeName(name = "jansenticationMode")
     private String authenticationMode;
 
-    @AttributeName(name = "jsLogConfigLocation")
+    @AttributeName(name = "jansLogConfigLocation")
     private String logConfigLocation;
 
     @AttributeName(name = "passwordResetAllowed")
     private boolean passwordResetAllowed;
 
-    @AttributeName(name = "jsCacheConf")
+    @AttributeName(name = "jansCacheConf")
     @JsonObject
     private CacheConfiguration cacheConfiguration;
 
-    @AttributeName(name = "jsDocStoreConf")
+    @AttributeName(name = "jansDocStoreConf")
     @JsonObject
     private DocumentStoreConfiguration documentStoreConfiguration;
 
