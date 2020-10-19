@@ -20,7 +20,7 @@ import io.jans.orm.annotation.JsonObject;
 public class TimerMetricEntry extends MetricEntry {
 
     @JsonObject
-    @AttributeName(name = "jsData")
+    @AttributeName(name = "jansData")
     private TimerMetricData metricData;
 
     public TimerMetricEntry() { }

@@ -29,10 +29,10 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     private String inum;
 
     @JsonObject
-    @AttributeName(name = "jsConfApp")
+    @AttributeName(name = "jansConfApp")
     private ShibbolethCASProtocolConfiguration casProtocolConfiguration;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public LdapShibbolethCASProtocolConfiguration() {

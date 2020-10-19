@@ -30,22 +30,22 @@ public class MetricEntry {
     @AttributeName(name = "uniqueIdentifier", ignoreDuringUpdate = true)
     private String id;
 
-    @AttributeName(name = "jsStartDate")
+    @AttributeName(name = "jansStartDate")
     private Date startDate;
 
-    @AttributeName(name = "jsEndDate")
+    @AttributeName(name = "jansEndDate")
     private Date endDate;
 
-    @AttributeName(name = "jsAppType")
+    @AttributeName(name = "jansAppType")
     private ApplicationType applicationType;
 
-    @AttributeName(name = "jsMetricTyp")
+    @AttributeName(name = "jansMetricTyp")
     private MetricType metricType;
 
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(name = "jsHost")
+    @AttributeName(name = "jansHost")
     private String nodeIndetifier;
 
     @AttributeName(name = "exp")
