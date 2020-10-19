@@ -27,7 +27,7 @@ import java.util.TimeZone;
 @ObjectClass(value = "oxU2fRequest")
 public class RequestMessageLdap extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansId")
     protected String id;
 
     @AttributeName(name = "jansReqId")

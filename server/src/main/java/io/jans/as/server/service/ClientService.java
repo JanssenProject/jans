@@ -268,11 +268,11 @@ public class ClientService {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		String nowDateString = ldapEntryManager.encodeTime(customEntry.getDn(), now);
 
-		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("jsLastAccessTime", nowDateString);
+		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("jansLastAccessTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
 
 		if (isUpdateLogonTime) {
-			CustomAttribute customAttributeLastLogonTime = new CustomAttribute("jsLastLogonTime", nowDateString);
+			CustomAttribute customAttributeLastLogonTime = new CustomAttribute("jansLastLogonTime", nowDateString);
 			customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
 		}
 
@@ -293,17 +293,17 @@ public class ClientService {
 				attribute = client.getClientName();
 			} else if (clientAttribute.equals("inum")) {
 				attribute = client.getClientId();
-			} else if (clientAttribute.equals("jsAppTyp")) {
+			} else if (clientAttribute.equals("jansAppTyp")) {
 				attribute = client.getApplicationType();
-			} else if (clientAttribute.equals("jsIdTknSignedRespAlg")) {
+			} else if (clientAttribute.equals("jansIdTknSignedRespAlg")) {
 				attribute = client.getIdTokenSignedResponseAlg();
-			} else if (clientAttribute.equals("jsRedirectURI") && client.getRedirectUris() != null) {
+			} else if (clientAttribute.equals("jansRedirectURI") && client.getRedirectUris() != null) {
 				JSONArray array = new JSONArray();
 				for (String redirectUri : client.getRedirectUris()) {
 					array.put(redirectUri);
 				}
 				attribute = array;
-			} else if (clientAttribute.equals("jsScope") && client.getScopes() != null) {
+			} else if (clientAttribute.equals("jansScope") && client.getScopes() != null) {
 				JSONArray array = new JSONArray();
 				for (String scopeDN : client.getScopes()) {
 					Scope s = scopeService.getScopeByDn(scopeDN);
