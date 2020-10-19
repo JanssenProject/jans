@@ -9,7 +9,7 @@
     <description>Swagger Java</description>
 
     <parent>
-        <groupId>org.gluu</groupId>
+        <groupId>io.jans</groupId>
         <artifactId>oxd</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
@@ -202,7 +202,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.gluu</groupId>
+            <groupId>io.jans</groupId>
             <artifactId>oxd-common</artifactId>
             <exclusions>
                 <exclusion>
@@ -212,7 +212,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.gluu</groupId>
+            <groupId>io.jans</groupId>
             <artifactId>oxd-common</artifactId>
             <version>${project.version}</version>
             <exclusions>
