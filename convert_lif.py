@@ -11,8 +11,8 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter, LDIFParser
 
 b64_encoded_field_descriptor = '@base64encodedfield-'
 parser = argparse.ArgumentParser()
-parser.add_argument("--infile", help="input schema json", required=True)
-parser.add_argument("--outfile", help="output schema json")
+parser.add_argument("--infile", help="input ldif file", required=True)
+parser.add_argument("--outfile", help="output ldif file")
 argsp = parser.parse_args()
 
 ldif_file = argsp.infile
@@ -23,10 +23,11 @@ if not os.path.exists(ldif_file):
 
 if not argsp.outfile:
     out_file = ldif_file+'.jans'
+else:
+    out_file = argsp.outfile
 
 with open('schema/mapping.json') as f:
-    mapping = json.load(f)
-
+    mapping = json.load(f, object_pairs_hook=OrderedDict)
 
 
 #escape base64 encoded fields
@@ -62,11 +63,19 @@ class myLdifParser(LDIFParser):
                             entry[e][i] = v.decode('utf-8')
                 self.entries.append((dn, entry))
 
+with open('schema/opendj_types.json') as f:
+    opendj_types = json.load(f)
+
+opendj_attributes = []
+for k in opendj_types:
+    opendj_attributes += opendj_types[k]
 
 def do_replace(eVal):
-    for m in mapping:
+    if eVal in opendj_attributes:
+        return eVal
+    for m in mapping['mappings']:
         if m in eVal:
-            eVal = eVal.replace(m, mapping[m])
+            eVal = eVal.replace(m, mapping['mappings'][m])
 
     return eVal
 
@@ -90,7 +99,11 @@ for dn, entry in ldif_parser.entries:
     new_dn_list = []
     for dne in dnutils.parse_dn(dn):
         k =  do_replace(dne[0])
-        new_dn_list.append('='.join((k, dne[1])))
+        new_val = [k, dne[1]]
+        if new_val[1] == 'gluu':
+            new_val[1] = 'jans'
+        new_dn_list.append('='.join(new_val))
+
     new_dn = ','.join(new_dn_list)
 
 

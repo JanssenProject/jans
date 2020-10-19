@@ -1,8 +1,0 @@
-dn: ou=fido2,ou=configuration,o=jans
-jsConfDyn::%(fido2_dynamic_conf_base64)s
-jsConfStatic::%(fido2_static_conf_base64)s
-jsRevision: 1
-objectClass: jsAppConf
-objectClass: top
-ou: fido2
-
