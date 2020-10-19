@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.jans</groupId>
-    <artifactId>oxd</artifactId>
+    <artifactId>jans-client-api-parent</artifactId>
     <packaging>pom</packaging>
     <version>5.0.0-SNAPSHOT</version>
     <name>oxD</name>
@@ -12,15 +12,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>5.0.0-SNAPSHOT</oxCore.version>
+        <jans-core.version>5.0.0-SNAPSHOT</jans-core.version>
         <jackson.version>2.10.1</jackson.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>5.0.0-SNAPSHOT</oxauth.version>
+        <jans-auth-server.version>5.0.0-SNAPSHOT</jans-auth-server.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>[24.1.1,)</guava.version>
-        <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
         <selenium.version>2.53.1</selenium.version>
         <skip.swagger.client.generation>false</skip.swagger.client.generation>
     </properties>
@@ -106,7 +105,7 @@
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>oxauth-client</artifactId>
-                <version>${oxauth.version}</version>
+                <version>${jans-auth-server.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.wordnik</groupId>
@@ -117,7 +116,7 @@
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>oxauth-model</artifactId>
-                <version>${oxauth.version}</version>
+                <version>${jans-auth-server.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.wordnik</groupId>
@@ -131,8 +130,8 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxcore-service</artifactId>
-                <version>${oxCore.version}</version>
+                <artifactId>jans-core-service</artifactId>
+                <version>${jans-core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.wordnik</groupId>
@@ -144,7 +143,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>io.jans</groupId>
-                        <artifactId>oxcore-persistence-ldap</artifactId>
+                        <artifactId>jans-core-persistence-ldap</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.python</groupId>
@@ -170,13 +169,13 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxcore-standalone</artifactId>
-                <version>${oxCore.version}</version>
+                <artifactId>jans-core-standalone</artifactId>
+                <version>${jans-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxcore-util</artifactId>
-                <version>${oxCore.version}</version>
+                <artifactId>jans-core-util</artifactId>
+                <version>${jans-core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.wordnik</groupId>
@@ -252,12 +251,6 @@
                 <groupId>org.seleniumhq.selenium</groupId>
                 <artifactId>selenium-htmlunit-driver</artifactId>
                 <version>2.52.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>net.sourceforge.htmlunit</groupId>
-                <artifactId>htmlunit-cssparser</artifactId>
-                <version>1.5.0</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
