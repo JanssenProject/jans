@@ -24,7 +24,7 @@ public class RegisterRequestMessageLdap extends RequestMessageLdap implements Se
     private static final long serialVersionUID = -2242931562244920584L;
 
     @JsonObject
-    @AttributeName(name = "jsReq")
+    @AttributeName(name = "jansReq")
     private RegisterRequestMessage registerRequestMessage;
 
     public RegisterRequestMessageLdap() {
