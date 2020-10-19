@@ -23,34 +23,34 @@ public class GluuCustomFidoDevice extends Entry {
 	 */
 	private static final long serialVersionUID = 4463359164739925541L;
 
-	@AttributeName(name = "jsId", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansId", ignoreDuringUpdate = true)
 	private String id;
 
 	@AttributeName(name = "creationDate", ignoreDuringUpdate = true)
 	private String creationDate;
 
-	@AttributeName(name = "jsApp", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansApp", ignoreDuringUpdate = true)
 	private String application;
 
-	@AttributeName(name = "jsCounter", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansCounter", ignoreDuringUpdate = true)
 	private String counter;
 
-	@AttributeName(name = "jsDeviceData", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansDeviceData", ignoreDuringUpdate = true)
 	private String deviceData;
 
-	@AttributeName(name = "jsDeviceHashCode", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansDeviceHashCode", ignoreDuringUpdate = true)
 	private String deviceHashCode;
 
-	@AttributeName(name = "jsDeviceKeyHandle", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansDeviceKeyHandle", ignoreDuringUpdate = true)
 	private String deviceKeyHandle;
 
-	@AttributeName(name = "jsDeviceRegistrationConf", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansDeviceRegistrationConf", ignoreDuringUpdate = true)
 	private String deviceRegistrationConf;
 
-	@AttributeName(name = "jsLastAccessTime", ignoreDuringUpdate = true)
+	@AttributeName(name = "jansLastAccessTime", ignoreDuringUpdate = true)
 	private String lastAccessTime;
 
-	@AttributeName(name = "jsStatus")
+	@AttributeName(name = "jansStatus")
 	private String status;
 
 	@AttributeName(name = "displayName")
@@ -59,7 +59,7 @@ public class GluuCustomFidoDevice extends Entry {
 	@AttributeName(name = "description")
 	private String description;
 
-	@AttributeName(name = "jsNickName")
+	@AttributeName(name = "jansNickName")
 	private String nickname;
 
 	@AttributeName(name = "excludeMetaLastMod")

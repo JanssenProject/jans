@@ -30,13 +30,13 @@ public class ScimCustomPerson extends Entry implements Serializable {
     @CustomObjectClass
     private String[] customObjectClasses;
 
-    @AttributeName(name = "jsCreationTimestamp")
+    @AttributeName(name = "jansCreationTimestamp")
     private Date creationDate;
 
     @AttributeName
     private Date updatedAt;
 
-    @AttributeName(name = "jsPPID")
+    @AttributeName(name = "jansPPID")
     private List<String> ppid;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true, attributesConfiguration = {

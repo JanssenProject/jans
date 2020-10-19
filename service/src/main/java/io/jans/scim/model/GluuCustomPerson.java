@@ -38,30 +38,30 @@ public class GluuCustomPerson extends User
     private String sourceServerName;
     private String sourceServerUserDn;
 
-    @AttributeName(name = "jsWhitePagesListed")
+    @AttributeName(name = "jansWhitePagesListed")
     private String gluuAllowPublication;
 
-    @AttributeName(name = "jsGuid")
+    @AttributeName(name = "jansGuid")
     private String guid;
 
-    @AttributeName(name = "jsOptOuts")
+    @AttributeName(name = "jansOptOuts")
     private List<String> optOuts;
 
-    @AttributeName(name = "jsAssociatedClnt")
+    @AttributeName(name = "jansAssociatedClnt")
     private List<String> associatedClient;
     
-    @AttributeName(name = "jsPPID")
+    @AttributeName(name = "jansPPID")
     private List<String> ppid;
 
    // @JsonObject
-    @AttributeName(name = "jsExternalUid")
+    @AttributeName(name = "jansExternalUid")
     private List<String> externalUid;
     
     @JsonObject
-    @AttributeName(name = "jsOTPDevices")
+    @AttributeName(name = "jansOTPDevices")
     private OTPDevice  otpDevices;
     
-    @AttributeName(name = "jsMobileDevices")
+    @AttributeName(name = "jansMobileDevices")
     private String mobileDevices;
 
 	public String getMobileDevices() {
@@ -80,7 +80,7 @@ public class GluuCustomPerson extends User
 		this.otpDevices = otpDevices;
 	}
 
-	@AttributeName(name = "jsCreationTimestamp")
+	@AttributeName(name = "jansCreationTimestamp")
     private Date creationDate;
 
     @AttributeName
