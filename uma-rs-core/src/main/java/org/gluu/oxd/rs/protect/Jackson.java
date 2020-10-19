@@ -1,6 +1,5 @@
 package org.gluu.oxd.rs.protect;
 
-import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
