@@ -23,7 +23,7 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass
 public class Fido2Entry extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
     @AttributeName(name = "jansCodeChallenge")

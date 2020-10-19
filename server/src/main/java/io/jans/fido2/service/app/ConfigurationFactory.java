@@ -206,7 +206,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean isRevisionIncreased() {
-        final Conf conf = loadConfigurationFromLdap("jsRevision");
+        final Conf conf = loadConfigurationFromLdap("jansRevision");
         if (conf == null) {
             return false;
         }
