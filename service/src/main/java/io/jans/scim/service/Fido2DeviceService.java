@@ -40,7 +40,7 @@ public class Fido2DeviceService implements Serializable {
 
 	public boolean removeFido2(GluuCustomPerson person, String deviceID) {
 		try {
-			String finalDn = String.format("jsId=%s,ou=fido2_register,", deviceID);
+			String finalDn = String.format("jansId=%s,ou=fido2_register,", deviceID);
 			finalDn = finalDn.concat(person.getDn());
 			ldapEntryManager.removeRecursively(finalDn);
 			return true;
@@ -56,7 +56,7 @@ public class Fido2DeviceService implements Serializable {
 			return String.format("ou=fido2_register,inum=%s,ou=people,%s", personInum, orgDn);
 		}
 		if (!StringHelper.isEmpty(oxid) && !StringHelper.isEmpty(personInum)) {
-			return String.format("jsId=%s,ou=fido2_register,inum=%s,ou=people,%s", oxid, personInum, orgDn);
+			return String.format("jansId=%s,ou=fido2_register,inum=%s,ou=people,%s", oxid, personInum, orgDn);
 		}
 		return String.format("ou=people,%s", orgDn);
 	}
@@ -79,7 +79,7 @@ public class Fido2DeviceService implements Serializable {
 			if (StringUtils.isNotEmpty(userId)) {
 				f2d = ldapEntryManager.find(GluuFido2Device.class, dn);
 			} else {
-				Filter filter = Filter.createEqualityFilter("jsId", id);
+				Filter filter = Filter.createEqualityFilter("jansId", id);
 				f2d = ldapEntryManager.findEntries(dn, GluuFido2Device.class, filter).get(0);
 			}
 		} catch (Exception e) {
@@ -104,7 +104,7 @@ public class Fido2DeviceService implements Serializable {
 			if (StringUtils.isNotEmpty(userId))
 				gluuCustomFidoDevice = ldapEntryManager.find(GluuFido2Device.class, dn);
 			else {
-				Filter filter = Filter.createEqualityFilter("jsId", id);
+				Filter filter = Filter.createEqualityFilter("jansId", id);
 				gluuCustomFidoDevice = ldapEntryManager.findEntries(dn, GluuFido2Device.class, filter).get(0);
 			}
 		} catch (Exception e) {

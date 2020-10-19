@@ -26,19 +26,19 @@ public class Fido2Entry extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = 7351459527571263266L;
 
-	@AttributeName(ignoreDuringUpdate = true, name = "jsId")
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsCodeChallenge")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansCodeChallenge")
     private String challenge;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsCodeChallengeHash")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansCodeChallengeHash")
     private String challengeHash;
 
     @AttributeName(ignoreDuringUpdate = true, name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsSessStateId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansSessStateId")
     private String sessionId;
 
     @AttributeName(name = "personInum")
