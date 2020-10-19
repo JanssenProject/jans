@@ -23,9 +23,9 @@ public class UserGroup {
     private String displayName;
     @AttributeName(name = "member")
     private String[] member;
-    @AttributeName(name = "jsGrpTyp")
+    @AttributeName(name = "jansGrpTyp")
     private String groupType;
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
     private String status;
     @AttributeName(name = "iname")
     private String iname;

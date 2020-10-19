@@ -32,26 +32,26 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName(name = "jsSmtpConf")
+	@AttributeName(name = "jansSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "jsCacheConf")
+	@AttributeName(name = "jansCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 
-	@AttributeName(name = "jsDocStoreConf")
+	@AttributeName(name = "jansDocStoreConf")
 	@JsonObject
 	private DocumentStoreConfiguration documentStoreConfiguration;
 
-	@AttributeName(name = "jsIDPAuthn")
+	@AttributeName(name = "jansIDPAuthn")
 	@JsonObject
 	private List<IDPAuthConf> idpAuthn;
 
-	@AttributeName(name = "jsAuthMode")
+	@AttributeName(name = "jansAuthMode")
 	private String authenticationMode;
 	
-	@AttributeName(name = "jsPassportEnabled")
+	@AttributeName(name = "jansPassportEnabled")
 	private Boolean passportEnabled;
 
 	public Boolean getPassportEnabled() {

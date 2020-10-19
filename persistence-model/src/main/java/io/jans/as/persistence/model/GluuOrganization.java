@@ -24,7 +24,7 @@ import java.io.Serializable;
  * @author Yuriy Movchan Date: 11.02.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "jsOrganization")
+@ObjectClass(value = "jansOrganization")
 @JsonInclude(Include.NON_NULL)
 public class GluuOrganization extends Entry implements Serializable {
 
@@ -52,19 +52,19 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName
 	private String seeAlso;
 
-	@AttributeName(name = "jsStatus")
+	@AttributeName(name = "jansStatus")
 	private GluuStatus status;
 
-	@AttributeName(name = "jsManagerGroup")
+	@AttributeName(name = "jansManagerGroup")
 	private String managerGroup;
 
-	@AttributeName(name = "jsThemeColor")
+	@AttributeName(name = "jansThemeColor")
 	private String themeColor;
 
-	@AttributeName(name = "jsOrgShortName")
+	@AttributeName(name = "jansOrgShortName")
 	private String shortName;
 
-	@AttributeName(name = "jsCustomMessage")
+	@AttributeName(name = "jansCustomMessage")
 	private String[] customMessages;
 
 	@AttributeName(name = "oxInumConfig")
@@ -73,10 +73,10 @@ public class GluuOrganization extends Entry implements Serializable {
 	@AttributeName(name = "title")
 	private String title;
 
-    @AttributeName(name = "jsLogoPath")
+    @AttributeName(name = "jansLogoPath")
     private String jsLogoPath;
 
-    @AttributeName(name = "jsFaviconPath")
+    @AttributeName(name = "jansFaviconPath")
     private String jsFaviconPath;
 
     public String getJsLogoPath() {

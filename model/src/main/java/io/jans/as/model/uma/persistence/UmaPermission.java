@@ -27,24 +27,24 @@ public class UmaPermission implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
     private String status;
-    @AttributeName(name = "jsTicket", consistency = true)
+    @AttributeName(name = "jansTicket", consistency = true)
     private String ticket;
-    @AttributeName(name = "jsConfCode")
+    @AttributeName(name = "jansConfCode")
     private String configurationCode;
     @AttributeName(name = "exp")
     private Date expirationDate;
     @AttributeName(name = "del")
     private boolean deletable = true;
 
-    @AttributeName(name = "jsResourceSetId")
+    @AttributeName(name = "jansResourceSetId")
     private String resourceId;
-    @AttributeName(name = "jsUmaScope")
+    @AttributeName(name = "jansUmaScope")
     private List<String> scopeDns;
 
     @JsonObject
-    @AttributeName(name = "jsAttrs")
+    @AttributeName(name = "jansAttrs")
     private Map<String, String> attributes;
 
     @Expiration
