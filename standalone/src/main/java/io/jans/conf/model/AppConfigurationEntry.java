@@ -19,7 +19,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @version 0.1, 03/25/2016
  */
 @DataEntry
-@ObjectClass(value = "jsAppConfiguration")
+@ObjectClass(value = "jansAppConfiguration")
 public class AppConfigurationEntry implements Serializable {
 
 	private static final long serialVersionUID = 1847361642302974184L;
@@ -27,11 +27,11 @@ public class AppConfigurationEntry implements Serializable {
 	@DN
     private String dn;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     @JsonObject
-	@AttributeName(name = "jsConfDyn")
+	@AttributeName(name = "jansConfDyn")
     private AppConfiguration application;
 
     public AppConfigurationEntry() {}

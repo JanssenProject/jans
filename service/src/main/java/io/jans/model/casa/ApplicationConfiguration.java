@@ -13,10 +13,10 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 @DataEntry
-@ObjectClass(value = "jsAppConfiguration")
+@ObjectClass(value = "jansAppConfiguration")
 public class ApplicationConfiguration extends Entry {
 
-    @AttributeName(name = "jsConfApp")
+    @AttributeName(name = "jansConfApp")
     private String settings;
 
     public String getSettings() {
