@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="UMA RS Resteasy Suite" parallel="false">
+
+    <test name="Core" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.rs.protect.resteasy.KeyTest"/>
+            <class name="org.gluu.oxd.rs.protect.resteasy.ConfigurationLoaderTest"/>
+        </classes>
+    </test>
+</suite>

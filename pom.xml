@@ -30,6 +30,8 @@
     </prerequisites>
 
     <modules>
+        <module>uma-rs-core</module>
+        <module>uma-rs-resteasy</module>
         <module>oxd-common</module>
         <module>oxd-client</module>
         <module>oxd-gen-client</module>
