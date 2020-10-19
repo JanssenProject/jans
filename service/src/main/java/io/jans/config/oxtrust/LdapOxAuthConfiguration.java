@@ -27,23 +27,23 @@ public class LdapOxAuthConfiguration extends Entry {
     @DN
     private String dn;
 
-    @AttributeName(name = "jsConfDyn")
+    @AttributeName(name = "jansConfDyn")
     private String dynamicConf;
 
-    @AttributeName(name = "jsConfStatic")
+    @AttributeName(name = "jansConfStatic")
     private String staticConf;
 
-    @AttributeName(name = "jsConfErrors")
+    @AttributeName(name = "jansConfErrors")
     private String errors;
 
-    @AttributeName(name = "jsConfWebKeys")
+    @AttributeName(name = "jansConfWebKeys")
     private String webKeys;
 
     @JsonObject
-    @AttributeName(name = "jsWebKeysSettings")
+    @AttributeName(name = "jansWebKeysSettings")
     private WebKeysSettings webKeysSettings;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public LdapOxAuthConfiguration() {
