@@ -26,10 +26,10 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     private String id;
 
-    @AttributeName(name = "jsCodeChallenge")
+    @AttributeName(name = "jansCodeChallenge")
     private String challange;
 
-    @AttributeName(name = "jsCodeChallengeHash")
+    @AttributeName(name = "jansCodeChallengeHash")
     private String challangeHash;
 
     @AttributeName(name = "creationDate")

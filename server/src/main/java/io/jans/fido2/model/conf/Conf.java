@@ -18,20 +18,20 @@ import io.jans.orm.annotation.ObjectClass;
  * @version May 12, 2020
  */
 @DataEntry
-@ObjectClass(value = "jsAppConfiguration")
+@ObjectClass(value = "jansAppConfiguration")
 public class Conf {
     @DN
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "jsConfDyn")
+    @AttributeName(name = "jansConfDyn")
     private AppConfiguration dynamicConf;
 
     @JsonObject
-    @AttributeName(name = "jsConfStatic")
+    @AttributeName(name = "jansConfStatic")
     private StaticConfiguration staticConf;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public Conf() {

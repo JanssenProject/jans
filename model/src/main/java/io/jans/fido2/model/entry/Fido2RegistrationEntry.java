@@ -24,24 +24,24 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
-    @AttributeName(name = "jsPublicKeyId")
+    @AttributeName(name = "jansPublicKeyId")
     protected String publicKeyId;
 
     @AttributeName(name = "displayName")
     private String displayName;
 
     @JsonObject
-    @AttributeName(name = "jsRegistrationData")
+    @AttributeName(name = "jansRegistrationData")
     private Fido2RegistrationData registrationData;
 
-    @AttributeName(name = "jsCounter")
+    @AttributeName(name = "jansCounter")
 	private int counter;
 
     @JsonObject
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
     private Fido2RegistrationStatus registrationStatus;
 
-    @AttributeName(name = "jsDeviceNotificationConf")
+    @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
     public Fido2RegistrationEntry() {

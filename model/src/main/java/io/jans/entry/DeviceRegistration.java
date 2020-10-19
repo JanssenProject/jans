@@ -40,40 +40,40 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	@AttributeName
 	private String description;
 
-	@AttributeName(name = "jsNickName")
+	@AttributeName(name = "jansNickName")
 	private String nickname;
 
     @JsonObject
-    @AttributeName(name = "jsDeviceRegistrationConf")
+    @AttributeName(name = "jansDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
     @JsonObject
-    @AttributeName(name = "jsDeviceNotificationConf")
+    @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
-    @AttributeName(name = "jsCounter")
+    @AttributeName(name = "jansCounter")
 	private long counter;
 
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
 	private DeviceRegistrationStatus status;
 
-	@AttributeName(name = "jsApp")
+	@AttributeName(name = "jansApp")
 	private String application;
 
-	@AttributeName(name = "jsDeviceKeyHandle")
+	@AttributeName(name = "jansDeviceKeyHandle")
 	private String keyHandle;
 
-	@AttributeName(name = "jsDeviceHashCode")
+	@AttributeName(name = "jansDeviceHashCode")
 	private Integer keyHandleHashCode;
 
     @JsonObject
-	@AttributeName(name = "jsDeviceData")
+	@AttributeName(name = "jansDeviceData")
 	private DeviceData deviceData;
 
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-    @AttributeName(name = "jsLastAccessTime")
+    @AttributeName(name = "jansLastAccessTime")
     private Date lastAccessTime;
 
     @AttributeName(name = "exp")
