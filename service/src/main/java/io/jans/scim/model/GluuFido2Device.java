@@ -22,10 +22,10 @@ import io.jans.orm.annotation.ObjectClass;
 public class GluuFido2Device extends Fido2Entry implements Serializable {
 
     @JsonObject
-    @AttributeName(name = "jsRegistrationData")
+    @AttributeName(name = "jansRegistrationData")
     private Fido2Data registrationData;
 
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
     private String registrationStatus;
 
     @AttributeName(name = "displayName")
