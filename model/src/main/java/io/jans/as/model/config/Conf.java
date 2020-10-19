@@ -25,22 +25,22 @@ public class Conf {
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "jsConfDyn")
+    @AttributeName(name = "jansConfDyn")
     private AppConfiguration dynamic;
 
     @JsonObject
-    @AttributeName(name = "jsConfStatic")
+    @AttributeName(name = "jansConfStatic")
     private StaticConfiguration statics;
 
     @JsonObject
-    @AttributeName(name = "jsConfErrors")
+    @AttributeName(name = "jansConfErrors")
     private ErrorMessages errors;
 
     @JsonObject
-    @AttributeName(name = "jsConfWebKeys")
+    @AttributeName(name = "jansConfWebKeys")
     private WebKeysConfiguration webKeys;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public Conf() {

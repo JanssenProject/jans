@@ -30,13 +30,13 @@ public class RequestMessageLdap extends BaseEntry {
     @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     protected String id;
 
-    @AttributeName(name = "jsReqId")
+    @AttributeName(name = "jansReqId")
     protected String requestId;
 
     @AttributeName(name = "creationDate")
     protected Date creationDate;
 
-    @AttributeName(name = "jsSessStateId")
+    @AttributeName(name = "jansSessStateId")
     protected String sessionId;
 
     @AttributeName(name = "personInum")

@@ -24,13 +24,13 @@ public class PairwiseIdentifier extends BaseEntry {
     @AttributeName(ignoreDuringUpdate = true, name = "jsId")
     private String id;
 
-    @AttributeName(name = "jsSectorIdentifier")
+    @AttributeName(name = "jansSectorIdentifier")
     private String sectorIdentifier;
 
-    @AttributeName(name = "jsClntId")
+    @AttributeName(name = "jansClntId")
     private String clientId;
 
-    @AttributeName(name = "jsUsrId")
+    @AttributeName(name = "jansUsrId")
     private String userInum;
 
     public PairwiseIdentifier() {

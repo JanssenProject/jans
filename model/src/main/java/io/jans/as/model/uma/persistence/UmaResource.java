@@ -31,29 +31,29 @@ public class UmaResource implements Serializable {
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @AttributeName(name = "jsId")
+    @AttributeName(name = "jansId")
     private String id;
 
     @NotNull(message = "Display name should be not empty")
     @AttributeName(name = "displayName")
     private String name;
 
-    @AttributeName(name = "jsFaviconImage")
+    @AttributeName(name = "jansFaviconImage")
     private String iconUri;
 
-    @AttributeName(name = "jsUmaScope", consistency = true)
+    @AttributeName(name = "jansUmaScope", consistency = true)
     private List<String> scopes;
 
-    @AttributeName(name = "jsScopeExpression", consistency = true)
+    @AttributeName(name = "jansScopeExpression", consistency = true)
     private String scopeExpression;
 
-    @AttributeName(name = "jsAssociatedClnt", consistency = true)
+    @AttributeName(name = "jansAssociatedClnt", consistency = true)
     private List<String> clients;
 
-    @AttributeName(name = "jsResource")
+    @AttributeName(name = "jansResource")
     private List<String> resources;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private String rev;
 
     @AttributeName(name = "owner")
@@ -62,7 +62,7 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "jsTyp")
+    @AttributeName(name = "jansTyp")
     private String type;
 
     @AttributeName(name = "iat")
