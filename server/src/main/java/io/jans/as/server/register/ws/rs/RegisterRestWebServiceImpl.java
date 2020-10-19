@@ -975,12 +975,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
-        if (StringHelper.equalsIgnoreCase("jsTrustedClnt", attr)) {
+        if (StringHelper.equalsIgnoreCase("jansTrustedClnt", attr)) {
             boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setTrustedClient(trustedClient);
 
             return true;
-        } else if (StringHelper.equalsIgnoreCase("jsInclClaimsInIdTkn", attr)) {
+        } else if (StringHelper.equalsIgnoreCase("jansInclClaimsInIdTkn", attr)) {
             boolean includeClaimsInIdToken = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
 

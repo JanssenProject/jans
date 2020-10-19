@@ -99,7 +99,7 @@ public class PushSnsService {
 		message = ServerUtil.asJson(messageMap);
 
 	    PublishRequest publishRequest = new PublishRequest();
-		publishRequest.setMessageStructure("json");
+		publishRequest.setMessageStructure("janson");
 		
 		if (messageAttributes != null) {
 			publishRequest.setMessageAttributes(messageAttributes);

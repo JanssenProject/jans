@@ -21,7 +21,7 @@ import java.net.URI;
 @ObjectClass(value = "pairwiseIdentifier")
 public class PairwiseIdentifier extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jsId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
     @AttributeName(name = "jansSectorIdentifier")
