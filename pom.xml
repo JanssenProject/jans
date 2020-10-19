@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.gluu</groupId>
+    <groupId>io.jans</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
     <version>5.0.0-SNAPSHOT</version>
@@ -70,7 +70,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>gluu-core-bom</artifactId>
                 <version>5.0.0-SNAPSHOT</version>
                 <scope>import</scope>
@@ -84,27 +84,27 @@
                 <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
                 <version>5.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxd-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxd-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxd-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxauth-client</artifactId>
                 <version>${oxauth.version}</version>
                 <exclusions>
@@ -115,7 +115,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxauth-model</artifactId>
                 <version>${oxauth.version}</version>
                 <exclusions>
@@ -130,7 +130,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxcore-service</artifactId>
                 <version>${oxCore.version}</version>
                 <exclusions>
@@ -143,7 +143,7 @@
                         <artifactId>swagger-jaxrs_2.10</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.gluu</groupId>
+                        <groupId>io.jans</groupId>
                         <artifactId>oxcore-persistence-ldap</artifactId>
                     </exclusion>
                     <exclusion>
@@ -169,12 +169,12 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxcore-standalone</artifactId>
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.gluu</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>oxcore-util</artifactId>
                 <version>${oxCore.version}</version>
                 <exclusions>
