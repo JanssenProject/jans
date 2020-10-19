@@ -70,7 +70,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
         Token patToken = null;
         try {
-            //patToken = getPatToken(); // WIP ??
+            // patToken = getPatToken(); // WIP ??
         } catch (Exception ex) {
             logger.error("Failed to obtain PAT token", ex);
             throw new WebApplicationException("Failed to obtain PAT token", ex);
@@ -78,16 +78,14 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
         logger.debug("this.umaService.getUmaMetadata() = " + this.umaService.getUmaMetadata());
 
-        logger.debug(
-                "AuthClientFactory::createUmaMetadataService() - resourceScopes = " + resourceScopes + "\n\n");
+        logger.debug("AuthClientFactory::createUmaMetadataService() - resourceScopes = " + resourceScopes + "\n\n");
 
-        /*
         if (!resourceScopes.isEmpty()) {
             this.umaService.validateRptToken(patToken, token, getUmaResourceId(), resourceScopes);
         } else {
             this.umaService.validateRptToken(patToken, token, getUmaResourceId(), getUmaScope());
         }
-        */
+
     }
 
     public String getUmaResourceId() {

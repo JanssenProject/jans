@@ -176,11 +176,6 @@
             <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
         </repository>
         <repository>
-            <id>jans</id>
-            <name>Jans repository</name>
-            <url>https://maven.jans.io/maven</url>
-        </repository>
-        <repository>
             <id>gluu</id>
             <name>Gluu repository</name>
             <url>https://ox.gluu.org/maven</url>
@@ -226,7 +221,7 @@
                     </systemPropertyVariables>
                     <excludedGroups>integration</excludedGroups>
                     <systemProperties>
-                       <!--  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager> -->
+                        <!-- <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager> -->
                         <karate.options>--tags ~@ignore</karate.options>
                     </systemProperties>
                 </configuration>

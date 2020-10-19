@@ -10,6 +10,7 @@ Given url umaresources_url
 And  header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+And print response
 And assert response.length != null
 
 Scenario: Fetch the first two uma resources

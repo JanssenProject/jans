@@ -46,8 +46,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class ConfigurationFactory {
 
     static {
-        if (System.getProperty("gluu.base") != null) {
-            BASE_DIR = System.getProperty("gluu.base");
+        if (System.getProperty("jans.base") != null) {
+            BASE_DIR = System.getProperty("jans.base");
         } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
@@ -62,7 +62,7 @@ public class ConfigurationFactory {
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
+    private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
     private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
     private static final String SALT_FILE_NAME = "salt";
 
@@ -318,16 +318,23 @@ public class ConfigurationFactory {
             Filter jsIdFilter = Filter.createSubstringFilter("jsId", null, targetArray, null);
             Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
             Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
-            List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
-            log.error(" \n umaResourceList = " + umaResourceList + "\n");
+
             /*
+             * List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
+             * .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
+             * log.error(" \n umaResourceList = " + umaResourceList + "\n");
+             * 
              * if (umaResourceList == null || umaResourceList.isEmpty()) throw new
              * ConfigurationException("Matching Config API Resource not found!");
              * UmaResource resource = umaResourceList.stream() .filter(x ->
-             * ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
-             * .orElse(null); if (resource == null) throw new
-             * ConfigurationException("Config API Resource not found!"); return resource;
+             * ConfigurationFactory.getApiResourceName().equals(x.getName())) .findFirst()
+             * .orElse(null);
+             * 
+             * log.debug("\n\n ConfigurationFactory.getApiResourceName() = resource "
+             * +resource+"\n\n"); if (resource == null) throw new
+             * ConfigurationException("Config API Resource not found!");
+             * 
+             * return resource;
              */
             // To-uncomment-later???
             return null;
@@ -339,7 +346,10 @@ public class ConfigurationFactory {
     }
 
     public String getBaseDnForResource() {
-        final String umaBaseDn = staticConf.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
+        log.debug("\n\n ConfigurationFactory.getBaseDnForResource() = staticConf = " + staticConf + "\n\n");
+        log.debug("\n\n ConfigurationFactory.getBaseDnForResource() = staticConf.getBaseDn() = "
+                + staticConf.getBaseDn() + "\n\n");
+        final String umaBaseDn = staticConf.getBaseDn().getUmaBase();
         return String.format("ou=resources,%s", umaBaseDn);
     }
 
