@@ -11,7 +11,7 @@
 
     <parent>
         <groupId>io.jans</groupId>
-        <artifactId>oxd</artifactId>
+        <artifactId>jans-client-api-parent</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
@@ -106,11 +106,11 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxcore-util</artifactId>
+            <artifactId>jans-core-util</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>oxcore-persistence-annotation</artifactId>
+            <artifactId>jans-core-persistence-annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
