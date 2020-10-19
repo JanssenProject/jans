@@ -31,34 +31,34 @@ public class Scope extends DeletableEntity implements Serializable {
     @AttributeName
     private String displayName;
 
-    @AttributeName(name = "jsId", consistency = true)
+    @AttributeName(name = "jansId", consistency = true)
     private String id;
 
-    @AttributeName(name = "jsIconUrl")
+    @AttributeName(name = "jansIconUrl")
     private String iconUrl;
 
     @AttributeName
     private String description;
 
-    @AttributeName(name = "jsScopeTyp")
+    @AttributeName(name = "jansScopeTyp")
     private ScopeType scopeType;
 
-    @AttributeName(name = "jsClaim")
+    @AttributeName(name = "jansClaim")
     private List<String> claims;
 
-    @AttributeName(name = "jsDefScope")
+    @AttributeName(name = "jansDefScope")
     private Boolean defaultScope;
 
-    @AttributeName(name = "jsGrpClaims")
+    @AttributeName(name = "jansGrpClaims")
     private Boolean groupClaims;
 
-    @AttributeName(name = "jsScrDn")
+    @AttributeName(name = "jansScrDn")
     private List<String> dynamicScopeScripts;
 
-    @AttributeName(name = "jsUmaPolicyScrDn")
+    @AttributeName(name = "jansUmaPolicyScrDn")
     private List<String> umaAuthorizationPolicies;
 
-    @AttributeName(name = "jsAttrs")
+    @AttributeName(name = "jansAttrs")
     @JsonObject
     private ScopeAttributes attributes;
 
