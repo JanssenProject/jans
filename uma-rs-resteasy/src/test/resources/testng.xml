@@ -4,8 +4,8 @@
 
     <test name="Core" enabled="true">
         <classes>
-            <class name="org.gluu.oxd.rs.protect.resteasy.KeyTest"/>
-            <class name="org.gluu.oxd.rs.protect.resteasy.ConfigurationLoaderTest"/>
+            <class name="io.jans.ca.rs.protect.resteasy.KeyTest"/>
+            <class name="io.jans.ca.rs.protect.resteasy.ConfigurationLoaderTest"/>
         </classes>
     </test>
 </suite>
