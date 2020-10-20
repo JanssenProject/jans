@@ -32,8 +32,8 @@ public class ConfigurationFactory {
 	private Logger log;
 
 	static {
-		if (System.getProperty("gluu.base") != null) {
-			BASE_DIR = System.getProperty("gluu.base");
+		if (System.getProperty("jans.base") != null) {
+			BASE_DIR = System.getProperty("jans.base");
 		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
