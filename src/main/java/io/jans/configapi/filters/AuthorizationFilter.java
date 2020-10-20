@@ -64,7 +64,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         try {
             String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-            // this.authorizationService.validateAuthorization(token, resourceInfo); //-
+            this.authorizationService.validateAuthorization(token, resourceInfo); //-
             // //WIP ??
             logger.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {

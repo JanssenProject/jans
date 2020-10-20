@@ -162,6 +162,12 @@ public class ConfigurationFactory {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final Conf c = loadConfigurationFromDb();
+            log.debug("\n\n\n Conf c = "+c+"\n\n");
+            log.debug(" Conf c.getDn() = "+c.getDn());
+            log.debug(" Conf c.getDynamic() = "+c.getDynamic());
+            log.debug(" Conf c.getStatics() = "+c.getStatics());
+            log.debug(" Conf c.getWebKeys() = "+c.getWebKeys());
+            log.debug(" Conf c.toString() = "+c.toString()+"\n\n\n\n");
             if (c != null) {
                 init(c);
                 return true;
@@ -316,29 +322,27 @@ public class ConfigurationFactory {
         try {
             String[] targetArray = new String[] { ConfigurationFactory.getApiResourceName() };
             Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+            // Filter jsIdFilter = Filter.createSubstringFilter("oxId", null, targetArray,
+            // null);
             Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
             Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
 
-            /*
-             * List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-             * .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
-             * log.error(" \n umaResourceList = " + umaResourceList + "\n");
-             * 
-             * if (umaResourceList == null || umaResourceList.isEmpty()) throw new
-             * ConfigurationException("Matching Config API Resource not found!");
-             * UmaResource resource = umaResourceList.stream() .filter(x ->
-             * ConfigurationFactory.getApiResourceName().equals(x.getName())) .findFirst()
-             * .orElse(null);
-             * 
-             * log.debug("\n\n ConfigurationFactory.getApiResourceName() = resource "
-             * +resource+"\n\n"); if (resource == null) throw new
-             * ConfigurationException("Config API Resource not found!");
-             * 
-             * return resource;
-             */
-            // To-uncomment-later???
-            return null;
+            List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
+                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
+            log.error(" \n umaResourceList = " + umaResourceList + "\n");
 
+            if (umaResourceList == null || umaResourceList.isEmpty())
+                throw new ConfigurationException("Matching Config API Resource not found!");
+
+            UmaResource resource = umaResourceList.stream()
+                    .filter(x -> ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
+                    .orElse(null);
+
+            log.debug("\n\n ConfigurationFactory.getApiResourceName() = resource " + resource + "\n\n");
+            if (resource == null)
+                throw new ConfigurationException("Config API Resource not found!");
+
+            return resource;
         } catch (Exception ex) {
             log.error("Failed to load Config API Resource.", ex);
             throw new ConfigurationException("Failed to load Config API Resource.", ex);
@@ -347,9 +351,8 @@ public class ConfigurationFactory {
 
     public String getBaseDnForResource() {
         log.debug("\n\n ConfigurationFactory.getBaseDnForResource() = staticConf = " + staticConf + "\n\n");
-        log.debug("\n\n ConfigurationFactory.getBaseDnForResource() = staticConf.getBaseDn() = "
-                + staticConf.getBaseDn() + "\n\n");
         final String umaBaseDn = staticConf.getBaseDn().getUmaBase();
+        //final String umaBaseDn = "ou=uma,o=gluu";
         return String.format("ou=resources,%s", umaBaseDn);
     }
 
