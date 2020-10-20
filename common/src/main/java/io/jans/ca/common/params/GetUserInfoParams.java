@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetUserInfoParams implements HasOxdIdParams {
+public class GetUserInfoParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "access_token")
     private String access_token;
     @JsonProperty(value = "id_token")
@@ -29,12 +29,12 @@ public class GetUserInfoParams implements HasOxdIdParams {
         this.access_token = accessToken;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getIdToken() {
@@ -53,13 +53,13 @@ public class GetUserInfoParams implements HasOxdIdParams {
         GetUserInfoParams that = (GetUserInfoParams) o;
 
         if (access_token != null ? !access_token.equals(that.access_token) : that.access_token != null) return false;
-        return !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
+        return !(rp_id != null ? !rp_id.equals(that.rp_id) : that.rp_id != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = oxd_id != null ? oxd_id.hashCode() : 0;
+        int result = rp_id != null ? rp_id.hashCode() : 0;
         result = 31 * result + (access_token != null ? access_token.hashCode() : 0);
         return result;
     }
@@ -69,7 +69,7 @@ public class GetUserInfoParams implements HasOxdIdParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetUserInfoParams");
         sb.append("{access_token='").append(access_token).append('\'');
-        sb.append(", oxd_id='").append(oxd_id).append('\'');
+        sb.append(", rp_id='").append(rp_id).append('\'');
         sb.append(", id_token='").append(id_token).append('\'');
         sb.append('}');
         return sb.toString();

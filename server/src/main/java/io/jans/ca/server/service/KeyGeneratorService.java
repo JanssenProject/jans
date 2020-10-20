@@ -16,7 +16,7 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.service.PersistenceService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,14 +33,14 @@ public class KeyGeneratorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeyGeneratorService.class);
 
-    private OxdServerConfiguration configuration;
+    private RpServerConfiguration configuration;
     private PersistenceService persistenceService;
     private AbstractCryptoProvider cryptoProvider;
 
     private JSONWebKeySet keys;
 
     @Inject
-    public KeyGeneratorService(OxdServerConfiguration configuration, PersistenceService persistenceService) {
+    public KeyGeneratorService(RpServerConfiguration configuration, PersistenceService persistenceService) {
         this.configuration = configuration;
         this.keys = new JSONWebKeySet();
         this.persistenceService = persistenceService;
@@ -136,7 +136,7 @@ public class KeyGeneratorService {
             generateKeys();
             return this.keys;
         }
-        LOG.info("Relying party JWKS generation is disabled in running oxd instance. To enable it set `enable_jwks_generation` field to true in `client-api-server.yml`.");
+        LOG.info("Relying party JWKS generation is disabled in running jans_client_api instance. To enable it set `enable_jwks_generation` field to true in `jans-client-api.yml`.");
         throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
     }
 

@@ -50,7 +50,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getOxdId()).getToken();
+                return getUmaTokenService().getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -72,19 +72,19 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
                     .build());
         }
 
-        UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
+        UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
         UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientEngine());
 
         UmaResource opUmaResource = getResource(resourceService, params, umaResource.getId());
 
         try {
-            String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
+            String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
             return update(pat, umaResource.getId(), rp, resourceService, opUmaResource);
         } catch (ClientErrorException e) {
             LOG.debug("Failed to update resource. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                return update(getUmaTokenService().obtainPat(params.getOxdId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
+                return update(getUmaTokenService().obtainPat(params.getRpId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
             } else {
                 throw e;
             }
@@ -98,11 +98,11 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         resourceService.updateResource("Bearer " + pat, resourceId, opUmaResource);
         updateRp(opUmaResource, rp, resourceId);
 
-        return new RsModifyResponse(rp.getOxdId());
+        return new RsModifyResponse(rp.getRpId());
     }
 
     private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
-        String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
+        String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
         UmaResourceWithId umaResourceWithId = resourceService.getResource("Bearer " + pat, resourceId);
 
         UmaResource umaResource = new UmaResource();
@@ -143,8 +143,8 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
     private void validate(RsModifyParams params) {
 
-        if (Strings.isNullOrEmpty(params.getOxdId())) {
-            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+        if (Strings.isNullOrEmpty(params.getRpId())) {
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_RP_ID);
         }
 
         if (Strings.isNullOrEmpty(params.getHttpMethod())) {

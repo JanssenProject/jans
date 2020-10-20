@@ -19,7 +19,7 @@ import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.RpGetRptResponse;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.ServerLauncher;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.model.Pat;
@@ -49,7 +49,7 @@ public class UmaTokenService {
     private final ValidationService validationService;
     private final DiscoveryService discoveryService;
     private final HttpService httpService;
-    private final OxdServerConfiguration configuration;
+    private final RpServerConfiguration configuration;
     private final StateService stateService;
     private final OpClientFactory opClientFactory;
 
@@ -59,7 +59,7 @@ public class UmaTokenService {
                            ValidationService validationService,
                            DiscoveryService discoveryService,
                            HttpService httpService,
-                           OxdServerConfiguration configuration,
+                           RpServerConfiguration configuration,
                            StateService stateService,
                            OpClientFactory opClientFactory
     ) {
@@ -74,8 +74,8 @@ public class UmaTokenService {
     }
 
     public RpGetRptResponse getRpt(RpGetRptParams params) throws Exception {
-        Rp rp = rpSyncService.getRp(params.getOxdId());
-        UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(params.getOxdId());
+        Rp rp = rpSyncService.getRp(params.getRpId());
+        UmaMetadata discovery = discoveryService.getUmaDiscoveryByRpId(params.getRpId());
 
         if (!Strings.isNullOrEmpty(rp.getRpt()) && rp.getRptExpiresAt() != null) {
             if (!CoreUtils.isExpired(rp.getRptExpiresAt())) {
@@ -134,7 +134,7 @@ public class UmaTokenService {
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
             final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
-            CorrectRptIntrospectionResponse status = introspectionService.introspectRpt(params.getOxdId(), tokenResponse.getAccessToken());
+            CorrectRptIntrospectionResponse status = introspectionService.introspectRpt(params.getRpId(), tokenResponse.getAccessToken());
 
             LOG.debug("RPT " + tokenResponse.getAccessToken() + ", status: " + status);
             if (status.getActive()) {
@@ -171,10 +171,10 @@ public class UmaTokenService {
         }
     }
 
-    public Pat getPat(String oxdId) {
-        validationService.notBlankOxdId(oxdId);
+    public Pat getPat(String rpId) {
+        validationService.notBlankRpId(rpId);
 
-        Rp rp = rpSyncService.getRp(oxdId);
+        Rp rp = rpSyncService.getRp(rpId);
 
         if (rp.getPat() != null && rp.getPatCreatedAt() != null && rp.getPatExpiresIn() != null && rp.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -187,12 +187,12 @@ public class UmaTokenService {
             }
         }
 
-        return obtainPat(oxdId);
+        return obtainPat(rpId);
     }
 
-    public Pat obtainPat(String oxdId) {
-        Rp rp = rpSyncService.getRp(oxdId);
-        Token token = obtainToken(oxdId, UmaScopeType.PROTECTION, rp);
+    public Pat obtainPat(String rpId) {
+        Rp rp = rpSyncService.getRp(rpId);
+        Token token = obtainToken(rpId, UmaScopeType.PROTECTION, rp);
 
         rp.setPat(token.getToken());
         rp.setPatCreatedAt(new Date());
@@ -204,10 +204,10 @@ public class UmaTokenService {
         return (Pat) token;
     }
 
-    public Token getOAuthToken(String oxdId) {
-        validationService.notBlankOxdId(oxdId);
+    public Token getOAuthToken(String rpId) {
+        validationService.notBlankRpId(rpId);
 
-        Rp rp = rpSyncService.getRp(oxdId);
+        Rp rp = rpSyncService.getRp(rpId);
 
         if (rp.getOauthToken() != null && rp.getOauthTokenCreatedAt() != null && rp.getOauthTokenExpiresIn() != null && rp.getOauthTokenExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -220,12 +220,12 @@ public class UmaTokenService {
             }
         }
 
-        return obtainOauthToken(oxdId);
+        return obtainOauthToken(rpId);
     }
 
-    public Token obtainOauthToken(String oxdId) {
-        Rp rp = rpSyncService.getRp(oxdId);
-        Token token = obtainToken(oxdId, null, rp);
+    public Token obtainOauthToken(String rpId) {
+        Rp rp = rpSyncService.getRp(rpId);
+        Token token = obtainToken(rpId, null, rp);
 
         rp.setOauthToken(token.getToken());
         rp.setOauthTokenCreatedAt(new Date());
@@ -237,9 +237,9 @@ public class UmaTokenService {
         return token;
     }
 
-    private Token obtainToken(String oxdId, UmaScopeType scopeType, Rp rp) {
+    private Token obtainToken(String rpId, UmaScopeType scopeType, Rp rp) {
 
-        OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId);
+        OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByRpId(rpId);
 
         final Token token;
         if (useClientAuthentication(scopeType)) {
@@ -267,9 +267,9 @@ public class UmaTokenService {
         if (response != null) {
             if (Util.allNotBlank(response.getAccessToken())) {
                 if (scopeType != null && !response.getScope().contains(scopeType.getValue())) {
-                    LOG.error("oxd requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
+                    LOG.error("rp requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
                     LOG.error("Please check AS(oxauth) configuration and make sure UMA scope (uma_protection) is enabled.");
-                    throw new RuntimeException("oxd requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
+                    throw new RuntimeException("rp requested scope " + scopeType + " but AS returned access_token without that scope, token scopes :" + response.getScope());
                 }
 
                 final Token opResponse = TokenFactory.newToken(scopeType);

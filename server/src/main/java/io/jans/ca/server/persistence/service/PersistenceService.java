@@ -18,7 +18,7 @@ public interface PersistenceService {
 
     boolean update(Rp rp);
 
-    Rp getRp(String oxdId);
+    Rp getRp(String rpId);
 
     ExpiredObject getExpiredObject(String key);
 
@@ -30,7 +30,7 @@ public interface PersistenceService {
 
     void destroy();
 
-    boolean remove(String oxdId);
+    boolean remove(String rpId);
 
     boolean deleteExpiredObjectsByKey(String key);
 

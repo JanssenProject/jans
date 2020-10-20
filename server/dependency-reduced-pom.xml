@@ -114,7 +114,7 @@
           <transformers>
             <transformer />
             <transformer>
-              <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+              <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
             </transformer>
             <transformer />
           </transformers>
@@ -150,7 +150,7 @@
               <skipAssembly>${generate.windows.exe}</skipAssembly>
               <archive>
                 <manifest>
-                  <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+                  <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
                 </manifest>
               </archive>
               <descriptors>
@@ -198,7 +198,7 @@
                 <configuration>
                   <archive>
                     <manifest>
-                      <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+                      <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
                     </manifest>
                   </archive>
                   <descriptors>

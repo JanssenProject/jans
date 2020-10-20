@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RegisterSiteResponse implements IOpResponse {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    @JsonProperty(value = "rp_id")
+    private String rpId;
     @JsonProperty(value = "op_host")
     private String opHost;
     @JsonProperty(value = "client_id")
@@ -32,12 +32,12 @@ public class RegisterSiteResponse implements IOpResponse {
     public RegisterSiteResponse() {
     }
 
-    public String getOxdId() {
-        return oxdId;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 
     public String getOpHost() {
@@ -107,7 +107,7 @@ public class RegisterSiteResponse implements IOpResponse {
     @Override
     public String toString() {
         return "RegisterSiteResponse{" +
-                "oxdId='" + oxdId + '\'' +
+                "rpId='" + rpId + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", clientName='" + clientName + '\'' +

@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetLogoutUrlParams implements HasOxdIdParams {
+public class GetLogoutUrlParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
 
     @JsonProperty(value = "id_token_hint")
     private String id_token_hint;
@@ -42,12 +42,12 @@ public class GetLogoutUrlParams implements HasOxdIdParams {
         this.id_token_hint = idTokenHint;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getState() {
@@ -70,7 +70,7 @@ public class GetLogoutUrlParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("LogoutParams");
-        sb.append("{oxd_id=").append(oxd_id);
+        sb.append("{rp_id=").append(rp_id);
         sb.append(", id_token_hint=").append(id_token_hint);
         sb.append(", post_logout_redirect_uri=").append(post_logout_redirect_uri);
         sb.append(", state=").append(state);

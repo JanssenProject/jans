@@ -35,7 +35,7 @@ public class AuthorizationCodeFlowTest {
         final GetTokensByCodeResponse2 tokens = requestTokens(client, site, userId, userSecret);
         //Get User Info
         GetUserInfoParams params = new GetUserInfoParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setAccessToken(tokens.getAccessToken());
 
         final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), null, params);
@@ -66,7 +66,7 @@ public class AuthorizationCodeFlowTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         //assertNotNull(resp);
-        //assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        //assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
     private GetTokensByCodeResponse2 requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
@@ -75,8 +75,8 @@ public class AuthorizationCodeFlowTest {
         final String nonce = "7r46ut6emu9gi11gn8044um640";
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
-        params.setCode(codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
+        params.setRpId(site.getRpId());
+        params.setCode(codeRequest(client, site.getRpId(), userId, userSecret, state, nonce));
         params.setState(state);
 
         final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), null, params);
@@ -88,7 +88,7 @@ public class AuthorizationCodeFlowTest {
 
     public static String codeRequest(ClientInterface client, String siteId, String userId, String userSecret, String state, String nonce) {
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
-        params.setOxdId(siteId);
+        params.setRpId(siteId);
         params.setUsername(userId);
         params.setPassword(userSecret);
         params.setState(state);
@@ -99,7 +99,7 @@ public class AuthorizationCodeFlowTest {
 
     public static void getLogoutUrl(ClientInterface client, RegisterSiteResponse site, String postLogoutRedirectUrl) {
         final GetLogoutUrlParams logoutParams = new GetLogoutUrlParams();
-        logoutParams.setOxdId(site.getOxdId());
+        logoutParams.setRpId(site.getRpId());
         logoutParams.setIdTokenHint("dummy_token");
         logoutParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         logoutParams.setState(UUID.randomUUID().toString());

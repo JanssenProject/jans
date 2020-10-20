@@ -27,7 +27,7 @@ public class AuthorizationCodeFlowTest {
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final AuthorizationCodeFlowParams params = new AuthorizationCodeFlowParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setClientId(clientId);
         params.setClientSecret(clientSecret);
         params.setNonce(UUID.randomUUID().toString());

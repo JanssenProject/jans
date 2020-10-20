@@ -50,7 +50,7 @@ public class TestUtils {
         return Jackson2.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
     }
 
-    public static OxdServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+    public static RpServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
 
         File file = new File(pathToYaml);
         if (!file.exists()) {
@@ -58,8 +58,8 @@ public class TestUtils {
             System.exit(1);
         }
 
-        DefaultConfigurationFactoryFactory<OxdServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
-        ConfigurationFactory<OxdServerConfiguration> configurationFactory = configurationFactoryFactory.create(OxdServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
+        DefaultConfigurationFactoryFactory<RpServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
+        ConfigurationFactory<RpServerConfiguration> configurationFactory = configurationFactoryFactory.create(RpServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
         return configurationFactory.build(file);
     }
 }

@@ -40,7 +40,7 @@ public class UmaFullTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetRptParams params = new RpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
         final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), null, params);

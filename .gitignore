@@ -37,3 +37,4 @@ gen-client/target/
 server/dependency-reduced-pom.xml
 server/src/test/resources/properties/users/*
 uma-rs-core/target/
+uma-rs-resteasy/target/

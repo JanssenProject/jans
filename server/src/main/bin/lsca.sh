@@ -2,11 +2,11 @@
 # Please run it with JDK 1.6 or higher
 
 BASEDIR=/opt/oxd-server
-CONF=/opt/oxd-server/conf/oxd-server.yml
-LIB=/opt/oxd-server/lib
+CONF=/opt/jans-client-api/conf/jans-client-api.yml
+LIB=/opt/jans-client-api/lib
 
 echo BASEDIR=$BASEDIR
 echo CONF=$CONF
 
 javaExe=java
-$javaExe -cp $LIB/oxd-server.jar:$LIB/* Cli -c $CONF "$@"
+$javaExe -cp $LIB/jans-client-api-server.jar:$LIB/* Cli -c $CONF "$@"

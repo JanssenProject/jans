@@ -38,7 +38,7 @@ public class UmaFullTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetRptParams params = new RpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
         final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(site), null, params);
@@ -64,7 +64,7 @@ public class UmaFullTest {
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
         final RpGetRptParams params = new RpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(UUID.randomUUID().toString());
 
         try {

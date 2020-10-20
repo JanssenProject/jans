@@ -11,10 +11,10 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsCheckAccessParams implements HasOxdIdParams {
+public class RsCheckAccessParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "rpt")
     private String rpt;
     @JsonProperty(value = "path")
@@ -27,12 +27,12 @@ public class RsCheckAccessParams implements HasOxdIdParams {
     public RsCheckAccessParams() {
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getRpt() {
@@ -71,7 +71,7 @@ public class RsCheckAccessParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsCheckAccessParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", path='").append(path).append('\'');
         sb.append(", http_method='").append(http_method).append('\'');

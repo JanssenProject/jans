@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import io.jans.ca.server.service.*;
 import io.jans.ca.mock.service.OpClientFactoryMockImpl;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.op.OpClientFactory;
 import io.jans.ca.server.persistence.service.PersistenceService;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
@@ -13,7 +13,7 @@ public class MockAppModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(OxdServerConfiguration.class).toProvider(ConfigurationService.class);
+        bind(RpServerConfiguration.class).toProvider(ConfigurationService.class);
 
         bind(ConfigurationService.class).in(Singleton.class);
         bind(PublicOpKeyService.class).in(Singleton.class);

@@ -34,7 +34,7 @@ public class UmaGetClaimsGatheringUrlTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
         params.setClaimsRedirectUri(paramRedirectUrl);
 
@@ -61,7 +61,7 @@ public class UmaGetClaimsGatheringUrlTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
         params.setClaimsRedirectUri(paramRedirectUrl);
 
@@ -95,7 +95,7 @@ public class UmaGetClaimsGatheringUrlTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
         params.setClaimsRedirectUri(paramRedirectUrl);
         params.setState(state);

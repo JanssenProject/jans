@@ -67,7 +67,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getOxdId()).getToken();
+                return getUmaTokenService().getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -78,7 +78,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
         List<String> requiredScopes = getRequiredScopes(params, resource);
 
-        CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());
+        CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getRpId(), params.getRpt());
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
@@ -111,7 +111,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
-                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                getUmaTokenService().obtainPat(params.getRpId()); // force to refresh PAT
                 response = rptInterceptor.registerTicketResponse(requiredScopes, resource.getId());
             } else {
                 throw e;
@@ -134,7 +134,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         List<String> resourceScopes = resource.getScopes();
 
         if (resourceScopes.isEmpty()) {
-            LOG.trace("Not scopes in resource:" + resource + ", oxdId: " + params.getOxdId());
+            LOG.trace("Not scopes in resource:" + resource + ", rpId: " + params.getRpId());
             if (!resource.getScopeExpressions().isEmpty() && JsonLogicNodeParser.isNodeValid(resource.getScopeExpressions().get(0))) {
                 resourceScopes = JsonLogicNodeParser.parseNode(resource.getScopeExpressions().get(0)).getData();
                 LOG.trace("Set requiredScope from scope expression.");

@@ -46,7 +46,7 @@ public class SetupClientTest {
 
         notEmpty(resp.getClientId());
         notEmpty(resp.getClientSecret());
-        notEmpty(resp.getOxdId());
+        notEmpty(resp.getRpId());
     }
 
     public static RegisterSiteResponse setupClient(ClientInterface client, String opHost, String redirectUrls) {
@@ -60,7 +60,7 @@ public class SetupClientTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(logoutUri);
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));

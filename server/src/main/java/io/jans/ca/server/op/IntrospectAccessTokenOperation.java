@@ -32,7 +32,7 @@ public class IntrospectAccessTokenOperation extends BaseOperation<IntrospectAcce
         getValidationService().validate(params);
 
         final IntrospectionService introspectionService = getInstance(IntrospectionService.class);
-        IntrospectionResponse response = introspectionService.introspectToken(params.getOxdId(), params.getAccessToken());
+        IntrospectionResponse response = introspectionService.introspectToken(params.getRpId(), params.getAccessToken());
 
         return new POJOResponse(response);
     }

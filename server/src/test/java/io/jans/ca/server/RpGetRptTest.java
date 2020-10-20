@@ -49,7 +49,7 @@ public class RpGetRptTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(redirectUrls.split(" ")[0]);
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setRptAsJwt(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
@@ -58,7 +58,7 @@ public class RpGetRptTest {
 
         final RegisterSiteResponse site = client.registerSite(params);
         assertNotNull(site);
-        assertTrue(!Strings.isNullOrEmpty(site.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(site.getRpId()));
 
         final RpGetRptResponse response = requestRpt(client, site, rsProtect);
         assertNotNull(response);
@@ -75,7 +75,7 @@ public class RpGetRptTest {
         final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetRptParams params = new RpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
         final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(site), null, params);

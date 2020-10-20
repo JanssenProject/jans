@@ -33,7 +33,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
         validateParams(params);
 
         Rp rp = getRp();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
 
         final Jwt idToken = Jwt.parse(params.getIdToken());
 
@@ -42,7 +42,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
                 .idToken(idToken)
                 .keyService(getKeyService())
                 .opClientFactory(getOpClientFactory())
-                .oxdServerConfiguration(getConfigurationService().getConfiguration())
+                .rpServerConfiguration(getConfigurationService().getConfiguration())
                 .rp(rp)
                 .build();
         validator.validateNonce(getStateService());

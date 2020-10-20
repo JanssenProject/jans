@@ -32,7 +32,7 @@ public class RegisterSiteTest {
         RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl, false);
         assertNotNull(resp);
 
-        TestUtils.notEmpty(resp.getOxdId());
+        TestUtils.notEmpty(resp.getRpId());
         site = resp;
     }
 
@@ -54,7 +54,7 @@ public class RegisterSiteTest {
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
 
-        params.setClientName("oxd-client-extension-up" + System.currentTimeMillis());
+        params.setClientName("rp-client-extension-up" + System.currentTimeMillis());
         params.setClientTokenEndpointAuthMethod("client_secret_basic");
         params.setClientTokenEndpointAuthSigningAlg("HS256");
         params.setClaimsRedirectUri(Lists.newArrayList("https://client.example.org"));
@@ -100,23 +100,23 @@ public class RegisterSiteTest {
 
         RegisterSiteResponse resp = Tester.newClient(host).registerSite(params);
         assertNotNull(resp);
-        assertNotNull(resp.getOxdId());
+        assertNotNull(resp.getRpId());
     }
 
     @Parameters({"host"})
     @Test(dependsOnMethods = {"register"})
     public void update(String host) {
-        TestUtils.notEmpty(site.getOxdId());
+        TestUtils.notEmpty(site.getRpId());
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
 
         // more specific site registration
         final UpdateSiteParams params = new UpdateSiteParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setScope(Lists.newArrayList("profile"));
 
-        params.setClientName("oxd-client-updated-test");
+        params.setClientName("rp-client-updated-test");
         params.setClientTokenEndpointAuthMethod("client_secret_basic");
         params.setClientTokenEndpointAuthSigningAlg("HS256");
         params.setClaimsRedirectUri(Lists.newArrayList("https://client.example.org/update"));
@@ -175,7 +175,7 @@ public class RegisterSiteTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(logoutUri);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
@@ -186,7 +186,7 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 
@@ -195,7 +195,7 @@ public class RegisterSiteTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
         params.setGrantTypes(Lists.newArrayList(
@@ -205,7 +205,7 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 
@@ -227,7 +227,7 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 
@@ -236,7 +236,7 @@ public class RegisterSiteTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setIdTokenSignedResponseAlg(algorithm);
         params.setGrantTypes(Lists.newArrayList(
@@ -249,7 +249,7 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 }

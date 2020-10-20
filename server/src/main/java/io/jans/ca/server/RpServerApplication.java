@@ -10,9 +10,9 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OxdServerApplication extends Application<OxdServerConfiguration> {
+public class RpServerApplication extends Application<RpServerConfiguration> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OxdServerApplication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RpServerApplication.class);
 
     public static void main(String[] args) {
         try {
@@ -20,28 +20,28 @@ public class OxdServerApplication extends Application<OxdServerConfiguration> {
                 ServerLauncher.shutdown(true);
                 return;
             } else {
-                new OxdServerApplication().run(args);
+                new RpServerApplication().run(args);
             }
         } catch (Throwable e) {
             if (args.length > 0 && "stop".equalsIgnoreCase(args[0])) {
-                LOG.error("Failed to stop oxd-server.", e);
+                LOG.error("Failed to stop jans_client_api.", e);
             } else {
-                LOG.error("Failed to start oxd-server.", e);
+                LOG.error("Failed to start jans_client_api.", e);
             }
             System.exit(1);
         }
     }
 
     @Override
-    public void initialize(Bootstrap<OxdServerConfiguration> bootstrap) {
+    public void initialize(Bootstrap<RpServerConfiguration> bootstrap) {
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
                 bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
     }
 
     @Override
-    public void run(OxdServerConfiguration configuration, Environment environment) {
+    public void run(RpServerConfiguration configuration, Environment environment) {
         ServerLauncher.configureServices(configuration);
-        TracingUtil.configureGlobalTracer(configuration, "oxd-server");
+        TracingUtil.configureGlobalTracer(configuration, "jans_client_api");
         environment.healthChecks().register("dummy", new HealthCheck() {
             @Override
             protected Result check() {

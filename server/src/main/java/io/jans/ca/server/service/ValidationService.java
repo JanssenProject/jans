@@ -5,7 +5,7 @@ import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.*;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.ServerLauncher;
 import io.jans.util.Pair;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
-    final OxdServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+    final RpServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
 
     private void notNull(IParams params) {
         if (params == null) {
@@ -31,9 +31,9 @@ public class ValidationService {
         }
     }
 
-    public void notBlankOxdId(String oxdId) {
-        if (Strings.isNullOrEmpty(oxdId)) {
-            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+    public void notBlankRpId(String rpId) {
+        if (Strings.isNullOrEmpty(rpId)) {
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_RP_ID);
         }
     }
 
@@ -71,16 +71,16 @@ public class ValidationService {
             return new Pair(null, true);
         }
 
-        if (params instanceof HasOxdIdParams) {
-            validate((HasOxdIdParams) params);
+        if (params instanceof HasRpIdParams) {
+            validate((HasRpIdParams) params);
         }
 
-        if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
+        if (!(params instanceof RegisterSiteParams) && params instanceof HasRpIdParams) {
             try {
-                String oxdId = ((HasOxdIdParams) params).getOxdId();
-                if (StringUtils.isNotBlank(oxdId)) {
+                String rpId = ((HasRpIdParams) params).getRpId();
+                if (StringUtils.isNotBlank(rpId)) {
                     final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
-                    final Rp rp = rpSyncService.getRp(oxdId);
+                    final Rp rp = rpSyncService.getRp(rpId);
                     if (rp != null) {
                         return new Pair<>(rp, false);
                     }
@@ -102,10 +102,10 @@ public class ValidationService {
         }
         if (params instanceof GetRpParams) {
             GetRpParams p = (GetRpParams) params;
-            String oxdId = p.getOxdId();
-            if (StringUtils.isNotBlank(oxdId) && (p.getList() == null || !p.getList())) {
+            String rpId = p.getRpId();
+            if (StringUtils.isNotBlank(rpId) && (p.getList() == null || !p.getList())) {
                 final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
-                Rp rp = rpSyncService.getRp(oxdId);
+                Rp rp = rpSyncService.getRp(rpId);
                 if (rp != null) {
                     return new Pair<>(rp, true);
                 }
@@ -118,9 +118,9 @@ public class ValidationService {
      * Returns whether has valid token
      *
      * @param accessToken
-     * @param oxdId
+     * @param rpId
      */
-    public void validateAccessToken(String accessToken, String oxdId) {
+    public void validateAccessToken(String accessToken, String rpId) {
 
         if (StringUtils.isBlank(accessToken)) {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
@@ -128,17 +128,17 @@ public class ValidationService {
 
         final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
 
-        final Rp rp = rpSyncService.getRp(oxdId);
+        final Rp rp = rpSyncService.getRp(rpId);
 
-        final IntrospectionResponse introspectionResponse = introspect(accessToken, oxdId);
+        final IntrospectionResponse introspectionResponse = introspect(accessToken, rpId);
 
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", clientId: " + rp.getClientId());
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
-            LOG.error("AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later).");
+            LOG.error("AS returned introspection response with empty/blank client_id which is required by jans_client_api. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later).");
             throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
-        if (!introspectionResponse.getScope().contains("oxd")) {
-            LOG.error("access_token does not have `oxd` scope. Make sure a) scope exists on AS b) register_site is registered with 'oxd' scope c) get_client_token has 'oxd' scope in request");
+        if (!introspectionResponse.getScope().contains("jans_client_api")) {
+            LOG.error("access_token does not have `jans_client_api` scope. Make sure a) scope exists on AS b) register_site is registered with 'jans_client_api' scope c) get_client_token has 'jans_client_api' scope in request");
             throw new HttpException(ErrorResponseCode.ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
@@ -149,19 +149,19 @@ public class ValidationService {
         throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN);
     }
 
-    public IntrospectionResponse introspect(String accessToken, String oxdId) {
+    public IntrospectionResponse introspect(String accessToken, String rpId) {
         if (StringUtils.isBlank(accessToken)) {
             LOG.debug("access_token is blank. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false");
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
         final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
-        final Rp rp = rpSyncService.getRp(oxdId);
+        final Rp rp = rpSyncService.getRp(rpId);
 
         LOG.trace("Introspect token with rp: " + rp);
 
         final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
-        final IntrospectionResponse response = introspectionService.introspectToken(oxdId, accessToken);
+        final IntrospectionResponse response = introspectionService.introspectToken(rpId, accessToken);
 
         if (!response.isActive()) {
             LOG.error("access_token is not active.");
@@ -170,17 +170,17 @@ public class ValidationService {
         return response;
     }
 
-    public void validate(HasOxdIdParams params) {
+    public void validate(HasRpIdParams params) {
         notNull(params);
-        notBlankOxdId(params.getOxdId());
+        notBlankRpId(params.getRpId());
     }
 
     public Rp validate(Rp rp) {
         if (rp == null) {
-            throw new HttpException(ErrorResponseCode.INVALID_OXD_ID);
+            throw new HttpException(ErrorResponseCode.INVALID_RP_ID);
         }
 
-        notBlankOxdId(rp.getOxdId());
+        notBlankRpId(rp.getRpId());
         notBlankOpHost(rp.getOpHost());
         isOpHostAllowed(rp.getOpHost());
         return rp;

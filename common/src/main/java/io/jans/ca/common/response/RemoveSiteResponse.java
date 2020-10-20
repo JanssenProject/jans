@@ -8,21 +8,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class RemoveSiteResponse implements IOpResponse {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    @JsonProperty(value = "rp_id")
+    private String rpId;
 
     public RemoveSiteResponse() {
     }
 
-    public RemoveSiteResponse(String oxdId) {
-        this.oxdId = oxdId;
+    public RemoveSiteResponse(String rpId) {
+        this.rpId = rpId;
     }
 
-    public String getOxdId() {
-        return oxdId;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 }

@@ -11,10 +11,10 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationCodeParams implements HasOxdIdParams {
+public class GetAuthorizationCodeParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "acr_values")
     private List<String> acr_values;
     @JsonProperty(value = "username")
@@ -63,12 +63,12 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
         this.username = username;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public List<String> getAcrValues() {
@@ -92,7 +92,7 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetAuthorizationCodeParams");
         sb.append("{acr_values=").append(acr_values);
-        sb.append(", oxd_id='").append(oxd_id).append('\'');
+        sb.append(", rp_id='").append(rp_id).append('\'');
         sb.append(", username='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", state='").append(state).append('\'');

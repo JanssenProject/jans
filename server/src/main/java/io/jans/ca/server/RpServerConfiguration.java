@@ -9,7 +9,7 @@ import io.dropwizard.Configuration;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OxdServerConfiguration extends Configuration {
+public class RpServerConfiguration extends Configuration {
 
     //@JsonProperty(value = "register_client_app_type")
     private String registerClientAppType = "web";
@@ -85,8 +85,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean enableTracing = false;
     @JsonProperty(value = "proxy_configuration")
     private JsonNode proxyConfiguration;
-    @JsonProperty(value = "protect_commands_with_oxd_id")
-    private List<String> protectCommandsWithOxdId;
+    @JsonProperty(value = "protect_commands_with_rp_id")
+    private List<String> protectCommandsWithRpId;
     @JsonProperty(value = "persistence_manager_remove_count")
     private int persistenceManagerRemoveCount = 1000;
     @JsonProperty(value = "bind_ip_addresses")
@@ -368,12 +368,12 @@ public class OxdServerConfiguration extends Configuration {
         this.validateUserInfoWithIdToken = validateUserInfoWithIdToken;
     }
 
-    public List<String> getProtectCommandsWithOxdId() {
-        return protectCommandsWithOxdId;
+    public List<String> getProtectCommandsWithRpId() {
+        return protectCommandsWithRpId;
     }
 
-    public void setProtectCommandsWithOxdId(List<String> protectCommandsWithOxdId) {
-        this.protectCommandsWithOxdId = protectCommandsWithOxdId;
+    public void setProtectCommandsWithRpId(List<String> protectCommandsWithRpId) {
+        this.protectCommandsWithRpId = protectCommandsWithRpId;
     }
 
     public int getPersistenceManagerRemoveCount() {
@@ -514,7 +514,7 @@ public class OxdServerConfiguration extends Configuration {
 
     @Override
     public String toString() {
-        return "OxdServerConfiguration{" +
+        return "RpServerConfiguration{" +
                 ", registerClientAppType='" + registerClientAppType + '\'' +
                 ", registerClientResponesType='" + registerClientResponesType + '\'' +
                 ", useClientAuthenticationForPat=" + useClientAuthenticationForPat +
@@ -543,7 +543,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", idTokenValidationCHashRequired=" + idTokenValidationCHashRequired + '\'' +
                 ", idTokenValidationAtHashRequired=" + idTokenValidationAtHashRequired + '\'' +
                 ", validateUserInfoWithIdToken=" + validateUserInfoWithIdToken + '\'' +
-                ", protectCommandsWithOxdId=" + protectCommandsWithOxdId + '\'' +
+                ", protectCommandsWithRpId=" + protectCommandsWithRpId + '\'' +
                 ", persistenceManagerRemoveCount=" + persistenceManagerRemoveCount + '\'' +
                 ", bindIpAddresses=" + bindIpAddresses + '\'' +
                 ", enableJwksGeneration=" + enableJwksGeneration + '\'' +

@@ -273,16 +273,16 @@ public class RegisterResponseMapper {
         return rpFromRegisterResponse;
     }
 
-    public static boolean isListsEqualIgnoringOrder(List<String> oxdRp, List<String> oxAuthRp) {
-        if (oxdRp == null || oxdRp.isEmpty()) {
-            return oxAuthRp == null || oxAuthRp.isEmpty();
-        } else if (oxAuthRp != null) {
-            return new HashSet<>(oxdRp).equals(new HashSet<>(oxAuthRp));
+    public static boolean isListsEqualIgnoringOrder(List<String> rps, List<String> rpFromOP) {
+        if (rps == null || rps.isEmpty()) {
+            return rpFromOP == null || rpFromOP.isEmpty();
+        } else if (rpFromOP != null) {
+            return new HashSet<>(rps).equals(new HashSet<>(rpFromOP));
         }
         return false;
     }
 
-    public static boolean isJsonStringEqual(String oxdParam, String oxAuthparam) throws IOException {
-        return Strings.isNullOrEmpty(oxdParam) ? Strings.isNullOrEmpty(oxAuthparam) : Jackson2.createJsonMapperWithoutEmptyAttributes().readTree(oxdParam).equals(Jackson2.createJsonMapperWithoutEmptyAttributes().readTree(oxAuthparam));
+    public static boolean isJsonStringEqual(String rpParam, String rpFormOPparam) throws IOException {
+        return Strings.isNullOrEmpty(rpParam) ? Strings.isNullOrEmpty(rpFormOPparam) : Jackson2.createJsonMapperWithoutEmptyAttributes().readTree(rpParam).equals(Jackson2.createJsonMapperWithoutEmptyAttributes().readTree(rpFormOPparam));
     }
 }

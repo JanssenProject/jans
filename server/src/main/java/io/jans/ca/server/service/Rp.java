@@ -17,8 +17,8 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Rp implements Serializable {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    @JsonProperty(value = "rp_id")
+    private String rpId;
     @JsonProperty(value = "op_host")
     private String opHost;
     @JsonProperty(value = "op_discovery_path")
@@ -113,8 +113,8 @@ public class Rp implements Serializable {
     private Date rptExpiresAt;
     @JsonProperty(value = "rpt_created_at")
     private Date rptCreatedAt;
-    @JsonProperty(value = "oxd_rp_programming_language")
-    private String oxdRpProgrammingLanguage;
+    @JsonProperty(value = "rp_programming_language")
+    private String rpProgrammingLanguage;
     @JsonProperty(value = "access_token_as_jwt")
     private Boolean accessTokenAsJwt = false;
     @JsonProperty(value = "access_token_signing_alg")
@@ -196,7 +196,7 @@ public class Rp implements Serializable {
     }
 
     public Rp(Rp conf) {
-        this.oxdId = conf.oxdId;
+        this.rpId = conf.rpId;
 
         this.opHost = conf.opHost;
         this.opDiscoveryPath = conf.opDiscoveryPath;
@@ -255,7 +255,7 @@ public class Rp implements Serializable {
         this.rptAsJwt = conf.rptAsJwt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
-        this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
+        this.rpProgrammingLanguage = conf.rpProgrammingLanguage;
         this.accessTokenAsJwt = conf.accessTokenAsJwt;
         this.accessTokenSigningAlg = conf.accessTokenSigningAlg;
         this.frontChannelLogoutSessionRequired = conf.frontChannelLogoutSessionRequired;
@@ -336,7 +336,7 @@ public class Rp implements Serializable {
     }
 
     public MinimumRp asMinimumRp() {
-        return new MinimumRp(oxdId, clientName);
+        return new MinimumRp(rpId, clientName);
     }
 
     public String getTokenEndpointAuthMethod() {
@@ -591,12 +591,12 @@ public class Rp implements Serializable {
         this.grantType = grantType;
     }
 
-    public String getOxdId() {
-        return oxdId;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 
     public String getOpHost() {
@@ -696,12 +696,12 @@ public class Rp implements Serializable {
         this.umaProtectedResources = umaProtectedResources;
     }
 
-    public String getOxdRpProgrammingLanguage() {
-        return oxdRpProgrammingLanguage;
+    public String getRpProgrammingLanguage() {
+        return rpProgrammingLanguage;
     }
 
-    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
-        this.oxdRpProgrammingLanguage = oxdRpProgrammingLanguage;
+    public void setRpProgrammingLanguage(String rpProgrammingLanguage) {
+        this.rpProgrammingLanguage = rpProgrammingLanguage;
     }
 
     public String getRpt() {
@@ -1049,7 +1049,7 @@ public class Rp implements Serializable {
     @Override
     public String toString() {
         return "Rp{" +
-                "oxdId='" + oxdId + '\'' +
+                "rpId='" + rpId + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
                 ", opConfigurationEndpoint='" + opConfigurationEndpoint + '\'' +
@@ -1097,7 +1097,7 @@ public class Rp implements Serializable {
                 ", rptAsJwt='" + rptAsJwt + '\'' +
                 ", tokenEndpointAuthSigningAlg='" + tokenEndpointAuthSigningAlg + '\'' +
                 ", tokenEndpointAuthMethod='" + tokenEndpointAuthMethod + '\'' +
-                ", oxdRpProgrammingLanguage='" + oxdRpProgrammingLanguage + '\'' +
+                ", rpProgrammingLanguage='" + rpProgrammingLanguage + '\'' +
                 ", accessTokenAsJwt='" + accessTokenAsJwt + '\'' +
                 ", accessTokenSigningAlg='" + accessTokenSigningAlg + '\'' +
                 ", frontChannelLogoutSessionRequired='" + frontChannelLogoutSessionRequired + '\'' +

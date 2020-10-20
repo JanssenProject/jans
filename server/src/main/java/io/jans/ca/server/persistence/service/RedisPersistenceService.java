@@ -5,7 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.service.MigrationService;
 import io.jans.ca.server.service.Rp;
 import io.jans.service.cache.AbstractRedisProvider;
@@ -24,10 +24,10 @@ public class RedisPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisPersistenceService.class);
 
-    private final OxdServerConfiguration configuration;
+    private final RpServerConfiguration configuration;
     private AbstractRedisProvider redisProvider;
 
-    public RedisPersistenceService(OxdServerConfiguration configuration) {
+    public RedisPersistenceService(RpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -49,7 +49,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean create(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
+            put(rp.getRpId(), Jackson2.serializeWithoutNulls(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
@@ -87,7 +87,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean update(Rp rp) {
         try {
-            put(rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
+            put(rp.getRpId(), Jackson2.serializeWithoutNulls(rp));
             return true;
         } catch (IOException e) {
             LOG.error("Failed to create RP: " + rp, e);
@@ -96,8 +96,8 @@ public class RedisPersistenceService implements PersistenceService {
     }
 
     @Override
-    public Rp getRp(String oxdId) {
-        return MigrationService.parseRp(get(oxdId));
+    public Rp getRp(String rpId) {
+        return MigrationService.parseRp(get(rpId));
     }
 
     public ExpiredObject getExpiredObject(String key) {
@@ -142,8 +142,8 @@ public class RedisPersistenceService implements PersistenceService {
     }
 
     @Override
-    public boolean remove(String oxdId) {
-        redisProvider.remove(oxdId);
+    public boolean remove(String rpId) {
+        redisProvider.remove(rpId);
         return true;
     }
 
@@ -177,7 +177,7 @@ public class RedisPersistenceService implements PersistenceService {
         return (String) redisProvider.get(key);
     }
 
-    public static RedisConfiguration asRedisConfiguration(OxdServerConfiguration configuration) throws Exception {
+    public static RedisConfiguration asRedisConfiguration(RpServerConfiguration configuration) throws Exception {
         return asRedisConfiguration(Jackson2.asOldNode(configuration.getStorageConfiguration()));
     }
 

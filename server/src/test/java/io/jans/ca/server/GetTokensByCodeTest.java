@@ -174,8 +174,8 @@ public class GetTokensByCodeTest {
 
         // refresh token
         final GetAccessTokenByRefreshTokenParams refreshParams = new GetAccessTokenByRefreshTokenParams();
-        refreshParams.setOxdId(site.getOxdId());
-        refreshParams.setScope(Lists.newArrayList("openid", "oxd"));
+        refreshParams.setRpId(site.getRpId());
+        refreshParams.setScope(Lists.newArrayList("openid", "jans_client_api"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
         GetClientTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(Tester.getAuthorization(site), null, refreshParams);
@@ -194,20 +194,20 @@ public class GetTokensByCodeTest {
 
         RegisterSiteResponse authServer = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         String accessToken = Tester.getAuthorization(authServer);
-        String authorizationOxdId = authServer.getOxdId();
+        String authorizationRpId = authServer.getRpId();
 
-        String code = codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, accessToken, authorizationOxdId);
+        String code = codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, accessToken, authorizationRpId);
 
         notEmpty(code);
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setCode(code);
         params.setState(state);
         params.setAuthenticationMethod(authenticationMethod);
         params.setAlgorithm(algorithm);
 
-        final GetTokensByCodeResponse2 resp = client.getTokenByCode(accessToken, authorizationOxdId, params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(accessToken, authorizationRpId, params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -218,14 +218,14 @@ public class GetTokensByCodeTest {
     public static GetTokensByCodeResponse2 tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
-        //codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce);
+        //codeRequest(client, site.getRpId(), userId, userSecret, state, nonce);
 
         final String code = CoreUtils.secureRandomString();
 
-        String testOxdId = site.getOxdId();
+        String testRpId = site.getRpId();
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(testOxdId);
+        params.setRpId(testRpId);
         params.setCode(code);
         params.setState(state);
 
@@ -249,16 +249,16 @@ public class GetTokensByCodeTest {
         return codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
     }
 
-    public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, String accessToken, String authorizationOxdId) {
+    public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, String accessToken, String authorizationRpId) {
         SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setUsername(userId);
         params.setPassword(userSecret);
         params.setState(state);
         params.setNonce(nonce);
         accessToken = Strings.isNullOrEmpty(accessToken) ? Tester.getAuthorization(site) : accessToken;
 
-        return client.getAuthorizationCode(accessToken, authorizationOxdId, params).getCode();
+        return client.getAuthorizationCode(accessToken, authorizationRpId, params).getCode();
     }
 }

@@ -7,10 +7,10 @@ import com.google.common.base.Strings;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsModifyParams implements HasOxdIdParams {
+public class RsModifyParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty("path")
     String path;
     @JsonProperty("http_method")
@@ -20,12 +20,12 @@ public class RsModifyParams implements HasOxdIdParams {
     @JsonProperty("scope_expression")
     String scopeExpression;
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getPath() {
@@ -64,7 +64,7 @@ public class RsModifyParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsModifyParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", path=").append(path);
         sb.append(", httpMethod=").append(httpMethod);
         sb.append(", scopes=").append(scopes);

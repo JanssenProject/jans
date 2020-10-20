@@ -14,10 +14,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthorizationCodeFlowParams implements HasOxdIdParams {
+public class AuthorizationCodeFlowParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "redirect_url")
     private String redirect_url;
     @JsonProperty(value = "client_id")
@@ -38,12 +38,12 @@ public class AuthorizationCodeFlowParams implements HasOxdIdParams {
     public AuthorizationCodeFlowParams() {
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getAcr() {
@@ -119,7 +119,7 @@ public class AuthorizationCodeFlowParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("AuthorizationCodeFlowParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", redirect_url='").append(redirect_url).append('\'');
         sb.append(", client_id='").append(client_id).append('\'');
         sb.append(", user_id='").append(user_id).append('\'');

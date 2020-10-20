@@ -31,7 +31,7 @@ public class GetLogoutUrlTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "", false);
 
         final GetLogoutUrlParams params = new GetLogoutUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setIdTokenHint("dummy_token");
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setState(UUID.randomUUID().toString());
