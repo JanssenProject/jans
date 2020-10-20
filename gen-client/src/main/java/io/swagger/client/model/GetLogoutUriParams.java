@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,8 +27,8 @@ import java.io.IOException;
 
 
 public class GetLogoutUriParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("id_token_hint")
   private String idTokenHint = null;
@@ -42,22 +42,22 @@ public class GetLogoutUriParams {
   @SerializedName("session_state")
   private String sessionState = null;
 
-  public GetLogoutUriParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public GetLogoutUriParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public GetLogoutUriParams idTokenHint(String idTokenHint) {
@@ -134,7 +134,7 @@ public class GetLogoutUriParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -142,7 +142,7 @@ public class GetLogoutUriParams {
       return false;
     }
     GetLogoutUriParams getLogoutUriParams = (GetLogoutUriParams) o;
-    return Objects.equals(this.oxdId, getLogoutUriParams.oxdId) &&
+    return Objects.equals(this.rpId, getLogoutUriParams.rpId) &&
         Objects.equals(this.idTokenHint, getLogoutUriParams.idTokenHint) &&
         Objects.equals(this.postLogoutRedirectUri, getLogoutUriParams.postLogoutRedirectUri) &&
         Objects.equals(this.state, getLogoutUriParams.state) &&
@@ -151,7 +151,7 @@ public class GetLogoutUriParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, idTokenHint, postLogoutRedirectUri, state, sessionState);
+    return Objects.hash(rpId, idTokenHint, postLogoutRedirectUri, state, sessionState);
   }
 
 
@@ -160,7 +160,7 @@ public class GetLogoutUriParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetLogoutUriParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    idTokenHint: ").append(toIndentedString(idTokenHint)).append("\n");
     sb.append("    postLogoutRedirectUri: ").append(toIndentedString(postLogoutRedirectUri)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
@@ -173,7 +173,7 @@ public class GetLogoutUriParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

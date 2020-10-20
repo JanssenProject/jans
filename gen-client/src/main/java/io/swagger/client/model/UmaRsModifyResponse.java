@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,30 +27,30 @@ import java.io.IOException;
 
 
 public class UmaRsModifyResponse {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
-  public UmaRsModifyResponse oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public UmaRsModifyResponse rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -58,12 +58,12 @@ public class UmaRsModifyResponse {
       return false;
     }
     UmaRsModifyResponse umaRsModifyResponse = (UmaRsModifyResponse) o;
-    return Objects.equals(this.oxdId, umaRsModifyResponse.oxdId);
+    return Objects.equals(this.rpId, umaRsModifyResponse.rpId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId);
+    return Objects.hash(rpId);
   }
 
 
@@ -72,7 +72,7 @@ public class UmaRsModifyResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRsModifyResponse {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -81,7 +81,7 @@ public class UmaRsModifyResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

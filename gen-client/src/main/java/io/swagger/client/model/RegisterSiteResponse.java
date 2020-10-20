@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,8 +27,8 @@ import java.io.IOException;
 
 
 public class RegisterSiteResponse {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("op_host")
   private String opHost = null;
@@ -54,22 +54,22 @@ public class RegisterSiteResponse {
   @SerializedName("client_secret_expires_at")
   private Integer clientSecretExpiresAt = null;
 
-  public RegisterSiteResponse oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public RegisterSiteResponse rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public RegisterSiteResponse opHost(String opHost) {
@@ -218,7 +218,7 @@ public class RegisterSiteResponse {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -226,7 +226,7 @@ public class RegisterSiteResponse {
       return false;
     }
     RegisterSiteResponse registerSiteResponse = (RegisterSiteResponse) o;
-    return Objects.equals(this.oxdId, registerSiteResponse.oxdId) &&
+    return Objects.equals(this.rpId, registerSiteResponse.rpId) &&
         Objects.equals(this.opHost, registerSiteResponse.opHost) &&
         Objects.equals(this.clientId, registerSiteResponse.clientId) &&
         Objects.equals(this.clientName, registerSiteResponse.clientName) &&
@@ -239,7 +239,7 @@ public class RegisterSiteResponse {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, opHost, clientId, clientName, clientSecret, clientRegistrationAccessToken, clientRegistrationClientUri, clientIdIssuedAt, clientSecretExpiresAt);
+    return Objects.hash(rpId, opHost, clientId, clientName, clientSecret, clientRegistrationAccessToken, clientRegistrationClientUri, clientIdIssuedAt, clientSecretExpiresAt);
   }
 
 
@@ -248,7 +248,7 @@ public class RegisterSiteResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegisterSiteResponse {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
     sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
     sb.append("    clientName: ").append(toIndentedString(clientName)).append("\n");
@@ -265,7 +265,7 @@ public class RegisterSiteResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

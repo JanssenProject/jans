@@ -29,7 +29,7 @@ tracer: 'jaeger'
 tracer_host: 'localhost'
 tracer_port: 5775
 storage_configuration:
-  dbFileLocation: "./oxd_db"
+  dbFileLocation: "./rp_db"
 
 # Connectors
 server:
