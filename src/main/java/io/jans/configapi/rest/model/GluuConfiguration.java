@@ -21,7 +21,7 @@ import java.util.Date;
  * @author Yuriy Zabrovarnyy
  */
 @DataEntry
-@ObjectClass(value = "gluuConfiguration")
+@ObjectClass(value = "jansConf")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuConfiguration extends InumEntry implements Serializable {
 
