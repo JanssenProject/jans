@@ -20,7 +20,7 @@ public class UmaSpontaneousScopeTest {
     @Parameters({"host", "opHost", "paramRedirectUrl", "userId", "userSecret", "rsProtectWithSpontaneousScope"})
     @Test
     public void init(String host, String opHost, String paramRedirectUrl, String userId, String userSecret, String rsProtectWithSpontaneousScope) throws Exception {
-        List<String> scopes = Lists.newArrayList("openid", "uma_protection", "profile", "address", "email", "phone", "user_name", "oxd");
+        List<String> scopes = Lists.newArrayList("openid", "uma_protection", "profile", "address", "email", "phone", "user_name", "jans_client_api");
         List<String> responseTypes = Lists.newArrayList("code", "id_token", "token");
         //register client
         ClientInterface client = Tester.newClient(host);
@@ -31,7 +31,7 @@ public class UmaSpontaneousScopeTest {
         RpGetRptResponse response = RpGetRptTest.requestRpt(client, registerResponse, rsProtectWithSpontaneousScope);
         //UMA Introspect RPT
         IntrospectRptParams params = new IntrospectRptParams();
-        params.setOxdId(registerResponse.getOxdId());
+        params.setRpId(registerResponse.getRpId());
         params.setRpt(response.getRpt());
 
         final CorrectRptIntrospectionResponse rptIntrospectionResponse = client.introspectRpt(Tester.getAuthorization(registerResponse), null, params);

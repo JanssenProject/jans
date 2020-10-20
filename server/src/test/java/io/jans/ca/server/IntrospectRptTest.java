@@ -27,7 +27,7 @@ public class IntrospectRptTest {
         final RpGetRptResponse rptResponse = RpGetRptTest.requestRpt(client, site, rsProtect);
 
         IntrospectRptParams params = new IntrospectRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setRpt(rptResponse.getRpt());
 
         final CorrectRptIntrospectionResponse response = client.introspectRpt(Tester.getAuthorization(site), null, params);

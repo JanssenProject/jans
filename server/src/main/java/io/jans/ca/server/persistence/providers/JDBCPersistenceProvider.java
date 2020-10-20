@@ -3,7 +3,7 @@ package io.jans.ca.server.persistence.providers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.configuration.JDBCConfiguration;
 import io.jans.ca.server.service.ConfigurationService;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -61,14 +61,14 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
         return dataSource.getConnection();
     }
 
-    public static JDBCConfiguration asJDBCConfiguration(OxdServerConfiguration configuration) throws Exception {
+    public static JDBCConfiguration asJDBCConfiguration(RpServerConfiguration configuration) throws Exception {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
                 return Jackson2.createJsonMapper().treeToValue(node, JDBCConfiguration.class);
             }
             LOG.error("JDBC Configuration not provided.");
-            throw new Exception("JDBC configuration not provided in `client-api-server.yml`.");
+            throw new Exception("JDBC configuration not provided in `jans-client-api.yml`.");
         } catch (Exception e) {
             LOG.error("Failed to parse JDBCConfiguration.", e);
             throw e;

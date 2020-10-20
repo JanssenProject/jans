@@ -3,7 +3,7 @@ package io.jans.ca.server.persistence.providers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.configuration.H2Configuration;
 import io.jans.ca.server.service.ConfigurationService;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -46,7 +46,7 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
         return pool.getConnection();
     }
 
-    public static H2Configuration asH2Configuration(OxdServerConfiguration configuration) {
+    public static H2Configuration asH2Configuration(RpServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
@@ -60,11 +60,11 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
 
     public void setDefaultUsernamePasswordIfEmpty(H2Configuration h2Configuration) {
         if (Strings.isNullOrEmpty(h2Configuration.getUsername())) {
-            h2Configuration.setUsername("oxd");
+            h2Configuration.setUsername("jans_client_api");
         }
 
         if (Strings.isNullOrEmpty(h2Configuration.getPassword())) {
-            h2Configuration.setPassword("oxd");
+            h2Configuration.setPassword("jans_client_api");
         }
     }
 }

@@ -32,7 +32,7 @@ public class GoogleTest {
 //        ClientInterface client = Tester.newClient(HOST);
 //
 //        final RegisterSiteResponse site = registerSite(client);
-//        final String authorizationUrl = getAuthorizationUrl(client, site.getOxdId());
+//        final String authorizationUrl = getAuthorizationUrl(client, site.getRpId());
 
         // after successful login get redirect with code
         // https://mytestproduct.com/?state=af0ifjsldkj&code=4/2I5U130cxs7MObKVniVseBQkHQ0JQS0p5JfZm7NgZ-M&authuser=0&session_state=02bd0461002924877bee444d9dfd9f1279e44335..ae63&prompt=consent#
@@ -41,7 +41,7 @@ public class GoogleTest {
 //        String code = "4/nWqDxBS-c7MDN_1Gq2WtW2L6B9KnA5rpOOYzGEdg7lM";
 //
 //        final GetTokensByCodeParams params = new GetTokensByCodeParams();
-//        params.setOxdId(site.getOxdId());
+//        params.setRpId(site.getRpId());
 //        params.setCode(code);
 //
 //        final GetTokensByCodeResponse resp = client.getTokenByCode(Tester.getAuthorization(), params);
@@ -50,7 +50,7 @@ public class GoogleTest {
 
     private static String getAuthorizationUrl(ClientInterface client, RegisterSiteResponse site) {
         final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
@@ -69,7 +69,7 @@ public class GoogleTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 }

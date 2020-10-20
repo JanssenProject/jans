@@ -28,14 +28,14 @@ public class GetRequestUriTest {
         JsonNode jwks = client.getRpJwks();
         //update jwks in OP
         UpdateSiteParams updateSiteParams = new UpdateSiteParams();
-        updateSiteParams.setOxdId(site.getOxdId());
+        updateSiteParams.setRpId(site.getRpId());
         updateSiteParams.setJwks(jwks.asText());
         updateSiteParams.setRequestObjectSigningAlg("RS256");
         client.updateSite(Tester.getAuthorization(site), null, updateSiteParams);
         //Request uri
         GetRequestObjectUriParams getRequestUriParams = new GetRequestObjectUriParams();
-        getRequestUriParams.setOxdId(site.getOxdId());
-        getRequestUriParams.setOxdHostUrl("http://localhost" + ":" + SetUpTest.SUPPORT.getLocalPort());
+        getRequestUriParams.setRpId(site.getRpId());
+        getRequestUriParams.setRpHostUrl("http://localhost" + ":" + SetUpTest.SUPPORT.getLocalPort());
         GetRequestObjectUriResponse getRequestUriResponse = client.getRequestObjectUri(Tester.getAuthorization(site), null, getRequestUriParams);
         assertNotNull(getRequestUriResponse.getRequestUri());
         //Get Request object
@@ -46,7 +46,7 @@ public class GetRequestUriTest {
         paramsMap.put("request", requestObject);
 
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setParams(paramsMap);
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, commandParams);
         assertNotNull(resp);

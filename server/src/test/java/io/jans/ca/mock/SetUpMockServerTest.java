@@ -2,7 +2,7 @@ package io.jans.ca.mock;
 
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.jans.ca.mock.guice.MockAppModule;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.ServerLauncher;
 import io.jans.ca.server.SetUpTest;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ public class SetUpMockServerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpMockServerTest.class);
 
-    public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
+    public static DropwizardTestSupport<RpServerConfiguration> SUPPORT = null;
 
 
     @Parameters({"host", "opHost", "redirectUrls"})

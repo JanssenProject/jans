@@ -101,7 +101,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("insert into rp(id, data) values(?, ?)");
-            query.setString(1, rp.getOxdId());
+            query.setString(1, rp.getRpId());
             query.setString(2, Jackson2.serializeWithoutNulls(rp));
             query.executeUpdate();
             query.close();
@@ -125,7 +125,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn.setAutoCommit(false);
             PreparedStatement query = conn.prepareStatement("update rp set data = ? where id = ?");
             query.setString(1, Jackson2.serializeWithoutNulls(rp));
-            query.setString(2, rp.getOxdId());
+            query.setString(2, rp.getRpId());
             query.executeUpdate();
             query.close();
 
@@ -141,14 +141,14 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         }
     }
 
-    public Rp getRp(String oxdId) {
+    public Rp getRp(String rpId) {
         Connection conn = null;
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
             PreparedStatement query = conn.prepareStatement("select id, data from rp where id = ?");
-            query.setString(1, oxdId);
+            query.setString(1, rpId);
             ResultSet rs = query.executeQuery();
 
             rs.next();
@@ -158,14 +158,14 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
             Rp rp = MigrationService.parseRp(data);
             if (rp != null) {
-                LOG.debug("Found RP id: " + oxdId + ", RP : " + rp);
+                LOG.debug("Found RP id: " + rpId + ", RP : " + rp);
                 return rp;
             } else {
-                LOG.error("Failed to fetch RP by id: " + oxdId);
+                LOG.error("Failed to fetch RP by id: " + rpId);
                 return null;
             }
         } catch (Exception e) {
-            LOG.error("Failed to find RP by id: " + oxdId + ". Error: " + e.getMessage(), e);
+            LOG.error("Failed to find RP by id: " + rpId + ". Error: " + e.getMessage(), e);
             rollbackSilently(conn);
             return null;
         } finally {
@@ -281,22 +281,22 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public boolean remove(String oxdId) {
+    public boolean remove(String rpId) {
         Connection conn = null;
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
             PreparedStatement query = conn.prepareStatement("delete from rp where id = ?");
-            query.setString(1, oxdId);
+            query.setString(1, rpId);
             query.executeUpdate();
             query.close();
 
             conn.commit();
-            LOG.debug("Removed rp successfully. oxdId: " + oxdId);
+            LOG.debug("Removed rp successfully. rpId: " + rpId);
             return true;
         } catch (Exception e) {
-            LOG.error("Failed to remove rp with oxdId: " + oxdId, e);
+            LOG.error("Failed to remove rp with rpId: " + rpId, e);
             rollbackSilently(conn);
             return false;
         } finally {

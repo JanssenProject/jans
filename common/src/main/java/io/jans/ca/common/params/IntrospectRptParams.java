@@ -7,20 +7,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IntrospectRptParams implements HasOxdIdParams {
+public class IntrospectRptParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "rpt")
     private String rpt;
 
     @Override
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getRpt() {

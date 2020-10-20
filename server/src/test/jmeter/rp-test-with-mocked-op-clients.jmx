@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="OXD Code Flow" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="jans_client_api Code Flow" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
@@ -17,13 +17,13 @@
             <stringProp name="Argument.value">http://client.example.com/cb/home</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="oxd_host" elementType="Argument">
-            <stringProp name="Argument.name">oxd_host</stringProp>
+          <elementProp name="rp_host" elementType="Argument">
+            <stringProp name="Argument.name">rp_host</stringProp>
             <stringProp name="Argument.value">localhost</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="oxd_port" elementType="Argument">
-            <stringProp name="Argument.name">oxd_port</stringProp>
+          <elementProp name="rp_port" elementType="Argument">
+            <stringProp name="Argument.name">rp_port</stringProp>
             <stringProp name="Argument.value">8443</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -81,8 +81,8 @@
         <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
           <collectionProp name="Arguments.arguments"/>
         </elementProp>
-        <stringProp name="HTTPSampler.domain">${oxd_host}</stringProp>
-        <stringProp name="HTTPSampler.port">${oxd_port}</stringProp>
+        <stringProp name="HTTPSampler.domain">${rp_host}</stringProp>
+        <stringProp name="HTTPSampler.port">${rp_port}</stringProp>
         <stringProp name="HTTPSampler.protocol">http</stringProp>
         <stringProp name="HTTPSampler.contentEncoding"></stringProp>
         <stringProp name="HTTPSampler.path"></stringProp>
@@ -207,9 +207,9 @@
               <stringProp name="filename"></stringProp>
             </ResultCollector>
             <hashTree/>
-            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor: oxd_id" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">oxd_id</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">oxd_id</stringProp>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor: rp_id" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">rp_id</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">rp_id</stringProp>
               <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
             </JSONPostProcessor>
             <hashTree/>
@@ -231,7 +231,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
+	&quot;rp_id&quot; : &quot;${rp_id}&quot;,&#xd;
 	&quot;username&quot; : &quot;${username}&quot;,&#xd;
 	&quot;password&quot; : &quot;${password}&quot;,&#xd;
 	&quot;state&quot; : &quot;${state}${session_state_counter}&quot;,&#xd;
@@ -316,7 +316,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
+	&quot;rp_id&quot; : &quot;${rp_id}&quot;,&#xd;
 	&quot;code&quot; : &quot;${code}&quot;,&#xd;
 	&quot;state&quot; : &quot;${state}${session_state_counter}&quot;&#xd;
 }&#xd;
@@ -398,7 +398,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-  &quot;oxd_id&quot;: &quot;${oxd_id}&quot;,&#xd;
+  &quot;rp_id&quot;: &quot;${rp_id}&quot;,&#xd;
   &quot;access_token&quot;: &quot;${access_token}&quot;&#xd;
 }</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
@@ -472,7 +472,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-  &quot;oxd_id&quot;: &quot;${oxd_id}&quot;,&#xd;
+  &quot;rp_id&quot;: &quot;${rp_id}&quot;,&#xd;
   &quot;id_token_hint&quot;: &quot;${id_token_hint}&quot;,&#xd;
   &quot;post_logout_redirect_uri&quot;: &quot;${post_logout_redirect_uri}&quot;,&#xd;
   &quot;session_state&quot;: &quot;${session_state}&quot;,&#xd;
@@ -819,15 +819,15 @@
               <stringProp name="filename"></stringProp>
             </ResultCollector>
             <hashTree/>
-            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor: oxd_id" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">oxd_id</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">oxd_id</stringProp>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor: rp_id" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">rp_id</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">rp_id</stringProp>
               <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
             </JSONPostProcessor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="-1003235265">oxd_id</stringProp>
+                <stringProp name="-1003235265">rp_id</stringProp>
               </collectionProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
               <boolProp name="Assertion.assume_success">false</boolProp>
@@ -843,7 +843,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
+	&quot;rp_id&quot; : &quot;${rp_id}&quot;,&#xd;
 	&quot;resources&quot; : ${resources},&#xd;
 	&quot;overwrite&quot; : true&#xd;
 }&#xd;
@@ -920,7 +920,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
+	&quot;rp_id&quot; : &quot;${rp_id}&quot;,&#xd;
 	&quot;rpt&quot; : &quot;dummy&quot;,&#xd;
 	&quot;path&quot; : &quot;/ws/phone&quot;,&#xd;
 	&quot;http_method&quot; : &quot;GET&quot;&#xd;
@@ -1003,7 +1003,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-  &quot;oxd_id&quot;: &quot;${oxd_id}&quot;,&#xd;
+  &quot;rp_id&quot;: &quot;${rp_id}&quot;,&#xd;
   &quot;ticket&quot;: &quot;${ticket}&quot;&#xd;
 }</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
@@ -1077,7 +1077,7 @@
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-  &quot;oxd_id&quot;: &quot;${oxd_id}&quot;,&#xd;
+  &quot;rp_id&quot;: &quot;${rp_id}&quot;,&#xd;
   &quot;ticket&quot;: &quot;${uma_ticket}&quot;,&#xd;
   &quot;claims_redirect_uri&quot; : &quot;${claims_redirect_uri}&quot;&#xd;
 }</stringProp>

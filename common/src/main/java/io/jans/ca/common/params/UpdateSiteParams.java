@@ -12,10 +12,10 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UpdateSiteParams implements HasOxdIdParams {
+public class UpdateSiteParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "post_logout_redirect_uris")
     private List<String> post_logout_redirect_uris;
 
@@ -160,12 +160,12 @@ public class UpdateSiteParams implements HasOxdIdParams {
         this.client_sector_identifier_uri = clientSectorIdentifierUri;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getClientFrontchannelLogoutUri() {
@@ -873,7 +873,7 @@ public class UpdateSiteParams implements HasOxdIdParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("UpdateSiteParams");
         sb.append("{acr_values=").append(acr_values);
-        sb.append(", oxd_id='").append(oxd_id).append('\'');
+        sb.append(", rp_id='").append(rp_id).append('\'');
         sb.append(", post_logout_redirect_uris='").append(post_logout_redirect_uris).append('\'');
         sb.append(", redirect_uris=").append(redirect_uris);
         sb.append(", response_types=").append(response_types);

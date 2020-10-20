@@ -12,13 +12,8 @@ import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
 import io.dropwizard.jetty.HttpsConnectorFactory;
 import io.dropwizard.server.DefaultServerFactory;
-import org.apache.commons.cli.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import io.jans.ca.client.ClientInterface;
-import io.jans.ca.client.OxdClient;
+import io.jans.ca.client.RpClient;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetRpParams;
 import io.jans.ca.common.params.RemoveSiteParams;
@@ -30,6 +25,11 @@ import io.jans.ca.server.service.Rp;
 import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.service.RpSyncService;
 import io.jans.util.Pair;
+import org.apache.commons.cli.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.BadRequestException;
@@ -48,16 +48,16 @@ public class Cli {
     public static void main(String[] args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
-        String oxdId;
+        String rpId;
         switchOffLogging();
         try {
             cmd = parser.parse(options(), args);
 
-            oxdId = cmd.getOptionValue("oxd_id");
+            rpId = cmd.getOptionValue("rp_id");
 
             Injector injector = ServerLauncher.getInjector();
 
-            final OxdServerConfiguration conf = parseConfiguration(cmd.getOptionValue("c"));
+            final RpServerConfiguration conf = parseConfiguration(cmd.getOptionValue("c"));
             injector.getInstance(ConfigurationService.class).setConfiguration(conf);
             injector.getInstance(PersistenceService.class).create();
 
@@ -82,16 +82,16 @@ public class Cli {
                     return;
                 }
 
-                System.out.println("oxd_id                                client_name");
+                System.out.println("rp_id                                client_name");
                 for (Rp rp : values) {
-                    System.out.println(String.format("%s  %s", rp.getOxdId(), rp.getClientName() != null ? rp.getClientName() : ""));
+                    System.out.println(String.format("%s  %s", rp.getRpId(), rp.getClientName() != null ? rp.getClientName() : ""));
                 }
                 return;
             }
 
             // view by oxd_id
-            if (cmd.hasOption("oxd_id")) {
-                print(oxdId, rpSyncService.getRp(oxdId));
+            if (cmd.hasOption("rp_id")) {
+                print(rpId, rpSyncService.getRp(rpId));
                 return;
             }
 
@@ -113,18 +113,18 @@ public class Cli {
         } catch (RuntimeException e) {
             // oxd is running and keeps h2 database locked, so we connect to oxd-server and fetch RP via client connection
             if (cmd != null) {
-                tryToConnectToRunningOxd(cmd);
+                tryToConnectToRunningRp(cmd);
             } else {
                 printHelpAndExit();
             }
         } catch (Throwable e) {
-            System.out.println("Failed to run oxd CLI (make sure oxd-server was run at least one time and database file is created). Error: " + e.getMessage());
+            System.out.println("Failed to run jans_client_api CLI (make sure jans_client_api was run at least one time and database file is created). Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    private static OxdServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+    private static RpServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
         if (StringUtils.isBlank(pathToYaml)) {
             System.out.println("Path to yml configuration file is not specified. Exit!");
             System.exit(1);
@@ -135,8 +135,8 @@ public class Cli {
             System.exit(1);
         }
 
-        DefaultConfigurationFactoryFactory<OxdServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
-        ConfigurationFactory<OxdServerConfiguration> configurationFactory = configurationFactoryFactory.create(OxdServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
+        DefaultConfigurationFactoryFactory<RpServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
+        ConfigurationFactory<RpServerConfiguration> configurationFactory = configurationFactoryFactory.create(RpServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
         return configurationFactory.build(file);
     }
 
@@ -157,7 +157,7 @@ public class Cli {
         root.setLevel(ch.qos.logback.classic.Level.OFF);
     }
 
-    private static Pair<Integer, Boolean> getPort(OxdServerConfiguration conf) {
+    private static Pair<Integer, Boolean> getPort(RpServerConfiguration conf) {
         final List<ConnectorFactory> applicationConnectors = ((DefaultServerFactory) conf.getServerFactory()).getApplicationConnectors();
         if (applicationConnectors == null || applicationConnectors.isEmpty()) {
             System.out.println("Failed to fetch port from configuration.");
@@ -176,11 +176,11 @@ public class Cli {
         return null;
     }
 
-    private static void tryToConnectToRunningOxd(CommandLine cmd) {
+    private static void tryToConnectToRunningRp(CommandLine cmd) {
         final Injector injector = ServerLauncher.getInjector();
-        final OxdServerConfiguration conf = injector.getInstance(ConfigurationService.class).get();
+        final RpServerConfiguration conf = injector.getInstance(ConfigurationService.class).get();
         if (conf == null) {
-            System.out.println("Failed to load configuration file of oxd-server.");
+            System.out.println("Failed to load configuration file of jans_client_api.");
             return;
         }
 
@@ -192,7 +192,7 @@ public class Cli {
 
         final String protocol = port.getSecond() ? "https" : "http";
         try {
-            final ClientInterface client = OxdClient.newTrustAllClient(protocol + "://localhost:" + port.getFirst());
+            final ClientInterface client = RpClient.newTrustAllClient(protocol + "://localhost:" + port.getFirst());
             String authorization = "";
 
             if (cmd.hasOption("a")) {
@@ -200,9 +200,9 @@ public class Cli {
             }
 
             if (StringUtils.isBlank(authorization)) {
-                System.out.println("Failed to connect to running oxd. There are two ways to proceed: \n" +
-                        " - 1) stop oxd and then run command again. Then script can connect to database directly. If oxd is running it has exclusive lock on database, so script is not able to connect to database directly\n" +
-                        " - 2) provide authorization access_token (same that is provided in Authorization header in oxd API) via -a parameter (e.g. lsca.sh -a xxxx-xxxx-xxxx-xxxx -l), so script can connect to running oxd");
+                System.out.println("Failed to connect to running jans_client_api. There are two ways to proceed: \n" +
+                        " - 1) stop jans_client_api and then run command again. Then script can connect to database directly. If jans_client_api is running it has exclusive lock on database, so script is not able to connect to database directly\n" +
+                        " - 2) provide authorization access_token (same that is provided in Authorization header in jans_client_api API) via -a parameter (e.g. lsca.sh -a xxxx-xxxx-xxxx-xxxx -l), so script can connect to running jans_client_api");
                 return;
             }
             authorization = "Bearer " + authorization;
@@ -213,7 +213,7 @@ public class Cli {
                 String respString = client.getRp(authorization, null, params);
                 GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp == null) {
-                    System.out.println("Failed to fetch entries from database. Please check oxd-server.log file for details.");
+                    System.out.println("Failed to fetch entries from database. Please check jans_client_api.log file for details.");
                     return;
                 }
                 if (resp.getNode() instanceof ArrayNode) {
@@ -224,12 +224,12 @@ public class Cli {
                     }
 
                     Iterator<JsonNode> elements = arrayNode.iterator();
-                    System.out.println("oxd_id                                client_name");
+                    System.out.println("rp_id                                client_name");
                     while (elements.hasNext()) {
                         final JsonNode element = elements.next();
-                        final JsonNode oxdIdNode = element.get("oxd_id");
+                        final JsonNode rpIdNode = element.get("rp_id");
                         final JsonNode clientNameNode = element.get("client_name");
-                        System.out.println(String.format("%s  %s", oxdIdNode != null ? oxdIdNode.asText() : "", clientNameNode != null ? clientNameNode.asText() : "null"));
+                        System.out.println(String.format("%s  %s", rpIdNode != null ? rpIdNode.asText() : "", clientNameNode != null ? clientNameNode.asText() : "null"));
                     }
                 } else {
                     System.out.println(resp.getNode());
@@ -237,43 +237,43 @@ public class Cli {
                 return;
             }
 
-            if (cmd.hasOption("oxd_id")) {
-                final String oxdId = cmd.getOptionValue("oxd_id");
+            if (cmd.hasOption("rp_id")) {
+                final String rpId = cmd.getOptionValue("rp_id");
 
-                String respString = client.getRp(authorization, null, new GetRpParams(oxdId));
+                String respString = client.getRp(authorization, null, new GetRpParams(rpId));
                 GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp != null) {
-                    print(oxdId, resp.getNode());
+                    print(rpId, resp.getNode());
                 } else {
-                    System.out.println("Failed to fetch entry from database, please check oxd_id really exist and is not malformed (more details at oxd-server.log file).");
+                    System.out.println("Failed to fetch entry from database, please check rp_id really exist and is not malformed (more details at jans_client_api.log file).");
                 }
                 return;
             }
 
             if (cmd.hasOption("d")) {
                 RemoveSiteResponse resp = client.removeSite(authorization, null, new RemoveSiteParams(cmd.getOptionValue("d")));
-                if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
+                if (resp != null && StringUtils.isNotBlank(resp.getRpId())) {
                     System.out.println("Entry removed successfully.");
                 } else {
-                    System.out.println("Failed to remove entry from database, please check oxd_id really exists and is not malformed (more details in oxd-server.log file).");
+                    System.out.println("Failed to remove entry from database, please check rp_id really exists and is not malformed (more details in jans_client_api.log file).");
                 }
                 return;
             }
             printHelpAndExit();
         } catch (BadRequestException e) {
-            System.out.println("Bad Request : 400. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
+            System.out.println("Bad Request : 400. Failed to execute command against jans_client_api on port " + port + ". Please check rp_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (NotAuthorizedException e) {
-            System.out.println("Not Authorized : 401. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
+            System.out.println("Not Authorized : 401. Failed to execute command against jans_client_api on port " + port + ". Please check rp_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (ForbiddenException e) {
-            System.out.println("Forbidden : 403. Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
+            System.out.println("Forbidden : 403. Failed to execute command against jans_client_api on port " + port + ". Please check rp_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         } catch (Exception e) {
-            System.out.println("Failed to execute command against oxd-server on port " + port + ". Please check oxd_id or access_token really exists and is not malformed, error: " + e.getMessage());
+            System.out.println("Failed to execute command against jans_client_api on port " + port + ". Please check rp_id or access_token really exists and is not malformed, error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -283,27 +283,27 @@ public class Cli {
         return StringUtils.remove(str, "\"");
     }
 
-    private static void print(String oxdId, Object rp) {
+    private static void print(String rpId, Object rp) {
         if (rp != null) {
-            System.out.println("JSON for oxd_id " + oxdId);
+            System.out.println("JSON for rp_id " + rpId);
             System.out.println(rp);
         } else {
-            System.out.println("No record found in database for oxd_id: " + oxdId);
+            System.out.println("No record found in database for rp_id: " + rpId);
         }
     }
 
     private static Options options() {
         Options options = new Options();
 
-        Option oxdIdOption = new Option("oxd_id", "oxd_id", true, "oxd_id is unique identifier within oxd database (returned by register_site and setup_client commands)");
-        oxdIdOption.setRequired(false);
-        options.addOption(oxdIdOption);
+        Option rpIdOption = new Option("rp_id", "rp_id", true, "rp_id is unique identifier within oxd database (returned by register_site and setup_client commands)");
+        rpIdOption.setRequired(false);
+        options.addOption(rpIdOption);
 
-        Option listOption = new Option("l", "list", false, "lists all oxd_ids contained in oxd database");
+        Option listOption = new Option("l", "list", false, "lists all rp_ids contained in oxd database");
         listOption.setRequired(false);
         options.addOption(listOption);
 
-        Option deleteOption = new Option("d", "delete", true, "deletes entry from database by oxd_id");
+        Option deleteOption = new Option("d", "delete", true, "deletes entry from database by rp_id");
         deleteOption.setRequired(false);
         options.addOption(deleteOption);
 
@@ -323,7 +323,7 @@ public class Cli {
         if (cmd.hasOption("l")) {
             optionsCount++;
         }
-        if (cmd.hasOption("oxd_id")) {
+        if (cmd.hasOption("rp_id")) {
             optionsCount++;
         }
         if (cmd.hasOption("d")) {

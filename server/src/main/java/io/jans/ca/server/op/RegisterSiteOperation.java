@@ -58,15 +58,15 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     public RegisterSiteResponse execute_(RegisterSiteParams params) {
         validateParametersAndFallbackIfNeeded(params);
 
-        String oxdId = UUID.randomUUID().toString();
+        String rpId = UUID.randomUUID().toString();
 
         LOG.info("Creating RP ...");
-        persistRp(oxdId, params);
+        persistRp(rpId, params);
 
         LOG.info("RP created: " + rp);
 
         RegisterSiteResponse response = new RegisterSiteResponse();
-        response.setOxdId(oxdId);
+        response.setRpId(rpId);
         response.setOpHost(rp.getOpHost());
         response.setClientId(rp.getClientId());
         response.setClientName(rp.getClientName());
@@ -102,7 +102,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         Rp fallback = getConfigurationService().defaultRp();
 
         //op_configuration_endpoint
-        LOG.info("Either 'op_configuration_endpoint' or 'op_host' should be set. oxd will now check which of these parameter is available.");
+        LOG.info("Either 'op_configuration_endpoint' or 'op_host' should be set. jans_client_api will now check which of these parameter is available.");
         if (StringUtils.isBlank(params.getOpConfigurationEndpoint())) {
             LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'.");
             String fallbackOpConfigurationEndpoint = fallback.getOpConfigurationEndpoint();
@@ -418,12 +418,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
     }
 
-    private void persistRp(String siteId, RegisterSiteParams params) {
+    private void persistRp(String rpId, RegisterSiteParams params) {
 
         try {
-            final RegisterRequest registerRequest = createRegisterClientRequest(params, siteId);
+            final RegisterRequest registerRequest = createRegisterClientRequest(params, rpId);
             rp = createRp(registerRequest);
-            rp.setOxdId(siteId);
+            rp.setRpId(rpId);
             rp.setApplicationType("web");
             rp.setOpHost(getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer());
             rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
@@ -465,8 +465,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
-            LOG.error("This OP (" + opHostEndpoint + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
-                    "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
+            LOG.error("This OP (" + opHostEndpoint + ") does not provide registration_endpoint. It means that jans_client_api is not able dynamically register client. " +
+                    "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to jans_client_api register_site command.");
             throw new HttpException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }
 
@@ -500,8 +500,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         throw new RuntimeException("Failed to register client for site. Details: " + (response != null ? response.getEntity() : "response is null"));
     }
 
-    private RegisterRequest createRegisterClientRequest(RegisterSiteParams params, String oxdId) {
-        String clientName = "oxd client for rp: " + oxdId;
+    private RegisterRequest createRegisterClientRequest(RegisterSiteParams params, String rpId) {
+        String clientName = "jans_client_api client for rp: " + rpId;
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
         }
@@ -524,8 +524,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
         }
 
-        if (StringUtils.isNotBlank(oxdId)) {
-            request.addCustomAttribute("oxd_id", oxdId);
+        if (StringUtils.isNotBlank(rpId)) {
+            request.addCustomAttribute("rp_id", rpId);
         }
 
         List<GrantType> grantTypes = Lists.newArrayList();
@@ -610,7 +610,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             }
 
             if (signatureAlgorithms == SignatureAlgorithm.NONE && !getConfigurationService().getConfiguration().getAcceptIdTokenWithoutSignature()) {
-                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in jans-client-api.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }
 

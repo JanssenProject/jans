@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 public class MinimumRp implements Serializable {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    @JsonProperty(value = "rp_id")
+    private String rpId;
 
     @JsonProperty(value = "client_name")
     private String clientName;
@@ -19,17 +19,17 @@ public class MinimumRp implements Serializable {
     public MinimumRp() {
     }
 
-    public MinimumRp(String oxdId, String clientName) {
-        this.oxdId = oxdId;
+    public MinimumRp(String rpId, String clientName) {
+        this.rpId = rpId;
         this.clientName = clientName;
     }
 
-    public String getOxdId() {
-        return oxdId;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 
     public String getClientName() {
@@ -43,7 +43,7 @@ public class MinimumRp implements Serializable {
     @Override
     public String toString() {
         return "MinimumRp{" +
-                "oxdId='" + oxdId + '\'' +
+                "rpId='" + rpId + '\'' +
                 ", clientName='" + clientName + '\'' +
                 '}';
     }

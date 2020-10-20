@@ -43,7 +43,7 @@ public class MigrationServiceTest {
 
     @Test(enabled = false)
     public void parse() {
-        migrationService.migrateChildren(new File("./oxd-server/src/test/resources/migration"));
+        migrationService.migrateChildren(new File("./jans-client-api-server/src/test/resources/migration"));
 
         assertNotNull(persistenceService.getRp("0c67e1f0-1fc2-46d6-b237-5e20882ec25c"));
         assertNotNull(persistenceService.getRp("2c65b0da-4bab-4e09-92bb-b028a04a3fe0"));

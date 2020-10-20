@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImplicitFlowParams implements HasOxdIdParams {
+public class ImplicitFlowParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "redirect_url")
     private String redirect_url;
     @JsonProperty(value = "client_id")
@@ -90,12 +90,12 @@ public class ImplicitFlowParams implements HasOxdIdParams {
         user_secret = p_userSecret;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     /**
@@ -107,7 +107,7 @@ public class ImplicitFlowParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("ImplicitFlowParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", redirect_url='").append(redirect_url).append('\'');
         sb.append(", client_id='").append(client_id).append('\'');
         sb.append(", user_id='").append(user_id).append('\'');

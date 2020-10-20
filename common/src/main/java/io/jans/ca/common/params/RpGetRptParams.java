@@ -13,10 +13,10 @@ import java.util.Map;
  * @author Yuriy Zabrovarnyy
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetRptParams implements HasOxdIdParams {
+public class RpGetRptParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "ticket")
     private String ticket;
     @JsonProperty(value = "claim_token")
@@ -45,12 +45,12 @@ public class RpGetRptParams implements HasOxdIdParams {
         this.params = params;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
 
@@ -113,7 +113,7 @@ public class RpGetRptParams implements HasOxdIdParams {
     @Override
     public String toString() {
         return "RpGetRptParams{" +
-                "oxd_id='" + oxd_id + '\'' +
+                "rp_id='" + rp_id + '\'' +
                 ", ticket='" + ticket + '\'' +
                 ", claim_token='" + claim_token + '\'' +
                 ", claim_token_format='" + claim_token_format + '\'' +

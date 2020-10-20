@@ -292,7 +292,7 @@ public class RestResource {
 
     private static void validateIpAddressAllowed(String callerIpAddress) {
         LOG.trace("Checking if caller ipAddress : {} is allowed to make request to oxd.", callerIpAddress);
-        final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        final RpServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         List<String> bindIpAddresses = conf.getBindIpAddresses();
 
         //localhost as default bindAddress
@@ -301,8 +301,8 @@ public class RestResource {
         }
         //show error if ip_address of a remote caller is not set in `bind_ip_addresses`
         if (bindIpAddresses == null || bindIpAddresses.isEmpty()) {
-            LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `client-api-server.yml`.");
-            throw new HttpException(ErrorResponseCode.OXD_ACCESS_DENIED);
+            LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `jans-client-api.yml`.");
+            throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
         }
         //allow all ip_address
         if (bindIpAddresses.contains("*")) {
@@ -312,8 +312,8 @@ public class RestResource {
         if (bindIpAddresses.contains(callerIpAddress)) {
             return;
         }
-        LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `client-api-server.yml`.");
-        throw new HttpException(ErrorResponseCode.OXD_ACCESS_DENIED);
+        LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `jans-client-api.yml`.");
+        throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
 
     }
 
@@ -321,11 +321,11 @@ public class RestResource {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(safeToJson(paramsAsString), paramsClass);
 
-        final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        final RpServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
 
         if (commandType.isAuthorizationRequired()) {
             validateAuthorizationOxdId(conf, authorizationOxdId);
-            validateAccessToken(authorization, safeToOxdId((HasOxdIdParams) params, authorizationOxdId));
+            validateAccessToken(authorization, safeToOxdId((HasRpIdParams) params, authorizationOxdId));
         }
 
         Command command = new Command(commandType, params);
@@ -337,7 +337,7 @@ public class RestResource {
         return forJsonConversion;
     }
 
-    private static void validateAuthorizationOxdId(OxdServerConfiguration conf, String authorizationOxdId) {
+    private static void validateAuthorizationOxdId(RpServerConfiguration conf, String authorizationOxdId) {
 
         if (Strings.isNullOrEmpty(authorizationOxdId)) {
             return;
@@ -346,25 +346,25 @@ public class RestResource {
         final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
         final Rp rp = rpSyncService.getRp(authorizationOxdId);
 
-        if (rp == null || Strings.isNullOrEmpty(rp.getOxdId())) {
+        if (rp == null || Strings.isNullOrEmpty(rp.getRpId())) {
             LOG.debug("`oxd_id` in `AuthorizationOxdId` header is not registered in oxd.");
-            throw new HttpException(ErrorResponseCode.AUTHORIZATION_OXD_ID_NOT_FOUND);
+            throw new HttpException(ErrorResponseCode.AUTHORIZATION_RP_ID_NOT_FOUND);
         }
 
-        if (conf.getProtectCommandsWithOxdId() == null || conf.getProtectCommandsWithOxdId().isEmpty()) {
+        if (conf.getProtectCommandsWithRpId() == null || conf.getProtectCommandsWithRpId().isEmpty()) {
             return;
         }
 
-        if (!conf.getProtectCommandsWithOxdId().contains(authorizationOxdId)) {
-            LOG.debug("`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should contain `oxd_id` from `protect_commands_with_oxd_id` field in client-api-server.yml.");
-            throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_OXD_ID);
+        if (!conf.getProtectCommandsWithRpId().contains(authorizationOxdId)) {
+            LOG.debug("`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should contain `oxd_id` from `protect_commands_with_oxd_id` field in jans-client-api.yml.");
+            throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_RP_ID);
         }
     }
 
     private static void validateAccessToken(String authorization, String authorizationOxdId) {
         final String prefix = "Bearer ";
 
-        final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+        final RpServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
             LOG.debug("Skip protection because protect_commands_with_access_token: false in configuration file.");
             return;
@@ -385,8 +385,8 @@ public class RestResource {
         validationService.validateAccessToken(accessToken, authorizationOxdId);
     }
 
-    private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
-        return Strings.isNullOrEmpty(authorizationOxdId) ? params.getOxdId() : authorizationOxdId;
+    private static String safeToOxdId(HasRpIdParams params, String authorizationOxdId) {
+        return Strings.isNullOrEmpty(authorizationOxdId) ? params.getRpId() : authorizationOxdId;
     }
 
     private static String safeToJson(String jsonString) {

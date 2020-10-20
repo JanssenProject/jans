@@ -11,10 +11,10 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetClaimsGatheringUrlParams implements HasOxdIdParams {
+public class RpGetClaimsGatheringUrlParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "ticket")
     private String ticket;
     @JsonProperty(value = "claims_redirect_uri")
@@ -27,12 +27,12 @@ public class RpGetClaimsGatheringUrlParams implements HasOxdIdParams {
     public RpGetClaimsGatheringUrlParams() {
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getTicket() {
@@ -71,7 +71,7 @@ public class RpGetClaimsGatheringUrlParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RpGetGetClaimsGatheringUrlParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", ticket=").append(ticket);
         sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
         sb.append(", state=").append(state);
