@@ -18,6 +18,6 @@ jansScimEnabled: false
 jansWhitePagesEnabled: disabled
 jansenticationMode: simple_password_auth
 objectClass: top
-objectClass: jansConf
+objectClass: jansAppConf
 ou: configuration
 

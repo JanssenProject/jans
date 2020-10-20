@@ -34,6 +34,12 @@ for k in opendj_types:
 
 
 conversions = []
+obj_conversions = []
+
+def check_duplicate(new):
+    for m in conversions:
+        if m[1] == new:
+            return True
 
 def do_replace(eVal):
     if eVal in opendj_attributes:
@@ -42,14 +48,19 @@ def do_replace(eVal):
         if m in eVal:
             eVal = eVal.replace(m, mapping['mappings'][m])
 
+    if eVal in mapping['postconversions']:
+        eVal = mapping['postconversions'][eVal]
+
     return eVal
 
-for attribute in schema['attributeTypes'][:]:
+
+new_attributeTypes = []
+
+for attribute in schema['attributeTypes']:
 
     skip = False
     for name in attribute['names']:
         if name in mapping['exclude']['attributeType']:
-            schema['attributeTypes'].remove(attribute)
             skip = True
     if skip:
         continue
@@ -61,18 +72,34 @@ for attribute in schema['attributeTypes'][:]:
     new_name_list = []
     for name in (attribute['names']):
         new = do_replace(name)
-        if not new in new_name_list:
+        
+        if not new in new_name_list and not check_duplicate(new):
             conversions.append((name, new))
             new_name_list.append(new)
+    if new_name_list:
+        attribute['names'] = new_name_list
+        new_attributeTypes.append(attribute)
 
-    attribute['names'] = new_name_list
+schema['attributeTypes'] = new_attributeTypes
 
-obj_conversions = []
-for obj in schema['objectClasses'][:]:
+
+new_objectClasses = []
+
+def check_objduplicate(new, lt):
+    for obc in new_objectClasses:
+        if new in obc[lt]:
+            return True
+
+def get_obj_by_name(name):
+    for obj in new_objectClasses:
+        if name in obj['names']:
+            return obj
+
+
+for obj in schema['objectClasses']:
     skip = False
     for name in obj['names']:
         if name in mapping['exclude']['objectClass']:
-            schema['objectClasses'].remove(obj)
             skip = True
     if skip:
         continue
@@ -85,11 +112,21 @@ for obj in schema['objectClasses'][:]:
         new_list = []
         for name in obj[lt]:
             new = do_replace(name)
-            if name != new:
-                obj_conversions.append((name, new))
+            obj_conversions.append((name, new))
+            if lt == 'names' and check_objduplicate(new, lt):
+                continue
             if not new in new_list:
                 new_list.append(new)
         obj[lt] = new_list
+
+    if obj['names'] and obj['may']:
+        new_objectClasses.append(obj)
+    elif not obj['names'] and obj['may']:
+        prev_obj = get_obj_by_name(new)
+        if prev_obj:
+            prev_obj['may'] += obj['may']
+
+schema['objectClasses'] = new_objectClasses
 
 macrkeys = list(schema['oidMacros'].keys())
 for macr in macrkeys:

@@ -1,4 +1,4 @@
-dn: ou=fido2,ou=configuration,o=jans
+dn: ou=jans-fido2,ou=configuration,o=jans
 jansConfDyn::%(fido2_dynamic_conf_base64)s
 jansConfStatic::%(fido2_static_conf_base64)s
 jansRevision: 1
