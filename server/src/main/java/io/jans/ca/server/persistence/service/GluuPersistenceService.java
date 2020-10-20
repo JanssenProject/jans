@@ -4,7 +4,7 @@ import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.PersistenceConfigKeys;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.modal.OrganizationBranch;
 import io.jans.ca.server.persistence.modal.RpObject;
 import io.jans.ca.server.persistence.providers.GluuPersistenceConfiguration;
@@ -23,16 +23,16 @@ import java.util.*;
 public class GluuPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GluuPersistenceService.class);
-    private OxdServerConfiguration configuration;
+    private RpServerConfiguration configuration;
     private PersistenceEntryManager persistenceEntryManager;
     private String persistenceType;
     private String baseDn;
 
-    public GluuPersistenceService(OxdServerConfiguration configuration) {
+    public GluuPersistenceService(RpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
-    public GluuPersistenceService(OxdServerConfiguration configuration, String persistenceType) {
+    public GluuPersistenceService(RpServerConfiguration configuration, String persistenceType) {
         this.configuration = configuration;
         this.persistenceType = persistenceType;
     }
@@ -54,9 +54,9 @@ public class GluuPersistenceService implements PersistenceService {
             }
 
             if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()))) {
-                LOG.error("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
+                LOG.error("The value of the `storage` field in `jans-client-api.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
                         , this.persistenceType, this.persistenceEntryManager.getPersistenceType());
-                throw new RuntimeException("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
+                throw new RuntimeException("The value of the `storage` field in `jans-client-api.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
                         + this.persistenceEntryManager.getPersistenceType());
             }
             prepareBranch();
@@ -77,21 +77,21 @@ public class GluuPersistenceService implements PersistenceService {
         if (!containsBranch(String.format("%s,%s", ou("configuration"), this.baseDn))) {
             addBranch(String.format("%s,%s", ou("configuration"), this.baseDn), "configuration");
         }
-        //create `ou=oxd,ou=configuration,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s,%s", ou("oxd"), ou("configuration"), this.baseDn))) {
-            addBranch(String.format("%s,%s,%s", ou("oxd"), ou("configuration"), this.baseDn), "oxd");
+        //create `ou=rp,ou=configuration,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn))) {
+            addBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn), "rp");
         }
-        //create `ou=oxd,o=gluu` if not present
-        if (!containsBranch(getOxdDn())) {
-            addBranch(getOxdDn(), "oxd");
+        //create `ou=rp,o=gluu` if not present
+        if (!containsBranch(getRpDn())) {
+            addBranch(getRpDn(), "rp");
         }
-        //create `ou=rp,ou=oxd,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s", getRpOu(), getOxdDn()))) {
-            addBranch(String.format("%s,%s", getRpOu(), getOxdDn()), "rp");
+        //create `ou=rp,ou=rp,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s", getRpOu(), getRpDn()))) {
+            addBranch(String.format("%s,%s", getRpOu(), getRpDn()), "rp");
         }
-        //create `ou=expiredObjects,ou=oxd,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getOxdDn()))) {
-            addBranch(String.format("%s,%s", getExpiredObjOu(), getOxdDn()), "expiredObjects");
+        //create `ou=expiredObjects,ou=rp,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()))) {
+            addBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()), "expiredObjects");
         }
     }
 
@@ -117,7 +117,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean create(Rp rp) {
         try {
-            RpObject rpObj = new RpObject(getDnForRp(rp.getOxdId()), rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
+            RpObject rpObj = new RpObject(getDnForRp(rp.getRpId()), rp.getRpId(), Jackson2.serializeWithoutNulls(rp));
             this.persistenceEntryManager.persist(rpObj);
             LOG.debug("RP created successfully. RP : {} ", rp);
             return true;
@@ -146,7 +146,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean update(Rp rp) {
         try {
-            RpObject rpObj = new RpObject(getDnForRp(rp.getOxdId()), rp.getOxdId(), Jackson2.serializeWithoutNulls(rp));
+            RpObject rpObj = new RpObject(getDnForRp(rp.getRpId()), rp.getRpId(), Jackson2.serializeWithoutNulls(rp));
             this.persistenceEntryManager.merge(rpObj);
             LOG.debug("RP updated successfully. RP : {} ", rpObj);
             return true;
@@ -156,25 +156,25 @@ public class GluuPersistenceService implements PersistenceService {
         return false;
     }
 
-    public Rp getRp(String oxdId) {
+    public Rp getRp(String rpId) {
         try {
-            RpObject rpFromGluuPersistance = getRpObject(oxdId, new String[0]);
+            RpObject rpFromGluuPersistance = getRpObject(rpId, new String[0]);
 
             Rp rp = MigrationService.parseRp(rpFromGluuPersistance.getData());
             if (rp != null) {
-                LOG.debug("Found RP id: {}, RP : {} ", oxdId, rp);
+                LOG.debug("Found RP id: {}, RP : {} ", rpId, rp);
                 return rp;
             }
-            LOG.error("Failed to fetch RP by id: {} ", oxdId);
+            LOG.error("Failed to fetch RP by id: {} ", rpId);
             return null;
         } catch (Exception e) {
-            LOG.error("Failed to update oxdId: {} ", oxdId, e);
+            LOG.error("Failed to update rpId: {} ", rpId, e);
         }
         return null;
     }
 
-    private RpObject getRpObject(String oxdId, String... returnAttributes) {
-        return (RpObject) this.persistenceEntryManager.find(getDnForRp(oxdId), RpObject.class, returnAttributes);
+    private RpObject getRpObject(String rpId, String... returnAttributes) {
+        return (RpObject) this.persistenceEntryManager.find(getDnForRp(rpId), RpObject.class, returnAttributes);
     }
 
     public ExpiredObject getExpiredObject(String key) {
@@ -204,7 +204,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean removeAllRps() {
         try {
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getRpDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all Rps successfully. ");
             return true;
         } catch (Exception e) {
@@ -215,7 +215,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public Set<Rp> getRps() {
         try {
-            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null);
+            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getRpDn()}), RpObject.class, null);
 
             Set<Rp> result = new HashSet();
             for (RpObject ele : rpObjects) {
@@ -241,14 +241,14 @@ public class GluuPersistenceService implements PersistenceService {
         this.persistenceEntryManager.destroy();
     }
 
-    public boolean remove(String oxdId) {
+    public boolean remove(String rpId) {
         try {
-            this.persistenceEntryManager.remove(getDnForRp(oxdId));
+            this.persistenceEntryManager.remove(getDnForRp(rpId));
 
-            LOG.debug("Removed rp successfully. oxdId: {} ", oxdId);
+            LOG.debug("Removed rp successfully. rpId: {} ", rpId);
             return true;
         } catch (Exception e) {
-            LOG.error("Failed to remove rp with oxdId: {} ", oxdId, e);
+            LOG.error("Failed to remove rp with rpId: {} ", rpId, e);
         }
         return false;
     }
@@ -270,7 +270,7 @@ public class GluuPersistenceService implements PersistenceService {
             final Date currentTime = cal.getTime();
             Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceEntryManager.encodeTime(baseDn, currentTime));
 
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getRpDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
@@ -279,20 +279,20 @@ public class GluuPersistenceService implements PersistenceService {
         return false;
     }
 
-    public String getDnForRp(String oxdId) {
-        return String.format("oxId=%s,%s,%s", new Object[]{oxdId, getRpOu(), getOxdDn()});
+    public String getDnForRp(String rpId) {
+        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getRpOu(), getRpDn()});
     }
 
-    public String getDnForExpiredObj(String oxdId) {
-        return String.format("oxId=%s,%s,%s", new Object[]{oxdId, getExpiredObjOu(), getOxdDn()});
+    public String getDnForExpiredObj(String rpId) {
+        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getExpiredObjOu(), getRpDn()});
     }
 
     public String ou(String ouName) {
         return String.format("ou=%s", ouName);
     }
 
-    private String getOxdDn() {
-        return String.format("%s,%s", ou("oxd"), this.baseDn);
+    private String getRpDn() {
+        return String.format("%s,%s", ou("rp"), this.baseDn);
     }
 
     private String getRpOu() {

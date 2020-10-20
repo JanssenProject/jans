@@ -35,7 +35,7 @@ public class NotAllowedTest {
         RegisterSiteResponse site = registerSite(client);
 
         final RsProtectParams2 params = new RsProtectParams2();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(Jackson2.createJsonMapper().readTree(rsProtect));
 
         final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(site), null, params);
@@ -58,7 +58,7 @@ public class NotAllowedTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 }

@@ -37,7 +37,7 @@ public class ServerLauncher {
     private static Injector INJECTOR = Guice.createInjector(new GuiceModule());
     private static boolean setUpSuite = false;
 
-    public static void configureServices(OxdServerConfiguration configuration) {
+    public static void configureServices(RpServerConfiguration configuration) {
         LOG.info("Starting service configuration...");
         printBuildNumber();
         addSecurityProviders();
@@ -50,9 +50,9 @@ public class ServerLauncher {
             INJECTOR.getInstance(RpService.class).load();
             INJECTOR.getInstance(MigrationService.class).migrate();
             INJECTOR.getInstance(SchedulerService.class).scheduleTasks();
-            LOG.info("oxD Services are configured successfully.");
+            LOG.info("jans_client_api Services are configured successfully.");
         } catch (Throwable e) {
-            LOG.error("Failed to start oxd server.", e);
+            LOG.error("Failed to start jans_client_api server.", e);
             if (!isSetUpSuite()) {
                 System.exit(1);
             }

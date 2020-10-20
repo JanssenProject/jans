@@ -29,7 +29,7 @@ public class IntrospectAccessTokenTest {
 
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "jans_client_api"));
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 
@@ -39,7 +39,7 @@ public class IntrospectAccessTokenTest {
         notEmpty(tokenResponse.getAccessToken());
 
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
-        introspectParams.setOxdId(setupResponse.getOxdId());
+        introspectParams.setRpId(setupResponse.getRpId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
         IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), null, introspectParams);

@@ -39,7 +39,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
 
     @Override
     public IOpResponse execute(AuthorizationCodeFlowParams params) {
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
         if (discovery != null) {
             return requestToken(discovery, params);
         }

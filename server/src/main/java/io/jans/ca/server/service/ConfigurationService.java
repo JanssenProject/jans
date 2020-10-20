@@ -3,7 +3,7 @@ package io.jans.ca.server.service;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,16 +13,16 @@ import java.io.IOException;
  * @author Yuriy Zabrovarnyy
  */
 
-public class ConfigurationService implements Provider<OxdServerConfiguration> {
+public class ConfigurationService implements Provider<RpServerConfiguration> {
 
     /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(ConfigurationService.class);
 
-    private OxdServerConfiguration configuration = null;
+    private RpServerConfiguration configuration = null;
 
-    public void setConfiguration(OxdServerConfiguration configuration) {
+    public void setConfiguration(RpServerConfiguration configuration) {
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
         this.configuration = configuration;
     }
@@ -36,12 +36,12 @@ public class ConfigurationService implements Provider<OxdServerConfiguration> {
         }
     }
 
-    public OxdServerConfiguration getConfiguration() {
+    public RpServerConfiguration getConfiguration() {
         return configuration;
     }
 
     @Override
-    public OxdServerConfiguration get() {
+    public RpServerConfiguration get() {
         return configuration;
     }
 }

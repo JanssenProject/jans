@@ -5,7 +5,7 @@ package io.jans.ca.server.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.op.OpClientFactory;
 import io.jans.ca.server.op.OpClientFactoryImpl;
 import io.jans.ca.server.persistence.service.PersistenceService;
@@ -21,7 +21,7 @@ public class GuiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(OxdServerConfiguration.class).toProvider(ConfigurationService.class);
+        bind(RpServerConfiguration.class).toProvider(ConfigurationService.class);
 
         bind(ConfigurationService.class).in(Singleton.class);
         bind(PublicOpKeyService.class).in(Singleton.class);

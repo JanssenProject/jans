@@ -36,7 +36,7 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     @Override
     public IOpResponse execute(CheckAccessTokenParams params) throws Exception {
-        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();
 

@@ -24,7 +24,7 @@ public class SetUpTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SetUpTest.class);
 
-    public static DropwizardTestSupport<OxdServerConfiguration> SUPPORT = null;
+    public static DropwizardTestSupport<RpServerConfiguration> SUPPORT = null;
 
 
     @Parameters({"host", "opHost", "redirectUrls"})
@@ -34,8 +34,8 @@ public class SetUpTest {
             LOG.debug("Running beforeSuite ...");
             ServerLauncher.setSetUpSuite(true);
 
-            SUPPORT = new DropwizardTestSupport<OxdServerConfiguration>(OxdServerApplication.class,
-                    ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml"),
+            SUPPORT = new DropwizardTestSupport<RpServerConfiguration>(RpServerApplication.class,
+                    ResourceHelpers.resourceFilePath("jans-client-api-jenkins.yml"),
                     ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
             );
             SUPPORT.before();

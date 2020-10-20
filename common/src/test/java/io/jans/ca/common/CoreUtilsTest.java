@@ -10,6 +10,6 @@ public class CoreUtilsTest {
 
     @Test
     public void cleanUpLogs() {
-        Assert.assertEquals("{'client_name':'name',  'oxd_id':'test_id'}", CoreUtils.cleanUpLog("{'client_name':'name', 'client_secret':'secret', 'oxd_id':'test_id'}"));
+        Assert.assertEquals("{'client_name':'name',  'rp_id':'test_id'}", CoreUtils.cleanUpLog("{'client_name':'name', 'client_secret':'secret', 'rp_id':'test_id'}"));
     }
 }

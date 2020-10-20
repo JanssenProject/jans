@@ -27,7 +27,7 @@ public class ParamsSecurityTest {
             RegisterSiteParams.class,
             GetJwksParams.class,
             EmptyParams.class,
-            HasOxdIdParams.class,
+            HasRpIdParams.class,
             GetDiscoveryParams.class,
             GetIssuerParams.class,
             GetRequestObjectUriParams.class,
@@ -41,8 +41,8 @@ public class ParamsSecurityTest {
             if (EXCLUSING_LIST.contains(clazz)) {
                 continue;
             }
-            if (!HasOxdIdParams.class.isAssignableFrom(clazz)) {
-                throw new AssertionError("Params class does not implement HasOxdIdParams interface, class: " + clazz);
+            if (!HasRpIdParams.class.isAssignableFrom(clazz)) {
+                throw new AssertionError("Params class does not implement HasRpIdParams interface, class: " + clazz);
             }
         }
     }

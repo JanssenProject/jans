@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.ca.client.ClientInterface;
-import io.jans.ca.client.OxdClient;
+import io.jans.ca.client.RpClient;
 import io.jans.ca.common.params.GetClientTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
 import io.jans.ca.common.response.RegisterSiteResponse;
@@ -29,7 +29,7 @@ public class Tester {
     private static String OP_HOST;
 
     public static ClientInterface newClient(String targetHost) {
-        return OxdClient.newClient(getTargetHost(targetHost));
+        return RpClient.newClient(getTargetHost(targetHost));
     }
 
     public static String getTargetHost(String targetHost) {
@@ -62,7 +62,7 @@ public class Tester {
 
     public static String getAuthorization(RegisterSiteResponse site) {
         final GetClientTokenParams params = new GetClientTokenParams();
-        params.setScope(Lists.newArrayList("openid", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "jans_client_api"));
         params.setOpHost(site.getOpHost());
         params.setClientId(site.getClientId());
         params.setClientSecret(site.getClientSecret());

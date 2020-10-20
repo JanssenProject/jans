@@ -71,10 +71,10 @@ public class ManualSwaggerGenerator {
                 case "status":
                     append(result, indent, "  example: ok\n");
                     break;
-                case "oxd_id":
+                case "rp_id":
                     append(result, indent, "  example: bcad760f-91ba-46e1-a020-05e4281d91b6\n");
                     break;
-                case "client_id_of_oxd_id":
+                case "client_id_of_rp_id":
                     append(result, indent, "  example: ccad760f-91ba-46e1-a020-05e4281d91b6\n");
                     break;
                 case "op_host":

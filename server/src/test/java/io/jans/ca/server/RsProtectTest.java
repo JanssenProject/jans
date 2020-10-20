@@ -42,7 +42,7 @@ public class RsProtectTest {
 
     @BeforeClass
     public void setUp() throws IOException, ConfigurationException {
-        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml")));
+        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("jans-client-api.yml")));
         persistenceService.create();
     }
 
@@ -69,7 +69,7 @@ public class RsProtectTest {
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectWithCreationExpiration).getResources());
 
-        Rp rp = persistenceService.getRp(site.getOxdId());
+        Rp rp = persistenceService.getRp(site.getRpId());
         rp.getUmaProtectedResources().forEach(ele -> {
             assertEquals(1582890956L, ele.getIat().longValue());
             assertEquals(2079299799L, ele.getExp().longValue());
@@ -87,7 +87,7 @@ public class RsProtectTest {
         protectResources(client, site, resources);
 
         final RsProtectParams2 params = new RsProtectParams2();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
 
         try {
@@ -111,7 +111,7 @@ public class RsProtectTest {
         protectResources(client, site, resources);
 
         final RsProtectParams2 params = new RsProtectParams2();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
@@ -140,7 +140,7 @@ public class RsProtectTest {
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond).getResources());
 
         final RsCheckAccessParams params = new RsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/GetAll");
         params.setRpt("");
@@ -153,7 +153,7 @@ public class RsProtectTest {
 
     public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
         final RsProtectParams2 params = new RsProtectParams2();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         try {
             params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         } catch (IOException e) {

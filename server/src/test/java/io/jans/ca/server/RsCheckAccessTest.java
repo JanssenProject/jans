@@ -59,7 +59,7 @@ public class RsCheckAccessTest {
 
     public static RsCheckAccessResponse checkAccess(ClientInterface client, RegisterSiteResponse site, List<String> scopeList) {
         final RsCheckAccessParams params = new RsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");
@@ -74,7 +74,7 @@ public class RsCheckAccessTest {
 
     public static void checkAccessWithIncorrectScopes(ClientInterface client, RegisterSiteResponse site, List<String> scopeList) {
         final RsCheckAccessParams params = new RsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");

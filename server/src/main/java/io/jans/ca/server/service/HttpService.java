@@ -6,7 +6,7 @@ package io.jans.ca.server.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import org.apache.http.client.HttpClient;
 import io.jans.ca.common.CoreUtils;
 import io.jans.ca.common.Jackson2;
@@ -30,10 +30,10 @@ public class HttpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 
-    private OxdServerConfiguration configuration;
+    private RpServerConfiguration configuration;
 
     @Inject
-    public HttpService(OxdServerConfiguration configuration) {
+    public HttpService(RpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -56,7 +56,7 @@ public class HttpService {
             final File trustStoreFile = new File(trustStorePath);
 
             if (!trustStoreFile.exists()) {
-                LOG.error("ERROR in configuration. Trust store path is invalid! Please fix key_store_path in oxd configuration");
+                LOG.error("ERROR in configuration. Trust store path is invalid! Please fix key_store_path in jans_client_api configuration");
                 return CoreUtils.createClientFallback(proxyConfig);
             }
             //Perform mutual authentication over SSL if allowed
@@ -64,12 +64,12 @@ public class HttpService {
                 final String mtlsClientKeyStorePath = configuration.getMtlsClientKeyStorePath();
 
                 if (Strings.isNullOrEmpty(mtlsClientKeyStorePath)) {
-                    LOG.error("Mtls Client key store path is empty! Please fix mtls_client_key_store_path in oxd configuration");
+                    LOG.error("Mtls Client key store path is empty! Please fix mtls_client_key_store_path in jans_client_api configuration");
                     return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
                 }
                 final File mtlsClientKeyStoreFile = new File(mtlsClientKeyStorePath);
                 if (!mtlsClientKeyStoreFile.exists()) {
-                    LOG.error("ERROR in configuration. Mtls Client key stroe path is invalid! Please fix mtls_client_key_store_path in oxd configuration");
+                    LOG.error("ERROR in configuration. Mtls Client key stroe path is invalid! Please fix mtls_client_key_store_path in jans_client_api configuration");
                     return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
                 }
                 return CoreUtils.createHttpClientForMutualAuthentication(trustStoreFile, configuration.getKeyStorePassword(), mtlsClientKeyStoreFile, configuration.getMtlsClientKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
@@ -77,12 +77,12 @@ public class HttpService {
             return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            LOG.error("Failed to create http client based on oxd configuration. Created default client.");
+            LOG.error("Failed to create http client based on jans_client_api configuration. Created default client.");
         }
         return CoreUtils.createClientFallback(proxyConfig);
     }
 
-    private static Optional<ProxyConfiguration> asProxyConfiguration(OxdServerConfiguration configuration) {
+    private static Optional<ProxyConfiguration> asProxyConfiguration(RpServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getProxyConfiguration();
             if (node != null) {
@@ -101,7 +101,7 @@ public class HttpService {
         }
 
         if (Strings.isNullOrEmpty(proxyConfiguration.get().getHost())) {
-            throw new RuntimeException("Invalid proxy server `hostname` provided (empty or null). oxd will connect to OP_HOST without proxy configuration.");
+            throw new RuntimeException("Invalid proxy server `hostname` provided (empty or null). jans_client_api will connect to OP_HOST without proxy configuration.");
         }
     }
 

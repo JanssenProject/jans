@@ -33,7 +33,7 @@ public class CheckIdTokenTest {
         GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, nonce, state);
 
         final CheckIdTokenParams params = new CheckIdTokenParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setIdToken(response.getIdToken());
         params.setNonce(nonce);
 

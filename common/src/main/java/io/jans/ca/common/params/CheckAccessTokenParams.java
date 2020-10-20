@@ -14,13 +14,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CheckAccessTokenParams implements HasOxdIdParams {
+public class CheckAccessTokenParams implements HasRpIdParams {
 
     /**
      * oxd ID
      */
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
 
     /**
      * Id token
@@ -40,12 +40,12 @@ public class CheckAccessTokenParams implements HasOxdIdParams {
     public CheckAccessTokenParams() {
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     /**
@@ -93,7 +93,7 @@ public class CheckAccessTokenParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CheckAccessTokenParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", id_token='").append(id_token).append('\'');
         sb.append(", access_token='").append(access_token).append('\'');
         sb.append('}');

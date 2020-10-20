@@ -19,11 +19,11 @@
     </dependencySets>
     <files>
         <file>
-            <source>${project.basedir}/src/main/resources/client-api-server.yml</source>
+            <source>${project.basedir}/src/main/resources/jans-client-api.yml</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/client-api-server.keystore</source>
+            <source>${project.basedir}/src/main/resources/jans-client-api.keystore</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
@@ -49,7 +49,7 @@
             <directory>${project.basedir}/src/main/bin</directory>
             <outputDirectory>/bin</outputDirectory>
             <includes>
-                <include>oxd*</include>
+                <include>jans-client-api*</include>
                 <include>ls*</include>
             </includes>
         </fileSet>
