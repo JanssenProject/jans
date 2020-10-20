@@ -92,7 +92,7 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
+	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
 	public static final String APP_PROPERTIES_FILE = DIR + "oxtrust.properties";
 
 	public static final String APPLICATION_CONFIGURATION = "oxtrust-config.json";
