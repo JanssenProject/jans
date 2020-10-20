@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -39,7 +39,7 @@ public class GetRequestObjectUriResponse {
    * Get requestUri
    * @return requestUri
   **/
-  @Schema(example = "https://<oxd-host>/get-request-object/d871gpie16np0f5kfv936sc33k", required = true, description = "")
+  @Schema(example = "https://<rp-host>/get-request-object/d871gpie16np0f5kfv936sc33k", required = true, description = "")
   public String getRequestUri() {
     return requestUri;
   }
@@ -50,7 +50,7 @@ public class GetRequestObjectUriResponse {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -81,7 +81,7 @@ public class GetRequestObjectUriResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
