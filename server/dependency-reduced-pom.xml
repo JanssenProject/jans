@@ -6,8 +6,8 @@
     <version>5.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>oxd-server</artifactId>
-  <name>oxD Server</name>
+  <artifactId>jans-client-api-server</artifactId>
+  <name>jans-client-api-server</name>
   <version>5.0.0-SNAPSHOT</version>
   <url>http://ox.gluu.org</url>
   <build>
@@ -34,7 +34,7 @@
         </includes>
       </testResource>
     </testResources>
-    <finalName>oxd-server</finalName>
+    <finalName>jans-client-api-server</finalName>
     <filters>
       <filter>${project.basedir}/../test/test.properties</filter>
     </filters>
@@ -114,7 +114,7 @@
           <transformers>
             <transformer />
             <transformer>
-              <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
+              <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
             </transformer>
             <transformer />
           </transformers>
@@ -150,7 +150,7 @@
               <skipAssembly>${generate.windows.exe}</skipAssembly>
               <archive>
                 <manifest>
-                  <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
+                  <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
                 </manifest>
               </archive>
               <descriptors>
@@ -198,7 +198,7 @@
                 <configuration>
                   <archive>
                     <manifest>
-                      <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
+                      <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
                     </manifest>
                   </archive>
                   <descriptors>
@@ -324,21 +324,21 @@
     </dependency>
     <dependency>
       <groupId>io.jans</groupId>
-      <artifactId>oxd-common</artifactId>
+      <artifactId>jans-client-api-common</artifactId>
       <version>5.0.0-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.jans</groupId>
-      <artifactId>oxd-client</artifactId>
+      <artifactId>jans-client-api</artifactId>
       <version>5.0.0-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.jans</groupId>
-      <artifactId>oxd-gen-client</artifactId>
+      <artifactId>jans-client-api-gen</artifactId>
       <version>5.0.0-SNAPSHOT</version>
       <scope>test</scope>
       <exclusions>
@@ -366,7 +366,7 @@
     </dependency>
     <dependency>
       <groupId>io.jans</groupId>
-      <artifactId>oxd-gen-client</artifactId>
+      <artifactId>jans-client-api-gen</artifactId>
       <version>5.0.0-SNAPSHOT</version>
       <type>test-jar</type>
       <scope>test</scope>
