@@ -70,7 +70,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
         Token patToken = null;
         try {
-            // patToken = getPatToken(); // WIP ??
+            patToken = getPatToken(); // WIP ??
         } catch (Exception ex) {
             logger.error("Failed to obtain PAT token", ex);
             throw new WebApplicationException("Failed to obtain PAT token", ex);
