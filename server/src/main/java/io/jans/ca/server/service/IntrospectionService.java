@@ -6,7 +6,7 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.introspection.CorrectUmaPermission;
 import io.jans.ca.server.introspection.*;
-import io.jans.ca.server.op.OpClientFactory;
+import io.jans.ca.server.op.OpClientFactoryImpl;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.spi.ReaderException;
@@ -27,10 +27,10 @@ public class IntrospectionService {
     private HttpService httpService;
     private UmaTokenService umaTokenService;
     private DiscoveryService discoveryService;
-    private OpClientFactory opClientFactory;
+    private OpClientFactoryImpl opClientFactory;
 
     @Inject
-    public IntrospectionService(HttpService httpService, UmaTokenService umaTokenService, DiscoveryService discoveryService, OpClientFactory opClientFactory) {
+    public IntrospectionService(HttpService httpService, UmaTokenService umaTokenService, DiscoveryService discoveryService, OpClientFactoryImpl opClientFactory) {
         this.httpService = httpService;
         this.umaTokenService = umaTokenService;
         this.discoveryService = discoveryService;
