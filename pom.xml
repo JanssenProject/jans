@@ -6,7 +6,7 @@
     <artifactId>jans-client-api-parent</artifactId>
     <packaging>pom</packaging>
     <version>5.0.0-SNAPSHOT</version>
-    <name>oxD</name>
+    <name>jans-client-api</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
@@ -31,10 +31,10 @@
     <modules>
         <module>uma-rs-core</module>
         <module>uma-rs-resteasy</module>
-        <module>oxd-common</module>
-        <module>oxd-client</module>
-        <module>oxd-gen-client</module>
-        <module>oxd-server</module>
+        <module>common</module>
+        <module>client</module>
+        <module>gen-client</module>
+        <module>server</module>
     </modules>
 
     <repositories>
@@ -61,8 +61,8 @@
         </repository>
         <repository>
             <id>local</id>
-            <name>oxd local repository</name>
-            <url>file://${project.basedir}/../oxd-repo</url>
+            <name>jans-client-api local repository</name>
+            <url>file://${project.basedir}/../jans-client-api-repo</url>
         </repository>
     </repositories>
 
@@ -70,7 +70,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>gluu-core-bom</artifactId>
+                <artifactId>jans-core-bom</artifactId>
                 <version>5.0.0-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
@@ -89,17 +89,17 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxd-common</artifactId>
+                <artifactId>jans-api-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxd-client</artifactId>
+                <artifactId>jans-api-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>oxd-server</artifactId>
+                <artifactId>jans-api-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -397,7 +397,7 @@
                                 </goals>
                                 <configuration>
                                     <skip>${skip.swagger.client.generation}</skip>
-                                    <inputSpec>${project.basedir}/oxd-server/src/main/resources/swagger.yaml</inputSpec>
+                                    <inputSpec>${project.basedir}/server/src/main/resources/swagger.yaml</inputSpec>
                                     <output>${project.basedir}/target/generated-sources/swagger</output>
                                     <language>java</language>
                                     <generateApiTests>false</generateApiTests>
@@ -425,7 +425,7 @@
                                 <configuration>
                                     <skip>${skip.swagger.client.generation}</skip>
                                     <target>
-                                        <copy todir="${project.basedir}/oxd-gen-client/src/main/java">
+                                        <copy todir="${project.basedir}/gen-client/src/main/java">
                                             <fileset dir="${project.basedir}/target/generated-sources/swagger/gen"/>
                                         </copy>
                                         <delete dir="${project.basedir}/target"/>
