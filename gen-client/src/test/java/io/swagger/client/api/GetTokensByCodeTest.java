@@ -61,7 +61,7 @@ public class GetTokensByCodeTest {
 
         // refresh token
         final GetAccessTokenByRefreshTokenParams refreshParams = new GetAccessTokenByRefreshTokenParams();
-        refreshParams.setOxdId(site.getOxdId());
+        refreshParams.setRpId(site.getRpId());
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
@@ -82,18 +82,18 @@ public class GetTokensByCodeTest {
         final RegisterSiteResponse authServer = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final String authorizationStr = Tester.getAuthorization(authServer);
 
-        final String code = codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, authorizationStr, authServer.getOxdId());
+        final String code = codeRequest(client, opHost, site.getRpId(), userId, userSecret, clientId, redirectUrls, state, nonce, authorizationStr, authServer.getRpId());
 
         notEmpty(code);
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setCode(code);
         params.setState(state);
         params.setAuthenticationMethod(authenticationMethod);
         params.setAlgorithm(algorithm);
 
-        final GetTokensByCodeResponse resp = client.getTokensByCode(params, authorizationStr, authServer.getOxdId());
+        final GetTokensByCodeResponse resp = client.getTokensByCode(params, authorizationStr, authServer.getRpId());
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -101,16 +101,16 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
+    public static String codeRequest(DevelopersApi client, String opHost, String rpId, String userId, String userSecret, String clientId, String redirectUrls, String state,
                                      String nonce, String authorization) throws Exception {
-        return codeRequest(client, opHost, oxdId, userId, userSecret, clientId, redirectUrls, state, nonce, authorization, null);
+        return codeRequest(client, opHost, rpId, userId, userSecret, clientId, redirectUrls, state, nonce, authorization, null);
     }
 
-    public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
-                                     String nonce, String authorization, String authorizationOxdId) throws Exception {
+    public static String codeRequest(DevelopersApi client, String opHost, String rpId, String userId, String userSecret, String clientId, String redirectUrls, String state,
+                                     String nonce, String authorization, String authorizationRpId) throws Exception {
         SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
 
-        final Request request = buildRequest(authorization, authorizationOxdId, oxdId, userId, userSecret, state, nonce, client);
+        final Request request = buildRequest(authorization, authorizationRpId, rpId, userId, userSecret, state, nonce, client);
 
         final Response response = client.getApiClient().getHttpClient().newCall(request).execute();
 
@@ -120,16 +120,16 @@ public class GetTokensByCodeTest {
 
     }
 
-    private static Request buildRequest(String authorization, String authorizationOxdId, String oxdId, String userId, String userSecret, String state, String nonce, DevelopersApi client) {
+    private static Request buildRequest(String authorization, String authorizationRpId, String rpId, String userId, String userSecret, String state, String nonce, DevelopersApi client) {
 
-        final String json = "{\"oxd_id\":\"" + oxdId + "\",\"username\":\"" + userId + "\",\"password\":\"" + userSecret
+        final String json = "{\"rp_id\":\"" + rpId + "\",\"username\":\"" + userId + "\",\"password\":\"" + userSecret
                 + "\",\"state\":\"" + state + "\",\"nonce\":\"" + nonce + "\"}";
 
         final RequestBody reqBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
 
         com.squareup.okhttp.Request.Builder request = new Request.Builder();
-        if (!Strings.isNullOrEmpty(authorizationOxdId)) {
-            request.addHeader("AuthorizationOxdId", authorizationOxdId);
+        if (!Strings.isNullOrEmpty(authorizationRpId)) {
+            request.addHeader("AuthorizationRpId", authorizationRpId);
         }
         return request
                 .addHeader("Authorization", authorization)

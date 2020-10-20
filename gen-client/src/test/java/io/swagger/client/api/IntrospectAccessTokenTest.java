@@ -25,7 +25,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         final String accessToken = tokenResponse.getAccessToken();
         Tester.notEmpty(accessToken);
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
-        introspectParams.setOxdId(setupResponse.getOxdId());
+        introspectParams.setRpId(setupResponse.getRpId());
         introspectParams.setAccessToken(accessToken);
         //
         final String authorization = "Bearer " + accessToken;
@@ -61,7 +61,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
 
         IntrospectAccessTokenParams iatParams = new IntrospectAccessTokenParams();
         iatParams.setAccessToken(invalidToken);
-        iatParams.setOxdId(setupData.getOxdId());
+        iatParams.setRpId(setupData.getRpId());
         try {
             IntrospectAccessTokenResponse resp = client.introspectAccessToken(iatParams, validHeader, null);
 
@@ -92,7 +92,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
 
         GetClientTokenResponse tokenResponseData = getGetClientTokenResponseData(opHost, client, setupResponse);
         IntrospectAccessTokenParams introspectParams = new IntrospectAccessTokenParams();
-        introspectParams.setOxdId(setupResponse.getOxdId());
+        introspectParams.setRpId(setupResponse.getRpId());
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());
 
         final String invalidAuthString = "Bearer NotAuthorized";
@@ -113,7 +113,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
                                                                         RegisterSiteResponse setupResponse) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "jans_client_api"));
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 

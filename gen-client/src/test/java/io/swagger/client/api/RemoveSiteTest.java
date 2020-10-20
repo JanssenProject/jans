@@ -22,20 +22,20 @@ public class RemoveSiteTest {
         RegisterSiteResponse response = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
 
         RemoveSiteParams params = new RemoveSiteParams();
-        params.setOxdId(response.getOxdId());
+        params.setRpId(response.getRpId());
 
         RemoveSiteResponse removeResponse = api.removeSite(params, Tester.getAuthorization(response), null);
         assertNotNull(removeResponse);
-        assertTrue(StringUtils.isNotEmpty(removeResponse.getOxdId()));
+        assertTrue(StringUtils.isNotEmpty(removeResponse.getRpId()));
     }
 
     @Test
-    public void testRemoveSiteWithInvalidOxdId() throws Exception {
+    public void testRemoveSiteWithInvalidRpId() throws Exception {
         final String someRandomId = UUID.randomUUID().toString();
         final DevelopersApi api = Tester.api();
 
         RemoveSiteParams params = new RemoveSiteParams();
-        params.setOxdId(someRandomId);
+        params.setRpId(someRandomId);
         try {
             api.removeSite(params, Tester.getAuthorization(), null);
         } catch (ApiException e) {

@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -55,7 +55,7 @@ public class GetClientTokenResponse {
    * Get scope
    * @return scope
   **/
-  @Schema(example = "[\"openid\",\"oxd\"]", required = true, description = "")
+  @Schema(example = "[\"openid\",\"rp\"]", required = true, description = "")
   public List<String> getScope() {
     return scope;
   }
@@ -120,7 +120,7 @@ public class GetClientTokenResponse {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -157,7 +157,7 @@ public class GetClientTokenResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
