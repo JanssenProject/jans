@@ -19,7 +19,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @version 2.1, 19/04/2015
  */
 @DataEntry
-@ObjectClass(value = "oxAuthConfiguration")
+@ObjectClass(value = "jansAppConf")
 public class LdapOxAuthConfiguration extends Entry {
 
     private static final long serialVersionUID = 2453308522994526877L;
