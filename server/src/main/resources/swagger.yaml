@@ -383,10 +383,10 @@ paths:
                 title: RegisterSiteResponse
                 required:
                 - op_host
-                - oxd_id
+                - rp_id
                 type: object
                 properties:
-                  oxd_id:
+                  rp_id:
                     type: string
                     example: bcad760f-91ba-46e1-a020-05e4281d91b6
                   op_host:
@@ -426,8 +426,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -518,7 +518,7 @@ paths:
                     type: array
                     example:
                     - openid
-                    - oxd
+                    - rp
                     items:
                       type: string
                   access_token:
@@ -542,8 +542,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -561,7 +561,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -572,10 +572,10 @@ paths:
               title: IntrospectAccessTokenParams
               required:
               - access_token
-              - oxd_id
+              - rp_id
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 access_token:
@@ -674,8 +674,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -686,7 +686,7 @@ paths:
       tags:
       - developers
       summary: Update Site
-      description: Updates site at oxd-server. If something changes in a pre-registered
+      description: Updates site at jans-client-api. If something changes in a pre-registered
         client, you can use this API to update your client in the OP.
       operationId: update-site
       parameters:
@@ -694,7 +694,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -704,10 +704,10 @@ paths:
             schema:
               title: UpdateSiteParams
               required:
-              - oxd_id
+              - rp_id
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: 6F9619FF-8B86-D011-B42D-00CF4FC964FF
                 redirect_uris:
@@ -800,7 +800,7 @@ paths:
                     RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.
                 client_name:
                   type: string
-                  description: oxd will generate its own non-human readable name by
+                  description: rp will generate its own non-human readable name by
                     default if client_name is not specified
                 logo_uri:
                   type: string
@@ -977,11 +977,11 @@ paths:
               schema:
                 title: UpdateSiteResponse
                 required:
-                - oxd_id
+                - rp_id
                 type: object
                 properties:
-                  oxd_id:
-                    $ref: '#/components/schemas/oxd_id'
+                  rp_id:
+                    $ref: '#/components/schemas/rp_id'
         400:
           description: Invalid parameters are provided to endpoint.
           content:
@@ -995,8 +995,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1007,14 +1007,14 @@ paths:
       tags:
       - developers
       summary: Remove Site
-      description: Removes site from oxd-server
+      description: Removes site from jans-client-api
       operationId: remove-site
       parameters:
       - name: Authorization
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1024,10 +1024,10 @@ paths:
             schema:
               title: RemoveSiteParams
               required:
-              - oxd_id
+              - rp_id
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: 6F9619FF-8B86-D011-B42D-00CF4FC964FF
         required: false
@@ -1039,11 +1039,11 @@ paths:
               schema:
                 title: RemoveSiteResponse
                 required:
-                - oxd_id
+                - rp_id
                 type: object
                 properties:
-                  oxd_id:
-                    $ref: '#/components/schemas/oxd_id'
+                  rp_id:
+                    $ref: '#/components/schemas/rp_id'
         400:
           description: Invalid parameters are provided to endpoint.
           content:
@@ -1057,8 +1057,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1076,7 +1076,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1086,10 +1086,10 @@ paths:
             schema:
               title: GetAuthorizationUrlParams
               required:
-              - oxd_id
+              - rp_id
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 scope:
@@ -1159,8 +1159,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1178,7 +1178,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1189,11 +1189,11 @@ paths:
               title: GetTokensByCodeParams
               required:
               - code
-              - oxd_id
+              - rp_id
               - state
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 code:
@@ -1256,8 +1256,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1275,7 +1275,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1286,10 +1286,10 @@ paths:
               title: GetUserInfoParams
               required:
               - access_token
-              - oxd_id
+              - rp_id
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 access_token:
@@ -1322,8 +1322,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1341,7 +1341,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1352,13 +1352,13 @@ paths:
               title: GetLogoutUriParams
               required:
               - id_token_hint
-              - oxd_id
+              - rp_id
               - post_logout_redirect_uri
               - session_state
               - state
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 id_token_hint:
@@ -1399,8 +1399,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1418,7 +1418,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1428,12 +1428,12 @@ paths:
             schema:
               title: GetAccessTokenByRefreshTokenParams
               required:
-              - oxd_id
+              - rp_id
               - refresh_token
               - scope
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 refresh_token:
@@ -1491,8 +1491,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1512,7 +1512,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1523,11 +1523,11 @@ paths:
               title: UmaRsProtectParams
               required:
               - overwrite
-              - oxd_id
+              - rp_id
               - resources
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 overwrite:
@@ -1545,10 +1545,10 @@ paths:
               schema:
                 title: UmaRsProtectResponse
                 required:
-                - oxd_id
+                - rp_id
                 type: object
                 properties:
-                  oxd_id:
+                  rp_id:
                     type: string
                     example: bcad760f-91ba-46e1-a020-05e4281d91b6
         400:
@@ -1564,8 +1564,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1584,7 +1584,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1595,11 +1595,11 @@ paths:
               title: UmaRsModifyParams
               required:
               - http_method
-              - oxd_id
+              - rp_id
               - path
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 path:
@@ -1624,10 +1624,10 @@ paths:
               schema:
                 title: UmaRsModifyResponse
                 required:
-                - oxd_id
+                - rp_id
                 type: object
                 properties:
-                  oxd_id:
+                  rp_id:
                     type: string
                     example: bcad760f-91ba-46e1-a020-05e4281d91b6
         400:
@@ -1643,8 +1643,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1662,7 +1662,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1673,12 +1673,12 @@ paths:
               title: UmaRsCheckAccessParams
               required:
               - http_method
-              - oxd_id
+              - rp_id
               - path
               - rpt
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 rpt:
@@ -1726,8 +1726,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1745,7 +1745,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1755,11 +1755,11 @@ paths:
             schema:
               title: IntrospectRptParams
               required:
-              - oxd_id
+              - rp_id
               - rpt
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 rpt:
@@ -1835,8 +1835,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1854,7 +1854,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1864,11 +1864,11 @@ paths:
             schema:
               title: UmaRpGetRptParams
               required:
-              - oxd_id
+              - rp_id
               - ticket
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 ticket:
@@ -1931,8 +1931,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -1950,7 +1950,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -1961,11 +1961,11 @@ paths:
               title: UmaRpGetClaimsGatheringUrlParams
               required:
               - claims_redirect_uri
-              - oxd_id
+              - rp_id
               - ticket
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 ticket:
@@ -2012,8 +2012,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2031,7 +2031,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -2095,8 +2095,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2176,8 +2176,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2284,7 +2284,7 @@ paths:
                     - phone
                     - mobile_phone
                     - name
-                    - oxd
+                    - rp
                     - email
                     items:
                       type: string
@@ -2581,7 +2581,7 @@ paths:
                       - inum
                     - permission:
                       - role
-                    - oxd: []
+                    - rp: []
                     - email:
                       - email_verified
                       - email
@@ -2606,8 +2606,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2636,8 +2636,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/JsonWebKey'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2655,7 +2655,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: AuthorizationOxdId
+      - name: AuthorizationRpId
         in: header
         schema:
           type: string
@@ -2665,11 +2665,11 @@ paths:
             schema:
               title: GetRequestObjectUriParams
               required:
-              - oxd_id
-              - oxd_host_url
+              - rp_id
+              - rp_host_url
               type: object
               properties:
-                oxd_id:
+                rp_id:
                   type: string
                   example: bcad760f-91ba-46e1-a020-05e4281d91b6
                 params:
@@ -2683,9 +2683,9 @@ paths:
                     by the Authorization Server. Valid values are none, HS256, HS384,
                     HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384,
                     PS512
-                oxd_host_url:
+                rp_host_url:
                   type: string
-                  example: https://<oxd-host>
+                  example: https://<rp-host>
         required: false
       responses:
         200:
@@ -2700,7 +2700,7 @@ paths:
                 properties:
                   request_uri:
                     type: string
-                    example: https://<oxd-host>/get-request-object/d871gpie16np0f5kfv936sc33k
+                    example: https://<rp-host>/get-request-object/d871gpie16np0f5kfv936sc33k
         400:
           description: Invalid parameters are provided to endpoint.
           content:
@@ -2714,8 +2714,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             application/json:
               schema:
@@ -2762,15 +2762,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check oxd-server.log file for
-            details (usually located in /var/log/oxd-server/oxd-server.log).
+          description: Internal error occured. Please check jans-client-api.log file for
+            details (usually located in /var/log/jans-client-api/jans-client-api.log).
           content:
             text/plain:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    oxd_id:
+    rp_id:
       type: string
       example: bcad760f-91ba-46e1-a020-05e4281d91b6
     Condition:

@@ -12,10 +12,10 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsProtectParams implements HasOxdIdParams {
+public class RsProtectParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "resources")
     private List<RsResource> resources;
     @JsonProperty(value = "overwrite")
@@ -24,12 +24,12 @@ public class RsProtectParams implements HasOxdIdParams {
     public RsProtectParams() {
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public List<RsResource> getResources() {
@@ -52,7 +52,7 @@ public class RsProtectParams implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsProtectParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", resources=").append(resources);
         sb.append(", overwrite=").append(overwrite);
         sb.append('}');

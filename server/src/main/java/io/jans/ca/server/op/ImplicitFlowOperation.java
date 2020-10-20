@@ -36,7 +36,7 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
 
     @Override
     public IOpResponse execute(ImplicitFlowParams params) {
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
         if (discovery != null) {
             return requestToken(discovery, params);
         }

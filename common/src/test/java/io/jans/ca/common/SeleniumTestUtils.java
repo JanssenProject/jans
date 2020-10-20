@@ -131,7 +131,7 @@ public class SeleniumTestUtils {
             }
 
             if(CollectionUtils.isEmpty(scopes)) {
-                scopes = Lists.newArrayList("openid", "profile", "oxd", "uma_protection");
+                scopes = Lists.newArrayList("openid", "profile", "jans_client_api", "uma_protection");
             }
             List<ResponseType> resTypes = responseTypes.stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList());
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(resTypes, clientId, scopes, redirectUrls.split(" ")[0], nonce);

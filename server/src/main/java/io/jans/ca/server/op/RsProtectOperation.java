@@ -58,7 +58,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getOxdId()).getToken();
+                return getUmaTokenService().getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -74,7 +74,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             LOG.debug("Failed to register resource. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                getUmaTokenService().obtainPat(params.getRpId()); // force to refresh PAT
                 registrar.register(params.getResources());
             } else {
                 throw e;
@@ -86,7 +86,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
         persist(registrar, rp);
 
-        return new RsProtectResponse(rp.getOxdId());
+        return new RsProtectResponse(rp.getRpId());
     }
 
     private void persist(ResourceRegistrar registrar, Rp rp) throws IOException {
@@ -168,8 +168,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                 throw new HttpException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
             } else {
                 // remove existing resources, overwrite=true
-                UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
-                String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
+                UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
+                String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
                 UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientEngine());
                 for (UmaResource resource : existingUmaResources) {
 

@@ -3,16 +3,16 @@ package io.jans.ca.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.ca.common.params.HasOxdIdParams;
+import io.jans.ca.common.params.HasRpIdParams;
 
 /**
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsProtectParams2 implements HasOxdIdParams {
+public class RsProtectParams2 implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "resources")
     private JsonNode resources;
     @JsonProperty(value = "protection_access_token")
@@ -31,12 +31,12 @@ public class RsProtectParams2 implements HasOxdIdParams {
         this.protection_access_token = token;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public JsonNode getResources() {
@@ -59,7 +59,7 @@ public class RsProtectParams2 implements HasOxdIdParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsProtectParams");
-        sb.append("{oxd_id='").append(oxd_id).append('\'');
+        sb.append("{rp_id='").append(rp_id).append('\'');
         sb.append(", resources=").append(resources);
         sb.append(", protection_access_token=").append(protection_access_token);
         sb.append(", overwrite=").append(overwrite);

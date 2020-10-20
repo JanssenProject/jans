@@ -35,7 +35,7 @@ public class RpSyncServiceTest {
 
     @BeforeClass
     public void setUp() throws IOException, ConfigurationException {
-        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml")));
+        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("jans-client-api.yml")));
         persistenceService.create();
         rpService.removeAllRps();
         rpService.load();
@@ -124,14 +124,14 @@ public class RpSyncServiceTest {
     @Test
     public void testRpGrantTypesSync(String host, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUrl) throws IOException {
         RegisterSiteResponse resp = RegisterSiteTest.registerSite(Tester.newClient(host), opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, true);
-        Rp oxdRpBeforeSync = rpService.getRps().get(resp.getOxdId());//grant_types: [authorization_code, uma-ticket, client_credentials]
+        Rp rpBeforeSync = rpService.getRps().get(resp.getRpId());//grant_types: [authorization_code, uma-ticket, client_credentials]
         final RegisterResponse response = rpSyncService.readClientFromRp(resp.getClientRegistrationClientUri(), resp.getClientRegistrationAccessToken());
 
         Rp opClientRp = RegisterResponseMapper.createRp(response);//grant_types: [refresh_token, implicit, authorization_code, uma-ticket, client_credentials]
-        Rp oxdRpAfterSync = rpSyncService.getRpTest(resp.getOxdId());//grant_types: [refresh_token, implicit, authorization_code, uma-ticket, client_credentials]
+        Rp rpAfterSync = rpSyncService.getRpTest(resp.getRpId());//grant_types: [refresh_token, implicit, authorization_code, uma-ticket, client_credentials]
         //grant_types of Rp before sync are not equal to grant_types of client at OP
-        assertNotSame(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(oxdRpBeforeSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
+        assertNotSame(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(rpBeforeSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
         //grant_types of Rp after sync are equal to grant_types of client at OP
-        assertEquals(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(oxdRpAfterSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
+        assertEquals(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(rpAfterSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
     }
 }

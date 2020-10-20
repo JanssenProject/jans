@@ -76,8 +76,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         return persistenceService.update(rp);
     }
 
-    public Rp getRp(String oxdId) {
-        return persistenceService.getRp(oxdId);
+    public Rp getRp(String rpId) {
+        return persistenceService.getRp(rpId);
     }
 
     public boolean removeAllRps() {
@@ -101,7 +101,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public boolean remove(String oxdId) {
-        return persistenceService.remove(oxdId);
+    public boolean remove(String rpId) {
+        return persistenceService.remove(rpId);
     }
 }

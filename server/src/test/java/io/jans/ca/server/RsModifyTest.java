@@ -44,26 +44,26 @@ public class RsModifyTest {
     public static RsModifyResponse modifyResourcesWithScopes(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
 
         final RsModifyParams params2 = new RsModifyParams();
-        params2.setOxdId(site.getOxdId());
+        params2.setRpId(site.getRpId());
         params2.setHttpMethod(resources.get(0).getConditions().get(0).getHttpMethods().get(0));
         params2.setPath(resources.get(0).getPath());
         params2.setScopes(Lists.newArrayList("http://photoz.example.com/dev/actions/see"));
 
         RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(site), null, params2);
-        assertNotNull(response.getOxdId());
+        assertNotNull(response.getRpId());
         return response;
     }
 
     public static RsModifyResponse modifyResourcesWithScopeExpression(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources, String correctScopeExpression) throws JsonProcessingException {
 
         final RsModifyParams params2 = new RsModifyParams();
-        params2.setOxdId(site.getOxdId());
+        params2.setRpId(site.getRpId());
         params2.setHttpMethod(resources.get(0).getConditions().get(0).getHttpMethods().get(0));
         params2.setPath(resources.get(0).getPath());
         params2.setScopeExpression(correctScopeExpression.replaceAll("'", "\""));
 
         RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(site), null, params2);
-        assertNotNull(response.getOxdId());
+        assertNotNull(response.getRpId());
         return response;
     }
 }

@@ -23,10 +23,10 @@ public class RemoveSiteTest {
         RegisterSiteResponse resp = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         assertNotNull(resp);
 
-        notEmpty(resp.getOxdId());
+        notEmpty(resp.getRpId());
 
-        RemoveSiteResponse removeResponse = client.removeSite(Tester.getAuthorization(resp), null, new RemoveSiteParams(resp.getOxdId()));
+        RemoveSiteResponse removeResponse = client.removeSite(Tester.getAuthorization(resp), null, new RemoveSiteParams(resp.getRpId()));
         assertNotNull(removeResponse);
-        assertNotNull(removeResponse.getOxdId());
+        assertNotNull(removeResponse.getRpId());
     }
 }

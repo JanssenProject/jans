@@ -3,7 +3,7 @@ package io.jans.ca.server.persistence.providers;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.PersistenceConfigKeys;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.persistence.configuration.GluuConfiguration;
 import io.jans.util.exception.ConfigurationException;
@@ -20,10 +20,10 @@ public class GluuPersistenceConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(JDBCPersistenceProvider.class);
 
-    private OxdServerConfiguration configuration;
+    private RpServerConfiguration configuration;
     private Properties connectionProperties;
 
-    public GluuPersistenceConfiguration(OxdServerConfiguration configuration) {
+    public GluuPersistenceConfiguration(RpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -61,7 +61,7 @@ public class GluuPersistenceConfiguration {
         return decryptedConnectionProperties;
     }
 
-    public static Optional<GluuConfiguration> asGluuConfiguration(OxdServerConfiguration configuration) {
+    public static Optional<GluuConfiguration> asGluuConfiguration(RpServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
@@ -76,30 +76,30 @@ public class GluuPersistenceConfiguration {
     private void validate(Optional<GluuConfiguration> gluuConfiguration) {
 
         if (!gluuConfiguration.isPresent()) {
-            LOG.error("The `storage_configuration` has been not provided in `client-api-server.yml`");
-            throw new RuntimeException("The `storage_configuration` has been not provided in `client-api-server.yml`");
+            LOG.error("The `storage_configuration` has been not provided in `jans-client-api.yml`");
+            throw new RuntimeException("The `storage_configuration` has been not provided in `jans-client-api.yml`");
         }
 
         GluuConfiguration configuration = gluuConfiguration.get();
 
         if (StringUtils.isBlank(configuration.getBaseDn())) {
-            LOG.error("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `client-api-server.yml`)");
-            throw new RuntimeException("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `client-api-server.yml`)");
+            LOG.error("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `jans-client-api.yml`)");
+            throw new RuntimeException("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `jans-client-api.yml`)");
         }
 
         if (StringUtils.isBlank(configuration.getType())) {
-            LOG.error("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `client-api-server.yml`)");
-            throw new RuntimeException("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `client-api-server.yml`)");
+            LOG.error("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `jans-client-api.yml`)");
+            throw new RuntimeException("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `jans-client-api.yml`)");
         }
 
         if (StringUtils.isBlank(configuration.getConnection())) {
-            LOG.error("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `client-api-server.yml`)");
-            throw new RuntimeException("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `client-api-server.yml`)");
+            LOG.error("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `jans-client-api.yml`)");
+            throw new RuntimeException("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `jans-client-api.yml`)");
         }
 
         if (StringUtils.isBlank(configuration.getSalt())) {
-            LOG.error("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `client-api-server.yml`)");
-            throw new RuntimeException("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `client-api-server.yml`)");
+            LOG.error("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `jans-client-api.yml`)");
+            throw new RuntimeException("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `jans-client-api.yml`)");
         }
     }
 }

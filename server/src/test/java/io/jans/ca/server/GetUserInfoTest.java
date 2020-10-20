@@ -29,7 +29,7 @@ public class GetUserInfoTest {
         final GetTokensByCodeResponse2 tokens = requestTokens(client, opHost, site, userId, userSecret, site.getClientId(), redirectUrls);
 
         GetUserInfoParams params = new GetUserInfoParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
@@ -43,7 +43,7 @@ public class GetUserInfoTest {
         final String state = CoreUtils.secureRandomString();
         final String nonce = CoreUtils.secureRandomString();
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce));
         params.setState(state);
 

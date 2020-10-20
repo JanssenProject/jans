@@ -9,21 +9,21 @@ import java.util.List;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAccessTokenByRefreshTokenParams implements HasOxdIdParams {
+public class GetAccessTokenByRefreshTokenParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "refresh_token")
     private String refresh_token;
     @JsonProperty(value = "scope")
     private List<String> scope;
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getRefreshToken() {
@@ -45,7 +45,7 @@ public class GetAccessTokenByRefreshTokenParams implements HasOxdIdParams {
     @Override
     public String toString() {
         return "GetAccessTokenByRefreshTokenParams{" +
-                "oxd_id='" + oxd_id + '\'' +
+                "rp_id='" + rp_id + '\'' +
                 ", refresh_token='" + refresh_token + '\'' +
                 ", scope=" + scope +
                 '}';

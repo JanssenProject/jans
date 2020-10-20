@@ -31,7 +31,7 @@ public class CheckAccessTokenTest {
         final CheckAccessTokenParams params = new CheckAccessTokenParams();
         params.setAccessToken(response.getAccessToken());
         params.setIdToken(response.getIdToken());
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
 
         final CheckAccessTokenResponse checkR = client.checkAccessToken(Tester.getAuthorization(site), null, params);
         assertNotNull(checkR);

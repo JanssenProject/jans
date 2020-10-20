@@ -5,7 +5,7 @@ package io.jans.ca.common.params;
  * @version 0.9, 23/05/2016
  */
 
-public interface HasOxdIdParams extends IParams {
+public interface HasRpIdParams extends IParams {
 
-    String getOxdId();
+    String getRpId();
 }

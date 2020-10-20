@@ -41,7 +41,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     public IOpResponse execute(GetUserInfoParams params) throws IOException {
         getValidationService().validate(params);
 
-        UserInfoClient client = getOpClientFactory().createUserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId()).getUserInfoEndpoint());
+        UserInfoClient client = getOpClientFactory().createUserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId()).getUserInfoEndpoint());
         client.setExecutor(getHttpService().getClientExecutor());
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 

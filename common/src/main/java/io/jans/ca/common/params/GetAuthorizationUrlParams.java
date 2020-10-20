@@ -12,10 +12,10 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationUrlParams implements HasOxdIdParams {
+public class GetAuthorizationUrlParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "acr_values")
     private List<String> acr_values;
     @JsonProperty(value = "prompt")
@@ -72,12 +72,12 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         this.prompt = prompt;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public List<String> getAcrValues() {
@@ -135,13 +135,13 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
 
         GetAuthorizationUrlParams that = (GetAuthorizationUrlParams) o;
 
-        return !(acr_values != null ? !acr_values.equals(that.acr_values) : that.acr_values != null) && !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
+        return !(acr_values != null ? !acr_values.equals(that.acr_values) : that.acr_values != null) && !(rp_id != null ? !rp_id.equals(that.rp_id) : that.rp_id != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = oxd_id != null ? oxd_id.hashCode() : 0;
+        int result = rp_id != null ? rp_id.hashCode() : 0;
         result = 31 * result + (acr_values != null ? acr_values.hashCode() : 0);
         return result;
     }
@@ -149,7 +149,7 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
     @Override
     public String toString() {
         return "GetAuthorizationUrlParams{" +
-                "oxd_id='" + oxd_id + '\'' +
+                "rp_id='" + rp_id + '\'' +
                 ", acr_values=" + acr_values +
                 ", prompt='" + prompt + '\'' +
                 ", scope=" + scope +

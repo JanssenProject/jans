@@ -12,7 +12,7 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegisterSiteParams implements HasOxdIdParams {
+public class RegisterSiteParams implements HasRpIdParams {
     @JsonProperty(value = "op_host")
     private String op_host;
     @JsonProperty(value = "op_discovery_path")
@@ -951,7 +951,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
 
     @JsonIgnore
     @Override
-    public String getOxdId() {
+    public String getRpId() {
         return "no";
     }
 }

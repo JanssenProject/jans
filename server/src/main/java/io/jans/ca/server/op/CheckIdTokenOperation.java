@@ -36,7 +36,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
     @Override
     public IOpResponse execute(CheckIdTokenParams params) {
         try {
-            OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+            OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
 
             final Rp rp = getRp();
             final String idToken = params.getIdToken();
@@ -46,7 +46,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .idToken(jwt)
                     .keyService(getKeyService())
                     .opClientFactory(getOpClientFactory())
-                    .oxdServerConfiguration(getConfigurationService().getConfiguration())
+                    .rpServerConfiguration(getConfigurationService().getConfiguration())
                     .rp(rp)
                     .build();
 

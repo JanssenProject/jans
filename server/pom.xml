@@ -130,7 +130,7 @@
                                 implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+                            <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
                         </transformer>
                         <transformer
                                 implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
@@ -183,7 +183,7 @@
                             <skipAssembly>${generate.windows.exe}</skipAssembly>
                             <archive>
                                 <manifest>
-                                    <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+                                    <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
                                 </manifest>
                             </archive>
                             <descriptors>
@@ -549,7 +549,7 @@
                                 <configuration>
                                     <archive>
                                         <manifest>
-                                            <mainClass>io.jans.ca.server.OxdServerApplication</mainClass>
+                                            <mainClass>io.jans.ca.server.RpServerApplication</mainClass>
                                         </manifest>
                                     </archive>
                                     <descriptors>

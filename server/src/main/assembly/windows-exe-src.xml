@@ -19,14 +19,14 @@
     </dependencySets>
     <files>
         <file>
-            <source>${project.basedir}/src/main/resources/windows/client-api-server.yml</source>
+            <source>${project.basedir}/src/main/resources/windows/jans-client-api.yml</source>
             <outputDirectory>/conf</outputDirectory>
-            <destName>oxd-server-win.yml</destName>
+            <destName>jans-client-api-win.yml</destName>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/client-api-server.yml</source>
+            <source>${project.basedir}/src/main/resources/jans-client-api.yml</source>
             <outputDirectory>/conf</outputDirectory>
-            <destName>oxd-server.yml</destName>
+            <destName>jans-client-api.yml</destName>
         </file>
         <file>
             <source>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows/amd64/prunsrv.exe</source>
@@ -69,7 +69,7 @@
             <directory>${project.basedir}/src/main/bin</directory>
             <outputDirectory>/bin</outputDirectory>
             <includes>
-                <include>oxd*</include>
+                <include>jans-client-api*</include>
                 <include>ls*</include>
             </includes>
         </fileSet>
