@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>jans-api-gen-client</artifactId>
+    <artifactId>jans-client-api-gen</artifactId>
     <packaging>jar</packaging>
-    <name>jans-api-gen-client</name>
+    <name>jans-client-api-gen</name>
     <version>5.0.0-SNAPSHOT</version>
     <url>https://github.com/swagger-api/swagger-codegen</url>
     <description>Swagger Java</description>
@@ -41,6 +41,7 @@
     </developers>
 
     <build>
+        <finalName>jans-client-api-gen</finalName>
         <filters>
             <filter>profiles/${cfg}/test-data.properties</filter>
         </filters>
@@ -202,7 +203,7 @@
     <dependencies>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-common</artifactId>
+            <artifactId>jans-client-api-common</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -212,7 +213,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-common</artifactId>
+            <artifactId>jans-client-api-common</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
