@@ -19,7 +19,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @version 0.9, 03/01/2013
  */
 @DataEntry
-@ObjectClass(value = "oxAuthConfiguration")
+@ObjectClass(value = "jansAppConf")
 public class Conf {
     @DN
     private String dn;
