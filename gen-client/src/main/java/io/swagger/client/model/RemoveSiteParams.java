@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,30 +27,30 @@ import java.io.IOException;
 
 
 public class RemoveSiteParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
-  public RemoveSiteParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public RemoveSiteParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "6F9619FF-8B86-D011-B42D-00CF4FC964FF", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -58,12 +58,12 @@ public class RemoveSiteParams {
       return false;
     }
     RemoveSiteParams removeSiteParams = (RemoveSiteParams) o;
-    return Objects.equals(this.oxdId, removeSiteParams.oxdId);
+    return Objects.equals(this.rpId, removeSiteParams.rpId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId);
+    return Objects.hash(rpId);
   }
 
 
@@ -72,7 +72,7 @@ public class RemoveSiteParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class RemoveSiteParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -81,7 +81,7 @@ public class RemoveSiteParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

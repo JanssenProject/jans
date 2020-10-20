@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -397,7 +397,7 @@ public class GetDiscoveryResponse {
    * Get scopesSupported
    * @return scopesSupported
   **/
-  @Schema(example = "[\"owner\",\"casa\",\"address\",\"clientinfo\",\"user_name\",\"openid\",\"profile\",\"uma_protection\",\"admin\",\"permission\",\"manage\",\"phone\",\"mobile_phone\",\"name\",\"oxd\",\"email\"]", description = "")
+  @Schema(example = "[\"owner\",\"casa\",\"address\",\"clientinfo\",\"user_name\",\"openid\",\"profile\",\"uma_protection\",\"admin\",\"permission\",\"manage\",\"phone\",\"mobile_phone\",\"name\",\"rp\",\"email\"]", description = "")
   public List<String> getScopesSupported() {
     return scopesSupported;
   }
@@ -1141,7 +1141,7 @@ public class GetDiscoveryResponse {
    * Get scopeToClaimsMapping
    * @return scopeToClaimsMapping
   **/
-  @Schema(example = "[{\"address\":[\"formatted\",\"postal_code\",\"street_address\",\"locality\",\"country\",\"region\"]},{\"owner\":[]},{\"manage\":[]},{\"profile\":[\"name\",\"family_name\",\"given_name\",\"middle_name\",\"nickname\",\"preferred_username\",\"profile\",\"picture\",\"website\",\"gender\",\"birthdate\",\"zoneinfo\",\"locale\",\"updated_at\"]},{\"mobile_phone\":[\"phone_mobile_number\"]},{\"phone\":[\"phone_number_verified\",\"phone_number\"]},{\"clientinfo\":[\"name\",\"inum\"]},{\"permission\":[\"role\"]},{\"oxd\":[]},{\"email\":[\"email_verified\",\"email\"]},{\"casa\":[\"email\"]},{\"user_name\":[\"user_name\"]},{\"name\":[]},{\"openid\":[]},{\"uma_protection\":[]},{\"admin\":[]}]", description = "")
+  @Schema(example = "[{\"address\":[\"formatted\",\"postal_code\",\"street_address\",\"locality\",\"country\",\"region\"]},{\"owner\":[]},{\"manage\":[]},{\"profile\":[\"name\",\"family_name\",\"given_name\",\"middle_name\",\"nickname\",\"preferred_username\",\"profile\",\"picture\",\"website\",\"gender\",\"birthdate\",\"zoneinfo\",\"locale\",\"updated_at\"]},{\"mobile_phone\":[\"phone_mobile_number\"]},{\"phone\":[\"phone_number_verified\",\"phone_number\"]},{\"clientinfo\":[\"name\",\"inum\"]},{\"permission\":[\"role\"]},{\"rp\":[]},{\"email\":[\"email_verified\",\"email\"]},{\"casa\":[\"email\"]},{\"user_name\":[\"user_name\"]},{\"name\":[]},{\"openid\":[]},{\"uma_protection\":[]},{\"admin\":[]}]", description = "")
   public Object getScopeToClaimsMapping() {
     return scopeToClaimsMapping;
   }
@@ -1152,7 +1152,7 @@ public class GetDiscoveryResponse {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -1271,7 +1271,7 @@ public class GetDiscoveryResponse {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

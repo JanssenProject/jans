@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -31,8 +31,8 @@ import java.util.Map;
 
 
 public class UpdateSiteParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("redirect_uris")
   private List<String> redirectUris = null;
@@ -184,22 +184,22 @@ public class UpdateSiteParams {
   @SerializedName("spontaneous_scopes")
   private List<String> spontaneousScopes = null;
 
-  public UpdateSiteParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public UpdateSiteParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "6F9619FF-8B86-D011-B42D-00CF4FC964FF", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public UpdateSiteParams redirectUris(List<String> redirectUris) {
@@ -620,10 +620,10 @@ public class UpdateSiteParams {
   }
 
    /**
-   * oxd will generate its own non-human readable name by default if client_name is not specified
+   * rp will generate its own non-human readable name by default if client_name is not specified
    * @return clientName
   **/
-  @Schema(description = "oxd will generate its own non-human readable name by default if client_name is not specified")
+  @Schema(description = "rp will generate its own non-human readable name by default if client_name is not specified")
   public String getClientName() {
     return clientName;
   }
@@ -1216,7 +1216,7 @@ public class UpdateSiteParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -1224,7 +1224,7 @@ public class UpdateSiteParams {
       return false;
     }
     UpdateSiteParams updateSiteParams = (UpdateSiteParams) o;
-    return Objects.equals(this.oxdId, updateSiteParams.oxdId) &&
+    return Objects.equals(this.rpId, updateSiteParams.rpId) &&
         Objects.equals(this.redirectUris, updateSiteParams.redirectUris) &&
         Objects.equals(this.postLogoutRedirectUris, updateSiteParams.postLogoutRedirectUris) &&
         Objects.equals(this.responseTypes, updateSiteParams.responseTypes) &&
@@ -1279,7 +1279,7 @@ public class UpdateSiteParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, redirectUris, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, claimsRedirectUri, clientTokenEndpointAuthSigningAlg, clientName, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
+    return Objects.hash(rpId, redirectUris, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, claimsRedirectUri, clientTokenEndpointAuthSigningAlg, clientName, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
   }
 
 
@@ -1288,7 +1288,7 @@ public class UpdateSiteParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class UpdateSiteParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    redirectUris: ").append(toIndentedString(redirectUris)).append("\n");
     sb.append("    postLogoutRedirectUris: ").append(toIndentedString(postLogoutRedirectUris)).append("\n");
     sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
@@ -1347,7 +1347,7 @@ public class UpdateSiteParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

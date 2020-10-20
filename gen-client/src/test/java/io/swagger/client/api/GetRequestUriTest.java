@@ -20,14 +20,14 @@ public class GetRequestUriTest {
         final GetRpJwksResponse getRpJwksResponse = api.getRpJwks();
         //update site with jwks
         UpdateSiteParams updateSiteParams = new UpdateSiteParams();
-        updateSiteParams.setOxdId(site.getOxdId());
+        updateSiteParams.setRpId(site.getRpId());
         updateSiteParams.setJwks(Jackson2.asJson(getRpJwksResponse));
         updateSiteParams.setRequestObjectSigningAlg("RS256");
         api.updateSite(updateSiteParams, Tester.getAuthorization(site), null);
         //Request uri
         GetRequestObjectUriParams getRequestUriParams = new GetRequestObjectUriParams();
-        getRequestUriParams.setOxdId(site.getOxdId());
-        getRequestUriParams.setOxdHostUrl(host);
+        getRequestUriParams.setRpId(site.getRpId());
+        getRequestUriParams.setRpHostUrl(host);
         GetRequestObjectUriResponse getRequestObjectUriResponse = api.getRequestObjectUri(getRequestUriParams, Tester.getAuthorization(site), null);
         assertNotNull(getRequestObjectUriResponse.getRequestUri());
 

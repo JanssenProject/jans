@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -30,8 +30,8 @@ import java.util.Map;
 
 
 public class GetRequestObjectUriParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("params")
   private Map<String, Object> params = null;
@@ -39,25 +39,25 @@ public class GetRequestObjectUriParams {
   @SerializedName("request_object_signing_alg")
   private String requestObjectSigningAlg = null;
 
-  @SerializedName("oxd_host_url")
-  private String oxdHostUrl = null;
+  @SerializedName("rp_host_url")
+  private String rpHostUrl = null;
 
-  public GetRequestObjectUriParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public GetRequestObjectUriParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public GetRequestObjectUriParams params(Map<String, Object> params) {
@@ -104,27 +104,27 @@ public class GetRequestObjectUriParams {
     this.requestObjectSigningAlg = requestObjectSigningAlg;
   }
 
-  public GetRequestObjectUriParams oxdHostUrl(String oxdHostUrl) {
-    this.oxdHostUrl = oxdHostUrl;
+  public GetRequestObjectUriParams rpHostUrl(String rpHostUrl) {
+    this.rpHostUrl = rpHostUrl;
     return this;
   }
 
    /**
-   * Get oxdHostUrl
-   * @return oxdHostUrl
+   * Get rpHostUrl
+   * @return rpHostUrl
   **/
-  @Schema(example = "https://<oxd-host>", required = true, description = "")
-  public String getOxdHostUrl() {
-    return oxdHostUrl;
+  @Schema(example = "https://<rp-host>", required = true, description = "")
+  public String getRpHostUrl() {
+    return rpHostUrl;
   }
 
-  public void setOxdHostUrl(String oxdHostUrl) {
-    this.oxdHostUrl = oxdHostUrl;
+  public void setRpHostUrl(String rpHostUrl) {
+    this.rpHostUrl = rpHostUrl;
   }
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -132,15 +132,15 @@ public class GetRequestObjectUriParams {
       return false;
     }
     GetRequestObjectUriParams getRequestObjectUriParams = (GetRequestObjectUriParams) o;
-    return Objects.equals(this.oxdId, getRequestObjectUriParams.oxdId) &&
+    return Objects.equals(this.rpId, getRequestObjectUriParams.rpId) &&
         Objects.equals(this.params, getRequestObjectUriParams.params) &&
         Objects.equals(this.requestObjectSigningAlg, getRequestObjectUriParams.requestObjectSigningAlg) &&
-        Objects.equals(this.oxdHostUrl, getRequestObjectUriParams.oxdHostUrl);
+        Objects.equals(this.rpHostUrl, getRequestObjectUriParams.rpHostUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, params, requestObjectSigningAlg, oxdHostUrl);
+    return Objects.hash(rpId, params, requestObjectSigningAlg, rpHostUrl);
   }
 
 
@@ -149,10 +149,10 @@ public class GetRequestObjectUriParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetRequestObjectUriParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    params: ").append(toIndentedString(params)).append("\n");
     sb.append("    requestObjectSigningAlg: ").append(toIndentedString(requestObjectSigningAlg)).append("\n");
-    sb.append("    oxdHostUrl: ").append(toIndentedString(oxdHostUrl)).append("\n");
+    sb.append("    rpHostUrl: ").append(toIndentedString(rpHostUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -161,7 +161,7 @@ public class GetRequestObjectUriParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

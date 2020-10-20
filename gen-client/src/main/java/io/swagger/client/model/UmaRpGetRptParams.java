@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -31,8 +31,8 @@ import java.util.Map;
 
 
 public class UmaRpGetRptParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("ticket")
   private String ticket = null;
@@ -58,22 +58,22 @@ public class UmaRpGetRptParams {
   @SerializedName("params")
   private Map<String, String> params = null;
 
-  public UmaRpGetRptParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public UmaRpGetRptParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public UmaRpGetRptParams ticket(String ticket) {
@@ -238,7 +238,7 @@ public class UmaRpGetRptParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -246,7 +246,7 @@ public class UmaRpGetRptParams {
       return false;
     }
     UmaRpGetRptParams umaRpGetRptParams = (UmaRpGetRptParams) o;
-    return Objects.equals(this.oxdId, umaRpGetRptParams.oxdId) &&
+    return Objects.equals(this.rpId, umaRpGetRptParams.rpId) &&
         Objects.equals(this.ticket, umaRpGetRptParams.ticket) &&
         Objects.equals(this.claimToken, umaRpGetRptParams.claimToken) &&
         Objects.equals(this.claimTokenFormat, umaRpGetRptParams.claimTokenFormat) &&
@@ -259,7 +259,7 @@ public class UmaRpGetRptParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, ticket, claimToken, claimTokenFormat, pct, rpt, scope, state, params);
+    return Objects.hash(rpId, ticket, claimToken, claimTokenFormat, pct, rpt, scope, state, params);
   }
 
 
@@ -268,7 +268,7 @@ public class UmaRpGetRptParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRpGetRptParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    ticket: ").append(toIndentedString(ticket)).append("\n");
     sb.append("    claimToken: ").append(toIndentedString(claimToken)).append("\n");
     sb.append("    claimTokenFormat: ").append(toIndentedString(claimTokenFormat)).append("\n");
@@ -285,7 +285,7 @@ public class UmaRpGetRptParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

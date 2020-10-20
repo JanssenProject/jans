@@ -45,26 +45,26 @@ public class RsModifyTest {
 
     public static UmaRsModifyResponse modifyResourcesWithScopes(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
         final UmaRsModifyParams params = new UmaRsModifyParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         RsResource rsResource = Jackson2.createJsonMapper().convertValue(resources.get(0), RsResource.class);
         params.setHttpMethod(rsResource.getConditions().get(0).getHttpMethods().get(0));
         params.setPath(rsResource.getPath());
         params.setScopes(Lists.newArrayList("http://photoz.example.com/dev/actions/see"));
 
         final UmaRsModifyResponse resp = client.umaRsModify(params, getAuthorization(site), null);
-        assertNotNull(resp.getOxdId());
+        assertNotNull(resp.getRpId());
         return resp;
     }
 
     public static UmaRsModifyResponse modifyResourcesWithScopeExpression(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources, String correctScopeExpression) throws Exception {
         final UmaRsModifyParams params = new UmaRsModifyParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setScopeExpression(correctScopeExpression.replaceAll("'", "\""));
 
         final UmaRsModifyResponse resp = client.umaRsModify(params, getAuthorization(site), null);
-        assertNotNull(resp.getOxdId());
+        assertNotNull(resp.getRpId());
         return resp;
     }
 }

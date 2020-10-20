@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -29,8 +29,8 @@ import java.util.List;
 
 
 public class UmaRsModifyParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("path")
   private String path = null;
@@ -44,22 +44,22 @@ public class UmaRsModifyParams {
   @SerializedName("scope_expression")
   private String scopeExpression = null;
 
-  public UmaRsModifyParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public UmaRsModifyParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public UmaRsModifyParams path(String path) {
@@ -144,7 +144,7 @@ public class UmaRsModifyParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -152,7 +152,7 @@ public class UmaRsModifyParams {
       return false;
     }
     UmaRsModifyParams umaRsModifyParams = (UmaRsModifyParams) o;
-    return Objects.equals(this.oxdId, umaRsModifyParams.oxdId) &&
+    return Objects.equals(this.rpId, umaRsModifyParams.rpId) &&
         Objects.equals(this.path, umaRsModifyParams.path) &&
         Objects.equals(this.httpMethod, umaRsModifyParams.httpMethod) &&
         Objects.equals(this.scopes, umaRsModifyParams.scopes) &&
@@ -161,7 +161,7 @@ public class UmaRsModifyParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, path, httpMethod, scopes, scopeExpression);
+    return Objects.hash(rpId, path, httpMethod, scopes, scopeExpression);
   }
 
 
@@ -170,7 +170,7 @@ public class UmaRsModifyParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class UmaRsModifyParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    httpMethod: ").append(toIndentedString(httpMethod)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
@@ -183,7 +183,7 @@ public class UmaRsModifyParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

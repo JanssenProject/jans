@@ -30,11 +30,11 @@ public class DifferentAuthServerTest {
         final GetTokensByCodeResponse tokens = requestTokens(client, opHost, site, authServerResp, userId, userSecret, site.getClientId(), redirectUrls);
 
         final io.swagger.client.model.GetUserInfoParams params = new GetUserInfoParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
-        final Map<String, Object> resp = client.getUserInfo(params, getAuthorization(authServerResp), authServerResp.getOxdId());
+        final Map<String, Object> resp = client.getUserInfo(params, getAuthorization(authServerResp), authServerResp.getRpId());
         Assert.assertNotNull(resp);
         assertFalse(resp.isEmpty());
         Assert.assertNotNull(resp.get("sub"));
@@ -54,10 +54,10 @@ public class DifferentAuthServerTest {
         final UmaRsCheckAccessResponse checkAccess = checkAccess(client, site, authServerResp, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
-        final UmaRpGetRptResponse response = client.umaRpGetRpt(params, getAuthorization(authServerResp), authServerResp.getOxdId());
+        final UmaRpGetRptResponse response = client.umaRpGetRpt(params, getAuthorization(authServerResp), authServerResp.getRpId());
 
         Assert.assertNotNull(response);
 
@@ -67,23 +67,23 @@ public class DifferentAuthServerTest {
 
     public static UmaRsProtectResponse protectResources(DevelopersApi client, RegisterSiteResponse site, RegisterSiteResponse authServerResp, List<RsResource> resources) throws Exception {
         final UmaRsProtectParams params = new UmaRsProtectParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(resources);
 
-        final UmaRsProtectResponse resp = client.umaRsProtect(params, getAuthorization(authServerResp), authServerResp.getOxdId());
+        final UmaRsProtectResponse resp = client.umaRsProtect(params, getAuthorization(authServerResp), authServerResp.getRpId());
         assertNotNull(resp);
         return resp;
     }
 
     public static UmaRsCheckAccessResponse checkAccess(DevelopersApi client, RegisterSiteResponse site, RegisterSiteResponse authServer, List<String> scopeList) throws Exception {
         final UmaRsCheckAccessParams params = new UmaRsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");
         params.setScopes(scopeList);
 
-        final ApiResponse<UmaRsCheckAccessResponse> apiResp = client.umaRsCheckAccessWithHttpInfo(params, getAuthorization(authServer), authServer.getOxdId());
+        final ApiResponse<UmaRsCheckAccessResponse> apiResp = client.umaRsCheckAccessWithHttpInfo(params, getAuthorization(authServer), authServer.getRpId());
 
         assertEquals(apiResp.getStatusCode(), 200)  ;  //fixme should be 401
         assertNotNull(apiResp.getData());
@@ -98,11 +98,11 @@ public class DifferentAuthServerTest {
         final String nonce = CoreUtils.secureRandomString();
 
         final io.swagger.client.model.GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
-        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
+        params.setRpId(site.getRpId());
+        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getRpId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokensByCode(params, getAuthorization(authServer), authServer.getOxdId());
+        final GetTokensByCodeResponse resp = client.getTokensByCode(params, getAuthorization(authServer), authServer.getRpId());
         Assert.assertNotNull(resp);
         Tester.notEmpty(resp.getAccessToken());
         Tester.notEmpty(resp.getIdToken());

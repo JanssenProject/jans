@@ -73,7 +73,7 @@ public class Tester {
     public static String getAuthorization(RegisterSiteResponse siteResponseData) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(siteResponseData.getOpHost());
-        params.setScope(Lists.newArrayList("openid", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "jans_client_api"));
         params.setClientId(siteResponseData.getClientId());
         params.setClientSecret(siteResponseData.getClientSecret());
 

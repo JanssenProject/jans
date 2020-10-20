@@ -57,7 +57,7 @@ public class RsProtectTest {
         protectResources(client, site, resources);
 
         final UmaRsProtectParams params = new UmaRsProtectParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
 
         params.setResources(resources);
 
@@ -81,7 +81,7 @@ public class RsProtectTest {
         protectResources(client, site, resources);
 
         final UmaRsProtectParams params = new UmaRsProtectParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(resources);
         params.setOverwrite(true); // force overwrite
 
@@ -112,7 +112,7 @@ public class RsProtectTest {
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond));
 
         final UmaRsCheckAccessParams params = new UmaRsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/GetAll");
         params.setRpt("");
@@ -125,7 +125,7 @@ public class RsProtectTest {
 
     public static UmaRsProtectResponse protectResources(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
         final UmaRsProtectParams params = new UmaRsProtectParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setResources(resources);
 
         final UmaRsProtectResponse resp = client.umaRsProtect(params, getAuthorization(site), null);

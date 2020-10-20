@@ -32,7 +32,7 @@ public class GetUserInfoTest {
         final GetTokensByCodeResponse tokens = requestTokens(client, opHost, site, userId, userSecret, site.getClientId(), redirectUrls);
 
         final GetUserInfoParams params = new GetUserInfoParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
@@ -50,7 +50,7 @@ public class GetUserInfoTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         final GetUserInfoParams params = new GetUserInfoParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setAccessToken("blahBlah"); // invalid token
 
         final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(params, getAuthorization(site), null);
@@ -66,8 +66,8 @@ public class GetUserInfoTest {
         final String nonce = CoreUtils.secureRandomString();
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
-        params.setOxdId(site.getOxdId());
-        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
+        params.setRpId(site.getRpId());
+        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getRpId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
         params.setState(state);
 
         final GetTokensByCodeResponse resp = client.getTokensByCode(params, getAuthorization(site), null);
