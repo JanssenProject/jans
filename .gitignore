@@ -23,16 +23,17 @@
 hs_err_pid*
 
 
-/oxd-server/.oxd-license
-/oxd-server/oxd-server.log
-/oxd-server/oxd_db.mv.db
-/oxd-server/oxd_db.trace.db
-oxd-gen-client/profiles/*
-oxd-gen-client/profiles/*/
-!oxd-gen-client/profiles/default/
-oxd-gen-client/src/test/resources/properties/*
-!oxd-gen-client/src/test/resources/properties/testng.properties
-!oxd-gen-client/src/test/resources/properties/testng.xml
-oxd-gen-client/target/
-oxd-server/dependency-reduced-pom.xml
-oxd-server/src/test/resources/properties/users/*
+/server/.oxd-license
+/server/oxd-server.log
+/server/oxd_db.mv.db
+/server/oxd_db.trace.db
+gen-client/profiles/*
+gen-client/profiles/*/
+!gen-client/profiles/default/
+gen-client/src/test/resources/properties/*
+!gen-client/src/test/resources/properties/testng.properties
+!gen-client/src/test/resources/properties/testng.xml
+gen-client/target/
+server/dependency-reduced-pom.xml
+server/src/test/resources/properties/users/*
+uma-rs-core/target/
