@@ -35,7 +35,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
     public IOpResponse execute(RpGetClaimsGatheringUrlParams params) throws Exception {
         validate(params);
 
-        final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
+        final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
         final Rp rp = getRp();
         final String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
 
@@ -46,7 +46,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
                 "&state=" + state;
 
         if (params.getCustomParameters() != null && !params.getCustomParameters().isEmpty()) {
-            List<String> paramsList = Lists.newArrayList("oxd_id", "client_id", "ticket", "state", "claims_redirect_uri");
+            List<String> paramsList = Lists.newArrayList("rp_id", "client_id", "ticket", "state", "claims_redirect_uri");
 
             Map<String, String> customParameterMap = params.getCustomParameters().entrySet()
                     .stream()

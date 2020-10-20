@@ -10,21 +10,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RsProtectResponse implements IOpResponse {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxdId;
+    @JsonProperty(value = "rp_id")
+    private String rpId;
 
     public RsProtectResponse() {
     }
 
-    public RsProtectResponse(String oxdId) {
-        this.oxdId = oxdId;
+    public RsProtectResponse(String rpId) {
+        this.rpId = rpId;
     }
 
-    public String getOxdId() {
-        return oxdId;
+    public String getRpId() {
+        return rpId;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxdId = oxdId;
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
     }
 }

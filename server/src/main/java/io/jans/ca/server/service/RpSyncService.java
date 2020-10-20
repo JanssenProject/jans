@@ -41,16 +41,17 @@ public class RpSyncService {
         return false;
     }
 
-    public Rp getRp(String oxdId) {
-        Rp rp = rpService.getRp(oxdId);
+    public Rp getRp(String rpId) {
+        Rp rp = rpService.getRp(rpId);
         if (!shouldSync(rp))
             return rp;
 
         return sync(rp);
     }
+
     //this method added to skip the vadidations while running test cases.
-    public Rp getRpTest(String oxdId) {
-        Rp rp = rpService.getRps().get(oxdId);
+    public Rp getRpTest(String rpId) {
+        Rp rp = rpService.getRps().get(rpId);
         if (!shouldSync(rp))
             return rp;
 

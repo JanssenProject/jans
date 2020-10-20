@@ -28,7 +28,7 @@ public class StressTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
         final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);

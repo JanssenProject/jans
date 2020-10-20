@@ -59,15 +59,15 @@ public class RpService {
         }
     }
 
-    public Rp getRp(String oxdId) {
-        Preconditions.checkNotNull(oxdId);
-        Preconditions.checkState(!Strings.isNullOrEmpty(oxdId));
+    public Rp getRp(String rpId) {
+        Preconditions.checkNotNull(rpId);
+        Preconditions.checkState(!Strings.isNullOrEmpty(rpId));
 
-        Rp rp = rpCache.getIfPresent(oxdId);
+        Rp rp = rpCache.getIfPresent(rpId);
         if (rp == null) {
-            rp = persistenceService.getRp(oxdId);
+            rp = persistenceService.getRp(rpId);
             if (rp != null) {
-                rpCache.put(oxdId, rp);
+                rpCache.put(rpId, rp);
             }
         }
         rp = validationService.validate(rp);
@@ -92,27 +92,27 @@ public class RpService {
     }
 
     public void create(Rp rp) {
-        if (StringUtils.isBlank(rp.getOxdId())) {
-            rp.setOxdId(UUID.randomUUID().toString());
+        if (StringUtils.isBlank(rp.getRpId())) {
+            rp.setRpId(UUID.randomUUID().toString());
         }
 
-        if (rpCache.getIfPresent(rp.getOxdId()) == null) {
+        if (rpCache.getIfPresent(rp.getRpId()) == null) {
             put(rp);
             persistenceService.create(rp);
         } else {
-            LOG.error("RP already exists in database, oxd_id: " + rp.getOxdId());
+            LOG.error("RP already exists in database, rp_id: " + rp.getRpId());
         }
     }
 
     private Rp put(Rp rp) {
-        rpCache.put(rp.getOxdId(), rp);
+        rpCache.put(rp.getRpId(), rp);
         return rp;
     }
 
-    public boolean remove(String oxdId) {
-        boolean ok = persistenceService.remove(oxdId);
+    public boolean remove(String rpId) {
+        boolean ok = persistenceService.remove(rpId);
         if (ok) {
-            rpCache.invalidate(oxdId);
+            rpCache.invalidate(rpId);
         }
         return ok;
     }

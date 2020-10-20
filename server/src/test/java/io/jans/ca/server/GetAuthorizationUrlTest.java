@@ -32,7 +32,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, commandParams);
         assertNotNull(resp);
@@ -47,7 +47,7 @@ public class GetAuthorizationUrlTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl,
                 logoutUrl, false);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setRedirectUri(paramRedirectUrl);
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, commandParams);
@@ -63,7 +63,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
 
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, commandParams);
@@ -82,7 +82,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
 
         Map<String, String> params = new HashMap<>();
         params.put("max_age", "70");
@@ -109,7 +109,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl, false);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setRedirectUri(paramRedirectUrl);
         commandParams.setState(state);
 
@@ -130,7 +130,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl, false);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setRedirectUri(paramRedirectUrl);
         commandParams.setNonce("dummy_nonce");
 

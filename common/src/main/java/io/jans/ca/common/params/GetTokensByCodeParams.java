@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetTokensByCodeParams implements HasOxdIdParams {
+public class GetTokensByCodeParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "state")
@@ -41,12 +41,12 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         this.state = state;
     }
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxdId) {
-        this.oxd_id = oxdId;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getAuthenticationMethod() {
@@ -72,12 +72,12 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
 
         GetTokensByCodeParams that = (GetTokensByCodeParams) o;
 
-        return !(code != null ? !code.equals(that.code) : that.code != null) && !(oxd_id != null ? !oxd_id.equals(that.oxd_id) : that.oxd_id != null);
+        return !(code != null ? !code.equals(that.code) : that.code != null) && !(rp_id != null ? !rp_id.equals(that.rp_id) : that.rp_id != null);
     }
 
     @Override
     public int hashCode() {
-        int result = oxd_id != null ? oxd_id.hashCode() : 0;
+        int result = rp_id != null ? rp_id.hashCode() : 0;
         result = 31 * result + (code != null ? code.hashCode() : 0);
         return result;
     }
@@ -87,7 +87,7 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("GetTokensByCodeParams");
         sb.append("{code='").append(code).append('\'');
-        sb.append(", oxd_id='").append(oxd_id).append('\'');
+        sb.append(", rp_id='").append(rp_id).append('\'');
         sb.append(", state='").append(state).append('\'');
         sb.append(", authentication_method='").append(authentication_method).append('\'');
         sb.append(", algorithm='").append(algorithm).append('\'');

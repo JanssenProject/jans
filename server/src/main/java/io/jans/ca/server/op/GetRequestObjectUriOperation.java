@@ -57,7 +57,7 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
             String requestUriId = UUID.randomUUID().toString();
             getRequestObjectService().put(requestUriId, signedJwt.toString());
 
-            String requestUri = baseRequestUri(params.getOxdHostUrl()) + requestUriId;
+            String requestUri = baseRequestUri(params.getRpHostUrl()) + requestUriId;
             LOG.trace("RequestObject created successfully. request_uri : {} ", requestUri);
 
             GetRequestObjectUriResponse response = new GetRequestObjectUriResponse();
@@ -93,7 +93,7 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
         jwt.getClaims().setIssuedAt(new Date());
         jwt.getClaims().setExpirationTime(Utils.addTimeToDate(new Date(), getConfigurationService().getConfiguration().getRequestObjectExpirationInMinutes(), Calendar.MINUTE));
         jwt.getClaims().setClaim("response_type", rp.getResponseTypes());
-        jwt.getClaims().setClaim("oxd_id", rp.getOxdId());
+        jwt.getClaims().setClaim("rp_id", rp.getRpId());
         //set claims from params
         if (params.getParams() != null && !params.getParams().isEmpty()) {
 
@@ -110,19 +110,19 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
     }
 
     private void validate(GetRequestObjectUriParams params) {
-        if (Strings.isNullOrEmpty(params.getOxdHostUrl())) {
-            LOG.error("'oxd_host_url' is empty or not specified.");
-            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_HOST);
+        if (Strings.isNullOrEmpty(params.getRpHostUrl())) {
+            LOG.error("'rp_host_url' is empty or not specified.");
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_RP_HOST);
         }
     }
 
-    private String baseRequestUri(String oxdHost) {
-        if (!oxdHost.startsWith("http")) {
-            oxdHost = "https://" + oxdHost;
+    private String baseRequestUri(String rpHost) {
+        if (!rpHost.startsWith("http")) {
+            rpHost = "https://" + rpHost;
         }
-        if (oxdHost.endsWith("/")) {
-            oxdHost = StringUtils.removeEnd(oxdHost, "/");
+        if (rpHost.endsWith("/")) {
+            rpHost = StringUtils.removeEnd(rpHost, "/");
         }
-        return oxdHost + "/get-request-object/";
+        return rpHost + "/get-request-object/";
     }
 }

@@ -7,11 +7,11 @@ import com.google.inject.Injector;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
-import io.jans.ca.common.params.HasOxdIdParams;
+import io.jans.ca.common.params.HasRpIdParams;
 import io.jans.ca.common.params.IParams;
 import io.jans.ca.server.Convertor;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.service.*;
 
 /**
@@ -19,6 +19,7 @@ import io.jans.ca.server.service.*;
  *
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 09/08/2013
+ *
  */
 
 public abstract class BaseOperation<T extends IParams> implements IOperation<T> {
@@ -107,7 +108,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public AuthCryptoProvider getCryptoProvider() throws Exception {
-        OxdServerConfiguration conf = getConfigurationService().get();
+        RpServerConfiguration conf = getConfigurationService().get();
         return new AuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
     }
 
@@ -116,12 +117,12 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public Rp getRp() {
-        if (params instanceof HasOxdIdParams) {
-            getValidationService().validate((HasOxdIdParams) params);
-            HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
-            return getRpSyncService().getRp(hasOxdId.getOxdId());
+        if (params instanceof HasRpIdParams) {
+            getValidationService().validate((HasRpIdParams) params);
+            HasRpIdParams hasRpId = (HasRpIdParams) params;
+            return getRpSyncService().getRp(hasRpId.getRpId());
         }
-        throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+        throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_RP_ID);
     }
 
     public ValidationService getValidationService() {

@@ -17,7 +17,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.OxdServerConfiguration;
+import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.service.PublicOpKeyService;
 import io.jans.ca.server.service.Rp;
 import io.jans.ca.server.service.StateService;
@@ -39,7 +39,7 @@ public class Validator {
     private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     private final OpenIdConfigurationResponse discoveryResponse;
-    private OxdServerConfiguration configuration;
+    private RpServerConfiguration configuration;
     private AbstractJwsSigner jwsSigner;
     private final Jwt idToken;
     private OpClientFactory opClientFactory;
@@ -50,7 +50,7 @@ public class Validator {
         return discoveryResponse;
     }
 
-    public OxdServerConfiguration getOxdServerConfiguration() {
+    public RpServerConfiguration getRpServerConfiguration() {
         return configuration;
     }
 
@@ -85,7 +85,7 @@ public class Validator {
 
         // required parameters
         private OpenIdConfigurationResponse discoveryResponse;
-        private OxdServerConfiguration configuration;
+        private RpServerConfiguration configuration;
         private Jwt idToken;
         private OpClientFactory opClientFactory;
         private PublicOpKeyService keyService;
@@ -99,7 +99,7 @@ public class Validator {
             return this;
         }
 
-        public Builder oxdServerConfiguration(OxdServerConfiguration configuration) {
+        public Builder rpServerConfiguration(RpServerConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
@@ -203,7 +203,7 @@ public class Validator {
         }
     }
 
-    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, OxdServerConfiguration configuration) {
+    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, RpServerConfiguration configuration) {
         final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
         final String jwkUrl = discoveryResponse.getJwksUri();
@@ -218,7 +218,7 @@ public class Validator {
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
             if (!configuration.getAcceptIdTokenWithoutSignature()) {
-                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in jans-client-api.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }
 

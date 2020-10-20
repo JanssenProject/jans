@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetRequestObjectUriParams implements HasOxdIdParams {
+public class GetRequestObjectUriParams implements HasRpIdParams {
 
-    @JsonProperty(value = "oxd_id")
-    private String oxd_id;
+    @JsonProperty(value = "rp_id")
+    private String rp_id;
     @JsonProperty(value = "params")
     private Map<String, Object> params;
     @JsonProperty(value = "request_object_signing_alg")
@@ -17,12 +17,12 @@ public class GetRequestObjectUriParams implements HasOxdIdParams {
     @JsonProperty(value = "oxd_host_url")
     private String oxd_host_url;
 
-    public String getOxdId() {
-        return oxd_id;
+    public String getRpId() {
+        return rp_id;
     }
 
-    public void setOxdId(String oxd_id) {
-        this.oxd_id = oxd_id;
+    public void setRpId(String rpId) {
+        this.rp_id = rpId;
     }
 
     public Map<String, Object> getParams() {
@@ -41,17 +41,17 @@ public class GetRequestObjectUriParams implements HasOxdIdParams {
         this.request_object_signing_alg = request_object_signing_alg;
     }
 
-    public String getOxdHostUrl() {
+    public String getRpHostUrl() {
         return oxd_host_url;
     }
 
-    public void setOxdHostUrl(String oxd_host_url) {
+    public void setRpHostUrl(String oxd_host_url) {
         this.oxd_host_url = oxd_host_url;
     }
     @Override
     public String toString() {
         return "GetRequestUri{" +
-                "oxd_id='" + oxd_id + '\'' +
+                "rp_id='" + rp_id + '\'' +
                 ", params=" + params +
                 ", request_object_signing_alg=" + request_object_signing_alg +
                 ", oxd_host_url=" + oxd_host_url +

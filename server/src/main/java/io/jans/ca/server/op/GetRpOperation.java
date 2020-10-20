@@ -41,11 +41,11 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rps));
         }
 
-        Rp rp = getRpSyncService().getRp(params.getOxdId());
+        Rp rp = getRpSyncService().getRp(params.getRpId());
         if (rp != null) {
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rp));
         } else {
-            LOG.trace("Failed to find RP by oxd_id: " + params.getOxdId());
+            LOG.trace("Failed to find RP by rp_id: " + params.getRpId());
         }
         return new GetRpResponse();
     }

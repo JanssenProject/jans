@@ -26,7 +26,7 @@ public class IntrospectRptOperation extends BaseOperation<IntrospectRptParams> {
     public IOpResponse execute(IntrospectRptParams params) {
         getValidationService().validate(params);
 
-        CorrectRptIntrospectionResponse response = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());
+        CorrectRptIntrospectionResponse response = getIntrospectionService().introspectRpt(params.getRpId(), params.getRpt());
         return new POJOResponse(response);
     }
 }

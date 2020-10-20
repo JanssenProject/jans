@@ -53,10 +53,10 @@ public class DiscoveryService {
         this.opClientFactory = opClientFactory;
     }
 
-    public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
-        validationService.notBlankOxdId(oxdId);
+    public OpenIdConfigurationResponse getConnectDiscoveryResponseByRpId(String rpId) {
+        validationService.notBlankRpId(rpId);
 
-        Rp rp = rpSyncService.getRp(oxdId);
+        Rp rp = rpSyncService.getRp(rpId);
         return getConnectDiscoveryResponse(rp);
     }
 
@@ -101,10 +101,10 @@ public class DiscoveryService {
         throw new HttpException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
     }
 
-    public UmaMetadata getUmaDiscoveryByOxdId(String oxdId) {
-        validationService.notBlankOxdId(oxdId);
+    public UmaMetadata getUmaDiscoveryByRpId(String rpId) {
+        validationService.notBlankRpId(rpId);
 
-        Rp rp = rpSyncService.getRp(oxdId);
+        Rp rp = rpSyncService.getRp(rpId);
         return getUmaDiscovery(rp.getOpConfigurationEndpoint(), rp.getOpHost(), rp.getOpDiscoveryPath());
     }
 

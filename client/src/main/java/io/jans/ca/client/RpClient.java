@@ -13,9 +13,9 @@ import java.security.cert.X509Certificate;
 /**
  * @author yuriyz
  */
-public class OxdClient {
+public class RpClient {
 
-    private OxdClient() {
+    private RpClient() {
     }
 
     public static ClientInterface newClient(String target) {
