@@ -60,11 +60,11 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
 
     public void setDefaultUsernamePasswordIfEmpty(H2Configuration h2Configuration) {
         if (Strings.isNullOrEmpty(h2Configuration.getUsername())) {
-            h2Configuration.setUsername("jans_client_api");
+            h2Configuration.setUsername("oxd");
         }
 
         if (Strings.isNullOrEmpty(h2Configuration.getPassword())) {
-            h2Configuration.setPassword("jans_client_api");
+            h2Configuration.setPassword("oxd");
         }
     }
 }
