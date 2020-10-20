@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>jans-api-server</artifactId>
+    <artifactId>jans-client-api-server</artifactId>
     <packaging>jar</packaging>
     <version>5.0.0-SNAPSHOT</version>
-    <name>jans-api-server</name>
+    <name>jans-client-api-server</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
@@ -26,7 +26,7 @@
     </parent>
 
     <build>
-        <finalName>jans-api-server</finalName>
+        <finalName>jans-client-api-server</finalName>
 
         <resources>
             <resource>
@@ -332,38 +332,39 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-common</artifactId>
+            <artifactId>jans-client-api-common</artifactId>
+            <version>5.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-common</artifactId>
+            <artifactId>jans-client-api-common</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-client</artifactId>
+            <artifactId>jans-client-api</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-gen-client</artifactId>
+            <artifactId>jans-client-api-gen</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-gen-client</artifactId>
+            <artifactId>jans-client-api-gen</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-client</artifactId>
+            <artifactId>jans-client-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
