@@ -4871,13 +4871,27 @@
         "jansPassportEnabled",
         "jansRadiusEnabled",
         "jansSamlEnabled",
-        "jansSmtpServerTrust"
+        "jansSmtpServerTrust",
+        "ou",
+        "jansConfDyn",
+        "jansConfErrors",
+        "jansConfStatic",
+        "jansConfWebKeys",
+        "jansRevision",
+        "jansWebKeysSettings",
+        "ou",
+        "jansConfApp",
+        "jansRevision",
+        "ou",
+        "jansConfDyn",
+        "jansConfStatic",
+        "jansRevision"
       ],
       "must": [
         "objectclass"
       ],
       "names": [
-        "jansConf"
+        "jansAppConf"
       ],
       "oid": "jansObjClass",
       "sup": [
@@ -5956,26 +5970,6 @@
       ],
       "names": [
         "jansOxtrustStat"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "ou",
-        "jansConfDyn",
-        "jansConfStatic",
-        "jansRevision"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansAppConf"
       ],
       "oid": "jansObjClass",
       "sup": [

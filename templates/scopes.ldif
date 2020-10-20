@@ -89,7 +89,7 @@ objectClass: jansCustomScope
 objectClass: top
 
 dn: inum=10B2,ou=scopes,o=jans
-description: View your local username in the Gluu Server.
+description: View your local username in the Janssen Server.
 inum: 10B2
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=42E0,ou=attributes,o=gluu

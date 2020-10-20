@@ -26,7 +26,7 @@ if not argsp.outfile:
 else:
     out_file = argsp.outfile
 
-with open('schema/mapping.json') as f:
+with open('schema/jans_schema_mappings.json') as f:
     mapping = json.load(f, object_pairs_hook=OrderedDict)
 
 
@@ -70,16 +70,6 @@ opendj_attributes = []
 for k in opendj_types:
     opendj_attributes += opendj_types[k]
 
-def do_replace(eVal):
-    if eVal in opendj_attributes:
-        return eVal
-    for m in mapping['mappings']:
-        if m in eVal:
-            eVal = eVal.replace(m, mapping['mappings'][m])
-
-    return eVal
-
-
 ldif_parser = myLdifParser(b64_escaped_file)
 ldif_parser.parse()
 
@@ -88,24 +78,65 @@ out_ldif = open(b64_escaped_out_file, 'wb')
 
 ldif_writer = LDIFWriter(out_ldif, cols=10000)
 
+dn_coversions =[
+    ('o', 'gluu', 'jans'),
+    ('ou', 'oxauth', 'jans-auth'),
+    ('ou', 'fido2', 'jans-fido2'),
+    ('ou', 'scim', 'jans-scim'),
+    
+]
+
 
 for dn, entry in ldif_parser.entries:
+    if 'OO11-BAFE' in entry.get('inum', []):
+        continue
     new_entry = OrderedDict()
     for a in entry:
-        s = do_replace(a)
-        new_entry[s] = entry[a]
-    new_entry['objectClass'] = [ do_replace(oc) for oc in new_entry['objectClass'] ]
+        if a != 'objectClass':
+            if a in opendj_attributes:
+                s=a
+            for ma in mapping['attribute']:
+                if a == ma:
+                    s = mapping['attribute'][ma]
+                    break
+
+            new_entry[s] = entry[a]
+
+    new_entry['objectClass'] = []
+    
+    for oc in entry['objectClass']:
+        nn = oc
+        for mn in mapping['objectClass']:
+            if mn == oc:
+                nn = mapping['objectClass'][mn]
+        new_entry['objectClass'].append(nn)
+    
 
     new_dn_list = []
     for dne in dnutils.parse_dn(dn):
-        k =  do_replace(dne[0])
+        k =  dne[0]
+        for ot in mapping:
+            for e in mapping[ot]:
+                if dne[0] == e:
+                    k = mapping[ot][e]
+                    break
         new_val = [k, dne[1]]
-        if new_val[1] == 'gluu':
-            new_val[1] = 'jans'
+        
+        for dnc in dn_coversions:
+            if dnc[0] == dne[0] and dnc[1] == dne[1]:
+                new_val[1] = dnc[2]
+
         new_dn_list.append('='.join(new_val))
 
     new_dn = ','.join(new_dn_list)
 
+
+    if 'Gluu' in new_entry.get('description', [''])[0]:
+        new_entry['description'][0] = new_entry['description'][0].replace('Gluu', 'Janssen')
+    
+    if 'gluu' in new_entry.get('displayName', [''])[0]:
+        new_entry['displayName'][0] = new_entry['displayName'][0].replace('gluu', 'janssen')
+    
 
     ldif_writer.unparse(new_dn, new_entry)
 
@@ -120,12 +151,16 @@ for l in open(b64_escaped_out_file):
         a = l[:n]
         v = l[n+1:].strip()
         if v.startswith(b64_encoded_field_descriptor):
-            l=a+'::'+v[len(b64_encoded_field_descriptor):]+'\n'
+            l = a+'::'+v[len(b64_encoded_field_descriptor):]+'\n'
+            if 'person_authentication_supergluuexternalauthenticator' in l:
+                l = l.replace('person_authentication_supergluuexternalauthenticator', 'person_authentication_superjansexternalauthenticator')
     w.write(l)
 
 w.close()
 
 os.remove(b64_escaped_file)
 os.remove(b64_escaped_out_file)
+
+
 
 print("Converted ldif was written to", out_file)
