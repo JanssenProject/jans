@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>jans-api-client</artifactId>
+    <artifactId>jans-client-api</artifactId>
     <packaging>jar</packaging>
     <version>5.0.0-SNAPSHOT</version>
-    <name>jans-api-client</name>
+    <name>jans-client-api</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
@@ -21,7 +21,7 @@
     </properties>
 
     <build>
-        <finalName>jans-api-client</finalName>
+        <finalName>jans-client-api</finalName>
 
         <resources>
             <resource>
@@ -120,7 +120,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-api-common</artifactId>
+            <artifactId>jans-client-api-common</artifactId>
         </dependency>
     </dependencies>
 
