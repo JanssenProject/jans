@@ -31,7 +31,7 @@
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.build.directory}/jans-client-api-server</source>
+            <source>${project.build.directory}/jans-client-api-server.jar</source>
             <outputDirectory>/lib</outputDirectory>
         </file>
     </files>
