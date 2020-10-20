@@ -38,7 +38,7 @@ def get_wait_max_time() -> int:
     """Get maximum time accepted by ``wait_for`` function.
 
     Default maximum time is 300 seconds. To change the value, pass
-    `JANS_WAIT_MAX_TIME` environment variable.
+    `CN_WAIT_MAX_TIME` environment variable.
 
     .. code-block:: python
 
@@ -47,7 +47,7 @@ def get_wait_max_time() -> int:
         from jans.pycloudlib import get_manager
         from jans.pycloudlib.wait import wait_for_config
 
-        os.environ["JANS_WAIT_MAX_TIME"] = "1200"
+        os.environ["CN_WAIT_MAX_TIME"] = "1200"
 
         manager = get_manager()
         wait_for_config(manager)
@@ -56,7 +56,7 @@ def get_wait_max_time() -> int:
     """
     default = 60 * 5
     try:
-        max_time = int(os.environ.get("JANS_WAIT_MAX_TIME", default))
+        max_time = int(os.environ.get("CN_WAIT_MAX_TIME", default))
     except ValueError:
         max_time = default
     return max(1, max_time)
@@ -66,7 +66,7 @@ def get_wait_interval() -> int:
     """Get interval time between each execution of ``wait_for`` function.
 
     Default interval time is 10 seconds. To change the value, pass
-    `JANS_WAIT_SLEEP_DURATION` environment variable.
+    `CN_WAIT_SLEEP_DURATION` environment variable.
 
     .. code-block:: python
 
@@ -75,7 +75,7 @@ def get_wait_interval() -> int:
         from jans.pycloudlib import get_manager
         from jans.pycloudlib.wait import wait_for_config
 
-        os.environ["JANS_WAIT_SLEEP_DURATION"] = "10"
+        os.environ["CN_WAIT_SLEEP_DURATION"] = "10"
 
         manager = get_manager()
         wait_for_config(manager)
@@ -84,7 +84,7 @@ def get_wait_interval() -> int:
     """
     default = 10
     try:
-        interval = int(os.environ.get("JANS_WAIT_SLEEP_DURATION", default))
+        interval = int(os.environ.get("CN_WAIT_SLEEP_DURATION", default))
     except ValueError:
         interval = default
     return max(1, interval)
@@ -169,16 +169,16 @@ def wait_for_ldap(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("JANS_LDAP_URL", "localhost:1636")
+    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
     user = manager.config.get("ldap_binddn")
     password = decode_text(
         manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
     )
 
-    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "ldap")
-    ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
-    namespace = os.environ.get("JANS_NAMESPACE", "jans")
+    namespace = os.environ.get("CN_NAMESPACE", "jans")
 
     # a minimum service stack is having oxTrust, hence check whether entry
     # for oxTrust exists in LDAP
@@ -220,7 +220,7 @@ def wait_for_ldap_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("JANS_LDAP_URL", "localhost:1636")
+    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
     user = manager.config.get("ldap_binddn")
     password = decode_text(
         manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
@@ -247,13 +247,13 @@ def wait_for_couchbase(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("JANS_COUCHBASE_URL", "localhost")
+    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
     user = get_couchbase_user(manager)
     password = get_couchbase_password(manager)
 
-    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
-    bucket_prefix = os.environ.get("JANS_NAMESPACE", "jans")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
+    bucket_prefix = os.environ.get("CN_NAMESPACE", "jans")
 
     # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;
@@ -291,7 +291,7 @@ def wait_for_couchbase_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("JANS_COUCHBASE_URL", "localhost")
+    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
     user = get_couchbase_user(manager)
     password = get_couchbase_password(manager)
 
@@ -310,7 +310,7 @@ def wait_for_oxauth(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    addr = os.environ.get("JANS_OXAUTH_BACKEND", "localhost:8081")
+    addr = os.environ.get("CN_OXAUTH_BACKEND", "localhost:8081")
     url = f"http://{addr}/oxauth/.well-known/openid-configuration"
     req = requests.get(url)
 
@@ -326,7 +326,7 @@ def wait_for_oxtrust(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    addr = os.environ.get("JANS_OXTRUST_BACKEND", "localhost:8082")
+    addr = os.environ.get("CN_OXTRUST_BACKEND", "localhost:8082")
     url = f"http://{addr}/identity/finishlogout.htm"
     req = requests.get(url)
 
@@ -346,7 +346,7 @@ def wait_for_oxd(manager, **kwargs):
 
     urllib3.disable_warnings()
 
-    addr = os.environ.get("JANS_OXD_SERVER_URL", "localhost:8443")
+    addr = os.environ.get("CN_OXD_SERVER_URL", "localhost:8443")
     url = f"https://{addr}/health-check"
     req = requests.get(url, verify=False)
 

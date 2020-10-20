@@ -45,7 +45,7 @@ def render_jans_properties(src: str, dest: str) -> None:
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
-            "persistence_type": os.environ.get("JANS_PERSISTENCE_TYPE", "ldap"),
-            "namespace": os.environ.get("JANS_NAMESPACE", "jans"),
+            "persistence_type": os.environ.get("CN_PERSISTENCE_TYPE", "ldap"),
+            "namespace": os.environ.get("CN_NAMESPACE", "jans"),
         }
         f.write(rendered_txt)

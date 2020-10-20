@@ -30,80 +30,80 @@ class ConsulConfig(BaseConfig):
 
     The following environment variables are used to instantiate the client:
 
-    - ``JANS_CONFIG_CONSUL_HOST``
-    - ``JANS_CONFIG_CONSUL_PORT``
-    - ``JANS_CONFIG_CONSUL_CONSISTENCY``
-    - ``JANS_CONFIG_CONSUL_SCHEME``
-    - ``JANS_CONFIG_CONSUL_VERIFY``
-    - ``JANS_CONFIG_CONSUL_CACERT_FILE``
-    - ``JANS_CONFIG_CONSUL_CERT_FILE``
-    - ``JANS_CONFIG_CONSUL_KEY_FILE``
-    - ``JANS_CONFIG_CONSUL_TOKEN_FILE``
-    - ``JANS_CONFIG_CONSUL_NAMESPACE``
+    - ``CN_CONFIG_CONSUL_HOST``
+    - ``CN_CONFIG_CONSUL_PORT``
+    - ``CN_CONFIG_CONSUL_CONSISTENCY``
+    - ``CN_CONFIG_CONSUL_SCHEME``
+    - ``CN_CONFIG_CONSUL_VERIFY``
+    - ``CN_CONFIG_CONSUL_CACERT_FILE``
+    - ``CN_CONFIG_CONSUL_CERT_FILE``
+    - ``CN_CONFIG_CONSUL_KEY_FILE``
+    - ``CN_CONFIG_CONSUL_TOKEN_FILE``
+    - ``CN_CONFIG_CONSUL_NAMESPACE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("JANS_CONFIG_CONSUL_")
+            if k.isupper() and k.startswith("CN_CONFIG_CONSUL_")
         }
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_HOST", "localhost",
+            "CN_CONFIG_CONSUL_HOST", "localhost",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_PORT", 8500,
+            "CN_CONFIG_CONSUL_PORT", 8500,
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_CONSISTENCY", "stale",
+            "CN_CONFIG_CONSUL_CONSISTENCY", "stale",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_SCHEME", "http",
+            "CN_CONFIG_CONSUL_SCHEME", "http",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_VERIFY", False,
+            "CN_CONFIG_CONSUL_VERIFY", False,
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
+            "CN_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
+            "CN_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
+            "CN_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
         )
 
         self.settings.setdefault(
-            "JANS_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
+            "CN_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
         )
 
-        self.settings.setdefault("JANS_CONFIG_CONSUL_NAMESPACE", "jans")
+        self.settings.setdefault("CN_CONFIG_CONSUL_NAMESPACE", "jans")
 
-        self.prefix = f"{self.settings['JANS_CONFIG_CONSUL_NAMESPACE']}/config/"
+        self.prefix = f"{self.settings['CN_CONFIG_CONSUL_NAMESPACE']}/config/"
         cert, verify = self._verify_cert(
-            self.settings["JANS_CONFIG_CONSUL_SCHEME"],
-            self.settings["JANS_CONFIG_CONSUL_VERIFY"],
-            self.settings["JANS_CONFIG_CONSUL_CACERT_FILE"],
-            self.settings["JANS_CONFIG_CONSUL_CERT_FILE"],
-            self.settings["JANS_CONFIG_CONSUL_KEY_FILE"],
+            self.settings["CN_CONFIG_CONSUL_SCHEME"],
+            self.settings["CN_CONFIG_CONSUL_VERIFY"],
+            self.settings["CN_CONFIG_CONSUL_CACERT_FILE"],
+            self.settings["CN_CONFIG_CONSUL_CERT_FILE"],
+            self.settings["CN_CONFIG_CONSUL_KEY_FILE"],
         )
 
-        self._request_warning(self.settings["JANS_CONFIG_CONSUL_SCHEME"], verify)
+        self._request_warning(self.settings["CN_CONFIG_CONSUL_SCHEME"], verify)
 
         self.client = Consul(
-            host=self.settings["JANS_CONFIG_CONSUL_HOST"],
-            port=self.settings["JANS_CONFIG_CONSUL_PORT"],
-            token=self._token_from_file(self.settings["JANS_CONFIG_CONSUL_TOKEN_FILE"]),
-            scheme=self.settings["JANS_CONFIG_CONSUL_SCHEME"],
-            consistency=self.settings["JANS_CONFIG_CONSUL_CONSISTENCY"],
+            host=self.settings["CN_CONFIG_CONSUL_HOST"],
+            port=self.settings["CN_CONFIG_CONSUL_PORT"],
+            token=self._token_from_file(self.settings["CN_CONFIG_CONSUL_TOKEN_FILE"]),
+            scheme=self.settings["CN_CONFIG_CONSUL_SCHEME"],
+            consistency=self.settings["CN_CONFIG_CONSUL_CONSISTENCY"],
             verify=verify,
             cert=cert,
         )
@@ -179,8 +179,8 @@ class ConsulConfig(BaseConfig):
             urllib3.disable_warnings()
             logger.warning(
                 "All requests to Consul will be unverified. "
-                "Please adjust JANS_CONFIG_CONSUL_SCHEME and "
-                "JANS_CONFIG_CONSUL_VERIFY environment variables."
+                "Please adjust CN_CONFIG_CONSUL_SCHEME and "
+                "CN_CONFIG_CONSUL_VERIFY environment variables."
             )
 
     def _token_from_file(self, path) -> str:

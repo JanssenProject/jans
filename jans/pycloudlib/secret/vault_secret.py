@@ -29,82 +29,82 @@ class VaultSecret(BaseSecret):
 
     The following environment variables are used to instantiate the client:
 
-    - ``JANS_SECRET_VAULT_HOST``
-    - ``JANS_SECRET_VAULT_PORT``
-    - ``JANS_SECRET_VAULT_SCHEME``
-    - ``JANS_SECRET_VAULT_VERIFY``
-    - ``JANS_SECRET_VAULT_ROLE_ID_FILE``
-    - ``JANS_SECRET_VAULT_SECRET_ID_FILE``
-    - ``JANS_SECRET_VAULT_CERT_FILE``
-    - ``JANS_SECRET_VAULT_KEY_FILE``
-    - ``JANS_SECRET_VAULT_CACERT_FILE``
-    - ``JANS_SECRET_VAULT_NAMESPACE``
+    - ``CN_SECRET_VAULT_HOST``
+    - ``CN_SECRET_VAULT_PORT``
+    - ``CN_SECRET_VAULT_SCHEME``
+    - ``CN_SECRET_VAULT_VERIFY``
+    - ``CN_SECRET_VAULT_ROLE_ID_FILE``
+    - ``CN_SECRET_VAULT_SECRET_ID_FILE``
+    - ``CN_SECRET_VAULT_CERT_FILE``
+    - ``CN_SECRET_VAULT_KEY_FILE``
+    - ``CN_SECRET_VAULT_CACERT_FILE``
+    - ``CN_SECRET_VAULT_NAMESPACE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("JANS_SECRET_VAULT_")
+            if k.isupper() and k.startswith("CN_SECRET_VAULT_")
         }
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_HOST", "localhost",
+            "CN_SECRET_VAULT_HOST", "localhost",
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_PORT", 8200,
+            "CN_SECRET_VAULT_PORT", 8200,
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_SCHEME", "http",
+            "CN_SECRET_VAULT_SCHEME", "http",
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_VERIFY", False,
+            "CN_SECRET_VAULT_VERIFY", False,
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
+            "CN_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
         ),
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_SECRET_ID_FILE", "/etc/certs/vault_secret_id",
+            "CN_SECRET_VAULT_SECRET_ID_FILE", "/etc/certs/vault_secret_id",
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_CERT_FILE", "/etc/certs/vault_client.crt",
+            "CN_SECRET_VAULT_CERT_FILE", "/etc/certs/vault_client.crt",
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_KEY_FILE", "/etc/certs/vault_client.key",
+            "CN_SECRET_VAULT_KEY_FILE", "/etc/certs/vault_client.key",
         )
         self.settings.setdefault(
-            "JANS_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
+            "CN_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
         )
 
-        self.settings.setdefault("JANS_SECRET_VAULT_NAMESPACE", "jans")
+        self.settings.setdefault("CN_SECRET_VAULT_NAMESPACE", "jans")
 
         cert, verify = self._verify_cert(
-            self.settings["JANS_SECRET_VAULT_SCHEME"],
-            self.settings["JANS_SECRET_VAULT_VERIFY"],
-            self.settings["JANS_SECRET_VAULT_CACERT_FILE"],
-            self.settings["JANS_SECRET_VAULT_CERT_FILE"],
-            self.settings["JANS_SECRET_VAULT_KEY_FILE"],
+            self.settings["CN_SECRET_VAULT_SCHEME"],
+            self.settings["CN_SECRET_VAULT_VERIFY"],
+            self.settings["CN_SECRET_VAULT_CACERT_FILE"],
+            self.settings["CN_SECRET_VAULT_CERT_FILE"],
+            self.settings["CN_SECRET_VAULT_KEY_FILE"],
         )
 
-        self._request_warning(self.settings["JANS_SECRET_VAULT_SCHEME"], verify)
+        self._request_warning(self.settings["CN_SECRET_VAULT_SCHEME"], verify)
 
         self.client = hvac.Client(
             url="{}://{}:{}".format(
-                self.settings["JANS_SECRET_VAULT_SCHEME"],
-                self.settings["JANS_SECRET_VAULT_HOST"],
-                self.settings["JANS_SECRET_VAULT_PORT"],
+                self.settings["CN_SECRET_VAULT_SCHEME"],
+                self.settings["CN_SECRET_VAULT_HOST"],
+                self.settings["CN_SECRET_VAULT_PORT"],
             ),
             cert=cert,
             verify=verify,
         )
-        self.prefix = f"secret/{self.settings['JANS_SECRET_VAULT_NAMESPACE']}"
+        self.prefix = f"secret/{self.settings['CN_SECRET_VAULT_NAMESPACE']}"
 
     @property
     def role_id(self):
         """Get the Role ID from file where location is determined
-        by ``JANS_SECRET_VAULT_ROLE_ID_FILE`` environment variable.
+        by ``CN_SECRET_VAULT_ROLE_ID_FILE`` environment variable.
         """
         try:
-            with open(self.settings["JANS_SECRET_VAULT_ROLE_ID_FILE"]) as f:
+            with open(self.settings["CN_SECRET_VAULT_ROLE_ID_FILE"]) as f:
                 role_id = f.read()
         except FileNotFoundError:
             role_id = ""
@@ -113,10 +113,10 @@ class VaultSecret(BaseSecret):
     @property
     def secret_id(self):
         """Get the Secret ID from file where location is determined
-        by ``JANS_SECRET_VAULT_SECRET_ID_FILE`` environment variable.
+        by ``CN_SECRET_VAULT_SECRET_ID_FILE`` environment variable.
         """
         try:
-            with open(self.settings["JANS_SECRET_VAULT_SECRET_ID_FILE"]) as f:
+            with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
                 secret_id = f.read()
         except FileNotFoundError:
             secret_id = ""
@@ -186,8 +186,8 @@ class VaultSecret(BaseSecret):
             urllib3.disable_warnings()
             logger.warning(
                 "All requests to Vault will be unverified. "
-                "Please adjust JANS_SECRET_VAULT_SCHEME and "
-                "JANS_SECRET_VAULT_VERIFY environment variables."
+                "Please adjust CN_SECRET_VAULT_SCHEME and "
+                "CN_SECRET_VAULT_VERIFY environment variables."
             )
 
     def _verify_cert(self, scheme, verify, cacert_file, cert_file, key_file) -> Tuple[Union[None, tuple], Union[bool, str]]:

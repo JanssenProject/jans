@@ -46,8 +46,8 @@ def test_render_jans_properties(tmpdir):
 
     persistence_type = "ldap"
     namespace = "jans"
-    os.environ["JANS_PERSISTENCE_TYPE"] = persistence_type
-    os.environ["JANS_NAMESPACE"] = namespace
+    os.environ["CN_PERSISTENCE_TYPE"] = persistence_type
+    os.environ["CN_NAMESPACE"] = namespace
 
     src = tmpdir.join("jans.properties.tmpl")
     src.write("""
@@ -113,7 +113,7 @@ ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
 def test_get_couchbase_user(gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 
-    os.environ["JANS_COUCHBASE_USER"] = "root"
+    os.environ["CN_COUCHBASE_USER"] = "root"
     assert get_couchbase_user(gmanager) == "root"
     os.environ.clear()
 
@@ -124,7 +124,7 @@ def test_get_couchbase_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
 
-    os.environ["JANS_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_password(gmanager) == "secret"
     os.environ.clear()
 
@@ -135,7 +135,7 @@ def test_get_encoded_couchbase_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
 
-    os.environ["JANS_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_password(gmanager) != "secret"
     os.environ.clear()
 
@@ -143,7 +143,7 @@ def test_get_encoded_couchbase_password(tmpdir, gmanager):
 def test_get_couchbase_superuser(gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 
-    os.environ["JANS_COUCHBASE_SUPERUSER"] = ""
+    os.environ["CN_COUCHBASE_SUPERUSER"] = ""
     assert get_couchbase_superuser(gmanager) == ""
     os.environ.clear()
 
@@ -154,7 +154,7 @@ def test_get_couchbase_superuser_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
-    os.environ["JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_superuser_password(gmanager) == "secret"
     os.environ.clear()
 
@@ -165,7 +165,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
-    os.environ["JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_superuser_password(gmanager) != "secret"
     os.environ.clear()
 
@@ -183,7 +183,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 #     # dummy cert
 #     cert_file.write(DUMMY_COUCHBASE_CERT)
 
-#     os.environ["JANS_COUCHBASE_CERT_FILE"] = str(cert_file)
+#     os.environ["CN_COUCHBASE_CERT_FILE"] = str(cert_file)
 #     # gmanager.config.set("couchbaseTrustStoreFn", str(keystore_file))
 #     sync_couchbase_truststore(gmanager)
 #     assert os.path.exists(str(keystore_file))
@@ -197,7 +197,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 def test_get_couchbase_conn_timeout(timeout, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_conn_timeout
 
-    os.environ["JANS_COUCHBASE_CONN_TIMEOUT"] = str(timeout)
+    os.environ["CN_COUCHBASE_CONN_TIMEOUT"] = str(timeout)
     assert get_couchbase_conn_timeout() == expected
 
 
@@ -208,7 +208,7 @@ def test_get_couchbase_conn_timeout(timeout, expected):
 def test_get_couchbase_conn_max_wait(max_wait, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_conn_max_wait
 
-    os.environ["JANS_COUCHBASE_CONN_MAX_WAIT"] = str(max_wait)
+    os.environ["CN_COUCHBASE_CONN_MAX_WAIT"] = str(max_wait)
     assert get_couchbase_conn_max_wait() == expected
 
 
@@ -221,7 +221,7 @@ def test_get_couchbase_conn_max_wait(max_wait, expected):
 def test_get_couchbase_scan_consistency(scan, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_scan_consistency
 
-    os.environ["JANS_COUCHBASE_SCAN_CONSISTENCY"] = scan
+    os.environ["CN_COUCHBASE_SCAN_CONSISTENCY"] = scan
     assert get_couchbase_scan_consistency() == expected
 
 
@@ -230,7 +230,7 @@ def test_sync_couchbase_cert(tmpdir):
 
     cert_file = tmpdir.join("couchbase.crt")
     cert_file.write(DUMMY_COUCHBASE_CERT)
-    os.environ["JANS_COUCHBASE_CERT_FILE"] = str(cert_file)
+    os.environ["CN_COUCHBASE_CERT_FILE"] = str(cert_file)
     assert sync_couchbase_cert() == DUMMY_COUCHBASE_CERT
     os.environ.clear()
 
@@ -269,8 +269,8 @@ def test_client_session_unverified():
 def test_client_session_verified(given, expected):
     from jans.pycloudlib.persistence.couchbase import BaseClient
 
-    os.environ["JANS_COUCHBASE_VERIFY"] = "true"
-    os.environ["JANS_COUCHBASE_CERT_FILE"] = given
+    os.environ["CN_COUCHBASE_VERIFY"] = "true"
+    os.environ["CN_COUCHBASE_CERT_FILE"] = given
     client = BaseClient("localhost", "admin", "password")
     assert client.session.verify == expected
     os.environ.clear()
@@ -283,8 +283,8 @@ def test_client_session_verified(given, expected):
 def test_client_session_verified_host(given, expected):
     from jans.pycloudlib.persistence.couchbase import BaseClient
 
-    os.environ["JANS_COUCHBASE_VERIFY"] = "true"
-    os.environ["JANS_COUCHBASE_HOST_HEADER"] = given
+    os.environ["CN_COUCHBASE_VERIFY"] = "true"
+    os.environ["CN_COUCHBASE_HOST_HEADER"] = given
     client = BaseClient("localhost", "admin", "password")
     assert client.session.headers["Host"] == expected
     os.environ.clear()
@@ -321,7 +321,7 @@ def test_n1ql_request_body_named_params():
 def test_render_hybrid_properties_default(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
 
     expected = """
 storages: ldap, couchbase
@@ -333,14 +333,14 @@ storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh,
     dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
 
 
 def test_render_hybrid_properties_user(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "user"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "user"
 
     expected = """
 storages: ldap, couchbase
@@ -353,15 +353,15 @@ storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_token(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "token"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "token"
 
     expected = """
 storages: ldap, couchbase
@@ -374,15 +374,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh,
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_session(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "session"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "session"
 
     expected = """
 storages: ldap, couchbase
@@ -395,15 +395,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh,
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_cache(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "cache"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "cache"
 
     expected = """
 storages: ldap, couchbase
@@ -416,15 +416,15 @@ storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_site(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["JANS_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["JANS_PERSISTENCE_LDAP_MAPPING"] = "site"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "site"
 
     expected = """
 storages: ldap, couchbase
@@ -437,5 +437,5 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("JANS_PERSISTENCE_TYPE", None)
-    os.environ.pop("JANS_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)

@@ -36,7 +36,7 @@ class ConfigManager:
     - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
     """
     def __init__(self):
-        _adapter = os.environ.get("JANS_CONFIG_ADAPTER", "consul",)
+        _adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul",)
         if _adapter == "consul":
             self.adapter = ConsulConfig()
         elif _adapter == "kubernetes":
@@ -80,7 +80,7 @@ class SecretManager:
     """
 
     def __init__(self):
-        _adapter = os.environ.get("JANS_SECRET_ADAPTER", "vault",)
+        _adapter = os.environ.get("CN_SECRET_ADAPTER", "vault",)
         if _adapter == "vault":
             self.adapter = VaultSecret()
         elif _adapter == "kubernetes":
