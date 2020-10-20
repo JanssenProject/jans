@@ -67,10 +67,12 @@ class OxauthInstaller(JettyInstaller):
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
 
+        self.ldif_scripts = os.path.join(Config.outputFolder, 'scripts.ldif')
+        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
         self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.ldif_clients, self.templates_folder, self.output_folder)
 
-        self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients, self.ldif_scripts])
 
 
     def install_oxauth_rp(self):

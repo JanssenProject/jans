@@ -66,8 +66,7 @@
   },
   "exclude": {
     "objectClass": [
-      "oxAuthConfiguration",
-      "oxApplicationConfiguration"
+      
     ],
     "attributeType": [
       "gluuVDSstatus",
@@ -81,5 +80,8 @@
       "oxFaviconImage",
       "oxStatus"
     ]
-  }
+  },
+  "postconversions": {
+    "jansConf": "jansAppConf"
+    }
 }
