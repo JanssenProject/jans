@@ -57,7 +57,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
     public static final String BASE_DIR;
     public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
+	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
     public static final String DEFAULT_PROPERTIES_FILE = DIR + "openid.properties";
 
 	private static final String SALT_FILE_NAME = "salt";
