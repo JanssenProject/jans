@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,28 +27,28 @@ import java.io.IOException;
 
 
 public class IntrospectAccessTokenParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("access_token")
   private String accessToken = null;
 
-  public IntrospectAccessTokenParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public IntrospectAccessTokenParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public IntrospectAccessTokenParams accessToken(String accessToken) {
@@ -71,7 +71,7 @@ public class IntrospectAccessTokenParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -79,13 +79,13 @@ public class IntrospectAccessTokenParams {
       return false;
     }
     IntrospectAccessTokenParams introspectAccessTokenParams = (IntrospectAccessTokenParams) o;
-    return Objects.equals(this.oxdId, introspectAccessTokenParams.oxdId) &&
+    return Objects.equals(this.rpId, introspectAccessTokenParams.rpId) &&
         Objects.equals(this.accessToken, introspectAccessTokenParams.accessToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, accessToken);
+    return Objects.hash(rpId, accessToken);
   }
 
 
@@ -94,7 +94,7 @@ public class IntrospectAccessTokenParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class IntrospectAccessTokenParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    accessToken: ").append(toIndentedString(accessToken)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -104,7 +104,7 @@ public class IntrospectAccessTokenParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

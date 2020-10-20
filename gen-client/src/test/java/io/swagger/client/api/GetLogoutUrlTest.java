@@ -32,7 +32,7 @@ public class GetLogoutUrlTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "","","" );
 
         final GetLogoutUriParams params = new GetLogoutUriParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setIdTokenHint("dummy_token");
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setState(UUID.randomUUID().toString());
@@ -46,11 +46,11 @@ public class GetLogoutUrlTest {
 
 
     @Test
-    public void testWithInvalidOxdId() throws Exception {
+    public void testWithInvalidRpId() throws Exception {
         final DevelopersApi client = api();
 
         final GetLogoutUriParams params = new GetLogoutUriParams();
-        params.setOxdId(UUID.randomUUID().toString());
+        params.setRpId(UUID.randomUUID().toString());
 
         try {
             client.getLogoutUri(params, Tester.getAuthorization(), null);
@@ -61,13 +61,13 @@ public class GetLogoutUrlTest {
 
     @Parameters({"opHost", "redirectUrls", "postLogoutRedirectUrl"})
     @Test
-    public void testWithNullOxdId(String opHost, String redirectUrls, String postLogoutRedirectUrl) throws Exception {
+    public void testWithNullRpId(String opHost, String redirectUrls, String postLogoutRedirectUrl) throws Exception {
         final DevelopersApi client = api();
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "","","" );
         final GetLogoutUriParams params = new GetLogoutUriParams();
-        params.setOxdId(null);
+        params.setRpId(null);
         try {
-            client.getLogoutUri(params, Tester.getAuthorization(site), site.getOxdId());
+            client.getLogoutUri(params, Tester.getAuthorization(site), site.getRpId());
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);  //BAD_REQUEST
         }

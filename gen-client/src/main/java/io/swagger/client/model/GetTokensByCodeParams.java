@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -27,8 +27,8 @@ import java.io.IOException;
 
 
 public class GetTokensByCodeParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("code")
   private String code = null;
@@ -42,22 +42,22 @@ public class GetTokensByCodeParams {
   @SerializedName("algorithm")
   private String algorithm = null;
 
-  public GetTokensByCodeParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public GetTokensByCodeParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public GetTokensByCodeParams code(String code) {
@@ -134,7 +134,7 @@ public class GetTokensByCodeParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -142,7 +142,7 @@ public class GetTokensByCodeParams {
       return false;
     }
     GetTokensByCodeParams getTokensByCodeParams = (GetTokensByCodeParams) o;
-    return Objects.equals(this.oxdId, getTokensByCodeParams.oxdId) &&
+    return Objects.equals(this.rpId, getTokensByCodeParams.rpId) &&
         Objects.equals(this.code, getTokensByCodeParams.code) &&
         Objects.equals(this.state, getTokensByCodeParams.state) &&
         Objects.equals(this.authenticationMethod, getTokensByCodeParams.authenticationMethod) &&
@@ -151,7 +151,7 @@ public class GetTokensByCodeParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, code, state, authenticationMethod, algorithm);
+    return Objects.hash(rpId, code, state, authenticationMethod, algorithm);
   }
 
 
@@ -160,7 +160,7 @@ public class GetTokensByCodeParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetTokensByCodeParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    authenticationMethod: ").append(toIndentedString(authenticationMethod)).append("\n");
@@ -173,7 +173,7 @@ public class GetTokensByCodeParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

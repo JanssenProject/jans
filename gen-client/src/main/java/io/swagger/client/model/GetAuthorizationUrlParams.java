@@ -1,6 +1,6 @@
 /*
- * oxd-server
- * oxd-server
+ * jans-api-server
+ * jans-api-server
  *
  * OpenAPI spec version: 4.2
  * Contact: yuriyz@gluu.org
@@ -31,8 +31,8 @@ import java.util.Map;
 
 
 public class GetAuthorizationUrlParams {
-  @SerializedName("oxd_id")
-  private String oxdId = null;
+  @SerializedName("rp_id")
+  private String rpId = null;
 
   @SerializedName("scope")
   private List<String> scope = null;
@@ -61,22 +61,22 @@ public class GetAuthorizationUrlParams {
   @SerializedName("params")
   private Map<String, String> params = null;
 
-  public GetAuthorizationUrlParams oxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public GetAuthorizationUrlParams rpId(String rpId) {
+    this.rpId = rpId;
     return this;
   }
 
    /**
-   * Get oxdId
-   * @return oxdId
+   * Get rpId
+   * @return rpId
   **/
   @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
-  public String getOxdId() {
-    return oxdId;
+  public String getRpId() {
+    return rpId;
   }
 
-  public void setOxdId(String oxdId) {
-    this.oxdId = oxdId;
+  public void setRpId(String rpId) {
+    this.rpId = rpId;
   }
 
   public GetAuthorizationUrlParams scope(List<String> scope) {
@@ -283,7 +283,7 @@ public class GetAuthorizationUrlParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -291,7 +291,7 @@ public class GetAuthorizationUrlParams {
       return false;
     }
     GetAuthorizationUrlParams getAuthorizationUrlParams = (GetAuthorizationUrlParams) o;
-    return Objects.equals(this.oxdId, getAuthorizationUrlParams.oxdId) &&
+    return Objects.equals(this.rpId, getAuthorizationUrlParams.rpId) &&
         Objects.equals(this.scope, getAuthorizationUrlParams.scope) &&
         Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
         Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
@@ -305,7 +305,7 @@ public class GetAuthorizationUrlParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, scope, acrValues, prompt, state, nonce, redirectUri, responseTypes, customParameters, params);
+    return Objects.hash(rpId, scope, acrValues, prompt, state, nonce, redirectUri, responseTypes, customParameters, params);
   }
 
 
@@ -314,7 +314,7 @@ public class GetAuthorizationUrlParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetAuthorizationUrlParams {\n");
     
-    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
+    sb.append("    rpId: ").append(toIndentedString(rpId)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
     sb.append("    prompt: ").append(toIndentedString(prompt)).append("\n");
@@ -332,7 +332,7 @@ public class GetAuthorizationUrlParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

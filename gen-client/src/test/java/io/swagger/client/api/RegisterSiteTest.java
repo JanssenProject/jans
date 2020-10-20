@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
 @Test
 public class RegisterSiteTest {
 
-    private String oxdId = null;
+    private String rpId = null;
 
     @Parameters({"opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
@@ -90,20 +90,20 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
-        assertNotNull(resp.getOxdId());
-        oxdId = resp.getOxdId();
+        assertNotNull(resp.getRpId());
+        rpId = resp.getRpId();
     }
 
     @Test(dependsOnMethods = {"register"})
     public void update() throws Exception {
-        notEmpty(oxdId);
+        notEmpty(rpId);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
 
         // more specific site registration
         final UpdateSiteParams params = new UpdateSiteParams();
-        params.setOxdId(oxdId);
-        params.setScope(Lists.newArrayList("profile", "oxd"));
+        params.setRpId(rpId);
+        params.setScope(Lists.newArrayList("profile", "jans_client_api"));
 
         UpdateSiteResponse resp = api().updateSite(params, getAuthorization(), null);
         assertNotNull(resp);
@@ -120,7 +120,7 @@ public class RegisterSiteTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(logoutUri.split(" ")[0]);
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
@@ -130,7 +130,7 @@ public class RegisterSiteTest {
         params.setAccessTokenSigningAlg(accessTokenSigningAlg);
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 
@@ -141,7 +141,7 @@ public class RegisterSiteTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(logoutUri.split(" ")[0]);
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
@@ -153,7 +153,7 @@ public class RegisterSiteTest {
         params.setJwks(Jackson2.asJson(apiClient.getRpJwks()));
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
-        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
         return resp;
     }
 
@@ -167,7 +167,7 @@ public class RegisterSiteTest {
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),

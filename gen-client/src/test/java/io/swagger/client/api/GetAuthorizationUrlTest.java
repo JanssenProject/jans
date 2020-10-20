@@ -23,7 +23,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
 
         final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site), null);
         assertNotNull(resp);
@@ -37,7 +37,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setState(state);
 
         final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site), null);
@@ -56,7 +56,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setNonce("dummy_nonce");
 
         final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site), null);
@@ -75,7 +75,7 @@ public class GetAuthorizationUrlTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRpId(site.getRpId());
         commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
 
         final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site), null);

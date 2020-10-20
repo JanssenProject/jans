@@ -47,7 +47,7 @@ public class RpGetRptTest {
         final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
         params.setRpt(firstResponse.getAccessToken());
 
@@ -67,7 +67,7 @@ public class RpGetRptTest {
         final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setTicket(checkAccess.getTicket());
 
         final UmaRpGetRptResponse response = client.umaRpGetRpt(params, Tester.getAuthorization(site), null);

@@ -66,7 +66,7 @@ public class RsCheckAccessTest {
 
     public static UmaRsCheckAccessResponse checkAccess(DevelopersApi client, RegisterSiteResponse site, List<String> scopeList) throws Exception {
         final UmaRsCheckAccessParams params = new UmaRsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");
@@ -83,7 +83,7 @@ public class RsCheckAccessTest {
 
     public static void checkAccessWithIncorrectScopes(DevelopersApi client, RegisterSiteResponse site, List<String> scopeList) throws Exception {
         final UmaRsCheckAccessParams params = new UmaRsCheckAccessParams();
-        params.setOxdId(site.getOxdId());
+        params.setRpId(site.getRpId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");

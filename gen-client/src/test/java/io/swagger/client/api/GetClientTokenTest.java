@@ -24,7 +24,7 @@ public class GetClientTokenTest {
     public void getClientToken(String opHost) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid","oxd"));
+        params.setScope(Lists.newArrayList("openid","jans_client_api"));
         params.setClientId(Tester.getSetupData().getClientId());
         params.setClientSecret(Tester.getSetupData().getClientSecret());
 
@@ -39,7 +39,7 @@ public class GetClientTokenTest {
     public void getClientToken_withOpConfigurationEndpoint(String opConfigurationEndpoint) throws ApiException {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpConfigurationEndpoint(opConfigurationEndpoint);
-        params.setScope(Lists.newArrayList("openid","oxd"));
+        params.setScope(Lists.newArrayList("openid","jans_client_api"));
         params.setClientId(Tester.getSetupData().getClientId());
         params.setClientSecret(Tester.getSetupData().getClientSecret());
 
