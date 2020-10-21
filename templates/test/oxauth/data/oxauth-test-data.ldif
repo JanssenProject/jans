@@ -1,283 +1,261 @@
-######################################
-# Attributes
-######################################
 dn: inum=18CC,ou=attributes,o=jans
-objectClass: jansAttribute
-objectClass: top
 description: oxAuth Client Application Type
 displayName: oxAuth Client Application Type
-jansAttributeName: oxAuthAppType
-jansAttributeOrigin: oxAuthClient
-jansAttributeType: string
-jansAttributeEditType: admin
-jansAttributeViewType: admin
-jansAttributeViewType: user
-oxAuthClaimName: oxAuthAppType
-jansStatus: active
 inum: 18CC
-urn: urn:jans:dir:attribute-def:oxAuthAppType
+jansAttrEditTyp: admin
+jansAttrName: oxAuthAppType
+jansAttrOrigin: oxAuthClient
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: oxAuthAppType
+jansStatus: active
+objectClass: jansAttr
+objectClass: top
+urn: urn:gluu:dir:attribute-def:oxAuthAppType
 
 dn: inum=18CD,ou=attributes,o=jans
-objectClass: jansAttribute
-objectClass: top
 description: oxAuth Client ID Token Signed Response Algorithm
 displayName: oxAuth Client ID Token Signed Response Algorithm
-jansAttributeName: oxAuthIdTokenSignedResponseAlg
-jansAttributeOrigin: oxAuthClient
-jansAttributeType: string
-jansAttributeEditType: admin
-jansAttributeViewType: admin
-jansAttributeViewType: user
-oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
-jansStatus: active
 inum: 18CD
-urn: urn:jans:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
+jansAttrEditTyp: admin
+jansAttrName: oxAuthIdTokenSignedResponseAlg
+jansAttrOrigin: oxAuthClient
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: oxAuthIdTokenSignedResponseAlg
+jansStatus: active
+objectClass: jansAttr
+objectClass: top
+urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
 
 dn: inum=18CE,ou=attributes,o=jans
-objectClass: jansAttribute
-objectClass: top
 description: oxAuth Client Redirect URI
 displayName: oxAuth Client Redirect URI
-jansAttributeName: oxAuthRedirectURI
-jansAttributeOrigin: oxAuthClient
-jansAttributeType: string
-jansAttributeEditType: admin
-jansAttributeViewType: admin
-jansAttributeViewType: user
-oxAuthClaimName: oxAuthRedirectURI
-jansStatus: active
 inum: 18CE
-urn: urn:jans:dir:attribute-def:oxAuthRedirectURI
+jansAttrEditTyp: admin
+jansAttrName: oxAuthRedirectURI
+jansAttrOrigin: oxAuthClient
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: oxAuthRedirectURI
+jansStatus: active
+objectClass: jansAttr
+objectClass: top
+urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
 
 dn: inum=18CF,ou=attributes,o=jans
-objectClass: jansAttribute
-objectClass: top
 description: oxAuth Client Scope
 displayName: oxAuth Client Scope
-jansAttributeName: oxAuthScope
-jansAttributeOrigin: oxAuthClient
-jansAttributeType: string
-jansAttributeEditType: admin
-jansAttributeViewType: admin
-jansAttributeViewType: user
-oxAuthClaimName: oxAuthScope
-jansStatus: active
 inum: 18CF
-urn: urn:jans:dir:attribute-def:oxAuthScope
+jansAttrEditTyp: admin
+jansAttrName: oxAuthScope
+jansAttrOrigin: oxAuthClient
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: oxAuthScope
+jansStatus: active
+objectClass: jansAttr
+objectClass: top
+urn: urn:gluu:dir:attribute-def:oxAuthScope
 
-######################################
-# Default Scopes
-######################################
 dn: inum=43F1,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=764C,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=C17A,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=D491,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=341A,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=341A,ou=scopes,o=jans
-changetype: modify
 add: oxAuthClaim
-oxAuthClaim: inum=18CC,ou=attributes,o=jans
+changetype: modify
+jansClaim: inum=18CC,ou=attributes,o=gluu
 
 dn: inum=10B2,ou=scopes,o=jans
 changetype: modify
+jansDefScope: true
 replace: defaultScope
-defaultScope: true
 
 dn: inum=341A,ou=scopes,o=jans
-changetype: modify
 add: oxAuthClaim
-oxAuthClaim: inum=18CD,ou=attributes,o=jans
-oxAuthClaim: inum=18CE,ou=attributes,o=jans
-oxAuthClaim: inum=18CF,ou=attributes,o=jans
+changetype: modify
+jansClaim: inum=18CD,ou=attributes,o=gluu
+jansClaim: inum=18CE,ou=attributes,o=gluu
+jansClaim: inum=18CF,ou=attributes,o=gluu
 
-######################################
-# Scopes
-######################################
 dn: inum=7D01,ou=scopes,o=jans
-objectClass: top
-objectClass: oxAuthCustomScope
-oxId: org_name
-inum: 7D01
 description: Dynamic scope org_name
-defaultScope: true
-oxScopeType: dynamic
-oxScriptDn: inum=031C-5621,ou=scripts,o=jans
+inum: 7D01
+jansDefScope: true
+jansId: org_name
+jansScopeTyp: dynamic
+jansScrDn: inum=031C-5621,ou=scripts,o=gluu
+objectClass: top
+objectClass: jansCustomScope
 
 dn: inum=7D02,ou=scopes,o=jans
-objectClass: top
-objectClass: oxAuthCustomScope
-oxId: work_phone
-inum: 7D02
 description: Dynamic scope work_phone
-defaultScope: true
-oxScopeType: dynamic
-oxScriptDn: inum=031C-5622,ou=scripts,o=jans
+inum: 7D02
+jansDefScope: true
+jansId: work_phone
+jansScopeTyp: dynamic
+jansScrDn: inum=031C-5622,ou=scripts,o=gluu
+objectClass: top
+objectClass: jansCustomScope
 
 dn: inum=0465-1DEA,ou=scopes,o=jans
-objectClass: oxAuthCustomScope
-objectClass: top
-defaultScope: true
 description: Custom scope for tests
-oxId: test
 inum: @DBE5-84F8-631A-9172CD07-49BE0465-1DEA
-oxAuthClaim: inum=D2E0,ou=attributes,o=jans
-oxScopeType: openid
-
-
-######################################
-# Clients
-######################################
-dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
+jansClaim: inum=D2E0,ou=attributes,o=gluu
+jansDefScope: true
+jansId: test
+jansScopeTyp: openid
+objectClass: jansCustomScope
 objectClass: top
-objectClass: oxAuthClient
+
+dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
 displayName: oxAuth Test Client (don't remove)
 inum: %(oxauthClient_4_inum)s
-oxAuthAppType: web
-oxAuthClientSecret: %(oxauthClient_4_encoded_pw)s
-oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
-oxAuthRedirectURI: https://client.example.com/cb
-oxAuthRedirectURI: https://client.example.com/cb1
-oxAuthRedirectURI: https://client.example.com/cb2
-oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
-oxAuthResponseType: token
-oxAuthResponseType: code
-oxAuthResponseType: id_token
-oxAuthGrantType: authorization_code
-oxAuthGrantType: implicit
-oxAuthGrantType: refresh_token
-oxAuthGrantType: client_credentials
-oxAuthScope: inum=F0C4,ou=scopes,o=jans
-oxAuthScope: inum=10B2,ou=scopes,o=jans
-oxAuthScope: inum=764C,ou=scopes,o=jans
-oxAuthScope: inum=43F1,ou=scopes,o=jans
-oxAuthScope: inum=341A,ou=scopes,o=jans
-oxAuthScope: inum=6D99,ou=scopes,o=jans
-oxAuthTokenEndpointAuthMethod: client_secret_basic
-oxAuthTrustedClient: true
+jansAppTyp: web
+jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+jansClntSecret: %(oxauthClient_4_encoded_pw)s
+jansGrantTyp: authorization_code
+jansGrantTyp: implicit
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: RS256
+jansRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
+jansRedirectURI: https://client.example.com/cb
+jansRedirectURI: https://client.example.com/cb1
+jansRedirectURI: https://client.example.com/cb2
+jansRespTyp: token
+jansRespTyp: code
+jansRespTyp: id_token
+jansScope: inum=F0C4,ou=scopes,o=gluu
+jansScope: inum=10B2,ou=scopes,o=gluu
+jansScope: inum=764C,ou=scopes,o=gluu
+jansScope: inum=43F1,ou=scopes,o=gluu
+jansScope: inum=341A,ou=scopes,o=gluu
+jansScope: inum=6D99,ou=scopes,o=gluu
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: true
+objectClass: top
+objectClass: jansClnt
 
 dn: inum=%(oxauthClient_2_inum)s,ou=clients,o=jans
-objectClass: top
-objectClass: oxAuthClient
 displayName: oxAuth Test Resource Server Client (don't remove)
 inum: %(oxauthClient_2_inum)s
-oxAuthAppType: web
-oxAuthClientSecret: %(oxauthClient_2_encoded_pw)s
-oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthRedirectURI: https://client.example.com/cb
-oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
-oxAuthResponseType: code
-oxAuthResponseType: id_token
-oxAuthGrantType: authorization_code
-oxAuthGrantType: implicit
-oxAuthGrantType: refresh_token
-oxAuthGrantType: client_credentials
-oxAuthScope: inum=6D99,ou=scopes,o=jans
-oxAuthScope: inum=7D90,ou=scopes,o=jans
-oxAuthTokenEndpointAuthMethod: client_secret_basic
-oxAuthTrustedClient: true
+jansAppTyp: web
+jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+jansClntSecret: %(oxauthClient_2_encoded_pw)s
+jansGrantTyp: authorization_code
+jansGrantTyp: implicit
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: RS256
+jansRedirectURI: https://client.example.com/cb
+jansRespTyp: code
+jansRespTyp: id_token
+jansScope: inum=6D99,ou=scopes,o=gluu
+jansScope: inum=7D90,ou=scopes,o=gluu
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: true
+objectClass: top
+objectClass: jansClnt
 
 dn: inum=%(oxauthClient_3_inum)s,ou=clients,o=jans
-objectClass: top
-objectClass: oxAuthClient
 displayName: oxAuth Test Requesting Party Client (don't remove)
 inum: %(oxauthClient_3_inum)s
-oxAuthAppType: web
-oxAuthClientSecret: %(oxauthClient_3_encoded_pw)s
-oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthRedirectURI: https://client.example.com/cb
-oxAuthResponseType: code
-oxAuthResponseType: id_token
-oxAuthGrantType: authorization_code
-oxAuthGrantType: implicit
-oxAuthGrantType: refresh_token
-oxAuthGrantType: client_credentials
-oxAuthTokenEndpointAuthMethod: client_secret_basic
-oxAuthTrustedClient: true
-
-######################################
-# UMA
-######################################
-dn: inum=5214-40D1,ou=scopes,o=jans
-objectClass: oxAuthCustomScope
+jansAppTyp: web
+jansClntSecret: %(oxauthClient_3_encoded_pw)s
+jansGrantTyp: authorization_code
+jansGrantTyp: implicit
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+jansIdTknSignedRespAlg: RS256
+jansRedirectURI: https://client.example.com/cb
+jansRespTyp: code
+jansRespTyp: id_token
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: true
 objectClass: top
+objectClass: jansClnt
+
+dn: inum=5214-40D1,ou=scopes,o=jans
 displayName: View
 inum: 5214-40D1
-oxId: http://photoz.example.com/dev/scopes/view
-oxUmaPolicyScriptDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=jans
-oxScopeType: uma
+jansId: http://photoz.example.com/dev/scopes/view
+jansScopeTyp: uma
+jansUmaPolicyScrDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=gluu
+objectClass: jansCustomScope
+objectClass: top
 
 dn: inum=B6EA-B301,ou=scopes,o=jans
-objectClass: oxAuthCustomScope
-objectClass: top
 displayName: Add/Edit
 inum: B6EA-B301
-oxId: modify
-oxScopeType: uma
+jansId: modify
+jansScopeTyp: uma
+objectClass: jansCustomScope
+objectClass: top
 
 dn: inum=03F8-EDD7,ou=scopes,o=jans
-objectClass: oxAuthCustomScope
-objectClass: top
 displayName: All
 inum: 03F8-EDD7
-oxId: http://photoz.example.com/dev/scopes/all
-oxScopeType: uma
-
-######################################
-# Sector Identifier
-######################################
-dn: oxId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
-oxId: a55ede29-8f5a-461d-b06e-76caee8d40b5
+jansId: http://photoz.example.com/dev/scopes/all
+jansScopeTyp: uma
+objectClass: jansCustomScope
 objectClass: top
-objectClass: oxSectorIdentifier
-oxAuthRedirectURI: https://www.jans.org
-oxAuthRedirectURI: http://localhost:80/oxauth-rp/home.htm
-oxAuthRedirectURI: https://localhost:8443/oxauth-rp/home.htm
-oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
-oxAuthRedirectURI: https://%(hostname)s/oxauth-client/test/resources/jwks.json
-oxAuthRedirectURI: https://client.example.org/callback
-oxAuthRedirectURI: https://client.example.org/callback2
-oxAuthRedirectURI: https://client.other_company.example.net/callback
-oxAuthRedirectURI: https://client.example.com/cb
-oxAuthRedirectURI: https://client.example.com/cb1
-oxAuthRedirectURI: https://client.example.com/cb2
 
-dn: oxId=840ef58d-a7d0-4986-af7b-71ed0089ce61,ou=sector_identifiers,o=jans
-oxId: 840ef58d-a7d0-4986-af7b-71ed0089ce61
+dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
+jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
+jansRedirectURI: https://www.gluu.org
+jansRedirectURI: http://localhost:80/oxauth-rp/home.htm
+jansRedirectURI: https://localhost:8443/oxauth-rp/home.htm
+jansRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
+jansRedirectURI: https://%(hostname)s/oxauth-client/test/resources/jwks.json
+jansRedirectURI: https://client.example.org/callback
+jansRedirectURI: https://client.example.org/callback2
+jansRedirectURI: https://client.other_company.example.net/callback
+jansRedirectURI: https://client.example.com/cb
+jansRedirectURI: https://client.example.com/cb1
+jansRedirectURI: https://client.example.com/cb2
 objectClass: top
-objectClass: oxSectorIdentifier
-oxAuthRedirectURI: https://example.com/bad_sector_identifier
+objectClass: jansSectorIdentifier
 
-######################################
-# Scripts - Dynamic scope
-######################################
+dn: jansId=840ef58d-a7d0-4986-af7b-71ed0089ce61,ou=sector_identifiers,o=jans
+jansId: 840ef58d-a7d0-4986-af7b-71ed0089ce61
+jansRedirectURI: https://example.com/bad_sector_identifier
+objectClass: top
+objectClass: jansSectorIdentifier
+
 dn: inum=031C-5621,ou=scripts,o=jans
 changetype: modify
-replace: oxEnabled
 oxEnabled: true
+replace: oxEnabled
 
 dn: inum=031C-5622,ou=scripts,o=jans
 changetype: modify
-replace: oxEnabled
 oxEnabled: true
+replace: oxEnabled
 

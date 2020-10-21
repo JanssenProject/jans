@@ -115,6 +115,7 @@ elif os.path.isfile(Config.setup_properties_fn+'.enc'):
 collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
+    collectProperties.save()
     Config.installed_instance = True
 
     if argsp.csx:
@@ -153,7 +154,7 @@ if Config.installed_instance:
 
     propertiesUtils.promptForProperties()
 
-    if not Config.addPostSetupService:
+    if not (argsp.t or argsp.x) and not Config.addPostSetupService:
         print("No service was selected to install. Exiting ...")
         sys.exit()
 
