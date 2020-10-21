@@ -85,7 +85,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if result:
             Config.jans_radius_client_id = result['inum']
-            Config.jans_ro_encoded_pw = result['oxAuthClientSecret']
+            Config.jans_ro_encoded_pw = result['jansClntSecret']
             Config.jans_ro_pw = self.unobscure(Config.jans_ro_encoded_pw)
     
             result = dbUtils.search('inum=5866-4202,ou=scripts,o=jans', search_scope=ldap3.BASE)
@@ -97,7 +97,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 Config.oxtrust_requesting_party_client_id = result['inum']
 
         admin_dn = None
-        result = dbUtils.search('o=jans', search_filter='(jansGroupType=jansManagerGroup)', search_scope=ldap3.SUBTREE)
+        result = dbUtils.search('o=jans', search_filter='(jansGrpTyp=jansManagerGroup)', search_scope=ldap3.SUBTREE)
         if result:
             admin_dn = result['member'][0]
 
@@ -112,78 +112,27 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
-        oxCacheConfiguration = json.loads(oxConfiguration['oxCacheConfiguration'])
+        oxCacheConfiguration = json.loads(oxConfiguration['jansCacheConf'])
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
-
-        result = dbUtils.search(oxidp_ConfigurationEntryDN, search_filter='(objectClass=oxApplicationConfiguration)', search_scope=ldap3.BASE)
-
-        if result:
-
-            oxConfApplication = json.loads(result['oxConfApplication'])
-            Config.idpClient_encoded_pw = oxConfApplication['openIdClientPassword']
-            Config.idpClient_pw =  self.unobscure(Config.idpClient_encoded_pw)
-            
-            Config.idp_client_id =  oxConfApplication['openIdClientId']
-
-            if 'openIdClientPassword' in oxConfApplication:
-                Config.idpClient_pw =  self.unobscure(oxConfApplication['openIdClientPassword'])
-            if 'openIdClientId' in oxConfApplication:
-                Config.idp_client_id =  oxConfApplication['openIdClientId']
-
-        dn_oxauth, oxAuthConfDynamic = dbUtils.get_oxAuthConfDynamic()
-        dn_oxtrust, oxTrustConfApplication = dbUtils.get_oxTrustConfApplication()
-
-        if 'apiUmaClientId' in oxTrustConfApplication:
-            Config.oxtrust_resource_server_client_id =  oxTrustConfApplication['apiUmaClientId']
-
-
-        if 'apiUmaClientKeyStorePassword' in oxTrustConfApplication:
-            Config.api_rs_client_jks_pass = self.unobscure(oxTrustConfApplication['apiUmaClientKeyStorePassword'])
-
-        if 'apiUmaResourceId' in oxTrustConfApplication:
-            Config.oxtrust_resource_id =  oxTrustConfApplication['apiUmaResourceId']
-
-        if 'idpSecurityKeyPassword' in oxTrustConfApplication:
-            Config.encoded_shib_jks_pw = oxTrustConfApplication['idpSecurityKeyPassword']
-            Config.shibJksPass =  self.unobscure(Config.encoded_shib_jks_pw)
-
-        Config.admin_email =  oxTrustConfApplication['orgSupportEmail']
-
-        if 'organizationName' in oxTrustConfApplication:
-            Config.orgName =  oxTrustConfApplication['organizationName']
-
-        Config.oxauth_client_id = oxTrustConfApplication['oxAuthClientId']
-        Config.oxauthClient_pw = self.unobscure(oxTrustConfApplication['oxAuthClientPassword'])
-        Config.oxauthClient_encoded_pw = oxTrustConfApplication['oxAuthClientPassword']
 
         Config.scim_rp_client_jks_pass = 'secret' # this is static
 
-        if 'scimUmaClientId' in oxTrustConfApplication:
-            Config.scim_rs_client_id =  oxTrustConfApplication['scimUmaClientId']
-
-        if 'scimUmaClientId' in oxTrustConfApplication:
-            Config.scim_resource_oxid =  oxTrustConfApplication['scimUmaResourceId']
-        if 'scimTestMode' in oxTrustConfApplication:
-            Config.scimTestMode =  oxTrustConfApplication['scimTestMode']
-
-        if 'apiUmaClientKeyStorePassword' in oxTrustConfApplication:
-            Config.api_rp_client_jks_pass = self.unobscure(oxTrustConfApplication['apiUmaClientKeyStorePassword'])
-            Config.api_rs_client_jks_fn = oxTrustConfApplication['apiUmaClientKeyStoreFile']
-
-        if 'scimUmaClientKeyStorePassword' in oxTrustConfApplication:
-            Config.scim_rs_client_jks_pass = self.unobscure(oxTrustConfApplication['scimUmaClientKeyStorePassword'])
-            Config.scim_rs_client_jks_fn = str(oxTrustConfApplication['scimUmaClientKeyStoreFile'])
-
         # Other clients
-        client_var_id_list = (
+        client_var_id_list = [
+                    ('oxauth_client_id', '1001.'),
+                    ('scim_rs_client_id', '1201.'),
                     ('scim_rp_client_id', '1202.'),
-                    ('passport_rs_client_id', '1501.'),
-                    ('passport_rp_client_id', '1502.'),
-                    ('passport_rp_ii_client_id', '1503.'),
-                    ('jans_radius_client_id', '1701.'),
-                    )
+                    ]
         self.check_clients(client_var_id_list)
-        self.check_clients([('passport_resource_id', '1504.')])
+
+        result = dbUtils.search(
+                        search_base='inum={},ou=clients,o=jans'.format(Config.oxauth_client_id),
+                        search_scope=ldap3.BASE,
+                        )
+        Config.oxauthClient_encoded_pw = result['jansClntSecret']
+        Config.oxauthClient_pw = self.unobscure(Config.oxauthClient_encoded_pw)
+
+        dn_oxauth, oxAuthConfDynamic = dbUtils.get_oxAuthConfDynamic()
 
         o_issuer = urlparse(oxAuthConfDynamic['issuer'])
         Config.hostname = str(o_issuer.netloc)
@@ -222,7 +171,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         #    setup_prop[jetty_services[service][0]] = os.path.exists('/opt/jans/jetty/{0}/webapps/{0}.war'.format(service))
 
 
-        for s in ('jansPassportEnabled', 'jansRadiusEnabled', 'jansSamlEnabled', 'jansScimEnabled'):
+        for s in ['jansScimEnabled']:
             setattr(Config, s, oxConfiguration.get(s, False))
 
         application_max_ram = 3072
@@ -237,25 +186,26 @@ class CollectProperties(SetupUtils, BaseInstaller):
             service_default_fn = os.path.join(default_dir, service)
             if os.path.exists(service_default_fn):
                 usedRatio += jetty_services[service]['memory']['ratio']
-                if service == 'oxauth':
+                if service == 'jans-auth':
                     service_prop = base.read_properties_file(service_default_fn)
                     m = re.search('-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
                     oxauth_max_heap_mem = int(m.groups()[0])
 
         if oxauth_max_heap_mem:
             ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
-            applicationMemory = oxauth_max_heap_mem / jetty_services['oxauth']['memory']['jvm_heap_ration']
-            allowedRatio = jetty_services['oxauth']['memory']['ratio'] * ratioMultiplier
+            applicationMemory = oxauth_max_heap_mem / jetty_services['jans-auth']['memory']['jvm_heap_ration']
+            allowedRatio = jetty_services['jans-auth']['memory']['ratio'] * ratioMultiplier
             application_max_ram = int(round(applicationMemory / allowedRatio))
-
-        if Config.get('jansRadiusEnabled'):
-            Config.oxauth_openidScopeBackwardCompatibility = True
 
         Config.os_type = base.os_type
         Config.os_version = base.os_version
 
         if not Config.get('ip'):
             Config.ip = self.detect_ip()
+
+        Config.installScimServer = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
+        Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
+        Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'config-api'))
 
     def save(self):
         propertiesUtils.save_properties()

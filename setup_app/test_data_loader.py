@@ -88,9 +88,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.logIt("Loading test ldif files")
 
-        if not self.passportInstaller.installed():
-            self.passportInstaller.generate_configuration()
-
         ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/oxauth/data/oxauth-test-data-user.ldif')
         
