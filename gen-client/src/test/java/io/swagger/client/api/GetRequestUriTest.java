@@ -27,7 +27,7 @@ public class GetRequestUriTest {
         //Request uri
         GetRequestObjectUriParams getRequestUriParams = new GetRequestObjectUriParams();
         getRequestUriParams.setRpId(site.getRpId());
-        getRequestUriParams.setRpHostUrl(host);
+        getRequestUriParams.setRpHostUrl(Tester.getHost());
         GetRequestObjectUriResponse getRequestObjectUriResponse = api.getRequestObjectUri(getRequestUriParams, Tester.getAuthorization(site), null);
         assertNotNull(getRequestObjectUriResponse.getRequestUri());
 
