@@ -4,7 +4,7 @@ use_client_authentication_for_pat: true
 trust_all_certs: true
 trust_store_path: ''
 trust_store_password: ''
-crypt_provider_key_store_path: './oxd-jwks.keystore'
+crypt_provider_key_store_path: './client-api-jwks.keystore'
 crypt_provider_key_store_password: 'example'
 crypt_provider_dn_name: 'CN=oxd CA Certificates'
 enable_jwks_generation: true
@@ -59,8 +59,8 @@ logging:
     - type: file
       threshold: TRACE
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: oxd-server.log
-      archivedLogFilenamePattern: oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: jans-client-api-server.log
+      archivedLogFilenamePattern: jans-client-api-server-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB

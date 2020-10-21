@@ -54,9 +54,9 @@ public class GluuPersistenceService implements PersistenceService {
             }
 
             if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()))) {
-                LOG.error("The value of the `storage` field in `jans-client-api.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
+                LOG.error("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
                         , this.persistenceType, this.persistenceEntryManager.getPersistenceType());
-                throw new RuntimeException("The value of the `storage` field in `jans-client-api.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
+                throw new RuntimeException("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
                         + this.persistenceEntryManager.getPersistenceType());
             }
             prepareBranch();

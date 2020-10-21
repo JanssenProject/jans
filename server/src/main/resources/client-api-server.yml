@@ -5,7 +5,7 @@ trust_all_certs: false
 trust_store_path: ''
 trust_store_password: ''
 enable_jwks_generation: true
-crypt_provider_key_store_path: '/opt/jans-client-api/conf/oxd-jwks.keystore'
+crypt_provider_key_store_path: '/opt/client-api-server/conf/client-api-jwks.keystore'
 crypt_provider_key_store_password: 'example'
 crypt_provider_dn_name: 'CN=oxd CA Certificates'
 support-google-logout: true
@@ -28,20 +28,20 @@ tracer: 'jaeger'
 tracer_host: 'localhost'
 tracer_port: 5775
 storage_configuration:
-  dbFileLocation: /opt/jans-client-api/data/rp_db
+  dbFileLocation: /opt/client-api-server/data/rp_db
 
 # Connectors
 server:
   applicationConnectors:
     - type: https
       port: 8443
-      keyStorePath: /opt/jans-client-api/conf/jans-client-api.keystore
+      keyStorePath: /opt/client-api-server/conf/client-api-server.keystore
       keyStorePassword: example
       validateCerts: false
   adminConnectors:
     - type: https
       port: 8444
-      keyStorePath: /opt/jans-client-api/conf/jans-client-api.keystore
+      keyStorePath: /opt/client-api-server/conf/client-api-server.keystore
       keyStorePassword: example
       validateCerts: false
 
@@ -61,8 +61,8 @@ logging:
     - type: file
       threshold: TRACE
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: /var/log/jans-client-api/jans-client-api.log
-      archivedLogFilenamePattern: /var/log/jans-client-api/jans-client-api-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: /var/log/client-api/client-api.log
+      archivedLogFilenamePattern: /var/log/client-api/client-api-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB

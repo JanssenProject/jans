@@ -610,7 +610,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             }
 
             if (signatureAlgorithms == SignatureAlgorithm.NONE && !getConfigurationService().getConfiguration().getAcceptIdTokenWithoutSignature()) {
-                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in jans-client-api.yml.");
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }
 

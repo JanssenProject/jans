@@ -20,7 +20,7 @@ public class RedisConfigurationTest {
 //    public static RpServerConfiguration redisTestConfiguration() {
 //        FileInputStream fis = null;
 //        try {
-//            fis = new FileInputStream(new File("./oxd-server/src/test/resources/rp-conf-test-redis.json"));
+//            fis = new FileInputStream(new File("./oxd-server/src/test/resources/client-api-conf-test-redis.json"));
 //            return ConfigurationService.createConfiguration(fis);
 //        } catch (Exception e) {
 //            IOUtils.closeQuietly(fis);

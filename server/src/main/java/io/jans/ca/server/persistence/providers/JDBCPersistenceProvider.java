@@ -68,7 +68,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
                 return Jackson2.createJsonMapper().treeToValue(node, JDBCConfiguration.class);
             }
             LOG.error("JDBC Configuration not provided.");
-            throw new Exception("JDBC configuration not provided in `jans-client-api.yml`.");
+            throw new Exception("JDBC configuration not provided in `client-api-server.yml`.");
         } catch (Exception e) {
             LOG.error("Failed to parse JDBCConfiguration.", e);
             throw e;
