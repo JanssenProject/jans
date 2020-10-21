@@ -50,14 +50,14 @@ class DBUtils:
     def get_oxAuthConfDynamic(self):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
-                        search_base='o=jans', 
-                        search_scope=ldap3.SUBTREE,
-                        search_filter='(objectClass=oxAuthConfiguration)',
-                        attributes=["oxAuthConfDynamic"]
+                        search_base='ou=jans-auth,ou=configuration,o=jans',
+                        search_scope=ldap3.BASE,
+                        search_filter='(objectClass=*)',
+                        attributes=["jansConfDyn"]
                         )
 
             dn = self.ldap_conn.response[0]['dn']
-            oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
+            oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_oxauth"'.format(self.default_bucket)
             result = cbm.exec_query(n1ql)
@@ -263,9 +263,28 @@ class DBUtils:
             for dn, entry in parser.entries:
                 backend_location = force if force else self.get_backend_location_for_dn(dn)
                 if backend_location == BackendTypes.LDAP:
-                    if not self.dn_exists(dn):
+                    if 'add' in  entry and 'changetype' in entry:
+                        base.logIt("LDAP modify add dn:{} entry:{}".format(dn, dict(entry)))
+                        change_attr = entry['add'][0]
+                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_ADD, [entry[change_attr][0]])]})
+                        if not ldap_operation_result:
+                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
+                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
+
+                    elif 'replace' in  entry and 'changetype' in entry:
+                        base.logIt("LDAP modify replace dn:{} entry:{}".format(dn, dict(entry)))
+                        change_attr = entry['replace'][0]
+                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_REPLACE, [entry[change_attr][0]])]})
+                        if not ldap_operation_result:
+                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
+                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
+
+                    elif not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
-                        self.ldap_conn.add(dn, attributes=entry)
+                        ldap_operation_result = self.ldap_conn.add(dn, attributes=entry)
+                        if not ldap_operation_result:
+                            base.logIt("Ldap add operation failed {}".format(str(self.ldap_conn.result)))
+                            base.logIt("Ldap add operation failed {}".format(str(self.ldap_conn.result)), True)
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
