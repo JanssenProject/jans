@@ -677,10 +677,19 @@ class PropertiesUtils(SetupUtils):
                     Config.java_type = 'jdk'
                     Config.defaultTrustStoreFN = '%s/lib/security/cacerts' % Config.jre_home
 
+
+            self.promptForHTTPD()
+
             promptForOxAuth = self.getPrompt("Install OAuth2 Authorization Server?", 
                                             self.getDefaultOption(Config.installOxAuth)
                                                 )[0].lower()
-            self.installOxAuth = True if promptForOxAuth == 'y' else False
+            Config.installOxAuth = True if promptForOxAuth == 'y' else False
+
+            promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
+                                            self.getDefaultOption(Config.installConfigApi)
+                                                )[0].lower()
+
+            Config.installConfigApi = True if promptForConfigApi == 'y' else False
 
             couchbase_mappings_ = self.getMappingType('couchbase')
             buckets_ = [ 'jans_{}'.format(b) for b in couchbase_mappings_ ]
@@ -701,7 +710,6 @@ class PropertiesUtils(SetupUtils):
                                     ))
                     sys.exit(False)
 
-        self.promptForHTTPD()
         self.promptForScimServer()
         self.promptForFido2Server()
 
