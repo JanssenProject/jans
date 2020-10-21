@@ -8,6 +8,7 @@ package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -63,9 +64,9 @@ public class ConfigurationFactory {
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-    private static final String APP_PROPERTIES_FILE = DIR + "jans-ldap.properties";
-    private static final String SALT_FILE_NAME = "salt";
+    private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
+    private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
+    private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
 
     @Inject
     Logger log;
@@ -181,7 +182,7 @@ public class ConfigurationFactory {
     }
 
     public String getConfigurationDn() {
-        return this.baseConfiguration.getString("jansAuth_ConfigurationEntryDN");
+        return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
 
     private Conf loadConfigurationFromDb() {
