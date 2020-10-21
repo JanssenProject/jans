@@ -32,9 +32,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
-
-                txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-
                 bc = []
                 if Config.wrends_install:
                     t_ = 'wrends'
@@ -54,6 +51,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
+            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"            
             txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
             #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
