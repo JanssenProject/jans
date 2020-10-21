@@ -94,11 +94,9 @@ for dn, entry in ldif_parser.entries:
     for a in entry:
         if a != 'objectClass':
             if a in opendj_attributes:
-                s=a
-            for ma in mapping['attribute']:
-                if a == ma:
-                    s = mapping['attribute'][ma]
-                    break
+                s=a            
+            else:
+                s = mapping['attribute'][a]
 
             new_entry[s] = entry[a]
 
