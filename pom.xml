@@ -6,7 +6,7 @@
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
-	<name>jans-auth-server-parent</name>
+	<name>Jans authentication server parent</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
