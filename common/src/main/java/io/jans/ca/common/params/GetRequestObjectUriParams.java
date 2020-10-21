@@ -14,8 +14,8 @@ public class GetRequestObjectUriParams implements HasRpIdParams {
     private Map<String, Object> params;
     @JsonProperty(value = "request_object_signing_alg")
     private String request_object_signing_alg;
-    @JsonProperty(value = "oxd_host_url")
-    private String oxd_host_url;
+    @JsonProperty(value = "rp_host_url")
+    private String rp_host_url;
 
     public String getRpId() {
         return rp_id;
@@ -42,11 +42,11 @@ public class GetRequestObjectUriParams implements HasRpIdParams {
     }
 
     public String getRpHostUrl() {
-        return oxd_host_url;
+        return rp_host_url;
     }
 
-    public void setRpHostUrl(String oxd_host_url) {
-        this.oxd_host_url = oxd_host_url;
+    public void setRpHostUrl(String rp_host_url) {
+        this.rp_host_url = rp_host_url;
     }
     @Override
     public String toString() {
@@ -54,7 +54,7 @@ public class GetRequestObjectUriParams implements HasRpIdParams {
                 "rp_id='" + rp_id + '\'' +
                 ", params=" + params +
                 ", request_object_signing_alg=" + request_object_signing_alg +
-                ", oxd_host_url=" + oxd_host_url +
+                ", rp_host_url=" + rp_host_url +
                 '}';
     }
 }

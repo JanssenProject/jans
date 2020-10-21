@@ -84,6 +84,9 @@ public class Tester {
         return "Bearer " + resp.getAccessToken();
     }
 
+    public static String getHost() {
+        return HOST;
+    }
 
     public static void setHost(String host) {
         HOST = host;
