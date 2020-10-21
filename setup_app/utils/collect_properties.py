@@ -37,7 +37,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         jans_prop = base.read_properties_file(Config.jans_properties_fn)
         Config.persistence_type = jans_prop['persistence.type']
-        oxauth_ConfigurationEntryDN = jans_prop['oxauth_ConfigurationEntryDN']
+        oxauth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
         oxtrust_ConfigurationEntryDN = jans_prop['oxtrust_ConfigurationEntryDN']
         oxidp_ConfigurationEntryDN = jans_prop['oxidp_ConfigurationEntryDN']
         jans_ConfigurationDN = 'ou=configuration,o=jans'
