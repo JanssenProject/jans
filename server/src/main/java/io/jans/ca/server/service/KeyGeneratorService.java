@@ -136,7 +136,7 @@ public class KeyGeneratorService {
             generateKeys();
             return this.keys;
         }
-        LOG.info("Relying party JWKS generation is disabled in running jans_client_api instance. To enable it set `enable_jwks_generation` field to true in `jans-client-api.yml`.");
+        LOG.info("Relying party JWKS generation is disabled in running jans_client_api instance. To enable it set `enable_jwks_generation` field to true in `client-api-server.yml`.");
         throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
     }
 

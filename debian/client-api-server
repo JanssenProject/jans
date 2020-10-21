@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Startup script for oxd-server under *nix systems (it works under NT/cygwin too).
+# Startup script for jans-client-api-server under *nix systems (it works under NT/cygwin too).
 # LSB Tags
 ### BEGIN INIT INFO
-# Provides:          oxd-server
+# Provides:          jans-client-api-server
 # Required-Start:    $local_fs $network
 # Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: oxd-server start script.
-# Description:       oxd exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Gluu.
+# Short-Description: jans-client-api-server start script.
+# Description:       jans-client-api-server exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Gluu.
 ### END INIT INFO
 
 
 # Read config
-source /etc/default/oxd-server
+source /etc/default/jans-client-api-server
 
 ##################################################
 # Set the name which is used by other variables.
@@ -24,8 +24,8 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 # To get the service to restart correctly on reboot, uncomment below (3 lines):
 # ========================
 # chkconfig: 3 99 99
-# description: oxd server
-# processname: oxd-server
+# description: jans-client-api server
+# processname: jans-client-api-server
 # ========================
 
 # Configuration files
@@ -34,11 +34,11 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   If it exists, this is read at the start of script. It may perform any
 #   sequence of shell commands, like setting relevant environment variables.
 #
-# $HOME/.$NAMErc (e.g. $HOME/.oxd-serverrc)
+# $HOME/.$NAMErc (e.g. $HOME/.jans-client-api-serverrc)
 #   If it exists, this is read at the start of script. It may perform any
 #   sequence of shell commands, like setting relevant environment variables.
 #
-#   The files will be checked for existence before being passed to oxd-server.
+#   The files will be checked for existence before being passed to jans-client-api-server.
 #
 # Configuration variables
 #
@@ -48,34 +48,34 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 # JAVA_OPTIONS
 #   Extra options to pass to the JVM
 #
-# OXD_HOME
-#   Where oxd is installed. If not set, the script will try go
+# JANS_CLIENT_API_HOME
+#   Where jans_client_api is installed. If not set, the script will try go
 #   guess it by looking at the invocation path for the script
 #
-# OXD_BASE
-#   Where your oxd server base directory is.  If not set, the value from
-#   $OXD_HOME will be used.
+# JANS_CLIENT_API_BASE
+#   Where your jans-client-api server base directory is.  If not set, the value from
+#   $JANS_CLIENT_API_HOME will be used.
 #
-# OXD_RUN
+# JANS_CLIENT_API_RUN
 #   Where the $NAME.pid file should be stored. It defaults to the
-#   first available of /var/run, /usr/var/run OXD_BASE and /tmp
+#   first available of /var/run, /usr/var/run JANS_CLIENT_API_BASE and /tmp
 #   if not set.
 #
-# OXD_PID_FILE
-#   The oxd-server PID file, defaults to $OXD_RUN/$NAME.pid
+# JANS_CLIENT_API_PID_FILE
+#   The jans-client-api-server PID file, defaults to $JANS_CLIENT_API_RUN/$NAME.pid
 #
-# OXD_ARGS
-#   The default arguments to pass to oxd-server.
+# JANS_CLIENT_API_ARGS
+#   The default arguments to pass to jans-client-api-server.
 #
-# OXD_USER
+# JANS_CLIENT_API_USER
 #   if set, then used as a username to run the server as
 #
-# OXD_SHELL
+# JANS_CLIENT_API_SHELL
 #   If set, then used as the shell by su when starting the server.  Will have
-#   no effect if start-stop-daemon exists.  Useful when OXD_USER does not
+#   no effect if start-stop-daemon exists.  Useful when JANS_CLIENT_API_USER does not
 #   have shell access, e.g. /bin/false
 #
-# OXD_INIT_LOG
+# JANS_CLIENT_API_INIT_LOG
 
 usage()
 {
@@ -176,106 +176,106 @@ done
 TMPDIR=${TMPDIR:-/tmp}
 
 ##################################################
-# oxd-server's hallmark
+# jans-client-api-server's hallmark
 ##################################################
-OXD_INSTALL_TRACE_FILE="oxd-server.jar"
+JANS_CLIENT_API_INSTALL_TRACE_FILE="jans-client-api-server.jar"
 
 
 ##################################################
-# Try to determine OXD_HOME if not set
+# Try to determine JANS_CLIENT_API_HOME if not set
 ##################################################
-if [ -z "$OXD_HOME" ]
+if [ -z "$JANS_CLIENT_API_HOME" ]
 then
-  OXD_SH=$0
-  case "$OXD_SH" in
-    /*)     OXD_HOME=${OXD_SH%/*/*} ;;
-    ./*/*)  OXD_HOME=${OXD_SH%/*/*} ;;
-    ./*)    OXD_HOME=.. ;;
-    */*/*)  OXD_HOME=./${OXD_SH%/*/*} ;;
-    */*)    OXD_HOME=. ;;
-    *)      OXD_HOME=.. ;;
+  JANS_CLIENT_API_SH=$0
+  case "$JANS_CLIENT_API_SH" in
+    /*)     JANS_CLIENT_API_HOME=${JANS_CLIENT_API_SH%/*/*} ;;
+    ./*/*)  JANS_CLIENT_API_HOME=${JANS_CLIENT_API_SH%/*/*} ;;
+    ./*)    JANS_CLIENT_API_HOME=.. ;;
+    */*/*)  JANS_CLIENT_API_HOME=./${JANS_CLIENT_API_SH%/*/*} ;;
+    */*)    JANS_CLIENT_API_HOME=. ;;
+    *)      JANS_CLIENT_API_HOME=.. ;;
   esac
 
-  if [ ! -f "$OXD_HOME/lib/$OXD_INSTALL_TRACE_FILE" ]
+  if [ ! -f "$JANS_CLIENT_API_HOME/lib/$JANS_CLIENT_API_INSTALL_TRACE_FILE" ]
   then
-    OXD_HOME=
+    JANS_CLIENT_API_HOME=
   fi
 fi
 
 
 ##################################################
-# No OXD_HOME yet? We're out of luck!
+# No JANS_CLIENT_API_HOME yet? We're out of luck!
 ##################################################
-if [ -z "$OXD_HOME" ]; then
-  echo "** ERROR: OXD_HOME not set, you need to set it or install in a standard location"
+if [ -z "$JANS_CLIENT_API_HOME" ]; then
+  echo "** ERROR: JANS_CLIENT_API_HOME not set, you need to set it or install in a standard location"
   exit 1
 fi
 
-cd "$OXD_HOME"
-OXD_HOME=$PWD
+cd "$JANS_CLIENT_API_HOME"
+JANS_CLIENT_API_HOME=$PWD
 
 
 ##################################################
-# Set OXD_BASE
+# Set JANS_CLIENT_API_BASE
 ##################################################
-if [ -z "$OXD_BASE" ]; then
-  OXD_BASE=$OXD_HOME
+if [ -z "$JANS_CLIENT_API_BASE" ]; then
+  JANS_CLIENT_API_BASE=$JANS_CLIENT_API_HOME
 fi
 
-cd "$OXD_BASE"
-OXD_BASE=$PWD
+cd "$JANS_CLIENT_API_BASE"
+JANS_CLIENT_API_BASE=$PWD
 
 
 #####################################################
-# Check that oxd server is where we think it is
+# Check that jans-client-api server is where we think it is
 #####################################################
-if [ ! -r "$OXD_HOME/lib/$OXD_INSTALL_TRACE_FILE" ]
+if [ ! -r "$JANS_CLIENT_API_HOME/lib/$JANS_CLIENT_API_INSTALL_TRACE_FILE" ]
 then
-  echo "** ERROR: Oops! oxd server doesn't appear to be installed in $OXD_HOME"
-  echo "** ERROR:  $OXD_HOME/lib/$OXD_INSTALL_TRACE_FILE is not readable!"
+  echo "** ERROR: Oops! jans-client-api server doesn't appear to be installed in $JANS_CLIENT_API_HOME"
+  echo "** ERROR:  $JANS_CLIENT_API_HOME/lib/$JANS_CLIENT_API_INSTALL_TRACE_FILE is not readable!"
   exit 1
 fi
 
 #####################################################
 # Find a location for the pid file
 #####################################################
-if [ -z "$OXD_RUN" ]
+if [ -z "$JANS_CLIENT_API_RUN" ]
 then
-  OXD_RUN=$(findDirectory -w /var/run /usr/var/run $OXD_BASE /tmp)
+  JANS_CLIENT_API_RUN=$(findDirectory -w /var/run /usr/var/run $JANS_CLIENT_API_BASE /tmp)
 fi
 
 #####################################################
 # Find a pid and state file
 #####################################################
-if [ -z "$OXD_PID_FILE" ]
+if [ -z "$JANS_CLIENT_API_PID_FILE" ]
 then
-  OXD_PID_FILE="$OXD_RUN/${NAME}.pid"
+  JANS_CLIENT_API_PID_FILE="$JANS_CLIENT_API_RUN/${NAME}.pid"
 fi
 
 get_pid() {
-        if [ -f $OXD_PID_FILE ]; then
-                PID_NUM=$(cat $OXD_PID_FILE)
+        if [ -f $JANS_CLIENT_API_PID_FILE ]; then
+                PID_NUM=$(cat $JANS_CLIENT_API_PID_FILE)
                 echo "$PID_NUM"
         else
-                PID_NUM="`ps -eaf|grep -i java|grep -v grep|grep -i 'oxd-conf.json'|awk '{print $2}'`"
-                ###For one more possible bug, find and kill oxd
+                PID_NUM="`ps -eaf|grep -i java|grep -v grep|grep -i 'jans-client-api-conf.json'|awk '{print $2}'`"
+                ###For one more possible bug, find and kill jans-client-api-server
                 if [ "x$PID_NUM" != "x" ]; then
                         echo "$PID_NUM"
                 fi
         fi
 }
 
-if [ -z "$OXD_STATE" ]
+if [ -z "$JANS_CLIENT_API_STATE" ]
 then
-  OXD_STATE=$OXD_BASE/${NAME}.state
+  JANS_CLIENT_API_STATE=$JANS_CLIENT_API_BASE/${NAME}.state
 fi
 
 case "`uname`" in
-CYGWIN*) OXD_STATE="`cygpath -w $OXD_STATE`";;
+CYGWIN*) JANS_CLIENT_API_STATE="`cygpath -w $JANS_CLIENT_API_STATE`";;
 esac
 
 
-OXD_ARGS=(${OXD_ARGS[*]} "oxd-server.state=$OXD_STATE")
+JANS_CLIENT_API_ARGS=(${JANS_CLIENT_API_ARGS[*]} "jans-client-api-server.state=$JANS_CLIENT_API_STATE")
 
 ##################################################
 # Setup JAVA if unset
@@ -306,24 +306,24 @@ if [[ "$JAVA" ]]; then
 fi
 
 #####################################################
-# See if OXD_LOGS is defined
+# See if JANS_CLIENT_API_LOGS is defined
 #####################################################
-if [ -z "$OXD_LOGS" ] && [ -d $OXD_BASE/logs ]
+if [ -z "$JANS_CLIENT_API_LOGS" ] && [ -d $JANS_CLIENT_API_BASE/logs ]
 then
-  OXD_LOGS=$OXD_BASE/logs
+  JANS_CLIENT_API_LOGS=$JANS_CLIENT_API_BASE/logs
 fi
-if [ -z "$OXD_LOGS" ] && [ -d $OXD_HOME/logs ]
+if [ -z "$JANS_CLIENT_API_LOGS" ] && [ -d $JANS_CLIENT_API_HOME/logs ]
 then
-  OXD_LOGS=$OXD_HOME/logs
+  JANS_CLIENT_API_LOGS=$JANS_CLIENT_API_HOME/logs
 fi
-if [ "$OXD_LOGS" ]
+if [ "$JANS_CLIENT_API_LOGS" ]
 then
 
   case "`uname`" in
-  CYGWIN*) OXD_LOGS="`cygpath -w $OXD_LOGS`";;
+  CYGWIN*) JANS_CLIENT_API_LOGS="`cygpath -w $JANS_CLIENT_API_LOGS`";;
   esac
 
-  #JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.logging.dir=$OXD_LOGS")
+  #JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Djans-client-api-server.logging.dir=$JANS_CLIENT_API_LOGS")
 fi
 
 #####################################################
@@ -336,29 +336,29 @@ esac
 
 
 #####################################################
-# Add oxd server properties to Java VM options.
+# Add jans-client-api server properties to Java VM options.
 #####################################################
 
 case "`uname`" in
 CYGWIN*)
-OXD_HOME="`cygpath -w $OXD_HOME`"
-OXD_BASE="`cygpath -w $OXD_BASE`"
+JANS_CLIENT_API_HOME="`cygpath -w $JANS_CLIENT_API_HOME`"
+JANS_CLIENT_API_BASE="`cygpath -w $JANS_CLIENT_API_BASE`"
 TMPDIR="`cygpath -w $TMPDIR`"
 ;;
 esac
 
-#JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Doxd.home=$OXD_HOME" "-Doxd.base=$OXD_BASE" "-Djava.io.tmpdir=$TMPDIR")
+#JAVA_OPTIONS=(${JAVA_OPTIONS[*]} "-Djans-client-api-server.home=$JANS_CLIENT_API_HOME" "-DJANS_CLIENT_API.base=$JANS_CLIENT_API_BASE" "-Djava.io.tmpdir=$TMPDIR")
 #####################################################
-# This is how the oxd server will be started
+# This is how the jans-client-api server will be started
 #####################################################
 
-OXD_START="ServerLauncher"
+JANS_CLIENT_API_START="ServerLauncher"
 
 case "`uname`" in
-CYGWIN*) OXD_START="`cygpath -w $OXD_START`";;
+CYGWIN*) JANS_CLIENT_API_START="`cygpath -w $JANS_CLIENT_API_START`";;
 esac
 
-RUN_ARGS=(${JAVA_OPTIONS[@]} "$OXD_START" ${OXD_ARGS[*]})
+RUN_ARGS=(${JAVA_OPTIONS[@]} "$JANS_CLIENT_API_START" ${JANS_CLIENT_API_ARGS[*]})
 RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 
 #####################################################
@@ -367,35 +367,35 @@ RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 #####################################################
 if (( DEBUG ))
 then
-  echo "OXD_HOME     =  $OXD_HOME"
-  echo "OXD_BASE     =  $OXD_BASE"
-  echo "OXD_CONF     =  $OXD_CONF"
-  echo "OXD_PID_FILE =  $OXD_PID_FILE"
-  echo "OXD_START    =  $OXD_START"
-  echo "OXD_ARGS     =  ${OXD_ARGS[*]}"
+  echo "JANS_CLIENT_API_HOME     =  $JANS_CLIENT_API_HOME"
+  echo "JANS_CLIENT_API_BASE     =  $JANS_CLIENT_API_BASE"
+  echo "JANS_CLIENT_API_CONF     =  $JANS_CLIENT_API_CONF"
+  echo "JANS_CLIENT_API_PID_FILE =  $JANS_CLIENT_API_PID_FILE"
+  echo "JANS_CLIENT_API_START    =  $JANS_CLIENT_API_START"
+  echo "JANS_CLIENT_API_ARGS     =  ${JANS_CLIENT_API_ARGS[*]}"
   echo "JAVA_OPTIONS =  ${JAVA_OPTIONS[*]}"
   echo "JAVA         =  $JAVA"
   echo "RUN_CMD      =  ${RUN_CMD[*]}"
 fi
 dip_in_logs() {
-	if [ ! -f $OXD_INIT_LOG ]; then
+	if [ ! -f $JANS_CLIENT_API_INIT_LOG ]; then
 		sleep 10
 	fi
 	echo "Checking logs for possible errors:"
-	INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+	INIT_START_STATUS=`tail -n 1 $JANS_CLIENT_API_INIT_LOG`
 	while true;
 	do
 		if [ "x$INIT_START_STATUS" != "x" ]; then
 			if [ "x$PREV_START_STATUS" = "x" ]; then
 				PREV_START_STATUS=$INIT_START_STATUS
 				sleep 10
-				INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+				INIT_START_STATUS=`tail -n 1 $JANS_CLIENT_API_INIT_LOG`
 			fi
 		fi
 		if [ "$INIT_START_STATUS" != "$PREV_START_STATUS" ]; then
 			PREV_START_STATUS=$INIT_START_STATUS	
 			sleep 10
-			INIT_START_STATUS=`tail -n 1 $OXD_INIT_LOG`
+			INIT_START_STATUS=`tail -n 1 $JANS_CLIENT_API_INIT_LOG`
 		else
 			break;
 		fi
@@ -410,19 +410,19 @@ do_start () {
     		if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1
     		then
       			unset CH_USER
-      			if [ -n "$OXD_USER" ]
+      			if [ -n "$JANS_CLIENT_API_USER" ]
       			then
-        			CH_USER="-c$OXD_USER"
+        			CH_USER="-c$JANS_CLIENT_API_USER"
       			fi
 
-			start-stop-daemon --start --quiet --chuid $OXD_USER --make-pidfile --pidfile $OXD_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $OXD_LOGS/start.log 2>&1
+			start-stop-daemon --start --quiet --chuid $JANS_CLIENT_API_USER --make-pidfile --pidfile $JANS_CLIENT_API_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $JANS_CLIENT_API_LOGS/start.log 2>&1
 
 			#dip_in_logs
 			sleep 4
 			for i in `seq 1 24`;
                         do
-                	        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
-                	        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1			        
+                	        START_STATUS=`tail -n 4 $JANS_CLIENT_API_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
+                	        ERROR_STATUS=`tail -n 10 $JANS_CLIENT_API_INIT_LOG|egrep -i "Failed to start jans-client-api server|Error"` > /dev/null 2>&1
 			        if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	        break
 		         	fi
@@ -432,20 +432,20 @@ do_start () {
                         	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
                         	if [ "x$ERROR_STATUS" != "x" ]; then
                                 	### Since error occurred, we should remove the PID file at this point itself.
-					kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
-					rm -f  $OXD_PID_FILE
+					kill -9 `cat $JANS_CLIENT_API_PID_FILE` > /dev/null 2>&1
+					rm -f  $JANS_CLIENT_API_PID_FILE
                                 	echo "Some errors encountered..."
                                 	echo "See log below: "
                                 	echo ""
                                 	echo "$ERROR_STATUS"
                                 	echo ""
-                                	echo "For details please check $OXD_INIT_LOG ."
+                                	echo "For details please check $JANS_CLIENT_API_INIT_LOG ."
                                 	echo "Exiting..."
                                 	exit 1
 				else
                                 	### Since error occurred, we should remove the PID file at this point itself.
-					kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
-					rm -f  $OXD_PID_FILE
+					kill -9 `cat $JANS_CLIENT_API_PID_FILE` > /dev/null 2>&1
+					rm -f  $JANS_CLIENT_API_PID_FILE
                                 	echo "Some errors encountered..."
                                 	echo ""
                                 	echo "Exiting..."
@@ -453,29 +453,29 @@ do_start () {
                         	fi
 	
                 	fi
-        		chown "$OXD_USER" "$OXD_PID_FILE" > /dev/null 2>&1
+        		chown "$JANS_CLIENT_API_USER" "$JANS_CLIENT_API_PID_FILE" > /dev/null 2>&1
 		else
-      			if [ -n "$OXD_USER" ] && [ `whoami` != "$OXD_USER" ]
+      			if [ -n "$JANS_CLIENT_API_USER" ] && [ `whoami` != "$JANS_CLIENT_API_USER" ]
       			then
         			unset SU_SHELL
-        			if [ "$OXD_SHELL" ]
+        			if [ "$JANS_CLIENT_API_SHELL" ]
         			then
-          				SU_SHELL="-s $OXD_SHELL"
+          				SU_SHELL="-s $JANS_CLIENT_API_SHELL"
         			fi
 
-        			touch "$OXD_PID_FILE"
-        			chown "$OXD_USER" "$OXD_PID_FILE"
+        			touch "$JANS_CLIENT_API_PID_FILE"
+        			chown "$JANS_CLIENT_API_USER" "$JANS_CLIENT_API_PID_FILE"
         			# FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
-        			su - "$OXD_USER" $SU_SHELL -c "
-				exec $JAVA ${JAVA_OPTIONS[@]} >> "$OXD_LOGS/start.log" 2>&1 &
+        			su - "$JANS_CLIENT_API_USER" $SU_SHELL -c "
+				exec $JAVA ${JAVA_OPTIONS[@]} >> "$JANS_CLIENT_API_LOGS/start.log" 2>&1 &
           			disown \$!
-          			echo \$! > '$OXD_PID_FILE'"
+          			echo \$! > '$JANS_CLIENT_API_PID_FILE'"
 				#dip_in_logs
 			        sleep 4
 			        for i in `seq 1 24`;
                                 do
-                		        START_STATUS=`tail -n 4 $OXD_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
-                		        ERROR_STATUS=`tail -n 10 $OXD_INIT_LOG|egrep -i "Failed to start oxd server|Error"` > /dev/null 2>&1                	                		        
+                		        START_STATUS=`tail -n 4 $JANS_CLIENT_API_INIT_LOG|grep -i 'o.e.j.s.Server -  Started'` > /dev/null 2>&1
+                		        ERROR_STATUS=`tail -n 10 $JANS_CLIENT_API_INIT_LOG|egrep -i "Failed to start jans-client-api server|Error"` > /dev/null 2>&1
 			                if [ "x$START_STATUS" != "x" ] || [ "x$ERROR_STATUS" != "x" ]; then
 		         	                break
 		                 	fi
@@ -485,20 +485,20 @@ do_start () {
 	                        	###If by chance log file doesn't provide necessary string, sleep another 10 seconds and check again PID of process
 	                        	if [ "x$ERROR_STATUS" != "x" ]; then
 	                                	### Since error occurred, we should remove the PID file at this point itself.
-						kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
-						rm -f  $OXD_PID_FILE
+						kill -9 `cat $JANS_CLIENT_API_PID_FILE` > /dev/null 2>&1
+						rm -f  $JANS_CLIENT_API_PID_FILE
 	                                	echo "Some errors encountered..."
 	                                	echo "See log below: "
 	                                	echo ""
 	                                	echo "$ERROR_STATUS"
 	                                	echo ""
-	                                	echo "For details please check $OXD_INIT_LOG ."
+	                                	echo "For details please check $JANS_CLIENT_API_INIT_LOG ."
 	                                	echo "Exiting..."
 	                                	exit 1
 					else
 	                                	### Since error occurred, we should remove the PID file at this point itself.
-						kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
-						rm -f  $OXD_PID_FILE
+						kill -9 `cat $JANS_CLIENT_API_PID_FILE` > /dev/null 2>&1
+						rm -f  $JANS_CLIENT_API_PID_FILE
 	                                	echo "Some errors encountered..."
 	                                	echo ""
 	                                	echo "Exiting..."
@@ -508,7 +508,7 @@ do_start () {
       			else
         			$JAVA ${JAVA_OPTIONS[@]} > /dev/null &
         			disown $!
-        			echo $! > "$OXD_PID_FILE"
+        			echo $! > "$JANS_CLIENT_API_PID_FILE"
       			fi
                	fi 	
         	echo "PID: [`get_pid`]"
@@ -519,8 +519,8 @@ do_start () {
                         echo "PID: [$PID_NUM]"
                         exit 1
                 else
-                        kill -9 `cat $OXD_PID_FILE` > /dev/null 2>&1
-                        rm -f  $OXD_PID_FILE
+                        kill -9 `cat $JANS_CLIENT_API_PID_FILE` > /dev/null 2>&1
+                        rm -f  $JANS_CLIENT_API_PID_FILE
                         do_start
                         exit 0
                 fi
@@ -532,31 +532,31 @@ do_stop () {
         if [ "x$PID_NUM" != "x" ]; then 
     		echo -n "Stopping $SERVICE_NAME: "
     		if [ $UID -eq 0 ] && type start-stop-daemon > /dev/null 2>&1; then
-      			start-stop-daemon -K -p"$OXD_PID_FILE" -d"$OXD_HOME" -a "$JAVA" -s HUP
+      			start-stop-daemon -K -p"$JANS_CLIENT_API_PID_FILE" -d"$JANS_CLIENT_API_HOME" -a "$JAVA" -s HUP
 
       			TIMEOUT=30
-      			while running "$OXD_PID_FILE"; do
+      			while running "$JANS_CLIENT_API_PID_FILE"; do
         			if (( TIMEOUT-- == 0 )); then
-          				start-stop-daemon -K -p"$OXD_PID_FILE" -d"$OXD_HOME" -a "$JAVA" -s KILL
+          				start-stop-daemon -K -p"$JANS_CLIENT_API_PID_FILE" -d"$JANS_CLIENT_API_HOME" -a "$JAVA" -s KILL
         			fi
 
         			sleep 1
       			done
     		else
-      			if [ ! -f "$OXD_PID_FILE" ] ; then
-        			echo "ERROR: no pid found at $OXD_PID_FILE"
+      			if [ ! -f "$JANS_CLIENT_API_PID_FILE" ] ; then
+        			echo "ERROR: no pid found at $JANS_CLIENT_API_PID_FILE"
         			exit 1
       			fi
 
-      			PID=$(cat "$OXD_PID_FILE" 2>/dev/null)
+      			PID=$(cat "$JANS_CLIENT_API_PID_FILE" 2>/dev/null)
       			if [ -z "$PID" ] ; then
-        			echo "ERROR: no pid id found in $OXD_PID_FILE"
+        			echo "ERROR: no pid id found in $JANS_CLIENT_API_PID_FILE"
         			exit 1
       			fi
       			kill "$PID" 2>/dev/null
 
       			TIMEOUT=30
-      			while running $OXD_PID_FILE; do
+      			while running $JANS_CLIENT_API_PID_FILE; do
         			if (( TIMEOUT-- == 0 )); then
           				kill -KILL "$PID" 2>/dev/null
         			fi
@@ -565,8 +565,8 @@ do_stop () {
       			done
     		fi
 
-    		rm -f "$OXD_PID_FILE"
-    		rm -f "$OXD_STATE"
+    		rm -f "$JANS_CLIENT_API_PID_FILE"
+    		rm -f "$JANS_CLIENT_API_STATE"
     		echo OK
 	else
                 echo "$SERVICE_NAME is not running ..."     
@@ -586,11 +586,11 @@ case "$ACTION" in
     ;;
 
   restart)
-    OXD_SH=$0
-    > "$OXD_STATE"
+    JANS_CLIENT_API_SH=$0
+    > "$JANS_CLIENT_API_STATE"
 
-    "$OXD_SH" stop "$@"
-    "$OXD_SH" start "$@"
+    "$JANS_CLIENT_API_SH" stop "$@"
+    "$JANS_CLIENT_API_SH" start "$@"
 
     ;;
 
@@ -604,11 +604,11 @@ case "$ACTION" in
     ;;
 
   run|demo)
-    echo "Running oxd server: "
+    echo "Running jans-client-api server: "
 
-    if running "$OXD_PID_FILE"
+    if running "$JANS_CLIENT_API_PID_FILE"
     then
-      echo Already Running $(cat "$OXD_PID_FILE")!
+      echo Already Running $(cat "$JANS_CLIENT_API_PID_FILE")!
       exit 1
     fi
 
@@ -616,28 +616,28 @@ case "$ACTION" in
     ;;
 
   check|status)
-    if running "$OXD_PID_FILE"
+    if running "$JANS_CLIENT_API_PID_FILE"
     then
-      echo "oxd server running pid=$(< "$OXD_PID_FILE")"
+      echo "jans-client-api server running pid=$(< "$JANS_CLIENT_API_PID_FILE")"
     else
-      echo "oxd server NOT running"
+      echo "jans-client-api server NOT running"
     fi
     echo
-    echo "OXD_HOME     =  $OXD_HOME"
-    echo "OXD_BASE     =  $OXD_BASE"
-    echo "OXD_CONF     =  $OXD_CONF"
-    echo "OXD_PID_FILE =  $OXD_PID_FILE"
-    echo "OXD_START    =  $OXD_START"
-    echo "OXD_LOGS     =  $OXD_LOGS"
-    echo "OXD_STATE    =  $OXD_STATE"
+    echo "JANS_CLIENT_API_HOME     =  $JANS_CLIENT_API_HOME"
+    echo "JANS_CLIENT_API_BASE     =  $JANS_CLIENT_API_BASE"
+    echo "JANS_CLIENT_API_CONF     =  $JANS_CLIENT_API_CONF"
+    echo "JANS_CLIENT_API_PID_FILE =  $JANS_CLIENT_API_PID_FILE"
+    echo "JANS_CLIENT_API_START    =  $JANS_CLIENT_API_START"
+    echo "JANS_CLIENT_API_LOGS     =  $JANS_CLIENT_API_LOGS"
+    echo "JANS_CLIENT_API_STATE    =  $JANS_CLIENT_API_STATE"
     echo "CLASSPATH    =  $CLASSPATH"
     echo "JAVA         =  $JAVA"
     echo "JAVA_OPTIONS =  ${JAVA_OPTIONS[*]}"
-    echo "OXD_ARGS     =  ${OXD_ARGS[*]}"
+    echo "JANS_CLIENT_API_ARGS     =  ${JANS_CLIENT_API_ARGS[*]}"
     echo "RUN_CMD      =  ${RUN_CMD[*]}"
     echo
 
-    if running "$OXD_PID_FILE"
+    if running "$JANS_CLIENT_API_PID_FILE"
     then
       exit 0
     fi
