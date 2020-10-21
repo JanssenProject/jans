@@ -146,6 +146,7 @@ class Config:
         self.installJansRadius = False
         self.installScimServer = False
         self.installFido2 = False
+        self.installConfigApi = False
         self.installCasa = False
         self.installOxd = False
         self.loadTestData = False

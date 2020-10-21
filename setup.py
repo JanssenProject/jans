@@ -54,6 +54,7 @@ from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.oxauth import OxauthInstaller
 from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.fido import FidoInstaller
+from setup_app.installers.config_api import ConfigApiInstaller
 #from setup_app.installers.oxd import OxdInstaller
 
 if base.snap:
@@ -135,8 +136,10 @@ openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
 httpdinstaller = HttpdInstaller()
 oxauthInstaller = OxauthInstaller()
+configApiInstaller = ConfigApiInstaller()
 fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
+
 #oxdInstaller = OxdInstaller()
 
 
@@ -247,6 +250,11 @@ def do_installation():
 
         if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
+
+
+        if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
+            configApiInstaller.start_installation()
+
 
         #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
         #    oxdInstaller.start_installation()
