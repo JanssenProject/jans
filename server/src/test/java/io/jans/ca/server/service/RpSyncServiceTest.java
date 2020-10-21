@@ -35,7 +35,7 @@ public class RpSyncServiceTest {
 
     @BeforeClass
     public void setUp() throws IOException, ConfigurationException {
-        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("client-api-server.yml")));
+        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("client-api-server-jenkins.yml")));
         persistenceService.create();
         rpService.removeAllRps();
         rpService.load();
