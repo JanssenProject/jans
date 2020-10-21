@@ -301,7 +301,7 @@ public class RestResource {
         }
         //show error if ip_address of a remote caller is not set in `bind_ip_addresses`
         if (bindIpAddresses == null || bindIpAddresses.isEmpty()) {
-            LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of `jans-client-api.yml`.");
+            LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of `client-api-server.yml`.");
             throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
         }
         //allow all ip_address
@@ -312,7 +312,7 @@ public class RestResource {
         if (bindIpAddresses.contains(callerIpAddress)) {
             return;
         }
-        LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of `jans-client-api.yml`.");
+        LOG.error("The caller is not allowed to make request to jans_client_api. To allow add ip_address of caller in `bind_ip_addresses` array of `client-api-server.yml`.");
         throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
 
     }
@@ -356,7 +356,7 @@ public class RestResource {
         }
 
         if (!conf.getProtectCommandsWithRpId().contains(AuthorizationRpId)) {
-            LOG.debug("`rp_id` in `AuthorizationRpId` header is invalid. The `AuthorizationRpId` header should contain `rp_id` from `protect_commands_with_rp_id` field in jans-client-api.yml.");
+            LOG.debug("`rp_id` in `AuthorizationRpId` header is invalid. The `AuthorizationRpId` header should contain `rp_id` from `protect_commands_with_rp_id` field in client-api-server.yml.");
             throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_RP_ID);
         }
     }

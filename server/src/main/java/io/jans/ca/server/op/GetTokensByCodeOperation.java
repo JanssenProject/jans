@@ -75,7 +75,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             tokenRequest.setAlgorithm(SignatureAlgorithm.fromString(rp.getTokenEndpointAuthSigningAlg()));
 
             if (!getConfigurationService().getConfiguration().getEnableJwksGeneration()) {
-                LOG.error("The Token Authentication Method is {}. Please set `enable_jwks_generation` (to `true`), `crypt_provider_key_store_path` and `crypt_provider_key_store_password` in `jans-client-api.yml` to enable RP-jwks generation in jans-client-api.", authenticationMethod.toString());
+                LOG.error("The Token Authentication Method is {}. Please set `enable_jwks_generation` (to `true`), `crypt_provider_key_store_path` and `crypt_provider_key_store_password` in `client-api-server.yml` to enable RP-jwks generation in jans-client-api.", authenticationMethod.toString());
                 throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
             }
 

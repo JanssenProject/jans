@@ -3,8 +3,8 @@
 # https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
 openapi: 3.0.1
 info:
-  title: jans-api-server
-  description: jans-api-server
+  title: jans-client-api-server
+  description: jans-client-api-server
   contact:
     email: yuriyz@gluu.org
   license:
@@ -426,8 +426,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -542,8 +542,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -674,8 +674,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -686,7 +686,7 @@ paths:
       tags:
       - developers
       summary: Update Site
-      description: Updates site at jans-client-api. If something changes in a pre-registered
+      description: Updates site at jans-client-api-server. If something changes in a pre-registered
         client, you can use this API to update your client in the OP.
       operationId: update-site
       parameters:
@@ -995,8 +995,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1007,7 +1007,7 @@ paths:
       tags:
       - developers
       summary: Remove Site
-      description: Removes site from jans-client-api
+      description: Removes site from jans-client-api-server
       operationId: remove-site
       parameters:
       - name: Authorization
@@ -1057,8 +1057,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1159,8 +1159,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1256,8 +1256,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1322,8 +1322,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1399,8 +1399,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1491,8 +1491,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1564,8 +1564,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1643,8 +1643,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1726,8 +1726,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1835,8 +1835,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -1931,8 +1931,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2012,8 +2012,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2095,8 +2095,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2176,8 +2176,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2606,8 +2606,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2636,8 +2636,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/JsonWebKey'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2714,8 +2714,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             application/json:
               schema:
@@ -2762,8 +2762,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
-          description: Internal error occured. Please check jans-client-api.log file for
-            details (usually located in /var/log/jans-client-api/jans-client-api.log).
+          description: Internal error occured. Please check client-api.log file for
+            details (usually located in /var/log/client-api/client-api.log).
           content:
             text/plain:
               schema:

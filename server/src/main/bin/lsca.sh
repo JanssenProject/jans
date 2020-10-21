@@ -1,9 +1,9 @@
 #!/bin/sh
 # Please run it with JDK 1.6 or higher
 
-BASEDIR=/opt/oxd-server
-CONF=/opt/jans-client-api/conf/jans-client-api.yml
-LIB=/opt/jans-client-api/lib
+BASEDIR=/opt/client-api-server
+CONF=/opt/client-api-server/conf/client-api-server.yml
+LIB=/opt/client-api-server/lib
 
 echo BASEDIR=$BASEDIR
 echo CONF=$CONF

@@ -2,7 +2,7 @@
 # Please run it with JDK 1.6 or higher
 
 BASEDIR=$(dirname $0)
-CONF=$BASEDIR/../conf/jans-client-api.yml
+CONF=$BASEDIR/../conf/client-api-server.yml
 echo BASEDIR=$BASEDIR
 echo CONF=$CONF
 
