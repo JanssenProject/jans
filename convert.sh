@@ -1,4 +1,5 @@
 python3 convert_lif.py --infile /mnt/data/projects/gluu/community-edition-setup/templates/attributes.ldif --outfile templates/attributes.ldif
+python3 convert_lif.py --infile /mnt/data/projects/gluu/community-edition-setup/templates/clients.ldif --outfile templates/clients.ldif
 python3 convert_lif.py --infile /mnt/data/projects/gluu/community-edition-setup/templates/base.ldif --outfile templates/base.ldif
 python3 convert_lif.py --infile /mnt/data/projects/gluu/community-edition-setup/templates/configuration.ldif --outfile templates/configuration.ldif
 python3 convert_lif.py --infile /mnt/data/projects/gluu/community-edition-setup/templates/scopes.ldif --outfile templates/scopes.ldif

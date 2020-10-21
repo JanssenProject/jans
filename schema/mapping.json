@@ -69,16 +69,6 @@
       
     ],
     "attributeType": [
-      "gluuVDSstatus",
-      "softwareVersion",
-      "oxX509URL",
-      "oxAuthX509PEM",
-      "oxAuthConfStatic",
-      "oxAuthConfDynamic",
-      "oxAuthAppType",
-      "oxUrl",
-      "oxFaviconImage",
-      "oxStatus"
     ]
   },
   "postconversions": {
