@@ -85,10 +85,10 @@ public class ConfigurationFactory {
 	@Inject
 	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
-	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
-	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
+	public static final String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
+	public static final String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
 
-	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+	private static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	static {
 		if (System.getProperty("jans.base") != null) {
@@ -110,11 +110,11 @@ public class ConfigurationFactory {
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
 	private static final String LDAP_PROPERTIES_FILE = DIR + "jans-ldap.properties";
 
-	private final String CONFIG_FILE_NAME = "jans-config.json";
-	private final String ERRORS_FILE_NAME = "jans-errors.json";
-	private final String STATIC_CONF_FILE_NAME = "jans-static-conf.json";
-	private final String WEB_KEYS_FILE_NAME = "jans-web-keys.json";
-	private final String SALT_FILE_NAME = "salt";
+	private static final String CONFIG_FILE_NAME = "jans-config.json";
+	private static final String ERRORS_FILE_NAME = "jans-errors.json";
+	private static final String STATIC_CONF_FILE_NAME = "jans-static-conf.json";
+	private static final String WEB_KEYS_FILE_NAME = "jans-web-keys.json";
+	private static final String SALT_FILE_NAME = "salt";
 
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
@@ -124,8 +124,8 @@ public class ConfigurationFactory {
     
     private PersistenceConfiguration persistenceConfiguration;
 	private AppConfiguration conf;
-	private io.jans.as.model.config.StaticConfiguration staticConf;
-	private io.jans.as.model.config.WebKeysConfiguration jwks;
+	private StaticConfiguration staticConf;
+	private WebKeysConfiguration jwks;
 	private ErrorResponseFactory errorResponseFactory;
 	private String cryptoConfigurationSalt;
 
@@ -165,7 +165,7 @@ public class ConfigurationFactory {
 		}
 	}
 
-	public void onServletContextActivation(@Observes ServletContext context ) {
+	public void onServletContextActivation(@Observes ServletContext context) {
         this.contextPath = context.getContextPath();
 
         this.facesMapping = "";
@@ -195,9 +195,8 @@ public class ConfigurationFactory {
 		log.debug("Initializing Configuration Timer");
 
 		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new ConfigurationEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new ConfigurationEvent(),
 				Scheduled.Literal.INSTANCE));
 	}
 
@@ -437,7 +436,7 @@ public class ConfigurationFactory {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
 		try {
-			final io.jans.as.model.config.Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
+			final Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 
 			return conf;
 		} catch (BasePersistenceException ex) {
@@ -448,12 +447,12 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private void init(io.jans.as.model.config.Conf p_conf) {
+	private void init(Conf p_conf) {
 		initConfigurationConf(p_conf);
 		this.loadedRevision = p_conf.getRevision();
 	}
 
-	private void initConfigurationConf(io.jans.as.model.config.Conf p_conf) {
+	private void initConfigurationConf(Conf p_conf) {
 		if (p_conf.getDynamic() != null) {
 			conf = p_conf.getDynamic();
 		}
@@ -522,7 +521,7 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private io.jans.as.model.config.StaticConfiguration loadStaticConfFromFile() {
+	private StaticConfiguration loadStaticConfFromFile() {
 		try {
 			return ServerUtil.createJsonMapper().readValue(new File(staticConfFilePath), StaticConfiguration.class);
 		} catch (Exception e) {
@@ -531,7 +530,7 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private io.jans.as.model.config.WebKeysConfiguration loadWebKeysFromFile() {
+	private WebKeysConfiguration loadWebKeysFromFile() {
 		try {
 			return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), WebKeysConfiguration.class);
 		} catch (Exception e) {
