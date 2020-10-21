@@ -83,11 +83,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.smtpConfiguration = smtpConfiguration;
 	}
 
-	public List<IDPAuthConf> getIDPAuthn(){
-		return this.idpAuthn;
+	public List<IDPAuthConf> getIdpAuthn() {
+		return idpAuthn;
 	}
-	
-	public void setIDPAuthn(List<IDPAuthConf> idpAuthn){
+
+	public void setIdpAuthn(List<IDPAuthConf> idpAuthn) {
 		this.idpAuthn = idpAuthn;
 	}
 

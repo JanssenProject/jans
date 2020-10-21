@@ -47,7 +47,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {
 		GluuConfiguration gluuConfiguration = configurationService.getConfiguration();
-		List<IDPAuthConf> authConfigurations = gluuConfiguration.getIDPAuthn();
+		List<IDPAuthConf> authConfigurations = gluuConfiguration.getIdpAuthn();
 		
 		List<CustomAuthenticationConfiguration> customAuthenticationConfigurations = new ArrayList<CustomAuthenticationConfiguration>();
 		
