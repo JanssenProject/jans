@@ -19,12 +19,12 @@
     </dependencySets>
     <files>
         <file>
-            <source>${project.basedir}/src/main/resources/windows/jans-client-api.yml</source>
+            <source>${project.basedir}/src/main/resources/windows/client-api-server.yml</source>
             <outputDirectory>/conf</outputDirectory>
             <destName>jans-client-api-win.yml</destName>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/jans-client-api.yml</source>
+            <source>${project.basedir}/src/main/resources/client-api-server.yml</source>
             <outputDirectory>/conf</outputDirectory>
             <destName>jans-client-api.yml</destName>
         </file>

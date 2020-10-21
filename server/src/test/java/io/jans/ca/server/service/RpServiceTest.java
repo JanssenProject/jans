@@ -40,7 +40,7 @@ public class RpServiceTest {
 
     @BeforeClass
     public void setUp() throws IOException, ConfigurationException {
-        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("jans-client-api.yml")));
+        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("client-api-server.yml")));
         persistenceService.create();
         service.removeAllRps();
         service.load();
