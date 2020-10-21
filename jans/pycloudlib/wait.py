@@ -180,11 +180,10 @@ def wait_for_ldap(manager, **kwargs):
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
     namespace = os.environ.get("CN_NAMESPACE", "jans")
 
-    # a minimum service stack is having oxTrust, hence check whether entry
-    # for oxTrust exists in LDAP
+    # a minimum service stack is having auth-server configuration
     default_search = (
-        f"ou=oxtrust,ou=configuration,o={namespace}",
-        "(objectClass=oxTrustConfiguration)",
+        f"ou=jans-auth,ou=configuration,o={namespace}",
+        "(objectClass=jansAppConf)",
     )
 
     if persistence_type == "hybrid":
@@ -257,7 +256,7 @@ def wait_for_couchbase(manager, **kwargs):
 
     # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;
-    bucket, key = bucket_prefix, "configuration_oxtrust"
+    bucket, key = bucket_prefix, "configuration_jans-auth"
 
     # if `hybrid` is selected and default mapping is stored in LDAP,
     # the default bucket won't have data, hence we check the user bucket instead
