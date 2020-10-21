@@ -6,28 +6,31 @@
 
 package io.jans.configapi.configuration;
 
-import io.quarkus.arc.AlternativePriority;
-import org.apache.commons.lang.StringUtils;
-import io.jans.exception.ConfigurationException;
-import io.jans.exception.OxIntializationException;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.auth.*;
+import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.auth.OpenIdAuthorizationService;
+import io.jans.configapi.auth.UmaAuthorizationService;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.exception.ConfigurationException;
+import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
+import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
+import io.quarkus.arc.AlternativePriority;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -38,8 +41,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
@@ -63,7 +64,7 @@ public class ConfigurationFactory {
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
     private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-    private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
+    private static final String APP_PROPERTIES_FILE = DIR + "jans-ldap.properties";
     private static final String SALT_FILE_NAME = "salt";
 
     @Inject
