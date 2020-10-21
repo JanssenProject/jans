@@ -1,8 +1,9 @@
 dn: inum=%(oxauth_client_id)s,ou=clients,o=jans
 displayName: oxTrust Admin GUI
 inum: %(oxauth_client_id)s
+jansAppTyp: web
 jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
-jansClntSecret: web
+jansClntSecret: %(oxauthClient_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
 jansGrantTyp: refresh_token
