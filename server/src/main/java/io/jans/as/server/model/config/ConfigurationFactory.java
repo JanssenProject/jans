@@ -116,7 +116,6 @@ public class ConfigurationFactory {
 	private static final String ERRORS_FILE_NAME = "jans-errors.json";
 	private static final String STATIC_CONF_FILE_NAME = "jans-static-conf.json";
 	private static final String WEB_KEYS_FILE_NAME = "jans-web-keys.json";
-	private static final String SALT_FILE_NAME = "salt";
 
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
@@ -154,7 +153,7 @@ public class ConfigurationFactory {
 			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
 			this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
 
-			String certsDir = this.baseConfiguration.getString("certsDir");
+			String certsDir = this.baseConfiguration.getString(CERTS_DIR);
 			if (StringHelper.isEmpty(certsDir)) {
 				certsDir = confDir;
 			}
