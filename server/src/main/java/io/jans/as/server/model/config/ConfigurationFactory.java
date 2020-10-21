@@ -108,12 +108,12 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String LDAP_PROPERTIES_FILE = DIR + "oxauth.properties";
+	private static final String LDAP_PROPERTIES_FILE = DIR + "jans-ldap.properties";
 
-	private final String CONFIG_FILE_NAME = "oxauth-config.json";
-	private final String ERRORS_FILE_NAME = "oxauth-errors.json";
-	private final String STATIC_CONF_FILE_NAME = "oxauth-static-conf.json";
-	private final String WEB_KEYS_FILE_NAME = "oxauth-web-keys.json";
+	private final String CONFIG_FILE_NAME = "jans-config.json";
+	private final String ERRORS_FILE_NAME = "jans-errors.json";
+	private final String STATIC_CONF_FILE_NAME = "jans-static-conf.json";
+	private final String WEB_KEYS_FILE_NAME = "jans-web-keys.json";
 	private final String SALT_FILE_NAME = "salt";
 
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
