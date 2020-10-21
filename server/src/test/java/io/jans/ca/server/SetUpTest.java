@@ -35,7 +35,7 @@ public class SetUpTest {
             ServerLauncher.setSetUpSuite(true);
 
             SUPPORT = new DropwizardTestSupport<RpServerConfiguration>(RpServerApplication.class,
-                    ResourceHelpers.resourceFilePath("jans-client-api-jenkins.yml"),
+                    ResourceHelpers.resourceFilePath("client-api-server-jenkins.yml"),
                     ConfigOverride.config("server.applicationConnectors[0].port", "0") // Optional, if not using a separate testing-specific configuration file, use a randomly selected port
             );
             SUPPORT.before();

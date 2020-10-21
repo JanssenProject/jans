@@ -19,7 +19,7 @@ import static io.jans.ca.server.TestUtils.notEmpty;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
-//Set `protect_commands_with_access_token` field to true in jans-client-api.yml file
+//Set `protect_commands_with_access_token` field to true in client-api-server.yml file
 public class DifferentAuthServerTest {
 
     @Parameters({"host", "opHost", "authServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret"})
