@@ -181,7 +181,7 @@ public class ConfigurationFactory {
     }
 
     public String getConfigurationDn() {
-        return this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
+        return this.baseConfiguration.getString("jansAuth_ConfigurationEntryDN");
     }
 
     private Conf loadConfigurationFromDb() {
