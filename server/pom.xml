@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-server</artifactId>
-	<name>jans-auth-server</name>
+	<name>Jans authentication server</name>
 	<packaging>war</packaging>
 
 	<parent>
