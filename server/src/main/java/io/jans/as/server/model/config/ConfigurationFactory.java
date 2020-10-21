@@ -434,7 +434,7 @@ public class ConfigurationFactory {
 
 	private io.jans.as.model.config.Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-		final String dn = this.baseConfiguration.getString("jans_ConfigurationEntryDN");
+		final String dn = this.baseConfiguration.getString("jansAuth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 
