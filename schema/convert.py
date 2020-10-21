@@ -73,9 +73,11 @@ for attribute in schema['attributeTypes']:
     for name in (attribute['names']):
         new = do_replace(name)
         
-        if not new in new_name_list and not check_duplicate(new):
-            conversions.append((name, new))
+        if not new in new_name_list and not check_duplicate(new):            
             new_name_list.append(new)
+
+        conversions.append((name, new))
+
     if new_name_list:
         attribute['names'] = new_name_list
         new_attributeTypes.append(attribute)
