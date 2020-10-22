@@ -50,7 +50,7 @@ class SetupUtils(Crypto64):
         base.logIt(*args, **kwargs)
 
 
-    def backupFile(self, inFile, destFolder=None, move=False):
+    def backupFile(self, inFile, destFolder=None, move=False, cur_content=''):
 
         if destFolder:
             if os.path.isfile(destFolder):
@@ -60,6 +60,15 @@ class SetupUtils(Crypto64):
                 destFile = os.path.join(destFolder, inName)
         else:
             destFile = inFile
+
+        # check if file is the same
+        if os.path.isfile(destFile):
+            with open(destFile, 'rb') as f:
+                old_content = f.read()
+            if isinstance(cur_content, str):
+                cur_content = cur_content.encode()
+            if cur_content == old_content:
+                return
 
         bc = 1
         while True:
@@ -162,7 +171,7 @@ class SetupUtils(Crypto64):
 
         inFilePathText = None
         if backup:
-            self.backupFile(outFilePath)
+            self.backupFile(outFilePath, cur_content=text)
         try:
             with open(outFilePath, 'w') as w:
                 w.write(text)
@@ -176,9 +185,10 @@ class SetupUtils(Crypto64):
             try:            
                 inFilePathLines = self.readFile(inFilePath).splitlines()            
                 try:
-                    self.backupFile(inFilePath)
+                    
                     inFilePathLines.insert(index, text)    
                     inFileText = ''.join(inFilePathLines)
+                    self.backupFile(inFilePath, cur_content=inFileText)
                     self.writeFile(inFilePath, inFileText)
                 except:            
                     self.logIt("Error writing %s" % inFilePathLines, True)            
@@ -216,7 +226,10 @@ class SetupUtils(Crypto64):
 
 
     def copyFile(self, inFile, destFolder):
-        self.backupFile(inFile, destFolder)
+        if os.path.isfile(inFile):
+            with open(inFile, 'rb') as f:
+                cur_content = f.read()
+        self.backupFile(inFile, destFolder, cur_content=cur_content)
         self.logIt("Copying file {} to {}".format(inFile, destFolder))
         try:
             shutil.copy(inFile, destFolder)
@@ -239,8 +252,11 @@ class SetupUtils(Crypto64):
                         self.removeFile(d)
 
                     if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                        with open(s, 'rb') as fi:
+                            cur_content = fi.read()
+                        self.backupFile(s, d, cur_content=cur_content)    
                         shutil.copy2(s, d)
-                        self.backupFile(s, d)
+                        
 
             self.logIt("Copied tree %s to %s" % (src, dst))
         except:
