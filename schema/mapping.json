@@ -66,9 +66,28 @@
   },
   "exclude": {
     "objectClass": [
-      
+      "xdiStatement",
+      "targetRelationalXdiStatement",
+      "sourceRelationalXdiStatement",
+      "gluuVDSstatus",
+      "gluuVDSenabled",
+      "gluuVdsCacheRefreshLastUpdate",
+      "gluuVdsCacheRefreshLastUpdateCount",
+      "gluuVdsCacheRefreshProblemCount",
+      "gluuVdsCacheRefreshPollingInterval",
+      "gluuVdsCacheRefreshEnabled"      
     ],
     "attributeType": [
+      "xdiStatement",
+      "sourceRelationalXdiStatement",
+      "targetRelationalXdiStatement",
+      "gluuVDSstatus",
+      "gluuVdsCacheRefreshLastUpdate",
+      "gluuVdsCacheRefreshLastUpdateCount",
+      "gluuVdsCacheRefreshPollingInterval",
+      "gluuVdsCacheRefreshEnabled",
+      "gluuVdsCacheRefreshProblemCount",
+      "gluuVDSenabled"
     ]
   },
   "postconversions": {

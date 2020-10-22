@@ -113,6 +113,8 @@ for obj in schema['objectClasses']:
     for lt in ('may', 'names'):
         new_list = []
         for name in obj[lt]:
+            if name in mapping['exclude']['attributeType']:
+                continue
             new = do_replace(name)
             obj_conversions.append((name, new))
             if lt == 'names' and check_objduplicate(new, lt):
