@@ -66,7 +66,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -181,7 +181,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -294,7 +294,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -407,7 +407,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -521,7 +521,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setJwksUri(clientJwksUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -640,7 +640,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
         registerRequest.setJwksUri(clientJwksUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -760,7 +760,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -879,7 +879,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -998,7 +998,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1117,7 +1117,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1236,7 +1236,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1355,7 +1355,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1474,7 +1474,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1593,7 +1593,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1707,7 +1707,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1825,7 +1825,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1951,7 +1951,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2077,7 +2077,7 @@ public class AddressClaimsTest extends BaseTest {
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
