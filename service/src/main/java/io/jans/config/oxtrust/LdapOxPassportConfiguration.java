@@ -20,7 +20,7 @@ import io.jans.orm.annotation.ObjectClass;
  */
 
 @DataEntry
-@ObjectClass(value = "oxPassportConfiguration")
+@ObjectClass(value = "jansPassportConfiguration")
 public class LdapOxPassportConfiguration extends Entry {
 
 	private static final long serialVersionUID = -8451013277721189767L;
