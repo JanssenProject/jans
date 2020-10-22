@@ -18,7 +18,7 @@ import java.net.URI;
  * @version June 30, 2018
  */
 @DataEntry
-@ObjectClass(value = "pairwiseIdentifier")
+@ObjectClass(value = "jansPairwiseIdentifier")
 public class PairwiseIdentifier extends BaseEntry {
 
     @AttributeName(ignoreDuringUpdate = true, name = "jansId")
