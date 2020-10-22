@@ -97,7 +97,8 @@
       ["oxAuthUserDN"]
     ],
     "static" : [
-        [["exp"], "objectClass = \"oxAuthSessionId\""]
+        [["sid"], "objectClass = \"jansSessId\""],
+        [["exp"], "objectClass = \"jansSessId\""]
     ]
   },
 
