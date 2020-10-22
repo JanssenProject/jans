@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthClientMultiAuthz" parallel="false">
+<suite name="jansAuthClientMultiAuthz" parallel="false">
 
     <!-- Authorization multi-step flow -->
     <test name="Authorization multi-step flow" enabled="true">
