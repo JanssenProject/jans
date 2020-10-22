@@ -100,7 +100,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
         # Client keys deployment
-        base.download('https://raw.githubusercontent.com/JansFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip', '/var/www/html/oxauth_test_client_keys.zip')        
+        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/oxauth_test_client_keys.zip', '/var/www/html/oxauth_test_client_keys.zip')        
         self.run([paths.cmd_unzip, '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run([paths.cmd_rm, '-rf', 'oxauth_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
@@ -200,12 +200,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.dbUtils.ldap_conn.bind()
 
-        result = self.dbUtils.search('ou=configuration,o=gluu', search_filter='(oxIDPAuthentication=*)', search_scope=ldap3.BASE)
+        result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(jansIDPAuthn=*)', search_scope=ldap3.BASE)
 
-        oxIDPAuthentication = json.loads(result['oxIDPAuthentication'])
+        oxIDPAuthentication = json.loads(result['jansIDPAuthn'])
         oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
         oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-        self.dbUtils.set_configuration('oxIDPAuthentication', oxIDPAuthentication_js)
+        self.dbUtils.set_configuration('jansIDPAuthn', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
 
