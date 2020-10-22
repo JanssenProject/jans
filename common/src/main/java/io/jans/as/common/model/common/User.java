@@ -19,7 +19,7 @@ import io.jans.util.StringHelper;
  * @author Yuriy Movchan Date: 06/11/2013
  */
 @DataEntry
-@ObjectClass(value = "gluuPerson")
+@ObjectClass(value = "jansPerson")
 public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;
