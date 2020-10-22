@@ -7,6 +7,7 @@
 package io.jans.as.server.service;
 
 import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -123,7 +124,7 @@ public class KeyGeneratorTimer {
 
     private void updateKeysImpl() throws Exception {
         log.info("Updating JWKS keys ...");
-        String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
+        String dn = configurationFactory.getBaseConfiguration().getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
         JSONObject jwks = conf.getWebKeys().toJSONObject();
