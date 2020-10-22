@@ -29,6 +29,10 @@ else:
 with open('schema/jans_schema_mappings.json') as f:
     mapping = json.load(f, object_pairs_hook=OrderedDict)
 
+with open('schema/mapping.json') as f:
+    mapped_json = json.load(f, object_pairs_hook=OrderedDict)
+
+
 mapping['objectClass']['gluuCustomPerson'] = 'jansCustomPerson'
 
 #escape base64 encoded fields
@@ -90,9 +94,12 @@ dn_coversions =[
 for dn, entry in ldif_parser.entries:
     if 'OO11-BAFE' in entry.get('inum', []):
         continue
+
     new_entry = OrderedDict()
     for a in entry:
         if a != 'objectClass':
+            if a in mapped_json['exclude']['attributeType']:
+                continue
             if a in opendj_attributes:
                 s = a
             elif a in ['changetype', 'add', 'replace']:
@@ -105,7 +112,8 @@ for dn, entry in ldif_parser.entries:
     new_entry['objectClass'] = []
     
     for oc in entry.get('objectClass', []):
-
+        if oc in mapped_json['exclude']['objectClass']:
+            continue
         nn = mapping['objectClass'].get(oc, oc)
         new_entry['objectClass'].append(nn)
 
