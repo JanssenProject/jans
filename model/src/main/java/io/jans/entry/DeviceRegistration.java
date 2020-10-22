@@ -26,7 +26,7 @@ import io.jans.orm.model.base.BaseEntry;
  * @author Yuriy Movchan Date: 05/14/2015
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(value = "oxDeviceRegistration")
+@ObjectClass(value = "jansDeviceRegistration")
 public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;
