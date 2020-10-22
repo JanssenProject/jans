@@ -141,7 +141,7 @@ public class AuthenticationPersistenceService {
     }
 
     public String getBaseDnForFido2AuthenticationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_auth,inum=1234,ou=people,o=gluu"
+        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_auth,inum=1234,ou=people,o=jans"
         if (StringHelper.isEmpty(userInum)) {
             return userBaseDn;
         }
