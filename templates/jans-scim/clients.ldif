@@ -8,7 +8,7 @@ jansJwks::%(scim_rs_client_base64_jwks)s
 jansLogoutSessRequired: false
 jansPersistClntAuthzs: false
 jansRequireAuthTime: false
-jansScope: inum=6D99,ou=scopes,o=gluu
+jansScope: inum=6D99,ou=scopes,o=jans
 jansTknEndpointAuthMethod: private_key_jwt
 objectClass: jansClnt
 objectClass: top

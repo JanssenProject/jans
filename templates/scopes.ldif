@@ -12,21 +12,21 @@ dn: inum=43F1,ou=scopes,o=jans
 description: View your basic profile info.
 inum: 43F1
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=2B29,ou=attributes,o=gluu
-jansClaim: inum=0C85,ou=attributes,o=gluu
-jansClaim: inum=B4B0,ou=attributes,o=gluu
-jansClaim: inum=A0E8,ou=attributes,o=gluu
-jansClaim: inum=5EC6,ou=attributes,o=gluu
-jansClaim: inum=B52A,ou=attributes,o=gluu
-jansClaim: inum=64A0,ou=attributes,o=gluu
-jansClaim: inum=EC3A,ou=attributes,o=gluu
-jansClaim: inum=3B47,ou=attributes,o=gluu
-jansClaim: inum=3692,ou=attributes,o=gluu
-jansClaim: inum=98FC,ou=attributes,o=gluu
-jansClaim: inum=A901,ou=attributes,o=gluu
-jansClaim: inum=36D9,ou=attributes,o=gluu
-jansClaim: inum=BE64,ou=attributes,o=gluu
-jansClaim: inum=6493,ou=attributes,o=gluu
+jansClaim: inum=2B29,ou=attributes,o=jans
+jansClaim: inum=0C85,ou=attributes,o=jans
+jansClaim: inum=B4B0,ou=attributes,o=jans
+jansClaim: inum=A0E8,ou=attributes,o=jans
+jansClaim: inum=5EC6,ou=attributes,o=jans
+jansClaim: inum=B52A,ou=attributes,o=jans
+jansClaim: inum=64A0,ou=attributes,o=jans
+jansClaim: inum=EC3A,ou=attributes,o=jans
+jansClaim: inum=3B47,ou=attributes,o=jans
+jansClaim: inum=3692,ou=attributes,o=jans
+jansClaim: inum=98FC,ou=attributes,o=jans
+jansClaim: inum=A901,ou=attributes,o=jans
+jansClaim: inum=36D9,ou=attributes,o=jans
+jansClaim: inum=BE64,ou=attributes,o=jans
+jansClaim: inum=6493,ou=attributes,o=jans
 jansDefScope: false
 jansId: profile
 jansScopeTyp: openid
@@ -37,8 +37,8 @@ dn: inum=764C,ou=scopes,o=jans
 description: View your email address.
 inum: 764C
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=8F88,ou=attributes,o=gluu
-jansClaim: inum=CAE3,ou=attributes,o=gluu
+jansClaim: inum=8F88,ou=attributes,o=jans
+jansClaim: inum=CAE3,ou=attributes,o=jans
 jansDefScope: false
 jansId: email
 jansScopeTyp: openid
@@ -49,14 +49,14 @@ dn: inum=C17A,ou=scopes,o=jans
 description: View your address.
 inum: C17A
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=27DB,ou=attributes,o=gluu
-jansClaim: inum=2A3D,ou=attributes,o=gluu
-jansClaim: inum=6609,ou=attributes,o=gluu
-jansClaim: inum=6EEB,ou=attributes,o=gluu
-jansClaim: inum=BCE8,ou=attributes,o=gluu
-jansClaim: inum=D90B,ou=attributes,o=gluu
-jansClaim: inum=E6B8,ou=attributes,o=gluu
-jansClaim: inum=E999,ou=attributes,o=gluu
+jansClaim: inum=27DB,ou=attributes,o=jans
+jansClaim: inum=2A3D,ou=attributes,o=jans
+jansClaim: inum=6609,ou=attributes,o=jans
+jansClaim: inum=6EEB,ou=attributes,o=jans
+jansClaim: inum=BCE8,ou=attributes,o=jans
+jansClaim: inum=D90B,ou=attributes,o=jans
+jansClaim: inum=E6B8,ou=attributes,o=jans
+jansClaim: inum=E999,ou=attributes,o=jans
 jansDefScope: false
 jansGrpClaims: true
 jansId: address
@@ -68,8 +68,8 @@ dn: inum=D491,ou=scopes,o=jans
 description: View your phone number.
 inum: D491
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=B17A,ou=attributes,o=gluu
-jansClaim: inum=0C18,ou=attributes,o=gluu
+jansClaim: inum=B17A,ou=attributes,o=jans
+jansClaim: inum=0C18,ou=attributes,o=jans
 jansDefScope: false
 jansId: phone
 jansScopeTyp: openid
@@ -80,8 +80,8 @@ dn: inum=341A,ou=scopes,o=jans
 description: View the client info.
 inum: 341A
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=2B29,ou=attributes,o=gluu
-jansClaim: inum=29DA,ou=attributes,o=gluu
+jansClaim: inum=2B29,ou=attributes,o=jans
+jansClaim: inum=29DA,ou=attributes,o=jans
 jansDefScope: false
 jansId: clientinfo
 jansScopeTyp: openid
@@ -92,7 +92,7 @@ dn: inum=10B2,ou=scopes,o=jans
 description: View your local username in the Janssen Server.
 inum: 10B2
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=42E0,ou=attributes,o=gluu
+jansClaim: inum=42E0,ou=attributes,o=jans
 jansDefScope: false
 jansId: user_name
 jansScopeTyp: openid
@@ -136,7 +136,7 @@ dn: inum=8A01,ou=scopes,o=jans
 description: View your mobile phone number.
 inum: 8A01
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansClaim: inum=6DA6,ou=attributes,o=gluu
+jansClaim: inum=6DA6,ou=attributes,o=jans
 jansDefScope: false
 jansId: mobile_phone
 jansScopeTyp: openid
@@ -150,7 +150,7 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: true
 jansId: permission
 jansScopeTyp: dynamic
-jansScrDn: inum=CB5B-3211,ou=scripts,o=gluu
+jansScrDn: inum=CB5B-3211,ou=scripts,o=jans
 objectClass: jansCustomScope
 objectClass: top
 
