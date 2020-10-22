@@ -462,7 +462,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -550,7 +550,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -639,7 +639,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -726,7 +726,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -815,7 +815,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -908,7 +908,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -996,7 +996,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1084,7 +1084,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1172,7 +1172,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1260,7 +1260,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1348,7 +1348,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1436,7 +1436,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1524,7 +1524,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1613,7 +1613,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1702,7 +1702,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1787,7 +1787,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1843,7 +1843,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1913,7 +1913,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1984,7 +1984,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2348,7 +2348,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2436,7 +2436,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2533,7 +2533,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2630,7 +2630,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2727,7 +2727,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2815,7 +2815,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);

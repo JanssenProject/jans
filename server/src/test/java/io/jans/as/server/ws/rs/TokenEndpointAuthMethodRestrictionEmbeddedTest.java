@@ -178,7 +178,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
@@ -491,7 +491,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
@@ -806,7 +806,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 
@@ -1120,7 +1120,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(jwksUri);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 

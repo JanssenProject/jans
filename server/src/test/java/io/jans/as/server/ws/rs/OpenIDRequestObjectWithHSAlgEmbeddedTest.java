@@ -75,7 +75,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -177,7 +177,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -288,7 +288,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
