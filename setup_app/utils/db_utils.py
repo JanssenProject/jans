@@ -95,7 +95,7 @@ class DBUtils:
 
             self.ldap_conn.modify(
                     dn,
-                    {"oxAuthConfDynamic": [ldap3.MODIFY_REPLACE, json.dumps(oxAuthConfDynamic, indent=2)]}
+                    {"jansConfDyn": [ldap3.MODIFY_REPLACE, json.dumps(oxAuthConfDynamic, indent=2)]}
                     )
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
