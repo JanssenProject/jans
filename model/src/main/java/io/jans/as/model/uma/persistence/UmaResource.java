@@ -22,7 +22,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
 @DataEntry
-@ObjectClass(value = "oxUmaResource")
+@ObjectClass(value = "jansUmaResource")
 public class UmaResource implements Serializable {
 
     @DN

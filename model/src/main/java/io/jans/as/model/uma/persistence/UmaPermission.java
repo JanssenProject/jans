@@ -20,7 +20,7 @@ import java.util.*;
  * @version 2.0, date: 17/05/2017
  */
 @DataEntry
-@ObjectClass(value = "oxUmaResourcePermission")
+@ObjectClass(value = "jansUmaResourcePermission")
 public class UmaPermission implements Serializable {
 
     public static final String PCT = "pct";
