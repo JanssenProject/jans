@@ -21,7 +21,7 @@ import java.util.List;
  * @author Yuriy Movchan Date: 10/16/2012
  */
 @DataEntry
-@ObjectClass(value = "oxAuthUmaRPT")
+@ObjectClass(value = "jansAuthUmaRPT")
 public class UmaRPT extends AbstractToken {
 
     @DN
