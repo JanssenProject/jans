@@ -21,7 +21,7 @@ import java.util.Date;
  * @author Yuriy Movchan Date: 01/21/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuConfiguration")
+@ObjectClass(value = "jansConfiguration")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SharedConfigurationEntry extends InumEntry implements Serializable {
 
