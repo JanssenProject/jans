@@ -43,19 +43,19 @@ public class CouchbaseConfService {
     public void save(List<CouchbaseConnectionConfiguration> confs) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
 
-        configuration.setIDPAuthn(getOrCreateIDPAuthConfs(configuration.getIDPAuthn(), confs));
+        configuration.setIdpAuthn(getOrCreateIDPAuthConfs(configuration.getIdpAuthn(), confs));
         configurationService.merge(configuration);
     }
 
     public void remove(String name) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
-        final List<IDPAuthConf> existing = gluuConfiguration.getIDPAuthn();
+        final List<IDPAuthConf> existing = gluuConfiguration.getIdpAuthn();
         Optional<IDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(name)).findFirst();
         if (existingConf.isEmpty())
             return; // does not exist, nothing to remove
 
         existing.remove(existingConf.get());
-        gluuConfiguration.setIDPAuthn(existing);
+        gluuConfiguration.setIdpAuthn(existing);
 
         configurationService.merge(gluuConfiguration);
     }
@@ -66,7 +66,7 @@ public class CouchbaseConfService {
     }
 
     private List<IDPAuthConf> getIDPAuthConf() {
-        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getIDPAuthn();
+        List<IDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getIdpAuthn();
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
