@@ -210,7 +210,7 @@ public class RegistrationPersistenceService {
     }
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=gluu"
+        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"
         if (StringHelper.isEmpty(userInum)) {
             return userBaseDn;
         }
