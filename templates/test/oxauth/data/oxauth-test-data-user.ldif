@@ -1,15 +1,15 @@
 dn: inum=7890,ou=groups,o=jans
-displayName: Gluu Test Group 1
+displayName: Jans Test Group 1
 inum: 7890
-jansGrpTyp: gluuTestGroup1
+jansGrpTyp: jansTestGroup1
 jansStatus: active
 objectClass: top
 objectClass: jansGrp
 
 dn: inum=7891,ou=groups,o=jans
-displayName: Gluu Test Group 2
+displayName: Jans Test Group 2
 inum: 7891
-jansGrpTyp: gluuTestGroup2
+jansGrpTyp: jansTestGroup2
 jansStatus: active
 objectClass: top
 objectClass: jansGrp
@@ -31,9 +31,9 @@ jansStatus: active
 l: Austin
 locale: en-US
 mail: test_user@test.org
-memberOf: inum=7890,ou=groups,o=gluu
-memberOf: inum=7891,ou=groups,o=gluu
-memberOf: inum=60B7,ou=groups,o=gluu
+memberOf: inum=7890,ou=groups,o=jans
+memberOf: inum=7891,ou=groups,o=jans
+memberOf: inum=60B7,ou=groups,o=jans
 middleName: User
 mobile: (512) 516-2413
 nickname: user
@@ -42,7 +42,7 @@ objectClass: top
 objectClass: jansPerson
 objectClass: jansCustomPerson
 phoneNumberVerified: true
-picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredLanguage: en_US
 profile: http://www.mywebsite.com/profile
 sn: User
@@ -52,7 +52,7 @@ telephoneNumber: (512) 516-2413
 uid: test_user
 updatedAt: 20170213135512.220Z
 userPassword: test_user_password
-website: http://www.gluu.org
+website: http://www.jans.org
 zoneinfo: America/Chicago
 
 dn: inum=B1F3-AEAE-B799,ou=people,o=jans
@@ -70,9 +70,9 @@ jansStatus: active
 l: Austin
 locale: en-US
 mail: test_user2@test.org
-memberOf: inum=7890,ou=groups,o=gluu
-memberOf: inum=7891,ou=groups,o=gluu
-memberOf: inum=60B7,ou=groups,o=gluu
+memberOf: inum=7890,ou=groups,o=jans
+memberOf: inum=7891,ou=groups,o=jans
+memberOf: inum=60B7,ou=groups,o=jans
 middleName: User2
 mobile: (512) 516-2414
 nickname: user2
@@ -81,7 +81,7 @@ objectClass: top
 objectClass: jansPerson
 objectClass: jansCustomPerson
 phoneNumberVerified: true
-picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredLanguage: en_US
 profile: http://www.mywebsite.com/profile
 sn: User2
@@ -91,21 +91,21 @@ telephoneNumber: (512) 516-2414
 uid: test_user2
 updatedAt: 20170213135512.220Z
 userPassword: test_user_password2
-website: http://www.gluu.org
+website: http://www.jans.io
 zoneinfo: America/Chicago
 
 dn: inum=60B7,ou=groups,o=jans
 add: member
 changetype: modify
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans
 
 dn: inum=7890,ou=groups,o=jans
 add: member
 changetype: modify
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans
 
 dn: inum=7891,ou=groups,o=jans
 add: member
 changetype: modify
-member: inum=B1F3-AEAE-B798,ou=people,o=gluu
+member: inum=B1F3-AEAE-B798,ou=people,o=jans
 

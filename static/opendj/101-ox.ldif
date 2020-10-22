@@ -2374,7 +2374,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.410 NAME 'authReqId'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'jansPairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
