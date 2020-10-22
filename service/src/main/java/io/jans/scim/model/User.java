@@ -21,7 +21,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @author Yuriy Movchan Date: 06/10/2013
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuPerson")
+@ObjectClass(value = "jansPerson")
 public class User extends CustomEntry implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7779582184398161112L;

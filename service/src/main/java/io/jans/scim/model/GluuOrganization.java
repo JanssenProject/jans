@@ -26,7 +26,7 @@ import io.jans.orm.model.base.Entry;
  * @author Yuriy Movchan Date: 11.02.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuOrganization")
+@ObjectClass(value = "jansOrganization")
 @JsonInclude(Include.NON_NULL)
 public class GluuOrganization extends Entry implements Serializable {
 
