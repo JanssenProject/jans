@@ -16,7 +16,7 @@ import java.util.Date;
  * @version October 16, 2015
  */
 @DataEntry
-@ObjectClass(value = "oxClientAuthorization")
+@ObjectClass(value = "jansClientAuthorization")
 public class ClientAuthorization implements Serializable {
 
     @DN
