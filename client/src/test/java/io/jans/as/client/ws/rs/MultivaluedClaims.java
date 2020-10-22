@@ -67,7 +67,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.NONE);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -154,7 +154,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -241,7 +241,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -328,7 +328,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -414,7 +414,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -504,7 +504,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -594,7 +594,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -684,7 +684,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -774,7 +774,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -864,7 +864,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -954,7 +954,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS256);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1045,7 +1045,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS384);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS384);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1136,7 +1136,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.PS512);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.PS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1229,7 +1229,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1315,7 +1315,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1405,7 +1405,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1497,7 +1497,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1589,7 +1589,7 @@ public class MultivaluedClaims extends BaseTest {
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-        registerRequest.addCustomAttribute("oxIncludeClaimsInIdToken", "true");
+        registerRequest.addCustomAttribute("jansInclClaimsInIdTkn", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
