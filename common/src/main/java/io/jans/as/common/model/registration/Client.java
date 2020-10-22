@@ -55,7 +55,7 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansClntIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @AttributeName(name = "jansClntSecretExpiresAt")
+    @AttributeName(name = "jansClntSecretExpAt")
     private Date clientSecretExpiresAt;
 
     @AttributeName(name = "jansRedirectURI")
