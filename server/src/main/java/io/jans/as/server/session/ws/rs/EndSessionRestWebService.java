@@ -31,7 +31,7 @@ public interface EndSessionRestWebService {
     Response requestEndSession(@QueryParam(EndSessionRequestParam.ID_TOKEN_HINT) String idTokenHint,
             @QueryParam(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI) String postLogoutRedirectUri,
             @QueryParam(EndSessionRequestParam.STATE) String state,
-            @QueryParam("session_id") String sessionId,
+            @QueryParam("sid") String sid,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

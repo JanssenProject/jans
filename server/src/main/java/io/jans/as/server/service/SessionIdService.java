@@ -730,6 +730,19 @@ public class SessionIdService {
     }
 
     @Nullable
+    public SessionId getSessionBySid(@Nullable String sid) {
+        if (StringUtils.isBlank(sid)) {
+            return null;
+        }
+
+        final List<SessionId> entries = persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, Filter.createEqualityFilter("sid", sid));
+        if (entries == null || entries.size() != 1) {
+            return null;
+        }
+        return entries.get(0);
+    }
+
+    @Nullable
     public SessionId getSessionByDn(@Nullable String dn, boolean silently) {
         if (StringUtils.isBlank(dn)) {
             return null;
