@@ -2,7 +2,7 @@ dn: inum=%(oxauth_client_id)s,ou=clients,o=jans
 displayName: oxTrust Admin GUI
 inum: %(oxauth_client_id)s
 jansAppTyp: web
-jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+jansClaimRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims
 jansClntSecret: %(oxauthClient_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
@@ -14,7 +14,7 @@ jansPersistClntAuthzs: false
 jansPostLogoutRedirectURI: https://%(hostname)s/identity/finishlogout.htm
 jansRedirectURI: https://%(hostname)s/identity/scim/auth
 jansRedirectURI: https://%(hostname)s/identity/authcode.htm
-jansRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims?authentication=true
+jansRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims?authentication=true
 jansRespTyp: code
 jansScope: inum=F0C4,ou=scopes,o=gluu
 jansScope: inum=10B2,ou=scopes,o=gluu
