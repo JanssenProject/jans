@@ -107,16 +107,16 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private LogoutTokenFactory logoutTokenFactory;
 
     @Override
-    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
+    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sid,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         try {
-            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
-                    idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
+            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}",
+                    idTokenHint, postLogoutRedirectUri, sid, sec.isSecure());
 
             Jwt idToken = validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
-            validateSessionIdRequestParameter(sessionId, postLogoutRedirectUri);
+            validateSidRequestParameter(sid, postLogoutRedirectUri);
 
-            final Pair<SessionId, AuthorizationGrant> pair = getPair(idTokenHint, sessionId, httpRequest);
+            final Pair<SessionId, AuthorizationGrant> pair = getPair(idTokenHint, sid, httpRequest);
             if (pair.getFirst() == null) {
                 final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
@@ -263,12 +263,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
     }
 
-    private void validateSessionIdRequestParameter(String sessionId, String postLogoutRedirectUri) {
-        // session_id is not required but if it is present then we must validate it #831
-        if (StringUtils.isNotBlank(sessionId)) {
-            SessionId sessionIdObject = sessionIdService.getSessionId(sessionId);
+    private void validateSidRequestParameter(String sid, String postLogoutRedirectUri) {
+        // sid is not required but if it is present then we must validate it #831
+        if (StringUtils.isNotBlank(sid)) {
+            SessionId sessionIdObject = sessionIdService.getSessionBySid(sid);
             if (sessionIdObject == null) {
-                final String reason = "session_id parameter in request is not valid. Logout is rejected. session_id parameter in request can be skipped or otherwise valid value must be provided.";
+                final String reason = "sid parameter in request is not valid. Logout is rejected. sid parameter in request can be skipped or otherwise valid value must be provided.";
                 log.error(reason);
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
             }
@@ -386,7 +386,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 build();
     }
 
-    private Pair<SessionId, AuthorizationGrant> getPair(String idTokenHint, String sessionId, HttpServletRequest httpRequest) {
+    private Pair<SessionId, AuthorizationGrant> getPair(String idTokenHint, String sid, HttpServletRequest httpRequest) {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
             Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
@@ -398,12 +398,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         SessionId ldapSessionId = null;
 
         try {
-            String id = sessionId;
-            if (StringHelper.isEmpty(id)) {
-                id = cookieService.getSessionIdFromCookie(httpRequest);
-            }
+            String id = cookieService.getSessionIdFromCookie(httpRequest);
             if (StringHelper.isNotEmpty(id)) {
                 ldapSessionId = sessionIdService.getSessionId(id);
+            }
+            if (StringUtils.isNotBlank(sid) && ldapSessionId == null) {
+                ldapSessionId = sessionIdService.getSessionBySid(sid);
             }
         } catch (Exception e) {
             log.error("Failed to current session id.", e);

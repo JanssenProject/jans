@@ -26,5 +26,7 @@ public interface AuthorizeResponseParam {
      */
     String SESSION_ID = "session_id";
 
+    String SID = "sid";
+
     String ACR_VALUES = "acr_values";
 }
