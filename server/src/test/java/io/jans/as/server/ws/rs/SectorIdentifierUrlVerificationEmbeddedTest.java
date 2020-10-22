@@ -71,7 +71,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 			registerRequest.setSubjectType(SubjectType.PAIRWISE);
@@ -182,7 +182,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 		try {
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 			registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -222,7 +222,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());

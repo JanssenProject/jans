@@ -69,7 +69,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 			io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 			registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
 
 			List<GrantType> grantTypes = Arrays.asList(

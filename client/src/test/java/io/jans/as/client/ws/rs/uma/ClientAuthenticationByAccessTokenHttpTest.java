@@ -105,7 +105,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setExecutor(clientExecutor(true));

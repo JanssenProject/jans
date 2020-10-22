@@ -84,7 +84,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(io.jans.as.model.common.SubjectType.PAIRWISE);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setClaims(Arrays.asList(
                 "iname",
                 "o"));
@@ -534,7 +534,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
                 io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -677,7 +677,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
                 io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -824,7 +824,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS

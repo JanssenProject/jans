@@ -76,7 +76,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -180,7 +180,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -284,7 +284,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -388,7 +388,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -493,7 +493,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -597,7 +597,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			registerRequest.setJwksUri(jwksUri);
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
