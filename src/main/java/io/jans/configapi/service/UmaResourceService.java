@@ -89,7 +89,7 @@ public class UmaResourceService {
     }
 
     public String getBaseDnForResource() {
-        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
+        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=jans"
         return String.format("ou=resources,%s", umaBaseDn);
     }
 }
