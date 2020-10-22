@@ -150,7 +150,7 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        initApiProtectionService();
+        createAuthorizationService();
     }
 
     private boolean createFromDb() {
@@ -286,20 +286,19 @@ public class ConfigurationFactory {
         }
     }
 
-   
-   
     @Produces
     @ApplicationScoped
     @Named("authorizationService")
-    private AuthorizationService initApiProtectionService() {
+    private AuthorizationService createAuthorizationService() {
         if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-            } else
+            } else {
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
+            }
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
