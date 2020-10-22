@@ -53,7 +53,7 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 	}
 
 	public String getDnForOrganization() {
-		return "o=gluu";
+		return "o=jans";
 	}
 
     private BaseCacheService getCacheService() {
