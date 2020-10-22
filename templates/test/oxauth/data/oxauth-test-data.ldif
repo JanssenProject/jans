@@ -65,40 +65,40 @@ urn: urn:gluu:dir:attribute-def:oxAuthScope
 dn: inum=43F1,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=764C,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=C17A,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=D491,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=341A,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=341A,ou=scopes,o=jans
-add: oxAuthClaim
+add: jansClaim
 changetype: modify
 jansClaim: inum=18CC,ou=attributes,o=gluu
 
 dn: inum=10B2,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
-replace: defaultScope
+replace: jansDefScope
 
 dn: inum=341A,ou=scopes,o=jans
-add: oxAuthClaim
+add: jansClaim
 changetype: modify
 jansClaim: inum=18CD,ou=attributes,o=gluu
 jansClaim: inum=18CE,ou=attributes,o=gluu
