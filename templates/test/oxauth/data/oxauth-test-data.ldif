@@ -12,7 +12,7 @@ jansClaimName: oxAuthAppType
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:gluu:dir:attribute-def:oxAuthAppType
+urn: urn:jans:dir:attribute-def:oxAuthAppType
 
 dn: inum=18CD,ou=attributes,o=jans
 description: oxAuth Client ID Token Signed Response Algorithm
@@ -28,7 +28,7 @@ jansClaimName: oxAuthIdTokenSignedResponseAlg
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
+urn: urn:jans:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
 
 dn: inum=18CE,ou=attributes,o=jans
 description: oxAuth Client Redirect URI
@@ -44,7 +44,7 @@ jansClaimName: oxAuthRedirectURI
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
+urn: urn:jans:dir:attribute-def:oxAuthRedirectURI
 
 dn: inum=18CF,ou=attributes,o=jans
 description: oxAuth Client Scope
@@ -60,7 +60,7 @@ jansClaimName: oxAuthScope
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:gluu:dir:attribute-def:oxAuthScope
+urn: urn:jans:dir:attribute-def:oxAuthScope
 
 dn: inum=43F1,ou=scopes,o=jans
 changetype: modify
@@ -90,7 +90,7 @@ replace: jansDefScope
 dn: inum=341A,ou=scopes,o=jans
 add: jansClaim
 changetype: modify
-jansClaim: inum=18CC,ou=attributes,o=gluu
+jansClaim: inum=18CC,ou=attributes,o=jans
 
 dn: inum=10B2,ou=scopes,o=jans
 changetype: modify
@@ -100,9 +100,9 @@ replace: jansDefScope
 dn: inum=341A,ou=scopes,o=jans
 add: jansClaim
 changetype: modify
-jansClaim: inum=18CD,ou=attributes,o=gluu
-jansClaim: inum=18CE,ou=attributes,o=gluu
-jansClaim: inum=18CF,ou=attributes,o=gluu
+jansClaim: inum=18CD,ou=attributes,o=jans
+jansClaim: inum=18CE,ou=attributes,o=jans
+jansClaim: inum=18CF,ou=attributes,o=jans
 
 dn: inum=7D01,ou=scopes,o=jans
 description: Dynamic scope org_name
@@ -110,7 +110,7 @@ inum: 7D01
 jansDefScope: true
 jansId: org_name
 jansScopeTyp: dynamic
-jansScrDn: inum=031C-5621,ou=scripts,o=gluu
+jansScrDn: inum=031C-5621,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScope
 
@@ -120,14 +120,14 @@ inum: 7D02
 jansDefScope: true
 jansId: work_phone
 jansScopeTyp: dynamic
-jansScrDn: inum=031C-5622,ou=scripts,o=gluu
+jansScrDn: inum=031C-5622,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScope
 
 dn: inum=0465-1DEA,ou=scopes,o=jans
 description: Custom scope for tests
 inum: @DBE5-84F8-631A-9172CD07-49BE0465-1DEA
-jansClaim: inum=D2E0,ou=attributes,o=gluu
+jansClaim: inum=D2E0,ou=attributes,o=jans
 jansDefScope: true
 jansId: test
 jansScopeTyp: openid
@@ -152,12 +152,12 @@ jansRedirectURI: https://client.example.com/cb2
 jansRespTyp: token
 jansRespTyp: code
 jansRespTyp: id_token
-jansScope: inum=F0C4,ou=scopes,o=gluu
-jansScope: inum=10B2,ou=scopes,o=gluu
-jansScope: inum=764C,ou=scopes,o=gluu
-jansScope: inum=43F1,ou=scopes,o=gluu
-jansScope: inum=341A,ou=scopes,o=gluu
-jansScope: inum=6D99,ou=scopes,o=gluu
+jansScope: inum=F0C4,ou=scopes,o=jans
+jansScope: inum=10B2,ou=scopes,o=jans
+jansScope: inum=764C,ou=scopes,o=jans
+jansScope: inum=43F1,ou=scopes,o=jans
+jansScope: inum=341A,ou=scopes,o=jans
+jansScope: inum=6D99,ou=scopes,o=jans
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
 objectClass: top
@@ -177,8 +177,8 @@ jansIdTknSignedRespAlg: RS256
 jansRedirectURI: https://client.example.com/cb
 jansRespTyp: code
 jansRespTyp: id_token
-jansScope: inum=6D99,ou=scopes,o=gluu
-jansScope: inum=7D90,ou=scopes,o=gluu
+jansScope: inum=6D99,ou=scopes,o=jans
+jansScope: inum=7D90,ou=scopes,o=jans
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
 objectClass: top
@@ -207,7 +207,7 @@ displayName: View
 inum: 5214-40D1
 jansId: http://photoz.example.com/dev/scopes/view
 jansScopeTyp: uma
-jansUmaPolicyScrDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=gluu
+jansUmaPolicyScrDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=jans
 objectClass: jansCustomScope
 objectClass: top
 
@@ -229,7 +229,7 @@ objectClass: top
 
 dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
 jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
-jansRedirectURI: https://www.gluu.org
+jansRedirectURI: https://www.jans.org
 jansRedirectURI: http://localhost:80/oxauth-rp/home.htm
 jansRedirectURI: https://localhost:8443/oxauth-rp/home.htm
 jansRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
