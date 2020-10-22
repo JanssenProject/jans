@@ -8,19 +8,17 @@ package io.jans.configapi.auth;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
-import io.jans.configapi.service.ConfigurationService;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Method;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
 
 public abstract class AuthorizationService implements Serializable {
     
@@ -29,9 +27,6 @@ public abstract class AuthorizationService implements Serializable {
 
     @Inject
     ConfigurationFactory configurationFactory;
-
-    @Inject
-    ConfigurationService configurationService;
 
     public abstract void validateAuthorization(String token, ResourceInfo resourceInfo) throws Exception;
 
@@ -56,35 +51,12 @@ public abstract class AuthorizationService implements Serializable {
         return authScopes.containsAll(resourceScopes);
     }
 
-    protected String getClientKeyStorePassword() {
-        logger.debug("\n\n\n AuthorizationService::getClientKeyStorePassword() configurationService.find().getKeyStoreSecret() = "+configurationService.find().getKeyStoreSecret()+"\n\n");
-        return configurationService.find().getKeyStoreSecret();
-    }
-
-    protected String getClientKeyStoreFile() {
-        logger.debug("\n\n\n AuthorizationService::getClientKeyStoreFile() configurationService = "+configurationService+"\n\n");
-        logger.debug(" AuthorizationService::getClientKeyStoreFile() configurationService.find() = "+configurationService.find());
-        logger.debug(" AuthorizationService::getClientKeyStoreFile() configurationService.find().toString() = "+configurationService.find().toString());
-        logger.debug("AuthorizationService::getClientKeyStoreFile() configurationService.find().getKeyStoreFile() = "+configurationService.find().getKeyStoreFile()+"\n\n");
-        return configurationService.find().getKeyStoreFile();
-    }
-
     private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
         if (methodAnnotation != null) {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
-    }
-
-    protected long computeAccessTokenExpirationTime(Integer expiresIn) {
-        Calendar calendar = Calendar.getInstance();
-        if (expiresIn != null) {
-            calendar.add(Calendar.SECOND, expiresIn);
-            calendar.add(Calendar.SECOND, -10); // Subtract 10 seconds to avoid expirations during executing request
-        }
-
-        return calendar.getTimeInMillis();
     }
 
 }
