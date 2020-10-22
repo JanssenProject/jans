@@ -180,7 +180,7 @@ public class UmaPctService {
     }
 
     public String branchBaseDn() {
-        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
+        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=jans"
         return String.format("ou=pct,%s", umaBaseDn);
     }
 

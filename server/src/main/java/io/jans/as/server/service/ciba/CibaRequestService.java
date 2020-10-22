@@ -51,7 +51,7 @@ public class CibaRequestService {
     private CacheService cacheService;
 
     private String cibaBaseDn() {
-        return staticConfiguration.getBaseDn().getCiba();  // ou=ciba,o=gluu
+        return staticConfiguration.getBaseDn().getCiba();  // ou=ciba,o=jans
     }
 
     /**

@@ -120,14 +120,14 @@ public class InumGenerator {
                 return baseDn.getPeople();
         }
 
-        // if not able to identify baseDn by type then return organization baseDn, e.g. o=gluu
+        // if not able to identify baseDn by type then return organization baseDn, e.g. o=jans
         Matcher m = baseRdnPattern.matcher(baseDn.getClients());
         if (m.matches()) {
         	return m.group(1);
         }
 
-        log.error("Use fallback DN: o=gluu, for ID generator, please check oxAuth configuration, clientDn must be valid DN");
-        return "o=gluu";
+        log.error("Use fallback DN: o=jans, for ID generator, please check oxAuth configuration, clientDn must be valid DN");
+        return "o=jans";
     }
 
 }

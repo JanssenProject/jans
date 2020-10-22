@@ -105,13 +105,13 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=gluu"
+        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"
 
         return String.format("ou=fido2_register,%s", userBaseDn);
     }
 
     public String getBaseDnForFidoDevices(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=gluu"
+        final String userBaseDn = getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=jans"
 
         return String.format("ou=fido,%s", userBaseDn);
 	}

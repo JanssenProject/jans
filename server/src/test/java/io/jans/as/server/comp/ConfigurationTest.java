@@ -78,7 +78,7 @@ public class ConfigurationTest extends ConfigurableTest {
 		final AppConfiguration configJson = loadConfFromFile(configFile);
 
 		final Conf c = new Conf();
-		c.setDn("ou=testconfiguration,o=gluu");
+		c.setDn("ou=testconfiguration,o=jans");
 		c.setDynamic(configJson);
 		c.setErrors(errorConf);
 		c.setStatics(staticConf);

@@ -232,7 +232,7 @@ public class ClientService {
 	public String buildClientDn(String p_clientId) {
 		final StringBuilder dn = new StringBuilder();
 		dn.append(String.format("inum=%s,", p_clientId));
-		dn.append(staticConfiguration.getBaseDn().getClients()); // ou=clients,o=gluu
+		dn.append(staticConfiguration.getBaseDn().getClients()); // ou=clients,o=jans
 		return dn.toString();
 	}
 
