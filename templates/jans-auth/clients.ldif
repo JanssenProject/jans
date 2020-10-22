@@ -16,9 +16,9 @@ jansRedirectURI: https://%(hostname)s/identity/scim/auth
 jansRedirectURI: https://%(hostname)s/identity/authcode.htm
 jansRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims?authentication=true
 jansRespTyp: code
-jansScope: inum=F0C4,ou=scopes,o=gluu
-jansScope: inum=10B2,ou=scopes,o=gluu
-jansScope: inum=764C,ou=scopes,o=gluu
+jansScope: inum=F0C4,ou=scopes,o=jans
+jansScope: inum=10B2,ou=scopes,o=jans
+jansScope: inum=764C,ou=scopes,o=jans
 jansSubjectTyp: public
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
