@@ -29,7 +29,6 @@ import java.util.List;
  * @author Javier Rojas Blum Date: 07.05.2012
  * @author Yuriy Movchan Date: 2016/04/26
  */
-@Stateless
 @Named
 public class ScopeService {
 
