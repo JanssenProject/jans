@@ -49,6 +49,8 @@ import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static io.jans.as.model.config.Constants.*;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
@@ -85,8 +87,8 @@ public class ConfigurationFactory {
 	@Inject
 	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
-	public static final String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
-	public static final String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
+	public static final String PERSISTENCE_CONFIGURATION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
+	public static final String BASE_CONFIGURATION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
 
 	private static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
@@ -107,14 +109,13 @@ public class ConfigurationFactory {
 	private static final String BASE_DIR;
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String LDAP_PROPERTIES_FILE = DIR + "jans-ldap.properties";
+	private static final String BASE_PROPERTIES_FILE = DIR + BASE_PROPERTIES_FILE_NAME;
+	private static final String LDAP_PROPERTIES_FILE = DIR + LDAP_PROPERTIES_FILE_NAME;
 
 	private static final String CONFIG_FILE_NAME = "jans-config.json";
 	private static final String ERRORS_FILE_NAME = "jans-errors.json";
 	private static final String STATIC_CONF_FILE_NAME = "jans-static-conf.json";
 	private static final String WEB_KEYS_FILE_NAME = "jans-web-keys.json";
-	private static final String SALT_FILE_NAME = "salt";
 
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
@@ -152,7 +153,7 @@ public class ConfigurationFactory {
 			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
 			this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
 
-			String certsDir = this.baseConfiguration.getString("certsDir");
+			String certsDir = this.baseConfiguration.getString(CERTS_DIR);
 			if (StringHelper.isEmpty(certsDir)) {
 				certsDir = confDir;
 			}
@@ -227,7 +228,7 @@ public class ConfigurationFactory {
 			if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName()) || (newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration.getLastModifiedTime())) {
 				// Reload configuration only if it was modified
 				this.persistenceConfiguration = newPersistenceConfiguration;
-				event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE);
+				event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGURATION_RELOAD_EVENT_TYPE);
 			}
 		}
 
@@ -238,7 +239,7 @@ public class ConfigurationFactory {
 			if (lastModified > baseConfigurationFileLastModifiedTime) {
 				// Reload configuration only if it was modified
 				loadBaseConfiguration();
-				event.select(BaseConfigurationReload.Literal.INSTANCE).fire(BASE_CONFIGUARION_RELOAD_EVENT_TYPE);
+				event.select(BaseConfigurationReload.Literal.INSTANCE).fire(BASE_CONFIGURATION_RELOAD_EVENT_TYPE);
 			}
 		}
 
@@ -434,7 +435,7 @@ public class ConfigurationFactory {
 
 	private io.jans.as.model.config.Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-		final String dn = this.baseConfiguration.getString("jansAuth_ConfigurationEntryDN");
+		final String dn = this.baseConfiguration.getString(SERVER_KEY_OF_CONFIGURATION_ENTRY);
 		try {
 			final Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 
