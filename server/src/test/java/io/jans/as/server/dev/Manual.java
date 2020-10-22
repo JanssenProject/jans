@@ -53,7 +53,7 @@ public class Manual {
 
 	@Test
 	public void getGroupsFromClient() {
-		final Client client = MANAGER.find(Client.class, "inum=@!0000!0008!7652.0000,ou=clients,o=gluu");
+		final Client client = MANAGER.find(Client.class, "inum=@!0000!0008!7652.0000,ou=clients,o=jans");
 		System.out.println(client);
 	}
 }

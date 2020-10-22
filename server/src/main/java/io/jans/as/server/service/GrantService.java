@@ -71,7 +71,7 @@ public class GrantService {
     }
 
     private String tokenBaseDn() {
-        return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=gluu
+        return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=jans
     }
 
     public void merge(TokenLdap p_token) {

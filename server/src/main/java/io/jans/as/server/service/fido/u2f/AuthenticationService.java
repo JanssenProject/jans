@@ -254,7 +254,7 @@ public class AuthenticationService extends RequestService {
      * Build DN string for U2F authentication request
      */
     public String getDnForAuthenticateRequestMessage(String jsId) {
-        final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=gluu
+        final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=jans
         if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=authentication_requests,%s", u2fBaseDn);
         }
