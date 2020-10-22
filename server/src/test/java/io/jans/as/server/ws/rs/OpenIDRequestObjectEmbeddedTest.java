@@ -88,7 +88,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -128,7 +128,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -286,7 +286,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {
@@ -1057,7 +1057,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
-			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
 			registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
 		} catch (JSONException e) {

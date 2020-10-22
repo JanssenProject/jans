@@ -334,7 +334,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setScope(Arrays.asList("openid", "profile", "email"));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setFrontChannelLogoutSessionRequired(true);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -387,7 +387,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setScope(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setFrontChannelLogoutSessionRequired(true);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         final RegisterClient registerClient = new RegisterClient(registrationClientUri2);
         registerClient.setRequest(registerRequest);

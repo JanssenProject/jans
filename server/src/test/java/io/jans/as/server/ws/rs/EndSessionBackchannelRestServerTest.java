@@ -54,7 +54,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         registerResponse = TClientService.register(registerRequest, url);
     }

@@ -110,7 +110,7 @@ public class TokenBindingHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setIdTokenTokenBindingCnf(JwtClaimName.TOKEN_BINDING_HASH); // token binding hash for cnf
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

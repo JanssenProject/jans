@@ -115,7 +115,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         // Register client with Sector Identifier URL
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -251,7 +251,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         // 1. Register client with Sector Identifier URL
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
@@ -368,7 +368,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -391,7 +391,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

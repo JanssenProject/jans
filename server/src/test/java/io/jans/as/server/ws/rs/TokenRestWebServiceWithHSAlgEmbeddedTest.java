@@ -66,7 +66,7 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -154,7 +154,7 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -242,7 +242,7 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
