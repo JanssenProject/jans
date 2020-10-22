@@ -35,7 +35,7 @@ public class KeyGenerator {
         cal.add(Calendar.YEAR, 3);
         Date expirationDate = cal.getTime();
 
-        String dnName = "C=US,ST=TX,L=Austin,O=Gluu,CN=Gluu oxPush2 U2F v1.0.0";
+        String dnName = "C=US,ST=TX,L=Austin,o=jans,CN=Gluu oxPush2 U2F v1.0.0";
 
         generateU2fAttestationKeys(startDate, expirationDate, dnName);
     }
