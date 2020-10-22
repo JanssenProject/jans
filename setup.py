@@ -152,11 +152,13 @@ if Config.installed_instance:
 
         setattr(Config, installer.install_var, installer.installed())
 
-    propertiesUtils.promptForProperties()
 
-    if not (argsp.t or argsp.x) and not Config.addPostSetupService:
-        print("No service was selected to install. Exiting ...")
-        sys.exit()
+    if not argsp.shell:
+        propertiesUtils.promptForProperties()
+
+        if not (argsp.t or argsp.x) and not Config.addPostSetupService:
+            print("No service was selected to install. Exiting ...")
+            sys.exit()
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
@@ -169,6 +171,10 @@ if argsp.x:
     testDataLoader.load_test_data()
     testDataLoader.deleteLdapPw()
     print("Test data loaded. Exiting ...")
+    sys.exit()
+
+if argsp.shell:
+    code.interact(local=locals())
     sys.exit()
 
 print()
@@ -190,10 +196,6 @@ class PostSetup:
 jansProgress.register(PostSetup)
 jansProgress.queue = queue
 
-
-if argsp.shell:
-    code.interact(local=locals())
-    sys.exit()
 
 def do_installation():
 
