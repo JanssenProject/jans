@@ -62,7 +62,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -961,7 +961,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
 
             io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     Arrays.asList(redirectUri));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {

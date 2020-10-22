@@ -68,7 +68,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         try {
             io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {

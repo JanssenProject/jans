@@ -36,7 +36,7 @@ public class AuthorizationResponseCustomHeaderTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

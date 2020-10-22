@@ -76,7 +76,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -114,7 +114,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -200,7 +200,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -285,7 +285,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
@@ -370,7 +370,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS

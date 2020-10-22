@@ -405,7 +405,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -467,7 +467,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -529,7 +529,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -590,7 +590,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -652,7 +652,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -714,7 +714,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -776,7 +776,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -838,7 +838,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -900,7 +900,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -961,7 +961,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -1023,7 +1023,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -1085,7 +1085,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -1146,7 +1146,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -1208,7 +1208,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 
@@ -1270,7 +1270,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setGrantTypes(grantTypes);
 

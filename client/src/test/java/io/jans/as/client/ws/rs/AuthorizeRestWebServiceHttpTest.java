@@ -1575,7 +1575,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1858,7 +1858,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1998,7 +1998,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2177,7 +2177,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2223,7 +2223,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

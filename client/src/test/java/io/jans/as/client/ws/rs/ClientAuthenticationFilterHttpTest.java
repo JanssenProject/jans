@@ -58,7 +58,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
