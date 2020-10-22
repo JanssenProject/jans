@@ -1,10 +1,10 @@
 dn: o=jans
 description: Welcome to oxTrust!
 displayName: %(orgName)s
-jansManagerGrp: inum=60B7,ou=groups,o=gluu
+jansManagerGrp: inum=60B7,ou=groups,o=jans
 jansOrgShortName: %(orgName)s
 jansThemeColor: 166309
-o: gluu
+o: jans
 objectClass: top
 objectClass: jansOrganization
 

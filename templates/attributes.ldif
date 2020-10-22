@@ -3,7 +3,7 @@ description: XRI i-number, persistent non-reassignable identifier
 displayName: Inum
 inum: 29DA
 jansAttrName: inum
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -13,7 +13,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.117
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:inum
+urn: urn:jans:dir:attribute-def:inum
 
 dn: inum=B4B0,ou=attributes,o=jans
 description: Given name(s) or first name(s) of the End-User.Note that in some cultures, people can have multiple given names;all can be present, with the names being separated by space characters.
@@ -22,7 +22,7 @@ inum: B4B0
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: givenName
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -40,7 +40,7 @@ displayName: Username
 inum: 42E0
 jansAttrEditTyp: admin
 jansAttrName: uid
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -58,7 +58,7 @@ displayName: Preferred Username
 inum: B52A
 jansAttrEditTyp: admin
 jansAttrName: preferredUsername
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -77,7 +77,7 @@ inum: 64A0
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: profile
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -96,7 +96,7 @@ inum: 3B47
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: website
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -114,7 +114,7 @@ displayName: Email Verified
 inum: 8F88
 jansAttrEditTyp: admin
 jansAttrName: emailVerified
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: boolean
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -132,7 +132,7 @@ displayName: Phone Number Verified
 inum: B17A
 jansAttrEditTyp: admin
 jansAttrName: phoneNumberVerified
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: boolean
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -150,7 +150,7 @@ displayName: OpenID Connect JSON formatted address
 inum: C8D5
 jansAttrEditTyp: admin
 jansAttrName: address
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -167,7 +167,7 @@ displayName: Last Updated
 inum: BE64
 jansAttrEditTyp: admin
 jansAttrName: updatedAt
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: generalizedTime
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -186,7 +186,7 @@ inum: 3692
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: gender
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -205,7 +205,7 @@ inum: 98FC
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: birthdate
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -223,7 +223,7 @@ displayName: memberOf
 inum: D2E0
 jansAttrEditTyp: admin
 jansAttrName: memberOf
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansClaimName: member_of
@@ -233,7 +233,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.121
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:memberOf
+urn: urn:jans:dir:attribute-def:memberOf
 
 dn: inum=A901,ou=attributes,o=jans
 description: String from time zone database representing the End-User's time zone. For example,Europe/Paris or America/Los_Angeles.
@@ -242,7 +242,7 @@ inum: A901
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: zoneinfo
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -261,7 +261,7 @@ inum: 36D9
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: locale
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -280,7 +280,7 @@ inum: 8A11
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: secretQuestion
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -289,7 +289,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.306
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:secretQuestion
+urn: urn:jans:dir:attribute-def:secretQuestion
 
 dn: inum=C703,ou=attributes,o=jans
 description: Secret Answer
@@ -298,7 +298,7 @@ inum: C703
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: secretAnswer
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -307,7 +307,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.305
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:secretAnswer
+urn: urn:jans:dir:attribute-def:secretAnswer
 
 dn: inum=6493,ou=attributes,o=jans
 description: Preferred Language
@@ -316,7 +316,7 @@ inum: 6493
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: preferredLanguage
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -334,7 +334,7 @@ displayName: iname
 inum: 5CA2
 jansAttrEditTyp: admin
 jansAttrName: iname
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansClaimName: iname
@@ -343,7 +343,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.116
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:iname
+urn: urn:jans:dir:attribute-def:iname
 
 dn: inum=CAE3,ou=attributes,o=jans
 description: Primary Email Address
@@ -352,7 +352,7 @@ inum: CAE3
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: mail
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -371,7 +371,7 @@ inum: A0E8
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: middleName
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -390,7 +390,7 @@ inum: 5EC6
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: nickname
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -410,7 +410,7 @@ inum: 0C85
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: sn
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -429,7 +429,7 @@ inum: BCA8
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: transientId
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -447,7 +447,7 @@ inum: BCB8
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: persistentId
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -465,7 +465,7 @@ inum: BCE8
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: c
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -475,7 +475,7 @@ jansSAML2URI: urn:oid:2.5.4.6
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:c
+urn: urn:jans:dir:attribute-def:c
 
 dn: inum=2B29,ou=attributes,o=jans
 description: End-User's full name in displayable formincluding all name parts, possibly including titles andsuffixes, ordered according to the End-User's locale and preferences.
@@ -484,7 +484,7 @@ inum: 2B29
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: displayName
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -503,7 +503,7 @@ inum: EC3A
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: picture
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -521,7 +521,7 @@ displayName: Organization
 inum: D03E
 jansAttrEditTyp: admin
 jansAttrName: o
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansClaimName: o
@@ -539,7 +539,7 @@ inum: AAEE
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: userPassword
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -548,7 +548,7 @@ jansSAML2URI: urn:oid:2.5.4.35
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:userPassword
+urn: urn:jans:dir:attribute-def:userPassword
 
 dn: inum=C001,ou=attributes,o=jans
 description: Organizational Title
@@ -556,7 +556,7 @@ displayName: Title
 inum: C001
 jansAttrEditTyp: admin
 jansAttrName: title
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -574,7 +574,7 @@ inum: 4502
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: carLicense
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -592,7 +592,7 @@ inum: BD22
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: facsimileTelephoneNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -609,7 +609,7 @@ displayName: Department
 inum: 08E2
 jansAttrEditTyp: admin
 jansAttrName: departmentNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -626,7 +626,7 @@ displayName: Employee Type
 inum: 3D44
 jansAttrEditTyp: admin
 jansAttrName: employeeType
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:employeeType
@@ -643,7 +643,7 @@ inum: D054
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: cn
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -661,7 +661,7 @@ inum: 6DA6
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: mobile
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -680,7 +680,7 @@ inum: 0C18
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: telephoneNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -699,7 +699,7 @@ inum: E6B8
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: st
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -717,7 +717,7 @@ displayName: Manager
 inum: 42D8
 jansAttrEditTyp: admin
 jansAttrName: manager
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:manager
@@ -734,7 +734,7 @@ inum: 6609
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: street
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -753,7 +753,7 @@ inum: E999
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: postOfficeBox
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -770,7 +770,7 @@ displayName: Employee Number
 inum: D0C9
 jansAttrEditTyp: admin
 jansAttrName: employeeNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:employeeNumber
@@ -786,7 +786,7 @@ displayName: Preferred Delivery Method
 inum: 894A
 jansAttrEditTyp: admin
 jansAttrName: preferredDeliveryMethod
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:preferredDeliveryMethod
@@ -794,7 +794,7 @@ jansSAML2URI: urn:oid:2.5.4.28
 jansStatus: inactive
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
+urn: urn:jans:dir:attribute-def:preferredDeliveryMethod
 
 dn: inum=570B,ou=attributes,o=jans
 description: Work Telephone Number
@@ -803,7 +803,7 @@ inum: 570B
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: telephoneNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -821,7 +821,7 @@ inum: D90B
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: roomNumber
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -838,7 +838,7 @@ displayName: Secretary
 inum: AC0B
 jansAttrEditTyp: admin
 jansAttrName: secretary
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:secretary
@@ -846,24 +846,24 @@ jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.21
 jansStatus: inactive
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:secretary
+urn: urn:jans:dir:attribute-def:secretary
 
 dn: inum=4649,ou=attributes,o=jans
 description: User status to allow/disable user access
 displayName: User Status
 inum: 4649
 jansAttrEditTyp: admin
-jansAttrName: gluuStatus
-jansAttrOrigin: gluuPerson
+jansAttrName: jansStatus
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansSAML1URI: urn:mace:dir:attribute-def:gluuStatus
+jansSAML1URI: urn:mace:dir:attribute-def:jansStatus
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.97
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:status
+urn: urn:jans:dir:attribute-def:status
 
 dn: inum=27DB,ou=attributes,o=jans
 description: Home Address
@@ -872,7 +872,7 @@ inum: 27DB
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: homePostalAddress
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -891,7 +891,7 @@ inum: 6EEB
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: l
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -910,7 +910,7 @@ inum: 2A3D
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: postalCode
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -929,7 +929,7 @@ inum: 48EE
 jansAttrEditTyp: user
 jansAttrEditTyp: admin
 jansAttrName: description
-jansAttrOrigin: gluuCustomPerson
+jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
@@ -1171,7 +1171,7 @@ displayName: Enrollment code
 inum: 5039
 jansAttrEditTyp: admin
 jansAttrName: oxEnrollmentCode
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansSAML1URI: urn:mace:dir:attribute-def:oxEnrollmentCode
@@ -1180,7 +1180,7 @@ jansSCIMCustomAttr: true
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
+urn: urn:jans:dir:attribute-def:oxEnrollmentCode
 
 dn: inum=42E1,ou=attributes,o=jans
 description: IMAP Data
@@ -1188,27 +1188,27 @@ displayName: IMAP Data
 inum: 42E1
 jansAttrEditTyp: admin
 jansAttrEditTyp: user
-jansAttrName: gluuIMAPData
-jansAttrOrigin: gluuPerson
+jansAttrName: jansIMAPData
+jansAttrOrigin: jansPerson
 jansAttrTyp: imapdata
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
 jansClaimName: imap_data
-jansSAML1URI: urn:mace:dir:attribute-def:gluuIMAPData
+jansSAML1URI: urn:mace:dir:attribute-def:jansIMAPData
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.355
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
-urn: urn:mace:dir:attribute-def:gluuIMAPData
+urn: urn:mace:dir:attribute-def:jansIMAPData
 
 dn: inum=6049,ou=attributes,o=jans
-description: gluuPermission
+description: jansPermission
 description: User permission or role
 displayName: User Permission
 inum: 6049
 jansAttrEditTyp: admin
 jansAttrName: role
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansClaimName: user_permission
@@ -1218,7 +1218,7 @@ jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:gluu:dir:attribute-def:role
+urn: urn:jans:dir:attribute-def:role
 
 dn: inum=CACA,ou=attributes,o=jans
 description: User certificate
@@ -1227,7 +1227,7 @@ inum: CACA
 jansAttrEditTyp: admin
 jansAttrEditTyp: user
 jansAttrName: userCertificate
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: certificate
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
@@ -1246,7 +1246,7 @@ inum: 11AA
 jansAttrEditTyp: admin
 jansAttrEditTyp: user
 jansAttrName: oxAuthBackchannelDeviceRegistrationToken
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
@@ -1262,7 +1262,7 @@ inum: 11AB
 jansAttrEditTyp: admin
 jansAttrEditTyp: user
 jansAttrName: oxAuthBackchannelUserCode
-jansAttrOrigin: gluuPerson
+jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user

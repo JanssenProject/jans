@@ -4490,7 +4490,7 @@
         "objectclass"
       ],
       "names": [
-        "pairwiseIdentifier"
+        "jansPairwiseIdentifier"
       ],
       "oid": "jansObjClass",
       "sup": [
