@@ -13,7 +13,6 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.UmaAuthorizationService;
@@ -23,7 +22,6 @@ import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.search.filter.Filter;
 import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.StringHelper;
@@ -40,7 +38,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 @ApplicationScoped
@@ -153,10 +150,6 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        //Initialize Config Api Resource
-        initConfigApiResource();
-        
-        //Initialize API Protection Mechanism
         initApiProtectionService();
     }
 
@@ -312,50 +305,4 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-
-    @Produces
-    @ApplicationScoped
-    @Named("configApiResource")
-    private UmaResource initConfigApiResource() {
-        log.error("ConfigurationFactory.getApiResourceName() = " + ConfigurationFactory.getApiResourceName());
-        if (StringHelper.isEmpty(ConfigurationFactory.getApiResourceName())) {
-            throw new ConfigurationException("Config API Resource not defined");
-        }
-        try {
-            String[] targetArray = new String[] { ConfigurationFactory.getApiResourceName() };
-            Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-            // Filter jsIdFilter = Filter.createSubstringFilter("oxId", null, targetArray,
-            // null);
-            Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
-            Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
-
-            List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
-            log.error(" \n umaResourceList = " + umaResourceList + "\n");
-
-            if (umaResourceList == null || umaResourceList.isEmpty())
-                throw new ConfigurationException("Matching Config API Resource not found!");
-
-            UmaResource resource = umaResourceList.stream()
-                    .filter(x -> ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
-                    .orElse(null);
-
-            log.debug("\n\n ConfigurationFactory.getApiResourceName() = resource " + resource + "\n\n");
-            if (resource == null)
-                throw new ConfigurationException("Config API Resource not found!");
-
-            return resource;
-        } catch (Exception ex) {
-            log.error("Failed to load Config API Resource.", ex);
-            throw new ConfigurationException("Failed to load Config API Resource.", ex);
-        }
-    }
-
-    public String getBaseDnForResource() {
-        log.debug("\n\n ConfigurationFactory.getBaseDnForResource() = staticConf = " + staticConf + "\n\n");
-        final String umaBaseDn = staticConf.getBaseDn().getUmaBase();
-        //final String umaBaseDn = "ou=uma,o=gluu";
-        return String.format("ou=resources,%s", umaBaseDn);
-    }
-
 }
