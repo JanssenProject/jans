@@ -13,12 +13,16 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
         self.service_name = 'jans-config-api'
-        self.config_api_root = os.path.join(Config.jansOptFolder, 'config-api')
         self.needdb = False # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installConfigApi'
         self.register_progess()
+
+        self.root_dir = os.path.join(Config.jansOptFolder, 'config-api')
+        self.conf_dir = os.path.join(self.root_dir, 'config')
+        self.log_dir = os.path.join(self.root_dir, 'log')
+        self.temp_dir = os.path.join(Config.templateFolder, self.service_name)
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion))
@@ -27,17 +31,20 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
     def install(self):
         self.logIt("Installing", pbar=self.service_name)
 
-        self.run([
-                'cp', 
-                self.source_files[0][0], 
-                self.config_api_root
-                ])
+        self.copyFile(self.source_files[0][0], self.root_dir)
+
+        self.copyFile(
+                os.path.join(Config.templateFolder, self.service_name, 'application.properties'),
+                self.conf_dir
+                )
 
     def installed(self):
         return os.path.exists(self.config_api_root)
 
         
     def create_folders(self):
-        if not os.path.exists(self.config_api_root):
-            self.run([paths.cmd_mkdir, '-p', self.config_api_root])
-    
+        for d in (self.root_dir, self.conf_dir, self.log_dir):
+            if not os.path.exists(d):
+                self.createDirs(d)
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.root_dir])
+                
