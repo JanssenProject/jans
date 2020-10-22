@@ -16,7 +16,7 @@ import io.jans.orm.model.base.InumEntry;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @DataEntry
-@ObjectClass(value = "gluuOxtrustStat")
+@ObjectClass(value = "jansOxtrustStat")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuOxTrustStat extends InumEntry implements Serializable {
 

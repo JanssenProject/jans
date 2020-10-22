@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Yuriy Movchan Date: 04/20/2014
  */
 @DataEntry
-@ObjectClass(value = "gluuConfiguration")
+@ObjectClass(value = "jansConfiguration")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuConfiguration extends InumEntry implements Serializable {
 
