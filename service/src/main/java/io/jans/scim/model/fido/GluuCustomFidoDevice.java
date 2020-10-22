@@ -15,7 +15,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @author Val Pecaoco
  */
 @DataEntry(sortBy = { "id" })
-@ObjectClass(value = "oxDeviceRegistration")
+@ObjectClass(value = "jansDeviceRegistration")
 public class GluuCustomFidoDevice extends Entry {
 
 	/**

@@ -18,7 +18,7 @@ import io.jans.orm.annotation.ObjectClass;
 
 @SuppressWarnings("serial")
 @DataEntry
-@ObjectClass(value = "oxFido2RegistrationEntry")
+@ObjectClass(value = "jansFido2RegistrationEntry")
 public class GluuFido2Device extends Fido2Entry implements Serializable {
 
     @JsonObject

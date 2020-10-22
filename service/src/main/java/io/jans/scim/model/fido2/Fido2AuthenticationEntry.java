@@ -19,7 +19,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
-@ObjectClass(value = "oxFido2AuthenticationEntry")
+@ObjectClass(value = "jansFido2AuthenticationEntry")
 public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
