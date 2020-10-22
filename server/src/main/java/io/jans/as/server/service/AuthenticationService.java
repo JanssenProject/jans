@@ -11,6 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.SessionId;
@@ -46,8 +47,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
-
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods
@@ -715,9 +714,10 @@ public class AuthenticationService {
         }
 
         final Map<String, String> result = sessionUser.getSessionAttributes();
-        Map<String, String> allowedParameters = requestParameterService.getAllowedParameters(result);
+        result.put(AuthorizeResponseParam.SESSION_ID, sessionUser.getId()); // parameters must be filled before filtering
+        result.put(AuthorizeResponseParam.SID, sessionUser.getOutsideSid()); // parameters must be filled before filtering
 
-        result.put(SESSION_ID, sessionUser.getId());
+        Map<String, String> allowedParameters = requestParameterService.getAllowedParameters(result);
 
         log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
         facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
