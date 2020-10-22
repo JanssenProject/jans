@@ -27,7 +27,7 @@ import java.util.List;
  * @version August 20, 2019
  */
 @DataEntry(sortBy = {"displayName"})
-@ObjectClass(value = "jansAuthClient")
+@ObjectClass(value = "jansClnt")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
 
