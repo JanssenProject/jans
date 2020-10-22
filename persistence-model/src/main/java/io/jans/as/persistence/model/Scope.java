@@ -18,7 +18,7 @@ import java.util.List;
  * @author Yuriy Movchan Date: 06/30/2015
  */
 @DataEntry
-@ObjectClass(value = "oxAuthCustomScope")
+@ObjectClass(value = "jansCustomScope")
 public class Scope extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
