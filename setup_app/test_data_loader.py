@@ -25,11 +25,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.service_name = 'test-data'
         self.pbar_text = "Loading" 
         self.needdb = True
-        self.app_type = static.AppType.SERVICE
+        self.app_type = static.AppType.APPLICATION
         self.install_type = static.InstallOption.OPTONAL
         self.install_var = 'loadTestData'
         self.register_progess()
-
         self.template_base = os.path.join(Config.templateFolder, 'test')
 
     def create_test_client_keystore(self):
