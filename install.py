@@ -87,6 +87,6 @@ print("Launcing Janssen Setup")
 setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
 
 if argsp.args:
-    setup_cmd += ' ' + setup_cmd
+    setup_cmd += ' ' + argsp.args
 
 os.system(setup_cmd)
