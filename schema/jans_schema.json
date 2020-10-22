@@ -1148,17 +1148,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "exclude VDS enabled or disabled",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansEnabled"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "equality": "caseIgnoreMatch",
       "names": [
         "jansValidationLog"
@@ -1173,55 +1162,6 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "jansValidationStatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "booleanMatch",
-      "names": [
-        "jansCacheRefreshEnabled"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "generalizedTimeMatch",
-      "names": [
-        "jansCacheRefreshLastUpd"
-      ],
-      "oid": "jansAttr",
-      "ordering": "generalizedTimeOrderingMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansCacheRefreshLastUpdCount"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansCacheRefreshPollingInterval"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansCacheRefreshProblemCount"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3356,28 +3296,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "OX SourceRelationalXdiStatement",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "sourceRelationalXdiStatement"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "OX TargetRelationalXdiStatement",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "targetRelationalXdiStatement"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Tertiary Key Attr Name",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3435,17 +3353,6 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "x"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "OX xdiStatement",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "xdiStatement"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4842,12 +4749,6 @@
         "jansStatus",
         "jansTargetRAM",
         "jansUrl",
-        "jansEnabled",
-        "jansCacheRefreshEnabled",
-        "jansCacheRefreshLastUpd",
-        "jansCacheRefreshLastUpdCount",
-        "jansCacheRefreshPollingInterval",
-        "jansCacheRefreshProblemCount",
         "jansWhitePagesEnabled",
         "iname",
         "inum",
@@ -5149,10 +5050,7 @@
       "may": [
         "organizationalOwner",
         "owner",
-        "sourceRelationalXdiStatement",
-        "targetRelationalXdiStatement",
         "x",
-        "xdiStatement",
         "xri"
       ],
       "must": [
@@ -5479,9 +5377,7 @@
         "literalValue",
         "organizationalOwner",
         "owner",
-        "targetRelationalXdiStatement",
         "x",
-        "xdiStatement",
         "xri"
       ],
       "must": [
