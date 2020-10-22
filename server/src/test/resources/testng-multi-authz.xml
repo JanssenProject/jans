@@ -1,4 +1,4 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthServerMultiAuthz" parallel="false">
+<suite name="jansAuthServerMultiAuthz" parallel="false">
 </suite>

@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthServer" parallel="false">
+<suite name="jansAuthServer" parallel="false">
 
 
     <test name="JsonApplierServerTest" enabled="true">
@@ -303,10 +303,10 @@
 	<parameter name="postLogoutRedirectUri" value="https://client.example.com/pl" />
 	<parameter name="ldapAdminPassword" value="${ldap.admin.password}" />
 	<parameter name="audience" value="${test.server.url}/restv1/token" />
-	<parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth/sectoridentifier/${sector.identifier.id}" />
+	<parameter name="sectorIdentifierUri" value="https://${test.server.name}/jans-auth/sectoridentifier/${sector.identifier.id}" />
 	<!-- By enabling this block, you require a place to publish files via HTTP or HTTPS -->
-	<!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/> -->
-	<!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/> -->
+	<!--<parameter name="requestFileBasePath" value="/var/www/html/jans-auth"/> -->
+	<!--<parameter name="requestFileBaseUrl" value="http://localhost/jans-auth"/> -->
 
 	<!-- Gluu -->
 	<parameter name="umaConfigurationPath" value="restv1/.well-known/gluu-configuration" />
