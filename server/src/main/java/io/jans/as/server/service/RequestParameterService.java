@@ -61,6 +61,7 @@ public class RequestParameterService {
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
             AuthorizeRequestParam.CLAIMS,
             AuthorizeRequestParam.AUTH_REQ_ID,
+            AuthorizeRequestParam.SID,
             DeviceAuthorizationService.SESSION_USER_CODE));
 
     @Inject
