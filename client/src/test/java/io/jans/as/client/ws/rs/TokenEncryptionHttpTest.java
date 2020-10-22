@@ -53,7 +53,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setGrantTypes(grantTypes);
 
@@ -132,7 +132,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setGrantTypes(grantTypes);
 
@@ -211,7 +211,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setGrantTypes(grantTypes);
 
@@ -287,7 +287,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setGrantTypes(grantTypes);
 
@@ -360,7 +360,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
             registerRequest.setGrantTypes(grantTypes);
 

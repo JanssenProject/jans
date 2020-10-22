@@ -115,7 +115,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -938,7 +938,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1147,7 +1147,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1249,7 +1249,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1351,7 +1351,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1454,7 +1454,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1557,7 +1557,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1661,7 +1661,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1764,7 +1764,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -1867,7 +1867,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
             registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
