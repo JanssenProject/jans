@@ -2440,24 +2440,6 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.11 NAME 'exclude'
   MUST ( objectclass )
   MAY ( description $ jansGuid $ excludeCreator $ excludeExpDate $ excludeLinktrack $ excludeModerated $ excludeModerators $ excludePending )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.12 NAME 'vdapcontainer'
-  SUP ( top )
-  STRUCTURAL
-  MUST ( objectclass )
-  MAY ( ou )
-  X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.13 NAME 'vdDirectoryView'
-  SUP ( top )
-  STRUCTURAL
-  MUST ( objectclass )
-  MAY ( o )
-  X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.14 NAME 'vdlabel'
-  SUP ( top )
-  STRUCTURAL
-  MUST ( objectclass )
-  MAY ( o )
-  X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.15 NAME 'jansEntry'
   SUP ( top )
   STRUCTURAL
@@ -2512,7 +2494,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.23 NAME 'jansGrant'
   MUST ( objectclass )
   MAY ( grtId $ iat )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'token'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'jansToken'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
@@ -2644,7 +2626,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.45 NAME 'jansFido2RegistrationEntry'
   MUST ( objectclass )
   MAY ( jansId $ creationDate $ displayName $ jansSessStateId $ jansCodeChallenge $ jansCodeChallengeHash $ jansPublicKeyId $ personInum $ jansRegistrationData $ jansDeviceNotificationConf $ jansCounter $ jansStatus )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.46 NAME 'samlAcr'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.46 NAME 'jansSamlAcr'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
@@ -2668,7 +2650,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.49 NAME 'jansRp'
   MUST ( objectclass )
   MAY ( jansId $ dat )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.50 NAME 'cibaReq'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.50 NAME 'jansCibaReq'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
