@@ -57,7 +57,7 @@ description: A domain issued and managed identifier for the person.Subject - Ide
 displayName: Preferred Username
 inum: B52A
 jansAttrEditTyp: admin
-jansAttrName: preferredUsername
+jansAttrName: jansPrefUsrName
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
