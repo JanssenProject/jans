@@ -18,7 +18,7 @@ jansScr::%(person_authentication_usercertexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=CB5B-3211,ou=scripts,o=jans
@@ -32,7 +32,7 @@ jansScr::%(dynamic_scope_dynamic_permission)s
 jansScrTyp: dynamic_scope
 objectClass: jansCustomScr
 objectClass: top
-oxEnabled: true
+jansEnabled: true
 programmingLanguage: python
 
 dn: inum=031C-4A65,ou=scripts,o=jans
@@ -46,7 +46,7 @@ jansScr::%(id_generator_samplescript)s
 jansScrTyp: id_generator
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=031C-5621,ou=scripts,o=jans
@@ -60,7 +60,7 @@ jansScr::%(dynamic_scope_org_name)s
 jansScrTyp: dynamic_scope
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=031C-5622,ou=scripts,o=jans
@@ -74,7 +74,7 @@ jansScr::%(dynamic_scope_work_phone)s
 jansScrTyp: dynamic_scope
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=13D3-E7AD,ou=scripts,o=jans
@@ -88,7 +88,7 @@ jansScr::%(cache_refresh_samplescript)s
 jansScrTyp: cache_refresh
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=24FD-B96E,ou=scripts,o=jans
@@ -106,7 +106,7 @@ jansScr::%(person_authentication_yubicloudexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: jansCustomScr
 objectClass: top
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-F995,ou=scripts,o=jans
@@ -121,7 +121,7 @@ jansScr::%(uma_rpt_policy_uma_rpt_policy)s
 jansScrTyp: uma_rpt_policy
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-F9A5,ou=scripts,o=jans
@@ -136,7 +136,7 @@ jansScr::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 jansScrTyp: uma_rpt_policy
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-F996,ou=scripts,o=jans
@@ -150,7 +150,7 @@ jansScr::%(uma_claims_gathering_uma_claims_gathering)s
 jansScrTyp: uma_claims_gathering
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-AA90,ou=scripts,o=jans
@@ -164,7 +164,7 @@ jansScr::%(introspection_introspection)s
 jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-BA90,ou=scripts,o=jans
@@ -178,7 +178,7 @@ jansScr::%(introspection_introspection_custom_params)s
 jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-CA90,ou=scripts,o=jans
@@ -192,7 +192,7 @@ jansScr::%(end_session_end_session)s
 jansScrTyp: end_session
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-AA91,ou=scripts,o=jans
@@ -206,7 +206,7 @@ jansScr::%(resource_owner_password_credentials_resource_owner_password_credentia
 jansScrTyp: resource_owner_password_credentials
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=2DAF-BA91,ou=scripts,o=jans
@@ -220,7 +220,7 @@ jansScr::%(resource_owner_password_credentials_resource_owner_password_credentia
 jansScrTyp: resource_owner_password_credentials
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=4BBE-C6A8,ou=scripts,o=jans
@@ -238,7 +238,7 @@ jansScr::%(person_authentication_basiclockaccountexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=5018-AF9C,ou=scripts,o=jans
@@ -258,7 +258,7 @@ jansScr::%(person_authentication_uafexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=5018-D4BF,ou=scripts,o=jans
@@ -279,7 +279,7 @@ jansScr::%(person_authentication_otpexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=5018-F9CF,ou=scripts,o=jans
@@ -296,7 +296,7 @@ jansScr::%(person_authentication_duoexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=522F-CDC5,ou=scripts,o=jans
@@ -310,7 +310,7 @@ jansScr::%(update_user_samplescript)s
 jansScrTyp: update_user
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=6EA0-8F0C,ou=scripts,o=jans
@@ -325,7 +325,7 @@ jansScr::%(user_registration_samplescript)s
 jansScrTyp: user_registration
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=6EA0-8F0D,ou=scripts,o=jans
@@ -339,7 +339,7 @@ jansScr::%(user_registration_confirmregistrationsamplescript)s
 jansScrTyp: user_registration
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=8BAF-80D6,ou=scripts,o=jans
@@ -356,7 +356,7 @@ jansScr::%(person_authentication_u2fexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=8BAF-80D7,ou=scripts,o=jans
@@ -372,7 +372,7 @@ jansScr::%(person_authentication_fido2externalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=92F0-BF9E,ou=scripts,o=jans
@@ -395,7 +395,7 @@ jansScr::%(person_authentication_superjansexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=92F0-759E,ou=scripts,o=jans
@@ -413,7 +413,7 @@ jansScr::%(person_authentication_thumbsigninexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=A51E-76DA,ou=scripts,o=jans
@@ -428,7 +428,7 @@ jansScr::%(person_authentication_basicexternalauthenticator)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=A910-56AB,ou=scripts,o=jans
@@ -444,7 +444,7 @@ jansScr::%(scim_samplescript)s
 jansScrTyp: scim
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=DAA9-B788,ou=scripts,o=jans
@@ -459,7 +459,7 @@ jansScr::%(client_registration_samplescript)s
 jansScrTyp: client_registration
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=09A0-93D6,ou=scripts,o=jans
@@ -477,7 +477,7 @@ jansScr::%(person_authentication_twilio2fa)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=09A0-93D7,ou=scripts,o=jans
@@ -498,7 +498,7 @@ jansScr::%(person_authentication_smpp2fa)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=DAA9-B789,ou=scripts,o=jans
@@ -512,7 +512,7 @@ jansScr::%(application_session_samplescript)s
 jansScrTyp: application_session
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=DAA9-BA60,ou=scripts,o=jans
@@ -526,7 +526,7 @@ jansScr::%(consent_gathering_consentgatheringsample)s
 jansScrTyp: consent_gathering
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=8AF7.D82A,ou=scripts,o=jans
@@ -539,7 +539,7 @@ jansScr::%(persistence_extension_samplescript)s
 jansScrTyp: persistence_extension
 objectClass: jansCustomScr
 objectClass: top
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=8AF7.D82B,ou=scripts,o=jans
@@ -552,7 +552,7 @@ jansScr::%(idp_samplescript)s
 jansScrTyp: idp
 objectClass: jansCustomScr
 objectClass: top
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
@@ -566,6 +566,6 @@ jansScr::%(ciba_end_user_notification)s
 jansScrTyp: ciba_end_user_notification
 objectClass: top
 objectClass: jansCustomScr
-oxEnabled: false
+jansEnabled: false
 programmingLanguage: python
 

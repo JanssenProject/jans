@@ -43,7 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.uid_attr = self.getLocalPrimaryKey()
 
         custScriptService = CdiUtil.bean(CustomScriptService)
-        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "oxEnabled", "oxLevel")
+        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "jansEnabled", "oxLevel")
         dynamicMethods = self.computeMethods(self.scriptsList)
 
         if len(dynamicMethods) > 0:

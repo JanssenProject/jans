@@ -223,7 +223,7 @@
     "numSubordinates"
   ], 
   "boolean": [
-    "oxEnabled",
+    "jansEnabled",
     "pwdLockout", 
     "pwdMustChange", 
     "pwdAllowUserChange", 
