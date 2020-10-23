@@ -62,6 +62,11 @@ objectClass: jansAttr
 objectClass: top
 urn: urn:jans:dir:attribute-def:oxAuthScope
 
+dn: inum=6609,ou=attributes,o=jans
+changetype: modify
+jansStatus: active
+replace: jansStatus
+
 dn: inum=43F1,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
