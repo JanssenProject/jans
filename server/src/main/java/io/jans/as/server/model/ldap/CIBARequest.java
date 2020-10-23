@@ -21,7 +21,7 @@ import java.util.Date;
  * @version May 27, 2020
  */
 @DataEntry
-@ObjectClass(value = "cibaRequest")
+@ObjectClass(value = "jansCibaReq")
 public class CIBARequest implements Serializable {
 
     @DN
