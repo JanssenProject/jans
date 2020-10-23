@@ -2608,7 +2608,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.42 NAME 'jansUmaPCT'
   MUST ( objectclass )
   MAY ( clnId $ iat $ exp $ del $ tknCde $ jansClaimValues )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.43 NAME 'cache'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.43 NAME 'jansCache'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
