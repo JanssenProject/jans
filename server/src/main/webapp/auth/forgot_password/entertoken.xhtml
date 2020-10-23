@@ -19,8 +19,8 @@
 	<ui:define name="head">
 		<meta name="description" content="Gluu Inc." />
 		<!-- Here we use # {...} which are JSF EL expressions, they bind server values to this markup -->
-		<link href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
-		<link rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/style.css"/>
+		<link href="#{webConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="#{webConfigurationService.getCssLocation()}/style.css"/>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
 	</ui:define>
 
@@ -45,7 +45,7 @@
 						<h2>Password Token</h2>
 						<p>Enter the token received in your email</p>	
 						<img
-							src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
+							src="#{webConfigurationService.getImgLocation()}/ver_code.png"
 							alt="ver_code" />
 						<!-- This form field is referenced in authenticate method of script -->
 						<input class="form-control" id="ResetTokenForm:inputToken" name="ResetTokenForm:inputToken"
