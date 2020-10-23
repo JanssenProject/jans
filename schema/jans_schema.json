@@ -5337,7 +5337,7 @@
         "objectclass"
       ],
       "names": [
-        "token"
+        "jansToken"
       ],
       "oid": "jansObjClass",
       "sup": [
