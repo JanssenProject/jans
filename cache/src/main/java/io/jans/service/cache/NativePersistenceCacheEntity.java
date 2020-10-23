@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @DataEntry
-@ObjectClass(value = "cache")
+@ObjectClass(value = "jansCache")
 public class NativePersistenceCacheEntity extends DeletableEntity implements Serializable, Deletable {
 
     @DN
