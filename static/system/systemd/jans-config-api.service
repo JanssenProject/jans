@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Config API service
+After=opendj.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-config-api start
+ExecStop=/opt/dist/scripts/jans-config-api stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
