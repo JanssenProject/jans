@@ -1,4 +1,5 @@
 import os
+import time
 import glob
 import ruamel.yaml
 
@@ -21,7 +22,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.root_dir = os.path.join(Config.jansOptFolder, 'config-api')
         self.conf_dir = os.path.join(self.root_dir, 'config')
-        self.log_dir = os.path.join(self.root_dir, 'log')
+        self.log_dir = os.path.join(self.root_dir, 'logs')
         self.temp_dir = os.path.join(Config.templateFolder, self.service_name)
 
         self.source_files = [
@@ -38,6 +39,15 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 self.conf_dir
                 )
 
+        self.copyFile(
+                os.path.join(Config.staticFolder, 'system/initd', self.service_name),
+                os.path.join(Config.distFolder, 'scripts')
+                )
+
+        self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
+
+
+
     def installed(self):
         return os.path.exists(self.config_api_root)
 
@@ -46,5 +56,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         for d in (self.root_dir, self.conf_dir, self.log_dir):
             if not os.path.exists(d):
                 self.createDirs(d)
+
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.root_dir])
                 
