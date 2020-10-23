@@ -23,7 +23,7 @@
 .login-panel-header {
 	background-color: #D4CFC7;
 	background-image:
-		url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+		url("#{webConfigurationService.getImgLocation()}/panel_header_bg.png");
 	background-position: left top;
 	background-repeat: repeat-x;
 	border-style: solid;
@@ -96,7 +96,7 @@ input.btn.btn-done {
 						<h2>#{msgs['otp_sms.verification']}</h2>
 						<p>#{msgs['otp_sms.usedevice']}</p>
 						<img
-							src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
+							src="#{webConfigurationService.getImgLocation()}/phone-ver.png"
 							alt="phone-ver" />
 						<h4>#{msgs['otp_sms.verificationcode']}</h4>
 						<p>
