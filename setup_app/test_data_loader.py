@@ -124,13 +124,28 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationCustomObjectClass':  'oxAuthClientCustomAttributes',
                                     'dynamicRegistrationCustomAttributes': [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ],
                                     'dynamicRegistrationExpirationTime': 86400,
-                                    'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket" ],
+                                    'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code" ],
                                     'legacyIdTokenClaims': True,
                                     'authenticationFiltersEnabled': True,
                                     'clientAuthenticationFiltersEnabled': True,
                                     'keyRegenerationEnabled': True,
                                     'openidScopeBackwardCompatibility': False,
-                                    'forceOfflineAccessScopeToEnableRefreshToken' : False
+                                    'forceOfflineAccessScopeToEnableRefreshToken' : False,
+                                    'dynamicRegistrationPasswordGrantTypeEnabled' : True,
+                                    'cibaEnabled': True,
+                                    'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+                                    'backchannelClientId': '123-123-123',
+                                    'backchannelUserCodeParameterSupported': True,
+                                    'tokenEndpointAuthSigningAlgValuesSupported': [ 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'userInfoSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'consentGatheringScriptBackwardCompatibility': False,
+                                    'claimsParameterSupported': True,
+                                    'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password' ],
+                                    'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'softwareStatementValidationClaimName': 'jwks_uri',
+                                    'softwareStatementValidationType': 'jwks_uri',
+                                    'umaGrantAccessIfNoPolicies': true
                                     }
 
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
