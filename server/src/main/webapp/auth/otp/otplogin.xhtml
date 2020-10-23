@@ -14,10 +14,10 @@
 		<meta name="description" content="Gluu Inc." />
 
 		<link
-			href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css"
+			href="#{webConfigurationService.getCssLocation()}/bootstrap.min.css"
 			rel="stylesheet" />
 		<link rel="stylesheet"
-			href="#{oxAuthConfigurationService.getCssLocation()}/style.css" />
+			href="#{webConfigurationService.getCssLocation()}/style.css" />
 		<link
 			href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600"
 			rel="stylesheet" />
@@ -35,7 +35,7 @@
 						<h2>#{msgs['otp.verification']}</h2>
 						<p>#{msgs['otp.usedevice']}</p>
 						<img
-							src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
+							src="#{webConfigurationService.getImgLocation()}/ver_code.png"
 							alt="ver_code" />
 						<h4>#{msgs['otp.entercode']}</h4>
 						<p>#{msgs['otp.getcode']}</p>

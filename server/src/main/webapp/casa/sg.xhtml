@@ -11,9 +11,9 @@
 	<ui:define name="pageTitle">#{msgs['casa.login.title']}</ui:define>
 	
 	<ui:define name="maincontent">
-		<script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-qrcode-0.17.0.min.js" />
+		<script src="#{webConfigurationService.getJsLocation()}/jquery-qrcode-0.17.0.min.js" />
 		<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/jquery-ui-1.12.1.min.js" />
-		<script src="#{oxAuthConfigurationService.getJsLocation()}/gluu-auth.js" />
+		<script src="#{webConfigurationService.getJsLocation()}/gluu-auth.js" />
 		<script>
 			let helper = (function() {
 				var authResult = undefined
