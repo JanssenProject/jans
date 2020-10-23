@@ -108,7 +108,7 @@ status() {
 			echo "PID: [$pid]"
 		fi
 	else
-		echo "The service $service_name is running..."
+		echo "The service $service_name is not running..."
 	fi
 }
 
