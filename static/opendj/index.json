@@ -127,7 +127,7 @@
         "attribute": "exp",
         "type": "date",
         "index": ["ordering"],
-        "backend": ["userRoot"]
+        "backend": ["userRoot", "metric"]
     },
 
     {
