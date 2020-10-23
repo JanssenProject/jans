@@ -121,10 +121,10 @@ class DBUtils:
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                     'inum={},ou=scripts,o=jans'.format(inum),
-                    {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
+                    {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
         elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxEnabled=true'.format(self.default_bucket, inum)
+            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
             self.cbm.exec_query(n1ql)
 
     def enable_service(self, service):
