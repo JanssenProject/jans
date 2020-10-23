@@ -5718,7 +5718,7 @@
         "objectclass"
       ],
       "names": [
-        "cache"
+        "jansCache"
       ],
       "oid": "jansObjClass",
       "sup": [
