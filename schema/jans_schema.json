@@ -4978,57 +4978,6 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "ou"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "vdapcontainer"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "o"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "vdDirectoryView"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "o"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "vdlabel"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
         "displayName",
         "iname",
         "inum"
@@ -5839,7 +5788,7 @@
         "objectclass"
       ],
       "names": [
-        "samlAcr"
+        "jansSamlAcr"
       ],
       "oid": "jansObjClass",
       "sup": [
@@ -5925,7 +5874,7 @@
         "objectclass"
       ],
       "names": [
-        "cibaReq"
+        "jansCibaReq"
       ],
       "oid": "jansObjClass",
       "sup": [
