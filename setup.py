@@ -248,15 +248,14 @@ def do_installation():
         if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuth):
             oxauthInstaller.start_installation()
 
+        if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
+            configApiInstaller.start_installation()
+
         if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
             fidoInstaller.start_installation()
 
         if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
-
-
-        if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
-            configApiInstaller.start_installation()
 
 
         #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
@@ -272,7 +271,7 @@ def do_installation():
 
         for service in jansProgress.services:
             if service['app_type'] == static.AppType.SERVICE:
-                jansProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].title()))
+                jansProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
