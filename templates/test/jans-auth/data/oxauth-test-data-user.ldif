@@ -33,7 +33,6 @@ locale: en-US
 mail: test_user@test.org
 memberOf: inum=7890,ou=groups,o=jans
 memberOf: inum=7891,ou=groups,o=jans
-memberOf: inum=60B7,ou=groups,o=jans
 middleName: User
 mobile: (512) 516-2413
 nickname: user
@@ -72,7 +71,6 @@ locale: en-US
 mail: test_user2@test.org
 memberOf: inum=7890,ou=groups,o=jans
 memberOf: inum=7891,ou=groups,o=jans
-memberOf: inum=60B7,ou=groups,o=jans
 middleName: User2
 mobile: (512) 516-2414
 nickname: user2
@@ -93,11 +91,6 @@ updatedAt: 20170213135512.220Z
 userPassword: test_user_password2
 website: http://www.jans.io
 zoneinfo: America/Chicago
-
-dn: inum=60B7,ou=groups,o=jans
-add: member
-changetype: modify
-member: inum=B1F3-AEAE-B798,ou=people,o=jans
 
 dn: inum=7890,ou=groups,o=jans
 add: member
