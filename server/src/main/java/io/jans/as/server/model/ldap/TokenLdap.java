@@ -20,7 +20,7 @@ import java.util.Date;
  */
 
 @DataEntry
-@ObjectClass(value = "token")
+@ObjectClass(value = "jansToken")
 public class TokenLdap implements Serializable {
 
     @DN
