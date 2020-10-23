@@ -76,18 +76,18 @@ if scripts_location == 'ldap':
                     search_base='inum=OO11-BAFE,ou=scripts,o=jans', 
                     search_scope=ldap3.BASE,
                     search_filter='(objectclass=*)',
-                    attributes=["oxEnabled"]
+                    attributes=["jansEnabled"]
                     )
 
     if ldap_conn.response:
         ldap_conn.modify(
                         ldap_conn.response[0]['dn'], 
-                        {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
+                        {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                         )
 
 else:
     cbm = get_cbm_conn()
-    result = cbm.exec_query('UPDATE `jans` USE KEYS "scripts_OO11-BAFE" SET `oxEnabled`=true')
+    result = cbm.exec_query('UPDATE `jans` USE KEYS "scripts_OO11-BAFE" SET `jansEnabled`=true')
 
 print("Restarting identity, this will take a while")
 setupObject.run_service_command('identity', 'restart')
