@@ -90,7 +90,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
     
             result = dbUtils.search('inum=5866-4202,ou=scripts,o=jans', search_scope=ldap3.BASE)
             if result:
-                Config.enableRadiusScripts = result['oxEnabled']
+                Config.enableRadiusScripts = result['jansEnabled']
 
             result = dbUtils.search('ou=clients,o=jans', search_filter='(inum=1402.*)', search_scope=ldap3.SUBTREE)
             if result:

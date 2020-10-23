@@ -251,11 +251,11 @@ objectClass: jansSectorIdentifier
 
 dn: inum=031C-5621,ou=scripts,o=jans
 changetype: modify
-oxEnabled: true
-replace: oxEnabled
+jansEnabled: true
+replace: jansEnabled
 
 dn: inum=031C-5622,ou=scripts,o=jans
 changetype: modify
-oxEnabled: true
-replace: oxEnabled
+jansEnabled: true
+replace: jansEnabled
 

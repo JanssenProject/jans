@@ -2255,7 +2255,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.390 NAME 'del'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.391 NAME 'oxEnabled'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.391 NAME 'jansEnabled'
   DESC 'Status of the entry, used by many objectclasses'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
@@ -2558,7 +2558,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.34 NAME 'jansCustomScr'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( inum $ displayName $ description $ jansScr $ jansScrTyp $ programmingLanguage $ jansModuleProperty $ jansConfProperty $ jansLevel $ jansRevision $ oxEnabled $ jansScrError $ jansAlias )
+  MAY ( inum $ displayName $ description $ jansScr $ jansScrTyp $ programmingLanguage $ jansModuleProperty $ jansConfProperty $ jansLevel $ jansRevision $ jansEnabled $ jansScrError $ jansAlias )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.35 NAME 'jansDeviceRegistration'
   SUP ( top )
