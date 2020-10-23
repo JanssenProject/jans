@@ -130,6 +130,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'clientAuthenticationFiltersEnabled': True,
                                     'keyRegenerationEnabled': True,
                                     'openidScopeBackwardCompatibility': False,
+                                    'forceOfflineAccessScopeToEnableRefreshToken' : False
                                     }
 
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
