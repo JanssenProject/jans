@@ -2512,7 +2512,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.23 NAME 'jansGrant'
   MUST ( objectclass )
   MAY ( grtId $ iat )
   X-ORIGIN 'Jans created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'token'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'jansToken'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
