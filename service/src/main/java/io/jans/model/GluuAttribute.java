@@ -30,7 +30,7 @@ import io.jans.orm.model.base.Entry;
  * @version May 2, 2019
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "jansAttribute")
+@ObjectClass(value = "jansAttr")
 public class GluuAttribute extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 4817004894646725606L;
