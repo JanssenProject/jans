@@ -29,7 +29,7 @@ class PostAuthn(PostAuthnType):
     # This method is called during Authorization Request at Authorization Endpoint.
     # If True is returned, session is set as unauthenticated and user is send for authentication.
     # Note :
-    # context is reference of io.jans.oxauth.service.external.context.ExternalPostAuthnContext(in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.ExternalPostAuthnContext(in https://github.com/JanssenFederation/oxauth project, )
     def forceReAuthentication(self, context):
         return False
 
@@ -37,7 +37,7 @@ class PostAuthn(PostAuthnType):
     # If True is returned user is send for Authorization. By default if client is "Pre-Authorized" or "Client Persist Authorizations" is on, authorization is skipped.
     # This script has higher priority and can cancel Pre-Authorization and persisted authorizations.
     # Note :
-    # context is reference of io.jans.oxauth.service.external.context.ExternalPostAuthnContext(in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.ExternalPostAuthnContext(in https://github.com/JanssenFederation/oxauth project, )
     # To get session object just call context.getSession()
     def forceAuthorization(self, context):
         return False

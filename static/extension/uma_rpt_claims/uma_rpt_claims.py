@@ -29,7 +29,7 @@ class UmaRptClaims(UmaRptClaimsType):
     # Returns boolean, true - apply changes from script method, false - ignore it.
     # Note :
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of io.jans.oxauth.service.external.context.ExternalUmaRptClaimsContext (in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.ExternalUmaRptClaimsContext (in https://github.com/JanssenFederation/oxauth project, )
     def modify(self, rptAsJsonObject, context):
         rptAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True
