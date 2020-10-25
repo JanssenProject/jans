@@ -29,14 +29,14 @@ from java.security import SecureRandom
 from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
-from org.jans.jsf2.message import FacesMessages
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.security import Identity
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.service.common import UserService
-from org.jans.oxauth.util import ServerUtil
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.util import StringHelper
+from io.jans.jsf2.message import FacesMessages
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.security import Identity
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.service.common import UserService
+from io.jans.oxauth.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):

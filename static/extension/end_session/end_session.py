@@ -3,7 +3,7 @@
 # Author: Yuriy Zabrovarnyy
 #
 
-from org.jans.model.custom.script.type.logout import EndSessionType
+from io.jans.model.custom.script.type.logout import EndSessionType
 from java.lang import String
 
 class EndSession(EndSessionType):
@@ -27,6 +27,6 @@ class EndSession(EndSessionType):
     # Returns string, it must be valid HTML (with iframes according to spec http://openid.net/specs/openid-connect-frontchannel-1_0.html)
     # This method is called on `/end_session` after actual session is killed and oxauth construct HTML to return to RP.
     # Note :
-    # context is reference of org.jans.oxauth.service.external.context.EndSessionContext (in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.oxauth.service.external.context.EndSessionContext (in https://github.com/JanssenFederation/oxauth project, )
     def getFrontchannelHtml(self, context):
         return ""

@@ -8,26 +8,26 @@ from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.model.config import ConfigurationFactory
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.jans.oxauth.service.net import HttpService
-from org.jans.oxauth.util import ServerUtil
-from org.jans.util import StringHelper
-from org.jans.oxauth.service.common import EncryptionService, UserService
-from org.jans.service import MailService
-from org.jans.oxauth.service.push.sns import PushPlatform, PushSnsService 
-from org.jans.oxnotify.client import NotifyClientFactory 
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.model.config import ConfigurationFactory
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.service.fido.u2f import DeviceRegistrationService
+from io.jans.oxauth.service.net import HttpService
+from io.jans.oxauth.util import ServerUtil
+from io.jans.util import StringHelper
+from io.jans.oxauth.service.common import EncryptionService, UserService
+from io.jans.service import MailService
+from io.jans.oxauth.service.push.sns import PushPlatform, PushSnsService 
+from io.jans.oxnotify.client import NotifyClientFactory 
 from java.util import Arrays, HashMap, IdentityHashMap, Date
 from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 
 try:
-    from org.jans.oxd.license.client.js import Product
-    from org.jans.oxd.license.validator import LicenseValidator
+    from io.jans.oxd.license.client.js import Product
+    from io.jans.oxd.license.validator import LicenseValidator
     has_license_api = True
 except ImportError:
     print "Super-Janssen. Load. Failed to load licensing API"

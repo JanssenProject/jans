@@ -4,8 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.model.custom.script.type.user import UserRegistrationType
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.user import UserRegistrationType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
@@ -29,7 +29,7 @@ class UserRegistration(UserRegistrationType):
         return True   
 
     # User registration init method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def initRegistration(self, user, requestParameters, configurationAttributes):
@@ -38,7 +38,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration pre method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def preRegistration(self, user, requestParameters, configurationAttributes):
@@ -54,7 +54,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration post method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def postRegistration(self, user, requestParameters, configurationAttributes):
@@ -63,7 +63,7 @@ class UserRegistration(UserRegistrationType):
         return True
     
     # User confirm New Registration method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def confirmRegistration(self, user, requestParameters, configurationAttributes):

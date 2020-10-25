@@ -4,14 +4,14 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.service import AuthenticationService
-from org.jans.oxauth.service.common import UserService
-from org.jans.service import MailService
-from org.jans.util import ArrayHelper
-from org.jans.util import StringHelper
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.service import AuthenticationService
+from io.jans.oxauth.service.common import UserService
+from io.jans.service import MailService
+from io.jans.util import ArrayHelper
+from io.jans.util import StringHelper
 from java.util import Arrays
 
 import duo_web
