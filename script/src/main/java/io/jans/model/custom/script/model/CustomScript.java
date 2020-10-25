@@ -55,7 +55,7 @@ public class CustomScript extends BaseEntry {
     @AttributeName(name = "jansScr")
     private String script;
 
-    @AttributeName(name = "jansScrType")
+    @AttributeName(name = "jansScrTyp")
     private CustomScriptType scriptType;
 
     @AttributeName(name = "programmingLanguage")
