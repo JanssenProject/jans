@@ -5,16 +5,16 @@
 # Author: Gasmyr Mougang
 #
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.service import AuthenticationService
-from org.jans.oxauth.service.common import UserService
-from org.jans.service import CacheService
-from org.jans.util import StringHelper
-from org.jans.persist.exception import AuthenticationException
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.service import AuthenticationService
+from io.jans.oxauth.service.common import UserService
+from io.jans.service import CacheService
+from io.jans.util import StringHelper
+from io.jans.persist.exception import AuthenticationException
 from javax.faces.application import FacesMessage
-from org.jans.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
 from java.time.format import DateTimeFormatter
 

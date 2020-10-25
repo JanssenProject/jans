@@ -8,14 +8,14 @@ from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
 from javax.ws.rs.core import Response
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.fido2.client import Fido2ClientFactory
-from org.jans.oxauth.security import Identity
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.service.common import UserService
-from org.jans.oxauth.util import ServerUtil
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.util import StringHelper
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.fido2.client import Fido2ClientFactory
+from io.jans.oxauth.security import Identity
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.service.common import UserService
+from io.jans.oxauth.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 from java.util.concurrent.locks import ReentrantLock
 
