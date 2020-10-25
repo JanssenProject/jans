@@ -6,20 +6,20 @@ from java.nio.charset import Charset
 from org.apache.http.params import CoreConnectionPNames
 
 from org.oxauth.persistence.model.configuration import JanssenConfiguration
-from org.jans.oxauth.security import Identity
-from org.jans.oxauth.service import AuthenticationService, UserService
-from org.jans.oxauth.service.common import EncryptionService
-from org.jans.oxauth.service.custom import CustomScriptService
-from org.jans.oxauth.service.net import HttpService
-from org.jans.oxauth.util import ServerUtil
-from org.jans.model import SimpleCustomProperty
-from org.jans.model.casa import ApplicationConfiguration
-from org.jans.model.custom.script import CustomScriptType
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.persist import PersistenceEntryManager
-from org.jans.service import CacheService
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.util import StringHelper
+from io.jans.oxauth.security import Identity
+from io.jans.oxauth.service import AuthenticationService, UserService
+from io.jans.oxauth.service.common import EncryptionService
+from io.jans.oxauth.service.custom import CustomScriptService
+from io.jans.oxauth.service.net import HttpService
+from io.jans.oxauth.util import ServerUtil
+from io.jans.model import SimpleCustomProperty
+from io.jans.model.casa import ApplicationConfiguration
+from io.jans.model.custom.script import CustomScriptType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.persist import PersistenceEntryManager
+from io.jans.service import CacheService
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 try:
     import json

@@ -4,8 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.model.custom.script.type.id import IdGeneratorType
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.id import IdGeneratorType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
@@ -32,7 +32,7 @@ class IdGenerator(IdGeneratorType):
     #   appId is application Id
     #   idType is Id Type
     #   idPrefix is Id Prefix
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def generateId(self, appId, idType, idPrefix, configurationAttributes):
         print "Id generator. Generate Id"

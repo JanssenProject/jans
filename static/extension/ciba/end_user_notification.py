@@ -5,11 +5,11 @@
 #
 #
 
-from org.jans.oxauth.client.fcm import FirebaseCloudMessagingResponse
-from org.jans.oxauth.client.fcm import FirebaseCloudMessagingClient
-from org.jans.oxauth.client.fcm import FirebaseCloudMessagingRequest
-from org.jans.oxauth.util import RedirectUri
-from org.jans.model.custom.script.type.ciba import EndUserNotificationType
+from io.jans.oxauth.client.fcm import FirebaseCloudMessagingResponse
+from io.jans.oxauth.client.fcm import FirebaseCloudMessagingClient
+from io.jans.oxauth.client.fcm import FirebaseCloudMessagingRequest
+from io.jans.oxauth.util import RedirectUri
+from io.jans.model.custom.script.type.ciba import EndUserNotificationType
 from java.lang import String
 from java.util import UUID
 

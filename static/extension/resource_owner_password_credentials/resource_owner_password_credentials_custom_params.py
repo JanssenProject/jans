@@ -5,14 +5,14 @@
 #
 #
 
-from org.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.model.common import SessionIdState
-from org.jans.oxauth.security import Identity
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.model.authorize import AuthorizeRequestParam
-from org.jans.oxauth.model.config import Constants
-from org.jans.util import StringHelper
+from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.model.common import SessionIdState
+from io.jans.oxauth.security import Identity
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.model.authorize import AuthorizeRequestParam
+from io.jans.oxauth.model.config import Constants
+from io.jans.util import StringHelper
 from java.lang import String
 from java.util import Date, HashMap
 
@@ -36,7 +36,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     # Returns True and set user into context when user authenticated succesfully
     # Returns False when user not authenticated or it's needed to cancel notmal flow
     # Note :
-    # context is reference of org.jans.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )
     def authenticate(self, context):
         print "ROPC script. Authenticate"
 

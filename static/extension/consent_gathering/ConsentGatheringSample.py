@@ -4,10 +4,10 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.model.custom.script.type.authz import ConsentGatheringType
-from org.jans.util import StringHelper
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.model.custom.script.type.authz import ConsentGatheringType
+from io.jans.util import StringHelper
 
 import java
 import random
@@ -34,7 +34,7 @@ class ConsentGathering(ConsentGatheringType):
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): # context is reference of org.jans.oxauth.service.external.context.ConsentGatheringContext
+    def authorize(self, step, context): # context is reference of io.jans.oxauth.service.external.context.ConsentGatheringContext
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:

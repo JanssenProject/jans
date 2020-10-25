@@ -1,14 +1,14 @@
 # Author: ThumbSignIn
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.service import AuthenticationService
-from org.jans.util import StringHelper
-from org.jans.oxauth.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.service import AuthenticationService
+from io.jans.util import StringHelper
+from io.jans.oxauth.util import ServerUtil
 from com.pramati.ts.thumbsignin_java_sdk import ThumbsigninApiController
 from org.json import JSONObject
-from org.jans.oxauth.model.util import Base64Util
+from io.jans.oxauth.model.util import Base64Util
 from java.lang import String
 
 import java
