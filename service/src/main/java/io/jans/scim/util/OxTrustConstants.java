@@ -37,7 +37,7 @@ public final class OxTrustConstants extends OxConstants {
 	public static final String mail = "mail";
 	public static final String ppid = "jansPPID";
 	public static final String jsId = "jansId";
-	public static final String SCRYPT_TYPE = "jansScrType";
+	public static final String SCRYPT_TYPE = "jansScrTyp";
 
 	public static final String status = "status";
 	public static final String jsStatus = "jansStatus";
