@@ -3,12 +3,12 @@
 #
 # Author: Jose Gonzalez
 #
-from org.jans.model.custom.script.type.scim import ScimType
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.scim import ScimType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.jans.oxtrust.ldap.service import PersonService
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxtrust.model import JanssenCustomPerson
+from io.jans.oxtrust.ldap.service import PersonService
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxtrust.model import JanssenCustomPerson
 
 import java
 

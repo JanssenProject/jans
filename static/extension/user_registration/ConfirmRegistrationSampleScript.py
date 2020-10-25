@@ -2,15 +2,15 @@
 # Copyright (c) 2016, Janssen
 #
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.model.custom.script.type.user import UserRegistrationType
-from org.jans.service import MailService
-from org.jans.oxtrust.service import PersonService
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.user import UserRegistrationType
+from io.jans.service import MailService
+from io.jans.oxtrust.service import PersonService
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.jans.config.oxtrust import AppConfiguration
+from io.jans.config.oxtrust import AppConfiguration
 from javax.faces.context import ExternalContext
-from org.jans.oxtrust.service import ConfigurationService
+from io.jans.oxtrust.service import ConfigurationService
 
 import java
 
@@ -30,7 +30,7 @@ class UserRegistration(UserRegistrationType):
         return True   
 
     # User registration init method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def initRegistration(self, user, requestParameters, configurationAttributes):
@@ -40,7 +40,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration pre method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def preRegistration(self, user, requestParameters, configurationAttributes):
@@ -54,7 +54,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration post method
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def postRegistration(self, user, requestParameters, configurationAttributes):

@@ -4,11 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.model.custom.script.type.user import CacheRefreshType
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.user import CacheRefreshType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.jans.oxtrust.model import JanssenCustomAttribute
-from org.jans.model.custom.script.model.bind import BindCredentials
+from io.jans.oxtrust.model import JanssenCustomAttribute
+from io.jans.model.custom.script.model.bind import BindCredentials
 
 import java
 
@@ -38,7 +38,7 @@ class CacheRefresh(CacheRefreshType):
     # Get bind credentials required to access source server 
     #   configId is the source server
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    #   return None (use password from configuration) or org.jans.model.custom.script.model.bind.BindCredentials
+    #   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials
     def getBindCredentials(self, configId, configurationAttributes):
         print "Cache refresh. GetBindCredentials method"
 #        if configId == "source":
@@ -47,7 +47,7 @@ class CacheRefresh(CacheRefreshType):
         return None
 
     # Update user entry before persist it
-    #   user is org.jans.oxtrust.model.JanssenCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, configurationAttributes):
         print "Cache refresh. UpdateUser method"

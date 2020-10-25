@@ -5,10 +5,10 @@
 #
 #
 
-from org.jans.model.custom.script.type.introspection import IntrospectionType
-from org.jans.oxauth.model.common import AuthorizationGrantList
-from org.jans.oxauth.service import SessionIdService
-from org.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.introspection import IntrospectionType
+from io.jans.oxauth.model.common import AuthorizationGrantList
+from io.jans.oxauth.service import SessionIdService
+from io.jans.service.cdi.util import CdiUtil
 from java.lang import String
 
 class Introspection(IntrospectionType):
@@ -33,7 +33,7 @@ class Introspection(IntrospectionType):
     # This method is called after introspection response is ready. This method can modify introspection response.
     # Note :
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of org.jans.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
         token = context.getHttpRequest().getParameter("token")
         if token is None:
