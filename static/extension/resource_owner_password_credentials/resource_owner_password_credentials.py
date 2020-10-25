@@ -1,6 +1,6 @@
-from org.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from org.jans.oxauth.service import AuthenticationService
-from org.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
+from io.jans.oxauth.service import AuthenticationService
+from io.jans.service.cdi.util import CdiUtil
 from java.lang import String
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
@@ -28,7 +28,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     # Returns True and set user into context when user authenticated succesfully
     # Returns False when user not authenticated or it's needed to cancel notmal flow
     # Note :
-    # context is reference of org.jans.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext#ExternalResourceOwnerPasswordCredentialsContext (in https://github.com/JanssenFederation/oxauth project, )
     def authenticate(self, context):
         print "ROPC script. Authenticate"
         deviceIdParam = context.getHttpRequest().getParameterValues("device_id")

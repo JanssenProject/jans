@@ -3,10 +3,10 @@
 #
 # Author: Jose Gonzalez
 
-from org.jans.model.custom.script.type.client import ClientRegistrationType
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.service import ScopeService
-from org.jans.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.client import ClientRegistrationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.service import ScopeService
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet, Date, GregorianCalendar
 
 import java
@@ -27,8 +27,8 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    #   registerRequest is org.jans.oxauth.client.RegisterRequest
-    #   client is org.jans.oxauth.model.registration.Client
+    #   registerRequest is io.jans.oxauth.client.RegisterRequest
+    #   client is io.jans.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def createClient(self, registerRequest, client, configurationAttributes):
 
@@ -55,8 +55,8 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    #   registerRequest is org.jans.oxauth.client.RegisterRequest
-    #   client is org.jans.oxauth.model.registration.Client
+    #   registerRequest is io.jans.oxauth.client.RegisterRequest
+    #   client is io.jans.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
         print "Casa client registration. UpdateClient method"       

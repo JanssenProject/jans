@@ -9,16 +9,16 @@ import sys
 from javax.ws.rs.core import Response
 from javax.ws.rs import WebApplicationException
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.oxauth.client.fido.u2f import FidoU2fClientFactory
-from org.jans.oxauth.model.config import Constants
-from org.jans.oxauth.security import Identity
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.service.common import UserService
-from org.jans.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.jans.oxauth.util import ServerUtil
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.util import StringHelper
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.oxauth.client.fido.u2f import FidoU2fClientFactory
+from io.jans.oxauth.model.config import Constants
+from io.jans.oxauth.security import Identity
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.service.common import UserService
+from io.jans.oxauth.service.fido.u2f import DeviceRegistrationService
+from io.jans.oxauth.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):

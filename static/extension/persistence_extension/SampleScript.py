@@ -4,11 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.model.custom.script.type.persistence import PersistenceType
-from org.jans.util import StringHelper
-from org.jans.persist.operation.auth import PasswordEncryptionHelper
-from org.jans.persist.operation.auth import PasswordEncryptionMethod
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.persistence import PersistenceType
+from io.jans.util import StringHelper
+from io.jans.persist.operation.auth import PasswordEncryptionHelper
+from io.jans.persist.operation.auth import PasswordEncryptionMethod
 
 import java
 

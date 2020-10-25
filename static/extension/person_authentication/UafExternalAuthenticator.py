@@ -13,17 +13,17 @@
 #   registration_uri: https://<idp_hostname>/identity/register
 #   qr_options: { width: 400, height: 400 }
 
-from org.jans.model.custom.script.type.auth import PersonAuthenticationType
-from org.jans.service.cdi.util import CdiUtil
-from org.jans.oxauth.security import Identity
-from org.jans.oxauth.service import AuthenticationService, SessionIdService
-from org.jans.oxauth.service.common import UserService
-from org.jans.util import StringHelper, ArrayHelper
-from org.jans.oxauth.util import ServerUtil
-from org.jans.oxauth.model.config import Constants
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxauth.security import Identity
+from io.jans.oxauth.service import AuthenticationService, SessionIdService
+from io.jans.oxauth.service.common import UserService
+from io.jans.util import StringHelper, ArrayHelper
+from io.jans.oxauth.util import ServerUtil
+from io.jans.oxauth.model.config import Constants
 from javax.ws.rs.core import Response
 from java.util import Arrays
-from org.jans.oxauth.service.net import HttpService
+from io.jans.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys

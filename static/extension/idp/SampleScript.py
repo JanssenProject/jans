@@ -4,9 +4,9 @@
 # Author: Yuriy Movchan
 #
 
-from org.jans.model.custom.script.type.idp import IdpType
-from org.jans.util import StringHelper
-from org.jans.idp.externalauth import AuthenticatedNameTranslator
+from io.jans.model.custom.script.type.idp import IdpType
+from io.jans.util import StringHelper
+from io.jans.idp.externalauth import AuthenticatedNameTranslator
 from net.shibboleth.idp.authn.principal import UsernamePrincipal, IdPAttributePrincipal
 from net.shibboleth.idp.authn import ExternalAuthentication
 from net.shibboleth.idp.attribute import IdPAttribute, StringAttributeValue
@@ -37,7 +37,7 @@ class IdpExtension(IdpType):
         return 11
 
     # Translate attributes from user profile
-    #   context is org.jans.idp.externalauth.TranslateAttributesContext (https://github.com/JanssenFederation/shib-oxauth-authn3/blob/master/src/main/java/org.jans.idp/externalauth/TranslateAttributesContext.java)
+    #   context is io.jans.idp.externalauth.TranslateAttributesContext (https://github.com/JanssenFederation/shib-oxauth-authn3/blob/master/src/main/java/io.jans.idp/externalauth/TranslateAttributesContext.java)
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def translateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: translateAttributes"
@@ -94,7 +94,7 @@ class IdpExtension(IdpType):
         return False
 
     # Update attributes before releasing them
-    #   context is org.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenFederation/shib-oxauth-authn3/blob/master/src/main/java/org.jans.idp/consent/processor/PostProcessAttributesContext.java)
+    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenFederation/shib-oxauth-authn3/blob/master/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"
