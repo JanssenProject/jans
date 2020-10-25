@@ -32,7 +32,7 @@ import io.jans.orm.model.base.BaseEntry;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @DataEntry(sortBy = "level")
-@ObjectClass("oxCustomScript")
+@ObjectClass("jansCustomScr")
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
