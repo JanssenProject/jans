@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @DataEntry
-@ObjectClass("gluuPerson")
+@ObjectClass("jansPerson")
 public class ScimCustomPerson extends Entry implements Serializable {
 
     private static final long serialVersionUID = -234934710284710189L;
