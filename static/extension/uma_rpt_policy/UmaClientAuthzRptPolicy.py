@@ -8,7 +8,7 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
-from io.jans.oxauth.model.uma import UmaConstants
+from io.jans.as.model.uma import UmaConstants
 from io.jans.model.uma import ClaimDefinitionBuilder
 from io.jans.model.custom.script.type.uma import UmaRptPolicyType
 from io.jans.service.cdi.util import CdiUtil
@@ -39,7 +39,7 @@ class UmaRptPolicy(UmaRptPolicyType):
         ]"""
         return ClaimDefinitionBuilder.build(json)
 
-    def authorize(self, context): # context is reference of io.jans.oxauth.uma.authorization.UmaAuthorizationContext
+    def authorize(self, context): # context is reference of io.jans.as.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
 
         client_id=context.getClient().getClientId()

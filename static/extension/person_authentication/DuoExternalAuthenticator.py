@@ -5,10 +5,10 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.oxauth.security import Identity
+from io.jans.as.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.oxauth.service import AuthenticationService
-from io.jans.oxauth.service.common import UserService
+from io.jans.as.service import AuthenticationService
+from io.jans.as.service.common import UserService
 from io.jans.service import MailService
 from io.jans.util import ArrayHelper
 from io.jans.util import StringHelper

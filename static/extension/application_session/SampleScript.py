@@ -7,14 +7,14 @@
 from io.jans.model.custom.script.type.session import ApplicationSessionType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.persist import PersistenceEntryManager
-from io.jans.oxauth.model.config import StaticConfiguration
-from io.jans.oxauth.model.ldap import TokenLdap
+from io.jans.as.model.config import StaticConfiguration
+from io.jans.as.model.ldap import TokenLdap
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.util import StringHelper, ArrayHelper
-from io.jans.oxauth.model.config import Constants
+from io.jans.as.model.config import Constants
 from java.util import Arrays, ArrayList
-from io.jans.oxauth.service.external.session import SessionEventType
+from io.jans.as.service.external.session import SessionEventType
 
 import java
 
@@ -41,7 +41,7 @@ class ApplicationSession(ApplicationSessionType):
         return 11
 
     # Called each time specific session event occurs
-    # event is io.jans.oxauth.service.external.session.SessionEvent
+    # event is io.jans.as.service.external.session.SessionEvent
     def onEvent(self, event):
         if event.getType() == SessionEventType.AUTHENTICATED:
             print "Session is authenticated, session: " + event.getSessionId().getId()
@@ -49,7 +49,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Application calls it at start session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
-    #   sessionId is io.jans.oxauth.model.common.SessionId
+    #   sessionId is io.jans.as.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def startSession(self, httpRequest, sessionId, configurationAttributes):
         print "Application session. Starting external session"
@@ -67,7 +67,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Application calls it at end session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
-    #   sessionId is io.jans.oxauth.model.common.SessionId
+    #   sessionId is io.jans.as.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def endSession(self, httpRequest, sessionId, configurationAttributes):
         print "Application session. Starting external session end"

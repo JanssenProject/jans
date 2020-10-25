@@ -6,7 +6,7 @@
 
 from io.jans.model.custom.script.type.scope import DynamicScopeType
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.oxauth.service.common import UserService
+from io.jans.as.service.common import UserService
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
@@ -29,7 +29,7 @@ class DynamicScope(DynamicScopeType):
         return True   
 
     # Update Json Web token before signing/encrypring it
-    #   dynamicScopeContext is io.jans.oxauth.service.external.context.DynamicScopeExternalContext
+    #   dynamicScopeContext is io.jans.as.service.external.context.DynamicScopeExternalContext
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def update(self, dynamicScopeContext, configurationAttributes):
         print "Dynamic scope. Update method"
