@@ -29,7 +29,7 @@ class SpontaneousScope(SpontaneousScopeType):
     # This method is called before spontaneous scope is persisted. It's possible to disable persistence via context.setAllowSpontaneousScopePersistence(false)
     # Also it's possible to manipulated already granted scopes, e.g. context.getGrantedScopes().remove("transaction:456")
     # Note :
-    # context is reference of io.jans.oxauth.service.external.context.SpontaneousScopeExternalContext(in https://github.com/JanssenFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.SpontaneousScopeExternalContext(in https://github.com/JanssenFederation/oxauth project, )
     def manipulateScopes(self, context):
         return
 
