@@ -31,10 +31,10 @@ from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.oxauth.security import Identity
-from io.jans.oxauth.service import AuthenticationService, SessionIdService
-from io.jans.oxauth.service.common import UserService
-from io.jans.oxauth.util import ServerUtil
+from io.jans.as.security import Identity
+from io.jans.as.service import AuthenticationService, SessionIdService
+from io.jans.as.service.common import UserService
+from io.jans.as.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
