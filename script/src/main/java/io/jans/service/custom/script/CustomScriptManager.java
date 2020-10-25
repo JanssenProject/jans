@@ -66,7 +66,7 @@ public class CustomScriptManager implements Serializable {
 	public static final String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
 	public static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
-	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "jansRevision", "jansScrType",
+	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "jansRevision", "jansScrTyp",
 			"jansModuleProperty", "jansEnabled" };
 
 	@Inject
