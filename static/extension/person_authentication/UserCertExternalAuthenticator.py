@@ -8,19 +8,19 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
-from io.jans.oxauth.security import Identity
-from io.jans.oxauth.service import AuthenticationService
-from io.jans.oxauth.service.common import UserService
+from io.jans.as.security import Identity
+from io.jans.as.service import AuthenticationService
+from io.jans.as.service.common import UserService
 from io.jans.util import StringHelper
-from io.jans.oxauth.util import ServerUtil
-from io.jans.oxauth.service.common import EncryptionService
+from io.jans.as.util import ServerUtil
+from io.jans.as.service.common import EncryptionService
 from java.util import Arrays
-from io.jans.oxauth.cert.fingerprint import FingerprintHelper
-from io.jans.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from io.jans.oxauth.cert.validation.model import ValidationStatus
-from io.jans.oxauth.util import CertUtil
-from io.jans.oxauth.model.util import CertUtils
-from io.jans.oxauth.service.net import HttpService
+from io.jans.as.cert.fingerprint import FingerprintHelper
+from io.jans.as.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from io.jans.as.cert.validation.model import ValidationStatus
+from io.jans.as.util import CertUtil
+from io.jans.as.model.util import CertUtils
+from io.jans.as.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys

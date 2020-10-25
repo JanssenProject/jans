@@ -6,7 +6,7 @@
 
 from io.jans.model.custom.script.type.client import ClientRegistrationType
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.oxauth.service import ScopeService
+from io.jans.as.service import ScopeService
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 
@@ -30,8 +30,8 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.oxauth.client.RegisterRequest
-    #   client is io.jans.oxauth.model.registration.Client
+    #   registerRequest is io.jans.as.client.RegisterRequest
+    #   client is io.jans.as.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def createClient(self, registerRequest, client, configurationAttributes):
         print "Client registration. CreateClient method"
@@ -61,8 +61,8 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.oxauth.client.RegisterRequest
-    #   client is io.jans.oxauth.model.registration.Client
+    #   registerRequest is io.jans.as.client.RegisterRequest
+    #   client is io.jans.as.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
         print "Client registration. UpdateClient method"
@@ -97,11 +97,11 @@ class ClientRegistration(ClientRegistrationType):
         return clientRedirectUrisSet
 
     # Returns secret key which will be used to validate Software Statement if HMAC algorithm is used (e.g. HS256, HS512). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.
-    # context is reference of io.jans.oxauth.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )
+    # context is reference of io.jans.as.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )
     def getSoftwareStatementHmacSecret(self, context):
         return ""
 
     # Returns JWKS which will be used to validate Software Statement if keys are used (e.g. RS256). Invoked if oxauth conf property softwareStatementValidationType=SCRIPT which is default/fallback value.
-    # context is reference of io.jans.oxauth.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )
+    # context is reference of io.jans.as.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )
     def getSoftwareStatementJwks(self, context):
         return ""

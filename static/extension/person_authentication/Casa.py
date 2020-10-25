@@ -6,12 +6,12 @@ from java.nio.charset import Charset
 from org.apache.http.params import CoreConnectionPNames
 
 from org.oxauth.persistence.model.configuration import JanssenConfiguration
-from io.jans.oxauth.security import Identity
-from io.jans.oxauth.service import AuthenticationService, UserService
-from io.jans.oxauth.service.common import EncryptionService
-from io.jans.oxauth.service.custom import CustomScriptService
-from io.jans.oxauth.service.net import HttpService
-from io.jans.oxauth.util import ServerUtil
+from io.jans.as.security import Identity
+from io.jans.as.service import AuthenticationService, UserService
+from io.jans.as.service.common import EncryptionService
+from io.jans.as.service.custom import CustomScriptService
+from io.jans.as.service.net import HttpService
+from io.jans.as.util import ServerUtil
 from io.jans.model import SimpleCustomProperty
 from io.jans.model.casa import ApplicationConfiguration
 from io.jans.model.custom.script import CustomScriptType

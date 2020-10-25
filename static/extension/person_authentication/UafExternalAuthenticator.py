@@ -15,15 +15,15 @@
 
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.oxauth.security import Identity
-from io.jans.oxauth.service import AuthenticationService, SessionIdService
-from io.jans.oxauth.service.common import UserService
+from io.jans.as.security import Identity
+from io.jans.as.service import AuthenticationService, SessionIdService
+from io.jans.as.service.common import UserService
 from io.jans.util import StringHelper, ArrayHelper
-from io.jans.oxauth.util import ServerUtil
-from io.jans.oxauth.model.config import Constants
+from io.jans.as.util import ServerUtil
+from io.jans.as.model.config import Constants
 from javax.ws.rs.core import Response
 from java.util import Arrays
-from io.jans.oxauth.service.net import HttpService
+from io.jans.as.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
