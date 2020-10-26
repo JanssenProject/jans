@@ -78,7 +78,7 @@ public class ServerLauncher {
         Properties properties = buildProperties();
         if (properties != null) {
             LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
-                    ", build time:" + properties.getProperty("git.build.time"));
+                    ", build time:" + properties.getProperty("git.build.time") + ", oxd_version:" + Utils.getOxdVersion());
         }
     }
 
