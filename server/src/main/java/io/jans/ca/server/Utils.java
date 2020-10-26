@@ -4,6 +4,7 @@
 package io.jans.ca.server;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.util.Util;
@@ -139,5 +140,9 @@ public class Utils {
         } catch (IOException | IllegalArgumentException e) {
             throw new RuntimeException("Could not load properties from file " + filename, e);
         }
+    }
+
+    public static String getOxdVersion() {
+        return !Strings.isNullOrEmpty(System.getProperty("projectVersion")) ? System.getProperty("projectVersion") : RpServerApplication.class.getPackage().getImplementationVersion();
     }
 }
