@@ -241,6 +241,16 @@ public class AppConfiguration implements Configuration {
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
 
+    public int discoveryCacheLifetimeInMinutes = 60;
+
+    public int getDiscoveryCacheLifetimeInMinutes() {
+        return discoveryCacheLifetimeInMinutes;
+    }
+
+    public void setDiscoveryCacheLifetimeInMinutes(int discoveryCacheLifetimeInMinutes) {
+        this.discoveryCacheLifetimeInMinutes = discoveryCacheLifetimeInMinutes;
+    }
+
     public String getSoftwareStatementValidationType() {
         if (softwareStatementValidationType == null) return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
         return softwareStatementValidationType;
