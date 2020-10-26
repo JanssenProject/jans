@@ -280,7 +280,7 @@ class BaseClient:
 
     def __init__(self, hosts, user, password):
         self._hosts = hosts
-        self.host = None
+        self.host = ""
         self.user = user
         self.password = password
         self._session = None
@@ -322,10 +322,11 @@ class BaseClient:
                 resp = self.healthcheck(_host)
                 if resp.ok:
                     self.host = _host
-                    return self.host
+                    break
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={resp.reason}")
             except Exception as exc:
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={exc}")
+        return self.host
 
     def healthcheck(self, host) -> NoReturn:
         """Run healthcheck to a host.
