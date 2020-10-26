@@ -5,7 +5,7 @@
 #
 
 from io.jans.model.custom.script.type.scope import DynamicScopeType
-from io.jans.as.service.common import UserService
+from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
