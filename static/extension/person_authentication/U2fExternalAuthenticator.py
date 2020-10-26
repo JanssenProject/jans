@@ -12,8 +12,8 @@ from org.jboss.resteasy.client.exception import ResteasyClientException
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.client.fido.u2f import FidoU2fClientFactory
 from io.jans.as.model.config import Constants
-from io.jans.as.security import Identity
-from io.jans.as.service import AuthenticationService, SessionIdService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service import UserService
 from io.jans.as.service.fido.u2f import DeviceRegistrationService
 from io.jans.as.util import ServerUtil

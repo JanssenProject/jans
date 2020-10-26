@@ -5,7 +5,7 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.as.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.authz import ConsentGatheringType
 from io.jans.util import StringHelper
 

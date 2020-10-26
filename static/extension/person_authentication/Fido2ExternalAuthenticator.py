@@ -10,8 +10,8 @@ from org.jboss.resteasy.client.exception import ResteasyClientException
 from javax.ws.rs.core import Response
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.fido2.client import Fido2ClientFactory
-from io.jans.as.security import Identity
-from io.jans.as.service import AuthenticationService, SessionIdService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.service import UserService
 from io.jans.as.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
