@@ -7,7 +7,7 @@
 
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.model.common import AuthorizationGrantList
-from io.jans.as.service import SessionIdService
+from io.jans.as.server.service import SessionIdService
 from io.jans.service.cdi.util import CdiUtil
 from java.lang import String
 

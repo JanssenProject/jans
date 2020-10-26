@@ -9,10 +9,10 @@ from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.as.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.model.config import ConfigurationFactory
-from io.jans.as.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.service.fido.u2f import DeviceRegistrationService
 from io.jans.as.service.net import HttpService
 from io.jans.as.util import ServerUtil
