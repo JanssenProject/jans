@@ -154,6 +154,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: address
 jansSAML1URI: urn:mace:dir:attribute-def:address
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.330
 jansStatus: active

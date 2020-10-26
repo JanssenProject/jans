@@ -157,7 +157,6 @@
         "ES512"
     ],
     "dynamicRegistrationCustomAttributes":[
-        "oxAuthTrustedClient"
     ],
     "displayValuesSupported":[
         "page",

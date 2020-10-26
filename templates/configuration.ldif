@@ -15,7 +15,7 @@ jansRadiusEnabled: false
 jansSamlEnabled: false
 jansScimEnabled: false
 jansWhitePagesEnabled: disabled
-jansenticationMode: simple_password_auth
+jansAuthMode: simple_password_auth
 objectClass: top
 objectClass: jansAppConf
 ou: configuration
