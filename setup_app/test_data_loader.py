@@ -122,7 +122,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         oxAuthConfDynamic_changes = {
                                     'dynamicRegistrationCustomObjectClass':  'oxAuthClientCustomAttributes',
-                                    'dynamicRegistrationCustomAttributes': [ "oxAuthTrustedClient", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ],
+                                    'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ],
                                     'dynamicRegistrationExpirationTime': 86400,
                                     'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code" ],
                                     'legacyIdTokenClaims': True,
