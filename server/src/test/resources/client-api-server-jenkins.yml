@@ -6,7 +6,7 @@ trust_store_path: ''
 trust_store_password: ''
 crypt_provider_key_store_path: './client-api-jwks.keystore'
 crypt_provider_key_store_password: 'example'
-crypt_provider_dn_name: 'CN=oxd CA Certificates'
+crypt_provider_dn_name: 'CN=jans-client-api CA Certificates'
 enable_jwks_generation: true
 support-google-logout: true
 db_cleanup_interval_in_hours: 1
@@ -59,8 +59,8 @@ logging:
     - type: file
       threshold: TRACE
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: jans-client-api-server.log
-      archivedLogFilenamePattern: jans-client-api-server-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: client-api.log
+      archivedLogFilenamePattern: client-api-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB
