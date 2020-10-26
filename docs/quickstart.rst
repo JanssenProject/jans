@@ -4,7 +4,7 @@ Quickstart
 Config and Secret
 =================
 
-Gluu Server app container at its core relies on config and secret layers to self-configure the container.
+Janssen Server app container at its core relies on config and secret layers to self-configure the container.
 
 .. code-block:: python
 
@@ -15,10 +15,10 @@ Gluu Server app container at its core relies on config and secret layers to self
 
     def create_manager():
         # use Kubernetes ConfigMap as config layer
-        os.environ["GLUU_CONFIG_ADAPTER"] = "kubernetes"
+        os.environ["CN_CONFIG_ADAPTER"] = "kubernetes"
 
         # use Kubernetes Secret as secret layer
-        os.environ["GLUU_SECRET_ADAPTER"] = "kubernetes"
+        os.environ["CN_SECRET_ADAPTER"] = "kubernetes"
 
         manager = get_manager()
         return manager
@@ -27,7 +27,7 @@ Gluu Server app container at its core relies on config and secret layers to self
     if __name__ == "__main__":
         manager = create_manager()
 
-        # get hostname of Gluu Server
+        # get hostname of Janssen Server
         manager.config.get("hostname")
 
         # get SSL cert of web-facing interface (i.e. nginx or ingress)
@@ -48,10 +48,10 @@ Startup Orders
 
     def create_manager():
         # use Kubernetes ConfigMap as config layer
-        os.environ["GLUU_CONFIG_ADAPTER"] = "kubernetes"
+        os.environ["CN_CONFIG_ADAPTER"] = "kubernetes"
 
         # use Kubernetes Secret as secret layer
-        os.environ["GLUU_SECRET_ADAPTER"] = "kubernetes"
+        os.environ["CN_SECRET_ADAPTER"] = "kubernetes"
 
         manager = get_manager()
         return manager
@@ -79,25 +79,25 @@ Create ``/app/templates/salt.tmpl``:
 
     encodeSalt = %(encode_salt)s
 
-Create ``/app/templates/gluu.properties.tmpl``:
+Create ``/app/templates/jans.properties.tmpl``:
 
 .. code-block:: text
 
     persistence.type=%(persistence_type)s
 
-    oxauth_ConfigurationEntryDN=ou=oxauth,ou=configuration,o=gluu
-    oxtrust_ConfigurationEntryDN=ou=oxtrust,ou=configuration,o=gluu
-    oxidp_ConfigurationEntryDN=ou=oxidp,ou=configuration,o=gluu
-    oxcas_ConfigurationEntryDN=ou=oxcas,ou=configuration,o=gluu
-    oxpassport_ConfigurationEntryDN=ou=oxpassport,ou=configuration,o=gluu
-    oxradius_ConfigurationEntryDN=ou=oxradius,ou=configuration,o=gluu
-    fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=gluu
+    oxauth_ConfigurationEntryDN=ou=oxauth,ou=configuration,o=jans
+    oxtrust_ConfigurationEntryDN=ou=oxtrust,ou=configuration,o=jans
+    oxidp_ConfigurationEntryDN=ou=oxidp,ou=configuration,o=jans
+    oxcas_ConfigurationEntryDN=ou=oxcas,ou=configuration,o=jans
+    oxpassport_ConfigurationEntryDN=ou=oxpassport,ou=configuration,o=jans
+    oxradius_ConfigurationEntryDN=ou=oxradius,ou=configuration,o=jans
+    fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
 
-    certsDir=%(certFolder)s
+    certsDir=/etc/certs
     confDir=
-    pythonModulesDir=%(gluuOptPythonFolder)s/libs:/opt/jython/Lib/site-packages
+    pythonModulesDir=/opt/jans/python/libs:/opt/jython/Lib/site-packages
 
-Create ``/app/templates/gluu-ldap.properties.tmpl``:
+Create ``/app/templates/jans-ldap.properties.tmpl``:
 
 .. code-block:: text
 
@@ -139,7 +139,7 @@ Create a Python script to configure persistence:
     from jans.pycloudlib import get_manager
     from jans.pycloudlib.persistence import (
         render_salt,
-        render_gluu_properties,
+        render_base_properties,
         render_ldap_properties,
         sync_ldap_truststore,
     )
@@ -147,10 +147,10 @@ Create a Python script to configure persistence:
 
     def create_manager():
         # use Kubernetes ConfigMap as config layer
-        os.environ["GLUU_CONFIG_ADAPTER"] = "kubernetes"
+        os.environ["CN_CONFIG_ADAPTER"] = "kubernetes"
 
         # use Kubernetes Secret as secret layer
-        os.environ["GLUU_SECRET_ADAPTER"] = "kubernetes"
+        os.environ["CN_SECRET_ADAPTER"] = "kubernetes"
 
         manager = get_manager()
         return manager
@@ -158,15 +158,15 @@ Create a Python script to configure persistence:
 
 
     def configure_persistence(manager):
-        persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "ldap")
+        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-        render_salt(manager, "/app/templates/salt.tmpl", "/etc/gluu/conf/salt")
-        render_gluu_properties("/app/templates/gluu.properties.tmpl", "/etc/gluu/conf/gluu.properties")
+        render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
+        render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
         render_ldap_properties(
             manager,
-            "/app/templates/gluu-ldap.properties.tmpl",
-            "/etc/gluu/conf/gluu-ldap.properties",
+            "/app/templates/jans-ldap.properties.tmpl",
+            "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
 

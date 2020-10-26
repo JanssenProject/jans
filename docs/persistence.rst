@@ -5,7 +5,7 @@ Persistence
 
 .. autofunction:: render_salt
 
-.. autofunction:: render_gluu_properties
+.. autofunction:: render_base_properties
 
 LDAP
 ====
