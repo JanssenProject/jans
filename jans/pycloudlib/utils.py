@@ -16,11 +16,9 @@ import socket
 import ssl
 import string
 import subprocess
-from typing import (
-    Any,
-    AnyStr,
-    Tuple,
-)
+from typing import Any
+from typing import AnyStr
+from typing import Tuple
 
 from cryptography.hazmat.primitives.ciphers import Cipher
 from cryptography.hazmat.primitives.ciphers import algorithms

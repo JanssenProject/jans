@@ -7,10 +7,8 @@ This module contains helpers to validate things.
 
 from typing import NoReturn
 
-from jans.pycloudlib.constants import (
-    PERSISTENCE_TYPES,
-    PERSISTENCE_LDAP_MAPPINGS,
-)
+from jans.pycloudlib.constants import PERSISTENCE_TYPES
+from jans.pycloudlib.constants import PERSISTENCE_LDAP_MAPPINGS
 
 
 class ValidationError(Exception):

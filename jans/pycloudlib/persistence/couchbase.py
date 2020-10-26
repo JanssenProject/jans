@@ -14,12 +14,9 @@ from typing import NoReturn
 import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 
-from jans.pycloudlib.utils import (
-    encode_text,
-    cert_to_truststore,
-    as_boolean,
-)
-# from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
+from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import as_boolean
 
 CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 

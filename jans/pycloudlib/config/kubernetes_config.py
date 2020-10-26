@@ -13,10 +13,8 @@ import kubernetes.client
 import kubernetes.config
 
 from jans.pycloudlib.config.base_config import BaseConfig
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 
 class KubernetesConfig(BaseConfig):

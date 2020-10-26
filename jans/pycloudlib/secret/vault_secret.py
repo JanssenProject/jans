@@ -7,19 +7,15 @@ This module contains secret adapter class to interact with Vault.
 
 import logging
 import os
-from typing import (
-    Any,
-    Tuple,
-    Union,
-)
+from typing import Any
+from typing import Tuple
+from typing import Union
 
 import hvac
 
 from jans.pycloudlib.secret.base_secret import BaseSecret
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
 

@@ -14,15 +14,11 @@ import backoff
 import ldap3
 import requests
 
-from jans.pycloudlib.persistence.couchbase import (
-    get_couchbase_user,
-    get_couchbase_password,
-    CouchbaseClient,
-)
-from jans.pycloudlib.utils import (
-    as_boolean,
-    decode_text,
-)
+from jans.pycloudlib.persistence.couchbase import get_couchbase_user
+from jans.pycloudlib.persistence.couchbase import get_couchbase_password
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import decode_text
 
 
 logger = logging.getLogger(__name__)

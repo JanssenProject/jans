@@ -137,12 +137,10 @@ Create a Python script to configure persistence:
     import os
 
     from jans.pycloudlib import get_manager
-    from jans.pycloudlib.persistence import (
-        render_salt,
-        render_base_properties,
-        render_ldap_properties,
-        sync_ldap_truststore,
-    )
+    from jans.pycloudlib.persistence import render_salt
+    from jans.pycloudlib.persistence import render_base_properties
+    from jans.pycloudlib.persistence import render_ldap_properties
+    from jans.pycloudlib.persistence import sync_ldap_truststore
 
 
     def create_manager():

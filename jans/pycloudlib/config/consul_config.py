@@ -7,19 +7,15 @@ This module contains config adapter class to interact with Consul.
 
 import logging
 import os
-from typing import (
-    Any,
-    Tuple,
-    Union,
-)
+from typing import Any
+from typing import Tuple
+from typing import Union
 
 from consul import Consul
 
 from jans.pycloudlib.config.base_config import BaseConfig
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
 

@@ -14,10 +14,8 @@ import kubernetes.client
 import kubernetes.config
 
 from jans.pycloudlib.secret.base_secret import BaseSecret
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 
 class KubernetesSecret(BaseSecret):

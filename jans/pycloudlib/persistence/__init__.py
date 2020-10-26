@@ -1,14 +1,11 @@
 import os
 
-from jans.pycloudlib.persistence.couchbase import (  # noqa: F401
-    render_couchbase_properties,
-    sync_couchbase_truststore,
-)
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties  # noqa: F401
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore  # noqa: F401
+
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties  # noqa: F401
-from jans.pycloudlib.persistence.ldap import (  # noqa: F401
-    render_ldap_properties,
-    sync_ldap_truststore,
-)
+from jans.pycloudlib.persistence.ldap import render_ldap_properties  # noqa: F401
+from jans.pycloudlib.persistence.ldap import sync_ldap_truststore  # noqa: F401
 
 
 def render_salt(manager, src: str, dest: str) -> None:
