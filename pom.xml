@@ -324,6 +324,12 @@
                         <suiteXmlFiles>
                             <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
                         </suiteXmlFiles>
+                        <systemProperties>
+                            <property>
+                                <name>projectVersion</name>
+                                <value>${project.version}</value>
+                            </property>
+                        </systemProperties>
                     </configuration>
                 </plugin>
                 <plugin>
