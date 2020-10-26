@@ -6,8 +6,8 @@ from java.nio.charset import Charset
 from org.apache.http.params import CoreConnectionPNames
 
 from org.oxauth.persistence.model.configuration import JanssenConfiguration
-from io.jans.as.security import Identity
-from io.jans.as.service import AuthenticationService, UserService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.as.service.common import EncryptionService
 from io.jans.as.service.custom import CustomScriptService
 from io.jans.as.service.net import HttpService

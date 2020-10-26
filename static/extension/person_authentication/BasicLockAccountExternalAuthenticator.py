@@ -6,13 +6,13 @@
 #
 
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.as.security import Identity
+from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.service import AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
 from io.jans.service import CacheService
 from io.jans.util import StringHelper
-from io.jans.persist.exception import AuthenticationException
+from io.jans.orm.exception import AuthenticationException
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
