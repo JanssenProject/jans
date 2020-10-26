@@ -1,5 +1,5 @@
 from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
-from io.jans.as.service import AuthenticationService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
 from java.lang import String
 
