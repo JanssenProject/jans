@@ -34,8 +34,8 @@ def render_salt(manager, src: str, dest: str) -> None:
         f.write(rendered_txt)
 
 
-def render_jans_properties(src: str, dest: str) -> None:
-    """Render file contains properties for Gluu Server.
+def render_base_properties(src: str, dest: str) -> None:
+    """Render file contains properties for Janssen Server.
 
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.

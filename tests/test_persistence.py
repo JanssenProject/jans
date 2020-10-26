@@ -41,8 +41,8 @@ def test_render_salt(tmpdir, gmanager, monkeypatch):
     assert dest.read() == f"encodeSalt = {gmanager.secret.get('encoded_salt')}"
 
 
-def test_render_jans_properties(tmpdir):
-    from jans.pycloudlib.persistence import render_jans_properties
+def test_render_base_properties(tmpdir):
+    from jans.pycloudlib.persistence import render_base_properties
 
     persistence_type = "ldap"
     namespace = "jans"
@@ -61,7 +61,7 @@ persistence.type={persistence_type}
 fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o={namespace}
 """.strip()
 
-    render_jans_properties(str(src), str(dest))
+    render_base_properties(str(src), str(dest))
     assert dest.read() == expected
     os.environ.clear()
 
