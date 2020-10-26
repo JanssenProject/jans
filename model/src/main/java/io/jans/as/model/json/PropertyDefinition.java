@@ -66,8 +66,8 @@ public enum PropertyDefinition {
 
     public enum ClassNames {
 
-        CLIENT_ATTRIBUTES("org.oxauth.persistence.model.ClientAttributes"),
-        REGISTER_REQUEST("org.gluu.oxauth.client.RegisterRequest");
+        CLIENT_ATTRIBUTES("io.jans.as.persistence.model.ClientAttributes"),
+        REGISTER_REQUEST("io.jans.as.client.RegisterRequest");
 
         private final String fullClassName;
 
