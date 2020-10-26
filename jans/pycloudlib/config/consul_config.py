@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.config.consul_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains config adapter class to interact with Consul.
 """

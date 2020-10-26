@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains config and secret helpers.
 """

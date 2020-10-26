@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.meta.docker_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module consists of class to interact with Docker API.
 """

@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.meta.base_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains base class for meta adapter.
 """

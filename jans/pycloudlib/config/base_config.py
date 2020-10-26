@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.config.base_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains base class for config adapter.
 """

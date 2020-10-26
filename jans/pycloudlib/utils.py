@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.utils
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 This module contains various helpers.
 """

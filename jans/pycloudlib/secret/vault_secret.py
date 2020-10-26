@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.secret.vault_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains secret adapter class to interact with Vault.
 """

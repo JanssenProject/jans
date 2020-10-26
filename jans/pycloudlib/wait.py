@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.wait
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 This module consists of startup order utilities.
 """

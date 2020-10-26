@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.secret.base_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains base class for secret adapter.
 """

@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.meta.kubernetes_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module consists of class to interact with Kubernetes API.
 """
