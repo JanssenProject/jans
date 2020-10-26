@@ -10,7 +10,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
 from io.jans.as.security import Identity
 from io.jans.as.service import AuthenticationService
-from io.jans.as.service.common import UserService
+from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper
 from io.jans.as.util import ServerUtil
 from io.jans.as.service.common import EncryptionService

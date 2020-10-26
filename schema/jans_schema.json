@@ -2066,7 +2066,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansenticationMode"
+        "jansAuthMode"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4174,10 +4174,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "jansenticationData",
+      "desc": "jansAuthData",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansenticationData"
+        "jansAuthData"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4754,7 +4754,7 @@
         "inum",
         "inumFN",
         "o",
-        "jansenticationMode",
+        "jansAuthMode",
         "excludeAuthnMode",
         "jansIDPAuthn",
         "jansLogViewerConfig",
@@ -5734,7 +5734,7 @@
         "jansSessStateId",
         "jansCodeChallenge",
         "personInum",
-        "jansenticationData",
+        "jansAuthData",
         "jansStatus"
       ],
       "must": [

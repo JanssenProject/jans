@@ -9,7 +9,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.service import AuthenticationService
-from io.jans.as.service.common import UserService
+from io.jans.as.server.service import UserService
 from io.jans.service import CacheService
 from io.jans.util import StringHelper
 from io.jans.persist.exception import AuthenticationException
@@ -95,7 +95,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
             else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
-                userSatus = self.getUserAttributeValue(user_name, .jans.tatus")
+                userSatus = self.getUserAttributeValue(user_name, "jansStatus")
                 print "Current user '%s' status is '%s'" % ( user_name, userSatus )
 
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
@@ -232,14 +232,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (find_user_by_uid == None):
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, .jans.tatus")
+        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "jansStatus")
         if status_attribute_value != None:
             user_status = status_attribute_value.getValue()
             if StringHelper.equals(user_status, "inactive"):
                 print "Basic (lock account). Lock user. User '%s' locked already" % user_name
                 return
         
-        userService.setCustomAttribute(find_user_by_uid, .jans.tatus", "inactive")
+        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
         userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "false")
         updated_user = userService.updateUser(find_user_by_uid)
 
@@ -264,7 +264,7 @@ class PersonAuthentication(PersonAuthenticationType):
         object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
-        userService.setCustomAttribute(find_user_by_uid, .jans.tatus", "active")
+        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
         userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "true")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         updated_user = userService.updateUser(find_user_by_uid)
