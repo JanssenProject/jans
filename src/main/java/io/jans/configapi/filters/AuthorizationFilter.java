@@ -51,6 +51,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     public void filter(ContainerRequestContext context) {
         logger.info("=======================================================================");
+        logger.debug("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
+        logger.debug("====== resourceInfo.getAbsolutePath() = " +resourceInfo.getClass().getName()+" , resourceInfo.getClass().getAnnotations() = "+resourceInfo.getClass().getAnnotations());
         logger.debug("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         logger.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -64,8 +66,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         try {
             String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-            this.authorizationService.validateAuthorization(token, resourceInfo); //-
-            // //WIP ??
+            this.authorizationService.validateAuthorization(token, resourceInfo,context.getMethod(), info.getPath());
             logger.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             logger.error("======AUTHORIZATION  FAILED ===========================================", ex);
