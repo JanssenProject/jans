@@ -42,6 +42,9 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     @Inject
     PatService patService;
+    
+    @Inject
+    ApiResourceService apiResourceService;
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -50,9 +53,12 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
     @Inject
     StaticConfiguration staticConf;
 
-    public void validateAuthorization(String rpt, ResourceInfo resourceInfo) throws Exception {
+    public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String methods, String path) throws Exception {
         log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
-                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + "\n");
+                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() 
+                + " , methods = "+methods+" , path = "+path+"\n");
+        
+        boolean flag = apiResourceService.resourceExists(resourceInfo, methods, path);
 
         // todo FIXME Yuriy Z -> Puja : implementation is wrong overall. Here step by step plan:
         // =================================
