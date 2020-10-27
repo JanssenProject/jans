@@ -10,6 +10,7 @@ from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
+from setup_app.pylib.jproperties import Properties
 
 class JreInstaller(BaseInstaller, SetupUtils):
 
@@ -57,6 +58,8 @@ class JreInstaller(BaseInstaller, SetupUtils):
             for jsfn in Path('/opt/jre').rglob('java.security'):
                 self.run([paths.cmd_sed, '-i', '/^#crypto.policy=unlimited/s/^#//', jsfn._str])
 
+        self.fix_java_security()
+
     def download_files(self):
         jre_arch_list = glob.glob(os.path.join(Config.distAppFolder, 'amazon-corretto-*.tar.gz'))
 
@@ -73,3 +76,24 @@ class JreInstaller(BaseInstaller, SetupUtils):
             base.download(self.open_jdk_archive_link, self.jreArchive)
         else:
             self.jreArchive = max(jre_arch_list)
+
+
+    def fix_java_security(self):
+        # https://github.com/OpenIdentityPlatform/OpenDJ/issues/78
+        java_security_fn = os.path.join(Config.jre_home, 'conf/security/java.security')
+
+        p = Properties()
+        with open(java_security_fn, 'rb') as f:
+            p.load(f, 'utf-8')
+
+        if not 'TLSv1.3' in p['jdk.tls.disabledAlgorithms'].data:
+            java_security = self.readFile(java_security_fn).splitlines()
+            for i, l in enumerate(java_security[:]):
+                if l.strip().startswith('jdk.tls.disabledAlgorithms'):
+                   n = l.find('=')
+                   k = l[:n].strip()
+                   v = l[n+1:].strip()
+                   java_security[i] = k + '=' + 'TLSv1.3, ' + v + '\n'
+                   break
+
+        self.writeFile(java_security_fn, '\n'.join(java_security))
