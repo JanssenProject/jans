@@ -5,20 +5,19 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
+import org.slf4j.Logger;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-
 @ApplicationScoped
-public class ApiResourceService {
+public class ApiResourceService { // todo maybe better UmaResourceProtectionService ?
 
 	@Inject
 	Logger logger;
@@ -28,6 +27,10 @@ public class ApiResourceService {
 
 	@Inject
 	UmaResourceService umaResourceService;
+
+	// todo this method should be called during application startup and ONLY if protection is set to UMA.
+    // if not all resources exists then throw exception. All paths and methods here are pre-define and must be based on
+    // our REST classes (from io.jans.configapi.rest.resource).
 
 	public boolean resourceExists(ResourceInfo resourceInfo,String methods, String path) {
 		logger.debug("Resource to verify - " + resourceInfo);
@@ -48,7 +51,8 @@ public class ApiResourceService {
 		return true;
 	}
 
-	private void verifyScope(List<String> resourceScopes) {
+	private void verifyScope(List<String> resourceScopes) { // todo rename createScopeIfNeeded
+	    // todo - cache scopes in guava cache. Otherwise you check same scopes again and again
 
 		for (String scopeName : resourceScopes) {
 			List<Scope> scopes = scopeService.searchScopes(scopeName, 1);
@@ -63,15 +67,14 @@ public class ApiResourceService {
 				scope.setDn(scopeService.getDnForScope(inum));
 				scope.setScopeType(ScopeType.UMA);
 				scopeService.addScope(scope);
-				Scope result = scopeService.getScopeByInum(inum);
-				logger.trace("Scope - '" + scopeName + "' created.");
 			}
 		}
-
 	}
 
-	public void verifyResource(ResourceInfo resourceInfo, String methods, String path) {
+	public void verifyResource(ResourceInfo resourceInfo, String methods, String path) { // todo rename createResourceIfNeeded
 		List<UmaResource> resources = umaResourceService.findResources(resourceInfo.getClass().getName(), 1000);
+
+		// todo if there are more then one -> throw exception. There should be exactly one
 		logger.trace("UmaResource - '" + resources);
 
 		if (resources == null || resources.isEmpty()) {
@@ -88,8 +91,8 @@ public class ApiResourceService {
 		String id = UUID.randomUUID().toString();
 		umaResource.setId(id);
 		umaResource.setDn(umaResourceService.getDnForResource(id));
-		umaResource.setName(resourceInfo.getClass().getName());
-		umaResource.setScopes(AuthUtil.getRequestedScopes(resourceInfo));
+		umaResource.setName(resourceInfo.getClass().getName()); // todo : name can be: <method> + <path>, e.g. POST /clients
+		umaResource.setScopes(AuthUtil.getRequestedScopes(resourceInfo)); // to POST /client we require `config-api-write` scope
 		umaResource.setResources(resources);
 		umaResourceService.addResource(umaResource);
 		logger.trace("UmaResource - '" + umaResource.getName() + "' created.");
