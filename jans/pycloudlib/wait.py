@@ -342,8 +342,9 @@ def wait_for_oxd(manager, **kwargs):
     urllib3.disable_warnings()
 
     addr = os.environ.get("CN_OXD_SERVER_URL", "localhost:8443")
+    verify = as_boolean(os.environ.get("CN_OXD_SERVER_VERIFY", False))
     url = f"https://{addr}/health-check"
-    req = requests.get(url, verify=False)
+    req = requests.get(url, verify=verify)
 
     if not req.ok:
         raise WaitError(req.reason)
