@@ -57,8 +57,6 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() 
                 + " , methods = "+methods+" , path = "+path+"\n");
-        
-        boolean flag = apiResourceService.resourceExists(resourceInfo, methods, path);
 
         // todo FIXME Yuriy Z -> Puja : implementation is wrong overall. Here step by step plan:
         // =================================
