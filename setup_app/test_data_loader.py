@@ -33,8 +33,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.jks")
-        client_keystore_fn = os.path.join(Config.outputFolder, 'test/oxauth/client/client_keystore.jks')
-        keys_json_fn =  os.path.join(Config.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
+        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.jks')
+        keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
@@ -57,8 +57,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         
         self.run(cmd, shell=True)
 
-        self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
-        self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
+        self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
+        self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
 
     def load_test_data(self):
 
@@ -94,7 +94,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
 
         self.writeFile(
-            os.path.join(Config.outputFolder, 'test/oxauth/server/config-oxauth-test.properties'),
+            os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
             config_oxauth_test_properties
             )
 
@@ -102,8 +102,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.logIt("Loading test ldif files")
 
-        ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
-        ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/oxauth/data/oxauth-test-data-user.ldif')
+        ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data.ldif')
+        ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data-user.ldif')
         
         scim_test_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data.ldif')
         scim_test_user_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data-user.ldif')
@@ -168,7 +168,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             # Update LDAP schema
             openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema/')
-            self.copyFile(os.path.join(Config.outputFolder, 'test/oxauth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
+            self.copyFile(os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
             self.copyFile(os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
 
             schema_fn = os.path.join(openDjSchemaFolder, '77-customAttributes.ldif')
@@ -268,8 +268,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         #self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
         #self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
         # Todo: Download and unzip file test_data.zip from CE server.
-        # Todo: Copy files from unziped folder test/oxauth/client/* into oxAuth/Client/profiles/ce_test
-        # Todo: Copy files from unziped folder test/oxauth/server/* into oxAuth/Server/profiles/ce_test
+        # Todo: Copy files from unziped folder test/jans-auth/client/* into oxAuth/Client/profiles/ce_test
+        # Todo: Copy files from unziped folder test/jans-auth/server/* into oxAuth/Server/profiles/ce_test
         #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_httpd', '-keystore', 'cacerts', '-file', '%s/httpd.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
         #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_opendj', '-keystore', 'cacerts', '-file', '%s/opendj.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
  
