@@ -1,18 +1,18 @@
 #!/bin/sh -e
 
-# Stopping oxd-server
-# This will stop oxd-server if its have been removed by purge 
-if [ -e /var/run/oxd-server.pid ]; then
-    kill -9 `cat /var/run/oxd-server.pid` > /dev/null 2>&1
-    rm -rf /var/run/oxd-server.pid > /dev/null 2>&1
+# Stopping jans-client-api-server
+# This will stop jans-client-api-server if its have been removed by purge
+if [ -e /var/run/client-api.pid ]; then
+    kill -9 `cat /var/run/client-api.pid` > /dev/null 2>&1
+    rm -rf /var/run/client-api.pid > /dev/null 2>&1
 fi
 
-# If purge selected remove all oxd files
+# If purge selected remove all client-api files
 if [ "$1" = purge ]; then
-    rm -rf /var/log/oxd-server > /dev/null 2>&1
-    rm -rf /etc/init.d/oxd-server > /dev/null 2>&1
-    rm -rf /lib/systemd/system/oxd-server.service > /dev/null 2>&1
-    rm -rf /opt/oxd-server > /dev/null 2>&1
+    rm -rf /var/log/client-api > /dev/null 2>&1
+    rm -rf /etc/init.d/client-api > /dev/null 2>&1
+    rm -rf /lib/systemd/system/client-api.service > /dev/null 2>&1
+    rm -rf /opt/client-api > /dev/null 2>&1
 fi
 
 mkdir -p /opt > /dev/null 2>&1
