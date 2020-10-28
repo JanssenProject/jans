@@ -92,10 +92,10 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
         assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
-        assertNotNull(clientInfoResponse.getClaim("oxAuthAppType"), "Unexpected result: oxAuthAppType not found");
-        assertNotNull(clientInfoResponse.getClaim("oxAuthIdTokenSignedResponseAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-        assertNotNull(clientInfoResponse.getClaim("oxAuthRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
-        assertNotNull(clientInfoResponse.getClaim("oxAuthScope"), "Unexpected result: oxAuthScope not found");
+        assertNotNull(clientInfoResponse.getClaim("jansAppTyp"), "Unexpected result: oxAuthAppType not found");
+        assertNotNull(clientInfoResponse.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
+        assertNotNull(clientInfoResponse.getClaim("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
+        assertNotNull(clientInfoResponse.getClaim("jansScope"), "Unexpected result: jansScope not found");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
@@ -155,10 +155,10 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
         assertNotNull(response2.getClaim("displayName"), "Unexpected result: displayName not found");
         assertNotNull(response2.getClaim("inum"), "Unexpected result: inum not found");
-        assertNotNull(response2.getClaim("oxAuthAppType"), "Unexpected result: oxAuthAppType not found");
-        assertNotNull(response2.getClaim("oxAuthIdTokenSignedResponseAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-        assertNotNull(response2.getClaim("oxAuthRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
-        assertNotNull(response2.getClaim("oxAuthScope"), "Unexpected result: oxAuthScope not found");
+        assertNotNull(response2.getClaim("jansAppTyp"), "Unexpected result: oxAuthAppType not found");
+        assertNotNull(response2.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
+        assertNotNull(response2.getClaim("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
+        assertNotNull(response2.getClaim("jansScope"), "Unexpected result: oxAuthScope not found");
     }
 
     @Test
