@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
-public class ApiResourceService { // todo maybe better UmaResourceProtectionService ?
+public class UmaResourceProtectionService {
 
 	@Inject
 	Logger logger;
@@ -42,16 +42,15 @@ public class ApiResourceService { // todo maybe better UmaResourceProtectionServ
 		List<String> resourceScopes = AuthUtil.getRequestedScopes(resourceInfo);
 		logger.debug("resourceScopes - " + resourceScopes);
 
-		// Verify Scopes
-		verifyScope(resourceScopes);
+		createScopeIfNeeded(resourceScopes);
 
 		// Verify Resources
-		verifyResource(resourceInfo, methods,  path);
+		createResourceIfNeeded(resourceInfo, methods,  path);
 		
 		return true;
 	}
 
-	private void verifyScope(List<String> resourceScopes) { // todo rename createScopeIfNeeded
+	private void createScopeIfNeeded(List<String> resourceScopes) { // todo rename createScopeIfNeeded
 	    // todo - cache scopes in guava cache. Otherwise you check same scopes again and again
 
 		for (String scopeName : resourceScopes) {
@@ -71,7 +70,7 @@ public class ApiResourceService { // todo maybe better UmaResourceProtectionServ
 		}
 	}
 
-	public void verifyResource(ResourceInfo resourceInfo, String methods, String path) { // todo rename createResourceIfNeeded
+	public void createResourceIfNeeded(ResourceInfo resourceInfo, String methods, String path) { // todo rename createResourceIfNeeded
 		List<UmaResource> resources = umaResourceService.findResources(resourceInfo.getClass().getName(), 1000);
 
 		// todo if there are more then one -> throw exception. There should be exactly one

@@ -76,8 +76,8 @@ public class ConfigSmtpResource extends BaseResource {
         return Response.ok(configurationService.getConfiguration().getSmtpConfiguration()).build();
     }
 
-    @GET
-    @Path(ApiConstants.STATUS)
+    @POST
+    @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response testSmtpConfiguration() throws EncryptionException {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();

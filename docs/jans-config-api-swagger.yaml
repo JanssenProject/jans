@@ -6,13 +6,13 @@ info:
     email: xxx@gluu.org
   license:
     name: License
-    url: 'https://github.com/GluuFederation/oxauth-config/blob/master/LICENSE'
+    url: 'https://github.com/JanssenProject/blob/master/LICENSE'
   version: '1.0'
 servers:
-  - url: 'https://gluu.org/'
+  - url: 'https://jans.io/'
 tags:
   - name: developers
-    description: jans-config enables access to the features available via the existing oxAuth API.
+    description: jans-config-api enables access to the features available via the existing Jans Authorization Server API.
   - name: Attribute
   - name: Default Authentication Method
   - name: Cache Configuration
@@ -32,13 +32,13 @@ tags:
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
 paths:
-  /api/v1/oxauth/config/oxauth:
+  /api/v1/config/oxauth:
     get:
-      summary: Gets all jans-auth-server configuration properties.
-      description: Gets all jans-auth-server configuration properties.
+      summary: Gets all Jans authorization server configuration properties.
+      description: Gets all Jans authorization server configuration properties.
       operationId: get-properties
       security:
-        - oxAuth:
+        - jans-auth:
           - read
       tags:
         - Configuration – Properties
@@ -49,7 +49,7 @@ paths:
             application/json:
               schema:
                 title: AppConfiguration
-                description: oxAuth config properties.
+                description: Jans Authorization Server config properties.
                 items:
                   $ref: '#/components/schemas/AppConfiguration'
         '401':
@@ -57,11 +57,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partially modifies jans-auth-server Application configuration properties.
-      description: Partially modifies jans-auth-server AppConfiguration properties.
+      summary: Partially modifies Jans authorization server Application configuration properties.
+      description: Partially modifies Jans authorization server AppConfiguration properties.
       operationId: patch-properties
       security:
-        - oxAuth:
+        - jans-auth:
           - write
       tags:
         - Configuration – Properties
@@ -80,17 +80,17 @@ paths:
             application/json:
               schema:
                 title: AppConfiguration
-                description: jans-auth-server config properties.
+                description: Jans authorization server config properties.
                 items:
                   $ref: '#/components/schemas/AppConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /fido2/config:
+  /api/v1/fido2/config:
     get:
-      summary: Gets oxAuth Fido2 configuration properties.
-      description: Gets oxAuth Fido2 configuration properties.
+      summary: Gets Jans Authorization Server Fido2 configuration properties.
+      description: Gets Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
         - Configuration – Fido2
@@ -153,7 +153,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates Fido2 configuration properties.
@@ -221,10 +221,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/attributes:
+  /api/v1/attributes:
     get:
       summary: Gets a list of Gluu attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
@@ -247,7 +247,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
       parameters:
         - schema:
@@ -291,7 +291,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       summary: Updates an existing attribute.
@@ -322,10 +322,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  '/api/v1/oxauth/attributes/{inum}':
+  '/api/v1/attributes/{inum}':
     parameters:
       - name: inum
         in: path
@@ -351,7 +351,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       summary: Deletes an attribute based on inum.
@@ -369,14 +369,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       summary: Partially modify a GluuAttribute.
       description: Partially modify a GluuAttribute.
       operationId: patch-attributes-by-inum
       security:
-        - oxAuth:
+        - jans-auth:
           - write
       tags:
         - Attribute
@@ -401,7 +401,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/oxauth/acrs:
+  /api/v1/acrs:
     get:
       summary: Gets default authentication method.
       description: Gets default authentication method.
@@ -427,7 +427,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates default authentication method.
@@ -455,10 +455,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/database/ldap:
+  /api/v1/config/database/ldap:
     get:
       summary: Gets list of existing LDAP configurations.
       description: Gets list of existing LDAP configurations. 
@@ -481,7 +481,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     post:
       summary: Adds a new LDAP configuration.
@@ -507,7 +507,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       summary: Updates LDAP configuration.
@@ -535,10 +535,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  '/api/v1/oxauth/config/database/ldap/{name}':
+  '/api/v1/config/database/ldap/{name}':
     parameters:
       - name: name
         in: path
@@ -566,7 +566,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       summary: Deletes an LDAP configuration.
@@ -584,14 +584,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       summary: Partially modify an LDAP configuration.
       description: Partially modify an LDAP configuration.
       operationId: patch-config-database-ldap-by-name
       security:
-        - oxAuth:
+        - jans-auth:
           - write
       tags:
         - Database - LDAP configuration
@@ -616,11 +616,225 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/oxauth/config/scripts:
+  /api/v1/config/database/ldap/test:
+    post:
+      summary: Tests a LDAP configurations by name.
+      description: Tests a LDAP configurations by name.
+      operationId: post-config-database-ldap-test
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: LDAP connection status true if connection is successfully established.
+                  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - read
+  /api/v1/config/database/couchbase:
+    get:
+      summary: Gets list of existing Couchbase configurations.
+      description: Gets list of existing Couchbase configurations. 
+      operationId: get-config-database-couchbase
+      tags:
+        - Database - Couchbase configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CouchbaseConfiguration
+                description: List of configured Couchbase configuration.
+                type: array
+                items:
+                  $ref: '#/components/schemas/CouchbaseConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - read
+    post:
+      summary: Adds a new Couchbase configuration.
+      description: Adds a new Couchbase configuration.
+      operationId: post-config-database-couchbase
+      tags:
+        - Database - Couchbase configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouchbaseConfiguration'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouchbaseConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - write
+    put:
+      summary: Updates Couchbase configuration.
+      description: Updates Couchbase configuration.
+      operationId: put-config-database-couchbase
+      tags:
+        - Database - Couchbase configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouchbaseConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouchbaseConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - write
+    parameters: []
+  /api/v1/config/database/couchbase/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Name of Couchbase configuration.
+        schema:
+          type: string
+    get:
+      summary: Gets a Couchbase configurations by name.
+      description: Gets a Couchbase configurations by name.
+      operationId: get-config-database-couchbase-by-name
+      tags:
+        - Database - Couchbase configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CouchbaseConfiguration
+                description: List of configured Couchbase configuration.
+                $ref: '#/components/schemas/CouchbaseConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - read
+    patch:
+      summary: Partially modify an Couchbase configuration.
+      description: Partially modify an Couchbase configuration.
+      operationId: patch-config-database-couchbase-by-name
+      tags:
+        - Database - Couchbase configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: maxConnections, value: 8 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouchbaseConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - write
+    delete:
+      summary: Deletes a Couchbase configurations by name.
+      description: Deletes a Couchbase configurations by name.
+      operationId: delete-config-database-couchbase-by-name
+      tags:
+        - Database - Couchbase configuration
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - write
+  /api/v1/config/database/couchbase/test:
+    post:
+      summary: Tests a Couchbase configurations by name.
+      description: Tests a Couchbase configurations by name.
+      operationId: post-config-database-couchbase-test
+      tags:
+        - Database - Couchbase configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouchbaseConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: Couchbase connection status true if connection is successfully established.
+                  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth:
+          - read
+  /api/v1/config/scripts/type/:
     get:
       summary: Gets a list of custom scripts.
       description: Gets a list of custom scripts.
-      operationId: get-config-oxauth-scripts
+      operationId: get-config-scripts
       tags:
         - Custom Scripts
       responses:
@@ -637,12 +851,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     post:
       summary: Adds a new custom script.
       description: Adds a new custom script.
-      operationId: post-config-oxauth-scripts
+      operationId: post-config-scripts
       tags:
         - Custom Scripts
       responses:
@@ -657,12 +871,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'      
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       summary: Updates a custom script.
       description: Updates a custom script.
-      operationId: put-config-oxauth-scripts
+      operationId: put-config-scripts
       tags:
         - Custom Scripts
       requestBody:
@@ -682,9 +896,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write    
-  /api/v1/oxauth/config/scripts/type/{type}:
+  /api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
           type: string
@@ -728,7 +942,7 @@ paths:
     get:
       summary: Gets list of scripts by type.
       description: Gets list of scripts by type.
-      operationId: get-config-oxauth-scripts-by-type
+      operationId: get-config-scripts-by-type
       tags:
         - Custom Scripts
       responses:
@@ -747,9 +961,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
-  /api/v1/oxauth/config/scripts/inum/{inum}:
+  /api/v1/config/scripts/inum/{inum}:
     parameters:
       - schema:
           type: string
@@ -760,7 +974,7 @@ paths:
     get:
       summary: Gets a script by Inum.
       description: Gets a script by Inum.
-      operationId: get-config-oxauth-scripts-by-inum
+      operationId: get-config-scripts-by-inum
       tags:
         - Custom Scripts
       responses:
@@ -777,9 +991,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
-  /api/v1/oxauth/config/scripts/{inum}:
+  /api/v1/config/scripts/{inum}:
     parameters:
       - schema:
           type: string
@@ -790,7 +1004,7 @@ paths:
     delete:
       summary: Deletes a custom script.
       description: Deletes a custom script.
-      operationId: delete-config-oxauth-scripts-by-inum
+      operationId: delete-config-scripts-by-inum
       tags:
         - Custom Scripts
       responses:
@@ -803,13 +1017,13 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write    
-  /api/v1/oxauth/config/cache:
+  /api/v1/config/cache:
     get:
       summary: Returns cache configuration.
       description: Returns cache configuration.
-      operationId: get-oxauth-config-cache
+      operationId: get-config-cache
       tags:
         - Cache Configuration
       responses:
@@ -1000,12 +1214,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     patch:
       summary: Partially modifies cache configuration.
       description: Partially modifies cache configuration.
-      operationId: patch-oxauth-config-cache
+      operationId: patch-config-cache
       tags:
         - Cache Configuration
       requestBody:
@@ -1202,13 +1416,13 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  /api/v1/oxauth/config/cache/memcached:
+  /api/v1/config/cache/memcached:
     get:
       summary: Returns Memcached cache configuration.
       description: Returns Memcached cache configuration.
-      operationId: get-oxauth-config-cache-memcached
+      operationId: get-config-cache-memcached
       tags:
         - Cache Configuration – Memcached
       responses:
@@ -1269,12 +1483,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates Memcached cache configuration.
       description: Updates Memcached cache configuration.
-      operationId: put-oxauth-config-cache-memcached
+      operationId: put-config-cache-memcached
       tags:
         - Cache Configuration – Memcached
       requestBody:
@@ -1388,14 +1602,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/cache/redis:
+  /api/v1/config/cache/redis:
     get:
       summary: Returns Redis cache configuration.
       description: Returns Redis cache configuration.
-      operationId: get-oxauth-config-cache-redis
+      operationId: get-config-cache-redis
       tags:
         - Cache Configuration – Redis
       responses:
@@ -1490,12 +1704,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates Redis cache configuration.
       description: Updates Redis cache configuration.
-      operationId: put-oxauth-config-cache-redis
+      operationId: put-config-cache-redis
       tags:
         - Cache Configuration – Redis
       requestBody:
@@ -1675,14 +1889,14 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/cache/in-memory:
+  /api/v1/config/cache/in-memory:
     get:
       summary: Returns in-Memory cache configuration.
       description: Returns in-Memory cache configuration.
-      operationId: get-oxauth-config-cache-in-memory
+      operationId: get-config-cache-in-memory
       tags:
         - Cache Configuration – in-Memory
       responses:
@@ -1707,12 +1921,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates in-Memory cache configuration.
       description: Updates in-Memory cache configuration.
-      operationId: put-oxauth-config-cache-in-memory
+      operationId: put-config-cache-in-memory
       tags:
         - Cache Configuration – in-Memory
       requestBody:
@@ -1752,14 +1966,14 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/cache/native-persistence:
+  /api/v1/config/cache/native-persistence:
     get:
       summary: Returns native persistence cache configuration.
       description: Returns native persistence cache configuration.
-      operationId: get-oxauth-config-cache-native-persistence
+      operationId: get-config-cache-native-persistence
       tags:
         - Cache Configuration – Native-Persistence
       responses:
@@ -1796,12 +2010,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       summary: Updates native persistence cache configuration.
       description: Updates native persistence cache configuration.
-      operationId: put-oxauth-config-cache-native-persistence
+      operationId: put-config-cache-native-persistence
       tags:
         - Cache Configuration – Native-Persistence
       requestBody:
@@ -1865,14 +2079,14 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/smtp:
+  /api/v1/config/smtp:
     get:
       summary: Returns SMTP server configuration.
       description: Returns SMTP server configuration.
-      operationId: get-oxauth-config-smtp
+      operationId: get-config-smtp
       tags:
         - Configuration – SMTP
       responses:
@@ -1918,12 +2132,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     post:
       summary: Adds SMTP server configuration.
       description: Adds SMTP server configuration.
-      operationId: post-oxauth-config-smtp
+      operationId: post-config-smtp
       tags:
         - Configuration – SMTP
       requestBody:
@@ -2005,12 +2219,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       summary: Updates SMTP server configuration.
       description: Updates SMTP server configuration.
-      operationId: put-oxauth-config-smtp
+      operationId: put-config-smtp
       tags:
         - Configuration – SMTP
       requestBody:
@@ -2094,12 +2308,12 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     delete:
       summary: Deletes SMTP server configuration.
       description: Deletes SMTP server configuration.
-      operationId: delete-oxauth-config-smtp
+      operationId: delete-config-smtp
       tags:
         - Configuration – SMTP
       responses:
@@ -2112,15 +2326,48 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/logging:
+  /api/v1/config/smtp/status:
+    get:
+      summary: Test SMTP server configuration.
+      description: Test SMTP server configuration.
+      operationId: test-config-smtp
+      tags:
+        - Configuration – SMTP
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: SMTP configuration status.
+                properties:
+                  service:
+                    description: Service name.
+                    type: string
+                    example: SMTP SERVER CONFIGURATION TEST
+                  status:
+                    description: Status of SMTP server connection test.
+                    type: string
+                    enum: 
+                    - OKAY
+                    - FAILED
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth:
+          - read
+  /api/v1/logging:
     get:
       tags:
         - Configuration – Logging
-      summary: Returns oxAuth logging settings.
-      description: Returns oxAuth logging settings.
+      summary: Returns Jans Authorization Server logging settings.
+      description: Returns Jans Authorization Server logging settings.
       operationId: get-config-logging
       responses:
         '200':
@@ -2134,7 +2381,7 @@ paths:
                   properties:
                     loggingLevel:
                       type: string
-                      description: Logging level for oxAuth logger.
+                      description: Logging level for Jans Authorization Server logger.
                       enum:
                         - TRACE
                         - DEBUG
@@ -2145,7 +2392,7 @@ paths:
                         - 'OFF'
                     loggingLayout:
                       type: string
-                      description: Logging layout used for oxAuth loggers.
+                      description: Logging layout used for Jans Authorization Server loggers.
                       enum:
                         - text
                         - json
@@ -2167,20 +2414,20 @@ paths:
                       items:
                         type: string
                       example:
-                        - /oxauth/img
-                        - /oxauth/stylesheet                 
+                        - /auth/img
+                        - /auth/stylesheet                 
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read   
     put:
       tags:
         - Configuration – Logging
-      summary: Updates oxAuth logging settings.
-      description: Updates oxAuth logging settings.
+      summary: Updates Jans Authorization Server logging settings.
+      description: Updates Jans Authorization Server logging settings.
       operationId: put-config-logging
       requestBody:
         content:
@@ -2192,7 +2439,7 @@ paths:
                 properties:
                   loggingLevel:
                     type: string
-                    description: Logging level for oxAuth logger.
+                    description: Logging level for Jans Authorization Server logger.
                     enum:
                       - TRACE
                       - DEBUG
@@ -2203,7 +2450,7 @@ paths:
                       - 'OFF'
                   loggingLayout:
                     type: string
-                    description: Logging layout used for oxAuth loggers.
+                    description: Logging layout used for Jans Authorization Server loggers.
                     enum:
                       - text
                       - json
@@ -2225,8 +2472,8 @@ paths:
                     items:
                       type: string
                     example:
-                      - /oxauth/img
-                      - /oxauth/stylesheet
+                      - /auth/img
+                      - /auth/stylesheet
       responses:
         '200':
           description: OK
@@ -2237,10 +2484,10 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  /api/v1/oxauth/config/jwks:
+  /api/v1/config/jwks:
     get:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
@@ -2288,7 +2535,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     put:
       tags:
@@ -2319,7 +2566,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       tags:
@@ -2343,9 +2590,9 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  /api/v1/oxauth/openid/clients:
+  /api/v1/openid/clients:
     get:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -2690,8 +2937,8 @@ paths:
                     disabled:
                       description: Specifies whether client is disabled.
                       type: boolean
-                    oxId:
-                      description: oxAuth Attribute Scope Id.
+                    jansId:
+                      description: Attribute Scope Id.
                       type: string
                     deletable:
                       description: Specifies whether client is deletable.
@@ -2734,7 +2981,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
       parameters:
         - schema:
@@ -3087,8 +3334,8 @@ paths:
                 disabled:
                   description: Specifies whether client is disabled.
                   type: boolean
-                oxId:
-                  description: oxAuth Attribute Scope Id.
+                jansId:
+                  description: Attribute Scope Id.
                   type: string
                 deletable:
                   description: Specifies whether client is deletable.
@@ -3461,8 +3708,8 @@ paths:
                   disabled:
                     description: Specifies whether client is disabled.
                     type: boolean
-                  oxId:
-                    description: oxAuth Attribute Scope Id.
+                  jansId:
+                    description: Attribute Scope Id.
                     type: string
                   deletable:
                     description: Specifies whether client is deletable.
@@ -3505,7 +3752,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       tags:
@@ -3846,8 +4093,8 @@ paths:
                 disabled:
                   description: Specifies whether client is disabled.
                   type: boolean
-                oxId:
-                  description: oxAuth Attribute Scope Id.
+                jansId:
+                  description: Jans Authorization Server Attribute Scope Id.
                   type: string
                 deletable:
                   description: Specifies whether client is deletable.
@@ -4220,8 +4467,8 @@ paths:
                   disabled:
                     description: Specifies whether client is disabled.
                     type: boolean
-                  oxId:
-                    description: oxAuth Attribute Scope Id.
+                  jansId:
+                    description: Jans Authorization Server Attribute Scope Id.
                     type: string
                   deletable:
                     description: Specifies whether client is deletable.
@@ -4266,9 +4513,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  '/api/v1/oxauth/openid/clients/{inum}':
+  '/api/v1/openid/clients/{inum}':
     parameters:
       - schema:
           type: string
@@ -4616,8 +4863,8 @@ paths:
                   disabled:
                     description: Specifies whether client is disabled.
                     type: boolean
-                  oxId:
-                    description: oxAuth Attribute Scope Id.
+                  jansId:
+                    description: Attribute Scope Id.
                     type: string
                   deletable:
                     description: Specifies whether client is deletable.
@@ -4660,7 +4907,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       tags:
@@ -4678,7 +4925,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       tags:
@@ -5028,8 +5275,8 @@ paths:
                   disabled:
                     description: Specifies whether client is disabled.
                     type: boolean
-                  oxId:
-                    description: oxAuth Attribute Scope Id.
+                  jansId:
+                    description: Jans Authorization Server Attribute Scope Id.
                     type: string
                   deletable:
                     description: Specifies whether client is deletable.
@@ -5074,9 +5321,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  /api/v1/oxauth/openid/sectors:
+  /api/v1/openid/sectoridentifiers:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5120,7 +5367,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     post:
       tags:
@@ -5188,7 +5435,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       tags:
@@ -5258,9 +5505,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  '/api/v1/oxauth/openid/sectors/{inum}':
+  /api/v1/openid/sectoridentifiers/{inum}:
     parameters:
       - name: inum
         in: path
@@ -5309,7 +5556,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       tags:
@@ -5327,7 +5574,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       tags:
@@ -5378,9 +5625,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  /api/v1/oxauth/uma/resources:
+  /api/v1/uma/resources:
     get:
       tags:
         - OAuth - UMA Resources
@@ -5432,7 +5679,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
       parameters:
         - schema:
@@ -5525,7 +5772,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       tags:
@@ -5608,9 +5855,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  '/api/v1/oxauth/uma/resources/{id}':
+  '/api/v1/uma/resources/{id}':
     parameters:
       - name: id
         in: path
@@ -5666,7 +5913,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       tags:
@@ -5684,7 +5931,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       tags:
@@ -5742,9 +5989,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
-  /api/v1/oxauth/scopes:
+  /api/v1/scopes:
     get:
       tags:
         - OAuth - Scopes
@@ -5766,7 +6013,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
       parameters:
         - schema:
@@ -5808,7 +6055,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     put:
       tags:
@@ -5835,10 +6082,10 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     parameters: []
-  '/api/v1/oxauth/scopes/{inum}':
+  /api/v1/scopes/{inum}:
     parameters:
       - schema:
           type: string
@@ -5865,7 +6112,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - read
     delete:
       tags:
@@ -5883,7 +6130,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
     patch:
       tags:
@@ -5913,11 +6160,11 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oxAuth:
+        - jans-auth:
           - write
 components:
   securitySchemes:
-    oxAuth:
+    jans-auth:
       type: oauth2
       description: Authorization
       flows:
@@ -6137,12 +6384,16 @@ components:
     CouchbaseConfiguration:
       type: object
       required:
+        - configId
         - userName
         - userPassword
         - servers
         - defaultBucket
         - buckets
       properties:
+        configId:
+          type: string
+          description: Unique identifier
         userName:
           type: string
           description: Couchbase server user.
@@ -6266,43 +6517,43 @@ components:
         baseEndpoint:
           type: string
           description: The base URL for endpoints.
-          example: 'https://server.example.com/oxauth/restv1'
+          example: 'https://server.example.com/restv1'
         authorizationEndpoint:
           type: string
           description: The authorization endpoint URL.
-          example: 'https://server.example.com/oxauth/restv1/authorize'
+          example: 'https://server.example.com/restv1/authorize'
         tokenEndpoint:
           type: string
           description: The token endpoint URL.
-          example: 'https://server.example.com/oxauth/restv1/token'
+          example: 'https://server.example.com/restv1/token'
         tokenRevocationEndpoint:
           type: string
           description: The URL for the access_token or refresh_token revocation endpoint.
-          example: 'https://server.example.com/oxauth/restv1/revoke'
+          example: 'https://server.example.com/restv1/revoke'
         userInfoEndpoint:
           type: string
           description: The User Info endpoint URL.
-          example: 'https://server.example.com/oxauth/restv1/userinfo'
+          example: 'https://server.example.com/restv1/userinfo'
         clientInfoEndpoint:
           type: string
           description: The Client Info endpoint URL.
-          example: 'https://server.example.com/oxauth/restv1/clientinfo'
+          example: 'https://server.example.com/restv1/clientinfo'
         checkSessionIFrame:
           type: string
           description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
-          example: 'https://server.example.com/oxauth/opiframe.htm'
+          example: 'https://server.example.com/opiframe.htm'
         endSessionEndpoint:
           type: string
           description: URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP.
-          example: 'https://server.example.com/oxauth/restv1/end_session'
+          example: 'https://server.example.com/restv1/end_session'
         jwksUri:
           type: string
           description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
-          example: 'https://server.example.com/oxauth/restv1/jwks'
+          example: 'https://server.example.com/restv1/jwks'
         registrationEndpoint:
           type: string
           description: URL of the Registration Endpoint.
-          example: 'https://server.example.com/oxauth/restv1/register'
+          example: 'https://server.example.com/restv1/register'
         openIdDiscoveryEndpoint:
           type: string
           description: URL for the Discovery Endpoint.
@@ -6314,11 +6565,11 @@ components:
         idGenerationEndpoint:
           type: string
           description: URL for the ID Generation Endpoint.
-          example: 'https://server.example.com/oxauth/restv1/id'
+          example: 'https://server.example.com/restv1/id'
         introspectionEndpoint:
           type: string
           description: URL for the Introspection Endpoint.
-          example: 'https://server.example.com/oxauth/restv1/introspection'
+          example: 'https://server.example.com/restv1/introspection'
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
           description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
@@ -6326,7 +6577,7 @@ components:
         umaConfigurationEndpoint:
           type: string
           description: URL for the UMA Configuration Endpoint.
-          example: 'https://server.example.com/oxauth/restv1/uma2-configuration'
+          example: 'https://server.example.com/restv1/uma2-configuration'
         sectorIdentifierEndpoint:
           type: string
           description: URL for the Sector Identifier Endpoint.
@@ -6799,7 +7050,7 @@ components:
           description: OpenID Connect Version.
           minLength: 1
           example: openidconnect-1.0
-        oxId:
+        jansId:
           type: string
           description: URL for the Inum generator Service.
           format: url
@@ -7149,7 +7400,7 @@ components:
           uniqueItems: true
           items:
             type: string
-          example: '\"/oxauth/img\", \"/oxauth/stylesheet\"'
+          example: '\"/auth/img\", \"/auth/stylesheet\"'
         externalLoggerConfiguration:
           type: string
           description: Path to external log4j2 logging configuration.
@@ -7290,7 +7541,7 @@ components:
           description: Sets cookie domain for all cookies created by OP.
         loggingLayout:
           type: string
-          description: Logging layout used for oxAuth loggers.
+          description: Logging layout used for Jans Authorization Server loggers.
           enum:
             - text
             - json
@@ -7623,4 +7874,4 @@ components:
                 type: string
             showInConfigurationEndpoint:
               type: boolean
-       
+    
