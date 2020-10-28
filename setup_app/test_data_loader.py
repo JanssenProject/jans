@@ -122,7 +122,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         oxAuthConfDynamic_changes = {
                                     'dynamicRegistrationCustomObjectClass':  'oxAuthClientCustomAttributes',
-                                    'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "oxIncludeClaimsInIdToken" ],
+                                    'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
                                     'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code" ],
                                     'legacyIdTokenClaims': True,
@@ -153,9 +153,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'introspectionScriptBackwardCompatibility': False,
                                     'spontaneousScopeLifetime': 0,
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
+                                    'sessionIdRequestParameterEnabled': True,
+                                    'skipRefreshTokenDuringRefreshing': False
                                     }
 
-        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
+        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA')
 
         self.dbUtils.set_oxAuthConfDynamic(oxAuthConfDynamic_changes)
         

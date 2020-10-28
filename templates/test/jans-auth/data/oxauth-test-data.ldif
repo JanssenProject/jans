@@ -1,66 +1,66 @@
 dn: inum=18CC,ou=attributes,o=jans
-description: oxAuth Client Application Type
-displayName: oxAuth Client Application Type
+description: Jans Client Application Type
+displayName: Jans Client Application Type
 inum: 18CC
 jansAttrEditTyp: admin
-jansAttrName: oxAuthAppType
-jansAttrOrigin: oxAuthClient
+jansAttrName: jansAppTyp
+jansAttrOrigin: jansClnt
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansClaimName: oxAuthAppType
+jansClaimName: jansAppTyp
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:jans:dir:attribute-def:oxAuthAppType
+urn: urn:jans:dir:attribute-def:jansAppTyp
 
 dn: inum=18CD,ou=attributes,o=jans
-description: oxAuth Client ID Token Signed Response Algorithm
-displayName: oxAuth Client ID Token Signed Response Algorithm
+description: Jans Client ID Token Signed Response Algorithm
+displayName: Jans Client ID Token Signed Response Algorithm
 inum: 18CD
 jansAttrEditTyp: admin
-jansAttrName: oxAuthIdTokenSignedResponseAlg
-jansAttrOrigin: oxAuthClient
+jansAttrName: jansIdTknSignedRespAlg
+jansAttrOrigin: jansClnt
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansClaimName: oxAuthIdTokenSignedResponseAlg
+jansClaimName: jansIdTknSignedRespAlg
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:jans:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
+urn: urn:jans:dir:attribute-def:jansIdTknSignedRespAlg
 
 dn: inum=18CE,ou=attributes,o=jans
-description: oxAuth Client Redirect URI
-displayName: oxAuth Client Redirect URI
+description: Jans Client Redirect URI
+displayName: Jans Client Redirect URI
 inum: 18CE
 jansAttrEditTyp: admin
-jansAttrName: oxAuthRedirectURI
-jansAttrOrigin: oxAuthClient
+jansAttrName: jansRedirectURI
+jansAttrOrigin: jansClnt
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansClaimName: oxAuthRedirectURI
+jansClaimName: jansRedirectURI
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:jans:dir:attribute-def:oxAuthRedirectURI
+urn: urn:jans:dir:attribute-def:jansRedirectURI
 
 dn: inum=18CF,ou=attributes,o=jans
-description: oxAuth Client Scope
-displayName: oxAuth Client Scope
+description: Jans Client Scope
+displayName: Jans Client Scope
 inum: 18CF
 jansAttrEditTyp: admin
-jansAttrName: oxAuthScope
-jansAttrOrigin: oxAuthClient
+jansAttrName: jansScope
+jansAttrOrigin: jansClnt
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansClaimName: oxAuthScope
+jansClaimName: jansScope
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
-urn: urn:jans:dir:attribute-def:oxAuthScope
+urn: urn:jans:dir:attribute-def:jansScope
 
 dn: inum=6609,ou=attributes,o=jans
 changetype: modify
@@ -140,7 +140,7 @@ objectClass: jansScope
 objectClass: top
 
 dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
-displayName: oxAuth Test Client (don't remove)
+displayName: Jans Test Client (don't remove)
 inum: %(oxauthClient_4_inum)s
 jansAppTyp: web
 jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
@@ -169,7 +169,7 @@ objectClass: top
 objectClass: jansClnt
 
 dn: inum=%(oxauthClient_2_inum)s,ou=clients,o=jans
-displayName: oxAuth Test Resource Server Client (don't remove)
+displayName: Jans Test Resource Server Client (don't remove)
 inum: %(oxauthClient_2_inum)s
 jansAppTyp: web
 jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
@@ -190,7 +190,7 @@ objectClass: top
 objectClass: jansClnt
 
 dn: inum=%(oxauthClient_3_inum)s,ou=clients,o=jans
-displayName: oxAuth Test Requesting Party Client (don't remove)
+displayName: Jans Test Requesting Party Client (don't remove)
 inum: %(oxauthClient_3_inum)s
 jansAppTyp: web
 jansClntSecret: %(oxauthClient_3_encoded_pw)s
