@@ -42,10 +42,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     @Inject
     PatService patService;
-    
-    @Inject
-    ApiResourceService apiResourceService;
-
+        
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     Instance<PersistenceEntryManager> persistenceManager;
