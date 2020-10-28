@@ -6,7 +6,7 @@ jansDefScope: true
 jansId: openid
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=43F1,ou=scopes,o=jans
 description: View your basic profile info.
@@ -31,7 +31,7 @@ jansDefScope: false
 jansId: profile
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=764C,ou=scopes,o=jans
 description: View your email address.
@@ -43,7 +43,7 @@ jansDefScope: false
 jansId: email
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=C17A,ou=scopes,o=jans
 description: View your address.
@@ -62,7 +62,7 @@ jansGrpClaims: true
 jansId: address
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=D491,ou=scopes,o=jans
 description: View your phone number.
@@ -74,7 +74,7 @@ jansDefScope: false
 jansId: phone
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=341A,ou=scopes,o=jans
 description: View the client info.
@@ -85,7 +85,7 @@ jansClaim: inum=29DA,ou=attributes,o=jans
 jansDefScope: false
 jansId: clientinfo
 jansScopeTyp: openid
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=10B2,ou=scopes,o=jans
@@ -97,7 +97,7 @@ jansDefScope: false
 jansId: user_name
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=6D99,ou=scopes,o=jans
 description: Obtain UMA PAT.
@@ -107,7 +107,7 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: true
 jansId: uma_protection
 jansScopeTyp: openid
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=6D90,ou=scopes,o=jans
@@ -118,7 +118,7 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: true
 jansId: oxd
 jansScopeTyp: openid
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=7D90,ou=scopes,o=jans
@@ -129,7 +129,7 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: false
 jansId: revoke_session
 jansScopeTyp: openid
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=8A01,ou=scopes,o=jans
@@ -141,7 +141,7 @@ jansDefScope: false
 jansId: mobile_phone
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=C4F5,ou=scopes,o=jans
 description: View your user permission and roles.
@@ -151,7 +151,7 @@ jansDefScope: true
 jansId: permission
 jansScopeTyp: dynamic
 jansScrDn: inum=CB5B-3211,ou=scripts,o=jans
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=C4F6,ou=scopes,o=jans
@@ -162,5 +162,5 @@ jansDefScope: true
 jansId: offline_access
 jansScopeTyp: openid
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 

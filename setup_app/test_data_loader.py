@@ -145,7 +145,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'softwareStatementValidationClaimName': 'jwks_uri',
                                     'softwareStatementValidationType': 'jwks_uri',
-                                    'umaGrantAccessIfNoPolicies': true
+                                    'umaGrantAccessIfNoPolicies': true,
+                                    'rejectJwtWithNoneAlg': false,
+                                    'removeRefreshTokensForClientOnLogout': true,
+                                    'fapiCompatibility': false,
+                                    'forceIdTokenHintPrecense': false,
+                                    'introspectionScriptBackwardCompatibility': false,
+                                    'spontaneousScopeLifetime': 0,
+                                    'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     }
 
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')

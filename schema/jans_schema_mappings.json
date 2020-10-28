@@ -210,7 +210,7 @@
     "oxAuthConfWebKeys": "jansConfWebKeys",
     "oxAuthConfiguration": "jansAppConf",
     "oxAuthContact": "jansContact",
-    "oxAuthCustomScope": "jansCustomScope",
+    "oxAuthCustomScope": "jansScope",
     "oxAuthDefaultAcrValues": "jansDefAcrValues",
     "oxAuthDefaultMaxAge": "jansDefMaxAge",
     "oxAuthExtraConf": "jansExtraConf",
