@@ -13,7 +13,7 @@
 
 
 # Read config
-source /etc/default/jans-client-api-server
+source /etc/default/client-api
 
 ##################################################
 # Set the name which is used by other variables.
@@ -257,7 +257,7 @@ get_pid() {
                 PID_NUM=$(cat $JANS_CLIENT_API_PID_FILE)
                 echo "$PID_NUM"
         else
-                PID_NUM="`ps -eaf|grep -i java|grep -v grep|grep -i 'jans-client-api-conf.json'|awk '{print $2}'`"
+                PID_NUM="`ps -eaf|grep -i java|grep -v grep|grep -i 'client-api-conf.json'|awk '{print $2}'`"
                 ###For one more possible bug, find and kill jans-client-api-server
                 if [ "x$PID_NUM" != "x" ]; then
                         echo "$PID_NUM"

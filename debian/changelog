@@ -1,4 +1,4 @@
-oxd-server %VERSION% %DIST%; urgency=low
+jans-client-api-server %VERSION% %DIST%; urgency=low
 
   * New version %VERSION%
 

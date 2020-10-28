@@ -1,4 +1,4 @@
-Source: oxd-server
+Source: jans-client-api-server
 Section: java
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
@@ -11,7 +11,7 @@ Architecture: all
 Depends: ${shlibs:Depends},
  ${misc:Depends},
 Description: plugins for OpenID and UMA
- oxd-server is a middleware service web application
+ jans-client-api-server is a middleware service web application
  developers can use to facilitate user authentication
  and authorization with an external OAuth 2.0
  identity provider.
