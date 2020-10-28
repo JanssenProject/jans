@@ -117,7 +117,7 @@ jansId: org_name
 jansScopeTyp: dynamic
 jansScrDn: inum=031C-5621,ou=scripts,o=jans
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=7D02,ou=scopes,o=jans
 description: Dynamic scope work_phone
@@ -127,7 +127,7 @@ jansId: work_phone
 jansScopeTyp: dynamic
 jansScrDn: inum=031C-5622,ou=scripts,o=jans
 objectClass: top
-objectClass: jansCustomScope
+objectClass: jansScope
 
 dn: inum=0465-1DEA,ou=scopes,o=jans
 description: Custom scope for tests
@@ -136,7 +136,7 @@ jansClaim: inum=D2E0,ou=attributes,o=jans
 jansDefScope: true
 jansId: test
 jansScopeTyp: openid
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
@@ -213,7 +213,7 @@ inum: 5214-40D1
 jansId: http://photoz.example.com/dev/scopes/view
 jansScopeTyp: uma
 jansUmaPolicyScrDn: inum=2DAF-F995,ou=scripts,o=@1736-179E-AA60-16B28F7C-B9AB,o=jans
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=B6EA-B301,ou=scopes,o=jans
@@ -221,7 +221,7 @@ displayName: Add/Edit
 inum: B6EA-B301
 jansId: modify
 jansScopeTyp: uma
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=03F8-EDD7,ou=scopes,o=jans
@@ -229,11 +229,11 @@ displayName: All
 inum: 03F8-EDD7
 jansId: http://photoz.example.com/dev/scopes/all
 jansScopeTyp: uma
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: inum=C17A,ou=scopes,o=jans
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 jansDefScope: true
 description: View your address.

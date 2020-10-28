@@ -5120,7 +5120,7 @@
         "objectclass"
       ],
       "names": [
-        "jansCustomScope"
+        "jansScope"
       ],
       "oid": "jansObjClass",
       "sup": [
