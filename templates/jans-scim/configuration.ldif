@@ -4,7 +4,7 @@ inum: 8CAD-B06D
 jansId: https://%(hostname)s/jans-auth/restv1/uma/scopes/scim_access
 jansScopeTyp: uma
 jansUmaPolicyScrDn: inum=2DAF-F9A5,ou=scripts,o=jans
-objectClass: jansCustomScope
+objectClass: jansScope
 objectClass: top
 
 dn: jansId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=jans
