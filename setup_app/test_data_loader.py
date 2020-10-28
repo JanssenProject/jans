@@ -82,13 +82,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
 
         if self.getMappingType('ldap'):
-            template_text = self.readFile(os.path.join(self.template_base, 'oxauth/server/config-oxauth-test-ldap.properties.nrnd'))
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-ldap.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))            
             config_oxauth_test_properties += '#ldap\n' +  rendered_text
 
 
         if self.getMappingType('couchbase'):
-            template_text = self.readFile(os.path.join(self.template_base, 'oxauth/server/config-oxauth-test-couchbase.properties.nrnd'))
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-couchbase.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
@@ -145,12 +145,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
                                     'softwareStatementValidationClaimName': 'jwks_uri',
                                     'softwareStatementValidationType': 'jwks_uri',
-                                    'umaGrantAccessIfNoPolicies': true,
-                                    'rejectJwtWithNoneAlg': false,
-                                    'removeRefreshTokensForClientOnLogout': true,
-                                    'fapiCompatibility': false,
-                                    'forceIdTokenHintPrecense': false,
-                                    'introspectionScriptBackwardCompatibility': false,
+                                    'umaGrantAccessIfNoPolicies': True,
+                                    'rejectJwtWithNoneAlg': False,
+                                    'removeRefreshTokensForClientOnLogout': True,
+                                    'fapiCompatibility': False,
+                                    'forceIdTokenHintPrecense': False,
+                                    'introspectionScriptBackwardCompatibility': False,
                                     'spontaneousScopeLifetime': 0,
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     }
@@ -265,11 +265,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         # Prepare for tests run
         #install_command, update_command, query_command, check_text = self.get_install_commands()
         #self.run_command(install_command.format('git'))
-        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Client/profiles/ce_test'])
-        #self.run([self.cmd_mkdir, '-p', 'oxAuth/Server/profiles/ce_test'])
+        #self.run([self.cmd_mkdir, '-p', 'jans-auth/Client/profiles/ce_test'])
+        #self.run([self.cmd_mkdir, '-p', 'jans-auth/Server/profiles/ce_test'])
         # Todo: Download and unzip file test_data.zip from CE server.
-        # Todo: Copy files from unziped folder test/jans-auth/client/* into oxAuth/Client/profiles/ce_test
-        # Todo: Copy files from unziped folder test/jans-auth/server/* into oxAuth/Server/profiles/ce_test
+        # Todo: Copy files from unziped folder test/jans-auth/client/* into jans-auth/Client/profiles/ce_test
+        # Todo: Copy files from unziped folder test/jans-auth/server/* into jans-auth/Server/profiles/ce_test
         #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_httpd', '-keystore', 'cacerts', '-file', '%s/httpd.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
         #self.run([self.cmd_keytool, '-import', '-alias', 'seed22.gluu.org_opendj', '-keystore', 'cacerts', '-file', '%s/opendj.crt' % self.certFolder, '-storepass', 'changeit', '-noprompt'])
  
