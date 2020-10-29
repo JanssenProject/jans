@@ -15,10 +15,7 @@ import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -35,7 +32,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
     @Test
     public void requestClientInfoImplicitFlow(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) {
         showTitle("requestClientInfoImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -92,9 +89,9 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
         assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
-        assertNotNull(clientInfoResponse.getClaim("jansAppTyp"), "Unexpected result: oxAuthAppType not found");
-        assertNotNull(clientInfoResponse.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-        assertNotNull(clientInfoResponse.getClaim("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
+        assertNotNull(clientInfoResponse.getClaim("jansAppTyp"), "Unexpected result: jansAppTyp not found");
+        assertNotNull(clientInfoResponse.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: jansIdTknSignedRespAlg not found");
+        assertNotNull(clientInfoResponse.getClaim("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
         assertNotNull(clientInfoResponse.getClaim("jansScope"), "Unexpected result: jansScope not found");
     }
 
@@ -104,7 +101,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
             final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientInfoPasswordFlow");
 
-        List<GrantType> grantTypes = Arrays.asList(
+        List<GrantType> grantTypes = Collections.singletonList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
@@ -130,12 +127,10 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        String username = userId;
-        String password = userSecret;
         String scope = "clientinfo";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
+        TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope,
                 clientId, clientSecret);
 
         showClient(tokenClient);
@@ -155,10 +150,10 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
         assertNotNull(response2.getClaim("displayName"), "Unexpected result: displayName not found");
         assertNotNull(response2.getClaim("inum"), "Unexpected result: inum not found");
-        assertNotNull(response2.getClaim("jansAppTyp"), "Unexpected result: oxAuthAppType not found");
-        assertNotNull(response2.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-        assertNotNull(response2.getClaim("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
-        assertNotNull(response2.getClaim("jansScope"), "Unexpected result: oxAuthScope not found");
+        assertNotNull(response2.getClaim("jansAppTyp"), "Unexpected result: jansAppTyp not found");
+        assertNotNull(response2.getClaim("jansIdTknSignedRespAlg"), "Unexpected result: jansIdTknSignedRespAlg not found");
+        assertNotNull(response2.getClaim("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
+        assertNotNull(response2.getClaim("jansScope"), "Unexpected result: jansScope not found");
     }
 
     @Test
