@@ -39,6 +39,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String idToken;
     private String state;
     private String sessionId;
+    private String sid;
     private Map<String, String> customParams;
     private ResponseMode responseMode;
 
@@ -111,6 +112,10 @@ public class AuthorizationResponse extends BaseResponse {
                     if (params.containsKey(SESSION_ID)) {
                         sessionId = params.get(SESSION_ID);
                         params.remove(SESSION_ID);
+                    }
+                    if (params.containsKey(SID)) {
+                        sid = params.get(SID);
+                        params.remove(SID);
                     }
                     if (params.containsKey(ACCESS_TOKEN)) {
                         accessToken = params.get(ACCESS_TOKEN);
@@ -193,6 +198,14 @@ public class AuthorizationResponse extends BaseResponse {
      */
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
     }
 
     /**

@@ -85,13 +85,14 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
         assertNotNull(authorizationResponse.getSessionId(), "The session_id is null");
+        assertNotNull(authorizationResponse.getSid(), "The sid is null");
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. End session
-        String endSessionId1 = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId1);
-        endSessionRequest1.setSessionId(authorizationResponse.getSessionId());
+        String state1 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, state1);
+        endSessionRequest1.setSessionId(authorizationResponse.getSid());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
