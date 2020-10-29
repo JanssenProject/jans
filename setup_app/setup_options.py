@@ -42,7 +42,7 @@ def get_setup_options():
     parser.add_argument('-state', help="State field used for generating X.509 certificates")
     parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
-    parser.add_argument('-application-max-ram', help="Used as the LDAP directory manager password")
+    parser.add_argument('-application-max-ram', help="Total memory (in KB) to be used by Jannses applications")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--install-config-api', help="Jans Auth Config Api", action='store_true')
     #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
