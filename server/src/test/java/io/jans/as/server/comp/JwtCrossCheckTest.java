@@ -158,7 +158,7 @@ public class JwtCrossCheckTest extends BaseTest {
                 .issuer("1202.d50a4eeb-ab5d-474b-aaaf-e4aa47bc54a5")
                 .expirationTime(new Date(1575559276888000L))
                 .issueTime(new Date(1575559276888000L))
-                .audience("https://gomer-vbox/oxauth/restv1/token")
+                .audience("https://gomer-vbox/jans-auth/restv1/token")
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(
@@ -181,7 +181,7 @@ public class JwtCrossCheckTest extends BaseTest {
         jwt.getClaims().setIssuer("1202.d50a4eeb-ab5d-474b-aaaf-e4aa47bc54a5");
         jwt.getClaims().setExpirationTime(new Date(1575559276888000L));
         jwt.getClaims().setIssuedAt(new Date(1575559276888000L));
-        jwt.getClaims().setAudience("https://gomer-vbox/oxauth/restv1/token");
+        jwt.getClaims().setAudience("https://gomer-vbox/jans-auth/restv1/token");
 
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), null, algorithm);
         jwt.setEncodedSignature(signature);

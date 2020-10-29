@@ -23,7 +23,7 @@ public class ClientInfoRequest extends BaseRequest {
     /**
      * Constructs a Client Info Request.
      *
-     * @param accessToken The access token obtained from the oxAuth authorization request.
+     * @param accessToken The access token obtained from the Jans Auth authorization request.
      */
     public ClientInfoRequest(String accessToken) {
         this.accessToken = accessToken;
@@ -31,18 +31,18 @@ public class ClientInfoRequest extends BaseRequest {
     }
 
     /**
-     * Returns the access token obtained from oxAuth authorization request.
+     * Returns the access token obtained from Jans Auth authorization request.
      *
-     * @return The access token obtained from oxAuth authorization request.
+     * @return The access token obtained from Jans Auth authorization request.
      */
     public String getAccessToken() {
         return accessToken;
     }
 
     /**
-     * Sets the access token obtained from oxAuth authorization request.
+     * Sets the access token obtained from Jans Auth authorization request.
      *
-     * @param accessToken The access token obtained from oxAuth authorization request.
+     * @param accessToken The access token obtained from Jans Auth authorization request.
      */
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;

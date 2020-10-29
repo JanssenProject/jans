@@ -2340,7 +2340,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         String accessToken = authorizationResponse1.getAccessToken();
 
-        // 4. Downstream client may be authorized by oxAuth presenting the access token and client credentials
+        // 4. Downstream client may be authorized by Jans Auth presenting the access token and client credentials
         responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
@@ -2467,7 +2467,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         String accessToken = authorizationResponse1.getAccessToken();
 
-        // 4. Downstream client may be authorized by oxAuth presenting the access token and client credentials
+        // 4. Downstream client may be authorized by Jans Auth presenting the access token and client credentials
         responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);

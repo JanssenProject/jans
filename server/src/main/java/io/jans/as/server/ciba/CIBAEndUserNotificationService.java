@@ -73,7 +73,7 @@ public class CIBAEndUserNotificationService {
         String key = cibaEncryptionService.decrypt(appConfiguration.getCibaEndUserNotificationConfig()
                 .getNotificationKey(), true);
         String to = deviceRegistrationToken;
-        String title = "oxAuth Authentication Request";
+        String title = "Jans Auth Authentication Request";
         String body = "Client Initiated Backchannel Authentication (CIBA)";
 
         RedirectUri authorizationRequestUri = new RedirectUri(appConfiguration.getAuthorizationEndpoint());

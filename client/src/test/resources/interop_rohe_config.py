@@ -43,7 +43,7 @@ info = {
         "contact": ["yuriy@gluu.com"],
         "application_type": "web",
         "application_name": "OIC test tool",
-        "key_export_url": "https://${test.server.name}/oxauth-client/test/resources/jwks.json",
+        "key_export_url": "https://${test.server.name}/jans-auth-client/test/resources/jwks.json",
         "keys": {
             "RSA": {
                 "key": "keys/pyoidc",

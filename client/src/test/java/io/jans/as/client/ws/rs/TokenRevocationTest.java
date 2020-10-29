@@ -27,7 +27,7 @@ import java.util.UUID;
 import static org.testng.Assert.*;
 
 /**
- * The oxAuth authorization server's revocation policy acts as follows:
+ * The Jans Auth authorization server's revocation policy acts as follows:
  * The revocation of a particular token cause the revocation of related
  * tokens and the underlying authorization grant.  If the particular
  * token is a refresh token, then the authorization server will also

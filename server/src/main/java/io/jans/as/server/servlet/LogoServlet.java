@@ -28,7 +28,7 @@ public class LogoServlet extends HttpServlet {
 
 	private static final Logger log = LoggerFactory.getLogger(LogoServlet.class);
 
-	public static final String BASE_OXAUTH_LOGO_PATH = "/opt/gluu/jetty/oxauth/custom/static/logo/";
+	public static final String BASE_OXAUTH_LOGO_PATH = "/opt/gluu/jetty/jans-auth/custom/static/logo/";
 
 	@Inject
 	private OrganizationService organizationService;
