@@ -504,7 +504,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("myschema://client.example.com/cb"); // URI with custom schema
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "Jans Auth native test app with custom schema in URI",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
@@ -529,7 +529,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth native test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "Jans Auth native test app",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -555,7 +555,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("http://localhost/cb"); // URI with HTTP schema
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth web test app with HTTP schema in URI",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
@@ -580,7 +580,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("http://127.0.0.1/cb"); // URI with HTTP schema
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth web test app with HTTP schema in URI",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
@@ -605,7 +605,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("http://www.example.com/cb"); // URI with HTTP schema
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth web test app with HTTP schema in URI",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
@@ -628,7 +628,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI", redirectUriList);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth web test app with HTTP schema in URI", redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

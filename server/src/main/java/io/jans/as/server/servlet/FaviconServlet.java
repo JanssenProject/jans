@@ -30,7 +30,7 @@ public class FaviconServlet extends HttpServlet {
 	private static final long serialVersionUID = 5445488800130871634L;
 
 	private static final Logger log = LoggerFactory.getLogger(FaviconServlet.class);
-	public static final String BASE_OXAUTH_FAVICON_PATH = "/opt/gluu/jetty/oxauth/custom/static/favicon/";
+	public static final String BASE_OXAUTH_FAVICON_PATH = "/opt/gluu/jetty/jans-auth/custom/static/favicon/";
 
 	@Override
 	protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response)

@@ -105,7 +105,7 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getOpPolicyUri(), "The opPolicyUri is null");
         assertNotNull(response.getOpTosUri(), "The opTosUri is null");
 
-        // oxAuth #917: Add dynamic scopes and claims to discovery
+        // Jans Auth #917: Add dynamic scopes and claims to discovery
         Map<String, List<String>> scopeToClaims = response.getScopeToClaimsMapping();
         List<String> scopesSupported = response.getScopesSupported();
         List<String> claimsSupported = response.getClaimsSupported();

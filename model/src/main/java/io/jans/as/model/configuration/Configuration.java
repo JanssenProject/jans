@@ -7,7 +7,7 @@
 package io.jans.as.model.configuration;
 
 /**
- * base interface for all oxAuth configurations
+ * base interface for all Jans Auth configurations
  *
  * @author Yuriy Movchan
  * @version 04/12/2017

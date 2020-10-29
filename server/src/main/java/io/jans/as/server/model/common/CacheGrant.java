@@ -125,7 +125,7 @@ public class CacheGrant implements Serializable {
             expiresIn = grant.getAuthorizationCode().getExpiresIn();
         } else {
             expiresIn = appConfiguration.getAccessTokenLifetime();
-            // oxAuth #830 Client-specific access token expiration
+            // Jans Auth #830 Client-specific access token expiration
             if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
                 expiresIn = client.getAccessTokenLifetime();
             }
