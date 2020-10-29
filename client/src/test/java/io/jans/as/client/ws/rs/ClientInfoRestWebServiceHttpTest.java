@@ -60,7 +60,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = new ArrayList<String>();
+        List<String> scopes = new ArrayList<>();
         scopes.add("clientinfo");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -98,7 +98,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestClientInfoPasswordFlow(
-            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) {
         showTitle("requestClientInfoPasswordFlow");
 
         List<GrantType> grantTypes = Collections.singletonList(
@@ -157,7 +157,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestClientInfoInvalidRequest() throws Exception {
+    public void requestClientInfoInvalidRequest() {
         showTitle("requestClientInfoInvalidRequest");
 
         ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
@@ -170,7 +170,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestClientInfoInvalidToken() throws Exception {
+    public void requestClientInfoInvalidToken() {
         showTitle("requestClientInfoInvalidToken");
 
         ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
