@@ -27,21 +27,32 @@ ip=
 hostname=
 
 
-### Backend type. For opendj, both will be opendj
-ldap_type=
-opendj_type=
-
 ### This information is needed for self signed certificate
 orgName=
 countryCode=
 city=
 state=
+admin_email=
+
 
 ## Do NOT modify below this part unless you know what you're doing
 
 ### The password to be used in Java KeyStore
 jksPass=
 
-### The cn=Directory Manager's password in ldap
+### Install local Directory Manager and set cn=Directory Manager's password in ldap
+wrends_install=1
 ldapPass=
 
+### Total memory (in KB) to be used by Jannses applications. This is typically 
+### 80% of your physical memory. If you have 8GB of ram, value will be 6553
+application_max_ram=
+
+### If you want to install Janssen Config Api, set this to True
+installConfigApi=
+
+### If you want to install Fido2 Server, set this to True
+installFido2=
+
+### If you want to install Scim Server, set this to True
+installScimServer=
