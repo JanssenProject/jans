@@ -12,6 +12,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -539,9 +540,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
                 newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
 
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
             }
 
             if (responseTypes.contains(io.jans.as.model.common.ResponseType.ID_TOKEN)) {
@@ -565,11 +566,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         state, authorizationGrant, includeIdTokenClaims,
                         JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getOutsideSid()));
 
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
             }
 
             if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr) && !appConfiguration.getFapiCompatibility()) {
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
             }
 
             if (sessionUser.getId() == null) {
@@ -579,14 +580,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 log.trace("newSessionId = {}", newSessionId);
             }
             if (!appConfiguration.getFapiCompatibility()) {
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
             }
-            redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
-            redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.STATE, state);
+            redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SID, sessionUser.getOutsideSid());
+            redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
+            redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, state);
             if (scope != null && !scope.isEmpty() && authorizationGrant != null && !appConfiguration.getFapiCompatibility()) {
                 scope = authorizationGrant.checkScopesPolicy(scope);
 
-                redirectUriResponse.getRedirectUri().addResponseParameter(io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE, scope);
+                redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
             }
 
             clientService.updateAccessTime(client, false);
