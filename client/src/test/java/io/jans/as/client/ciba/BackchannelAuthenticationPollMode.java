@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -2161,15 +2162,15 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"clientJwksUri"})
+    @Parameters({"clientJwksUri", "userId"})
     @Test
-    public void backchannelTokenDeliveryModePollFail6(final String clientJwksUri) {
+    public void backchannelTokenDeliveryModePollFail6(final String clientJwksUri, final String userId) {
         showTitle("backchannelTokenDeliveryModePollFail6");
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -2200,8 +2201,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(null); // Invalid user code.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
