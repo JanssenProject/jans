@@ -14,9 +14,6 @@ def get_setup_options():
     parser = argparse.ArgumentParser(description=parser_description)
     parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
     parser.add_argument('-d', help="Installation directory")
-    parser.add_argument('-r', '--install-oxauth-rp', help="Install oxAuth RP", action='store_true')
-    parser.add_argument('-p', '--install-passport', help="Install Passport", action='store_true')
-    parser.add_argument('-s', '--install-shib', help="Install the Shibboleth IDP", action='store_true')
     parser.add_argument('-f', help="Specify setup.properties file")
     parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
     parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
@@ -36,9 +33,7 @@ def get_setup_options():
 
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
-    parser.add_argument('--no-oxauth', help="Do not install oxAuth OAuth2 Authorization Server", action='store_true')
-    parser.add_argument('--no-oxtrust', help="Do not install oxTrust Admin UI", action='store_true')
-    parser.add_argument('--install-jans-radius', help="Install oxTrust Admin UI", action='store_true')
+    parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
     parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
     parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
     parser.add_argument('-org-name', help="Organization name field used for generating X.509 certificates")
@@ -46,17 +41,16 @@ def get_setup_options():
     parser.add_argument('-city', help="City field used for generating X.509 certificates")
     parser.add_argument('-state', help="State field used for generating X.509 certificates")
     parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
-    parser.add_argument('-oxtrust-admin-password', help="Used as the default admin user for oxTrust")
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
     parser.add_argument('-application-max-ram', help="Used as the LDAP directory manager password")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
-    parser.add_argument('--install-casa', help="Install Casa", action='store_true')
-    parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
+    parser.add_argument('--install-config-api', help="Jans Auth Config Api", action='store_true')
+    #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
     parser.add_argument('--install-scim', help="Install Scim Server", action='store_true')
-    parser.add_argument('--install-fido2', help="Install Fido2")
-    parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
+    parser.add_argument('--install-fido2', help="Install Fido2", action='store_true')
+    #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
-    parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
+    #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     
     argsp = parser.parse_args()
@@ -66,37 +60,24 @@ def get_setup_options():
         'noPrompt': False,
         'downloadWars': False,
         'installOxAuth': True,
-        'installOxTrust': True,
+        'installConfigApi': False,
         'wrends_install': InstallTypes.LOCAL,
         'installHTTPD': True,
-        'installSaml': False,
-        'installOxAuthRP': False,
-        'installPassport': False,
-        'installJansRadius': False,
         'installScimServer': False,
-        'installCasa': False,
         'installOxd': False,
         'installFido2': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
-        'cb_install': InstallTypes.NONE,
         'loadTestDataExit': False,
         'loadData': True,
         'properties_password': None,
     }
 
-
-    if argsp.install_local_wrends:
-        setupOptions['wrends_install'] = InstallTypes.LOCAL
-
-    if argsp.no_oxauth:
+    if argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
 
-    if argsp.no_oxtrust:
-        setupOptions['installOxTrust'] = False
-
-    setupOptions['installJansRadius'] = argsp.install_jans_radius
+    setupOptions['installConfigApi'] = argsp.install_config_api
 
     if argsp.ip_address:
         setupOptions['ip'] = argsp.ip_address
@@ -122,9 +103,6 @@ def get_setup_options():
     if argsp.application_max_ram:
         setupOptions['application_max_ram'] = argsp.application_max_ram
 
-    if argsp.oxtrust_admin_password:
-        setupOptions['oxtrust_admin_password'] = argsp.oxtrust_admin_password
-
     if argsp.ldap_admin_password:
         setupOptions['ldapPass'] = argsp.ldap_admin_password
 
@@ -142,17 +120,12 @@ def get_setup_options():
 
     if argsp.enable_scim_test_mode:
         setupOptions['scimTestMode'] = 'true'
-
-    setupOptions['installSaml'] = argsp.install_shib
+    
     setupOptions['downloadWars'] = argsp.w
-    setupOptions['installOxAuthRP'] = argsp.install_oxauth_rp
-    setupOptions['installPassport'] = argsp.install_passport
     setupOptions['loadTestData']  = argsp.t
     setupOptions['loadTestDataExit'] = argsp.x
     setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
-    setupOptions['installCasa'] = argsp.install_casa
-    setupOptions['installOxd'] = argsp.install_oxd
     setupOptions['installScimServer'] = argsp.install_scim
     setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
@@ -160,17 +133,14 @@ def get_setup_options():
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = InstallTypes.REMOTE
 
-    if argsp.remote_couchbase:
-        setupOptions['cb_install'] = InstallTypes.REMOTE
-
     if argsp.no_data:
         setupOptions['loadData'] = False
 
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
 
-    if argsp.oxd_use_jans_storage:
-        setupOptions['oxd_use_jans_storage'] = True
+    #if argsp.oxd_use_jans_storage:
+    #    setupOptions['oxd_use_jans_storage'] = True
 
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
