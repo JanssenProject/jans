@@ -2107,9 +2107,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"clientJwksUri"})
+    @Parameters({"clientJwksUri", "userId"})
     @Test
-    public void backchannelTokenDeliveryModePollFail5(final String clientJwksUri) {
+    public void backchannelTokenDeliveryModePollFail5(final String clientJwksUri, final String userId) {
         showTitle("backchannelTokenDeliveryModePollFail5");
 
         // 1. Dynamic Client Registration
@@ -2144,8 +2144,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(null); // Invalid client notification token.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
