@@ -7,7 +7,6 @@
 package io.jans.as.client.ciba;
 
 import io.jans.as.client.*;
-import io.jans.as.client.BaseTest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -20,6 +19,7 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
@@ -38,7 +38,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -103,7 +103,7 @@ public class RegistrationTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -171,7 +171,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -274,7 +274,7 @@ public class RegistrationTest extends BaseTest {
 
         clientUpdateRequest.setSectorIdentifierUri(sectorIdentifierUri);
         clientUpdateRequest.setJwksUri(clientJwksUri);
-        clientUpdateRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        clientUpdateRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         clientUpdateRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         clientUpdateRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -320,7 +320,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwks(jwkResponse.getJwks().toString());
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.PS256);
@@ -406,7 +406,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -475,7 +475,7 @@ public class RegistrationTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -547,7 +547,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -654,7 +654,7 @@ public class RegistrationTest extends BaseTest {
 
         clientUpdateRequest.setSectorIdentifierUri(sectorIdentifierUri);
         clientUpdateRequest.setJwksUri(clientJwksUri);
-        clientUpdateRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        clientUpdateRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         clientUpdateRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         clientUpdateRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -703,7 +703,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwks(jwkResponse.getJwks().toString());
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -788,7 +788,7 @@ public class RegistrationTest extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -854,7 +854,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -923,7 +923,7 @@ public class RegistrationTest extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1028,7 +1028,7 @@ public class RegistrationTest extends BaseTest {
         clientUpdateRequest.setHttpMethod(HttpMethod.PUT);
 
         clientUpdateRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        clientUpdateRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        clientUpdateRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         clientUpdateRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         clientUpdateRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1071,7 +1071,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(null); // Missing backchannel_token_delivery_mode
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
@@ -1095,7 +1095,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(null); // Missing backchannel_client_notification_endpoint
@@ -1120,7 +1120,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(null); // Missing backchannel_client_notification_endpoint
@@ -1195,7 +1195,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(null); // Missing jwks_uri
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1220,7 +1220,7 @@ public class RegistrationTest extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(null); // Missing jwks_uri
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
