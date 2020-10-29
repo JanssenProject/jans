@@ -114,9 +114,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
         # Client keys deployment
-        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/oxauth_test_client_keys.zip', '/var/www/html/oxauth_test_client_keys.zip')        
-        self.run([paths.cmd_unzip, '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
-        self.run([paths.cmd_rm, '-rf', 'oxauth_test_client_keys.zip'])
+        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')        
+        self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
+        self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
 
 
