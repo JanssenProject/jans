@@ -50,6 +50,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     private static String clientId;
     private static String idToken;
     private static String sessionId;
+    private static String sid;
 
     @Parameters({"registerPath", "redirectUris", "postLogoutRedirectUri"})
     @Test
@@ -141,6 +142,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
                 idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
                 sessionId = params.get(AuthorizeResponseParam.SESSION_ID);
+                sid = params.get(AuthorizeResponseParam.SID);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -158,7 +160,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
         String state = UUID.randomUUID().toString();
 
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
-        endSessionRequest.setSessionId(sessionId);
+        endSessionRequest.setSessionId(sid);
 
         Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();

@@ -112,7 +112,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // 4. End session with an already ended session
         String endSessionId2 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest2 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId2);
-        endSessionRequest2.setSessionId(authorizationResponse.getSessionId());
+        endSessionRequest2.setSessionId(authorizationResponse.getSid());
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);
@@ -185,7 +185,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // 3. End session
         String endSessionId1 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest1 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId1);
-        endSessionRequest1.setSessionId(authorizationResponse.getSessionId());
+        endSessionRequest1.setSessionId(authorizationResponse.getSid());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
@@ -205,7 +205,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // 4. End session with an already ended session
         String endSessionId2 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest2 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId2);
-        endSessionRequest2.setSessionId(authorizationResponse.getSessionId());
+        endSessionRequest2.setSessionId(authorizationResponse.getSid());
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);
