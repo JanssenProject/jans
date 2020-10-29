@@ -214,7 +214,7 @@ args = ['/opt/jre/bin/keytool', '-genkey',
         '-keystore', keystore_fn,
         '-storepass', keyStoreSecret,
         '-keypass', keyStoreSecret,
-        '-dname', '"CN=oxAuth CA Certificates"'
+        '-dname', '"CN=Jans Auth CA Certificates"'
         ]
 
 output = run_command(args)
@@ -235,11 +235,11 @@ for l in menifest.splitlines():
 
 vendor = vendor_id.split('.')[-1]
 
-oxauth_client_jar_fn = '/opt/dist/gluu/oxauth-client-jar-with-dependencies.jar'
+oxauth_client_jar_fn = '/opt/dist/gluu/jans-auth-client-jar-with-dependencies.jar'
 if not os.path.exists(oxauth_client_jar_fn):
-    print("Downloading oxauth-client with dependencies")
-    # Download oxauth-client with dependencies
-    oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/oxauth-client/{1}/oxauth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
+    print("Downloading jans-auth-client with dependencies")
+    # Download jans-auth-client with dependencies
+    oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/jans-auth-client/{1}/jans-auth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
     args = ['wget', '-nv',oxauth_client_url, '-O', oxauth_client_jar_fn]
     output = run_command(args)
 
@@ -247,12 +247,12 @@ if not os.path.exists(oxauth_client_jar_fn):
 print("Determining oxauth key generator path")
 # Determine oxauth key generator path
 try:
-    oxauth_client_jar_fn = max(list(glob.iglob('/home/jetty/lib/oxauth-client-*.jar')))
+    oxauth_client_jar_fn = max(list(glob.iglob('/home/jetty/lib/jans-auth-client-*.jar')))
 except:
     try:
-        oxauth_client_jar_fn = max(list(glob.iglob('/opt/dist/gluu/oxauth-client-*.jar')))
+        oxauth_client_jar_fn = max(list(glob.iglob('/opt/dist/gluu/jans-auth-client-*.jar')))
     except:
-        print("Can't find oxauth-client jar file. Exiting...")
+        print("Can't find jans-auth-client jar file. Exiting...")
         sys.exit(False)
 
 
@@ -263,7 +263,7 @@ for fn in oxauth_client_jar_zf.namelist():
         key_gen_path = fp.replace('/','.')
         break
 else:
-    print("Can't determine oxauth-client KeyGenerator path. Exiting...")
+    print("Can't determine jans-auth-client KeyGenerator path. Exiting...")
     sys.exit(False)
 
 
@@ -274,7 +274,7 @@ args = [ '/opt/jre/bin/keytool', '-delete',
         '-alias dummy', '-keystore', keystore_fn,
         '-storepass', keyStoreSecret,
         '-keypass', keyStoreSecret,
-        '-dname', '"CN=oxAuth CA Certificates"'
+        '-dname', '"CN=Jans Auth CA Certificates"'
         ]
 
 output = run_command(args)
@@ -307,7 +307,7 @@ if gluu_ver_real < '3.1.2':
 else:
     args += ['-sig_keys', key_algs, '-enc_keys', enc_keys]
     
-args += ['-dnname', "'CN=oxAuth CA Certificates'"]
+args += ['-dnname', "'CN=Jans Auth CA Certificates'"]
 
 if argsp.expiration_hours:
     args += ['-expiration_hours', str(argsp.expiration_hours)]
