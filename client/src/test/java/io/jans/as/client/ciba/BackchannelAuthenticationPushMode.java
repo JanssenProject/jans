@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -2057,14 +2058,14 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint"})
+    @Parameters({"backchannelClientNotificationEndpoint", "userId"})
     @Test
-    public void backchannelTokenDeliveryModePushFail5(final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushFail5(final String backchannelClientNotificationEndpoint, final String userId) {
         showTitle("backchannelTokenDeliveryModePushFail5");
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2096,7 +2097,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(null); // Invalid client notification token.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -2113,9 +2114,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint"})
+    @Parameters({"backchannelClientNotificationEndpoint", "userId"})
     @Test
-    public void backchannelTokenDeliveryModePushFail6(final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushFail6(final String backchannelClientNotificationEndpoint, final String userId) {
         showTitle("backchannelTokenDeliveryModePushFail6");
 
         // 1. Dynamic Client Registration
@@ -2153,8 +2154,8 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(null); // Invalid user code.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
@@ -2172,14 +2173,14 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint"})
+    @Parameters({"backchannelClientNotificationEndpoint", "userId"})
     @Test
-    public void backchannelTokenDeliveryModePushFail7(final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushFail7(final String backchannelClientNotificationEndpoint, final String userId) {
         showTitle("backchannelTokenDeliveryModePushFail7");
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2212,8 +2213,8 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode("INVALID_USER_CODE"); // Invalid user code.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
