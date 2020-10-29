@@ -92,11 +92,6 @@ changetype: modify
 jansDefScope: true
 replace: jansDefScope
 
-dn: inum=341A,ou=scopes,o=jans
-add: jansClaim
-changetype: modify
-jansClaim: inum=18CC,ou=attributes,o=jans
-
 dn: inum=10B2,ou=scopes,o=jans
 changetype: modify
 jansDefScope: true
@@ -108,6 +103,7 @@ changetype: modify
 jansClaim: inum=18CD,ou=attributes,o=jans
 jansClaim: inum=18CE,ou=attributes,o=jans
 jansClaim: inum=18CF,ou=attributes,o=jans
+jansClaim: inum=18CC,ou=attributes,o=jans
 
 dn: inum=7D01,ou=scopes,o=jans
 description: Dynamic scope org_name
