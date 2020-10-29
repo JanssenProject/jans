@@ -160,7 +160,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
         String state = UUID.randomUUID().toString();
 
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
-        endSessionRequest.setSessionId(sid);
+        endSessionRequest.setSid(sid);
 
         Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
