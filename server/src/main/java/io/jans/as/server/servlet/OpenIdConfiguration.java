@@ -86,7 +86,7 @@ public class OpenIdConfiguration extends HttpServlet {
 	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
 		if (!(externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded())) {
 			httpResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-			log.error("oxAuth still starting up!");
+			log.error("Jans Auth still starting up!");
 			return;
 		}
 

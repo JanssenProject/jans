@@ -126,7 +126,7 @@ public class InumGenerator {
         	return m.group(1);
         }
 
-        log.error("Use fallback DN: o=jans, for ID generator, please check oxAuth configuration, clientDn must be valid DN");
+        log.error("Use fallback DN: o=jans, for ID generator, please check Jans Auth configuration, clientDn must be valid DN");
         return "o=jans";
     }
 

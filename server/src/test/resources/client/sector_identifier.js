@@ -1,4 +1,4 @@
-[ "https://${test.server.name}/oxauth-rp/home.htm",
+[ "https://${test.server.name}/jans-auth-rp/home.htm",
     "https://client.example.org/callback",
     "https://client.example.org/callback2",
     "https://client.other_company.example.net/callback",

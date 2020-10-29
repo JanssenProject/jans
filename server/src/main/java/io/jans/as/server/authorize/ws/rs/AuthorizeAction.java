@@ -195,7 +195,7 @@ public class AuthorizeAction {
     // CIBA Request parameter
     private String authReqId;
 
-    // custom oxAuth parameters
+    // custom Jans Auth parameters
     private String sessionId;
 
     private String allowedScope;
@@ -247,7 +247,7 @@ public class AuthorizeAction {
             return;
         }
 
-        // Fix the list of scopes in the authorization page. oxAuth #739
+        // Fix the list of scopes in the authorization page. Jans Auth #739
         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
         allowedScope = io.jans.as.model.util.StringUtils.implode(grantedScopes, " ");
 

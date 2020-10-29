@@ -55,7 +55,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     /**
      * Executes the call to the REST Service and processes the response.
      *
-     * @param accessToken The access token obtained from the oxAuth authorization request.
+     * @param accessToken The access token obtained from the Jans Auth authorization request.
      * @return The service response.
      */
     public ClientInfoResponse execClientInfo(String accessToken) {

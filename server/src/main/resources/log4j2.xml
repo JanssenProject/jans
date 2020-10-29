@@ -6,7 +6,7 @@
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 		</Console>
 
-		<RollingFile name="OX_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:log.base}/logs/http_request_response.log" filePattern="${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:log.base}/logs/http_request_response.log" filePattern="${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -17,7 +17,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="FILE" fileName="${sys:log.base}/logs/oxauth.log" filePattern="${sys:log.base}/logs/oxauth-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-auth.log" filePattern="${sys:log.base}/logs/jans-auth-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -28,7 +28,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/oxauth_persistence.log" filePattern="${sys:log.base}/logs/oxauth_persistence-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence.log" filePattern="${sys:log.base}/logs/jans-auth_persistence-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -39,7 +39,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/oxauth_persistence_duration.log" filePattern="${sys:log.base}/logs/oxauth_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_duration.log" filePattern="${sys:log.base}/logs/jans-auth_persistence_duration-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -50,8 +50,8 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/oxauth_persistence_ldap_statistics.log"
-			filePattern="${sys:log.base}/logs/oxauth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics.log"
+			filePattern="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -62,7 +62,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/oxauth_script.log" filePattern="${sys:log.base}/logs/oxauth_script-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_script.log" filePattern="${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -73,7 +73,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_AUDIT_LOG_FILE" fileName="${sys:log.base}/logs/oxauth_audit.log" filePattern="${sys:log.base}/logs/oxauth_audit-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_AUTH_AUDIT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_audit.log" filePattern="${sys:log.base}/logs/jans-auth_audit-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%macAddr] [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -86,12 +86,8 @@
 	</Appenders>
 
 	<Loggers>
-		<!-- ############### oxAuth ################# -->
-		<Logger name="org.gluu.oxauth" level="${log4j.default.log.level}" />
-		<Logger name="io.jans.service" level="${log4j.default.log.level}" />
-
 		<!-- ############### Gluu ################# -->
-		<Logger name="org.gluu" level="${log4j.default.log.level}" />
+		<Logger name="io.jans" level="${log4j.default.log.level}" />
 
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
@@ -101,55 +97,51 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-		<Logger name="org.gluu.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE" />
-		</Logger>
-
-		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		<Logger name="org.gluu.jans-auth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.orm" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
 		</Logger>
 
 		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
 		</Logger>
 		<logger name="com.couchbase.client" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
 		</logger>
 
 		<Logger name="io.jans.orm.ldap.operation.watch" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.orm.watch" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
+			<AppenderRef ref="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.service.PythonService" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.service.custom.script" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.service.custom" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
 		</Logger>
 
 		<Logger name="io.jans.as.server.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="OX_AUDIT_LOG_FILE" />
+			<AppenderRef ref="JANS_AUTH_AUDIT_LOG_FILE" />
 		</Logger>
 
 		<Root level="info">
