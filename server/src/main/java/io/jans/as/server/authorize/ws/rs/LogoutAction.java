@@ -128,7 +128,7 @@ public class LogoutAction {
         }
 
         if (sessionId != null && !postLogoutRedirectUri.isEmpty()) {
-            sb.append("&" + EndSessionRequestParam.SESSION_ID + "=").append(sessionId.getId());
+            sb.append("&" + EndSessionRequestParam.SID + "=").append(sessionId.getOutsideSid());
         }
 
         if (postLogoutRedirectUri != null && !postLogoutRedirectUri.isEmpty()) {

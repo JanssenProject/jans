@@ -16,12 +16,12 @@ public interface EndSessionRequestParam {
      * Previously issued ID Token passed to the logout endpoint as a hint about the End-User's current authenticated
      * session with the Client.
      */
-    public static final String ID_TOKEN_HINT = "id_token_hint";
+    String ID_TOKEN_HINT = "id_token_hint";
 
     /**
      * URL to which the RP is requesting that the End-User's User-Agent be redirected after a logout has been performed.
      */
-    public static final String POST_LOGOUT_REDIRECT_URI = "post_logout_redirect_uri";
+    String POST_LOGOUT_REDIRECT_URI = "post_logout_redirect_uri";
 
 
     /**
@@ -29,12 +29,7 @@ public interface EndSessionRequestParam {
      * specified by the post_logout_redirect_uri parameter. If included in the logout request, the OP passes this
      * value back to the RP using the state query parameter when redirecting the User Agent back to the RP.
      */
-    public static final String STATE = "state";
+    String STATE = "state";
 
-    /**
-     * String that represents the End-User's login state at the OP.
-     */
-    public static final String SESSION_ID = "session_id";
-
-    public static final String SID = "sid";
+    String SID = "sid";
 }
