@@ -4,6 +4,8 @@ import glob
 import time
 import json
 import ldap3
+import urllib.request
+import base64
 
 from setup_app import paths
 from setup_app import static
@@ -156,6 +158,33 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False
                                     }
+
+        if Config.get('ciba_patch_user_pass'):
+            username, password = Config.get('ciba_patch_user_pass').split(':')
+            patch_url = 'https://ox.gluu.org/protected/jans-auth/jans-auth-test-config-patch.json'
+            req = urllib.request.Request(patch_url)
+            credentials = ('%s:%s' % (username, password))
+            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
+            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
+            data = None
+            datajs = None
+            self.logIt("Retreiving auto test ciba patch from " + patch_url)
+            try:
+                resp = urllib.request.urlopen(req)
+                data = resp.read()
+                self.logIt("Auto test ciba patch retreived")
+            except:
+                self.logIt("Can't retreive auto test ciba patch", True)
+
+            if data:
+                try:
+                    datajs = json.loads(data.decode())
+                except:
+                    self.logIt("Can't decode json for auto test ciba patch", True)
+
+            if datajs:
+                oxAuthConfDynamic_changes.update(datajs)
+                self.logIt("oxAuthConfDynamic was updated with auto test ciba patch")
 
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA')
 
