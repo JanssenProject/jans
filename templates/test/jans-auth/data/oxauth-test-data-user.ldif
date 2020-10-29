@@ -18,7 +18,7 @@ dn: inum=B1F3-AEAE-B798,ou=people,o=jans
 birthdate: 19830106010101.253Z
 c: US
 cn: Test User
-displayName: oxAuth Test User
+displayName: Jans Test User
 emailVerified: true
 gender: Male
 givenName: Test
@@ -58,7 +58,7 @@ dn: inum=B1F3-AEAE-B799,ou=people,o=jans
 birthdate: 19830106010101.253Z
 c: US
 cn: Test User2
-displayName: oxAuth Test User2
+displayName: Jans Test User2
 emailVerified: true
 gender: Male
 givenName: Test2
