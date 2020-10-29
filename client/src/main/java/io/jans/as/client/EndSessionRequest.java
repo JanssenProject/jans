@@ -23,7 +23,7 @@ public class EndSessionRequest extends BaseRequest {
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
-    private String sessionId;
+    private String sid;
     private String state;
 
     /**
@@ -74,21 +74,21 @@ public class EndSessionRequest extends BaseRequest {
     }
 
     /**
-     * Gets session id.
+     * Gets sid.
      *
-     * @return session id.
+     * @return sid.
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getSid() {
+        return sid;
     }
 
     /**
-     * Sets session id.
+     * Sets sid.
      *
-     * @param p_sessionId session id
+     * @param sid sid
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSid(String sid) {
+        this.sid = sid;
     }
 
     /**
@@ -144,11 +144,11 @@ public class EndSessionRequest extends BaseRequest {
                         .append(URLEncoder.encode(state, Util.UTF8_STRING_ENCODING));
             }
 
-            if (StringUtils.isNotBlank(sessionId)) {
+            if (StringUtils.isNotBlank(sid)) {
                 queryStringBuilder.append("&")
                         .append(EndSessionRequestParam.SESSION_ID)
                         .append("=")
-                        .append(URLEncoder.encode(sessionId, Util.UTF8_STRING_ENCODING));
+                        .append(URLEncoder.encode(sid, Util.UTF8_STRING_ENCODING));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
