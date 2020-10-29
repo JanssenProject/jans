@@ -406,7 +406,14 @@ public abstract class BaseTest {
 					.pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
 
-            WebElement allowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormAllowButton)));
+			WebElement allowButton;
+			try {
+				allowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormAllowButton)));
+			} catch (RuntimeException ex) {
+                System.out.println("Page dump URL: " + currentDriver.getCurrentUrl());
+                System.out.println("Page dump source: " + currentDriver.getPageSource());
+                throw ex;
+			}
 
 			// We have to use JavaScript because target is link with onclick
 			JavascriptExecutor jse = (JavascriptExecutor) currentDriver;
