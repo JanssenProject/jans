@@ -146,7 +146,7 @@ public class EndSessionRequest extends BaseRequest {
 
             if (StringUtils.isNotBlank(sid)) {
                 queryStringBuilder.append("&")
-                        .append(EndSessionRequestParam.SESSION_ID)
+                        .append(EndSessionRequestParam.SID)
                         .append("=")
                         .append(URLEncoder.encode(sid, Util.UTF8_STRING_ENCODING));
             }
