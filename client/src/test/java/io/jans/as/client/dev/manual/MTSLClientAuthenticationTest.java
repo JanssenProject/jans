@@ -80,7 +80,7 @@ public class MTSLClientAuthenticationTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH);
 
-        TokenClient tokenClient = new TokenClient("https://ce-ob.gluu.org/oxauth/restv1/token");
+        TokenClient tokenClient = new TokenClient("https://ce-ob.gluu.org/jans-auth/restv1/token");
         tokenClient.setExecutor(new ApacheHttpClient4Executor(httpclient));
         tokenClient.setRequest(tokenRequest);
         TokenResponse tokenResponse = tokenClient.exec();

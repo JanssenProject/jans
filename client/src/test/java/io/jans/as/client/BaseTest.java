@@ -835,7 +835,7 @@ public abstract class BaseTest {
     }
 
     private String determineGluuConfigurationEndpoint(String host) {
-        return host + "/oxauth/restv1/gluu-configuration";
+        return host + "/jans-auth/restv1/gluu-configuration";
     }
 
     public void showTitle(String title) {

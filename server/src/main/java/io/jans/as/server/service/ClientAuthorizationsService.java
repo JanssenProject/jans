@@ -99,7 +99,7 @@ public class ClientAuthorizationsService {
         Client client = clientService.getClient(clientId);
 
 
-        // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
+        // Jans Auth #441 Pre-Authorization + Persist Authorizations... don't write anything
         // If a client has pre-authorization=true, there is no point to create the entry under
         // ou=clientAuthorizations it will negatively impact performance, grow the size of the
         // ldap database, and serve no purpose.
