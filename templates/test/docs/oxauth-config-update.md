@@ -5,7 +5,7 @@ II. Client keys deployment.
 - wget --no-check-certificate https://raw.githubusercontent.com/JansFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
 - unzip oxauth_test_client_keys.zip
 - rm -rf oxauth_test_client_keys.zip
-- chown -R root.www-data oxauth-client
+- chown -R root.www-data jans-auth-client
 
 III. These changes should be applied to oxAuth config.
 1. "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",

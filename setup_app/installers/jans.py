@@ -79,9 +79,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
 
-        #Download oxauth-client-jar-with-dependencies
+        #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/oxauth-client/{0}/oxauth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
+            oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
             base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 
