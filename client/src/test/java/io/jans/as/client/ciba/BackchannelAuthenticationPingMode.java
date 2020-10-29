@@ -2176,10 +2176,11 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "userId"})
     @Test
     public void backchannelTokenDeliveryModePingFail5(final String clientJwksUri,
-                                                      final String backchannelClientNotificationEndpoint) {
+                                                      final String backchannelClientNotificationEndpoint,
+                                                      final String userId) {
         showTitle("backchannelTokenDeliveryModePingFail5");
 
         // 1. Dynamic Client Registration
@@ -2209,7 +2210,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
         assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PING.getValue());
         assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), new Boolean(true).toString());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2217,7 +2218,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
-        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(null); // Invalid client notification token.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
