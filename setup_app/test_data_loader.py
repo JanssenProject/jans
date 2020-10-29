@@ -114,14 +114,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
         # Client keys deployment
-        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/oxauth_test_client_keys.zip', '/var/www/html/oxauth_test_client_keys.zip')        
-        self.run([paths.cmd_unzip, '-o', '/var/www/html/oxauth_test_client_keys.zip', '-d', '/var/www/html/'])
-        self.run([paths.cmd_rm, '-rf', 'oxauth_test_client_keys.zip'])
-        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/oxauth-client'])
+        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')        
+        self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
+        self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
+        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
 
 
         oxAuthConfDynamic_changes = {
-                                    'dynamicRegistrationCustomObjectClass':  'oxAuthClientCustomAttributes',
+                                    'dynamicRegistrationCustomObjectClass':  'jansClntCustomAttributes',
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
                                     'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code" ],
