@@ -5,13 +5,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -22,13 +22,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -39,13 +39,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -56,13 +56,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -73,13 +73,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -90,13 +90,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -107,13 +107,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -124,13 +124,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -141,13 +141,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -158,13 +158,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -175,7 +175,7 @@
             {
                 "httpMethods":["POST"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             }
         ]
@@ -186,13 +186,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -203,7 +203,7 @@
             {
                 "httpMethods":["POST"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             }
         ]
@@ -214,13 +214,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["POST","PUT","DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -231,7 +231,7 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             }
         ]
@@ -242,7 +242,7 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             }
         ]
@@ -253,7 +253,7 @@
             {
                 "httpMethods":["DELETE"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -264,13 +264,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -281,13 +281,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PATCH","PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -298,13 +298,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -315,13 +315,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -332,7 +332,7 @@
             {
                 "httpMethods":["POST"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             }
         ]
@@ -343,13 +343,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -360,13 +360,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -377,13 +377,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -394,13 +394,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -411,13 +411,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -428,13 +428,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
@@ -445,13 +445,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "config-api-read"
+                    "https://jans.io/oauth/scopes/config-api-read"
                 ]
             },
             {
                "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "config-api-write"
+                    "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
