@@ -8,6 +8,7 @@ package io.jans.as.server.ws.rs;
 
 import com.google.common.collect.Lists;
 import io.jans.as.client.BaseTest;
+import io.jans.as.client.EndSessionRequest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
@@ -45,7 +46,6 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
 
     private static io.jans.as.client.RegisterResponse registerResponse;
     private static String idToken;
-    private static String sessionId;
     private static String sid;
 
     @Parameters({"redirectUris", "postLogoutRedirectUri"})
@@ -64,7 +64,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "requestEndSessionStep1")
     public void requestEndSessionStep2(final String authorizePath, final String userId, final String userSecret,
-                                       final String redirectUri) throws Exception {
+                                       final String redirectUri) {
 
         final String state = UUID.randomUUID().toString();
 
@@ -108,7 +108,6 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
                 assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
                 idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
-                sessionId = params.get(AuthorizeResponseParam.SESSION_ID);
                 sid = params.get(AuthorizeResponseParam.SID);
             } catch (URISyntaxException e) {
                 e.printStackTrace();
@@ -126,8 +125,8 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
             throws Exception {
         String state = UUID.randomUUID().toString();
 
-        io.jans.as.client.EndSessionRequest endSessionRequest = new io.jans.as.client.EndSessionRequest(idToken, postLogoutRedirectUri, state);
-        endSessionRequest.setSessionId(sid);
+        EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
+        endSessionRequest.setSid(sid);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();

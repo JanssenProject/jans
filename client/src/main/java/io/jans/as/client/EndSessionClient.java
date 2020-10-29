@@ -78,8 +78,8 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
         if (StringUtils.isNotBlank(getRequest().getState())) {
             clientRequest.queryParameter(EndSessionRequestParam.STATE, getRequest().getState());
         }
-        if (StringUtils.isNotBlank(getRequest().getSessionId())) {
-            clientRequest.queryParameter(EndSessionRequestParam.SESSION_ID, getRequest().getSessionId());
+        if (StringUtils.isNotBlank(getRequest().getSid())) {
+            clientRequest.queryParameter(EndSessionRequestParam.SID, getRequest().getSid());
         }
 
         // Call REST Service and handle response
