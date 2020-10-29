@@ -96,7 +96,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         } else if (tth == TokenTypeHint.REFRESH_TOKEN) {
             authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
         } else {
-            // Since the hint about the type of the token submitted for revocation is optional. oxAuth will
+            // Since the hint about the type of the token submitted for revocation is optional. Jans Auth will
             // search it as Access Token then as Refresh Token.
             authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
             if (authorizationGrant == null) {

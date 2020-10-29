@@ -87,7 +87,7 @@ public class KeyExporter {
 						SecurityProviderUtility.installBCProvider(true);
 
 						AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStore, keyStorePasswd,
-								"CN=oxAuth CA Certificates");
+								"CN=Jans Auth CA Certificates");
 						PrivateKey privateKey = cryptoProvider.getPrivateKey(keyAlias);
 						String base64EncodedKey = WordUtils.wrap(new String(Base64.encode(privateKey.getEncoded())), 64,
 								"\n", true);

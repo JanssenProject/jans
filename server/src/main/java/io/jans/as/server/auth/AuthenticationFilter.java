@@ -302,7 +302,7 @@ public class AuthenticationFilter implements Filter {
                 int delim = token.indexOf(":");
 
                 if (delim != -1) {
-                    // oxAuth #677 URL decode the username and password
+                    // Jans Auth #677 URL decode the username and password
                     username = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
                     password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
                 }

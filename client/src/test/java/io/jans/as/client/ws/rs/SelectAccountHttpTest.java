@@ -97,11 +97,11 @@ public class SelectAccountHttpTest extends BaseTest {
 
         output("5. Check that we have 2 buttons for Account 1 and Account 2");
         final SelectPage selectPage = SelectPage.navigate(pageConfig, authorizationEndpoint + "?" + authorizationRequest.getQueryString());
-        assertNotNull(selectPage.getAccountButton("oxAuth Test User"));
-        assertNotNull(selectPage.getAccountButton("oxAuth Test User2"));
+        assertNotNull(selectPage.getAccountButton("Jans Auth Test User"));
+        assertNotNull(selectPage.getAccountButton("Jans Auth Test User2"));
 
         output("6. Switch back to Account 1");
-        selectPage.switchAccount(selectPage.getAccountButton("oxAuth Test User"));
+        selectPage.switchAccount(selectPage.getAccountButton("Jans Auth Test User"));
         assertEquals(account1SessionId, assertSessionIdCookie()); // check session_id really corresponds to Account 1
     }
 
@@ -186,7 +186,7 @@ public class SelectAccountHttpTest extends BaseTest {
     }
 
     private RegisterResponse registerClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth select accounts test app", StringUtils.spaceSeparatedToList(redirectUris));
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth select accounts test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);

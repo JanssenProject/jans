@@ -60,7 +60,7 @@ public class ConfigurationTest extends ConfigurableTest {
 	 */
 	// @Test
 	public void createLatestTestConfInLdapFromFiles() throws Exception {
-		final String prefix = "U:\\own\\project\\oxAuth\\Server\\src\\test\\resources\\conf";
+		final String prefix = "U:\\own\\project\\jans-auth\\server\\src\\test\\resources\\conf";
 
 		final String errorsFile = prefix + "\\oxauth-errors.json";
 		final String staticFile = prefix + "\\oxauth-static-conf.json";

@@ -164,7 +164,7 @@ public class AppConfiguration implements Configuration {
 
     private WebKeyStorage webKeysStorage;
     private String dnName;
-    // oxAuth KeyStore
+    // Jans Auth KeyStore
     private String keyStoreFile;
     private String keyStoreSecret;
     //oxEleven
@@ -425,7 +425,7 @@ public class AppConfiguration implements Configuration {
     private Boolean httpLoggingEnabled;
 
     /**
-     * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/oxauth/img", "/oxauth/stylesheet"]
+     * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
      */
     private Set<String> httpLoggingExludePaths;
 
@@ -1858,7 +1858,7 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
-     * Returns a flag to determinate if oxAuth supports password grant type for
+     * Returns a flag to determinate if Jans Auth supports password grant type for
      * dynamic client registration.
      * @return Boolean, true if it supports, false if it doesn't support.
      */
@@ -1867,7 +1867,7 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
-     * This method sets the flag that define if oxAuth supports or not password
+     * This method sets the flag that define if Jans Auth supports or not password
      * grant type for dynamic client registration.
      * @param dynamicRegistrationPasswordGrantTypeEnabled Boolean value for
      *                                                    the flag.

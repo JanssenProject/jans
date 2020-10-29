@@ -120,7 +120,7 @@ public abstract class UserService {
     	user.setCustomAttributes(Arrays.asList(
     			new CustomObjectAttribute("inum", inum),
     			new CustomObjectAttribute("jansStatus", GluuStatus.ACTIVE.getValue()),
-				new CustomObjectAttribute("displayName", "User " + uid + " added via oxAuth custom plugin")));
+				new CustomObjectAttribute("displayName", "User " + uid + " added via Jans Auth custom plugin")));
     	user.setUserId(uid);
 
     	List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
