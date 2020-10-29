@@ -82,7 +82,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -145,7 +145,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -178,7 +178,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userEmail);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -205,7 +205,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -238,7 +238,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userInum);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -265,7 +265,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -298,7 +298,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userInum);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
@@ -324,7 +324,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -354,7 +354,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userInum);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
@@ -383,7 +383,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
@@ -418,7 +418,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -452,7 +452,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
@@ -487,7 +487,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -521,7 +521,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
@@ -556,7 +556,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -590,7 +590,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
@@ -625,7 +625,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -659,7 +659,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
@@ -694,7 +694,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -728,7 +728,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
@@ -763,7 +763,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -797,7 +797,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
@@ -832,7 +832,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -866,7 +866,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
@@ -901,7 +901,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -935,7 +935,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
@@ -970,7 +970,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1002,7 +1002,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1035,7 +1035,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgA128KWEncA128GCM);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1063,7 +1063,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1096,7 +1096,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgA256KWEncA256GCM);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1124,7 +1124,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1157,7 +1157,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSA15EncA128CBCPLUSHS256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1185,7 +1185,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1218,7 +1218,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSA15EncA256CBCPLUSHS512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1246,7 +1246,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1279,7 +1279,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSAOAEPEncA256GCM);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1307,7 +1307,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1340,7 +1340,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1368,7 +1368,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1401,7 +1401,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1429,7 +1429,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1462,7 +1462,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1490,7 +1490,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1523,7 +1523,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1551,7 +1551,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1584,7 +1584,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1612,7 +1612,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1645,7 +1645,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1673,7 +1673,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1706,7 +1706,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS256);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1734,7 +1734,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1767,7 +1767,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS384);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1795,7 +1795,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1828,7 +1828,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS512);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -1854,7 +1854,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1902,7 +1902,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -1954,7 +1954,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2008,7 +2008,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2039,7 +2039,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(null); // Invalid login hint.
         backchannelAuthenticationRequest.setLoginHintToken(null); // Invalid login hint token.
         backchannelAuthenticationRequest.setIdTokenHint(null); // Invalid id token hint
@@ -2096,7 +2096,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(null); // Invalid client notification token.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
@@ -2121,7 +2121,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2240,7 +2240,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
-        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+        registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
 
         registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
         registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
@@ -2273,7 +2273,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Collections.singletonList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
@@ -2326,7 +2326,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2349,6 +2349,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2400,7 +2401,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2423,6 +2424,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2474,7 +2476,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2497,6 +2499,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2548,7 +2551,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2571,6 +2574,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2622,7 +2626,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2645,6 +2649,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2696,7 +2701,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2719,6 +2724,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2770,7 +2776,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2793,6 +2799,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2844,7 +2851,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2867,6 +2874,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2918,7 +2926,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2941,6 +2949,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -2994,7 +3003,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -3063,7 +3072,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -3134,7 +3143,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -3208,7 +3217,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -3282,7 +3291,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
