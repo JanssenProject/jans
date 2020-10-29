@@ -52,7 +52,8 @@ def get_setup_options():
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
-    
+    parser.add_argument('-ciba-patch-user-pass', help="password:username for downloading auto test ciba password")
+
     argsp = parser.parse_args()
 
     setupOptions = {
@@ -129,7 +130,9 @@ def get_setup_options():
     setupOptions['installScimServer'] = argsp.install_scim
     setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
-
+    setupOptions['ciba_patch_user_pass'] = argsp.ciba_patch_user_pass
+    
+    
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = InstallTypes.REMOTE
 
