@@ -143,7 +143,7 @@ dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
 displayName: Jans Test Client (don't remove)
 inum: %(oxauthClient_4_inum)s
 jansAppTyp: web
-jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+jansClaimRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims
 jansClntSecret: %(oxauthClient_4_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
@@ -172,7 +172,7 @@ dn: inum=%(oxauthClient_2_inum)s,ou=clients,o=jans
 displayName: Jans Test Resource Server Client (don't remove)
 inum: %(oxauthClient_2_inum)s
 jansAppTyp: web
-jansClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+jansClaimRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims
 jansClntSecret: %(oxauthClient_2_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
