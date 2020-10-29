@@ -249,7 +249,7 @@ class Config:
         self.ldap_setup_properties = os.path.join(self.templateFolder, 'opendj-setup.properties')
 
         # OpenID key generation default setting
-        self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
+        self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
         self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         self.default_key_expiration = 365
 
@@ -286,7 +286,7 @@ class Config:
                         'casa': ['opendj oxauth', 78],
                         'oxd-server': ['opendj oxauth', 80],
                         'passport': ['opendj oxauth', 82],
-                        'oxauth-rp': ['opendj oxauth', 84],
+                        'jans-auth-rp': ['opendj oxauth', 84],
                         'jans-radius': ['opendj oxauth', 86],
                         }
 
