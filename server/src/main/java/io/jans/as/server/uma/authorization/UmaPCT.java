@@ -25,7 +25,7 @@ import java.util.Date;
  * @author yuriyz on 05/30/2017.
  */
 @DataEntry
-@ObjectClass(value = "jansAuthUmaPCT")
+@ObjectClass(value = "jansUmaPCT")
 public class UmaPCT extends AbstractToken {
 
     private final static Logger log = LoggerFactory.getLogger(UmaPCT.class);
