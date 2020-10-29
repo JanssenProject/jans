@@ -19,7 +19,7 @@ class OxauthInstaller(JettyInstaller):
 
         self.source_files = [
                     (os.path.join(Config.distJansFolder, 'jans-auth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
-                    (os.path.join(Config.distJansFolder, 'oxauth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
+                    (os.path.join(Config.distJansFolder, 'jans-auth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/jans-auth-rp/%s/jans-auth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
@@ -80,15 +80,15 @@ class OxauthInstaller(JettyInstaller):
 
         Config.pbar.progress(self.service_name, "Installing OxAuthRP", False)
 
-        self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
+        self.logIt("Copying jans-auth-rp.war into jetty webapps folder...")
 
-        jettyServiceName = 'oxauth-rp'
+        jettyServiceName = 'jans-auth-rp'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
         self.copyFile(self.source_files[1][0], jettyServiceWebapps)
 
-        self.enable('oxauth-rp')
+        self.enable('jans-auth-rp')
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase

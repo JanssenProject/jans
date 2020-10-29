@@ -150,7 +150,7 @@ jansGrantTyp: implicit
 jansGrantTyp: refresh_token
 jansGrantTyp: client_credentials
 jansIdTknSignedRespAlg: RS256
-jansRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
+jansRedirectURI: https://%(hostname)s/jans-auth-rp/home.htm
 jansRedirectURI: https://client.example.com/cb
 jansRedirectURI: https://client.example.com/cb1
 jansRedirectURI: https://client.example.com/cb2
@@ -255,10 +255,10 @@ jansScopeTyp: openid
 dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
 jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
 jansRedirectURI: https://www.jans.org
-jansRedirectURI: http://localhost:80/oxauth-rp/home.htm
-jansRedirectURI: https://localhost:8443/oxauth-rp/home.htm
-jansRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
-jansRedirectURI: https://%(hostname)s/oxauth-client/test/resources/jwks.json
+jansRedirectURI: http://localhost:80/jans-auth-rp/home.htm
+jansRedirectURI: https://localhost:8443/jans-auth-rp/home.htm
+jansRedirectURI: https://%(hostname)s/jans-auth-rp/home.htm
+jansRedirectURI: https://%(hostname)s/jans-auth-client/test/resources/jwks.json
 jansRedirectURI: https://client.example.org/callback
 jansRedirectURI: https://client.example.org/callback2
 jansRedirectURI: https://client.other_company.example.net/callback

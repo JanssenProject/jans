@@ -122,7 +122,7 @@ class Setup(object):
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/jans-auth-rp/%s/jans-auth-rp-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
@@ -243,7 +243,7 @@ class Setup(object):
                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                         'installed' : False
                         },
-            'oxauth-rp' : {'name' : 'oxauth-rp',
+            'jans-auth-rp' : {'name' : 'jans-auth-rp',
                            'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
                            'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
@@ -581,7 +581,7 @@ class Setup(object):
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                         'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
                                         'jackson-core-*.jar', 'jackson-core-asl-*.jar', 'jackson-mapper-asl-*.jar', 'jackson-xc-*.jar',
-                                        'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
+                                        'jettison-*.jar', 'oxauth-model-*.jar', 'jans-auth-client-*.jar' ]
 
 
 
