@@ -6,7 +6,7 @@
 
 package io.jans.as.server.comp;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 
 /**
  * @author Javier Rojas Blum

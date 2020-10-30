@@ -6,7 +6,7 @@
 
 package io.jans.as.server.comp;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.util.ilocale.LocaleUtil;
 import org.testng.annotations.Test;
 

@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaTestUtil;
