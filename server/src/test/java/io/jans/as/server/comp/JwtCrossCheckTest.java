@@ -16,7 +16,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;

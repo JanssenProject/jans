@@ -6,7 +6,7 @@
 
 package io.jans.as.server.ws.rs;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenRequest;

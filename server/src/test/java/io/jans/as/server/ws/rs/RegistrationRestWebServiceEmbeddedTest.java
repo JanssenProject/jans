@@ -7,7 +7,7 @@
 package io.jans.as.server.ws.rs;
 
 import com.google.common.collect.Lists;
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.ws.rs.ClientTestUtil;
