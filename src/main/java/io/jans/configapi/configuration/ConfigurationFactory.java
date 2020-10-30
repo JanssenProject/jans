@@ -16,6 +16,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.UmaAuthorizationService;
+import io.jans.configapi.auth.UmaResourceProtectionService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -98,6 +99,9 @@ public class ConfigurationFactory {
     private static String API_PROTECTION_TYPE;
     
     @Inject
+    UmaResourceProtectionService umaResourceProtectionService;
+    
+    @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
     
     @Produces
@@ -151,6 +155,7 @@ public class ConfigurationFactory {
         }
 
         createAuthorizationService();
+        
     }
 
     private boolean createFromDb() {
@@ -297,6 +302,8 @@ public class ConfigurationFactory {
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
+            	umaResourceProtectionService.verifyUmaResources();
+            	log.debug(" \n\n ConfigurationFactory::create() - umaResourceProtectionService.getResourceList() = "+umaResourceProtectionService.getResourceList()+"\n\n");
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }
         } catch (Exception ex) {

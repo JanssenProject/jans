@@ -137,7 +137,7 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-auth-client</artifactId>
+            <artifactId>jans-client-api</artifactId>
             <version>${jans.version}</version>
         </dependency>
 
@@ -347,6 +347,7 @@
             </build>
             <properties>
                 <quarkus.package.type>native</quarkus.package.type>
+                <quarkus.native.additional-build-args>-H:ResourceConfigurationFiles=resources-config.json</quarkus.native.additional-build-args>
             </properties>
         </profile>
     </profiles>
