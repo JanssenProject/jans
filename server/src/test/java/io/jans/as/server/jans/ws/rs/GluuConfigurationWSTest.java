@@ -6,7 +6,7 @@
 
 package io.jans.as.server.jans.ws.rs;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.model.gluu.GluuConfiguration;
 import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.container.test.api.RunAsClient;
