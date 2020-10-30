@@ -6,7 +6,6 @@
 
 package io.jans.as.server.ws.rs;
 
-import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.client.model.authorize.Claim;
@@ -25,6 +24,7 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
+import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
 import org.jboss.arquillian.test.api.ArquillianResource;

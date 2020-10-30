@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

@@ -6,7 +6,7 @@
 
 package io.jans.as.server.model.uma;
 
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.model.common.Holder;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaConstants;
