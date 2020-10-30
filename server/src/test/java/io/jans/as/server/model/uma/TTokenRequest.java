@@ -7,7 +7,7 @@
 package io.jans.as.server.model.uma;
 
 import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.*;

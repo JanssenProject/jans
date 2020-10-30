@@ -7,7 +7,7 @@
 package io.jans.as.server.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.jans.as.client.BaseTest;
+import io.jans.as.server.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.ws.rs.ClientTestUtil;
