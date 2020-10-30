@@ -220,8 +220,8 @@
     "returnClientSecretOnRead":true,
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
-    "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
-    "personCustomObjectClassList":["gluuCustomPerson"],
+    "dynamicRegistrationCustomObjectClass":"jansClntCustomAttributes",
+    "personCustomObjectClassList":["jansCustomPerson"],
     "authenticationFiltersEnabled":true,
     "clientAuthenticationFiltersEnabled":true,
     "clientRegDefaultToCodeFlowWithRefresh":true,
@@ -230,21 +230,21 @@
             "filter":"(&(mail=*{0}*)(inum={1}))",
             "bind":false,
             "bindPasswordAttribute":null,
-            "baseDn":"ou=people,o=gluu"
+            "baseDn":"ou=people,o=jans"
         },
         {
             "filter":"uid={0}",
             "bind":true,
             "bindPasswordAttribute":"pwd",
-            "baseDn":"ou=people,o=gluu"
+            "baseDn":"ou=people,o=jans"
         }
     ],
     "clientAuthenticationFilters":[
         {
             "filter":"myCustomAttr1={0}",
             "bind":false,
-            "bindPasswordAttribute":"oxAuthClientSecret",
-            "baseDn":"ou=clients,o=gluu"
+            "bindPasswordAttribute":"jansClientSecret",
+            "baseDn":"ou=clients,o=jans"
         }
     ],
     "applianceInum":"${config.oxauth.appliance}",
@@ -266,7 +266,7 @@
     "shareSubjectIdBetweenClientsWithSameSectorId": true,
     "webKeysStorage": "keystore",
     "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
-    "dnName": "CN=oxAuth CA Certificates",
+    "dnName": "CN=Jans Auth CA Certificates",
     "keyStoreFile": "./conf/keystore.jks",
     "keyStoreSecret": "secret",
     "endSessionWithAccessToken":false,
