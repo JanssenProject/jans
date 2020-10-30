@@ -159,16 +159,16 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'skipRefreshTokenDuringRefreshing': False
                                     }
 
-        if Config.get('ciba_patch_user_pass'):
-            username, password = Config.get('ciba_patch_user_pass').split(':')
-            patch_url = 'https://ox.gluu.org/protected/jans-auth/jans-auth-test-config-patch.json'
-            req = urllib.request.Request(patch_url)
-            credentials = ('%s:%s' % (username, password))
-            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
-            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
+        if Config.get('config_patch_creds'):
             data = None
             datajs = None
+            patch_url = 'https://ox.gluu.org/protected/jans-auth/jans-auth-test-config-patch.json'
+            req = urllib.request.Request(patch_url)
+            credentials = Config.get('config_patch_creds')
+            encoded_credentials = base64.b64encode(credentials.encode('ascii'))
+            req.add_header('Authorization', 'Basic %s' % encoded_credentials.decode("ascii"))
             self.logIt("Retreiving auto test ciba patch from " + patch_url)
+
             try:
                 resp = urllib.request.urlopen(req)
                 data = resp.read()
