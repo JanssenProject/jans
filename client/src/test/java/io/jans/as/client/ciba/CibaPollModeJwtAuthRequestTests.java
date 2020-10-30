@@ -351,7 +351,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
+        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -374,6 +374,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
