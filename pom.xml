@@ -226,7 +226,7 @@
                     </systemPropertyVariables>
                     <excludedGroups>integration</excludedGroups>
                     <systemProperties>
-                       <!--  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager> -->
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager> 
                         <karate.options>--tags ~@ignore</karate.options>
                     </systemProperties>
                 </configuration>
