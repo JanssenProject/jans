@@ -6,3 +6,9 @@ config.ldap.useSSL=true
 config.ldap.configurationEntryDN=ou=jans_test,ou=configuration,o=jans
 config.ldap.createLdapConfigurationEntryIfNotExist=true
 config.ldap.certsDir=conf
+
+config.client.authorization-code-lifetime=600
+config.client.dynamic-registration-expiration-time=86400
+config.client.clean-service-interval=600
+
+config.uma.requester-permission-token-lifetime=3600
