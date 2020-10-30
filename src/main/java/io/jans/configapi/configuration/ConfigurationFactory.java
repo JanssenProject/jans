@@ -85,17 +85,13 @@ public class ConfigurationFactory {
     private String cryptoConfigurationSalt;
     private String saltFilePath;
     
+
     @Inject
-    @ConfigProperty(name = "resource.name")
-    private static String API_RESOURCE_NAME;
-    private static String API_RESOURCE_ID;
-    
-    @Inject
-    @ConfigProperty(name = "client.id")
+    @ConfigProperty(name = "apiUmaClientId")
     private static String API_CLIENT_ID;
     
     @Inject
-    @ConfigProperty(name = "protection.type")
+    @ConfigProperty(name = "apiProtection.type")
     private static String API_PROTECTION_TYPE;
     
     @Inject
@@ -127,14 +123,7 @@ public class ConfigurationFactory {
     public static String getConfigAppPropertiesFile() {
         return API_PROTECTION_TYPE;
     }
-
-    public static String getApiResourceName() {
-        return API_RESOURCE_NAME;
-    }
-
-    public static String getApiResourceId() {
-        return API_RESOURCE_ID;
-    }
+ 
 
     public static String getApiClientId() {
         return API_CLIENT_ID;
