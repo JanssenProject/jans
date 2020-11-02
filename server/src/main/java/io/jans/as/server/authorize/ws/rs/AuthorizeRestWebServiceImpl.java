@@ -14,6 +14,8 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
@@ -203,8 +205,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = Response.ok();
 
         List<String> uiLocales = Util.splittedStringAsList(uiLocalesStr, " ");
-        List<io.jans.as.model.common.ResponseType> responseTypes = io.jans.as.model.common.ResponseType.fromString(responseType, " ");
-        List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(prompt, " ");
+        List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
+        List<Prompt> prompts = Prompt.fromString(prompt, " ");
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
         io.jans.as.model.common.ResponseMode responseMode = io.jans.as.model.common.ResponseMode.getByValue(respMode);
