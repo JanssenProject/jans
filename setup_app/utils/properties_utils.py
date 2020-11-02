@@ -602,15 +602,15 @@ class PropertiesUtils(SetupUtils):
 
             if Config.wrends_install == InstallTypes.LOCAL:
 
-                ldapPass = Config.ldapPass if Config.ldapPass else Config.oxtrust_admin_password
+                ldapPass = (Config.ldapPass if Config.ldapPass else Config.oxtrust_admin_password) or self.getPW(6)
+
 
                 while True:
-                    ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), Config.oxtrust_admin_password)
-
-                    if self.checkPassword(ldapPass):
+                    ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
+                    if len(ldapPass) > 3:
                         break
                     else:
-                        print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+                        print("Ldap Admin password should be at least four characters in length.")
 
                 Config.ldapPass = ldapPass
 
