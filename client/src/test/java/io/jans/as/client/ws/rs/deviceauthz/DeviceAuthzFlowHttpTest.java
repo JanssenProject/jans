@@ -489,14 +489,14 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     }
 
     private AuthorizationResponse processAuthorization(String userId, String userSecret, WebDriver currentDriver) {
-        Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+        Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                 .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class);
 
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
-            WebElement loginButton = wait.until(d -> currentDriver.findElement(By.id(loginFormLoginButton)));
+            WebElement loginButton = wait.until(d -> d.findElement(By.id(loginFormLoginButton)));
 
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
@@ -538,7 +538,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         }
         deviceAuthzPage.clickContinueButton();
 
-        Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+        Wait<WebDriver> wait = new FluentWait<WebDriver>(currentDriver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                 .pollingEvery(Duration.ofMillis(500))
                 .ignoring(NoSuchElementException.class);
@@ -573,15 +573,15 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
-            Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+            Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                     .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                     .pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
 
             WebElement doNotAllowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormDoNotAllowButton)));
-            final String previousUrl2 = driver.getCurrentUrl();
+            final String previousUrl2 = currentDriver.getCurrentUrl();
             doNotAllowButton.click();
-            waitForPageSwitch(driver, previousUrl2);
+            waitForPageSwitch(currentDriver, previousUrl2);
         } else {
             fail("The authorization form was expected to be shown.");
         }
