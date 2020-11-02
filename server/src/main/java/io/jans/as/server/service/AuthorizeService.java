@@ -14,6 +14,8 @@ import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.ciba.PushErrorResponseType;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.persistence.model.Scope;
@@ -91,9 +93,6 @@ public class AuthorizeService {
     private RequestParameterService requestParameterService;
 
     @Inject
-    private AuthorizationGrantList authorizationGrantList;
-
-    @Inject
     private CIBAPingCallbackService cibaPingCallbackService;
 
     @Inject
@@ -161,7 +160,7 @@ public class AuthorizeService {
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
-                List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
+                List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
                 prompts.remove(Prompt.CONSENT);
                 sessionAttribute.put(AuthorizeRequestParam.PROMPT, io.jans.as.model.util.StringUtils.implodeEnum(prompts, " "));
             }
@@ -192,8 +191,8 @@ public class AuthorizeService {
 
         String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
         String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
-        io.jans.as.model.common.ResponseMode responseMode = io.jans.as.model.common.ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
-        List<io.jans.as.model.common.ResponseType> responseType = io.jans.as.model.common.ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
+        ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
+        List<ResponseType> responseType = ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
 
         RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
         redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
