@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
@@ -30,7 +31,7 @@ import java.util.List;
 @ApplicationScoped
 public class UserService extends io.jans.as.common.service.common.UserService {
 
-	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
+	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.objectClassPerson };
 
     @Inject
     private StaticConfiguration staticConfiguration;
