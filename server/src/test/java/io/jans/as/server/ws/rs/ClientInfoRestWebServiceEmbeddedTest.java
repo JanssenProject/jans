@@ -183,11 +183,11 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("displayName"), "Unexpected result: displayName not found");
             assertTrue(jsonObj.has("inum"), "Unexpected result: inum not found");
-            assertTrue(jsonObj.has("oxAuthAppType"), "Unexpected result: oxAuthAppType not found");
-            assertTrue(jsonObj.has("oxAuthIdTokenSignedResponseAlg"),
-                    "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-            assertTrue(jsonObj.has("oxAuthRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
-            assertTrue(jsonObj.has("oxAuthScope"), "Unexpected result: oxAuthScope not found");
+            assertTrue(jsonObj.has("jansAppTyp"), "Unexpected result: jansAppTyp not found");
+            assertTrue(jsonObj.has("jansIdTknSignedRespAlg"),
+                    "Unexpected result: jansIdTknSignedRespAlg not found");
+            assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
+            assertTrue(jsonObj.has("jansScope"), "Unexpected result: jansScope not found");
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
