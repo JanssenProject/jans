@@ -13,6 +13,8 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -172,7 +174,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             if (r.getSubjectType() == null) {
-                io.jans.as.model.common.SubjectType defaultSubjectType = io.jans.as.model.common.SubjectType.fromString(appConfiguration.getDefaultSubjectType());
+                SubjectType defaultSubjectType = SubjectType.fromString(appConfiguration.getDefaultSubjectType());
                 if (defaultSubjectType != null) {
                     r.setSubjectType(defaultSubjectType);
                 } else if (appConfiguration.getSubjectTypesSupported().contains(io.jans.as.model.common.SubjectType.PUBLIC.toString())) {
@@ -339,13 +341,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             final SignatureAlgorithm signatureAlgorithm = softwareStatement.getHeader().getSignatureAlgorithm();
 
-            final io.jans.as.model.common.SoftwareStatementValidationType validationType = io.jans.as.model.common.SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
-            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.NONE) {
+            final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
+            if (validationType == SoftwareStatementValidationType.NONE) {
                 log.trace("software_statement validation was skipped due to `softwareStatementValidationType` configuration property set to none. (Not recommended.)");
                 return softwareStatement.getClaims().toJsonObject();
             }
 
-            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.SCRIPT) {
+            if (validationType == SoftwareStatementValidationType.SCRIPT) {
                 if (!externalDynamicClientRegistrationService.isEnabled()) {
                     log.error("Server is mis-configured. softwareStatementValidationType=script but there is no any Dynamic Client Registration script enabled.");
                     return null;
@@ -379,20 +381,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 return softwareStatement.getClaims().toJsonObject();
             }
 
-            if ((validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS_URI ||
-                    validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS) &&
+            if ((validationType == SoftwareStatementValidationType.JWKS_URI ||
+                    validationType == SoftwareStatementValidationType.JWKS) &&
                     StringUtils.isBlank(appConfiguration.getSoftwareStatementValidationClaimName())) {
                 log.error("softwareStatementValidationClaimName configuration property is not specified. Please specify claim name from software_statement which points to jwks (or jwks_uri).");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "Failed to validate software statement");
             }
 
             String jwksUriClaim = null;
-            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS_URI) {
+            if (validationType == SoftwareStatementValidationType.JWKS_URI) {
                 jwksUriClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
             }
 
             String jwksClaim = null;
-            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS) {
+            if (validationType == SoftwareStatementValidationType.JWKS) {
                 jwksClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
             }
 
