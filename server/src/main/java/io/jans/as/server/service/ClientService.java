@@ -279,7 +279,8 @@ public class ClientService {
 		try {
 			ldapEntryManager.merge(customEntry);
 		} catch (EntryPersistenceException epe) {
-			log.error("Failed to update jsLastAccessTime and jsLastLogonTime of client '{}'", clientDn);
+			log.error("Failed to update jansLastAccessTime and jansLastLogonTime of client '{}'", clientDn);
+			log.trace("Failed to update user:", epe);
 		}
 
 		removeFromCache(client);
