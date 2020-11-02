@@ -410,8 +410,8 @@ public abstract class BaseTest {
 			WebElement allowButton;
 			try {
 				allowButton = wait.until(d -> {
-                    System.out.println("Inner page dump URL: " + currentDriver.getCurrentUrl());
-                    System.out.println("Inner page dump source: " + currentDriver.getPageSource());
+                    System.out.println("Inner page dump URL: " + d.getCurrentUrl());
+                    System.out.println("Inner page dump source: " + d.getPageSource());
 				    return d.findElement(By.id(authorizeFormAllowButton));
                 });
 			} catch (RuntimeException ex) {
