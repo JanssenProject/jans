@@ -161,8 +161,8 @@
         "PS512"
     ],
     "dynamicRegistrationCustomAttributes":[
-        "oxAuthTrustedClient",
-        "oxIncludeClaimsInIdToken",
+        "jansTrustedClnt",
+        "jansInclClaimsInIdTkn",
         "myCustomAttr1",
         "myCustomAttr2"
     ],
