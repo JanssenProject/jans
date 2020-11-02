@@ -44,10 +44,10 @@ def get_setup_options():
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
     parser.add_argument('-application-max-ram', help="Total memory (in KB) to be used by Jannses applications")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
-    parser.add_argument('--install-config-api', help="Jans Auth Config Api", action='store_true')
+    parser.add_argument('--no-config-api', help="Do not install Jans Auth Config Api", action='store_true')
     #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
-    parser.add_argument('--install-scim', help="Install Scim Server", action='store_true')
-    parser.add_argument('--install-fido2', help="Install Fido2", action='store_true')
+    parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
+    parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
@@ -61,12 +61,12 @@ def get_setup_options():
         'noPrompt': False,
         'downloadWars': False,
         'installOxAuth': True,
-        'installConfigApi': False,
+        'installConfigApi': True,
         'wrends_install': InstallTypes.LOCAL,
         'installHTTPD': True,
-        'installScimServer': False,
+        'installScimServer': True,
         'installOxd': False,
-        'installFido2': False,
+        'installFido2': True,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -78,7 +78,14 @@ def get_setup_options():
     if argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
 
-    setupOptions['installConfigApi'] = argsp.install_config_api
+    if argsp.no_config_api:
+        setupOptions['installConfigApi'] = False
+
+    if argsp.no_scim:
+        setupOptions['installScimServer'] = False
+
+    if argsp.no_fido2:
+        setupOptions['installFido2'] = False
 
     if argsp.ip_address:
         setupOptions['ip'] = argsp.ip_address
@@ -127,8 +134,6 @@ def get_setup_options():
     setupOptions['loadTestDataExit'] = argsp.x
     setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
-    setupOptions['installScimServer'] = argsp.install_scim
-    setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
     setupOptions['config_patch_creds'] = argsp.config_patch_creds
 

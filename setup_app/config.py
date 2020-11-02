@@ -135,7 +135,7 @@ class Config:
         self.installJans = True
         self.installJre = True
         self.installJetty = True
-        self.installNode = True
+        self.installNode = False
         self.installJython = True
         self.installOxAuth = True
         self.installOxTrust = True
@@ -144,9 +144,9 @@ class Config:
         self.installOxAuthRP = False
         self.installPassport = False
         self.installJansRadius = False
-        self.installScimServer = False
-        self.installFido2 = False
-        self.installConfigApi = False
+        self.installScimServer = True
+        self.installFido2 = True
+        self.installConfigApi = True
         self.installCasa = False
         self.installOxd = False
         self.loadTestData = False
