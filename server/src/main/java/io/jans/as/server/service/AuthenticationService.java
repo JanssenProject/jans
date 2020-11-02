@@ -11,6 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
@@ -562,7 +563,7 @@ public class AuthenticationService {
 		if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
 			// Combine object classes from LDAP and configuration in one list
 			Set<Object> customPersonCustomObjectClassList = new HashSet<Object>();
-			customPersonCustomObjectClassList.add("gluuPerson");
+			customPersonCustomObjectClassList.add(AttributeConstants.objectClassPerson);
 			customPersonCustomObjectClassList.addAll(personCustomObjectClassList);
 			if (user.getCustomObjectClasses() != null) { 
 				customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
@@ -582,7 +583,8 @@ public class AuthenticationService {
 		try {
 			ldapEntryManager.merge(customEntry);
 		} catch (EntryPersistenceException epe) {
-			log.error("Failed to update jsLastLogonTime of user '{}'", user.getUserId());
+			log.error("Failed to update jansLastLogonTime of user '{}'", user.getUserId());
+			log.trace("Failed to update user:", epe);epe.printStackTrace();
 		}
 	}
 

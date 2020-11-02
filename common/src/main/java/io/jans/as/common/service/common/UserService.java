@@ -14,6 +14,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.util.Util;
 import org.slf4j.Logger;
 
@@ -30,7 +31,7 @@ import java.util.*;
  */
 public abstract class UserService {
 
-	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
+	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.objectClassPerson };
 
     @Inject
     private Logger log;
