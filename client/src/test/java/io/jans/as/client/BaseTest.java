@@ -318,23 +318,24 @@ public abstract class BaseTest {
             boolean cleanupCookies, boolean useNewDriver, int authzSteps) {
         WebDriver currentDriver = initWebDriver(useNewDriver, cleanupCookies);
 
-        AuthorizeClient authorizeClient = processAuthentication(currentDriver, authorizeUrl, authorizationRequest,
-                userId, userSecret);
+        try {
+            AuthorizeClient authorizeClient = processAuthentication(currentDriver, authorizeUrl, authorizationRequest,
+                    userId, userSecret);
 
-        int remainAuthzSteps = authzSteps;
+            int remainAuthzSteps = authzSteps;
 
-        String authorizationResponseStr = null;
-        do {
-            authorizationResponseStr = acceptAuthorization(currentDriver, authorizationRequest.getRedirectUri());
-            remainAuthzSteps--;
-        } while (remainAuthzSteps >= 1);
+            String authorizationResponseStr = null;
+            do {
+                authorizationResponseStr = acceptAuthorization(currentDriver, authorizationRequest.getRedirectUri());
+                remainAuthzSteps--;
+            } while (remainAuthzSteps >= 1);
 
-        AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest,
-                currentDriver, authorizeClient, authorizationResponseStr);
-
-        stopWebDriver(useNewDriver, currentDriver);
-
-        return authorizationResponse;
+            AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest,
+                    currentDriver, authorizeClient, authorizationResponseStr);
+            return authorizationResponse;
+        } finally {
+            stopWebDriver(useNewDriver, currentDriver);
+        }
     }
 
     protected WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
@@ -401,14 +402,14 @@ public abstract class BaseTest {
 
 		// Check for authorization form if client has no persistent authorization
 		if (!authorizationResponseStr.contains("#")) {
-			Wait<WebDriver> wait = new FluentWait<WebDriver>(currentDriver)
+			Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                     .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
 					.pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
 
 			WebElement allowButton;
 			try {
-				allowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormAllowButton)));
+				allowButton = wait.until(d -> d.findElement(By.id(authorizeFormAllowButton)));
 			} catch (RuntimeException ex) {
                 System.out.println("Page dump URL: " + currentDriver.getCurrentUrl());
                 System.out.println("Page dump source: " + currentDriver.getPageSource());
