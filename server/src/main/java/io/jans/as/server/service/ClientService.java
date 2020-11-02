@@ -44,7 +44,7 @@ import java.util.*;
 @Named
 public class ClientService {
 
-	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
+	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "jansClnt" };
 
 	@Inject
 	private Logger log;
@@ -280,7 +280,7 @@ public class ClientService {
 			ldapEntryManager.merge(customEntry);
 		} catch (EntryPersistenceException epe) {
 			log.error("Failed to update jansLastAccessTime and jansLastLogonTime of client '{}'", clientDn);
-			log.trace("Failed to update user:", epe);
+			log.trace("Failed to update user:", epe);epe.printStackTrace();
 		}
 
 		removeFromCache(client);
