@@ -14,7 +14,7 @@ public class AttributeConstants {
     public static final String CURRENT_PERSON = "currentPerson";
 
     public static final String top = "top";
-    public static final String objectClassPerson = "gluuPerson";
+    public static final String objectClassPerson = "jansPerson";
     public static final String objectClassInumMap = "gluuInumMap";
 
     public static final String inumDelimiter = "!";
