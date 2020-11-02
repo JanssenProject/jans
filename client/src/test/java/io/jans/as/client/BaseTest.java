@@ -401,7 +401,7 @@ public abstract class BaseTest {
 
 		// Check for authorization form if client has no persistent authorization
 		if (!authorizationResponseStr.contains("#")) {
-			Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+			Wait<WebDriver> wait = new FluentWait<WebDriver>(currentDriver)
                     .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
 					.pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
