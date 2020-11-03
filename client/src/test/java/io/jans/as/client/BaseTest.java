@@ -417,6 +417,7 @@ public abstract class BaseTest {
 			} catch (RuntimeException ex) {
                 System.out.println("Page dump URL: " + currentDriver.getCurrentUrl());
                 System.out.println("Page dump source: " + currentDriver.getPageSource());
+                ex.printStackTrace();
                 throw ex;
 			}
 
