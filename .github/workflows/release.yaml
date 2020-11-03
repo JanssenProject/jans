@@ -1,0 +1,62 @@
+name: release
+on:
+  push:
+    paths:
+      - __version__.py
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        sudo apt-get update
+        sudo apt-get install ruby
+
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Build Zipapp
+      run: |
+        mkdir /home/runner/work/test
+        cp -r . /home/runner/work/test/
+        cd /home/runner/work/test/
+
+    - name: Get version
+      id: get_version
+      run: |
+        echo "::set-output name=version::$(python3 -c 'import __version__ ; print(__version__.__version__)')"
+        echo "::set-output name=pversion::$(python3 -c 'import __version__ ; print(__version__.__previous_version__)')"
+        echo "::set-output name=gituser::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[0])')"
+        echo "::set-output name=gitproject::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[1])')"
+        echo "::set-output name=gitbranch::$(python3 -c 'import os ; BRANCH = os.environ.get("GITHUB_REF") ; print(str(BRANCH).split("/")[2])')"
+        echo "::set-output name=releasedate::$(date +'%d-%m-%Y')"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        release_name: v${{ steps.get_version.outputs.version }}
+        body: |
+          # Release Notes
+
+          ## [v${{ steps.get_version.outputs.version }}](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/tree/v${{ steps.get_version.outputs.version }}) (${{ steps.get_version.outputs.releasedate }})
+
+
+          [Full Changelog](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/compare/v${{ steps.get_version.outputs.pversion }}...v${{ steps.get_version.outputs.version }})
+
+          ## Please find release notes below :
+
+          https://github.com/GluuFederation/cloud-native-edition/releases/tag/v${{ steps.get_version.outputs.version }}
+
+        draft: false
+        prerelease: false

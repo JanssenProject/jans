@@ -1,0 +1,52 @@
+name: updatehelmchart
+on: [workflow_dispatch]
+jobs:
+  createPullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+
+      - name: Clone cloud native repo
+        run: |
+          sudo bash automation/prepare_chart.sh
+          sudo python3 automation/analyze_chart.py
+          sudo cp -rf /home/runner/work/test/pygluu/kubernetes/templates/helm/gluu/. .
+          sudo cp /home/runner/work/test/pygluu/kubernetes/__init__.py __version__.py
+          sudo rm -rf home/runner/work/test
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update Helm Chart
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: update-helm-chart
+          title: 'Update helm chart'
+          body: |
+            - Update Helm chart
+            - Auto-generated due to a release in the main repo https://github.com/GluuFederation/cloud-native-edition
+
+          labels: |
+            enhancement
+          assignees: moabu
+          reviewers: moabu
+
+      - name: Check output
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
