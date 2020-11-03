@@ -234,7 +234,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
 
-                grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode());
+                grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
 
                 final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
                 return response(Response.ok().entity(entity), oAuth2AuditLog);
