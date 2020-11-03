@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="jansAuthClient" parallel="classes" thread-count="4">
+<suite name="jansAuthClient" parallel="tests" thread-count="4">
 
     <test name="JsonApplier Client test" enabled="true">
         <classes>
