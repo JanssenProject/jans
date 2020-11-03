@@ -39,7 +39,10 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
