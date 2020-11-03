@@ -27,7 +27,7 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
     ConfigurationService configurationService;
 
     public HealthCheckResponse call() {
-        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("oxauth-config-api readiness");
+        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("jans-config-api readiness");
         try {
             checkDatabaseConnection();
             responseBuilder.up();
