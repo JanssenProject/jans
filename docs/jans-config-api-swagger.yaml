@@ -5615,7 +5615,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/uma.resource.readonly]
       parameters:
         - schema:
             type: integer
@@ -5707,7 +5707,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
     put:
       tags:
         - OAuth - UMA Resources
@@ -5789,7 +5789,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
   '/api/v1/uma/resources/{id}':
     parameters:
       - name: id
@@ -5846,7 +5846,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/uma.resource.readonly]
     delete:
       tags:
         - OAuth - UMA Resources
@@ -5920,7 +5920,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
   /api/v1/scopes:
     get:
       tags:
@@ -5943,7 +5943,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/scopes.readonly]
       parameters:
         - schema:
             type: string
@@ -5984,7 +5984,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
     put:
       tags:
         - OAuth - Scopes
@@ -6010,7 +6010,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
     parameters: []
   /api/v1/scopes/{inum}:
     parameters:
@@ -6039,7 +6039,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: ['https://jans.io/oauth/config/scopes.readonly']
     delete:
       tags:
         - OAuth - Scopes
@@ -6056,7 +6056,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
     patch:
       tags:
         - OAuth - Scopes
@@ -6085,7 +6085,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
 components:
   securitySchemes:
     jans-auth:
@@ -6098,6 +6098,10 @@ components:
             https://jans.io/oauth/scopes/config-api-read: Grants read access
             https://jans.io/oauth/scopes/config-api-write: Grants write access
             https://jans.io/oauth/scopes/config-api-all: Grants all access
+            https://jans.io/oauth/config/scopes.readonly: View scope related information
+            https://jans.io/oauth/config/scopes.write: View and manage scope related information
+            https://jans.io/oauth/config/uma.resource.readonly: View UMA Resource related information
+            https://jans.io/oauth/config/uma.resource.write: View and manage UMA Resource related information
   responses:
     Found:
       description: Resource Found.

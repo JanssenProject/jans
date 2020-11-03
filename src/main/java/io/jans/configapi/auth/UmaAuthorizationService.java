@@ -58,7 +58,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
 	public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String methods, String path)
 			throws Exception {
-		System.out.println(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
+		log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
 				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , methods = "
 				+ methods + " , path = " + path + "\n");
 
@@ -90,7 +90,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
 		// Get umaResource
 		UmaResource umaResource = getUmaResource(resourceInfo, methods, path);
-		System.out.println(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
+		log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
 
 		if (umaResource.getScopes() == null || umaResource.getScopes().isEmpty())
 			return; // nothing to validate. Resource is not protected.
@@ -99,10 +99,10 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 	}
 
 	public void validateRptToken(String rpt, UmaResource umaResource) throws Exception {
-		System.out.println("UmaAuthorizationService::validateRptToken" + "() - Entry - rpt = " + rpt
+		log.debug("UmaAuthorizationService::validateRptToken" + "() - Entry - rpt = " + rpt
 				+ " , umaResource = " + umaResource + "\n\n\n");
 		final Token patToken = patService.getPatToken();
-		System.out.println("validateRptToken() - Entry - rpt = " + rpt + " , umaResource = " + umaResource + "\n\n\n");
+		log.debug("validateRptToken() - Entry - rpt = " + rpt + " , umaResource = " + umaResource + "\n\n\n");
 
 		umaService.validateRptToken(patToken, rpt, umaResource.getId(), umaResource.getScopes());
 
@@ -131,10 +131,10 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 	}
 
 	private UmaResource getUmaResource(ResourceInfo resourceInfo, String methods, String path) {
-		System.out.println(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
+		log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
 				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , methods = "
 				+ methods + " , path = " + path + "\n");
-		System.out.println(
+		log.debug(
 				" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
 						+ umaResourceProtectionCache.getAllUmaResources());
 		return umaResourceProtectionCache.getUmaResource(methods + " " + path);
