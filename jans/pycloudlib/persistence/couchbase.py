@@ -547,6 +547,12 @@ class CouchbaseClient:
             f"settings/rbac/users/local/{username}", data=data, method="PUT",
         )
 
+    def get_index_nodes(self):
+        resp = self.rest_client.exec_api("pools/default", method="GET")
+        if not resp.ok:
+            return []
+        return [node for node in resp.json()["nodes"] if "index" in node["services"]]
+
 
 # backward-compat
 def suppress_verification_warning():
