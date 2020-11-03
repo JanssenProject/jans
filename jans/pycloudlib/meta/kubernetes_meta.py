@@ -43,7 +43,8 @@ class KubernetesMeta(BaseMeta):
         :params label: Label name, i.e. ``APP_NAME=oxauth``.
         :returns: List of container objects.
         """
-        return self.client.list_pod_for_all_namespaces(label_selector=label).items
+        namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
+        return self.client.list_namespaced_pod(namespace, label_selector=label).items
 
     def get_container_ip(self, container) -> str:
         """Get container's IP address.
