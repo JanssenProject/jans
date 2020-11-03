@@ -6,28 +6,31 @@
 
 package io.jans.configapi.configuration;
 
-import io.quarkus.arc.AlternativePriority;
-import org.apache.commons.lang.StringUtils;
-import io.jans.exception.ConfigurationException;
-import io.jans.exception.OxIntializationException;
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.auth.*;
+import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.auth.OpenIdAuthorizationService;
+import io.jans.configapi.auth.UmaAuthorizationService;
+import io.jans.configapi.auth.UmaResourceProtectionService;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.exception.ConfigurationException;
+import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
+import io.quarkus.arc.AlternativePriority;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -36,18 +39,15 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
 public class ConfigurationFactory {
 
     static {
-        if (System.getProperty("gluu.base") != null) {
-            BASE_DIR = System.getProperty("gluu.base");
+        if (System.getProperty("jans.base") != null) {
+            BASE_DIR = System.getProperty("jans.base");
         } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
@@ -62,9 +62,9 @@ public class ConfigurationFactory {
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
-    private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
-    private static final String SALT_FILE_NAME = "salt";
+    private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
+    private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
+    private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
 
     @Inject
     Logger log;
@@ -85,18 +85,17 @@ public class ConfigurationFactory {
     private String cryptoConfigurationSalt;
     private String saltFilePath;
     
+
     @Inject
-    @ConfigProperty(name = "resource.name")
-    private static String API_RESOURCE_NAME;
-    private static String API_RESOURCE_ID;
-    
-    @Inject
-    @ConfigProperty(name = "client.id")
+    @ConfigProperty(name = "apiUmaClientId")
     private static String API_CLIENT_ID;
     
     @Inject
-    @ConfigProperty(name = "protection.type")
+    @ConfigProperty(name = "apiProtection.type")
     private static String API_PROTECTION_TYPE;
+    
+    @Inject
+    UmaResourceProtectionService umaResourceProtectionService;
     
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
@@ -124,14 +123,7 @@ public class ConfigurationFactory {
     public static String getConfigAppPropertiesFile() {
         return API_PROTECTION_TYPE;
     }
-
-    public static String getApiResourceName() {
-        return API_RESOURCE_NAME;
-    }
-
-    public static String getApiResourceId() {
-        return API_RESOURCE_ID;
-    }
+ 
 
     public static String getApiClientId() {
         return API_CLIENT_ID;
@@ -151,17 +143,20 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        //Initialize Config Api Resource
-        initConfigApiResource();
+        createAuthorizationService();
         
-        //Initialize API Protection Mechanism
-        initApiProtectionService();
     }
 
     private boolean createFromDb() {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final Conf c = loadConfigurationFromDb();
+            log.debug("\n\n\n Conf c = "+c+"\n\n");
+            log.debug(" Conf c.getDn() = "+c.getDn());
+            log.debug(" Conf c.getDynamic() = "+c.getDynamic());
+            log.debug(" Conf c.getStatics() = "+c.getStatics());
+            log.debug(" Conf c.getWebKeys() = "+c.getWebKeys());
+            log.debug(" Conf c.toString() = "+c.toString()+"\n\n\n\n");
             if (c != null) {
                 init(c);
                 return true;
@@ -174,7 +169,7 @@ public class ConfigurationFactory {
     }
 
     public String getConfigurationDn() {
-        return this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
+        return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
 
     private Conf loadConfigurationFromDb() {
@@ -285,62 +280,24 @@ public class ConfigurationFactory {
         }
     }
 
-   
-   
     @Produces
     @ApplicationScoped
     @Named("authorizationService")
-    private AuthorizationService initApiProtectionService() {
+    private AuthorizationService createAuthorizationService() {
         if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-            } else
+            } else {
+            	umaResourceProtectionService.verifyUmaResources();
+            	log.debug(" \n\n ConfigurationFactory::create() - umaResourceProtectionService.getResourceList() = "+umaResourceProtectionService.getResourceList()+"\n\n");
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
+            }
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-
-    @Produces
-    @ApplicationScoped
-    @Named("configApiResource")
-    private UmaResource initConfigApiResource() {
-        log.error("ConfigurationFactory.getApiResourceName() = " + ConfigurationFactory.getApiResourceName());
-        if (StringHelper.isEmpty(ConfigurationFactory.getApiResourceName())) {
-            throw new ConfigurationException("Config API Resource not defined");
-        }
-        try {
-            String[] targetArray = new String[] { ConfigurationFactory.getApiResourceName() };
-            Filter oxIdFilter = Filter.createSubstringFilter("oxId", null, targetArray, null);
-            Filter displayNameFilter = Filter.createSubstringFilter(ApiConstants.DISPLAY_NAME, null, targetArray, null);
-            Filter searchFilter = Filter.createORFilter(oxIdFilter, displayNameFilter);
-            List<UmaResource> umaResourceList = persistenceEntryManagerInstance.get()
-                    .findEntries(getBaseDnForResource(), UmaResource.class, searchFilter);
-            log.error(" \n umaResourceList = " + umaResourceList + "\n");
-            /*
-             * if (umaResourceList == null || umaResourceList.isEmpty()) throw new
-             * ConfigurationException("Matching Config API Resource not found!");
-             * UmaResource resource = umaResourceList.stream() .filter(x ->
-             * ConfigurationFactory.getApiResourceName().equals(x.getName())).findFirst()
-             * .orElse(null); if (resource == null) throw new
-             * ConfigurationException("Config API Resource not found!"); return resource;
-             */
-            // To-uncomment-later???
-            return null;
-
-        } catch (Exception ex) {
-            log.error("Failed to load Config API Resource.", ex);
-            throw new ConfigurationException("Failed to load Config API Resource.", ex);
-        }
-    }
-
-    public String getBaseDnForResource() {
-        final String umaBaseDn = staticConf.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
-        return String.format("ou=resources,%s", umaBaseDn);
-    }
-
 }

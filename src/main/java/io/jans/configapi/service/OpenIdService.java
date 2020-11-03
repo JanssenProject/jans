@@ -6,6 +6,7 @@
 
 package io.jans.configapi.service;
 
+import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.configapi.auth.AuthClientFactory;
 import io.jans.util.StringHelper;
@@ -29,9 +30,9 @@ public class OpenIdService extends Initializable implements Serializable {
     @Inject
     ConfigurationService configurationService;
 
-    private IntrospectionService introspectionService;
+    private OpenIdClientService introspectionService;
 
-    public IntrospectionService getIntrospectionService() {
+    public OpenIdClientService getIntrospectionService() {
         init();
         return introspectionService;
     }

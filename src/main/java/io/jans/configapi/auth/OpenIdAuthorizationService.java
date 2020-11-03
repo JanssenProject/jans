@@ -33,7 +33,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public void validateAuthorization(String token, ResourceInfo resourceInfo) throws Exception {
+    public void validateAuthorization(String token, ResourceInfo resourceInfo, String methods, String path) throws Exception {
         if (StringUtils.isBlank(token)) {
             logger.error("Token is blank !!!!!!");
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
@@ -48,7 +48,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            logger.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
+            logger.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
+                    + introspectionResponse.getScope());
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 

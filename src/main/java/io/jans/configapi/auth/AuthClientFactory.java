@@ -11,6 +11,8 @@ import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.uma.UmaMetadata;
+
+import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.configapi.util.ApiConstants;
 
 import javax.ws.rs.core.UriBuilder;
@@ -34,7 +36,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 public class AuthClientFactory {
 
-    public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
+    public static OpenIdClientService getIntrospectionService(String url, boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
     }
 
@@ -51,13 +53,13 @@ public class AuthClientFactory {
         return createUmaRptIntrospectionService(umaMetadata);
     }
 
-    private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
+    private static OpenIdClientService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                 .register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(url);
-        IntrospectionService proxy = target.proxy(IntrospectionService.class);
+        OpenIdClientService proxy = target.proxy(OpenIdClientService.class);
         return proxy;
     }
 
