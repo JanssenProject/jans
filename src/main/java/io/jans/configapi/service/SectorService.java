@@ -40,17 +40,17 @@ public class SectorService implements Serializable {
     @Inject
     private ClientService clientService;
 
-    public String getDnForSectorIdentifier(String oxId) {
+    public String getDnForSectorIdentifier(String jsId) {
         String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return String.format("ou=sector_identifiers,%s", orgDn);
         }
-        return String.format("oxId=%s,ou=sector_identifiers,%s", oxId, orgDn);
+        return String.format("jansId=%s,ou=sector_identifiers,%s", jsId, orgDn);
     }
 
     public List<SectorIdentifier> searchSectorIdentifiers(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter searchFilter = Filter.createSubstringFilter(AttributeConstants.oxId, null, targetArray, null);
+        Filter searchFilter = Filter.createSubstringFilter(AttributeConstants.jsId, null, targetArray, null);
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, searchFilter,
                 sizeLimit);
     }
@@ -59,11 +59,11 @@ public class SectorService implements Serializable {
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, null);
     }
 
-    public SectorIdentifier getSectorIdentifierById(String oxId) {
+    public SectorIdentifier getSectorIdentifierById(String jsId) {
         try {
-            return persistenceEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(oxId));
+            return persistenceEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(jsId));
         } catch (Exception e) {
-            log.trace("Failed to find sector identifier by oxId " + oxId, e);
+            log.trace("Failed to find sector identifier by jsId " + jsId, e);
             return null;
         }
     }

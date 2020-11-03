@@ -6,16 +6,20 @@
 
 package io.jans.configapi.auth;
 
-//import io.jans.as.client.uma.wrapper.UmaClient;
-import io.jans.as.client.uma.UmaRptIntrospectionService;
+import io.jans.as.client.uma.exception.UmaException;
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.RptIntrospectionResponse;
-import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.as.common.service.common.EncryptionService;
-import io.jans.configapi.service.UmaService;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.configapi.service.UmaClientService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
@@ -23,178 +27,87 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import io.jans.util.Pair;
-import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
 public class UmaAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Token umaPat;
-    private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
-    private final ReentrantLock lock = new ReentrantLock();
 
     @Inject
-    private Logger logger;
+    Logger log;
 
     @Inject
-    private EncryptionService encryptionService;
+    UmaClientService umaService;
 
     @Inject
-    UmaResource configApiResource;
+    PatService patService;
+        
+    @Inject
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+    Instance<PersistenceEntryManager> persistenceManager;
 
     @Inject
-    UmaService umaService;
+    StaticConfiguration staticConf;
 
-    @Inject
-    private UmaMetadata umaMetadata;
+    public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String methods, String path) throws Exception {
+        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
+                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() 
+                + " , methods = "+methods+" , path = "+path+"\n");
 
-    public void validateAuthorization(String token, ResourceInfo resourceInfo) throws Exception {
-        logger.debug(" UmaAuthorizationService::validateAuthorization() - token = " + token
-                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + "\n");
+        // todo FIXME Yuriy Z -> Puja : implementation is wrong overall. Here step by step plan:
+        // =================================
+        // 1. first all endpoints of config API has to be protected by UMA. Protection is made by registering UMA resource.
+        // e.g. POST, PUT /client -> umaResource1; GET /client -> umaResource2
+        // in this way we can grant access got GET /client (via umaResource2) but forbid change it (don't give permission for umaResource1)
+        // It corresponds to oxd protection command https://gluu.org/docs/oxd/4.2/api/#uma-rs-protect-resources
+        // It should not register umaResource again and again. Usually it should be one UMA resource for one or many endpoints.
+        // =================================
+        // 2. on each call permission should be checked, which means
+        // - get umaResource for exactly this endpoint
+        // - introspect RPT which returns permissions
+        // - Validate: check that permission corresponds to exactly this umaResource (no match -> forbid)
+        // - if resource match then check scopes
+        // - It corresponds to oxd check access command https://gluu.org/docs/oxd/4.2/api/#uma-rs-check-access
+        // Does it make sense to use uma-rs lib ? It will simplify this task.
+        // uma-rs in jans worlds is now part of jans-client-api. You can add dependency on `jans-uma-rs` or `jans-uma-rs-resteasy` and re-use it.
+        // https://github.com/JanssenProject/jans-client-api/blob/245692aa3911158c39729e5aa2513e44d254c48f/uma-rs-resteasy/src/main/java/io/jans/ca/rs/protect/resteasy/RptPreProcessInterceptor.java#L31
+        List<String> requestedScopes = getRequestedScopes(resourceInfo);
+        log.debug("requestedScopes = " + requestedScopes + "\n");
+        if (requestedScopes == null || requestedScopes.isEmpty())
+            return; // nothing to validate. Resource is not protected.
 
-        if (StringUtils.isBlank(token)) {
-            logger.info("Token is blank");
+        if (StringUtils.isBlank(rpt)) {
+            log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has to be registered
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        logger.debug(" UmaAuthorizationService::validateAuthorization() - resourceScopes = " + resourceScopes + "\n");
-
-        Token patToken = null;
-        try {
-            //patToken = getPatToken(); // WIP ??
-        } catch (Exception ex) {
-            logger.error("Failed to obtain PAT token", ex);
-            throw new WebApplicationException("Failed to obtain PAT token", ex);
-        }
-
-        logger.debug("this.umaService.getUmaMetadata() = " + this.umaService.getUmaMetadata());
-
-        logger.debug(
-                "AuthClientFactory::createUmaMetadataService() - resourceScopes = " + resourceScopes + "\n\n");
-
-        /*
-        if (!resourceScopes.isEmpty()) {
-            this.umaService.validateRptToken(patToken, token, getUmaResourceId(), resourceScopes);
-        } else {
-            this.umaService.validateRptToken(patToken, token, getUmaResourceId(), getUmaScope());
-        }
-        */
+        UmaResource umaResource = null; // TODO load umaResource for this endpoint
+        validateRptToken(rpt, requestedScopes, umaResource);
     }
 
-    public String getUmaResourceId() {
-        return configApiResource.getId();
-    }
 
-    public String getUmaScope() {
-        String scopes = new String();
-        List<String> scopeList = configApiResource.getScopes();
-        if (scopeList != null && !scopeList.isEmpty()) {
-            scopes = scopeList.stream().map(s -> s.concat(" ")).collect(Collectors.joining());
-            logger.debug(scopes);
+    public void validateRptToken(String authorization, List<String> requestedScopes, UmaResource umaResource) throws Exception {
+        final Token patToken = patService.getPatToken();
+
+        logger.debug("validateRptToken() - Entry - patToken = " + patToken + " , authorization = "
+                + authorization + " , scopeIds = " + requestedScopes + "\n\n\n");
+
+        if (patToken == null || patToken.getIdToken() == null) {
+            throw new UmaException("PAT cannot be null");
         }
 
-        return scopes.trim();
-    }
+        logger.trace("Validating RPT, scopeIds: {}, authorization: {}", requestedScopes, authorization);
 
-    private String getClientId() {
-        return configurationFactory.getApiClientId(); // TBD
-    }
+        if (StringHelper.isNotEmpty(authorization) && authorization.startsWith("Bearer ")) {
+            String rptToken = authorization.substring(7);
 
-    private String getClientKeyId() {
-        return null; // TBD
-    }
+            RptIntrospectionResponse rptStatusResponse = umaService.introspectRpt(patToken, rptToken);
 
-    public Token getPatToken() throws Exception {
-        if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
-            return this.umaPat;
+            // TODO for puja: https://github.com/JanssenProject/jans-client-api/blob/245692aa3911158c39729e5aa2513e44d254c48f/uma-rs-resteasy/src/main/java/io/jans/ca/rs/protect/resteasy/RptPreProcessInterceptor.java#L94
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        lock.lock();
-        try {
-            if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
-                return this.umaPat;
-            }
-
-            retrievePatToken();
-        } finally {
-            lock.unlock();
-        }
-
-        return this.umaPat;
-    }
-
-    private boolean isEnabledUmaAuthentication() {
-        return (this.umaMetadata != null) && isExistPatToken();
-    }
-
-    private boolean isExistPatToken() {
-        try {
-            return getPatToken() != null;
-        } catch (Exception ex) {
-            logger.error("Failed to check UMA PAT token status", ex);
-        }
-
-        return false;
-    }
-
-    private String getIssuer() {
-        if (umaMetadata == null) {
-            return "";
-        }
-        return umaMetadata.getIssuer();
-    }
-
-    private void retrievePatToken() throws Exception {
-        this.umaPat = null;
-        if (umaMetadata == null) {
-            return;
-        }
-        logger.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = "
-                + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "
-                + getClientKeyId() + "\n\n");
-        String umaClientKeyStoreFile = getClientKeyStoreFile();
-        String umaClientKeyStorePassword = getClientKeyStorePassword();
-        if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
-            throw new Exception("UMA JKS keystore path or password is empty");
-        }
-        /*
-         * if (umaClientKeyStorePassword != null) { try { umaClientKeyStorePassword =
-         * encryptionService.decrypt(umaClientKeyStorePassword); } catch
-         * (EncryptionException ex) {
-         * logger.error("Failed to decrypt UmaClientKeyStorePassword password", ex); } }
-         */
-        try {
-            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
-                    umaClientKeyStorePassword, getClientId(), getClientKeyId());
-            if (this.umaPat == null) {
-                this.umaPatAccessTokenExpiration = 0l;
-            } else {
-                this.umaPatAccessTokenExpiration = computeAccessTokenExpirationTime(this.umaPat.getExpiresIn());
-            }
-        } catch (Exception ex) {
-            throw new Exception("Failed to obtain valid UMA PAT token", ex);
-        }
-
-        if ((this.umaPat == null) || (this.umaPat.getAccessToken() == null)) {
-            throw new Exception("Failed to obtain valid UMA PAT token");
-        }
-    }
-
-    private boolean isValidPatToken(Token validatePatToken, long validatePatTokenExpiration) {
-        final long now = System.currentTimeMillis();
-
-        // Get new access token only if is the previous one is missing or expired
-        return !((validatePatToken == null) || (validatePatToken.getAccessToken() == null)
-                || (validatePatTokenExpiration <= now));
     }
 
 }

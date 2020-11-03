@@ -21,7 +21,7 @@ import java.util.Date;
  * @author Yuriy Zabrovarnyy
  */
 @DataEntry
-@ObjectClass(value = "gluuConfiguration")
+@ObjectClass(value = "jansConf")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuConfiguration extends InumEntry implements Serializable {
 
@@ -31,102 +31,99 @@ public class GluuConfiguration extends InumEntry implements Serializable {
     @AttributeName
     private String displayName;
 
-    @AttributeName(name = "gluuHostname", updateOnly = true)
+    @AttributeName(name = "jansHostname", updateOnly = true)
     private String hostname;
 
-    @AttributeName(name = "gluuLastUpdate", updateOnly = true)
+    @AttributeName(name = "jansLastUpd", updateOnly = true)
     private Date lastUpdate;
 
     @AttributeName(name = "gluuConfigurationPollingInterval")
     private String pollingInterval;
 
-    @AttributeName(name = "gluuStatus", updateOnly = true)
+    @AttributeName(name = "jansStatus", updateOnly = true)
     private GluuStatus status;
 
     @AttributeName(name = "userPassword", ignoreDuringRead = true)
     private String userPassword;
 
-    @AttributeName(name = "gluuHTTPstatus", updateOnly = true)
+    @AttributeName(name = "jansHTTPstatus", updateOnly = true)
     private String gluuHttpStatus;
 
-    @AttributeName(name = "gluuDSstatus", updateOnly = true)
+    @AttributeName(name = "jansDSstatus", updateOnly = true)
     private String gluuDSStatus;
 
-    @AttributeName(name = "gluuVDSstatus", updateOnly = true)
+    @AttributeName(name = "jansStatus", updateOnly = true)
     private String gluuVDSStatus;
 
-    @AttributeName(name = "gluuSPTR")
-    private String gluuSPTR;
+    @AttributeName(name = "jansSPTR")
+    private String sptr;
 
-    @AttributeName(name = "gluuSslExpiry", updateOnly = true)
+    @AttributeName(name = "jansSslExpiry", updateOnly = true)
     private String sslExpiry;
 
-    @AttributeName(name = "gluuOrgProfileMgt")
+    @AttributeName(name = "jansOrgProfileMgt")
     private boolean profileManagment;
 
-    @AttributeName(name = "gluuManageIdentityPermission")
+    @AttributeName(name = "jansManageIdentityPermission")
     private boolean manageIdentityPermission;
 
-    @AttributeName(name = "gluuVdsCacheRefreshEnabled")
+    @AttributeName(name = "jansCacheRefreshEnabled")
     private boolean vdsCacheRefreshEnabled;
 
-    @AttributeName(name = "oxTrustCacheRefreshServerIpAddress")
+    @AttributeName(name = "excludeCacheRefreshServerIpAddr")
     private String cacheRefreshServerIpAddress;
 
-    @AttributeName(name = "gluuVdsCacheRefreshPollingInterval")
+    @AttributeName(name = "jansCacheRefreshPollingInterval")
     private String vdsCacheRefreshPollingInterval;
 
-    @AttributeName(name = "gluuVdsCacheRefreshLastUpdate")
+    @AttributeName(name = "jansCacheRefreshLastUpd")
     private Date vdsCacheRefreshLastUpdate;
 
-    @AttributeName(name = "gluuVdsCacheRefreshLastUpdateCount")
+    @AttributeName(name = "jansCacheRefreshLastUpdCount")
     private String vdsCacheRefreshLastUpdateCount;
 
-    @AttributeName(name = "gluuVdsCacheRefreshProblemCount")
+    @AttributeName(name = "jansCacheRefreshProblemCount")
     private String vdsCacheRefreshProblemCount;
 
-    @AttributeName(name = "gluuScimEnabled")
+    @AttributeName(name = "jansScimEnabled")
     private boolean scimEnabled;
 
-    @AttributeName(name = "gluuPassportEnabled")
+    @AttributeName(name = "jansPassportEnabled")
     private boolean passportEnabled;
 
-    @AttributeName(name = "gluuRadiusEnabled")
+    @AttributeName(name = "jansRadiusEnabled")
     private boolean radiusEnabled;
 
-    @AttributeName(name = "gluuSamlEnabled")
+    @AttributeName(name = "jansSamlEnabled")
     private boolean samlEnabled;
 
-    @AttributeName(name = "oxTrustEmail")
+    @AttributeName(name = "excludeEmail")
     private String contactEmail;
 
-    @AttributeName(name = "oxSmtpConfiguration")
+    @AttributeName(name = "jansSmtpConf")
     @JsonObject
     private SmtpConfiguration smtpConfiguration;
 
     @AttributeName(name = "gluuConfigurationDnsServer")
     private String configurationDnsServer;
 
-    @AttributeName(name = "gluuMaxLogSize")
+    @AttributeName(name = "jansMaxLogSize")
     private int maxLogSize;
 
-    @AttributeName(name = "oxAuthenticationMode")
+    @AttributeName(name = "jansenticationMode")
     private String authenticationMode;
 
-    @AttributeName(name = "oxTrustAuthenticationMode")
-    private String oxTrustAuthenticationMode;
-
-    @AttributeName(name = "oxLogConfigLocation")
-    private String oxLogConfigLocation;
+    @AttributeName(name = "jansLogConfigLocation")
+    private String logConfigLocation;
 
     @AttributeName(name = "passwordResetAllowed")
     private boolean passwordResetAllowed;
 
-    @AttributeName(name = "oxCacheConfiguration")
+    @AttributeName(name = "jansCacheConf")
     @JsonObject
     private CacheConfiguration cacheConfiguration;
 
-    @AttributeName(name = "oxDocumentStoreConfiguration")
+    @AttributeName(name = "jansDocStoreConf")
     @JsonObject
     private DocumentStoreConfiguration documentStoreConfiguration;
 
@@ -155,14 +152,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
     public void setAuthenticationMode(String authenticationMode) {
         this.authenticationMode = authenticationMode;
-    }
-
-    public String getOxTrustAuthenticationMode() {
-        return oxTrustAuthenticationMode;
-    }
-
-    public void setOxTrustAuthenticationMode(String oxTrustAuthenticationMode) {
-        this.oxTrustAuthenticationMode = oxTrustAuthenticationMode;
     }
 
     public String getCacheRefreshServerIpAddress() {
@@ -213,15 +202,15 @@ public class GluuConfiguration extends InumEntry implements Serializable {
         this.gluuVDSStatus = gluuVDSStatus;
     }
 
-    public String getGluuSPTR() {
-        return gluuSPTR;
-    }
+    public String getSptr() {
+		return sptr;
+	}
 
-    public void setGluuSPTR(String gluuSPTR) {
-        this.gluuSPTR = gluuSPTR;
-    }
+	public void setSptr(String sptr) {
+		this.sptr = sptr;
+	}
 
-    public String getHostname() {
+	public String getHostname() {
         return hostname;
     }
 
@@ -253,15 +242,15 @@ public class GluuConfiguration extends InumEntry implements Serializable {
         this.maxLogSize = maxLogSize;
     }
 
-    public String getOxLogConfigLocation() {
-        return oxLogConfigLocation;
-    }
+    public String getLogConfigLocation() {
+		return logConfigLocation;
+	}
 
-    public void setOxLogConfigLocation(String oxLogConfigLocation) {
-        this.oxLogConfigLocation = oxLogConfigLocation;
-    }
+	public void setLogConfigLocation(String logConfigLocation) {
+		this.logConfigLocation = logConfigLocation;
+	}
 
-    public boolean isPasswordResetAllowed() {
+	public boolean isPasswordResetAllowed() {
         return passwordResetAllowed;
     }
 

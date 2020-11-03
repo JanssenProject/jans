@@ -39,9 +39,9 @@ public class UmaResourceService {
 
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
-        Filter oxIdFilter = Filter.createSubstringFilter("oxId", null, targetArray, null);
+        Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
 
-        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, oxIdFilter, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, jsIdFilter, sizeLimit);
     }
 
     public List<UmaResource> getAllResources(int sizeLimit) {
@@ -81,15 +81,15 @@ public class UmaResourceService {
         }
     }
 
-    public String getDnForResource(String oxId) {
-        if (StringHelper.isEmpty(oxId)) {
+    public String getDnForResource(String jsId) {
+        if (StringHelper.isEmpty(jsId)) {
             return getBaseDnForResource();
         }
-        return String.format("oxId=%s,%s", oxId, getBaseDnForResource());
+        return String.format("jansId=%s,%s", jsId, getBaseDnForResource());
     }
 
     public String getBaseDnForResource() {
-        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=gluu"
+        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=jans"
         return String.format("ou=resources,%s", umaBaseDn);
     }
 }
