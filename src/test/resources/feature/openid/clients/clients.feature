@@ -10,6 +10,7 @@ Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+And print response
 And assert response.length != null
 
 Scenario: Fetch the first three openidconnect clients

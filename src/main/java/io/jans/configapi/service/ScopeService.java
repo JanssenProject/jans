@@ -96,7 +96,7 @@ public class ScopeService {
         Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("oxScopeType", scopeType), searchFilter);
+            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("jansScopeTyp", scopeType), searchFilter);
         }
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, sizeLimit);
@@ -113,7 +113,7 @@ public class ScopeService {
     public List<Scope> getAllScopesList(int size, String scopeType) {
         Filter searchFilter = null;
         if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createEqualityFilter("oxScopeType", scopeType);
+            searchFilter = Filter.createEqualityFilter("jansScopeTyp", scopeType);
         }
         return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, size);
     }
