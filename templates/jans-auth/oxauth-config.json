@@ -275,6 +275,7 @@
     "imgLocation":"",
     "metricReporterInterval":300,
     "metricReporterKeepDataDays":15,
+    "metricReporterEnabled": false,
     "pairwiseIdType":"algorithmic",
     "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
     "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
