@@ -15,7 +15,11 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Preconditions;
 
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,4 +46,45 @@ public class Jackson {
         JsonNode patched = jsonPatch.apply(objectMapper.convertValue(obj, JsonNode.class));
         return (T) objectMapper.treeToValue(patched, obj.getClass());
     }
+    
+
+    @SuppressWarnings("unchecked")
+    public static <T> T read(InputStream inputStream, T obj) throws IOException {
+    	try {
+    		/*
+    		 Preconditions.checkNotNull(inputStream);
+         Preconditions.checkNotNull(obj);     
+         return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
+         */
+    	 Preconditions.checkNotNull(inputStream); 
+         
+    	 //ObjectMapper objectMapper = JacksonMapperHolder.MAPPER;
+    	 ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+         System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() -inputStream = "+inputStream);
+         //return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
+         return (T) objectMapper.readValue(inputStream, obj.getClass());
+    	}catch(Exception ex) {
+    		ex.printStackTrace();
+    		System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() -ex = "+ex);
+    		throw ex;
+    	}
+    }
+    
+    private static class JacksonMapperHolder {
+        private static final ObjectMapper MAPPER = jsonMapper();
+
+        public static ObjectMapper jsonMapper() {
+            final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+
+            final ObjectMapper mapper = new ObjectMapper();
+            final DeserializationConfig deserializationConfig = mapper.getDeserializationConfig().with(jackson);
+            final SerializationConfig serializationConfig = mapper.getSerializationConfig().with(jackson);
+            if (deserializationConfig != null && serializationConfig != null) {
+                // do nothing for now
+            }
+            return mapper;
+        }
+    }
+    
+
 }
