@@ -5,13 +5,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/scopes.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/scopes.write"
                 ]
             }
         ]
@@ -22,13 +22,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/scopes.readonly"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/scopes.write"
                 ]
             }
         ]
@@ -39,13 +39,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/uma.resources.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/uma.resources.write"
                 ]
             }
         ]
@@ -56,13 +56,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/uma.resources.readonly"
                 ]
             },
             {
                "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/uma.resources.write"
                 ]
             }
         ]

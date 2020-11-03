@@ -90,7 +90,23 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
         </dependency>
-       
+
+        <!-- jans dependencies -->
+         <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
+            <version>${jans.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>jackrabbit-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>        
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-model</artifactId>

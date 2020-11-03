@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 public abstract class AuthorizationService implements Serializable {
     
     @Inject
-    Logger logger;
+    Logger log;
 
     @Inject
     ConfigurationFactory configurationFactory;
