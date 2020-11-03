@@ -60,12 +60,10 @@ public class Jackson {
          
     	 //ObjectMapper objectMapper = JacksonMapperHolder.MAPPER;
     	 ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-         System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() -inputStream = "+inputStream);
          //return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
          return (T) objectMapper.readValue(inputStream, obj.getClass());
     	}catch(Exception ex) {
     		ex.printStackTrace();
-    		System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() -ex = "+ex);
     		throw ex;
     	}
     }

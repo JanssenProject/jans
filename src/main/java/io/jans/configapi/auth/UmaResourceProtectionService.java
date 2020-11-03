@@ -83,15 +83,15 @@ public class UmaResourceProtectionService {
 		// Load the uma resource json
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
-		System.out.println(
+		log.debug(
 				" \n\n UmaResourceProtectionService::verifyUmaResources() -modified **** inputStream = " + inputStream);
 		this.rsResourceList = RsProtector.instance(inputStream).getResourceMap().values();
 
 		// this.rsResourceList = Jackson.read(inputStream, RsResourceList.class);
-		System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
+		log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
 				+ rsResourceList + "\n\n");
 
-		// System.out.println("Resource to verify - " + rsResourceList);
+		// log.debug("Resource to verify - " + rsResourceList);
 		// Throw error if resource details then
 		Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
@@ -102,7 +102,7 @@ public class UmaResourceProtectionService {
 		// Verify Cache
 		System.out
 				.println("\n\n UmaResourceProtectionCache.getAllScopes = " + UmaResourceProtectionCache.getAllScopes());
-		System.out.println("\n\n UmaResourceProtectionCache.getAllUmaResources = "
+		log.debug("\n\n UmaResourceProtectionCache.getAllUmaResources = "
 				+ UmaResourceProtectionCache.getAllUmaResources());
 
 	}
@@ -111,25 +111,25 @@ public class UmaResourceProtectionService {
 		// todo - cache scopes in guava cache. Otherwise you check same scopes again and
 		// again
 
-		System.out.println(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - rsResourceList = "
+		log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - rsResourceList = "
 				+ rsResourceList + "\n\n");
 		List<String> rsScopes = null;
 		for (RsResource rsResource : rsResourceList) {
 			for (Condition condition : rsResource.getConditions()) {
 				rsScopes = condition.getScopes();
 				for (String scopeName : rsScopes) {
-					System.out.println(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - scopeName = "
+					log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - scopeName = "
 							+ scopeName + "\n\n");
 
 					// Check in cache
 					if (UmaResourceProtectionCache.getScope(scopeName) != null) {
-						System.out.println("Scope - '" + scopeName + "' exists in cache.");
+						log.debug("Scope - '" + scopeName + "' exists in cache.");
 						return;
 					}
 
 					// Check in DB
 					List<Scope> scopes = scopeService.searchScopes(scopeName, 2);
-					System.out.println("Scopes - " + scopes);
+					log.debug("Scopes - " + scopes);
 					Scope scope = null;
 
 					if (scopes != null && !scopes.isEmpty()) {
@@ -144,7 +144,7 @@ public class UmaResourceProtectionService {
 					}
 
 					if (scopes == null || scopes.isEmpty()) {
-						System.out.println("Scope - '" + scopeName + "' does not exist, hence creating it.");
+						log.debug("Scope - '" + scopeName + "' does not exist, hence creating it.");
 						// Scope does not exists hence create Scope
 						scope = new Scope();
 						String inum = UUID.randomUUID().toString();
@@ -155,7 +155,7 @@ public class UmaResourceProtectionService {
 						scope.setScopeType(ScopeType.UMA);
 						scopeService.addScope(scope);
 
-						System.out.println("Scope - '" + scope.getId() + "' created.");
+						log.debug("Scope - '" + scope.getId() + "' created.");
 						System.out
 								.println(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - scope created = "
 										+ scope.getId() + "\n\n");
@@ -166,14 +166,14 @@ public class UmaResourceProtectionService {
 
 				}
 			}
-			System.out.println(
+			log.debug(
 					" \n\n UmaResourceProtectionService::createScopeIfNeeded() - UmaResourceProtectionCache.getAllScopes() = "
 							+ UmaResourceProtectionCache.getAllScopes() + "\n\n");
 		}
 	}
 
 	public void createResourceIfNeeded() {
-		System.out.println(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
+		log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
 				+ rsResourceList + "\n\n");
 
 		Map<String, UmaResource> allResources = UmaResourceProtectionCache.getAllUmaResources();
@@ -194,13 +194,13 @@ public class UmaResourceProtectionService {
 
 				// Check in cache
 				if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
-					System.out.println("UmaResource - '" + umaResourceName + "' exists in cache.");
+					log.debug("UmaResource - '" + umaResourceName + "' exists in cache.");
 					return;
 				}
 
 				// Check in DB
 				List<UmaResource> umaResources = umaResourceService.findResources(umaResourceName, 2);
-				System.out.println("UmaResource - " + umaResources);
+				log.debug("UmaResource - " + umaResources);
 				UmaResource umaResource = null;
 
 				if (umaResources != null && !umaResources.isEmpty()) { 
@@ -215,7 +215,7 @@ public class UmaResourceProtectionService {
 
 				// Create Resource
 				if (umaResources == null || umaResources.isEmpty()) {
-					System.out.println("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
+					log.debug("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
 					umaResource = new UmaResource();
 					String id = UUID.randomUUID().toString();
 					umaResource.setId(id);
@@ -223,8 +223,8 @@ public class UmaResourceProtectionService {
 					umaResource.setName(umaResourceName); // todo : name can be: <method> + <path>, e.g. POST /clients
 					umaResource.setScopes(condition.getScopes()); // to POST /client we require `config-api-write` scope
 					umaResourceService.addResource(umaResource);
-					System.out.println("UmaResource - '" + umaResource.getName() + "' created.");
-					System.out.println(
+					log.debug("UmaResource - '" + umaResource.getName() + "' created.");
+					log.debug(
 							" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResource created = "
 									+ umaResource + "\n\n");
 				}
@@ -233,7 +233,7 @@ public class UmaResourceProtectionService {
 				UmaResourceProtectionCache.putUmaResource(umaResource);
 			}
 		}
-		System.out.println(
+		log.debug(
 				" \n\n UmaResourceProtectionService::createResourceIfNeeded() - UmaResourceProtectionCache.getAllUmaResources() = "
 						+ UmaResourceProtectionCache.getAllUmaResources() + "\n\n");
 

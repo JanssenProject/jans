@@ -94,7 +94,7 @@ public class PatService {
 		if (umaMetadata == null) {
 			return;
 		}
-		System.out.println("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile()
+		log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile()
 				+ " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() ="
 				+ getClientId() + " , getClientKeyId() = " + getClientKeyId() + "\n\n");
 
