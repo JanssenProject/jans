@@ -379,8 +379,9 @@ public abstract class BaseTest {
         System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
 
         navigateToAuhorizationUrl(currentDriver, authorizationRequestUrl);
-
         if (userSecret != null) {
+            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+
             final String previousUrl = currentDriver.getCurrentUrl();
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
@@ -389,8 +390,6 @@ public abstract class BaseTest {
 
             WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
             passwordElement.sendKeys(userSecret);
-
-            WebElement loginButton = currentDriver.findElement(By.id(loginFormLoginButton));
 
             loginButton.click();
 
@@ -406,25 +405,24 @@ public abstract class BaseTest {
         return authorizeClient;
     }
 
+	private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
+		Wait<WebDriver> wait = new FluentWait<>(currentDriver)
+		        .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
+				.pollingEvery(Duration.ofMillis(1000))
+		        .ignoring(NoSuchElementException.class);
+
+		WebElement loginButton = wait.until(d -> {
+		    return d.findElement(By.id(id));
+		});
+		return loginButton;
+	}
+
 	protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
 		String authorizationResponseStr = currentDriver.getCurrentUrl();
 
 		// Check for authorization form if client has no persistent authorization
 		if (!authorizationResponseStr.contains("#")) {
-			Wait<WebDriver> wait = new FluentWait<>(currentDriver)
-                    .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
-					.pollingEvery(Duration.ofMillis(1000))
-                    .ignoring(NoSuchElementException.class);
-
-			WebElement allowButton;
-			try {
-				allowButton = wait.until(d -> {
-				    return d.findElement(By.id(authorizeFormAllowButton));
-                });
-			} catch (RuntimeException ex) {
-                ex.printStackTrace();
-                throw ex;
-			}
+            WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
 
 			// We have to use JavaScript because target is link with onclick
 			JavascriptExecutor jse = (JavascriptExecutor) currentDriver;
