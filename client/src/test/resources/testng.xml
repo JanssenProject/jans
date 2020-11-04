@@ -2,6 +2,10 @@
 
 <suite name="jansAuthClient" parallel="tests" thread-count="4">
 
+    <listeners>
+        <listener class-name="io.jans.as.client.RetryListener" />
+    </listeners>
+
     <test name="JsonApplier Client test" enabled="true">
         <classes>
             <class name="io.jans.as.client.json.JsonApplierTest"/>
