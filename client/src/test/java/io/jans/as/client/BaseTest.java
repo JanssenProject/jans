@@ -397,6 +397,10 @@ public abstract class BaseTest {
             if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
                 waitForPageSwitch(currentDriver, previousUrl);
             }
+            
+            if (currentDriver.getPageSource().contains("Failed to authenticate.")) { 
+            	fail("Failed to authenticate user");
+            }
         }
 
         return authorizeClient;
@@ -409,7 +413,7 @@ public abstract class BaseTest {
 		if (!authorizationResponseStr.contains("#")) {
 			Wait<WebDriver> wait = new FluentWait<>(currentDriver)
                     .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
-					.pollingEvery(Duration.ofMillis(500))
+					.pollingEvery(Duration.ofMillis(1000))
                     .ignoring(NoSuchElementException.class);
 
 			WebElement allowButton;
