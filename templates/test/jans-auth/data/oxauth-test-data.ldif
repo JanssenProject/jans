@@ -100,9 +100,9 @@ replace: jansDefScope
 dn: inum=341A,ou=scopes,o=jans
 changetype: modify
 add: jansClaim
-jansClaim: inum=18CE,ou=attributes,o=jans
 jansClaim: inum=18CF,ou=attributes,o=jans
 jansClaim: inum=18CC,ou=attributes,o=jans
+jansClaim: inum=18CD,ou=attributes,o=jans
 
 dn: inum=7D01,ou=scopes,o=jans
 description: Dynamic scope org_name
