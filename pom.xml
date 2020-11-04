@@ -470,25 +470,19 @@
             <dependency>
                 <groupId>org.seleniumhq.selenium</groupId>
                 <artifactId>selenium-java</artifactId>
-                <version>2.53.1</version>
+                <version>3.141.59</version>
                 <scope>test</scope>
             </dependency>
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>selenium-remote-driver</artifactId>
-				<version>2.53.1</version>
+				<version>3.141.59</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.seleniumhq.selenium</groupId>
 				<artifactId>selenium-support</artifactId>
 				<version>3.141.59</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.htmlunit</groupId>
-				<artifactId>htmlunit-cssparser</artifactId>
-				<version>1.5.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
