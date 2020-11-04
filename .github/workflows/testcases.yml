@@ -4,7 +4,13 @@ on:
   push:
     branches:
       - master
-      - v2
+    paths:
+      - "jans/**"
+      - "tests/**"
+      - "setup.py"
+  pull_request:
+    branches:
+      - master
     paths:
       - "jans/**"
       - "tests/**"
