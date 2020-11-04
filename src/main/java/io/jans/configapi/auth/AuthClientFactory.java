@@ -11,7 +11,6 @@ import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.uma.UmaMetadata;
-
 import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.configapi.util.ApiConstants;
 
