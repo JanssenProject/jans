@@ -437,12 +437,12 @@ public abstract class BaseTest {
 
             if (redirectUri != null && !authorizationResponseStr.startsWith(redirectUri)) {
                 navigateToAuhorizationUrl(currentDriver, authorizationResponseStr);
-                authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
+                authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
 
             if (redirectUri == null && !authorizationResponseStr.contains("code=")) { // corner case for redirect_uri = null
                 navigateToAuhorizationUrl(currentDriver, authorizationResponseStr);
-                authorizationResponseStr = waitForPageSwitch(authorizationResponseStr);
+                authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
 		} else {
 			fail("The authorization form was expected to be shown.");
