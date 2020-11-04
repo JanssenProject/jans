@@ -52,7 +52,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext context) {
         logger.info("=======================================================================");
         logger.debug("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
-        logger.debug("====== resourceInfo.getAbsolutePath() = " +resourceInfo.getClass().getName()+" , resourceInfo.getClass().getAnnotations() = "+resourceInfo.getClass().getAnnotations());
+        logger.debug("====== resourceInfo.getClass().getName().toString() = " +resourceInfo.getClass().getName().toString()+" resourceInfo.getResourceClass().getName() = "+ resourceInfo.getResourceClass().getName()+" , resourceInfo.getClass().getAnnotations().toString() = "+resourceInfo.getClass().getAnnotations().toString());
         logger.debug("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         logger.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);

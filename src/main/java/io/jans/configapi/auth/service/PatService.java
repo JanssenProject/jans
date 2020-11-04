@@ -1,15 +1,13 @@
-package io.jans.configapi.auth;
+package io.jans.configapi.auth.service;
 
 
-import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.service.ConfigurationService;
-import io.jans.configapi.service.UmaService;
-import io.jans.as.client.uma.UmaMetadataService;
-import io.jans.as.client.uma.UmaPermissionService;
-import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
+import io.jans.configapi.auth.UmaClient;
+import io.jans.configapi.auth.service.UmaService;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
@@ -37,13 +35,13 @@ public class PatService {
 	ConfigurationFactory configurationFactory;
 
 	@Inject
-	private UmaMetadata umaMetadata;
-
-	@Inject
 	private EncryptionService encryptionService;
-
+	
 	@Inject
 	UmaService umaService;
+	
+	@Inject
+	private UmaMetadata umaMetadata;
 
 	private Token umaPat;
 	private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
@@ -107,7 +105,7 @@ public class PatService {
 		if (umaClientKeyStorePassword != null) {
 			try {
 				umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-			} catch (Exception ex) {
+			} catch (EncryptionException ex) {
 				log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
 			}
 		}
@@ -116,6 +114,8 @@ public class PatService {
 
 			this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
 					umaClientKeyStorePassword, getClientId(), getClientKeyId());
+			log.debug("\n\n umaPat = " +umaPat+"\n\n");  //todo:???Remove later only for testing
+			
 			if (this.umaPat == null) {
 				this.umaPatAccessTokenExpiration = 0l;
 			} else {

@@ -4,12 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.service;
+package io.jans.configapi.auth.service;
 
-import io.jans.configapi.auth.client.OpenIdClientService;
-import io.jans.as.client.service.IntrospectionService;
 import io.jans.configapi.auth.AuthClientFactory;
-import io.jans.util.StringHelper;
+import io.jans.configapi.auth.client.OpenIdClientService;
+import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.exception.ConfigurationException;
 import io.jans.util.init.Initializable;
 
@@ -25,7 +24,7 @@ public class OpenIdService extends Initializable implements Serializable {
     private static final long serialVersionUID = 4564959567069741194L;
 
     @Inject
-    Logger logger;
+    Logger log;
 
     @Inject
     ConfigurationService configurationService;
@@ -42,20 +41,20 @@ public class OpenIdService extends Initializable implements Serializable {
         try {
             loadOpenIdConfiguration();
         } catch (IOException ex) {
-            logger.error("Failed to load oxAuth OpenId configuration", ex);
+            log.error("Failed to load oxAuth OpenId configuration", ex);
             throw new ConfigurationException("Failed to load oxAuth OpenId configuration", ex);
         }
     }
 
     private void loadOpenIdConfiguration() throws IOException {
-        logger.debug(
+        log.debug(
                 "OpenIdService::loadOpenIdConfiguration() - configurationService.find().getIntrospectionEndpoint() = "
                         + configurationService.find().getIntrospectionEndpoint());
         String introspectionEndpoint = configurationService.find().getIntrospectionEndpoint();
         this.introspectionService = AuthClientFactory.getIntrospectionService(introspectionEndpoint, false);
 
-        logger.debug("\n\n OpenIdService::loadOpenIdConfiguration() - introspectionService =" + introspectionService);
-        logger.info("Successfully loaded oxAuth configuration");
+        log.debug("\n\n OpenIdService::loadOpenIdConfiguration() - introspectionService =" + introspectionService);
+        log.info("Successfully loaded oxAuth configuration");
     }
 
 }

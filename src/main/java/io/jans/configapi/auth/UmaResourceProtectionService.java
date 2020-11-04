@@ -1,7 +1,5 @@
 package io.jans.configapi.auth;
 
-
-//import io.jans.configapi.auth.model.*;
 import io.jans.ca.rs.protect.Condition;
 import io.jans.ca.rs.protect.RsProtector;
 import io.jans.ca.rs.protect.RsResource;
@@ -13,7 +11,8 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.service.ScopeService;
-import io.jans.configapi.service.UmaService;
+import io.jans.configapi.auth.service.PatService;
+import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.Jackson;
 import java.io.IOException;
@@ -138,8 +137,7 @@ public class UmaResourceProtectionService {
 
 						if (scopes.size() > 1) {
 							log.error(scopes.size() + " UMA Scope with same name.");
-							throw new WebApplicationException(
-									Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+							throw new WebApplicationException(scopes.size() + " UMA Scope with same name.",Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 						}
 					}
 
@@ -190,7 +188,7 @@ public class UmaResourceProtectionService {
 		for (RsResource rsResource : rsResourceList) {
 
 			for (Condition condition : rsResource.getConditions()) {
-				String umaResourceName = condition.getHttpMethods() + " " + rsResource.getPath();
+				String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); //???todo: Puja -> To be reviewed by Yuriy Z
 
 				// Check in cache
 				if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
@@ -207,9 +205,8 @@ public class UmaResourceProtectionService {
 					// Fetch existing resources to store in cache
 					umaResource = umaResources.get(0);
 					if (umaResources.size() > 1) {
-						log.error(umaResources.size() + " UMA Resource with same name !!!!!!");
-						throw new WebApplicationException(
-								Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+						log.error(umaResources.size() + " UMA Resource with same name.");
+						throw new WebApplicationException(umaResources.size() + " UMA Resource with same name.",Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 					}
 				}
 
