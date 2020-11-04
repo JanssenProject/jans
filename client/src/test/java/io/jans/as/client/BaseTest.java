@@ -386,12 +386,11 @@ public abstract class BaseTest {
 
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                Arrays.asList(userId.split("")).forEach(c -> usernameElement.sendKeys(c));
+                ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userId + "';", usernameElement);
             }
 
             WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-            Arrays.asList(userSecret.split("")).forEach(c -> passwordElement.sendKeys(c));
-
+            ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userSecret + "';", passwordElement);
             loginButton.click();
 
             if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
