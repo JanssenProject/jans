@@ -380,16 +380,17 @@ public abstract class BaseTest {
 
         navigateToAuhorizationUrl(currentDriver, authorizationRequestUrl);
         if (userSecret != null) {
+            final String previousUrl = currentDriver.getCurrentUrl();
+
             WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
-            final String previousUrl = currentDriver.getCurrentUrl();
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                usernameElement.sendKeys(userId);
+                Arrays.asList(userId.split("")).forEach(c -> usernameElement.sendKeys(c));
             }
 
             WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-            passwordElement.sendKeys(userSecret);
+            Arrays.asList(userSecret.split("")).forEach(c -> passwordElement.sendKeys(c));
 
             loginButton.click();
 
@@ -397,7 +398,7 @@ public abstract class BaseTest {
                 waitForPageSwitch(currentDriver, previousUrl);
             }
             
-            if (currentDriver.getPageSource().contains("Failed to authenticate.")) { 
+            if (currentDriver.getPageSource().contains("Failed to authenticate.")) {
             	fail("Failed to authenticate user");
             }
         }
