@@ -386,11 +386,21 @@ public abstract class BaseTest {
 
             if (userId != null) {
                 WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userId + "';", usernameElement);
+                usernameElement.sendKeys(userId);
+                
+                // Force update via script
+                if (!userId.equals(usernameElement.getText())) {
+                	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userId + "';", usernameElement);
+                }
             }
 
             WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-            ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userSecret + "';", passwordElement);
+            passwordElement.sendKeys(userSecret);
+            
+            // Force update via script
+            if (!userSecret.equals(passwordElement.getText())) {
+            	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userSecret + "';", passwordElement);
+            }
             loginButton.click();
 
             if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
