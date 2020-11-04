@@ -382,34 +382,31 @@ public abstract class BaseTest {
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
 
-            WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+            int remainAuthAttempts = 3;
+			do {
+				WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
-            if (userId != null) {
-                WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                usernameElement.sendKeys(userId);
-                
-                // Force update via script
-                if (!userId.equals(usernameElement.getAttribute("value"))) {
-                	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userId + "';", usernameElement);
-                }
-            }
+				if (userId != null) {
+					WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
+					usernameElement.sendKeys(userId);
+				}
 
-            WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-            passwordElement.sendKeys(userSecret);
-            
-            // Force update via script
-            if (!userSecret.equals(passwordElement.getAttribute("value"))) {
-            	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userSecret + "';", passwordElement);
-            }
-            loginButton.click();
+				WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
+				passwordElement.sendKeys(userSecret);
+				loginButton.click();
 
-            if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
-                waitForPageSwitch(currentDriver, previousUrl);
-            }
-            
-            if (currentDriver.getPageSource().contains("Failed to authenticate.")) {
-            	fail("Failed to authenticate user");
-            }
+				if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
+					waitForPageSwitch(currentDriver, previousUrl);
+				}
+
+				if (currentDriver.getPageSource().contains("Failed to authenticate.")) {
+					fail("Failed to authenticate user");
+				} else {
+					break;
+				}
+				remainAuthAttempts--;
+				System.out.print("Attempting to login: " + remainAuthAttempts);
+			} while (remainAuthAttempts >= 1);
         }
 
         return authorizeClient;
