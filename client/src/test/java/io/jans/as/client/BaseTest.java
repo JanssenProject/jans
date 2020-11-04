@@ -389,7 +389,7 @@ public abstract class BaseTest {
                 usernameElement.sendKeys(userId);
                 
                 // Force update via script
-                if (!userId.equals(usernameElement.getText())) {
+                if (!userId.equals(usernameElement.getAttribute("value"))) {
                 	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userId + "';", usernameElement);
                 }
             }
@@ -398,7 +398,7 @@ public abstract class BaseTest {
             passwordElement.sendKeys(userSecret);
             
             // Force update via script
-            if (!userSecret.equals(passwordElement.getText())) {
+            if (!userSecret.equals(passwordElement.getAttribute("value"))) {
             	((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + userSecret + "';", passwordElement);
             }
             loginButton.click();
