@@ -384,6 +384,11 @@ public abstract class BaseTest {
 
             int remainAuthAttempts = 3;
 			do {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
 				if (userId != null) {
