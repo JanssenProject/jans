@@ -20,7 +20,7 @@ import java.io.File;
 public class Deployments {
 
 	public static WebArchive createDeployment() {
-		final WebArchive war = ShrinkWrap.create(WebArchive.class, "oxauth.war")
+		final WebArchive war = ShrinkWrap.create(WebArchive.class, "jans-auth.war")
 				// adding the configuration class silences the logged exception
 				// when building the configuration on the server-side, but
 				// shouldn't be necessary
