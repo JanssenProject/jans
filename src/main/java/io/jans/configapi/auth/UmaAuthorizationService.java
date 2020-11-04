@@ -6,7 +6,6 @@
 
 package io.jans.configapi.auth;
 
-import io.jans.configapi.service.UmaService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.exception.UmaException;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -15,6 +14,9 @@ import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.uma.wrapper.Token;
+import io.jans.ca.rs.protect.RsResource;
+import io.jans.configapi.auth.service.UmaService;
+import io.jans.configapi.auth.service.PatService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -29,7 +31,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
@@ -66,7 +73,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 		// step plan:
 		// =================================
 		// 1. first all endpoints of config API has to be protected by UMA. Protection
-		// is made by registering UMA resource.
+		// is made by registering UMA resource. - [Puja: DONE]
 		// e.g. POST, PUT /client -> umaResource1; GET /client -> umaResource2
 		// in this way we can grant access got GET /client (via umaResource2) but forbid
 		// change it (don't give permission for umaResource1)
@@ -88,7 +95,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 		// on `jans-uma-rs` or `jans-uma-rs-resteasy` and re-use it.
 		// https://github.com/JanssenProject/jans-client-api/blob/245692aa3911158c39729e5aa2513e44d254c48f/uma-rs-resteasy/src/main/java/io/jans/ca/rs/protect/resteasy/RptPreProcessInterceptor.java#L31
 
-		// Get umaResource
+		// Get UmaResource
 		UmaResource umaResource = getUmaResource(resourceInfo, methods, path);
 		log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
 
@@ -99,11 +106,14 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 	}
 
 	public void validateRptToken(String rpt, UmaResource umaResource) throws Exception {
-		log.debug("UmaAuthorizationService::validateRptToken" + "() - Entry - rpt = " + rpt
-				+ " , umaResource = " + umaResource + "\n\n\n");
-		final Token patToken = patService.getPatToken();
-		log.debug("validateRptToken() - Entry - rpt = " + rpt + " , umaResource = " + umaResource + "\n\n\n");
+		log.debug("UmaAuthorizationService::validateRptToken" + "() - Entry - rpt = " + rpt + " , umaResource = "
+				+ umaResource + "\n\n\n");
 
+		// Generate PAT token
+		Token patToken = patService.getPatToken();
+		log.debug("validateRptToken() - patToken = " + patToken + "\n\n\n");
+
+		// Validate Token
 		umaService.validateRptToken(patToken, rpt, umaResource.getId(), umaResource.getScopes());
 
 		// Impt Verify later
@@ -134,9 +144,34 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 		log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
 				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , methods = "
 				+ methods + " , path = " + path + "\n");
-		log.debug(
-				" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
-						+ umaResourceProtectionCache.getAllUmaResources());
+		log.debug(" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
+				+ umaResourceProtectionCache.getAllUmaResources());
+		
+		//???todo: Puja -> To be reviewed by Yuriy Z
+		//Verify in cache
+		Map<String, UmaResource> resources = umaResourceProtectionCache.getAllUmaResources();
+		
+		//Filter based on resource
+		Set<String> keys = resources.keySet();
+		List<String> filteredKeys = keys.stream()
+				.filter(k -> k.contains(path))
+				.collect(Collectors.toList());
+		
+		
+		if(keys==null || keys.isEmpty()) {
+			throw new WebApplicationException("No mataching resource found .",Response.status(Response.Status.UNAUTHORIZED).build());
+		}
+		
+		for (String key : keys) {
+			String[] result = key.split(":::");
+			if(result !=null && result.length>0) {
+				String httpMethods = result[0];
+				String pathUrl = result[1];
+				
+				//todo: pending
+			}
+				
+		}
 		return umaResourceProtectionCache.getUmaResource(methods + " " + path);
 	}
 
