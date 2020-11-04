@@ -47,7 +47,6 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
-import org.testng.ITestNGMethod;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
@@ -111,10 +110,6 @@ public abstract class BaseTest {
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
-        for (ITestNGMethod method : context.getAllTestMethods()) {
-            method.setRetryAnalyzer(new RetryAnalyzer());
-        }
-
         SecurityProviderUtility.installBCProvider();
 
         Reporter.log("Invoked init test suite method \n", true);
