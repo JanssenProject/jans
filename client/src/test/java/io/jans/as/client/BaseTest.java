@@ -377,40 +377,49 @@ public abstract class BaseTest {
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
 
-            int remainAuthAttempts = 3;
-			do {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
+			WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
-				if (userId != null) {
-					WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-					usernameElement.sendKeys(userId);
-				}
+			if (userId != null) {
+				setWebElementValue(currentDriver, loginFormUsername, userId);
+			}
 
-				WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-				passwordElement.sendKeys(userSecret);
-				loginButton.click();
+			setWebElementValue(currentDriver, loginFormPassword, userSecret);
 
-				if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
-					waitForPageSwitch(currentDriver, previousUrl);
-				}
+			loginButton.click();
 
-				if (currentDriver.getPageSource().contains("Failed to authenticate.")) {
-					fail("Failed to authenticate user");
-				} else {
-					break;
-				}
-				remainAuthAttempts--;
-				System.out.print("Attempting to login: " + remainAuthAttempts);
-			} while (remainAuthAttempts >= 1);
+			if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
+				waitForPageSwitch(currentDriver, previousUrl);
+			}
+
+			if (currentDriver.getPageSource().contains("Failed to authenticate.")) {
+				fail("Failed to authenticate user");
+			}
         }
 
         return authorizeClient;
     }
+
+	private void setWebElementValue(WebDriver currentDriver, String elemnetId, String value) {
+		WebElement webElement = currentDriver.findElement(By.id(elemnetId));
+		webElement.sendKeys(value);
+
+		int remainAttempts = 10;
+		do {
+            if (value.equals(webElement.getAttribute("value"))) {
+            	break;
+            }
+            
+            ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + value + "';", webElement);
+
+            try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+            
+            remainAttempts--;
+		} while (remainAttempts >= 1);
+	}
 
 	private WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
 		Wait<WebDriver> wait = new FluentWait<>(currentDriver)
