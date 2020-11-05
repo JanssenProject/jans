@@ -26,76 +26,103 @@ import java.util.UUID;
 
 public class UmaClient {
 
-    public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile,
-            final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
-        TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
+	public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile,
+			final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+		TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
 
-        return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
-    }
+		return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
+	}
 
-  
+	public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret,
+			String... scopeArray) throws Exception {
+		return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, scopeArray);
+	}
 
-    private static Token request(final String tokenUrl, final String clientKeyStoreFile,
-            final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
-            throws UmaException {
-        AuthCryptoProvider cryptoProvider;
-        try {
-            cryptoProvider = new AuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
-        } catch (Exception ex) {
-            throw new UmaException("Failed to initialize crypto provider");
-        }
+	public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret,
+			UmaScopeType scopeType, String... scopeArray) throws Exception {
 
-        try {
-            String tmpKeyId = keyId;
-            if (StringHelper.isEmpty(tmpKeyId)) {
-                // Get first key
-                List<String> aliases = cryptoProvider.getKeys();
-                if (aliases.size() > 0) {
-                    tmpKeyId = aliases.get(0);
-                }
-            }
+		String scope = scopeType.getValue();
+		if (scopeArray != null && scopeArray.length > 0) {
+			for (String s : scopeArray) {
+				scope = scope + " " + s;
+			}
+		}
 
-            if (StringHelper.isEmpty(tmpKeyId)) {
-                throw new UmaException("UMA keyId is empty");
-            }
+		TokenClient tokenClient = new TokenClient(tokenUrl);
 
-            SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
+		TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
 
-            tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-            tokenRequest.setAuthUsername(clientId);
-            tokenRequest.setCryptoProvider(cryptoProvider);
-            tokenRequest.setAlgorithm(algorithm);
-            tokenRequest.setKeyId(tmpKeyId);
-            tokenRequest.setAudience(tokenUrl);
+		if (response.getStatus() == 200) {
+			final String patToken = response.getAccessToken();
+			final Integer expiresIn = response.getExpiresIn();
+			if (Util.allNotBlank(patToken)) {
+				return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
+			}
+		}
+		return null;
+	}
 
-            Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
+	private static Token request(final String tokenUrl, final String clientKeyStoreFile,
+			final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
+			throws UmaException {
+		AuthCryptoProvider cryptoProvider;
+		try {
+			cryptoProvider = new AuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
+		} catch (Exception ex) {
+			throw new UmaException("Failed to initialize crypto provider");
+		}
 
-            return umaPat;
-        } catch (Exception ex) {
-            throw new UmaException("Failed to obtain valid UMA PAT token", ex);
-        }
-    }
-    
-    public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
-        if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
-            return null;
-        }
+		try {
+			String tmpKeyId = keyId;
+			if (StringHelper.isEmpty(tmpKeyId)) {
+				// Get first key
+				List<String> aliases = cryptoProvider.getKeys();
+				if (aliases.size() > 0) {
+					tmpKeyId = aliases.get(0);
+				}
+			}
 
-        TokenClient tokenClient = new TokenClient(tokenUrl);
+			if (StringHelper.isEmpty(tmpKeyId)) {
+				throw new UmaException("UMA keyId is empty");
+			}
 
-        tokenClient.setRequest(tokenRequest);
+			SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
 
-        TokenResponse response = tokenClient.exec();
+			tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+			tokenRequest.setAuthUsername(clientId);
+			tokenRequest.setCryptoProvider(cryptoProvider);
+			tokenRequest.setAlgorithm(algorithm);
+			tokenRequest.setKeyId(tmpKeyId);
+			tokenRequest.setAudience(tokenUrl);
 
-        if (response.getStatus() == 200) {
-            final String patToken = response.getAccessToken();
-            final Integer expiresIn = response.getExpiresIn();
-            if (Util.allNotBlank(patToken)) {
-                return new Token(null, null, patToken, response.getScope(), expiresIn);
-            }
-        }
+			Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
 
-        return null;
-    }
+			return umaPat;
+		} catch (Exception ex) {
+			throw new UmaException("Failed to obtain valid UMA PAT token", ex);
+		}
+	}
+
+	public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
+		if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
+			return null;
+		}
+
+		TokenClient tokenClient = new TokenClient(tokenUrl);
+
+		tokenClient.setRequest(tokenRequest);
+
+		TokenResponse response = tokenClient.exec();
+
+		if (response.getStatus() == 200) {
+			final String patToken = response.getAccessToken();
+			final Integer expiresIn = response.getExpiresIn();
+			if (Util.allNotBlank(patToken)) {
+				return new Token(null, null, patToken, response.getScope(), expiresIn);
+			}
+		}
+
+		return null;
+	}
 
 }

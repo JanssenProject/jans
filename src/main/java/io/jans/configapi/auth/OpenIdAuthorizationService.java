@@ -32,7 +32,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 	@Inject
 	OpenIdService openIdService;
 
-	public void validateAuthorization(String token, ResourceInfo resourceInfo, String methods, String path)
+	public void validateAuthorization(String token, ResourceInfo resourceInfo, String method, String path)
 			throws Exception {
 		if (StringUtils.isBlank(token)) {
 			logger.error("Token is blank !!!");
