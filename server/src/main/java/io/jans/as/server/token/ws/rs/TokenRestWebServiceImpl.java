@@ -13,6 +13,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -609,7 +610,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private boolean isRefreshTokenAllowed(Client client, String requestedScope) {
-        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !requestedScope.contains(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS)) {
+        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !Strings.nullToEmpty(requestedScope).contains(ScopeConstants.OFFLINE_ACCESS)) {
             return false;
         }
         return Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN);
