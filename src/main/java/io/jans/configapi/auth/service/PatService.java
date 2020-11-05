@@ -1,6 +1,5 @@
 package io.jans.configapi.auth.service;
 
-
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
@@ -36,10 +35,10 @@ public class PatService {
 
 	@Inject
 	private EncryptionService encryptionService;
-	
+
 	@Inject
 	UmaService umaService;
-	
+
 	@Inject
 	private UmaMetadata umaMetadata;
 
@@ -92,30 +91,42 @@ public class PatService {
 		if (umaMetadata == null) {
 			return;
 		}
-		log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile()
-				+ " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() ="
-				+ getClientId() + " , getClientKeyId() = " + getClientKeyId() + "\n\n");
+		
+		//??todo: Puja -> To be reviewed by Yuriy Z
+		
+		
+		log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = "
+				+ getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "
+				+ getClientKeyId() + "\n\n");
 
 		String umaClientKeyStoreFile = getClientKeyStoreFile();
 		String umaClientKeyStorePassword = getClientKeyStorePassword();
 		if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
 			throw new Exception("UMA JKS keystore path or password is empty");
 		}
+		
 
-		if (umaClientKeyStorePassword != null) {
-			try {
-				umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-			} catch (EncryptionException ex) {
-				log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-			}
-		}
+			
+		/*
+		 * if (umaClientKeyStorePassword != null) { try { umaClientKeyStorePassword =
+		 * encryptionService.decrypt(umaClientKeyStorePassword); } catch
+		 * (EncryptionException ex) {
+		 * log.error("Failed to decrypt UmaClientKeyStorePassword password", ex); } }
+		 */
 
 		try {
 
-			this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
-					umaClientKeyStorePassword, getClientId(), getClientKeyId());
-			log.debug("\n\n umaPat = " +umaPat+"\n\n");  //todo:???Remove later only for testing
+			//??todo: Puja -> To be reviewed by Yuriy Z			
+			this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
+			  umaClientKeyStoreFile, umaClientKeyStorePassword, getClientId(),
+			 getClientKeyId());
+			 
 			
+			/*log.debug("\n\n umaPat = Calling requestPat with umaClientId and umaClientSecret);
+			this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), "d9cd98ad-fe2c-4fd9-b717-d9436d9f2009",
+					"test1234", null);*/
+			log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
+
 			if (this.umaPat == null) {
 				this.umaPatAccessTokenExpiration = 0l;
 			} else {

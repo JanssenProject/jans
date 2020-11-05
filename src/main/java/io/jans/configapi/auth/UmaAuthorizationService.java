@@ -63,11 +63,11 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 	@Inject
 	StaticConfiguration staticConf;
 
-	public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String methods, String path)
+	public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
 			throws Exception {
 		log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
-				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , methods = "
-				+ methods + " , path = " + path + "\n");
+				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
+				+ method + " , path = " + path + "\n");
 
 		// todo FIXME Yuriy Z -> Puja : implementation is wrong overall. Here step by
 		// step plan:
@@ -96,7 +96,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 		// https://github.com/JanssenProject/jans-client-api/blob/245692aa3911158c39729e5aa2513e44d254c48f/uma-rs-resteasy/src/main/java/io/jans/ca/rs/protect/resteasy/RptPreProcessInterceptor.java#L31
 
 		// Get UmaResource
-		UmaResource umaResource = getUmaResource(resourceInfo, methods, path);
+		UmaResource umaResource = getUmaResource(resourceInfo, method, path);
 		log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
 
 		if (umaResource.getScopes() == null || umaResource.getScopes().isEmpty())
@@ -140,39 +140,53 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
 	}
 
-	private UmaResource getUmaResource(ResourceInfo resourceInfo, String methods, String path) {
+	//??todo: Puja -> To be reviewed by Yuriy Z
+	private UmaResource getUmaResource(ResourceInfo resourceInfo, String method, String path) {
 		log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
-				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , methods = "
-				+ methods + " , path = " + path + "\n");
+				+ " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
+				+ method + " , path = " + path + "\n");
 		log.debug(" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
 				+ umaResourceProtectionCache.getAllUmaResources());
-		
-		//???todo: Puja -> To be reviewed by Yuriy Z
-		//Verify in cache
+
+		// Verify in cache
 		Map<String, UmaResource> resources = umaResourceProtectionCache.getAllUmaResources();
-		
-		//Filter based on resource
+
+		// Filter based on resource
 		Set<String> keys = resources.keySet();
-		List<String> filteredKeys = keys.stream()
-				.filter(k -> k.contains(path))
-				.collect(Collectors.toList());
-		
-		
-		if(keys==null || keys.isEmpty()) {
-			throw new WebApplicationException("No mataching resource found .",Response.status(Response.Status.UNAUTHORIZED).build());
+		List<String> filteredKeys = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
+
+		log.debug(" UmaAuthorizationService::getUmaResource() - filteredKeys = " + filteredKeys);
+		if (filteredKeys == null || filteredKeys.isEmpty()) {
+			throw new WebApplicationException("No mataching resource found .",
+					Response.status(Response.Status.UNAUTHORIZED).build());
 		}
-		
-		for (String key : keys) {
+
+		UmaResource umaResource = null;
+		for (String key : filteredKeys) {
 			String[] result = key.split(":::");
-			if(result !=null && result.length>0) {
-				String httpMethods = result[0];
+			if (result != null && result.length > 0) {
+				String httpmethod = result[0];
 				String pathUrl = result[1];
-				
-				//todo: pending
+				log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = "
+						+ pathUrl);
+				if (path.equals(pathUrl)) {
+					// Matching url
+					log.debug(" UmaAuthorizationService::getUmaResource() - Matching url, path = " + path
+							+ " , pathUrl = " + pathUrl);
+
+					// Verify Method
+					if (httpmethod.contains(method)) {
+						umaResource = umaResourceProtectionCache.getUmaResource(key);
+						log.debug(" UmaAuthorizationService::getUmaResource() - Matching umaResource =" + umaResource);
+						break;
+					}
+
+				}
+
 			}
-				
+
 		}
-		return umaResourceProtectionCache.getUmaResource(methods + " " + path);
+		return umaResource;
 	}
 
 }

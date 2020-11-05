@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,8 +88,8 @@ public class UmaResourceProtectionService {
 		this.rsResourceList = RsProtector.instance(inputStream).getResourceMap().values();
 
 		// this.rsResourceList = Jackson.read(inputStream, RsResourceList.class);
-		log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
-				+ rsResourceList + "\n\n");
+		log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = " + rsResourceList
+				+ "\n\n");
 
 		// log.debug("Resource to verify - " + rsResourceList);
 		// Throw error if resource details then
@@ -110,15 +111,15 @@ public class UmaResourceProtectionService {
 		// todo - cache scopes in guava cache. Otherwise you check same scopes again and
 		// again
 
-		log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - rsResourceList = "
-				+ rsResourceList + "\n\n");
+		log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - rsResourceList = " + rsResourceList
+				+ "\n\n");
 		List<String> rsScopes = null;
 		for (RsResource rsResource : rsResourceList) {
 			for (Condition condition : rsResource.getConditions()) {
 				rsScopes = condition.getScopes();
 				for (String scopeName : rsScopes) {
-					log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - scopeName = "
-							+ scopeName + "\n\n");
+					log.debug(" \n\n UmaResourceProtectionService::createScopeIfNeeded() - scopeName = " + scopeName
+							+ "\n\n");
 
 					// Check in cache
 					if (UmaResourceProtectionCache.getScope(scopeName) != null) {
@@ -137,7 +138,8 @@ public class UmaResourceProtectionService {
 
 						if (scopes.size() > 1) {
 							log.error(scopes.size() + " UMA Scope with same name.");
-							throw new WebApplicationException(scopes.size() + " UMA Scope with same name.",Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+							throw new WebApplicationException(scopes.size() + " UMA Scope with same name.",
+									Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 						}
 					}
 
@@ -171,8 +173,8 @@ public class UmaResourceProtectionService {
 	}
 
 	public void createResourceIfNeeded() {
-		log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
-				+ rsResourceList + "\n\n");
+		log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = " + rsResourceList
+				+ "\n\n");
 
 		Map<String, UmaResource> allResources = UmaResourceProtectionCache.getAllUmaResources();
 
@@ -188,7 +190,9 @@ public class UmaResourceProtectionService {
 		for (RsResource rsResource : rsResourceList) {
 
 			for (Condition condition : rsResource.getConditions()) {
-				String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); //???todo: Puja -> To be reviewed by Yuriy Z
+				String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); // ???todo: Puja ->
+																									// To be reviewed by
+																									// Yuriy Z
 
 				// Check in cache
 				if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
@@ -201,12 +205,13 @@ public class UmaResourceProtectionService {
 				log.debug("UmaResource - " + umaResources);
 				UmaResource umaResource = null;
 
-				if (umaResources != null && !umaResources.isEmpty()) { 
+				if (umaResources != null && !umaResources.isEmpty()) {
 					// Fetch existing resources to store in cache
 					umaResource = umaResources.get(0);
 					if (umaResources.size() > 1) {
 						log.error(umaResources.size() + " UMA Resource with same name.");
-						throw new WebApplicationException(umaResources.size() + " UMA Resource with same name.",Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+						throw new WebApplicationException(umaResources.size() + " UMA Resource with same name.",
+								Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
 					}
 				}
 
@@ -218,16 +223,16 @@ public class UmaResourceProtectionService {
 					umaResource.setId(id);
 					umaResource.setDn(umaResourceService.getDnForResource(id));
 					umaResource.setName(umaResourceName); // todo : name can be: <method> + <path>, e.g. POST /clients
-					umaResource.setScopes(condition.getScopes()); // to POST /client we require `config-api-write` scope
+					umaResource.setScopes(getScopes(condition.getScopes())); // to POST /client we require
+																				// `config-api-write` scope
 					umaResourceService.addResource(umaResource);
 					log.debug("UmaResource - '" + umaResource.getName() + "' created.");
-					log.debug(
-							" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResource created = "
-									+ umaResource + "\n\n");
+					log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResource created = "
+							+ umaResource + "\n\n");
 				}
 
 				// Add to cache
-				UmaResourceProtectionCache.putUmaResource(umaResource);
+				UmaResourceProtectionCache.putUmaResource(umaResourceName, umaResource);
 			}
 		}
 		log.debug(
@@ -236,25 +241,18 @@ public class UmaResourceProtectionService {
 
 	}
 
-	PatProvider patProvider = new PatProvider() {
-		@Override
-		public String getPatToken() {
-			return getUmaToken();
+	//??todo: Puja -> To be reviewed by Yuriy Z
+	private List<String> getScopes(List<String> resourceScopes) {
+		List<String> scopes = new ArrayList();
+		log.debug("getScopes() - resourceScopes= " + resourceScopes);
+		for (String strScope : resourceScopes) {
+			Scope scope = UmaResourceProtectionCache.getScope(strScope);
+			if (scope != null) {
+				scopes.add(scope.getInum());
+			}
 		}
+		log.debug("getScopes() - scopes= " + scopes);
+		return scopes;
 
-		@Override
-		public void clearPat() {
-			// do nothing
-		}
-	};
-
-	private String getUmaToken() {
-		String token = null;
-		try {
-			token = patService.getPatToken().getIdToken();
-		} catch (Exception ex) {
-			log.error("Toekn exception - " + ex);
-		}
-		return token;
 	}
 }

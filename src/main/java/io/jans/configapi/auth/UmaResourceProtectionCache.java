@@ -68,10 +68,10 @@ public class UmaResourceProtectionCache {
 
 	}
 
-	public static void putUmaResource(UmaResource umaResource) {
+	public static void putUmaResource(String umaResourceName, UmaResource umaResource) {
 		Preconditions.checkNotNull(umaResource);
-		if (umaResourceCache.getIfPresent(umaResource.getName()) == null) {
-			umaResourceCache.put(umaResource.getName(), umaResource);
+		if (umaResourceCache.getIfPresent(umaResourceName) == null) {
+			umaResourceCache.put(umaResourceName, umaResource);
 		}
 	}
 
