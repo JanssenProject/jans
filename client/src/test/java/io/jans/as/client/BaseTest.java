@@ -412,7 +412,7 @@ public abstract class BaseTest {
             ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + value + "';", webElement);
 
             try {
-				Thread.sleep(100);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
