@@ -28,7 +28,7 @@ public abstract class AuthorizationService implements Serializable {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    public abstract void validateAuthorization(String token, ResourceInfo resourceInfo, String methods, String path) throws Exception;
+    public abstract void validateAuthorization(String token, ResourceInfo resourceInfo, String method, String path) throws Exception;
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

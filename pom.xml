@@ -156,7 +156,11 @@
             <artifactId>jans-client-api</artifactId>
             <version>${jans.version}</version>
         </dependency>
-
+		<dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-client</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
         <!-- Karate -->
         <dependency>
             <groupId>com.intuit.karate</groupId>

@@ -104,7 +104,8 @@ public class UmaService extends Initializable implements Serializable {
 				authorization);
 
 		if (patToken == null) {
-			log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has to be registered
+			log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has
+										// to be registered
 			Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
 			throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
 		}
@@ -128,10 +129,10 @@ public class UmaService extends Initializable implements Serializable {
 						}
 					}
 
-						log.error("Status response for RPT token: '{}' not contains right permissions", rptToken);
-					}
+					log.error("Status response for RPT token: '{}' not contains right permissions", rptToken);
 				}
 			}
+		}
 
 		Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
 		throw new WebApplicationException("UMA authentication failed.", registerPermissionsResponse);
@@ -163,7 +164,7 @@ public class UmaService extends Initializable implements Serializable {
 	}
 
 	private Response prepareRegisterPermissionsResponse(Token patToken, String resourceId, List<String> scopes) {
-		String ticket = registerResourcePermission(patToken, resourceId, scopes);	
+		String ticket = registerResourcePermission(patToken, resourceId, scopes);
 		Response response = null;
 		if (StringHelper.isEmpty(ticket)) {
 			// return null;
@@ -171,7 +172,7 @@ public class UmaService extends Initializable implements Serializable {
 			return response;
 		}
 		log.debug("Construct response: HTTP 401 (Unauthorized), ticket: '{}'", ticket);
-		
+
 		try {
 			String authHeaderValue = String.format(
 					"UMA realm=\"Authorization required\", host_id=%s, as_uri=%s, ticket=%s",
