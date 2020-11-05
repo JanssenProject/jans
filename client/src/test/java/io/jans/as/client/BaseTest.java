@@ -403,7 +403,7 @@ public abstract class BaseTest {
 		WebElement webElement = currentDriver.findElement(By.id(elemnetId));
 		webElement.sendKeys(value);
 
-		int remainAttempts = 10;
+		int remainAttempts = 20;
 		do {
             if (value.equals(webElement.getAttribute("value"))) {
             	break;
