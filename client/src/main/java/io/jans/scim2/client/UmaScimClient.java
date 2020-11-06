@@ -13,17 +13,18 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.uma.UmaClientFactory;
+import io.jans.as.client.uma.UmaTokenService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.scim2.client.exception.ScimInitializationException;
 import io.jans.util.StringHelper;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.uma.UmaClientFactory;
-import io.jans.as.client.uma.UmaTokenService;
 
 /**
  * Instances of this class contain the necessary logic to handle the authorization processes required by a client of SCIM
@@ -167,9 +168,9 @@ public class UmaScimClient<T> extends AbstractScimClient<T> {
                 throw new ScimInitializationException("UMA JKS keystore path or password is empty");
             }
 
-            OxAuthCryptoProvider cryptoProvider;
+            AuthCryptoProvider cryptoProvider;
             try {
-                cryptoProvider = new OxAuthCryptoProvider(umaAatClientJksPath, umaAatClientJksPassword, null);
+                cryptoProvider = new AuthCryptoProvider(umaAatClientJksPath, umaAatClientJksPassword, null);
             } catch (Exception ex) {
                 throw new ScimInitializationException("Failed to initialize crypto provider");
             }
