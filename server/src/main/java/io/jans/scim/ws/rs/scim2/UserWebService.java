@@ -302,7 +302,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
                 //Handle special case: https://github.com/GluuFederation/oxTrust/issues/800
                 if (po.getType().equals(REMOVE) && po.getPath().equals("pairwiseIdentifiers")){
                     //If this block weren't here, the implementation will throw error because read-only attribute cannot be altered
-                    person.setOxPPID(null);
+                    person.setPpid(null);
                     user.setPairwiseIdentifiers(null);
                     scim2UserService.removePPIDsBranch(person.getDn());
                 }

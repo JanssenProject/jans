@@ -383,7 +383,7 @@ public class Scim2UserService implements Serializable {
 		res.setRoles(getAttributeListValue(person, Role.class, "excludeRole"));
 		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "excludex509Certificate"));
 
-		res.setPairwiseIdentifiers(person.getOxPPID());
+		res.setPairwiseIdentifiers(person.getPpid());
 
 		transferExtendedAttributesToResource(person, res);
 
