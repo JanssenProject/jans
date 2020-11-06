@@ -144,6 +144,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String loggingLevel;
     private String loggingLayout;
+    private String externalLoggerConfiguration;
 
     private String shibbolethVersion;
     private String shibboleth3IdpRootDir;
@@ -792,7 +793,15 @@ public class AppConfiguration implements Configuration, Serializable {
         this.loggingLayout = loggingLayout;
     }
 
-    public int getMetricReporterInterval() {
+    public String getExternalLoggerConfiguration() {
+		return externalLoggerConfiguration;
+	}
+
+	public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+		this.externalLoggerConfiguration = externalLoggerConfiguration;
+	}
+
+	public int getMetricReporterInterval() {
         return metricReporterInterval;
     }
 
