@@ -47,14 +47,8 @@ public class OpenIdService extends Initializable implements Serializable {
     }
 
     private void loadOpenIdConfiguration() throws IOException {
-        log.debug(
-                "OpenIdService::loadOpenIdConfiguration() - configurationService.find().getIntrospectionEndpoint() = "
-                        + configurationService.find().getIntrospectionEndpoint());
         String introspectionEndpoint = configurationService.find().getIntrospectionEndpoint();
         this.introspectionService = AuthClientFactory.getIntrospectionService(introspectionEndpoint, false);
-
-        log.debug("\n\n OpenIdService::loadOpenIdConfiguration() - introspectionService =" + introspectionService);
-        log.info("Successfully loaded oxAuth configuration");
     }
 
 }

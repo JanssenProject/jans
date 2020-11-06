@@ -1,22 +1,21 @@
 package io.jans.configapi.auth.service;
 
-
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.auth.UmaClient;
-import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Calendar;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.slf4j.Logger;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,143 +24,139 @@ import java.util.concurrent.locks.ReentrantLock;
 @Named("patService")
 public class PatService {
 
-	@Inject
-	Logger log;
+    @Inject
+    Logger log;
 
-	@Inject
-	ConfigurationService configurationService;
+    @Inject
+    ConfigurationService configurationService;
 
-	@Inject
-	ConfigurationFactory configurationFactory;
+    @Inject
+    ConfigurationFactory configurationFactory;
 
-	@Inject
-	private EncryptionService encryptionService;
-	
-	@Inject
-	UmaService umaService;
-	
-	@Inject
-	private UmaMetadata umaMetadata;
+    @Inject
+    private EncryptionService encryptionService;
 
-	private Token umaPat;
-	private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
-	private final ReentrantLock lock = new ReentrantLock();
+    @Inject
+    private UmaMetadata umaMetadata;
 
-	public Token getPatToken() throws Exception {
-		if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
-			return this.umaPat;
-		}
+    private Token umaPat;
+    private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
+    private final ReentrantLock lock = new ReentrantLock();
 
-		lock.lock();
-		try {
-			if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
-				return this.umaPat;
-			}
+    public Token getPatToken() throws Exception {
+        if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
+            return this.umaPat;
+        }
 
-			retrievePatToken();
-		} finally {
-			lock.unlock();
-		}
+        lock.lock();
+        try {
+            if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
+                return this.umaPat;
+            }
 
-		return this.umaPat;
-	}
+            retrievePatToken();
+        } finally {
+            lock.unlock();
+        }
 
-	protected boolean isEnabledUmaAuthentication() {
-		return (umaMetadata != null) && isExistPatToken();
-	}
+        return this.umaPat;
+    }
 
-	public boolean isExistPatToken() {
-		try {
-			return getPatToken() != null;
-		} catch (Exception ex) {
-			log.error("Failed to check UMA PAT token status", ex);
-		}
+    protected boolean isEnabledUmaAuthentication() {
+        return (umaMetadata != null) && isExistPatToken();
+    }
 
-		return false;
-	}
+    public boolean isExistPatToken() {
+        try {
+            return getPatToken() != null;
+        } catch (Exception ex) {
+            log.error("Failed to check UMA PAT token status", ex);
+        }
 
-	public String getIssuer() {
-		if (umaMetadata == null) {
-			return "";
-		}
-		return umaMetadata.getIssuer();
-	}
+        return false;
+    }
 
-	private void retrievePatToken() throws Exception {
-		this.umaPat = null;
-		if (umaMetadata == null) {
-			return;
-		}
-		log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile()
-				+ " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() ="
-				+ getClientId() + " , getClientKeyId() = " + getClientKeyId() + "\n\n");
+    public String getIssuer() {
+        if (umaMetadata == null) {
+            return "";
+        }
+        return umaMetadata.getIssuer();
+    }
 
-		String umaClientKeyStoreFile = getClientKeyStoreFile();
-		String umaClientKeyStorePassword = getClientKeyStorePassword();
-		if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
-			throw new Exception("UMA JKS keystore path or password is empty");
-		}
+    private void retrievePatToken() throws Exception {
+        this.umaPat = null;
+        if (umaMetadata == null) {
+            return;
+        }
 
-		if (umaClientKeyStorePassword != null) {
-			try {
-				umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-			} catch (EncryptionException ex) {
-				log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-			}
-		}
+        log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "+ getClientKeyId() + "\n\n");
 
-		try {
+        // ??todo: Puja -> To be reviewed by Yuriy Z -> Will we have a folder on server
+        // /opt/configapi/conf/configapi-jwks.keystore ?? Need help for this part...
+        String umaClientKeyStoreFile = getClientKeyStoreFile();
+        String umaClientKeyStorePassword = getClientKeyStorePassword();
+        if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
+            throw new Exception("UMA JKS keystore path or password is empty");
+        }
 
-			this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
-					umaClientKeyStorePassword, getClientId(), getClientKeyId());
-			log.debug("\n\n umaPat = " +umaPat+"\n\n");  //todo:???Remove later only for testing
-			
-			if (this.umaPat == null) {
-				this.umaPatAccessTokenExpiration = 0l;
-			} else {
-				this.umaPatAccessTokenExpiration = computeAccessTokenExpirationTime(this.umaPat.getExpiresIn());
-			}
-		} catch (Exception ex) {
-			throw new Exception("Failed to obtain valid UMA PAT token", ex);
-		}
+        if (umaClientKeyStorePassword != null) {
+            try {
+                umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
+            } catch (EncryptionException ex) {
+                log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
+            }
+        }
 
-		if ((this.umaPat == null) || (this.umaPat.getAccessToken() == null)) {
-			throw new Exception("Failed to obtain valid UMA PAT token");
-		}
-	}
+        try {
 
-	protected long computeAccessTokenExpirationTime(Integer expiresIn) {
-		// Compute "accessToken" expiration timestamp
-		Calendar calendar = Calendar.getInstance();
-		if (expiresIn != null) {
-			calendar.add(Calendar.SECOND, expiresIn);
-			calendar.add(Calendar.SECOND, -10); // Subtract 10 seconds to avoid expirations during executing request
-		}
+            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
+                    umaClientKeyStorePassword, getClientId(), getClientKeyId());
 
-		return calendar.getTimeInMillis();
-	}
+            if (this.umaPat == null) {
+                this.umaPatAccessTokenExpiration = 0l;
+            } else {
+                this.umaPatAccessTokenExpiration = computeAccessTokenExpirationTime(this.umaPat.getExpiresIn());
+            }
+        } catch (Exception ex) {
+            throw new Exception("Failed to obtain valid UMA PAT token", ex);
+        }
 
-	private boolean isValidPatToken(Token validatePatToken, long validatePatTokenExpiration) {
-		final long now = System.currentTimeMillis();
+        if ((this.umaPat == null) || (this.umaPat.getAccessToken() == null)) {
+            throw new Exception("Failed to obtain valid UMA PAT token");
+        }
+    }
 
-		// Get new access token only if is the previous one is missing or expired
-		return !((validatePatToken == null) || (validatePatToken.getAccessToken() == null)
-				|| (validatePatTokenExpiration <= now));
-	}
+    protected long computeAccessTokenExpirationTime(Integer expiresIn) {
+        Calendar calendar = Calendar.getInstance();
+        if (expiresIn != null) {
+            calendar.add(Calendar.SECOND, expiresIn);
+            calendar.add(Calendar.SECOND, -10); // Subtract 10 seconds to avoid expirations during executing request
+        }
 
-	protected String getClientKeyStorePassword() {
-		return configurationService.find().getKeyStoreSecret();
-	}
+        return calendar.getTimeInMillis();
+    }
 
-	protected String getClientKeyStoreFile() {
-		return configurationService.find().getKeyStoreFile();
-	}
+    private boolean isValidPatToken(Token validatePatToken, long validatePatTokenExpiration) {
+        final long now = System.currentTimeMillis();
 
-	private String getClientId() {
-		return configurationFactory.getApiClientId(); // TBD
-	}
+        // Get new access token only if is the previous one is missing or expired
+        return !((validatePatToken == null) || (validatePatToken.getAccessToken() == null)
+                || (validatePatTokenExpiration <= now));
+    }
 
-	private String getClientKeyId() {
-		return null; // TBD
-	}
+    protected String getClientKeyStorePassword() {
+        return configurationService.find().getKeyStoreSecret();
+    }
+
+    protected String getClientKeyStoreFile() {
+        return configurationService.find().getKeyStoreFile();
+    }
+
+    private String getClientId() {
+        return configurationFactory.getApiClientId();
+    }
+
+    private String getClientKeyId() {
+        return null; // TBD
+    }
 }
