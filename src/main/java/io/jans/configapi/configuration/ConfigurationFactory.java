@@ -154,12 +154,6 @@ public class ConfigurationFactory {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final Conf c = loadConfigurationFromDb();
-            log.debug("\n\n\n Conf c = "+c+"\n\n");
-            log.debug(" Conf c.getDn() = "+c.getDn());
-            log.debug(" Conf c.getDynamic() = "+c.getDynamic());
-            log.debug(" Conf c.getStatics() = "+c.getStatics());
-            log.debug(" Conf c.getWebKeys() = "+c.getWebKeys());
-            log.debug(" Conf c.toString() = "+c.toString()+"\n\n\n\n");
             if (c != null) {
                 init(c);
                 return true;
@@ -294,8 +288,7 @@ public class ConfigurationFactory {
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
-            	umaResourceProtectionService.verifyUmaResources();
-            	log.debug(" \n\n ConfigurationFactory::create() - umaResourceProtectionService.getResourceList() = "+umaResourceProtectionService.getResourceList()+"\n\n");
+                umaResourceProtectionService.verifyUmaResources(); //Verify UmaResources available 
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }
         } catch (Exception ex) {
