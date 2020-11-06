@@ -51,9 +51,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
-        log.debug("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
+        log.debug("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = " + info.getRequestUri() + "\n\n");
         log.debug("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
-        log.debug("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
+        log.debug("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI() + " request.toString() " + request.toString());
         log.debug("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
@@ -67,7 +67,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         try {
             String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-            this.authorizationService.validateAuthorization(token, resourceInfo,context.getMethod(), request.getRequestURI());
+            this.authorizationService.validateAuthorization(token, resourceInfo, context.getMethod(),
+                    request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
