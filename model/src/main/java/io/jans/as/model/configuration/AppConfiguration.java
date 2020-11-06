@@ -1921,6 +1921,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getClientRegDefaultToCodeFlowWithRefresh() {
+        if (clientRegDefaultToCodeFlowWithRefresh == null) clientRegDefaultToCodeFlowWithRefresh = false;
         return clientRegDefaultToCodeFlowWithRefresh;
     }
 
