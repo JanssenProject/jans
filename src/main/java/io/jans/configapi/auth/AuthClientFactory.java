@@ -6,7 +6,6 @@
 
 package io.jans.configapi.auth;
 
-import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
