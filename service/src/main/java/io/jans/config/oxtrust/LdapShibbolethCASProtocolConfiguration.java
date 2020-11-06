@@ -20,7 +20,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @author Dmitry Ognyannikov
  */
 @DataEntry
-@ObjectClass(value = "jansShibbolethCASProtocolConfiguration")
+@ObjectClass(value = "jansAppConf")
 public class LdapShibbolethCASProtocolConfiguration extends Entry implements Serializable {
 
     private static final long serialVersionUID = -11887457695212971L;
@@ -29,7 +29,7 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     private String inum;
 
     @JsonObject
-    @AttributeName(name = "jansConfApp")
+    @AttributeName(name = "jansConfDyn")
     private ShibbolethCASProtocolConfiguration casProtocolConfiguration;
 
     @AttributeName(name = "jansRevision")
