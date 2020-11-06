@@ -52,9 +52,9 @@ public class AttributeService extends io.jans.service.AttributeService {
 
 		List<GluuAttribute> result = new ArrayList<GluuAttribute>();
 		for (GluuAttribute attribute : attributes) {
-			boolean isEmpty = attribute.getOxSCIMCustomAttribute() == null;
+			boolean isEmpty = attribute.getScimCustomAttr() == null;
 			if (!isEmpty) {
-				if ((attribute.getOxSCIMCustomAttribute() != null) && attribute.getOxSCIMCustomAttribute()) {
+				if ((attribute.getScimCustomAttr() != null) && attribute.getScimCustomAttr()) {
 					result.add(attribute);
 				}
 			}
