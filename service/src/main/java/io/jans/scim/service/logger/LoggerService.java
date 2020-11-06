@@ -10,16 +10,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.config.oxtrust.AppConfiguration;
-import io.jans.scim.service.ConfigurationService;
 
 @ApplicationScoped
 public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-    @Inject
-    private ConfigurationService configurationService;
 
     @Override
     public boolean isDisableJdkLogger() {
@@ -33,7 +29,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Override
     public String getExternalLoggerConfiguration() {
-        return configurationService.getConfiguration().getOxLogConfigLocation();
+        return appConfiguration.getExternalLoggerConfiguration();
     }
 
     @Override

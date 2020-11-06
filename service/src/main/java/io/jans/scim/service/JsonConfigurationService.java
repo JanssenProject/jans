@@ -88,7 +88,7 @@ public class JsonConfigurationService implements Serializable {
 
 	public String getOxAuthDynamicConfigJson() throws IOException {
 		String configurationDn = configurationFactory.getConfigurationDn();
-		return loadOxAuthConfig(configurationDn).getOxAuthConfigDynamic();
+		return loadOxAuthConfig(configurationDn).getDynamicConf();
 	}
 
 	public io.jans.as.model.configuration.AppConfiguration getOxauthAppConfiguration() throws IOException {
@@ -143,7 +143,7 @@ public class JsonConfigurationService implements Serializable {
 		String configurationDn = configurationFactory.getConfigurationDn();
 
 		LdapOxAuthConfiguration ldapOxAuthConfiguration = loadOxAuthConfig(configurationDn);
-		ldapOxAuthConfiguration.setOxAuthConfigDynamic(oxAuthDynamicConfigJson);
+		ldapOxAuthConfiguration.setDynamicConf(oxAuthDynamicConfigJson);
 		ldapOxAuthConfiguration.setRevision(ldapOxAuthConfiguration.getRevision() + 1);
 		persistenceEntryManager.merge(ldapOxAuthConfiguration);
 		return true;
