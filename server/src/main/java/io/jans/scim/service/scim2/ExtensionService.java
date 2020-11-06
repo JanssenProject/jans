@@ -56,7 +56,7 @@ public class ExtensionService {
                 Map<String, ExtensionField> fields = new HashMap<>();
 
                 for (GluuAttribute attribute : attributeService.getSCIMRelatedAttributes()) {
-                    if (Optional.ofNullable(attribute.getOxSCIMCustomAttribute()).orElse(false)) {
+                    if (Optional.ofNullable(attribute.getScimCustomAttr()).orElse(false)) {
                         // first non-null check is needed because certain entries do not have the multivalue attribute set
 
                         ExtensionField field = new ExtensionField();
