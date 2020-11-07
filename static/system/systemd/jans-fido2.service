@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Fido2 Service
-After=opendj.service
+After=jans-auth.service
 
 [Service]
 Type=forking
