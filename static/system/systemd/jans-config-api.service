@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Config API service
-After=opendj.service
+After=jans-auth.service
 
 [Service]
 Type=forking
