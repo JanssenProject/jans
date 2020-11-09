@@ -25,8 +25,7 @@ import java.util.UUID;
  * @author Javier Rojas Blum
  * @version May 30, 2018
  */
-@ApplicationScoped
-public class AttributeService extends io.jans.service.AttributeService {
+public abstract class AttributeService extends io.jans.service.AttributeService {
 
     /**
      *
@@ -184,5 +183,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     public void updateAttribute(GluuAttribute attribute) {
         persistenceEntryManager.merge(attribute);
     }
+
+    protected abstract boolean isUseLocalCache();
 
 }

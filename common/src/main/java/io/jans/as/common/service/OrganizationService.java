@@ -6,27 +6,19 @@
 
 package io.jans.as.common.service;
 
+import javax.inject.Inject;
+
 import io.jans.as.persistence.model.GluuOrganization;
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.OxConstants;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-@ApplicationScoped
-@Named("organizationService")
-public class OrganizationService extends io.jans.service.OrganizationService {
+public abstract class OrganizationService extends io.jans.service.OrganizationService {
 
     private static final long serialVersionUID = -8966940469789981584L;
     public static final int ONE_MINUTE_IN_SECONDS = 60;
-
-    @Inject
-	private AppConfiguration appConfiguration;
 
 	@Inject
 	private PersistenceEntryManager ldapEntryManager;
@@ -57,11 +49,13 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 	}
 
     private BaseCacheService getCacheService() {
-    	if (appConfiguration.getUseLocalCache()) {
+    	if (isUseLocalCache()) {
     		return localCacheService;
     	}
     	
     	return cacheService;
     }
+
+    protected abstract boolean isUseLocalCache();
 
 }

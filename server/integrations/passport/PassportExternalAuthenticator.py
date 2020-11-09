@@ -334,7 +334,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPassportConfigDN(self):
 
-        f = open('/etc/gluu/conf/gluu.properties', 'r')
+        f = open('/etc/gluu/conf/jans.properties', 'r')
         for line in f:
             prop = line.split("=")
             if prop[0] == "oxpassport_ConfigurationEntryDN":
