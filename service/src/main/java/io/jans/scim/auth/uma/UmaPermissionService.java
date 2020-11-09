@@ -32,7 +32,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.exception.OxIntializationException;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaMetadataService;
@@ -261,7 +261,7 @@ public class UmaPermissionService implements Serializable {
 		try {
 			String authHeaderValue = String.format(
 					"UMA realm=\"Authorization required\", host_id=%s, as_uri=%s, ticket=%s",
-					getHost(appConfiguration.getIdpUrl()), getUmaConfigurationEndpoint(), ticket);
+					getHost(appConfiguration.getApplicationUrl()), getUmaConfigurationEndpoint(), ticket);
 			response = Response.status(Response.Status.UNAUTHORIZED).header("WWW-Authenticate", authHeaderValue)
 					.build();
 		} catch (MalformedURLException ex) {

@@ -4,29 +4,32 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.scim.service.config;
+package io.jans.scim.service;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import io.jans.config.oxtrust.AttributeResolverConfiguration;
-import io.jans.config.oxtrust.Configuration;
 import io.jans.exception.ConfigurationException;
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.scim.model.conf.AppConfiguration;
+import io.jans.config.oxtrust.Configuration;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.scim.model.conf.Conf;
 import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.AppConfigurationReloadEvent;
-import io.jans.service.cdi.event.ApplicationInitialized;
-import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import io.jans.service.cdi.event.BaseConfigurationReload;
 import io.jans.service.cdi.event.ConfigurationEvent;
 import io.jans.service.cdi.event.ConfigurationUpdate;
@@ -35,17 +38,14 @@ import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
-import io.jans.util.init.Initializable;
 import io.jans.util.properties.FileConfiguration;
 import org.slf4j.Logger;
 
-import io.jans.scim.service.ApplicationFactory;
-
 /**
- * @author Yuriy Movchan
- * @version 0.1, 05/15/2013
+ * @author Yuriy Movchan Date: 05/13/2020
  */
-public abstract class ConfigurationFactory<C> extends Initializable {
+@ApplicationScoped
+public class ConfigurationFactory {
 
 	@Inject
 	private Logger log;
@@ -54,20 +54,22 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 	private Event<TimerEvent> timerEvent;
 
 	@Inject
-	private Event<AppConfigurationReloadEvent> configurationUpdateEvent;
+	private Event<AppConfiguration> configurationUpdateEvent;
 
 	@Inject
 	private Event<String> event;
 
 	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
-	@Inject
+    @Inject
 	private PersistanceFactoryService persistanceFactoryService;
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
+
+	@Inject
+	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -77,8 +79,7 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 	static {
 		if (System.getProperty("jans.base") != null) {
 			BASE_DIR = System.getProperty("jans.base");
-		} else if ((System.getProperty("catalina.base") != null)
-				&& (System.getProperty("catalina.base.ignore") == null)) {
+		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
 			BASE_DIR = System.getProperty("catalina.home");
@@ -89,51 +90,45 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 		}
 	}
 
-	public static final String BASE_DIR;
-	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
+	private static final String BASE_DIR;
+	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	public static final String APP_PROPERTIES_FILE = DIR + "oxtrust.properties";
+	private static final String APP_PROPERTIES_FILE = DIR + "scim.properties";
 
-	public static final String APPLICATION_CONFIGURATION = "oxtrust-config.json";
-	public static final String CACHE_PROPERTIES_FILE = "oxTrustCacheRefresh.properties";
-	public static final String LOG_ROTATION_CONFIGURATION = "oxTrustLogRotationConfiguration.xml";
-	public static final String SALT_FILE_NAME = "salt";
+	private final String SALT_FILE_NAME = "salt";
 
-	private String confDir, configFilePath, cacheRefreshFilePath, logRotationFilePath, saltFilePath;
+	private String confDir, saltFilePath;
 
 	private boolean loaded = false;
 
-	protected FileConfiguration baseConfiguration;
-
-	private PersistenceConfiguration persistenceConfiguration;
-
-	protected AttributeResolverConfiguration attributeResolverConfiguration;
+	private FileConfiguration baseConfiguration;
+    
+    private PersistenceConfiguration persistenceConfiguration;
+	private AppConfiguration dynamicConf;
+	private StaticConfiguration staticConf;
 	private String cryptoConfigurationSalt;
 
 	private AtomicBoolean isActive;
 
-	private long baseConfigurationFileLastModifiedTime = -1;
+	private long baseConfigurationFileLastModifiedTime;
 
+	private long loadedRevision = -1;
 	private boolean loadedFromLdap = true;
 
-	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) ApplicationInitializedEvent init) {
-		init();
-	}
-
-	@Override
-	protected void initInternal() {
+	@PostConstruct
+	public void init() {
 		this.isActive = new AtomicBoolean(true);
 		try {
-			log.info("Creating oxTrustConfiguration");
+            this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
 			loadBaseConfiguration();
 
-			this.persistenceConfiguration = persistanceFactoryService
-					.loadPersistenceConfiguration(getApplicationPropertiesFileName());
 			this.confDir = confDir();
-			this.configFilePath = confDir + APPLICATION_CONFIGURATION;
-			this.cacheRefreshFilePath = confDir + CACHE_PROPERTIES_FILE;
-			this.logRotationFilePath = confDir + LOG_ROTATION_CONFIGURATION;
+
+			String certsDir = this.baseConfiguration.getString("certsDir");
+			if (StringHelper.isEmpty(certsDir)) {
+				certsDir = confDir;
+			}
 			this.saltFilePath = confDir + SALT_FILE_NAME;
 
 			loadCryptoConfigurationSalt();
@@ -143,7 +138,6 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 	}
 
 	public void create() {
-		init();
 		if (!createFromDb()) {
 			log.error("Failed to load configuration from LDAP. Please fix it!!!.");
 			throw new ConfigurationException("Failed to load configuration from LDAP.");
@@ -183,21 +177,17 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 
 	private void reloadConfiguration() {
 		// Reload LDAP configuration if needed
-		PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService
-				.loadPersistenceConfiguration(getApplicationPropertiesFileName());
+	    PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
 
 		if (newPersistenceConfiguration != null) {
-			if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(),
-					newPersistenceConfiguration.getFileName())
-					|| (newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration
-							.getLastModifiedTime())) {
+			if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName()) || (newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration.getLastModifiedTime())) {
 				// Reload configuration only if it was modified
 				this.persistenceConfiguration = newPersistenceConfiguration;
 				event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE);
 			}
 		}
 
-		// Reload Base configuration if needed
+        // Reload Base configuration if needed
 		File baseConfiguration = new File(BASE_PROPERTIES_FILE);
 		if (baseConfiguration.exists()) {
 			final long lastModified = baseConfiguration.lastModified();
@@ -211,20 +201,21 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 		if (!loadedFromLdap) {
 			return;
 		}
-
-		final C conf = loadConfigurationFromDb("jansRevision");
-		if (conf == null) {
-			return;
-		}
-
-		if (!isNewRevision(conf)) {
-			return;
-		}
-
-		createFromDb();
+		
+		reloadConfFromLdap();
 	}
 
-	public String confDir() {
+	private boolean isRevisionIncreased() {
+        final Conf conf = loadConfigurationFromLdap("jansRevision");
+        if (conf == null) {
+            return false;
+        }
+
+        log.trace("LDAP revision: " + conf.getRevision() + ", server revision:" + loadedRevision);
+        return conf.getRevision() > this.loadedRevision;
+    }
+
+	private String confDir() {
 		final String confDir = this.baseConfiguration.getString("confDir", null);
 		if (StringUtils.isNotBlank(confDir)) {
 			return confDir;
@@ -237,16 +228,103 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 		return baseConfiguration;
 	}
 
-	public PersistenceConfiguration getPersistenceConfiguration() {
-		return persistenceConfiguration;
+	@Produces
+    @ApplicationScoped
+    public PersistenceConfiguration getPersistenceConfiguration() {
+        return persistenceConfiguration;
+    }
+
+	@Produces
+	@ApplicationScoped
+	public AppConfiguration getAppConfiguration() {
+		return dynamicConf;
 	}
 
-	public AttributeResolverConfiguration getAttributeResolverConfiguration() {
-		return attributeResolverConfiguration;
+	@Produces
+	@ApplicationScoped
+	public StaticConfiguration getStaticConfiguration() {
+		return staticConf;
+	}
+
+	public BaseDnConfiguration getBaseDn() {
+		return getStaticConfiguration().getBaseDn();
 	}
 
 	public String getCryptoConfigurationSalt() {
 		return cryptoConfigurationSalt;
+	}
+
+	public boolean reloadConfFromLdap() {
+        if (!isRevisionIncreased()) {
+            return false;
+        }
+
+        return createFromDb();
+    }
+
+	private boolean createFromDb() {
+		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
+		try {
+			final Conf c = loadConfigurationFromLdap();
+			if (c != null) {
+				init(c);
+
+				// Destroy old configuration
+				if (this.loaded) {
+					destroy(AppConfiguration.class);
+
+					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
+				}
+
+				this.loaded = true;
+				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(dynamicConf);
+
+				return true;
+			}
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+
+		throw new ConfigurationException("Unable to find configuration in DB... ");
+	}
+
+	public void destroy(Class<? extends Configuration> clazz) {
+		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
+		configurationInstance.destroy(confInstance.get());
+	}
+
+	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
+		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
+		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
+	}
+
+	private Conf loadConfigurationFromLdap(String... returnAttributes) {
+		final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+		final String dn = getConfigurationDn();
+		try {
+			final Conf conf = persistenceEntryManager.find(dn, Conf.class, returnAttributes);
+
+			return conf;
+		} catch (BasePersistenceException ex) {
+			log.error(ex.getMessage());
+		}
+
+		return null;
+	}
+
+	public String getConfigurationDn() {
+		return this.baseConfiguration.getString("scim_ConfigurationEntryDN");
+	}
+
+	private void init(Conf conf) {
+		initConfigurationConf(conf);
+		this.loadedRevision = conf.getRevision();
+	}
+
+	private void initConfigurationConf(Conf conf) {
+		if (conf.getDynamicConf() != null) {
+			dynamicConf = conf.getDynamicConf();
+		}
 	}
 
 	private void loadBaseConfiguration() {
@@ -262,20 +340,16 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 
 			this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
 		} catch (Exception ex) {
-			log.error("Failed to load configuration from {}", this.saltFilePath, ex);
-			throw new ConfigurationException("Failed to load configuration from " + this.saltFilePath, ex);
+			log.error("Failed to load configuration from {}", saltFilePath, ex);
+			throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
 		}
 	}
 
 	private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
 		try {
 			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-			if (fileConfiguration.isLoaded()) {
-				log.debug("########## fileName = " + fileConfiguration.getFileName());
-				log.debug("########## oxtrust_ConfigurationEntryDN = "
-						+ fileConfiguration.getString("oxtrust_ConfigurationEntryDN"));
-				return fileConfiguration;
-			}
+
+			return fileConfiguration;
 		} catch (Exception ex) {
 			if (isMandatory) {
 				log.error("Failed to load configuration from {}", fileName, ex);
@@ -286,42 +360,5 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 		return null;
 	}
 
-	private boolean createFromDb() {
-		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
-		try {
-			final C conf = loadConfigurationFromDb();
-			if (conf != null) {
-				init(conf);
 
-				// Destroy old configuration
-				if (this.loaded) {
-					destroryLoadedConfiguration();
-				}
-
-				this.loaded = true;
-				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(new AppConfigurationReloadEvent());
-
-				return true;
-			}
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-		}
-
-		return false;
-	}
-
-	protected void destroy(Class<? extends Configuration> clazz) {
-		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
-		configurationInstance.destroy(confInstance.get());
-	}
-
-	public abstract String getConfigurationDn();
-
-	protected abstract String getApplicationPropertiesFileName();
-
-	protected abstract void init(C conf);
-	protected abstract C loadConfigurationFromDb(String... returnAttributes);
-	protected abstract void destroryLoadedConfiguration();
-
-	protected abstract boolean isNewRevision(C c);
 }

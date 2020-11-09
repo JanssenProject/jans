@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;

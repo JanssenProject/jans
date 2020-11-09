@@ -14,7 +14,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.scim.service.cdi.event.Events;
 import io.jans.service.BaseCacheService;

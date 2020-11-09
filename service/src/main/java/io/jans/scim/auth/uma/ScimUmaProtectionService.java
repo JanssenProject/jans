@@ -16,15 +16,12 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import io.jans.config.oxtrust.AppConfiguration;
-import io.jans.as.client.ClientInfoClient;
-import io.jans.as.client.ClientInfoResponse;
 import org.slf4j.Logger;
 
-import io.jans.scim.auth.uma.BaseUmaProtectionService;
-import io.jans.scim.auth.uma.BindingUrls;
+import io.jans.as.client.ClientInfoClient;
+import io.jans.as.client.ClientInfoResponse;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.service.ConfigurationService;
-import io.jans.scim.service.JsonConfigurationService;
 import io.jans.scim.service.OpenIdService;
 
 /**
@@ -47,9 +44,6 @@ public class ScimUmaProtectionService extends BaseUmaProtectionService implement
 
 	@Inject
 	private ConfigurationService configurationService;
-
-    @Inject
-    private JsonConfigurationService jsonConfigurationService;
 
     @Inject
     private OpenIdService openIdService;
@@ -107,7 +101,7 @@ public class ScimUmaProtectionService extends BaseUmaProtectionService implement
 
         try {
             //Test mode may be removed in upcoming versions of Gluu Server...
-            if (jsonConfigurationService.getOxTrustappConfiguration().isScimTestMode()) {
+            if (appConfiguration.isScimTestMode()) {
                 log.info("SCIM Test Mode is ACTIVE");
                 authorizationResponse = processTestModeAuthorization(authorization);
             }

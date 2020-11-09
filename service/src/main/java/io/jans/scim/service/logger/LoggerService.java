@@ -9,7 +9,7 @@ package io.jans.scim.service.logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 
 @ApplicationScoped
 public class LoggerService extends io.jans.service.logger.LoggerService {
