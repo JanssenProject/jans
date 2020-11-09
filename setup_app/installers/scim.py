@@ -88,6 +88,8 @@ class ScimInstaller(JettyInstaller):
 
         self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
 
+        self.write_webapps_xml()
+
     def update_backend(self):
         self.dbUtils.add_client2script('2DAF-F9A5', Config.scim_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.scim_rp_client_id)
