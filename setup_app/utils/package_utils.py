@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from setup_app import paths
 from setup_app.config import Config
