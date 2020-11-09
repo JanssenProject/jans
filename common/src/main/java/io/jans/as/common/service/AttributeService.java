@@ -6,20 +6,20 @@
 
 package io.jans.as.common.service;
 
-import io.jans.model.GluuAttribute;
-import io.jans.orm.search.filter.Filter;
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.common.util.AttributeConstants;
-import io.jans.service.BaseCacheService;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
+import io.jans.as.common.util.AttributeConstants;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.model.GluuAttribute;
+import io.jans.orm.search.filter.Filter;
+import io.jans.service.BaseCacheService;
+import io.jans.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
@@ -37,9 +37,6 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
 
     @Inject
     private StaticConfiguration staticConfiguration;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     /**
      * returns GluuAttribute by Dn
@@ -116,7 +113,7 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
     }
 
     protected BaseCacheService getCacheService() {
-        if (appConfiguration.getUseLocalCache()) {
+        if (isUseLocalCache()) {
             return localCacheService;
         }
         return cacheService;
