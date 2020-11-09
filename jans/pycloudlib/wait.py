@@ -186,7 +186,7 @@ def wait_for_ldap(manager, **kwargs):
         # `cache` and `token` mapping only have base entries
         search_mapping = {
             "default": default_search,
-            "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=gluuGroup)"),
+            "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=jansGrp)"),
             "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
             "cache": (f"ou=cache,o={namespace}", "(ou=cache)"),
             "token": (f"ou=tokens,o={namespace}", "(ou=tokens)"),
