@@ -27,6 +27,7 @@ import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.scim.service.ApplicationFactory;
+import io.jans.scim.service.ConfigurationFactory;
 import io.jans.scim.service.logger.LoggerService;
 import io.jans.service.PythonService;
 import io.jans.service.custom.script.CustomScriptManager;
@@ -65,6 +66,9 @@ public class AppInitializer {
 
 	@Inject
 	private CustomScriptManager customScriptManager;
+	
+	@Inject
+	PersistenceConfiguration persistenceConfiguration;
     
     //@Inject
     //private ExternalScimService externalScimService;
@@ -109,14 +113,13 @@ public class AppInitializer {
     public PersistenceEntryManager createPersistenceEntryManager() throws Exception {
 
         logger.debug("Obtaining PersistenceEntryManagerFactory from persistence API");
-        PersistenceConfiguration persistenceConf = persistanceFactoryService.loadPersistenceConfiguration();
-        FileConfiguration persistenceConfig = persistenceConf.getConfiguration();
+        FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
         Properties backendProperties = persistenceConfig.getProperties();
-        PersistenceEntryManagerFactory factory = persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceConf);
+        PersistenceEntryManagerFactory factory = persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceConfiguration);
 
         String type = factory.getPersistenceType();
         logger.info("Underlying database of type '{}' detected", type);
-        String file = String.format("%s/%s", DEFAULT_CONF_BASE, persistenceConf.getFileName());
+        String file = String.format("%s/%s", DEFAULT_CONF_BASE, persistenceConfiguration.getFileName());
         logger.info("Using config file: {}", file);
 
         logger.debug("Decrypting backend properties");

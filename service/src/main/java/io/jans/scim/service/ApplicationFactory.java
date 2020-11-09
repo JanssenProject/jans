@@ -11,9 +11,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.SmtpConfiguration;
-import io.jans.scim.service.config.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
@@ -37,7 +36,7 @@ public class ApplicationFactory {
     private Logger log;
 
     @Inject
-    private ConfigurationFactory<?> configurationFactory;
+    private ConfigurationFactory configurationFactory;
 
     @Inject
     private ConfigurationService configurationService;

@@ -24,6 +24,7 @@ import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterBaseListener;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterLexer;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterParser;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
+import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.service.PersistanceFactoryService;
 
@@ -41,6 +42,9 @@ public class ScimFilterParserService {
 
     @Inject
     private PersistanceFactoryService persistenceFactoryService;
+
+    @Inject
+	PersistenceConfiguration persistenceConfiguration;
 
     private boolean ldapBackend;
 
@@ -122,7 +126,7 @@ public class ScimFilterParserService {
     @PostConstruct
     private void init() {
         ldapBackend = persistenceFactoryService.getPersistenceEntryManagerFactory(
-                persistenceFactoryService.loadPersistenceConfiguration()).getPersistenceType().equals("ldap");
+        		persistenceConfiguration).getPersistenceType().equals("ldap");
     }
 
 }

@@ -13,7 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.ConfigurationException;
 import io.jans.util.init.Initializable;

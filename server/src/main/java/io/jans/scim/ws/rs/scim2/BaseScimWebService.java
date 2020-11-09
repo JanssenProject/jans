@@ -28,7 +28,7 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.orm.model.SortOrder;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.exception.SCIMException;
