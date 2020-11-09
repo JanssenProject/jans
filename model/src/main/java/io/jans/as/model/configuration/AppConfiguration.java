@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
+import io.jans.as.model.jwk.KeySelectionStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Set;
 public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
+    public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
 
     private String issuer;
     private String baseEndpoint;
@@ -167,6 +169,7 @@ public class AppConfiguration implements Configuration {
     // Jans Auth KeyStore
     private String keyStoreFile;
     private String keyStoreSecret;
+    private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
     //oxEleven
     private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
@@ -242,6 +245,15 @@ public class AppConfiguration implements Configuration {
     private Boolean cibaEnabled;
 
     public int discoveryCacheLifetimeInMinutes = 60;
+
+    public KeySelectionStrategy getKeySelectionStrategy() {
+        if (keySelectionStrategy == null) keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
+        return keySelectionStrategy;
+    }
+
+    public void setKeySelectionStrategy(KeySelectionStrategy keySelectionStrategy) {
+        this.keySelectionStrategy = keySelectionStrategy;
+    }
 
     public int getDiscoveryCacheLifetimeInMinutes() {
         return discoveryCacheLifetimeInMinutes;
@@ -1909,6 +1921,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getClientRegDefaultToCodeFlowWithRefresh() {
+        if (clientRegDefaultToCodeFlowWithRefresh == null) clientRegDefaultToCodeFlowWithRefresh = false;
         return clientRegDefaultToCodeFlowWithRefresh;
     }
 

@@ -151,11 +151,11 @@ public class AuthorizeService {
             }
             session.addPermission(clientId, true);
             sessionIdService.updateSessionId(session);
+            identity.setSessionId(session);
 
             // OXAUTH-297 - set session_id cookie
             if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
                 cookieService.createSessionIdCookie(session, false);
-                identity.setSessionId(session);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
