@@ -99,7 +99,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         UmaResource umaResource = null;
         for (String key : filteredPaths) {
             String[] result = key.split(":::");
-            if (result != null && result.length > 0) {
+            if (result != null && result.length > 1) {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
                 log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = "
