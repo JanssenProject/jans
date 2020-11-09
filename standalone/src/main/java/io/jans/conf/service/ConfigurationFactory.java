@@ -293,7 +293,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	}
 
 	protected String getDefaultPersistanceConfigurationFileName() {
-		return "gluu-ldap.properties";
+		return "jans-ldap.properties";
 	}
 
 	public C getAppConfiguration() {
