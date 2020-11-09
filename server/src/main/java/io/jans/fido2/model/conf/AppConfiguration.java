@@ -8,9 +8,9 @@ package io.jans.fido2.model.conf;
 
 import java.util.List;
 
-import io.jans.as.model.configuration.Configuration;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.jans.as.model.configuration.Configuration;
 
 /**
  * Represents the configuration JSON file.

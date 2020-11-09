@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 
 /**
@@ -23,7 +24,7 @@ import io.jans.as.model.config.StaticConfiguration;
 @ApplicationScoped
 public class UserService extends io.jans.as.common.service.common.UserService {
 
-	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
+	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.objectClassPerson };
 
     @Inject
     private StaticConfiguration staticConfiguration;
