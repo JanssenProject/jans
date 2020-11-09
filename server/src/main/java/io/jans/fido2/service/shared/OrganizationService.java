@@ -7,10 +7,20 @@
 package io.jans.fido2.service.shared;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import io.jans.fido2.model.conf.AppConfiguration;
 
 @ApplicationScoped
-public class OrganizationService extends io.jans.service.OrganizationService {
+@Named("organizationService")
+public class OrganizationService extends io.jans.as.common.service.OrganizationService {
 
-	private static final long serialVersionUID = -3912721745240924111L;
-	
+	@Inject
+	private AppConfiguration appConfiguration;
+
+    protected boolean isUseLocalCache() {
+    	return appConfiguration.isUseLocalCache();
+    }
+
 }
