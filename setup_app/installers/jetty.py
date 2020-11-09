@@ -279,7 +279,19 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                     retVal = False
 
         return retVal
-        
+
+    def write_webapps_xml(self, jans_app_path=None, jans_apps=None):
+        if not jans_app_path:
+            jans_app_path = '/'+self.service_name
+        if not jans_apps:
+            jans_apps = self.service_name+'.war'
+
+        web_apps_xml_fn = os.path.join(Config.templateFolder, 'jans-app.xml')
+        web_apps_xml = self.readFile(web_apps_xml_fn)
+        web_apps_xml = self.fomatWithDict(web_apps_xml, {'jans_app_path': jans_app_path, 'jans_apps': jans_apps})
+        out_filename = os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+        self.writeFile(out_filename, web_apps_xml)
+
     def calculate_selected_aplications_memory(self):
         Config.pbar.progress("jans", "Calculating application memory")
 
