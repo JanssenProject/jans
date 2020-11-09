@@ -32,7 +32,8 @@ class ScimInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        self.oxtrust_config_fn = os.path.join(self.output_folder, 'oxtrust_config.json')
+        self.dynamic_config_fn = os.path.join(self.output_folder, 'dynamic-conf.json')
+        self.static_config_fn = os.path.join(self.output_folder, 'static-conf.json')
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_clients = os.path.join(self.output_folder, 'clients.ldif')
 
@@ -76,9 +77,14 @@ class ScimInstaller(JettyInstaller):
         Config.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(Config.scim_rp_client_jwks, 1)
 
     def render_import_templates(self):
+        
+        self.renderTemplateInOut(self.dynamic_config_fn, self.templates_folder, self.output_folder)
+        self.renderTemplateInOut(self.static_config_fn, self.templates_folder, self.output_folder)
+        Config.templateRenderingDict['scim_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.dynamic_config_fn)
+        Config.templateRenderingDict['scim_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_fn)
+
         self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.ldif_clients, self.templates_folder, self.output_folder)
-        self.renderTemplateInOut(self.oxtrust_config_fn, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
 
