@@ -9,8 +9,12 @@ package io.jans.as.model.crypto;
 import com.google.common.collect.Lists;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.impl.ECDSA;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.*;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -26,12 +30,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.Use;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +37,10 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -51,10 +52,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.jwk.JWKParameter.*;
@@ -73,6 +71,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     private String keyStoreSecret;
     private String dnName;
     private final boolean rejectNoneAlg;
+    private final KeySelectionStrategy keySelectionStrategy;
 
     public AuthCryptoProvider() throws Exception {
         this(null, null, null);
@@ -83,7 +82,12 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
+        this(keyStoreFile, keyStoreSecret, dnName, rejectNoneAlg, AppConfiguration.DEFAULT_KEY_SELECTION_STRATEGY);
+    }
+
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg, KeySelectionStrategy keySelectionStrategy) throws Exception {
         this.rejectNoneAlg = rejectNoneAlg;
+        this.keySelectionStrategy = keySelectionStrategy != null ? keySelectionStrategy : AppConfiguration.DEFAULT_KEY_SELECTION_STRATEGY;
         if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
             this.keyStoreFile = keyStoreFile;
             this.keyStoreSecret = keyStoreSecret;
@@ -358,20 +362,31 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         }
 
         String kid = null;
-        LOG.trace("WebKeys:" + jsonWebKeySet.getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        final List<JSONWebKey> keys = jsonWebKeySet.getKeys();
+        LOG.trace("WebKeys:" + keys.stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
         LOG.trace("KeyStoreKeys:" + getKeys());
-        for (JSONWebKey key : jsonWebKeySet.getKeys()) {
+
+        List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
+
+        for (JSONWebKey key : keys) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 kid = key.getKid();
                 Key keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
                 if (keyFromStore != null) {
-                    return kid;
+                    keysByAlgAndUse.add(key);
                 }
             }
         }
 
-        LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
-        return kid;
+        if (keysByAlgAndUse.isEmpty()) {
+            LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
+            return kid;
+        }
+
+        final JSONWebKey selectedKey = keySelectionStrategy.select(keysByAlgAndUse);
+        final String selectedKid = selectedKey != null ? selectedKey.getKid() : null;
+        LOG.trace("Selected kid: " + selectedKid);
+        return selectedKid;
     }
 
     public PrivateKey getPrivateKey(String alias)

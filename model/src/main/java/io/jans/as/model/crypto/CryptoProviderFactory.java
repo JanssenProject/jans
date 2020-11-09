@@ -57,7 +57,7 @@ public class CryptoProviderFactory {
             return keyStoreProvider;
         }
 
-        return keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg());
+        return keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg(), configuration.getKeySelectionStrategy());
     }
 
     public static void reset() {
