@@ -1,9 +1,0 @@
-{
-    "scimTestMode": %(scimTestMode)s,
-    "scimUmaClientId":"%(scim_rs_client_id)s",
-    "scimUmaClientKeyId":"",
-    "scimUmaResourceId":"%(scim_resource_oxid)s",
-    "scimUmaScope":"https://%(hostname)s/jans-auth/restv1/uma/scopes/scim_access",
-    "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
-    "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s"
-}
