@@ -54,7 +54,7 @@ import com.wordnik.swagger.annotations.Api;
  * Re-engineered by jgomer on 2017-09-27.
  */
 @Named("scim2SchemaEndpoint")
-@Path("/scim/v2/Schemas")
+@Path("/v2/Schemas")
 @Api(value = "/v2/Schemas", description = "SCIM 2.0 Schema Endpoint (https://tools.ietf.org/html/rfc7643#section-4)")
 public class SchemaWebService extends BaseScimWebService {
 

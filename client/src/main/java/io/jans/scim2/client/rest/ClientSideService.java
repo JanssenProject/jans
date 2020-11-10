@@ -36,7 +36,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * A succesful response for this request should contain a status code of 200 and a ServiceProviderConfig object
      * in the entity body
      */
-    @Path("/scim/v2/ServiceProviderConfig")
+    @Path("/v2/ServiceProviderConfig")
     @GET
     @Produces(MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT)
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -50,7 +50,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * A succesful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of ResourceType objects)
      */
-    @Path("/scim/v2/ResourceTypes")
+    @Path("/v2/ResourceTypes")
     @GET
     @Produces(MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT)
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -64,7 +64,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * A succesful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of SchemaResource objects)
      */
-    @Path("/scim/v2/Schemas")
+    @Path("/v2/Schemas")
     @GET
     @Produces(MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT)
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -80,7 +80,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * A succesful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of SCIM resource objects)
      */
-    @Path("/scim/v2/.search")
+    @Path("/v2/.search")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -95,7 +95,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * A succesful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of SCIM resource objects)
      */
-    @Path("/scim/v2/.search")
+    @Path("/v2/.search")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -113,7 +113,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * body (holding the results of every processed operation). The number of results is constrained by parameters such as
      * org.gluu.oxtrust.model.scim2.bulk.BulkRequest#failOnErrors.
      */
-    @Path("/scim/v2/Bulk")
+    @Path("/v2/Bulk")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -128,7 +128,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * body (holding the results of every processed operation). The number of results is constrained by parameters such as
      * org.gluu.oxtrust.model.scim2.bulk.BulkRequest#failOnErrors
      */
-    @Path("/scim/v2/Bulk")
+    @Path("/v2/Bulk")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -144,7 +144,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * @param itemsPerPage Maximum number of results to retrieve
      * @return An json object representing the results of the query. See the doc page for more information
      */    
-    @Path("/scim/UpdatedUsers")
+    @Path("/UpdatedUsers")
     @GET
     @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
     Response usersChangedAfter(@QueryParam("timeStamp") String isoDate,

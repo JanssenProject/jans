@@ -31,7 +31,7 @@ import io.jans.scim.service.scim2.interceptor.RejectFilterParam;
  * Updated by jgomer2001 on 2017-09-23
  */
 @Named("serviceProviderConfig")
-@Path("/scim/v2/ServiceProviderConfig")
+@Path("/v2/ServiceProviderConfig")
 public class ServiceProviderConfigWS extends BaseScimWebService {
 
     @GET

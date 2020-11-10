@@ -51,7 +51,7 @@ import com.wordnik.swagger.annotations.ApiParam;
  * Created by jgomer on 2017-10-25.
  */
 @Named
-@Path("/scim/v2/.search")
+@Path("/v2/.search")
 public class SearchResourcesWebService extends BaseScimWebService {
 
     @Inject

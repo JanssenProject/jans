@@ -71,7 +71,7 @@ import org.joda.time.format.ISODateTimeFormat;
  * @author jgomer
  */
 @Named("scim2Fido2DeviceEndpoint")
-@Path("/scim/v2/Fido2Devices")
+@Path("/v2/Fido2Devices")
 public class Fido2DeviceWebService extends BaseScimWebService implements IFido2DeviceWebService {
 
     @Inject

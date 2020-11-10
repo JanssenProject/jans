@@ -70,7 +70,7 @@ import com.wordnik.swagger.annotations.Authorization;
  * Re-engineered by jgomer on 2017-11-23.
  */
 @Named("scim2BulkEndpoint")
-@Path("/scim/v2/Bulk")
+@Path("/v2/Bulk")
 @Api(value = "/v2/Bulk", description = "SCIM 2.0 Bulk Endpoint (https://tools.ietf.org/html/rfc7644#section-3.7)",
         authorizations = {@Authorization(value = "Authorization", type = "uma") })
 public class BulkWebService extends BaseScimWebService {

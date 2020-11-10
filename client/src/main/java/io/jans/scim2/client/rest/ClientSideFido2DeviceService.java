@@ -58,7 +58,7 @@ public interface ClientSideFido2DeviceService extends IFido2DeviceWebService, Cl
      * A succesful response for this operation should contain a status code of 200 and a FidoDeviceResource
      * in the entity body (the resource after the update took place)
      */
-    @Path("/scim/v2/Fido2Devices/{id}")
+    @Path("/v2/Fido2Devices/{id}")
     @PUT
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})

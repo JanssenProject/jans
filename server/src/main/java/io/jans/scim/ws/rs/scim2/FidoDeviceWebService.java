@@ -72,7 +72,7 @@ import io.jans.scim.service.scim2.interceptor.RefAdjusted;
  * Updated by jgomer on 2017-10-09.
  */
 @Named("scim2FidoDeviceEndpoint")
-@Path("/scim/v2/FidoDevices")
+@Path("/v2/FidoDevices")
 public class FidoDeviceWebService extends BaseScimWebService implements IFidoDeviceWebService {
 
     @Inject
