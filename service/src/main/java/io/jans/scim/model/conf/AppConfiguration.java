@@ -61,8 +61,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String loggingLayout;
     private String externalLoggerConfiguration;
 
-    private String organizationName;
-
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
