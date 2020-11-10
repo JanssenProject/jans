@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author Yuriy Movchan Date: 12/19/2018
  */
 @ApplicationScoped
-@Path("/fido2/configuration")
+@Path("/configuration")
 public class ConfigurationController {
 
 	@Inject

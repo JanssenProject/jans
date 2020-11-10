@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @version May 08, 2020
  */
 @ApplicationScoped
-@Path("/fido2/assertion")
+@Path("/assertion")
 public class AssertionController {
 
     @Inject
