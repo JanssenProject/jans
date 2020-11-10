@@ -19,7 +19,7 @@ jobs:
       matrix:
         # Override automatic language detection by changing the below list
         # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        language: ['python', 'javascript', 'java']
+        language: ['java']
         # Learn more...
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
@@ -32,6 +32,30 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-      
+
+    - name: Build jans-bom
+      run: |
+        git clone https://github.com/JanssenProject/jans-bom.git
+        cd jans-bom
+        mvn clean install -fae -Dmaven.test.skip=true -Dmaven.test.failure.ignore=true -Dmaven.clean.failOnError=false -Dfindbugs.skip=true
+        cd ..
+        
+    - name: Build jans-orm
+      run: |
+        git clone https://github.com/JanssenProject/jans-orm.git
+        cd jans-orm
+        mvn clean install -fae -Dmaven.test.skip=true -Dmaven.test.failure.ignore=true -Dmaven.clean.failOnError=false -Dfindbugs.skip=true
+        cd ..
+                
+    - name: Build jans-core
+      run: |
+        git clone https://github.com/JanssenProject/jans-core.git
+        cd jans-core
+        mvn clean install -fae -Dmaven.test.skip=true -Dmaven.test.failure.ignore=true -Dmaven.clean.failOnError=false -Dfindbugs.skip=true
+        cd ..
+                
+    - name: Build with Maven
+      run: |
+        mvn clean compile -fae -Dmaven.test.skip=true -Dmaven.test.failure.ignore=true -Dmaven.clean.failOnError=false -Dfindbugs.skip=true
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
