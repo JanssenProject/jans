@@ -72,7 +72,7 @@ import com.wordnik.swagger.annotations.Authorization;
  * Updated by jgomer on 2017-09-12.
  */
 @Named
-@Path("/scim/v2/Users")
+@Path("/v2/Users")
 @Api(value = "/v2/Users", description = "SCIM 2.0 User Endpoint (https://tools.ietf.org/html/rfc7644#section-3.2)",
         authorizations = {@Authorization(value = "Authorization", type = "uma")})
 public class UserWebService extends BaseScimWebService implements IUserWebService {

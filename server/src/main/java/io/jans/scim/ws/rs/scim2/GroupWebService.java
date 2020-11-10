@@ -70,7 +70,7 @@ import io.jans.scim.service.scim2.interceptor.RefAdjusted;
  * Updated by jgomer on 2017-10-18
  */
 @Named("scim2GroupEndpoint")
-@Path("/scim/v2/Groups")
+@Path("/v2/Groups")
 @Api(value = "/v2/Groups", description = "SCIM 2.0 Group Endpoint (https://tools.ietf.org/html/rfc7644#section-3.2)",
         authorizations = {@Authorization(value = "Authorization", type = "uma")})
 public class GroupWebService extends BaseScimWebService implements IGroupWebService {

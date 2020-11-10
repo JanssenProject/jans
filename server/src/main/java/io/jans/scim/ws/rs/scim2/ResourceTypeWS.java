@@ -45,7 +45,7 @@ import com.wordnik.swagger.annotations.Api;
  * Re-engineered by jgomer on 2017-09-25.
  */
 @Named("resourceTypesWs")
-@Path("/scim/v2/ResourceTypes")
+@Path("/v2/ResourceTypes")
 @Api(value = "/v2/ResourceTypes", description = "SCIM 2.0 ResourceType Endpoint (https://tools.ietf.org/html/rfc7643#section-6)")
 public class ResourceTypeWS extends BaseScimWebService {
 

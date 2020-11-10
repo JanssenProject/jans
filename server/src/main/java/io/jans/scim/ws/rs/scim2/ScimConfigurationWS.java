@@ -36,7 +36,7 @@ import io.jans.service.JsonService;
  * Updated by jgomer on 2020-10-20.
  */
 @ApplicationScoped
-@Path("/scim/scim-configuration")
+@Path("/scim-configuration")
 @Api(value = "/.well-known/scim-configuration", description = "The SCIM server endpoint that provides configuration data. ")
 public class ScimConfigurationWS {
 

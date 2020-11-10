@@ -54,7 +54,7 @@ public interface ClientSideUserService extends IUserWebService, CloseableClient 
      * A succesful response for this operation should contain a status code of 201 (created) and a UserResource
      * in the entity body (the resource just created)
      */
-    @Path("/scim/v2/Users")
+    @Path("/v2/Users")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -81,7 +81,7 @@ public interface ClientSideUserService extends IUserWebService, CloseableClient 
      * A succesful response for this operation should contain a status code of 200 and a UserResource
      * in the entity body (the resource after the update took place)
      */
-    @Path("/scim/v2/Users/{id}")
+    @Path("/v2/Users/{id}")
     @PUT
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -106,7 +106,7 @@ public interface ClientSideUserService extends IUserWebService, CloseableClient 
      * A succesful response for this operation should contain a status code of 200 and a UserResource
      * in the entity body (the resource after modifications took place)
      */
-    @Path("/scim/v2/Users/{id}")
+    @Path("/v2/Users/{id}")
     @PATCH
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})

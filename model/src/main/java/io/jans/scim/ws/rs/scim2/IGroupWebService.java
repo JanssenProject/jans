@@ -62,7 +62,7 @@ public interface IGroupWebService {
      * A succesful response for this operation should contain a status code of 201 (created) and a {@link GroupResource}
      * in the entity body (the resource just created)
      */
-    @Path("/scim/v2/Groups")
+    @Path("/v2/Groups")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -81,7 +81,7 @@ public interface IGroupWebService {
      * A succesful response for this operation should contain a status code of 200 and a {@link GroupResource}
      * in the entity body (the resource retrieved)
      */
-    @Path("/scim/v2/Groups/{id}")
+    @Path("/v2/Groups/{id}")
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -106,7 +106,7 @@ public interface IGroupWebService {
      * A succesful response for this operation should contain a status code of 200 and a {@link GroupResource}
      * in the entity body (the resource after the update took place)
      */
-    @Path("/scim/v2/Groups/{id}")
+    @Path("/v2/Groups/{id}")
     @PUT
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -123,7 +123,7 @@ public interface IGroupWebService {
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 204 (no content)
      */
-    @Path("/scim/v2/Groups/{id}")
+    @Path("/v2/Groups/{id}")
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -149,7 +149,7 @@ public interface IGroupWebService {
      * A succesful response for this operation should contain a status code of 200 and a {@link io.jans.scim.model.scim2.ListResponse
      * ListResponse} in the entity body (holding a collection of SCIM resources)
      */
-    @Path("/scim/v2/Groups")
+    @Path("/v2/Groups")
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
@@ -171,7 +171,7 @@ public interface IGroupWebService {
      * A succesful response for this request should contain a status code of 200 and a {@link io.jans.scim.model.scim2.ListResponse
      * ListResponse} in the entity body (holding a collection of SCIM resources)
      */
-    @Path("/scim/v2/Groups/.search")
+    @Path("/v2/Groups/.search")
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
@@ -191,7 +191,7 @@ public interface IGroupWebService {
      * A succesful response for this operation should contain a status code of 200 and a {@link GroupResource}
      * in the entity body (the resource after modifications took place)
      */
-    @Path("/scim/v2/Groups/{id}")
+    @Path("/v2/Groups/{id}")
     @PATCH
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
