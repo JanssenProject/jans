@@ -7,11 +7,14 @@
 package io.jans.scim.ws.rs.scim2;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import io.jans.orm.PersistenceEntryManager;
 
 /**
  * Health check controller
@@ -23,12 +26,17 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 public class HealthCheckController {
 
-	@GET
-	@POST
-	@Path("/health-check")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Inject
+	private PersistenceEntryManager persistenceEntryManager;
+
+    @GET
+    @POST
+    @Path("/health-check")
+    @Produces(MediaType.APPLICATION_JSON)
 	public String healthCheckController() {
-		return "{\"status\":\"running\"}";
+    	boolean isConnected = persistenceEntryManager.getOperationService().isConnected();
+    	String dbStatus = isConnected ? "online" : "offline"; 
+        return "{\"status\": \"running\", \"db_status\":\"" + dbStatus + "\"}";
 	}
 
 }
