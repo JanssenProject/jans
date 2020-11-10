@@ -1,2 +1,2 @@
-# Jans Notify
-Simple push notification server
+# Jansssen Notify
+Janssen Notify is a simple push notification server.
