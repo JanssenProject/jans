@@ -558,5 +558,5 @@ class CouchbaseClient:
 def suppress_verification_warning():
     import urllib3
 
-    if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", False)):
+    if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", True)):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
