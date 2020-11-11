@@ -2,6 +2,9 @@
 
 import sys
 import base64
+
+sys.path.append("%(install_dir)s")
+
 from pyDes import *
 
 saltFn = "%(configFolder)s/salt"
