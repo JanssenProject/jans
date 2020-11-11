@@ -67,6 +67,7 @@ main_chart_file_parser["dependencies"] = chart_dependencies
 main_chart_file_parser.dump_it()
 find_replace(main_dir, "support@gluu.org", "support@jans.io", "*.*")
 find_replace(main_dir, "https://www.gluu.org", "https://jans.io", "*.*")
+find_replace(main_dir, "demoexample.gluu.org", "demoexample.jans.io", "*.*")
 find_replace(main_dir, "https://gluu.org/docs/gluu-server", "https://jans.io", "*.*")
 find_replace(main_dir, "Gluu", "Janssen", "*.*")
 find_replace(main_dir, "gluu", "jans", "*.*")
