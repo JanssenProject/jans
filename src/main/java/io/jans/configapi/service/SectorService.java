@@ -7,9 +7,9 @@
 package io.jans.configapi.service;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.persistence.model.SectorIdentifier;
+import io.jans.configapi.service.OrganizationService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
