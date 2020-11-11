@@ -1,4 +1,7 @@
 
+![couchbase](https://github.com/JanssenProject/jans-cloud-native/workflows/couchbase/badge.svg)
+![opendj](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj/badge.svg)
+
 ## System Requirements for cloud deployments
 
 !!!note
@@ -27,7 +30,7 @@ Start a fresh ubuntu `18.04` or `20.04` and execute the following
 wget https://raw.githubusercontent.com/JanssenProject/jans-cloud-native/master/automation/startdemo.sh && chmod u+x startdemo.sh && ./startdemo.sh
 ```
 
-This will install with the default settings the can be found inside [values.yaml](helm/values.yaml). Please map the `ip` of the instance running ubuntu to `demoexample.jans.io` and then access the endpoints at your browser such in the example in the table below.
+This will install docker, microk8s, helm and Janssen with the default settings the can be found inside [values.yaml](helm/values.yaml). Please map the `ip` of the instance running ubuntu to `demoexample.jans.io` and then access the endpoints at your browser such in the example in the table below.
 
 
 |Service           | Example endpoint                                                       |   
