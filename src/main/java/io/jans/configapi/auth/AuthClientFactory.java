@@ -28,8 +28,9 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 public class AuthClientFactory {
@@ -53,12 +54,20 @@ public class AuthClientFactory {
 
     private static OpenIdClientService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = createEngine(followRedirects);
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-                .register(engine);
-        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+    /*   RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
+               .register(engine);
+         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(url);
         OpenIdClientService proxy = target.proxy(OpenIdClientService.class);
+        return proxy;*/
+        
+        OpenIdClientService proxy = RestClientBuilder.newBuilder()
+        		.register(engine).baseUri(UriBuilder.fromPath(url).build()).build(OpenIdClientService.class);
+        		
         return proxy;
+        /*  ResteasyClient client = ResteasyClientBuilder.newClient().register(OpenIdClientService.class);
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
+        IntrospectionService proxy = target.proxy(IntrospectionService.class);*/
     }
 
     private static UmaMetadataService createUmaMetadataService(String url, boolean followRedirects) {

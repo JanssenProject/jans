@@ -7,8 +7,8 @@
 package io.jans.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-import io.jans.as.common.service.AttributeService;
 import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.service.AttributeService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
