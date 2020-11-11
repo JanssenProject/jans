@@ -51,15 +51,15 @@ public class ConfigurationController {
 
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);
-        attestation.put("base_path", baseEndpointUri + "/fido2/attestation");
-        attestation.put("options_enpoint", baseEndpointUri + "/fido2/attestation/options");
-        attestation.put("result_enpoint", baseEndpointUri + "/fido2/attestation/result");
+        attestation.put("base_path", baseEndpointUri + "/attestation");
+        attestation.put("options_enpoint", baseEndpointUri + "/attestation/options");
+        attestation.put("result_enpoint", baseEndpointUri + "/attestation/result");
 
         ObjectNode assertion = dataMapperService.createObjectNode();
         response.set("assertion", assertion);
-        assertion.put("base_path", baseEndpointUri + "/fido2/assertion");
-        assertion.put("options_enpoint", baseEndpointUri + "/fido2/assertion/options");
-        assertion.put("result_enpoint", baseEndpointUri + "/fido2/assertion/result");
+        assertion.put("base_path", baseEndpointUri + "/assertion");
+        assertion.put("options_enpoint", baseEndpointUri + "/assertion/options");
+        assertion.put("result_enpoint", baseEndpointUri + "/assertion/result");
 
         ResponseBuilder builder = Response.ok().entity(response.toString());
         return builder.build();
