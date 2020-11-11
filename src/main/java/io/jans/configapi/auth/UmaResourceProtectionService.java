@@ -2,14 +2,13 @@ package io.jans.configapi.auth;
 
 import com.google.common.base.Preconditions;
 
-import io.jans.ca.rs.protect.Condition;
-import io.jans.ca.rs.protect.RsProtector;
-import io.jans.ca.rs.protect.RsResource;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.auth.model.*;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
+import io.jans.configapi.util.Jackson;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -56,9 +55,11 @@ public class UmaResourceProtectionService {
         // Load the uma resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
-        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() -modified **** inputStream = " + inputStream);
-        this.rsResourceList = RsProtector.instance(inputStream).getResourceMap().values();
-
+                
+        RsResourceList resourceList =  Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
+        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList+ "\n\n");
+        
+        this.rsResourceList = resourceList.getResources();
         log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = " + rsResourceList+ "\n\n");
 
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");

@@ -18,8 +18,9 @@ import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
 
-import org.slf4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -28,7 +29,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     private static final long serialVersionUID = 1L;
 
     @Inject
-    Logger logger;
+    Logger log;
 
     @Inject
     OpenIdService openIdService;
@@ -37,7 +38,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throws Exception {
         
         if (StringUtils.isBlank(token)) {
-            logger.error("Token is blank !!!");
+        	log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
         
@@ -45,13 +46,13 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionService() .introspectToken("Bearer " + token, token);
         
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
-            logger.error("Token is Invalid.");
+        	log.error("Token is Invalid.");
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            logger.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
+            log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
             throw new WebApplicationException("Insufficient scopes. Required scope",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }

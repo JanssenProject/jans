@@ -98,6 +98,10 @@ public class ConfigurationFactory {
     private static String API_PROTECTION_TYPE;
     
     @Inject
+    @ConfigProperty(name = "apiUmaClientPassword")
+    private static String API_UMA_CLIENT_PASSWORD;
+    
+    @Inject
     UmaResourceProtectionService umaResourceProtectionService;
     
     @Inject
@@ -131,6 +135,11 @@ public class ConfigurationFactory {
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
+    
+    public static String getApiClientPassword() {
+        return API_UMA_CLIENT_PASSWORD;
+    }
+    
     
     public void create() {
         loadBaseConfiguration();

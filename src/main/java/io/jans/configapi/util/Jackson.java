@@ -50,22 +50,18 @@ public class Jackson {
 
     @SuppressWarnings("unchecked")
     public static <T> T read(InputStream inputStream, T obj) throws IOException {
-    	try {
-    		/*
-    		 Preconditions.checkNotNull(inputStream);
-         Preconditions.checkNotNull(obj);     
-         return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
-         */
+    	try {    	
     	 Preconditions.checkNotNull(inputStream); 
-         
-    	 //ObjectMapper objectMapper = JacksonMapperHolder.MAPPER;
     	 ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-         //return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
-         return (T) objectMapper.readValue(inputStream, obj.getClass());
+         return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
     	}catch(Exception ex) {
     		ex.printStackTrace();
     		throw ex;
     	}
+    }
+    
+    public static ObjectMapper createJsonMapper() {
+        return JacksonMapperHolder.MAPPER;
     }
     
     private static class JacksonMapperHolder {
