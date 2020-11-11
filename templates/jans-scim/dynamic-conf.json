@@ -2,7 +2,7 @@
     "baseDN":"o=jans",
 
     "applicationUrl":"https://%(hostname)s",
-    "baseEndpoint":"https://%(hostname)s/identity/restv1",
+    "baseEndpoint":"https://%(hostname)s/jans-scim/restv1",
 
     "personCustomObjectClass":"gluuCustomPerson",
 
