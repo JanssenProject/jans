@@ -701,7 +701,7 @@ public class AuthenticationService {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void onSuccessfulLogin(SessionId sessionUser) {
-		log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
+		log.info("Attempting to redirect user: SessionUser: {}", sessionUser != null ? sessionUser.getId() : null);
 
 		if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
 			return;
