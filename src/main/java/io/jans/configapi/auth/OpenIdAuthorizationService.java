@@ -8,6 +8,8 @@ package io.jans.configapi.auth;
 
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.auth.service.OpenIdService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,10 +19,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
