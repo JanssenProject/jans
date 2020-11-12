@@ -8,7 +8,7 @@ jans-client-api is a middleware service which can be used by web application dev
 
 ### Source Install
 
-If you're a Java geek, you can build the jans-client-api server using Maven. The code is available in [Github](https://github.com/JanssenProject/jans-client-api).
+If you're a Java geek, you can build the jans-client-api server using [Maven](https://maven.apache.org). The code is available in [Github](https://github.com/JanssenProject/jans-client-api).
 
 ```
 git clone https://github.com/JanssenProject/jans-client-api.git
