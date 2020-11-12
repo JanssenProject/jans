@@ -15,7 +15,7 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.configapi.auth.*;
+import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -82,8 +82,11 @@ public class UmaService extends Initializable implements Serializable {
                 .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
 
         log.info("##### Getting UMA Metadata ...");
+
+        log.debug("\n\n UmaService:::::getUmaMetadataConfiguration() -  umaMetadataService =" + umaMetadataService
+                + "\n\n");
         UmaMetadata umaMetadata = umaMetadataService.getMetadata();
-        
+        log.debug("\n\n UmaService:::::getUmaMetadataConfiguration() -  umaMetadata =" + umaMetadata + "\n\n");
         log.info("##### Getting UMA metadata ... DONE");
 
         if (umaMetadata == null) {
@@ -94,8 +97,10 @@ public class UmaService extends Initializable implements Serializable {
     }
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
-
-        log.trace("Validating RPT, resourceId: {}, scopeIds: {}, authorization: {}", resourceId, scopeIds, authorization);
+        log.debug("\n\n UmaService::validateRptToken() - patToken  = " + patToken + " , authorization = "
+                + authorization + " , resourceId = " + resourceId + " , scopeIds = " + scopeIds);
+        log.trace("Validating RPT, resourceId: {}, scopeIds: {}, authorization: {}", resourceId, scopeIds,
+                authorization);
 
         if (patToken == null) {
             log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has
@@ -106,10 +111,11 @@ public class UmaService extends Initializable implements Serializable {
 
         if (StringHelper.isNotEmpty(authorization) && authorization.startsWith("Bearer ")) {
             String rptToken = authorization.substring(7);
+            log.debug("\n\n UmaService::validateRptToken() - rptToken  = " + rptToken);
 
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
             log.trace("RPT status response: {} ", rptStatusResponse);
-            
+
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 log.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
             } else {
@@ -144,11 +150,15 @@ public class UmaService extends Initializable implements Serializable {
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
         String authorization = "Bearer " + patToken.getAccessToken();
+        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization);
 
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
         try {
+            log.debug("\n\n UmaService::getStatusResponse() - this.umaRptIntrospectionService  = "
+                    + this.umaRptIntrospectionService);
             rptStatusResponse = this.umaRptIntrospectionService.requestRptStatus(authorization, rptToken, "");
+            log.debug("\n\n UmaService::getStatusResponse() - rptStatusResponse  = " + rptStatusResponse);
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
@@ -190,6 +200,8 @@ public class UmaService extends Initializable implements Serializable {
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
+        log.debug("\n\n\n UmaService::registerResourcePermission() - this.umaPermissionService = "
+                + this.umaPermissionService + " , patToken = " + patToken);
         PermissionTicket ticket = this.umaPermissionService.registerPermission("Bearer " + patToken.getAccessToken(),
                 UmaPermissionList.instance(permission));
         if (ticket == null) {

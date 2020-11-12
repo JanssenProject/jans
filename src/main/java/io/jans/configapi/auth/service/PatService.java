@@ -3,7 +3,7 @@ package io.jans.configapi.auth.service;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.configapi.auth.UmaClient;
+import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.StringHelper;
