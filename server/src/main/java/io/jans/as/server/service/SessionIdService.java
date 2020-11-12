@@ -885,7 +885,12 @@ public class SessionIdService {
             acrs = Util.splittedStringAsList(acrValues, " ");
         }
 
-        return acrs;
+        HashSet<String> resultAcrs = new HashSet<String>();
+        for (String acr : acrs) {
+        	resultAcrs.add(externalAuthenticationService.scriptName(acr));
+        }
+        
+        return new ArrayList<String>(resultAcrs);
     }
 
     private void auditLogging(SessionId sessionId) {
