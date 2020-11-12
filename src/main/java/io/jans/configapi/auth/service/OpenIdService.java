@@ -6,7 +6,7 @@
 
 package io.jans.configapi.auth.service;
 
-import io.jans.configapi.auth.AuthClientFactory;
+import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.exception.ConfigurationException;

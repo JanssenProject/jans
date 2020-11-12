@@ -4,34 +4,23 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.auth;
+package io.jans.configapi.auth.client;
 
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.configapi.auth.client.OpenIdClientService;
-import io.jans.configapi.util.ApiConstants;
 
 import javax.ws.rs.core.UriBuilder;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+
+
+import javax.ws.rs.core.MediaType;
 
 public class AuthClientFactory {
 
@@ -53,25 +42,31 @@ public class AuthClientFactory {
     }
 
     private static OpenIdClientService createIntrospectionService(String url, boolean followRedirects) {
-        ApacheHttpClient43Engine engine = createEngine(followRedirects);
-    /*   RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                .register(engine);
+        //restClient.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
          ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(url);
-        OpenIdClientService proxy = target.proxy(OpenIdClientService.class);
-        return proxy;*/
+         target.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+         OpenIdClientService proxy = target.proxy(OpenIdClientService.class);
+        return proxy;
+        
+        /*
         
         OpenIdClientService proxy = RestClientBuilder.newBuilder()
         		.register(engine).baseUri(UriBuilder.fromPath(url).build()).build(OpenIdClientService.class);
         		
         return proxy;
+        */
         /*  ResteasyClient client = ResteasyClientBuilder.newClient().register(OpenIdClientService.class);
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
         IntrospectionService proxy = target.proxy(IntrospectionService.class);*/
     }
 
     private static UmaMetadataService createUmaMetadataService(String url, boolean followRedirects) {
-        ApacheHttpClient43Engine engine = createEngine(followRedirects);
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                 .register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
@@ -81,7 +76,7 @@ public class AuthClientFactory {
     }
 
     private static UmaPermissionService createUmaPermissionService(UmaMetadata umaMetadata) {
-        ApacheHttpClient43Engine engine = createEngine(false);
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder()
                 .baseUri(UriBuilder.fromPath(umaMetadata.getPermissionEndpoint()).build()).register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
@@ -91,7 +86,7 @@ public class AuthClientFactory {
     }
 
     private static UmaRptIntrospectionService createUmaRptIntrospectionService(UmaMetadata umaMetadata) {
-        ApacheHttpClient43Engine engine = createEngine(false);
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder()
                 .baseUri(UriBuilder.fromPath(umaMetadata.getIntrospectionEndpoint()).build()).register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
@@ -99,49 +94,7 @@ public class AuthClientFactory {
         UmaRptIntrospectionService proxy = target.proxy(UmaRptIntrospectionService.class);
         return proxy;
     }
-
-    private static ApacheHttpClient43Engine createEngine(boolean followRedirects) {
-        return createEngine(ApiConstants.CONNECTION_POOL_MAX_TOTAL, ApiConstants.CONNECTION_POOL_DEFAULT_MAX_PER_ROUTE,
-                ApiConstants.CONNECTION_POOL_VALIDATE_AFTER_INACTIVITY, CookieSpecs.STANDARD, followRedirects);
-    }
-
-    private static ApacheHttpClient43Engine createEngine(int maxTotal, int defaultMaxPerRoute,
-            int validateAfterInactivity, String cookieSpec, boolean followRedirects) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        cm.setMaxTotal(maxTotal);
-        cm.setDefaultMaxPerRoute(defaultMaxPerRoute);
-        cm.setValidateAfterInactivity(validateAfterInactivity * 1000);
-
-        HttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(cookieSpec).build())
-                .setKeepAliveStrategy(connectionKeepAliveStrategy).setConnectionManager(cm).build();
-
-        final ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient);
-        engine.setFollowRedirects(followRedirects);
-        return engine;
-    }
-
-    private static ConnectionKeepAliveStrategy connectionKeepAliveStrategy = new ConnectionKeepAliveStrategy() {
-        @Override
-        public long getKeepAliveDuration(HttpResponse httpResponse, HttpContext httpContext) {
-
-            HeaderElementIterator headerElementIterator = new BasicHeaderElementIterator(
-                    httpResponse.headerIterator(HTTP.CONN_KEEP_ALIVE));
-
-            while (headerElementIterator.hasNext()) {
-
-                HeaderElement headerElement = headerElementIterator.nextElement();
-
-                String name = headerElement.getName();
-                String value = headerElement.getValue();
-
-                if (value != null && name.equalsIgnoreCase("timeout")) {
-                    return Long.parseLong(value) * 1000;
-                }
-            }
-
-            // Set own keep alive duration if server does not have it
-            return ApiConstants.CONNECTION_POOL_CUSTOM_KEEP_ALIVE_TIMEOUT * 1000;
-        }
-    };
+    
+  
+    
 }
