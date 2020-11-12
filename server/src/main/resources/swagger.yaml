@@ -1,6 +1,6 @@
 # raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/oxd-server/src/main/resources/swagger.yaml
-# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxd/version_4.0/oxd-server/src/main/resources/swagger.yaml#/developers/setup-client
+# https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml
 openapi: 3.0.1
 info:
   title: jans-client-api-server
