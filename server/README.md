@@ -1,3 +1,3 @@
-## oxd server
+## jans-client-api server
 
-Docs: http://gluu.org/docs/oxd/
+Docs: In progress
