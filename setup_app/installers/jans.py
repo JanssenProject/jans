@@ -401,7 +401,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         else:
             self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
-            self.run([paths.cmd_chmod, '-R', '664', Config.certFolder])
+            self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
+            self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
 
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
