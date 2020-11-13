@@ -264,10 +264,11 @@ def do_installation():
         if argsp.t:
             testDataLoader.load_test_data()
 
-
         jansProgress.progress(PostSetup.service_name, "Saving properties")
         propertiesUtils.save_properties()
         time.sleep(2)
+
+        jansInstaller.post_install_tasks()
 
         for service in jansProgress.services:
             if service['app_type'] == static.AppType.SERVICE:
@@ -275,8 +276,6 @@ def do_installation():
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
-
-        jansInstaller.post_install_tasks()
 
         jansProgress.progress(static.COMPLETED)
 
