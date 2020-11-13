@@ -20,7 +20,7 @@ import io.jans.fido2.ws.rs.controller.HealthCheckController;
  * @author Yuriy Movchan
  * @version 0.1, 11/13/2020
  */
-@ApplicationPath("/system")
+@ApplicationPath("/sys")
 public class SystemResteasyInitializer extends Application {	
 
 	@Override
