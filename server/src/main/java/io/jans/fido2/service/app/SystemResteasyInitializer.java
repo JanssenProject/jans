@@ -12,26 +12,21 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import io.jans.fido2.ws.rs.controller.AssertionController;
-import io.jans.fido2.ws.rs.controller.AttestationController;
-import io.jans.fido2.ws.rs.controller.ConfigurationController;
 import io.jans.fido2.ws.rs.controller.HealthCheckController;
 
 /**
  * Integration with Resteasy
  * 
  * @author Yuriy Movchan
- * @version 0.1, 03/21/2017
+ * @version 0.1, 11/13/2020
  */
-@ApplicationPath("/restv1")
-public class ResteasyInitializer extends Application {	
+@ApplicationPath("/system")
+public class SystemResteasyInitializer extends Application {	
 
 	@Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(ConfigurationController.class);
-        classes.add(AssertionController.class);
-        classes.add(AttestationController.class);
+        classes.add(HealthCheckController.class);
 
         return classes;
     }
