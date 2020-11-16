@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 @ApplicationScoped
 @Named("umaAuthorizationService")
 public class UmaAuthorizationService extends AuthorizationService implements Serializable {
