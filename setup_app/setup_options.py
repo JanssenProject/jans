@@ -53,6 +53,7 @@ def get_setup_options():
     #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")
+    parser.add_argument('--dump-config-on-error', help="Dump configuration on error", action='store_true')
 
     argsp = parser.parse_args()
 
@@ -136,6 +137,7 @@ def get_setup_options():
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
     setupOptions['config_patch_creds'] = argsp.config_patch_creds
+    setupOptions['dump_config_on_error'] = argsp.dump_config_on_error
 
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = InstallTypes.REMOTE
