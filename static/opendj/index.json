@@ -56,7 +56,7 @@
     },
 
     {
-        "attribute": "jansAuthClientId",
+        "attribute": "jansClientId",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -70,7 +70,7 @@
     },
 
     {
-        "attribute": "jansAuthClientSecretExpiresAt",
+        "attribute": "jansClientSecretExpiresAt",
         "type": "date",
         "index": ["ordering"],
         "backend": ["userRoot"]
@@ -292,14 +292,14 @@
     },
 
     {
-        "attribute": "jansAuthUmaScope",
+        "attribute": "jansUmaScope",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
     },
 
     {
-        "attribute": "jansAuthUserId",
+        "attribute": "jansUserId",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -320,7 +320,7 @@
     },
 
     {
-        "attribute": "jansAuthUserDN",
+        "attribute": "jansUserDN",
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
