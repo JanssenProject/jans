@@ -6,6 +6,8 @@
 
 package io.jans.configapi.auth.service;
 
+import io.jans.as.client.service.IntrospectionService;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.configapi.service.ConfigurationService;
@@ -28,12 +30,21 @@ public class OpenIdService extends Initializable implements Serializable {
 
     @Inject
     ConfigurationService configurationService;
+    
 
-    private OpenIdClientService introspectionService;
+    private IntrospectionService introspectionService;
 
-    public OpenIdClientService getIntrospectionService() {
+    public IntrospectionService getIntrospectionService() {
         init();
         return introspectionService;
+    }
+    
+    public String getIntrospectionEndpoint() {
+        return configurationService.find().getIntrospectionEndpoint();
+    }
+    
+    public IntrospectionResponse getIntrospectionResponse(String header, String token) {
+        return AuthClientFactory.getIntrospectionResponse(getIntrospectionEndpoint(), header, token, false);
     }
 
     @Override
@@ -45,10 +56,15 @@ public class OpenIdService extends Initializable implements Serializable {
             throw new ConfigurationException("Failed to load oxAuth OpenId configuration", ex);
         }
     }
-
     private void loadOpenIdConfiguration() throws IOException {
+        log.debug(
+                "OpenIdService::loadOpenIdConfiguration() - configurationService.find().getIntrospectionEndpoint() = "
+                        + configurationService.find().getIntrospectionEndpoint());
         String introspectionEndpoint = configurationService.find().getIntrospectionEndpoint();
         this.introspectionService = AuthClientFactory.getIntrospectionService(introspectionEndpoint, false);
+
+        log.debug("\n\n OpenIdService::loadOpenIdConfiguration() - introspectionService =" + introspectionService);
+        log.info("Successfully loaded oxAuth configuration");
     }
 
 }

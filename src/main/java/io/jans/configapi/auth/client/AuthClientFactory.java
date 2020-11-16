@@ -6,6 +6,8 @@
 
 package io.jans.configapi.auth.client;
 
+import io.jans.as.client.service.IntrospectionService;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
@@ -19,12 +21,19 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
-
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
 
 public class AuthClientFactory {
 
-    public static OpenIdClientService getIntrospectionService(String url, boolean followRedirects) {
+    public static IntrospectionService getIntrospectionService(String url,boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
     }
 
@@ -40,29 +49,48 @@ public class AuthClientFactory {
             boolean followRedirects) {
         return createUmaRptIntrospectionService(umaMetadata);
     }
+    
+    public static IntrospectionResponse getIntrospectionResponse(String url,String header, String token,boolean followRedirects) {
+        System.out.println("\n\n\n AuthClientFactory::getIntrospectionResponse() - url = "+url+" ,header="+header+" ,token = "+token);
+       /* ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
+               .register(engine);
+         restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(url);
+           Form form = new Form();
+         form.param("token", token);
+         Entity<Form> entity = Entity.form(form);
+         Response response = target.request(MediaType.APPLICATION_FORM_URLENCODED).post(entity);
+         System.out.println("\n\n\n AuthClientFactory::getIntrospectionResponse() - response = "+response);
+         //Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.form(new MultivaluedHashMap<String, String>(token)));
+         String value = response.readEntity(String.class);
+         System.out.println(value);
+         response.close();
+     */
+        Client client = ResteasyClientBuilder.newClient();
+        WebTarget target = client.target(url);
+        Form form = new Form();
+        form.param("token", token);
+        Entity<Form> entity = Entity.form(form);
+        Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", header).post(entity);
+        String value = response.readEntity(String.class);
+        System.out.println(value);
+        response.close();  
+        
+       return new IntrospectionResponse();
+    }
 
-    private static OpenIdClientService createIntrospectionService(String url, boolean followRedirects) {
+    private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                .register(engine);
-        //restClient.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(url);
-         target.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-         OpenIdClientService proxy = target.proxy(OpenIdClientService.class);
+         IntrospectionService proxy = target.proxy(IntrospectionService.class);
         return proxy;
         
-        /*
-        
-        OpenIdClientService proxy = RestClientBuilder.newBuilder()
-        		.register(engine).baseUri(UriBuilder.fromPath(url).build()).build(OpenIdClientService.class);
-        		
-        return proxy;
-        */
-        /*  ResteasyClient client = ResteasyClientBuilder.newClient().register(OpenIdClientService.class);
-        ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
-        IntrospectionService proxy = target.proxy(IntrospectionService.class);*/
+
     }
 
     private static UmaMetadataService createUmaMetadataService(String url, boolean followRedirects) {
