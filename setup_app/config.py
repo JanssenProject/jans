@@ -47,6 +47,9 @@ class Config:
 
     @classmethod
     def dump(self, dumpFile=False):
+        if self.dump_config_on_error:
+            return
+
         myDict = {}
         for obj_name, obj in inspect.getmembers(self):
             obj_name = str(obj_name)
@@ -68,6 +71,8 @@ class Config:
         self.install_dir = install_dir
         self.thread_queue = None
         self.jetty_user = 'jetty'
+        self.dump_config_on_error = False
+
 
         self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
         if base.snap:
