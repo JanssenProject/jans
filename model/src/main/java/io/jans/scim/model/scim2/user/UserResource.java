@@ -50,16 +50,16 @@ public class UserResource extends BaseScimResource {
     @Attribute(description = "A fully qualified URL to a page representing the User's online profile",
             referenceTypes = { "external" },
             type = AttributeDefinition.Type.REFERENCE)
-    @StoreReference(ref = "excludeProfileURL")
+    @StoreReference(ref = "jansProfileURL")
     private String profileUrl;
 
     @Attribute(description = "The user's title, such as 'Vice President'.")
-    @StoreReference(ref = "excludeTitle")
+    @StoreReference(ref = "jansTitle")
     private String title;
 
     @Attribute(description = "Used to identify the organization to user relationship. Typical values used might be " +
             "'Contractor', 'Employee', 'Intern', 'Temp', 'External', and 'Unknown' but any value may be used.")
-    @StoreReference(ref = "excludeUsrTyp")
+    @StoreReference(ref = "jansUsrTyp")
     private String userType;
 
     @Attribute(description = "Indicates the User's preferred written or spoken language.  Generally used for selecting a " +
@@ -80,7 +80,7 @@ public class UserResource extends BaseScimResource {
 
     @Attribute(description = "A Boolean value indicating the User's administrative status.",
             type = AttributeDefinition.Type.BOOLEAN)
-    @StoreReference(ref = "excludeActive")
+    @StoreReference(ref = "jansActive")
     private Boolean active;
 
     @Attribute(description = "The User's clear text password. This attribute is intended to be used as a means to specify" +
@@ -94,7 +94,7 @@ public class UserResource extends BaseScimResource {
             "e.g., bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.",
             multiValueClass = Email.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludeEmail")
+    @StoreReference(ref = "jansEmail")
     private List<Email> emails;
 
     @Attribute(description = "Phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider " +
@@ -102,25 +102,25 @@ public class UserResource extends BaseScimResource {
             "fax, pager and other.",
             multiValueClass = PhoneNumber.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludePhoneValue")
+    @StoreReference(ref = "jansPhoneValue")
     private List<PhoneNumber> phoneNumbers;
 
     @Attribute(description = "Instant messaging addresses for the User.",
             multiValueClass = InstantMessagingAddress.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludeImsValue")
+    @StoreReference(ref = "jansImsValue")
     private List<InstantMessagingAddress> ims;
 
     @Attribute(description = "URIs of photos of the User.",
             multiValueClass = Photo.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludePhotos")
+    @StoreReference(ref = "jansPhotos")
     private List<Photo> photos;
 
     @Attribute(description = "Physical mailing addresses for this User.",
             multiValueClass = Address.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludeAddres")
+    @StoreReference(ref = "jansAddres")
     private List<Address> addresses;
 
     @Attribute(description = "A list of groups that the user belongs to, either thorough direct membership, nested groups, " +
@@ -133,20 +133,20 @@ public class UserResource extends BaseScimResource {
     @Attribute(description = "A list of entitlements for the User that represent a thing the User has.",
             multiValueClass = Entitlement.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludeEntitlements")
+    @StoreReference(ref = "jansEntitlements")
     private List<Entitlement> entitlements;
 
     @Attribute(description = "A list of roles for the User that collectively represent who the User is; e.g., 'Student'," +
             " 'Faculty'.",
             multiValueClass = Role.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludeRole")
+    @StoreReference(ref = "jansRole")
     private List<Role> roles;
 
     @Attribute(description = "A list of certificates issued to the User.",
             multiValueClass = X509Certificate.class,
             type = AttributeDefinition.Type.COMPLEX)
-    @StoreReference(ref = "excludex509Certificate")
+    @StoreReference(ref = "jans509Certificate")
     private List<X509Certificate> x509Certificates;
 
     //This attribute is not present in SCIM spec... but see https://github.com/GluuFederation/SCIM-Client/issues/19

@@ -248,8 +248,8 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             //In database, excludeMetaLastMod is just a string (not date)
 
             Filter filter = Filter.createORFilter(
-                    Filter.createNOTFilter(Filter.createPresenceFilter("excludeMetaLastMod")),
-                    Filter.createGreaterOrEqualFilter("excludeMetaLastMod", date));
+                    Filter.createNOTFilter(Filter.createPresenceFilter("jansMetaLastMod")),
+                    Filter.createGreaterOrEqualFilter("jansMetaLastMod", date));
             List<GluuGroup> list = entryManager.findEntries(groupService.getDnForGroup(null), GluuGroup.class, filter);
             response = Response.ok(getGroupResultsAsJson(list)).build();
 
@@ -273,7 +273,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             scim2GroupService.transferAttributesToGroupResource(group, jsScimGrp, userWebService.getEndpointUrl(), groupWebService.getEndpointUrl());
             resources.add(jsScimGrp);
 
-            String modified = group.getAttribute("excludeMetaLastMod");
+            String modified = group.getAttribute("jansMetaLastMod");
             try {
                 if (modified != null) {
                     long updatedAt = ZonedDateTime.parse(modified).toInstant().toEpochMilli();

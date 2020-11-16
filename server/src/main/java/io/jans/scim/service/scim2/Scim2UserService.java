@@ -159,11 +159,11 @@ public class Scim2UserService implements Serializable {
 		// NOTE: calling person.setAttribute("ATTR", null) is not changing the attribute in LDAP :(
 
 		// Set values trying to follow the order found in BaseScimResource class
-		person.setAttribute("excludeExternalId", res.getExternalId());
-		person.setCustomAttribute("excludeMetaCreated", res.getMeta().getCreated());
-		person.setCustomAttribute("excludeMetaLastMod", res.getMeta().getLastModified());
+		person.setAttribute("jansExternalId", res.getExternalId());
+		person.setCustomAttribute("jansMetaCreated", res.getMeta().getCreated());
+		person.setCustomAttribute("jansMetaLastMod", res.getMeta().getLastModified());
 		// When creating user, location will be set again when having an inum
-		person.setCustomAttribute("excludeMetaLocation", res.getMeta().getLocation());
+		person.setCustomAttribute("jansMetaLocation", res.getMeta().getLocation());
 
 		// Set values trying to follow the order found in UserResource class
 		person.setUid(res.getUserName());
@@ -172,47 +172,47 @@ public class Scim2UserService implements Serializable {
 			person.setAttribute("givenName", res.getName().getGivenName());
 			person.setAttribute("sn", res.getName().getFamilyName());
 			person.setAttribute("middleName", res.getName().getMiddleName());
-			person.setAttribute("excludehonorificPrefix", res.getName().getHonorificPrefix());
-			person.setAttribute("excludehonorificSuffix", res.getName().getHonorificSuffix());
-			person.setAttribute("excludeNameFormatted", res.getName().computeFormattedName());
+			person.setAttribute("jansHonorificPrefix", res.getName().getHonorificPrefix());
+			person.setAttribute("jansHonorificSuffix", res.getName().getHonorificSuffix());
+			person.setAttribute("jansNameFormatted", res.getName().computeFormattedName());
 		}
 		person.setAttribute("displayName", res.getDisplayName());
 
 		person.setAttribute("nickname", res.getNickName());
-		person.setAttribute("excludeProfileURL", res.getProfileUrl());
-		person.setAttribute("excludeTitle", res.getTitle());
-		person.setAttribute("excludeUsrTyp", res.getUserType());
+		person.setAttribute("jansProfileURL", res.getProfileUrl());
+		person.setAttribute("jansTitle", res.getTitle());
+		person.setAttribute("jansUsrTyp", res.getUserType());
 
 		person.setAttribute("preferredLanguage", res.getPreferredLanguage());
 		person.setAttribute("locale", res.getLocale());
 		person.setAttribute("zoneinfo", res.getTimezone());
 
-		// Why both jsStatus and excludeActive used for active? it's for active being used in filter queries?
+		// Why both jansStatus and jansActive used for active? it's for active being used in filter queries?
 		// Also it seems jsStatus can have several values, see org.gluu.model.GluuStatus
 		Boolean active = Optional.ofNullable(res.getActive()).orElse(false);
-		person.setCustomAttribute("excludeActive", active);
+		person.setCustomAttribute("jansActive", active);
 		person.setAttribute("jansStatus",
 				active ? GluuStatus.ACTIVE.getValue() : GluuStatus.INACTIVE.getValue());
 		person.setUserPassword(res.getPassword());
 
-		person.setAttribute("excludeEmail", getComplexMultivaluedAsArray(res.getEmails()));
+		person.setAttribute("jansEmail", getComplexMultivaluedAsArray(res.getEmails()));
 		try {
 			person = userPersistenceHelper.syncEmailForward(person);
 		} catch (Exception e) {
 			log.error("Problem syncing emails forward", e);
 		}
 
-		person.setAttribute("excludePhoneValue", getComplexMultivaluedAsArray(res.getPhoneNumbers()));
-		person.setAttribute("excludeImsValue", getComplexMultivaluedAsArray(res.getIms()));
-		person.setAttribute("excludePhotos", getComplexMultivaluedAsArray(res.getPhotos()));
-		person.setAttribute("excludeAddres", getComplexMultivaluedAsArray(res.getAddresses()));
+		person.setAttribute("jansPhoneValue", getComplexMultivaluedAsArray(res.getPhoneNumbers()));
+		person.setAttribute("jansImsValue", getComplexMultivaluedAsArray(res.getIms()));
+		person.setAttribute("jansPhotos", getComplexMultivaluedAsArray(res.getPhotos()));
+		person.setAttribute("jansAddres", getComplexMultivaluedAsArray(res.getAddresses()));
 
 		// group membership changes MUST be applied via the "Group" Resource (Section
 		// 4.1.2 & 8.7.1 RFC 7643) only
 
-		person.setAttribute("excludeEntitlements", getComplexMultivaluedAsArray(res.getEntitlements()));
-		person.setAttribute("excludeRole", getComplexMultivaluedAsArray(res.getRoles()));
-		person.setAttribute("excludex509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
+		person.setAttribute("jansEntitlements", getComplexMultivaluedAsArray(res.getEntitlements()));
+		person.setAttribute("jansRole", getComplexMultivaluedAsArray(res.getRoles()));
+		person.setAttribute("jansx509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
 
 		// Pairwise identifiers must not be supplied here... (they are mutability = readOnly)
 		transferExtendedAttributesToPerson(res, person);
@@ -276,24 +276,24 @@ public class Scim2UserService implements Serializable {
 		log.debug("transferAttributesToUserResource");
 
 		res.setId(person.getInum());
-		res.setExternalId(person.getAttribute("excludeExternalId"));
+		res.setExternalId(person.getAttribute("jansExternalId"));
 
 		Meta meta = new Meta();
 		meta.setResourceType(ScimResourceUtil.getType(res.getClass()));
 
-		meta.setCreated(person.getAttribute("excludeMetaCreated"));
+		meta.setCreated(person.getAttribute("jansMetaCreated"));
 		if (meta.getCreated() == null) {
 			Date date = person.getCreationDate();
 			meta.setCreated(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
 		}
 
-		meta.setLastModified(person.getAttribute("excludeMetaLastMod"));
+		meta.setLastModified(person.getAttribute("jansMetaLastMod"));
 		if (meta.getLastModified() == null) {
 			Date date = person.getUpdatedAt();
 			meta.setLastModified(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
 		}
 
-		meta.setLocation(person.getAttribute("excludeMetaLocation"));
+		meta.setLocation(person.getAttribute("jansMetaLocation"));
 		if (meta.getLocation() == null) {
             meta.setLocation(url + "/" + person.getInum());
         }
@@ -307,10 +307,10 @@ public class Scim2UserService implements Serializable {
 		name.setGivenName(person.getGivenName());
 		name.setFamilyName(person.getSurname());
 		name.setMiddleName(person.getAttribute("middleName"));
-		name.setHonorificPrefix(person.getAttribute("excludehonorificPrefix"));
-		name.setHonorificSuffix(person.getAttribute("excludehonorificSuffix"));
+		name.setHonorificPrefix(person.getAttribute("jansHonorificPrefix"));
+		name.setHonorificSuffix(person.getAttribute("jansHonorificSuffix"));
 
-		String formatted = person.getAttribute("excludeNameFormatted");
+		String formatted = person.getAttribute("jansNameFormatted");
 		if (formatted == null) { // recomputes the formatted name if absent in LDAP
             name.computeFormattedName();
         } else {
@@ -321,21 +321,21 @@ public class Scim2UserService implements Serializable {
 		res.setDisplayName(person.getDisplayName());
 
 		res.setNickName(person.getAttribute("nickname"));
-		res.setProfileUrl(person.getAttribute("excludeProfileURL"));
-		res.setTitle(person.getAttribute("excludeTitle"));
-		res.setUserType(person.getAttribute("excludeUsrTyp"));
+		res.setProfileUrl(person.getAttribute("jansProfileURL"));
+		res.setTitle(person.getAttribute("jansTitle"));
+		res.setUserType(person.getAttribute("jansUsrTyp"));
 
 		res.setPreferredLanguage(person.getPreferredLanguage());
 		res.setLocale(person.getAttribute("locale"));
 		res.setTimezone(person.getTimezone());
 
-		res.setActive(Boolean.valueOf(person.getAttribute("excludeActive"))
+		res.setActive(Boolean.valueOf(person.getAttribute("jansActive"))
 				|| GluuBoolean.getByValue(person.getAttribute("jansStatus")).isBooleanValue());
 		res.setPassword(person.getUserPassword());
 
-		res.setEmails(getAttributeListValue(person, Email.class, "excludeEmail"));
+		res.setEmails(getAttributeListValue(person, Email.class, "jansEmail"));
         if (res.getEmails() == null) {
-            //There can be cases where excludeEmail is not synced with mail attribute....
+            //There can be cases where jansEmail is not synced with mail attribute....
             List<Email> emails = person.getAttributeList("mail").stream()
                     .map(m -> {
                         Email email = new Email();
@@ -346,10 +346,10 @@ public class Scim2UserService implements Serializable {
             res.setEmails(emails.size() == 0 ? null : emails);
         }
 
-        res.setPhoneNumbers(getAttributeListValue(person, PhoneNumber.class, "excludePhoneValue"));
-		res.setIms(getAttributeListValue(person, InstantMessagingAddress.class, "excludeImsValue"));
-		res.setPhotos(getAttributeListValue(person, Photo.class, "excludePhotos"));
-		res.setAddresses(getAttributeListValue(person, Address.class, "excludeAddres"));
+        res.setPhoneNumbers(getAttributeListValue(person, PhoneNumber.class, "jansPhoneValue"));
+		res.setIms(getAttributeListValue(person, InstantMessagingAddress.class, "jansImsValue"));
+		res.setPhotos(getAttributeListValue(person, Photo.class, "jansPhotos"));
+		res.setAddresses(getAttributeListValue(person, Address.class, "jansAddres"));
 
 		List<String> listOfGroups = person.getMemberOf();
 		if (listOfGroups != null && listOfGroups.size() > 0) {
@@ -379,9 +379,9 @@ public class Scim2UserService implements Serializable {
             }
 		}
 
-		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "excludeEntitlements"));
-		res.setRoles(getAttributeListValue(person, Role.class, "excludeRole"));
-		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "excludex509Certificate"));
+		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "jansEntitlements"));
+		res.setRoles(getAttributeListValue(person, Role.class, "jansRole"));
+		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "jansx509Certificate"));
 
 		res.setPairwiseIdentifiers(person.getPpid());
 
@@ -476,7 +476,7 @@ public class Scim2UserService implements Serializable {
 		assignComputedAttributesToPerson(gluuPerson);
 
 		String location = url + "/" + gluuPerson.getInum();
-		gluuPerson.setAttribute("excludeMetaLocation", location);
+		gluuPerson.setAttribute("jansMetaLocation", location);
 
 		log.info("Persisting user {}", userName);
 		userPersistenceHelper.addCustomObjectClass(gluuPerson);

@@ -76,11 +76,11 @@ public class Scim2GroupService implements Serializable {
 
 	private void transferAttributesToGroup(GroupResource res, GluuGroup group, String usersUrl) {
 
-		// externalId (so excludeExternalId) not part of LDAP schema
-		group.setAttribute("excludeMetaCreated", res.getMeta().getCreated());
-		group.setAttribute("excludeMetaLastMod", res.getMeta().getLastModified());
+		// externalId (so jansExternalId) not part of LDAP schema
+		group.setAttribute("jansMetaCreated", res.getMeta().getCreated());
+		group.setAttribute("jansMetaLastMod", res.getMeta().getLastModified());
 		// When creating group, location will be set again when having an inum
-		group.setAttribute("excludeMetaLocation", res.getMeta().getLocation());
+		group.setAttribute("jansMetaLocation", res.getMeta().getLocation());
 
 		group.setDisplayName(res.getDisplayName());
 		group.setStatus(GluuStatus.ACTIVE);
@@ -133,9 +133,9 @@ public class Scim2GroupService implements Serializable {
 
 		Meta meta = new Meta();
 		meta.setResourceType(ScimResourceUtil.getType(res.getClass()));
-		meta.setCreated(gluuGroup.getAttribute("excludeMetaCreated"));
-		meta.setLastModified(gluuGroup.getAttribute("excludeMetaLastMod"));
-		meta.setLocation(gluuGroup.getAttribute("excludeMetaLocation"));
+		meta.setCreated(gluuGroup.getAttribute("jansMetaCreated"));
+		meta.setLastModified(gluuGroup.getAttribute("jansMetaLastMod"));
+		meta.setLocation(gluuGroup.getAttribute("jansMetaLocation"));
 		if (meta.getLocation() == null)
 			meta.setLocation(groupsUrl + "/" + gluuGroup.getInum());
 
@@ -190,7 +190,7 @@ public class Scim2GroupService implements Serializable {
 		assignComputedAttributesToGroup(gluuGroup);
 
 		String location = groupsUrl + "/" + gluuGroup.getInum();
-		gluuGroup.setAttribute("excludeMetaLocation", location);
+		gluuGroup.setAttribute("jansMetaLocation", location);
 
 		log.info("Persisting group {}", groupName);
 
