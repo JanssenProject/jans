@@ -41,7 +41,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
         
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionService() .introspectToken("Bearer " + token, token);
+        //IntrospectionResponse introspectionResponse = openIdService.getIntrospectionService().introspectToken("Bearer " + token, token);
+        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer " + token, token);
+        System.out.println("\n\n introspectionResponse = "+introspectionResponse+"\n\n");
         
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
         	log.error("Token is Invalid.");

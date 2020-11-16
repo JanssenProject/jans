@@ -37,8 +37,11 @@ public class PatService {
     private EncryptionService encryptionService;
 
     @Inject
-    private UmaMetadata umaMetadata;
-
+    UmaService umaService;
+    
+    private UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
+    
+    //private UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
     private Token umaPat;
     private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
     private final ReentrantLock lock = new ReentrantLock();

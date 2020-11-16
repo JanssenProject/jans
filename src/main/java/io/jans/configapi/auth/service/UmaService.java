@@ -37,7 +37,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-public class UmaService extends Initializable implements Serializable {
+//public class UmaService extends Initializable implements Serializable {
+public class UmaService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,9 +49,20 @@ public class UmaService extends Initializable implements Serializable {
     ConfigurationService configurationService;
 
     private UmaMetadata umaMetadata;
+    private UmaMetadataService umaMetadataService;
     private UmaPermissionService umaPermissionService;
     private UmaRptIntrospectionService umaRptIntrospectionService;
-
+    
+   public UmaService() { 
+       //loadUmaConfigurationService();
+       getUmaMetadata();
+       
+       getUmaPermissionService();
+       
+       getUmaRptIntrospectionService();
+   }
+    
+    /*
     @Override
     protected void initInternal() {
         try {
@@ -64,13 +76,54 @@ public class UmaService extends Initializable implements Serializable {
         init();
         return this.umaMetadata;
     }
-
-    public void loadUmaConfigurationService() throws Exception {
-        this.umaMetadata = getUmaMetadataConfiguration();
+*/
+    public void loadUmaConfigurationService()  {
+        this.umaMetadataService = AuthClientFactory
+                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
+        this.umaMetadata = umaMetadataService.getMetadata();
         this.umaPermissionService = AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
         this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
+        
+        System.out.println("\n\n\n UmaService::loadUmaConfigurationService() - this.umaMetadata  = "+ this.umaMetadata);
+        System.out.println("UmaService::loadUmaConfigurationService() - this.umaPermissionService  = "+ this.umaPermissionService);
+        System.out.println("UmaService::loadUmaConfigurationService() - this.umaRptIntrospectionService  = "+ this.umaRptIntrospectionService);
+    }    
+
+
+    @Produces
+    @ApplicationScoped
+    @Named("umaMetadata")
+    public UmaMetadata getUmaMetadata() {
+        this.umaMetadata = this.getUmaMetadataService().getMetadata();
+        return this.umaMetadata;
     }
 
+    @Produces
+    @ApplicationScoped
+    @Named("umaMetadataService")
+    public UmaMetadataService getUmaMetadataService() {
+        this.umaMetadataService = AuthClientFactory
+                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
+        return this.umaMetadataService;
+    }
+
+    @Produces
+    @ApplicationScoped
+    @Named("umaPermissionService")
+    public UmaPermissionService getUmaPermissionService() {
+        this.umaPermissionService = AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
+        return this.umaPermissionService;
+    }
+
+    @Produces
+    @ApplicationScoped
+    @Named("umaRptIntrospectionService")
+    public UmaRptIntrospectionService getUmaRptIntrospectionService() {
+        this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
+        return this.umaRptIntrospectionService;
+    }
+
+    /*
     @Produces
     @ApplicationScoped
     @Named("umaMetadataConfiguration")
@@ -95,13 +148,13 @@ public class UmaService extends Initializable implements Serializable {
 
         return umaMetadata;
     }
+*/
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
-        log.debug("\n\n UmaService::validateRptToken() - patToken  = " + patToken + " , authorization = "
-                + authorization + " , resourceId = " + resourceId + " , scopeIds = " + scopeIds);
-        log.trace("Validating RPT, resourceId: {}, scopeIds: {}, authorization: {}", resourceId, scopeIds,
-                authorization);
+        System.out.println("\n\n UmaService::validateRptToken() - patToken  = "+patToken+" , authorization = "+authorization+" , resourceId = "+resourceId+" , scopeIds = "+scopeIds);
+        log.trace("Validating RPT, resourceId: {}, scopeIds: {}, authorization: {}", resourceId, scopeIds, authorization);
 
+        System.out.println("UmaService::validateRptToken() - this.getUmaPermissionService  = "+ this.getUmaPermissionService());
         if (patToken == null) {
             log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has
                                         // to be registered - DONE call done Permissions ticket
@@ -111,11 +164,11 @@ public class UmaService extends Initializable implements Serializable {
 
         if (StringHelper.isNotEmpty(authorization) && authorization.startsWith("Bearer ")) {
             String rptToken = authorization.substring(7);
-            log.debug("\n\n UmaService::validateRptToken() - rptToken  = " + rptToken);
-
+            System.out.println("\n\n UmaService::validateRptToken() - rptToken  = "+rptToken);
+            
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
             log.trace("RPT status response: {} ", rptStatusResponse);
-
+            
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 log.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
             } else {
@@ -150,15 +203,14 @@ public class UmaService extends Initializable implements Serializable {
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
         String authorization = "Bearer " + patToken.getAccessToken();
-        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization);
-
+        System.out.println("\n\n UmaService::getStatusResponse() - authorization  = "+authorization);
+        
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
         try {
-            log.debug("\n\n UmaService::getStatusResponse() - this.umaRptIntrospectionService  = "
-                    + this.umaRptIntrospectionService);
-            rptStatusResponse = this.umaRptIntrospectionService.requestRptStatus(authorization, rptToken, "");
-            log.debug("\n\n UmaService::getStatusResponse() - rptStatusResponse  = " + rptStatusResponse);
+            System.out.println("\n\n UmaService::getStatusResponse() - this.umaRptIntrospectionService  = "+this.umaRptIntrospectionService);
+            rptStatusResponse = this.getUmaRptIntrospectionService().requestRptStatus(authorization, rptToken, "");
+            System.out.println("\n\n UmaService::getStatusResponse() - rptStatusResponse  = "+rptStatusResponse);
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
@@ -200,9 +252,8 @@ public class UmaService extends Initializable implements Serializable {
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
-        log.debug("\n\n\n UmaService::registerResourcePermission() - this.umaPermissionService = "
-                + this.umaPermissionService + " , patToken = " + patToken);
-        PermissionTicket ticket = this.umaPermissionService.registerPermission("Bearer " + patToken.getAccessToken(),
+        System.out.println("\n\n\n UmaService::registerResourcePermission() FINAL - this.umaPermissionService = "+this.umaPermissionService+" , patToken = "+patToken+"\n\n\n\n");
+        PermissionTicket ticket = this.getUmaPermissionService().registerPermission("Bearer " + patToken.getAccessToken(),
                 UmaPermissionList.instance(permission));
         if (ticket == null) {
             return null;

@@ -7,12 +7,15 @@
 package io.jans.configapi.auth.client;
 
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
+
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
+import io.jans.configapi.util.ApiConstants;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
@@ -23,8 +26,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+
+import javax.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public class UmaClient {
+
+    @Inject
+    @RestClient
+    UMATokenService service;
 
     public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret,
             String... scopeArray) throws Exception {
@@ -71,8 +82,8 @@ public class UmaClient {
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
                 .register(engine);
         restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-        // restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        restClient.property("Content-Type", MediaType.APPLICATION_JSON);
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(tokenUrl);
 
@@ -89,27 +100,6 @@ public class UmaClient {
         }
         return null;
 
-        /*
-         * final TokenResponse tokenResponse = new TokenResponse(clientResponse);
-         * tokenResponse.injectDataFromJson();
-         */
-
-        /*
-         * 
-         * //return exec(); RestClientBuilder restClient =
-         * RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenPath).build()
-         * ); Client client = ClientBuilder.newBuilder().build();
-         * client.property("Authorization", "Basic " +
-         * tokenRequest.getEncodedCredentials()); client.property("Content-Type",
-         * MediaType.APPLICATION_FORM_URLENCODED);
-         * //client.setHttpMethod(HttpMethod.POST); //client.formParameter("scope",
-         * scope); WebTarget target = client.target(UriBuilder.fromPath(tokenPath));
-         * target.property("Authorization", "Basic " +
-         * tokenRequest.getEncodedCredentials()); //TokenResponse response =
-         * restClient.post(Entity.form(new MultivaluedHashMap<String,
-         * String>(tokenRequest.getParameters()))); //String entity =
-         * response.readEntity(String.class); return new TokenResponse();
-         */
     }
 
 }
