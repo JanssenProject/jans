@@ -17,7 +17,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.AAAA-2222,ou=people,o=jans
 birthdate: 20140210000000Z
 displayName: Test Aaaa 2222
-excludeAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
+jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
 excludeExternalId: 12000
 givenName: Aaaa 2222
 inum: XXXX.AAAA-2222
@@ -90,7 +90,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-2222,ou=people,o=jans
 birthdate: 20150214000000Z
 displayName: Test Bbbb 2222
-excludeAddres: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansAddres: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 excludeExternalId: 22000
 givenName: Bbbb 2222
 inum: XXXX.BBBB-2222
@@ -163,7 +163,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-2222,ou=people,o=jans
 birthdate: 20160119000000Z
 displayName: Test Cccc 2222
-excludeAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
+jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 excludeExternalId: 32000
 givenName: Cccc 2222
 inum: XXXX.CCCC-2222
