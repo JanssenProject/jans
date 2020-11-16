@@ -80,8 +80,8 @@ public class UserPersistenceHelper {
 
         Date updateDate = new Date();
         person.setUpdatedAt(updateDate);
-        if (person.getAttribute("excludeMetaLastMod") != null) {
-            person.setAttribute("excludeMetaLastMod",
+        if (person.getAttribute("jansMetaLastMod") != null) {
+            person.setAttribute("jansMetaLastMod",
                     ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
         }
         persistenceEntryManager.merge(person);
@@ -112,8 +112,8 @@ public class UserPersistenceHelper {
     }
 
     /**
-     * One-way sync from "excludeEmail" to "mail". Ultimately this is persisted so
-     * "mail" will be updated by values from "excludeEmail".
+     * One-way sync from "jansEmail" to "mail". Ultimately this is persisted so
+     * "mail" will be updated by values from "jansEmail".
      *
      * @param customPerson Represents the user object to be modified 
      * @return Modified user object
@@ -122,7 +122,7 @@ public class UserPersistenceHelper {
     public ScimCustomPerson syncEmailForward(ScimCustomPerson customPerson) throws Exception {
 
         log.info("syncing email ...");
-        List<String> excludeEmails = customPerson.getAttributeList("excludeEmail");
+        List<String> excludeEmails = customPerson.getAttributeList("jansEmail");
 
         if (!excludeEmails.isEmpty()) {
             ObjectMapper mapper = ServiceUtil.getObjectMapper();

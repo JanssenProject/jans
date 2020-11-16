@@ -62,13 +62,13 @@ public class GluuCustomFidoDevice extends Entry {
 	@AttributeName(name = "jansNickName")
 	private String nickname;
 
-	@AttributeName(name = "excludeMetaLastMod")
+	@AttributeName(name = "jansMetaLastMod")
 	private String metaLastModified;
 
-	@AttributeName(name = "excludeMetaLocation")
+	@AttributeName(name = "jansMetaLocation")
 	private String metaLocation;
 
-	@AttributeName(name = "excludeMetaVer")
+	@AttributeName(name = "jansMetaVer")
 	private String metaVersion;
 
 	public String getId() {

@@ -82,7 +82,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansCacheRefreshEnabled")
 	private boolean vdsCacheRefreshEnabled;
 
-	@AttributeName(name = "excludeCacheRefreshServerIpAddr")
+	@AttributeName(name = "jansCacheRefreshServerIpAddr")
 	private String cacheRefreshServerIpAddress;
 
 	@AttributeName(name = "jansCacheRefreshPollingInterval")
@@ -109,7 +109,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansSamlEnabled")
 	private boolean samlEnabled;
 
-	@AttributeName(name = "excludeEmail")
+	@AttributeName(name = "jansEmail")
 	private String contactEmail;
 
 	@AttributeName(name = "jansSmtpConf")

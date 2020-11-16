@@ -35,18 +35,18 @@ public class Name {
 
     @Attribute(description = "The honorific prefix(es) of the User, or  Title in most Western languages (for example, Ms. " +
             "given the full name Ms. Barbara J Jensen, III.).")
-    @StoreReference(ref = "excludehonorificPrefix")
+    @StoreReference(ref = "jansHonorificPrefix")
     private String honorificPrefix;
 
     @Attribute(description = "The honorific suffix(es) of the User, or  Suffix in most Western languages (for example, " +
             "III. given the full name Ms. Barbara J Jensen, III.)")
-    @StoreReference(ref = "excludehonorificSuffix")
+    @StoreReference(ref = "jansHonorificSuffix")
     private String honorificSuffix;
 
     @Attribute(description = "The full name, including all middle names, titles, and suffixes as appropriate, formatted " +
             "for display (for example, Ms. Barbara J Jensen, III.).")
     //This field is computed iff a value is not passed (ie is null)
-    @StoreReference(ref = "excludeNameFormatted")
+    @StoreReference(ref = "jansNameFormatted")
     private String formatted;
 
     /**

@@ -105,8 +105,8 @@ public class PersonService implements Serializable {
 		try {
 			Date updateDate = new Date();
 			person.setUpdatedAt(updateDate);
-			if (person.getAttribute("excludeMetaLastMod") != null) {
-				person.setAttribute("excludeMetaLastMod",
+			if (person.getAttribute("jansMetaLastMod") != null) {
+				person.setAttribute("jansMetaLastMod",
 						ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
 			}
 			persistenceEntryManager.merge(person);
