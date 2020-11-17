@@ -58,7 +58,7 @@ public class CustomScript extends BaseEntry {
     @AttributeName(name = "jansScrTyp")
     private CustomScriptType scriptType;
 
-    @AttributeName(name = "programmingLanguage")
+    @AttributeName(name = "jansProgLng")
     private ProgrammingLanguage programmingLanguage;
 
     @JsonObject

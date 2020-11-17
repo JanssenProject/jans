@@ -7,7 +7,7 @@
 package io.jans.util;
 
 /**
- * Constants loads the LDAP schema attribute names like uid, iname
+ * Constants loads the LDAP schema attribute names like uid
  *
  * @author Yuriy Movchan
  * @version 0.1, 10/14/2010
@@ -18,7 +18,6 @@ public class OxConstants {
 	public static final String OBJECT_CLASS = "objectClass";
 
 	public static final String INUM = "inum";
-	public static final String INAME = "iname";
 	public static final String DISPLAY_NAME = "displayName";
 	public static final String SCRIPT_TYPE = "jansScrTyp";
 	public static final String DESCRIPTION = "description";
