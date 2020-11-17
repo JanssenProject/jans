@@ -39,14 +39,15 @@ public class PatService {
     @Inject
     UmaService umaService;
     
-    private UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
+    //UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
     
-    //private UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
+    private UmaMetadata umaMetadata;
     private Token umaPat;
     private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
     private final ReentrantLock lock = new ReentrantLock();
 
     public Token getPatToken() throws Exception {
+        this.umaMetadata = this.umaService.getUmaMetadata();
         if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
             return this.umaPat;
         }
@@ -92,7 +93,9 @@ public class PatService {
             return;
         }
 
-        log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "+ getClientKeyId() + "\n\n");
+        //??todo: Puja -> To be reviewed by Yuriy Z -> Using ClientId and clientSecret based on discussion with @Arnab ?????
+        
+       // System.out.println("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "+ getClientKeyId() + "\n\n");
 
         // ??todo: Puja -> To be reviewed by Yuriy Z -> Will we have a folder on server
         // /opt/configapi/conf/configapi-jwks.keystore ?? Need help for this part...
