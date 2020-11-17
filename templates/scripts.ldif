@@ -19,7 +19,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=CB5B-3211,ou=scripts,o=jans
 description: Permission Dynamic Scope script
@@ -33,7 +33,7 @@ jansScrTyp: dynamic_scope
 objectClass: jansCustomScr
 objectClass: top
 jansEnabled: true
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=031C-4A65,ou=scripts,o=jans
 description: Sample Id Generator script
@@ -47,7 +47,7 @@ jansScrTyp: id_generator
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=031C-5621,ou=scripts,o=jans
 description: Sample Dynamic Scope script for org_name
@@ -61,7 +61,7 @@ jansScrTyp: dynamic_scope
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=031C-5622,ou=scripts,o=jans
 description: Sample Dynamic Scope script for work_phone
@@ -75,7 +75,7 @@ jansScrTyp: dynamic_scope
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=13D3-E7AD,ou=scripts,o=jans
 description: Sample Cache Refresh script
@@ -89,7 +89,7 @@ jansScrTyp: cache_refresh
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=24FD-B96E,ou=scripts,o=jans
 description: OTP Validation of passwords using Yubicloud authentication module
@@ -107,7 +107,7 @@ jansScrTyp: person_authentication
 objectClass: jansCustomScr
 objectClass: top
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-F995,ou=scripts,o=jans
 description: Sample UMA RPT Policy
@@ -122,7 +122,7 @@ jansScrTyp: uma_rpt_policy
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-F9A5,ou=scripts,o=jans
 description: Client authorization UMA RPT Policy for SCIM and Passport
@@ -137,7 +137,7 @@ jansScrTyp: uma_rpt_policy
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-F996,ou=scripts,o=jans
 description: Sample UMA Claims Gathering
@@ -151,7 +151,7 @@ jansScrTyp: uma_claims_gathering
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-AA90,ou=scripts,o=jans
 description: Introspection Sample Script
@@ -165,7 +165,7 @@ jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-BA90,ou=scripts,o=jans
 description: Introspection Custom Parameters Sample Script
@@ -179,7 +179,7 @@ jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-CA90,ou=scripts,o=jans
 description: Frontchannel logout Sample
@@ -193,7 +193,7 @@ jansScrTyp: end_session
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-AA91,ou=scripts,o=jans
 description: Resource Owner Password Credentials Example
@@ -207,7 +207,7 @@ jansScrTyp: resource_owner_password_credentials
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=2DAF-BA91,ou=scripts,o=jans
 description: Resource Owner Password Credentials Custom Parameters Example
@@ -221,7 +221,7 @@ jansScrTyp: resource_owner_password_credentials
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=4BBE-C6A8,ou=scripts,o=jans
 description: Basic (with user locking) authentication module
@@ -239,7 +239,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=5018-AF9C,ou=scripts,o=jans
 description: UAF authentication module
@@ -259,7 +259,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=5018-D4BF,ou=scripts,o=jans
 description: HOTP/TOPT authentication module
@@ -280,7 +280,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=5018-F9CF,ou=scripts,o=jans
 description: DUO authentication module
@@ -297,7 +297,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=522F-CDC5,ou=scripts,o=jans
 description: Sample Update User script
@@ -311,7 +311,7 @@ jansScrTyp: update_user
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=6EA0-8F0C,ou=scripts,o=jans
 description: Sample User Registration script
@@ -326,7 +326,7 @@ jansScrTyp: user_registration
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=6EA0-8F0D,ou=scripts,o=jans
 description: Sample Confirm User Registration  script
@@ -340,7 +340,7 @@ jansScrTyp: user_registration
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=8BAF-80D6,ou=scripts,o=jans
 description: Fido U2F authentication module
@@ -357,7 +357,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=8BAF-80D7,ou=scripts,o=jans
 description: Fido2 authentication module
@@ -373,7 +373,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=92F0-BF9E,ou=scripts,o=jans
 description: Super Janssen authentication module
@@ -396,7 +396,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=92F0-759E,ou=scripts,o=jans
 description: ThumbSignIn authentication module
@@ -414,7 +414,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=A51E-76DA,ou=scripts,o=jans
 description: Sample authentication module
@@ -429,7 +429,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=A910-56AB,ou=scripts,o=jans
 description: Sample script for SCIM events
@@ -445,7 +445,7 @@ jansScrTyp: scim
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=DAA9-B788,ou=scripts,o=jans
 description: Sample Client Registration script
@@ -460,7 +460,7 @@ jansScrTyp: client_registration
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=09A0-93D6,ou=scripts,o=jans
 description: Twilio SMS authentication module
@@ -478,7 +478,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=09A0-93D7,ou=scripts,o=jans
 description: SMPP SMS authentication module
@@ -499,7 +499,7 @@ jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=DAA9-B789,ou=scripts,o=jans
 description: Sample Application Session script
@@ -513,7 +513,7 @@ jansScrTyp: application_session
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=DAA9-BA60,ou=scripts,o=jans
 description: Consent Gathering script
@@ -527,7 +527,7 @@ jansScrTyp: consent_gathering
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=8AF7.D82A,ou=scripts,o=jans
 displayName: persistence_extension
@@ -540,7 +540,7 @@ jansScrTyp: persistence_extension
 objectClass: jansCustomScr
 objectClass: top
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=8AF7.D82B,ou=scripts,o=jans
 displayName: idp
@@ -553,7 +553,7 @@ jansScrTyp: idp
 objectClass: jansCustomScr
 objectClass: top
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
 description: Firebase notification sender
@@ -567,5 +567,5 @@ jansScrTyp: ciba_end_user_notification
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
-programmingLanguage: python
+jansProgLng: python
 
