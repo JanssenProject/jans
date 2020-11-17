@@ -32,27 +32,29 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public void validateAuthorization(String token, ResourceInfo resourceInfo, String method, String path)
+    public void processAuthorization(String token, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        
+
         if (StringUtils.isBlank(token)) {
-        	log.error("Token is blank !!!");
+            log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
-        
+
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        //IntrospectionResponse introspectionResponse = openIdService.getIntrospectionService().introspectToken("Bearer " + token, token);
+        // IntrospectionResponse introspectionResponse =
+        // openIdService.getIntrospectionService().introspectToken("Bearer " + token,
+        // token);
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer " + token, token);
-        System.out.println("\n\n introspectionResponse = "+introspectionResponse+"\n\n");
         
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
-        	log.error("Token is Invalid.");
+            log.error("Token is Invalid.");
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
+            log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
+                    + introspectionResponse.getScope());
             throw new WebApplicationException("Insufficient scopes. Required scope",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }

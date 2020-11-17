@@ -1,10 +1,12 @@
 package io.jans.configapi.auth.client;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import io.jans.as.model.uma.RptIntrospectionResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.SecurityContext;
 @Path("/token")
 @RegisterRestClient(configKey="uma-token")
 public interface UMATokenService {
+
     @POST
     @Path("/token")
     @Produces({MediaType.APPLICATION_JSON})
@@ -60,4 +63,3 @@ public interface UMATokenService {
             @Context HttpServletResponse response,
             @Context SecurityContext sec);
 }
-

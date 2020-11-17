@@ -37,17 +37,16 @@ public class PatService {
     private EncryptionService encryptionService;
 
     @Inject
-    UmaService umaService;
-    
-    //UmaMetadata umaMetadata = this.umaService.getUmaMetadata();
-    
-    private UmaMetadata umaMetadata;
+    UmaMetadata umaMetadata;
+    // UmaService umaService;
+
+    // private UmaMetadata umaMetadata;
     private Token umaPat;
     private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
     private final ReentrantLock lock = new ReentrantLock();
 
     public Token getPatToken() throws Exception {
-        this.umaMetadata = this.umaService.getUmaMetadata();
+        // this.umaMetadata = this.umaService.getUmaMetadata();
         if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
             return this.umaPat;
         }
@@ -93,35 +92,20 @@ public class PatService {
             return;
         }
 
-        //??todo: Puja -> To be reviewed by Yuriy Z -> Using ClientId and clientSecret based on discussion with @Arnab ?????
-        
-       // System.out.println("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "+ getClientKeyId() + "\n\n");
-
-        // ??todo: Puja -> To be reviewed by Yuriy Z -> Will we have a folder on server
-        // /opt/configapi/conf/configapi-jwks.keystore ?? Need help for this part...
-        /*String umaClientKeyStoreFile = getClientKeyStoreFile();
-        String umaClientKeyStorePassword = getClientKeyStorePassword();
-        if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
-            throw new Exception("UMA JKS keystore path or password is empty");
-        }
-
-       /* if (umaClientKeyStorePassword != null) {
-            try {
-                umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-            } catch (EncryptionException ex) {
-                log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-            }
-        }
-*/
         try {
 
-          /*  this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
-                    umaClientKeyStorePassword, getClientId(), getClientKeyId());
-                    */
-        	log.debug("\n\n umaPat = Calling requestPat with ApiClientId = "+this.configurationFactory.getApiClientId()+" , ApiClientPassword = "+this.configurationFactory.getApiClientPassword());
-        	this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), this.configurationFactory.getApiClientId(),this.configurationFactory.getApiClientPassword(), null);
-        	log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
+            // ??todo: Puja -> To be reviewed by Yuriy Z -> Using ClientId and clientSecret
+            // based on discussion with @duttarnab ?????
 
+            /*
+             * this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
+             * umaClientKeyStoreFile, umaClientKeyStorePassword, getClientId(),
+             * getClientKeyId());
+             */
+
+            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
+                    this.configurationFactory.getApiClientId(), this.configurationFactory.getApiClientPassword(), null);
+            log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
 
             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
