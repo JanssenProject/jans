@@ -6,32 +6,28 @@
 
 package io.jans.configapi.auth.client;
 
+
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.configapi.auth.client.OpenIdClientService;
-
-import javax.ws.rs.core.UriBuilder;
-
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
+import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.UriBuilder;
 
 public class AuthClientFactory {
+    
+    @Inject
+    @RestClient
+    OpenIdClientService openIdClientService;
 
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
@@ -51,17 +47,20 @@ public class AuthClientFactory {
     }
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
-            boolean followRedirects) {       
-       
-        Client client = ResteasyClientBuilder.newClient();
-        WebTarget target = client.target(url);
-        Form form = new Form();
-        form.param("token", token);
-        Entity<Form> entity = Entity.form(form);
-        Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", header).post(entity);
-        String value = response.readEntity(String.class);       
-        response.close();
-        return new IntrospectionResponse();
+            boolean followRedirects) {
+        
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
+                .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
+        restClient.property("Authorization", "Basic " + header);
+        
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .property("Content-Type", MediaType.APPLICATION_JSON).target(url);
+    
+        IntrospectionService proxy = target.proxy(IntrospectionService.class);
+
+        return proxy.introspectToken(token, token);
+
     }
 
     private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
