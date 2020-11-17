@@ -42,7 +42,7 @@ def autogenerate():
     jans_json = fp.read()
     fp.close()
     gen = SchemaGenerator(jans_json)
-    with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
+    with open(os.path.join(opendj_folder, '101-jans.ldif'), 'w') as f:
         f.write(gen.generate_ldif())
 
     fp = open(os.path.join(localdir, 'custom_schema.json'), 'r')
