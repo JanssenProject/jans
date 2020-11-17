@@ -8,9 +8,6 @@ jansIDPAuthn: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled
 jansManageIdentityPermission: true
 jansMaxLogSize: 200
 jansOrgProfileMgt: false
-jansPassportEnabled: false
-jansRadiusEnabled: false
-jansSamlEnabled: false
 jansScimEnabled: false
 jansWhitePagesEnabled: disabled
 jansAuthMode: simple_password_auth

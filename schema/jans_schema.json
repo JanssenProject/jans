@@ -12,28 +12,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Reference the dn of a person.",
-      "equality": "distinguishedNameMatch",
-      "names": [
-        "associatedPerson"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Blowfish crypted text",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "blowfishPass"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "ISO 3166-1 Alpha-2 Country Code",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -63,106 +41,6 @@
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Track which appliances are deployed at an organization.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansDeplAppliances"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Track rules for the federation in Jans SAML config. Deprecated  as multi-party federation management should move to Jagger.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "federationRules"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Organizational attribute to control whether new users can be added  via the exclude GUI.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAddPersonCap"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Track bandwidth requirements for the Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAdditionalBandwidth"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Track additional memory requirements for the Jans Server instance.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAdditionalMem"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO : use unclear",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAdditionalUsrs"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Persist the DNS server that should be used for the Jans Server instance.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansApplianceDnsServer"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Set the frequency of the health status update of the Jans Server",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansAppliancePollingInterval"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Used by the Jans Server to request an update",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansApplianceUpdReqList",
-        "jansApplianceUpdReuestList"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
     {
@@ -245,49 +123,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Track data received by the Jans Server",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansBandwidthRX"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Track data sent by the Jans Server",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansBandwidthTX"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use? Used to group attributes together.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansCategory"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship federation info",
-      "equality": "distinguishedNameMatch",
-      "names": [
-        "jansContainerFed"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "exclude custom welcome message",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -299,121 +134,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Monitor health of the instance LDAP server.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansDSstatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Specifies SAML trust relationship entity ID",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansEntityId"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "TODO - Stores URL of favicon",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansFaviconImage"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "exclude flag for the federation feature. Values enabled or disabled.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansFedHostingEnabled"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor free disk space on the Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansFreeDiskSpace"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor free memory on the Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansFreeMem"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor swap space on the Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansFreeSwap"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor HTTP availability of the Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansHTTPstatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor the number of groups. TODO - Remove?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansGrpCount"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Typ of Grp. Not used.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansGrpTyp"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Grp visibility. Not used.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansGrpVisibility"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -432,109 +156,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcAmount"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "generalizedTimeMatch",
-      "names": [
-        "jansInvcDate"
-      ],
-      "oid": "jansAttr",
-      "ordering": "generalizedTimeOrderingMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcLineItemName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcNo"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcNumber"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcProductNumber"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcQuantity"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansInvcStatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "IP address of the Jans Server instance",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansIpAddr"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Used in exclude to specify if a SAML Trust Relationship is a federation.  It could also be a website",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansIsFed"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -553,28 +178,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansLifeRay",
-        "TODO-remove"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Montior the average CPU load for a Jans Server instance.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansLoadAvg"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Logo used by exclude for default look and feel.",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -583,16 +186,6 @@
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "booleanMatch",
-      "names": [
-        "jansManageIdentityPermission"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
       "x_origin": "Jans created attribute"
     },
     {
@@ -625,16 +218,6 @@
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Maximum Log File Size",
-      "equality": "integerMatch",
-      "names": [
-        "jansMaxLogSize"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
       "x_origin": "Jans created attribute"
     },
     {
@@ -671,107 +254,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPaidUntil"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPaymentProcessorTimestamp"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitor the number of people in the LDAP severs for a Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPersonCount"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPrivate"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship attribute",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansProfileConf"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Jans Server flag to publish the IDP metadata via the web server",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPublishIdpMetadata"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "exclude reference for the dn of the released attribute",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansReleasedAttr"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansResizeInitiated"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - use unknown for Jans SAML config",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansRulesAccepted"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "SAML 1 uri of attribute",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -794,94 +276,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Metadata filter in SAML trust relationship",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLMetaDataFilter"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML trust relationship configuration",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLTrustEngine"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML trust relationship refresh time",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLmaxRefreshDelay"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship file location of metadata",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLspMetaDataFN"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship SP metadata type - file, URI, federation",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLspMetaDataSourceTyp"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship URI location of metadata",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSAMLspMetaDataURL"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Specifies if the person has the SLA manager role",
-      "equality": "booleanMatch",
-      "names": [
-        "jansSLAManager"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSPTR"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "exclude SCIM feature - enabled or disabled",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -890,50 +284,6 @@
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitors activity of Jans Server Shibboleth IDP",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansShibAssertionsIssued"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitors failed login attempts on Jans Server Shibboleth IDP",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansShibFailedAuth"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitors security events on Jans Server Shibboleth IDP",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansShibSecurityEvents"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitors login attempts on Jans Server Shibboleth IDP",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansShibSuccessfulAuths"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
     },
     {
@@ -1028,17 +378,6 @@
       "desc": "SAML Trust Relationship configuration",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansSpecificRelyingPartyConfig"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SAML Trust Relationship configuration",
-      "equality": "caseIgnoreMatch",
-      "names": [
         "jansSslExpiry"
       ],
       "oid": "jansAttr",
@@ -1058,39 +397,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Monitors how long the Jans Server instance has been running.",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSystemUptime"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Monitors total available RAM on Jans Server instance",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansTargetRAM"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Store location for upload of Favicon",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansTempFaviconImage"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "exclude login page configuration",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -1102,86 +408,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "exclude login page configuration",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansTrustContact"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansTrustDeconstruction"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Jans instance URL",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansUrl"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansValidationLog"
-      ],
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansValidationStatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansWhitePagesEnabled"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Allow Publication",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansWhitePagesListed"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "iname"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -1200,62 +430,9 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "XRI i-number sans punctuation",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "inumFN"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "OX literalValue",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "literalBinaryValue"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "OX literalValue",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "literalValue"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "equality": "distinguishedNameMatch",
       "names": [
         "memberOf"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "TODO - in use?",
-      "equality": "booleanMatch",
-      "names": [
-        "nonProfit"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "OX organizationalOwner",
-      "equality": "distinguishedNameMatch",
-      "names": [
-        "organizationalOwner"
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
@@ -2051,16 +1228,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "excludeAuthnMode"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "jans configuration code",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -2508,7 +1675,7 @@
     {
       "equality": "booleanMatch",
       "names": [
-        "jansSCIMCustomAttr"
+        "jansScimCustomAttr"
       ],
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
@@ -2543,7 +1710,7 @@
         "jansScrDn"
       ], 
       "multivalued": true, 
-      "oid": "oxAttribute", 
+      "oid": "jansAttr", 
       "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
       "x_origin": "Gluu created attribute"
     }, 
@@ -2846,16 +2013,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Is password reset mechanics allowed",
-      "equality": "booleanMatch",
-      "names": [
-        "passwordResetAllowed"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "PersistentId",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -2878,42 +2035,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Primary Key Attr Name",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "primaryKeyAttrName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Primary Key Value",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "primaryKeyValue"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "programming language",
       "equality": "caseIgnoreMatch",
       "names": [
-        "programmingLanguage"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "prostoresTimestamp"
+        "jansProgLng"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -2936,60 +2061,6 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "role"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SCIM Authz mode",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "scimAuthMode"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "scim Grp",
-      "equality": "distinguishedNameMatch",
-      "names": [
-        "jansScimGrp"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.12",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "scim status",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "scimStatus"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Secondary Key Attr Name",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "secondaryKeyAttrName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Secondary Key Value",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "secondaryKeyValue"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3022,28 +2093,6 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "jansSoftVer"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Tertiary Key Attr Name",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "tertiaryKeyAttrName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Tertiary Key Value",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "tertiaryKeyValue"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3462,61 +2511,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "exclude Passport Strategy Conf",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansPassportConf"
-      ],
-      "json": true,
-      "multivalued": true,
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "booleanMatch",
-      "names": [
-        "jansPassportEnabled"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "booleanMatch",
-      "names": [
-        "jansRadiusEnabled"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "equality": "booleanMatch",
-      "names": [
-        "jansSamlEnabled"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "This data has information about attribute Validation",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansValidation"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "This data has information about TR EntityTyp",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansEntityTyp"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3617,17 +2615,6 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "attr"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "Attrs",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "userRandomKey"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3967,65 +2954,10 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "idpLogoPath",
-      "equality": "caseIgnoreMatch",
-      "substr": "caseIgnoreSubstringsMatch",
-      "names": [
-        "idpLogoPath"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "idpFaviconPath",
-      "equality": "caseIgnoreMatch",
-      "substr": "caseIgnoreSubstringsMatch",
-      "names": [
-        "idpFaviconPath"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "parent",
-      "equality": "caseIgnoreMatch",
-      "substr": "caseIgnoreSubstringsMatch",
-      "names": [
-        "parent"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "classRef",
-      "equality": "caseIgnoreMatch",
-      "substr": "caseIgnoreSubstringsMatch",
-      "names": [
-        "classRef"
-      ],
-      "oid": "jansAttr",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Trust SMTP server",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansSmtpServerTrust"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "pattern",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "pattern"
       ],
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -4152,8 +3084,6 @@
         "jansManagedOrganizations",
         "jansOptOuts",
         "jansStatus",
-        "jansWhitePagesListed",
-        "iname",
         "inum",
         "mail",
         "jansSLAManager",
@@ -4218,7 +3148,6 @@
         "jansIMAPData",
         "jansPPID",
         "jansGuid",
-        "userRandomKey",
         "jansPreferredMethod",
         "userCertificate",
         "jansOTPDevices",
@@ -4249,7 +3178,6 @@
         "jansGrpTyp",
         "jansGrpVisibility",
         "jansStatus",
-        "iname",
         "inum",
         "member",
         "o",
@@ -4277,51 +3205,30 @@
       "may": [
         "c",
         "county",
-        "jansDeplAppliances",
         "description",
         "displayName",
-        "jansAddPersonCap",
-        "jansAdditionalUsrs",
-        "jansApplianceUpdReqList",
         "jansCustomMessage",
         "jansFaviconImage",
-        "jansFedHostingEnabled",
-        "jansInvcNo",
         "jansLogoImage",
-        "jansManageIdentityPermission",
         "jansManager",
         "jansManagerGrp",
         "jansOrgShortName",
-        "jansPaidUntil",
-        "jansPaymentProcessorTimestamp",
-        "jansStatus",
-        "jansTempFaviconImage",
         "jansThemeColor",
-        "jansWhitePagesEnabled",
-        "iname",
         "inum",
         "l",
         "mail",
         "memberOf",
-        "nonProfit",
         "o",
         "jansCreationTimestamp",
         "jansRegistrationConf",
         "postalCode",
-        "prostoresTimestamp",
-        "scimAuthMode",
-        "jansScimGrp",
-        "scimStatus",
         "st",
         "street",
         "telephoneNumber",
         "title",
         "uid",
-        "userPassword",
         "jansLogoPath",
-        "jansFaviconPath",
-        "idpLogoPath",
-        "idpFaviconPath"
+        "jansFaviconPath"
       ],
       "must": [
         "objectclass"
@@ -4338,39 +3245,16 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "blowfishPass",
         "c",
         "ou",
         "description",
         "displayName",
-        "jansAdditionalBandwidth",
-        "jansAdditionalMem",
-        "jansApplianceDnsServer",
-        "jansAppliancePollingInterval",
-        "jansBandwidthRX",
-        "jansBandwidthTX",
-        "jansDSstatus",
-        "jansFedHostingEnabled",
-        "jansHTTPstatus",
         "jansHostname",
-        "jansInvcNo",
         "jansLastUpd",
-        "jansLifeRay",
         "jansManageIdentityPermission",
         "jansManager",
-        "jansMaxLogSize",
         "jansOrgProfileMgt",
-        "jansPaidUntil",
-        "jansPaymentProcessorTimestamp",
-        "jansPrivate",
-        "jansPublishIdpMetadata",
-        "jansResizeInitiated",
-        "jansSPTR",
         "jansScimEnabled",
-        "jansShibAssertionsIssued",
-        "jansShibFailedAuth",
-        "jansShibSecurityEvents",
-        "jansShibSuccessfulAuths",
         "jansEmail",
         "jansSmtpFromEmailAddr",
         "jansSmtpFromName",
@@ -4384,38 +3268,27 @@
         "jansStatus",
         "jansTargetRAM",
         "jansUrl",
-        "jansWhitePagesEnabled",
-        "iname",
         "inum",
-        "inumFN",
         "o",
         "jansAuthMode",
-        "excludeAuthnMode",
         "jansIDPAuthn",
         "jansLogViewerConfig",
         "jansLogConfigLocation",
         "jansSmtpConf",
         "jansCacheConf",
         "jansDocStoreConf",
-        "passwordResetAllowed",
         "jansSoftVer",
         "userPassword",
         "jansCacheRefreshServerIpAddr",
-        "jansPassportEnabled",
-        "jansRadiusEnabled",
-        "jansSamlEnabled",
         "jansSmtpServerTrust",
-        "ou",
         "jansConfDyn",
         "jansConfErrors",
         "jansConfStatic",
         "jansConfWebKeys",
         "jansRevision",
         "jansWebKeysSettings",
-        "ou",
         "jansConfApp",
         "jansRevision",
-        "ou",
         "jansConfDyn",
         "jansConfStatic",
         "jansRevision"
@@ -4445,15 +3318,13 @@
         "jansClaimName",
         "jansAttrUsgTyp",
         "jansAttrViewTyp",
-        "jansCategory",
         "jansSAML1URI",
         "jansSAML2URI",
         "jansStatus",
-        "iname",
         "inum",
         "jansMultivaluedAttr",
         "jansNameIdTyp",
-        "jansSCIMCustomAttr",
+        "jansScimCustomAttr",
         "jansSourceAttr",
         "seeAlso",
         "urn",
@@ -4466,97 +3337,6 @@
       ],
       "names": [
         "jansAttr"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "description",
-        "displayName",
-        "federationRules",
-        "jansContainerFed",
-        "jansEntityId",
-        "jansIsFed",
-        "jansProfileConf",
-        "jansReleasedAttr",
-        "jansRulesAccepted",
-        "jansSAMLMetaDataFilter",
-        "jansSAMLTrustEngine",
-        "jansSAMLmaxRefreshDelay",
-        "jansSAMLspMetaDataFN",
-        "jansSAMLspMetaDataSourceTyp",
-        "jansSAMLspMetaDataURL",
-        "jansSpecificRelyingPartyConfig",
-        "jansStatus",
-        "jansTrustContact",
-        "jansTrustDeconstruction",
-        "jansValidationLog",
-        "jansValidationStatus",
-        "iname",
-        "inum",
-        "o",
-        "jansPostLogoutRedirectURI",
-        "url",
-        "jansEntityTyp"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansSAMLconfig"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "jansStatus",
-        "inum",
-        "primaryKeyAttrName",
-        "primaryKeyValue",
-        "secondaryKeyAttrName",
-        "secondaryKeyValue",
-        "tertiaryKeyAttrName",
-        "tertiaryKeyValue"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansInumMap"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "jansInvcAmount",
-        "jansInvcDate",
-        "jansInvcLineItemName",
-        "jansInvcNumber",
-        "jansInvcProductNumber",
-        "jansInvcQuantity",
-        "jansInvcStatus",
-        "inum"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansInvc"
       ],
       "oid": "jansObjClass",
       "sup": [
@@ -4587,7 +3367,6 @@
       "kind": "STRUCTURAL",
       "may": [
         "displayName",
-        "iname",
         "inum"
       ],
       "must": [
@@ -4605,7 +3384,6 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "associatedPerson",
         "displayName",
         "description",
         "inum",
@@ -4953,7 +3731,7 @@
         "description",
         "jansScr",
         "jansScrTyp",
-        "programmingLanguage",
+        "jansProgLng",
         "jansModuleProperty",
         "jansConfProperty",
         "jansLevel",
@@ -5105,46 +3883,6 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "ou",
-        "jansPassportConf",
-        "jansStatus"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansPassportConf"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "ou",
-        "uniqueIdentifier",
-        "inum",
-        "jansConfApp",
-        "jansRevision"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansShibbolethCASProtocolConf"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
         "clnId",
         "iat",
         "exp",
@@ -5229,50 +3967,6 @@
       ],
       "names": [
         "jansFido2RegistrationEntry"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "parent",
-        "classRef",
-        "inum"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansSamlAcr"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "jansFreeDiskSpace",
-        "jansFreeMem",
-        "jansFreeSwap",
-        "jansGrpCount",
-        "jansIpAddr",
-        "jansLoadAvg",
-        "jansPersonCount",
-        "jansSystemUptime",
-        "uniqueIdentifier"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansOxtrustStat"
       ],
       "oid": "jansObjClass",
       "sup": [

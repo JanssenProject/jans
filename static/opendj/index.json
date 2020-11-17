@@ -28,13 +28,6 @@
     },
 
     {
-        "attribute": "iname",
-        "type": "string",
-        "index": ["equality"],
-        "backend": ["userRoot", "site"]
-    },
-
-    {
         "attribute": "uniqueIdentifier",
         "type": "string",
         "index": ["equality"],
