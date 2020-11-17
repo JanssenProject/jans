@@ -42,7 +42,7 @@ Linux:
 sh client-api-start.sh
 ```
 
-After `jans-client-api` server is started you will able test status using `health-check` url: https://localhost:8443/health-check.
+After `jans-client-api` server is started, status can be checked using `health-check` url: https://localhost:8443/health-check.
 
 ## Api Description
 
