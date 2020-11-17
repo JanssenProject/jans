@@ -21,7 +21,7 @@
   "imgLocation": "",
   "consentGatheringScriptBackwardCompatibility": false,
   "personCustomObjectClassList": [
-    "gluuCustomPerson",
-    "gluuPerson"
+    "jansCustomPerson",
+    "jansPerson"
   ]
 }
