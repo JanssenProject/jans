@@ -9,7 +9,7 @@ package io.jans.scim.util;
 import io.jans.util.OxConstants;
 
 /**
- * Constants loads the LDAP schema attribute names like uid, iname
+ * Constants loads the LDAP schema attribute names like uid
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
@@ -24,7 +24,6 @@ public final class OxTrustConstants extends OxConstants {
 	public static final String objectClassInumMap = "gluuInumMap";
 
 	public static final String inumDelimiter = "!";
-	public static final String inameDelimiter = "*";
 
 	public static final String PERSON_INUM = "personInum";
 
@@ -150,9 +149,6 @@ public final class OxTrustConstants extends OxConstants {
 	public static final String INUM_PERSON_OBJECTTYPE = "0000";
 	public static final String INUM_GROUP_OBJECTTYPE = "0003";
 	public static final String INUM_SECTOR_IDENTIFIER_OBJECTTYPE = "0012";
-	public static final String INAME_PERSON_OBJECTTYPE = "person";
-	public static final String INAME_OXPLUS = "oxplus";
-	public static final String INAME_CLASS_OBJECTTYPE = "class";
 
 	public static final String SELF_LINK_CONTRACT = "$self";
 	public static final String ADMIN_LINK_CONTRACT = "*linkcontract*manager";

@@ -58,18 +58,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "userPassword", ignoreDuringRead = true)
 	private String userPassword;
 
-	@AttributeName(name = "jansHTTPstatus", updateOnly = true)
-	private String gluuHttpStatus;
-
-	@AttributeName(name = "jansDSstatus", updateOnly = true)
-	private String gluuDSStatus;
-
-	@AttributeName(name = "jansStatus", updateOnly = true)
-	private String gluuVDSStatus;
-
-	@AttributeName(name = "jansSPTR")
-	private String sptr;
-
 	@AttributeName(name = "jansSslExpiry", updateOnly = true)
 	private String sslExpiry;
 
@@ -79,35 +67,8 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansManageIdentityPermission")
 	private boolean manageIdentityPermission;
 
-	@AttributeName(name = "jansCacheRefreshEnabled")
-	private boolean vdsCacheRefreshEnabled;
-
-	@AttributeName(name = "jansCacheRefreshServerIpAddr")
-	private String cacheRefreshServerIpAddress;
-
-	@AttributeName(name = "jansCacheRefreshPollingInterval")
-	private String vdsCacheRefreshPollingInterval;
-
-	@AttributeName(name = "jansCacheRefreshLastUpd")
-	private Date vdsCacheRefreshLastUpdate;
-
-	@AttributeName(name = "jansCacheRefreshLastUpdCount")
-	private String vdsCacheRefreshLastUpdateCount;
-
-	@AttributeName(name = "jansCacheRefreshProblemCount")
-	private String vdsCacheRefreshProblemCount;
-
 	@AttributeName(name = "jansScimEnabled")
 	private boolean scimEnabled;
-
-	@AttributeName(name = "jansPassportEnabled")
-	private boolean passportEnabled;
-
-	@AttributeName(name = "jansRadiusEnabled")
-	private boolean radiusEnabled;
-
-	@AttributeName(name = "jansSamlEnabled")
-	private boolean samlEnabled;
 
 	@AttributeName(name = "jansEmail")
 	private String contactEmail;
@@ -119,17 +80,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "gluuConfigurationDnsServer")
 	private String configurationDnsServer;
 
-	@AttributeName(name = "jansMaxLogSize")
-	private int maxLogSize;
-
 	@AttributeName(name = "jansenticationMode")
 	private String authenticationMode;
 
 	@AttributeName(name = "jansLogConfigLocation")
 	private String logConfigLocation;
-
-	@AttributeName(name = "passwordResetAllowed")
-	private boolean passwordResetAllowed;
 
 	@AttributeName(name = "jansCacheConf")
 	@JsonObject
@@ -166,14 +121,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.authenticationMode = authenticationMode;
 	}
 
-	public String getCacheRefreshServerIpAddress() {
-		return cacheRefreshServerIpAddress;
-	}
-
-	public void setCacheRefreshServerIpAddress(String cacheRefreshServerIpAddress) {
-		this.cacheRefreshServerIpAddress = cacheRefreshServerIpAddress;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -188,38 +135,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
-	}
-
-	public String getGluuDSStatus() {
-		return gluuDSStatus;
-	}
-
-	public void setGluuDSStatus(String gluuDSStatus) {
-		this.gluuDSStatus = gluuDSStatus;
-	}
-
-	public String getGluuHttpStatus() {
-		return gluuHttpStatus;
-	}
-
-	public void setGluuHttpStatus(String gluuHttpStatus) {
-		this.gluuHttpStatus = gluuHttpStatus;
-	}
-
-	public String getGluuVDSStatus() {
-		return gluuVDSStatus;
-	}
-
-	public void setGluuVDSStatus(String gluuVDSStatus) {
-		this.gluuVDSStatus = gluuVDSStatus;
-	}
-
-	public String getSPTR() {
-		return sptr;
-	}
-
-	public void setSPTR(String sptr) {
-		this.sptr = sptr;
 	}
 
 	public String getHostname() {
@@ -246,28 +161,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.manageIdentityPermission = manageIdentityPermission;
 	}
 
-	public int getMaxLogSize() {
-		return maxLogSize;
-	}
-
-	public void setMaxLogSize(int maxLogSize) {
-		this.maxLogSize = maxLogSize;
-	}
-
 	public String getLogConfigLocation() {
 		return logConfigLocation;
 	}
 
 	public void setLogConfigLocation(String logConfigLocation) {
 		this.logConfigLocation = logConfigLocation;
-	}
-
-	public boolean isPasswordResetAllowed() {
-		return passwordResetAllowed;
-	}
-
-	public void setPasswordResetAllowed(boolean passwordResetAllowed) {
-		this.passwordResetAllowed = passwordResetAllowed;
 	}
 
 	public String getPollingInterval() {
@@ -329,70 +228,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.userPassword = userPassword;
 	}
 
-	public boolean isVdsCacheRefreshEnabled() {
-		return vdsCacheRefreshEnabled;
-	}
-
-	public void setVdsCacheRefreshEnabled(boolean vdsCacheRefreshEnabled) {
-		this.vdsCacheRefreshEnabled = vdsCacheRefreshEnabled;
-	}
-
-	public Date getVdsCacheRefreshLastUpdate() {
-		return vdsCacheRefreshLastUpdate;
-	}
-
-	public void setVdsCacheRefreshLastUpdate(Date vdsCacheRefreshLastUpdate) {
-		this.vdsCacheRefreshLastUpdate = vdsCacheRefreshLastUpdate;
-	}
-
-	public String getVdsCacheRefreshLastUpdateCount() {
-		return vdsCacheRefreshLastUpdateCount;
-	}
-
-	public void setVdsCacheRefreshLastUpdateCount(String vdsCacheRefreshLastUpdateCount) {
-		this.vdsCacheRefreshLastUpdateCount = vdsCacheRefreshLastUpdateCount;
-	}
-
-	public String getVdsCacheRefreshPollingInterval() {
-		return vdsCacheRefreshPollingInterval;
-	}
-
-	public void setVdsCacheRefreshPollingInterval(String vdsCacheRefreshPollingInterval) {
-		this.vdsCacheRefreshPollingInterval = vdsCacheRefreshPollingInterval;
-	}
-
-	public String getVdsCacheRefreshProblemCount() {
-		return vdsCacheRefreshProblemCount;
-	}
-
-	public void setVdsCacheRefreshProblemCount(String vdsCacheRefreshProblemCount) {
-		this.vdsCacheRefreshProblemCount = vdsCacheRefreshProblemCount;
-	}
-
-	public boolean isPassportEnabled() {
-		return passportEnabled;
-	}
-
-	public void setPassportEnabled(boolean passportEnabled) {
-		this.passportEnabled = passportEnabled;
-	}
-
-	public boolean isRadiusEnabled() {
-		return radiusEnabled;
-	}
-
-	public void setRadiusEnabled(boolean radiusEnabled) {
-		this.radiusEnabled = radiusEnabled;
-	}
-
-	public boolean isSamlEnabled() {
-		return this.samlEnabled;
-	}
-
-	public void setSamlEnabled(boolean samlEnabled) {
-		this.samlEnabled = samlEnabled;
-	}
-
 	public CacheConfiguration getCacheConfiguration() {
 		return cacheConfiguration;
 	}
@@ -417,24 +252,4 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.customObjectClasses = customObjectClasses;
 	}
 
-	@Override
-	public String toString() {
-		return "GluuConfiguration [description=" + description + ", displayName=" + displayName + ", hostname="
-				+ hostname + ", lastUpdate=" + lastUpdate + ", pollingInterval=" + pollingInterval + ", status="
-				+ status + ", userPassword=" + userPassword + ", gluuHttpStatus=" + gluuHttpStatus + ", gluuDSStatus="
-				+ gluuDSStatus + ", gluuVDSStatus=" + gluuVDSStatus + ", sptr=" + sptr + ", sslExpiry="
-				+ sslExpiry + ", profileManagment=" + profileManagment + ", manageIdentityPermission="
-				+ manageIdentityPermission + ", vdsCacheRefreshEnabled=" + vdsCacheRefreshEnabled
-				+ ", cacheRefreshServerIpAddress=" + cacheRefreshServerIpAddress + ", vdsCacheRefreshPollingInterval="
-				+ vdsCacheRefreshPollingInterval + ", vdsCacheRefreshLastUpdate=" + vdsCacheRefreshLastUpdate
-				+ ", vdsCacheRefreshLastUpdateCount=" + vdsCacheRefreshLastUpdateCount
-				+ ", vdsCacheRefreshProblemCount=" + vdsCacheRefreshProblemCount + ", scimEnabled=" + scimEnabled
-				+ ", passportEnabled=" + passportEnabled + ", radiusEnabled=" + radiusEnabled + ", samlEnabled="
-				+ samlEnabled + ", contactEmail=" + contactEmail + ", smtpConfiguration=" + smtpConfiguration
-				+ ", configurationDnsServer=" + configurationDnsServer + ", maxLogSize=" + maxLogSize
-				+ ", authenticationMode=" + authenticationMode
-				+ ", jsLogConfigLocation=" + logConfigLocation + ", passwordResetAllowed="
-				+ passwordResetAllowed + ", cacheConfiguration=" + cacheConfiguration + ", documentStoreConfiguration="
-				+ documentStoreConfiguration + ", customObjectClasses=" + Arrays.toString(customObjectClasses) + "]";
-	}
 }
