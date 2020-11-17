@@ -86,7 +86,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         registerRequest.setSubjectType(io.jans.as.model.common.SubjectType.PAIRWISE);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setClaims(Arrays.asList(
-                "iname",
                 "o"));
 
         List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
@@ -432,7 +431,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
                 SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("o", ClaimValue.createEssential(true)));
 
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -511,7 +509,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(JwtClaimName.EMAIL));
 
             // Custom attributes
-            assertTrue(jsonObj.has("iname"));
             assertTrue(jsonObj.has("o"));
         } catch (JSONException e) {
             e.printStackTrace();

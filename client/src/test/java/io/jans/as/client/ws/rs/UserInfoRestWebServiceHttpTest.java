@@ -483,7 +483,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setClaims(Arrays.asList(
-                "iname",
                 "o"));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -515,7 +514,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
-        jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
         //jwtAuthorizationRequest.addUserInfoClaim(new Claim("gluuStatus", ClaimValue.createEssential(true)));
         //jwtAuthorizationRequest.addUserInfoClaim(new Claim("gluuWhitePagesListed", ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("o", ClaimValue.createEssential(true)));
@@ -552,7 +550,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
 
         // Custom Claims
-        assertNotNull(userInfoResponse.getClaim("iname"), "Unexpected result: iname not found");
         //assertNotNull(response2.getClaim("gluuStatus"), "Unexpected result: gluuStatus not found");
         //assertNotNull(response2.getClaim("gluuWhitePagesListed"), "Unexpected result: gluuWhitePagesListed not found");
         assertNotNull(userInfoResponse.getClaim("o"), "Unexpected result: organization not found");
