@@ -12,8 +12,8 @@
    "metricReporterKeepDataDays":15,
    "metricReporterEnabled":true,
    "personCustomObjectClassList":[
-      "gluuCustomPerson",
-      "gluuPerson"
+      "jansCustomPerson",
+      "jansPerson"
    ],
    "fido2Configuration":{
       "authenticatorCertsFolder":"/etc/gluu/conf/fido2/authenticator_cert",
