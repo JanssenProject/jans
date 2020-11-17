@@ -12,8 +12,8 @@
   "metricReporterKeepDataDays": 15,
   "loggingLevel": "INFO",
   "personCustomObjectClassList": [
-    "gluuCustomPerson",
-    "gluuPerson"
+    "jansCustomPerson",
+    "jansPerson"
   ],
   "fido2Configuration": {
     "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
