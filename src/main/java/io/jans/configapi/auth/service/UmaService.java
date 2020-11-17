@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.LinkedList;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -37,7 +38,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-//public class UmaService extends Initializable implements Serializable {
+@Named("umaService")
 public class UmaService implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -48,25 +49,31 @@ public class UmaService implements Serializable {
     @Inject
     ConfigurationService configurationService;
 
-    private UmaMetadata umaMetadata;
-    private UmaMetadataService umaMetadataService;
-    private UmaPermissionService umaPermissionService;
-    private UmaRptIntrospectionService umaRptIntrospectionService;
+    UmaMetadata umaMetadata;
+    UmaMetadataService umaMetadataService;
+    UmaPermissionService umaPermissionService;
+    UmaRptIntrospectionService umaRptIntrospectionService;
     
-   public UmaService() { 
-       //loadUmaConfigurationService();
-       getUmaMetadata();
-       
-       getUmaPermissionService();
-       
-       getUmaRptIntrospectionService();
-   }
+    /*
+     * public UmaService() { init(); System.out.
+     * println("\n\n\n ******************* UmaService::UmaService() *******************  - Entry \n\n\n"
+     * ); System.out.
+     * println("\n\n\n UmaService::UmaService() - configurationService = "
+     * +configurationService+" \n\n\n");
+     * 
+     * //getUmaMetadata();
+     * 
+     * //getUmaPermissionService();
+     * 
+     * //getUmaRptIntrospectionService();
+     * System.out.println("\n\n\n UmaService::UmaService() - Exit \n\n\n"); }
+     */
     
     /*
     @Override
     protected void initInternal() {
         try {
-            loadUmaConfigurationService();
+            init();
         } catch (Exception ex) {
             throw new ConfigurationException("Failed to load oxAuth UMA configuration", ex);
         }
@@ -77,49 +84,73 @@ public class UmaService implements Serializable {
         return this.umaMetadata;
     }
 */
-    public void loadUmaConfigurationService()  {
-        this.umaMetadataService = AuthClientFactory
-                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
+   @PostConstruct
+    public void init()  {
+       System.out.println("\n\n\n UmaService::init() - configurationService = "+configurationService+" \n\n\n");
+        this.umaMetadataService = AuthClientFactory.getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
         this.umaMetadata = umaMetadataService.getMetadata();
         this.umaPermissionService = AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
         this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
         
-        System.out.println("\n\n\n UmaService::loadUmaConfigurationService() - this.umaMetadata  = "+ this.umaMetadata);
-        System.out.println("UmaService::loadUmaConfigurationService() - this.umaPermissionService  = "+ this.umaPermissionService);
-        System.out.println("UmaService::loadUmaConfigurationService() - this.umaRptIntrospectionService  = "+ this.umaRptIntrospectionService);
-    }    
+        System.out.println("\n\n\n UmaService::init() - this.umaMetadataService  = "+ this.umaMetadataService);
+        System.out.println("\n\n\n UmaService::init() - this.umaMetadata  = "+ this.umaMetadata);
+        System.out.println("UmaService::init() - this.umaPermissionService  = "+ this.umaPermissionService);
+        System.out.println("UmaService::init() - this.umaRptIntrospectionService  = "+ this.umaRptIntrospectionService);
+    }   
+   
+   /*
+    * @Produces
+    * 
+    * @ApplicationScoped
+    * 
+    * @Named("umaMetadataService")
+    */
+   public UmaMetadataService getUmaMetadataService() {
+       //System.out.println("\n\n\n UmaService::getUmaMetadataService() - Entry ");
+       //this.umaMetadataService = AuthClientFactory
+       //        .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
+      System.out.println("UmaService::getUmaMetadataService() - this.umaMetadataService = "+this.umaMetadataService);
+       return this.umaMetadataService;
+   }
 
 
     @Produces
     @ApplicationScoped
     @Named("umaMetadata")
     public UmaMetadata getUmaMetadata() {
-        this.umaMetadata = this.getUmaMetadataService().getMetadata();
+        //System.out.println("\n\n\n UmaService::getUmaMetadata() - Entry ");
+        //this.umaMetadata = this.getUmaMetadataService().getMetadata();
+        System.out.println("\n\n\n UmaService::getUmaMetadata() - this.umaMetadata = "+this.umaMetadata+"\n\n\n");
         return this.umaMetadata;
     }
+   
 
-    @Produces
-    @ApplicationScoped
-    @Named("umaMetadataService")
-    public UmaMetadataService getUmaMetadataService() {
-        this.umaMetadataService = AuthClientFactory
-                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
-        return this.umaMetadataService;
-    }
-
-    @Produces
-    @ApplicationScoped
-    @Named("umaPermissionService")
+    /*
+     * @Produces
+     * 
+     * @ApplicationScoped
+     * 
+     * @Named("umaPermissionService")
+     */
     public UmaPermissionService getUmaPermissionService() {
-        this.umaPermissionService = AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
+        // System.out.println("\n\n\n UmaService::getUmaPermissionService() - Entry ");
+        // this.umaPermissionService =
+        // AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
+        System.out.println("\n\n\n UmaService::getUmaPermissionService() - this.umaPermissionService = "+ this.umaPermissionService);
         return this.umaPermissionService;
     }
 
-    @Produces
-    @ApplicationScoped
-    @Named("umaRptIntrospectionService")
+    /*
+     * @Produces
+     * 
+     * @ApplicationScoped
+     * 
+     * @Named("umaRptIntrospectionService")
+     */
     public UmaRptIntrospectionService getUmaRptIntrospectionService() {
-        this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
+        //System.out.println("\n\n\n UmaService::getUmaRptIntrospectionService() - Entry ");
+        ///this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
+        System.out.println("\n\n\n UmaService::getUmaRptIntrospectionService() - this.umaRptIntrospectionService  = "+this.umaRptIntrospectionService);
         return this.umaRptIntrospectionService;
     }
 
