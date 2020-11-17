@@ -22,7 +22,6 @@ displayName: Jans Auth Test User
 emailVerified: true
 gender: Male
 givenName: Test
-iname: @test*person*test_user
 inum: B1F3-AEAE-B798
 jansBackchannelDeviceRegistrationTkn: dv95B2zWvZBEGbcAf3byKO
 jansBackchannelUsrCode: 59b335fb-a2df-4275-be43-1b8d3cc9a5c5
@@ -62,7 +61,6 @@ displayName: Jans Auth Test User2
 emailVerified: true
 gender: Male
 givenName: Test2
-iname: @test*person*test_user2
 inum: B1F3-AEAE-B799
 jansPrefUsrName: user2
 jansStatus: active
