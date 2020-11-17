@@ -18,7 +18,6 @@ public class AttributeConstants {
     public static final String objectClassInumMap = "gluuInumMap";
 
     public static final String inumDelimiter = "!";
-    public static final String inameDelimiter = "*";
 
     public static final String PERSON_INUM = "personInum";
 

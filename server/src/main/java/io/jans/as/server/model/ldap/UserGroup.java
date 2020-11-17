@@ -27,8 +27,6 @@ public class UserGroup {
     private String groupType;
     @AttributeName(name = "jansStatus")
     private String status;
-    @AttributeName(name = "iname")
-    private String iname;
     @AttributeName(name = "inum")
     private String inum;
     @AttributeName(name = "owner")
@@ -56,14 +54,6 @@ public class UserGroup {
 
     public void setGroupType(String p_groupType) {
         groupType = p_groupType;
-    }
-
-    public String getIname() {
-        return iname;
-    }
-
-    public void setIname(String p_iname) {
-        iname = p_iname;
     }
 
     public String getInum() {
