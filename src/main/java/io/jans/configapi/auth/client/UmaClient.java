@@ -8,7 +8,10 @@ package io.jans.configapi.auth.client;
 
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.TokenRequest;
+import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.uma.RptIntrospectionResponse;
+import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
@@ -72,14 +75,13 @@ public class UmaClient {
 
         request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        // request.header("Content-Type", MediaType.APPLICATION_JSON);
 
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
                 .register(engine);
         restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
         restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        
+
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(tokenUrl);
 
@@ -96,6 +98,24 @@ public class UmaClient {
         }
         return null;
 
+    }
+
+    public static RptIntrospectionResponse getRptStatus(UmaMetadata umaMetadata, String authorization,
+            String rptToken) {
+        // introspectionEndpoint='https://pujavs.gluu42.server/oxauth/restv1/rpt/status',
+        // codeChallengeMethodsSupported=null}
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder()
+                .baseUri(UriBuilder.fromPath(umaMetadata.getIntrospectionEndpoint()).build())
+                .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
+        restClient.property("Authorization", "Basic " + authorization);
+        restClient.property("Content-Type", MediaType.APPLICATION_JSON);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .property("Content-Type", MediaType.APPLICATION_JSON).target(umaMetadata.getIntrospectionEndpoint());
+      
+        UmaRptIntrospectionService proxy = target.proxy(UmaRptIntrospectionService.class);
+        return proxy.requestRptStatus(authorization, rptToken, "");
     }
 
 }

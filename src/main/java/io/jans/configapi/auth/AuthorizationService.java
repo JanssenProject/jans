@@ -7,18 +7,17 @@
 package io.jans.configapi.auth;
 
 import io.jans.configapi.filters.ProtectedApi;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
 
 public abstract class AuthorizationService implements Serializable {
 
@@ -27,7 +26,8 @@ public abstract class AuthorizationService implements Serializable {
     @Inject
     Logger log;
 
-    public abstract void validateAuthorization(String token, ResourceInfo resourceInfo, String method, String path) throws Exception;
+    public abstract void processAuthorization(String token, ResourceInfo resourceInfo, String method,
+            String path) throws Exception;
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

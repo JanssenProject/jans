@@ -29,7 +29,11 @@ import javax.ws.rs.ext.Provider;
 @ProtectedApi
 @Priority(Priorities.AUTHENTICATION)
 public class AuthorizationFilter implements ContainerRequestFilter {
+   
     private static final String AUTHENTICATION_SCHEME = "Bearer";
+    
+    @Inject
+    Logger log;
 
     @Context
     UriInfo info;
@@ -42,9 +46,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
-
-    @Inject
-    Logger log;
+    
 
     @Inject
     AuthorizationService authorizationService;
@@ -58,7 +60,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        log.debug("\n\n\n filter - authorizationHeader = " + authorizationHeader + "\n\n\n");
+        log.debug("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
 
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
@@ -66,9 +68,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-            this.authorizationService.validateAuthorization(token, resourceInfo, context.getMethod(),
-                    request.getRequestURI());
+            this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
