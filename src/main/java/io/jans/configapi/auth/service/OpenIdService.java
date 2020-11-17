@@ -13,12 +13,14 @@ import io.jans.configapi.auth.client.OpenIdClientService;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.exception.ConfigurationException;
 import io.jans.util.init.Initializable;
+import org.slf4j.Logger;
 
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
-import org.slf4j.Logger;
 
 @ApplicationScoped
 public class OpenIdService extends Initializable implements Serializable {

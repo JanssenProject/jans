@@ -6,30 +6,26 @@
 
 package io.jans.configapi.auth.client;
 
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
-
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
-import io.jans.configapi.util.ApiConstants;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
-
-import javax.inject.Inject;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public class UmaClient {
 
