@@ -419,7 +419,7 @@
   "loggingLevel": "INFO",
   "keyRegenerationEnabled": true,
   "personCustomObjectClassList": [
-    "gluuCustomPerson",
-    "gluuPerson"
+    "jansCustomPerson",
+    "jansPerson"
   ]
 }

@@ -11,7 +11,7 @@
         "USER"
     ],
     "name": "qaattribute",
-    "origin": "gluuPerson",
+    "origin": "jansPerson",
     "oxMultiValuedAttribute": false,
     "requred": false,
     "status": "ACTIVE",
