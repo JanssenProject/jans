@@ -65,7 +65,7 @@ public class UmaResourceProtectionService {
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
         createScopeIfNeeded();
-        
+
         createResourceIfNeeded();
 
         log.debug("\n\n UmaResourceProtectionCache.getAllUmaResources = " + UmaResourceProtectionCache.getAllUmaResources());
@@ -81,7 +81,7 @@ public class UmaResourceProtectionService {
             for (Condition condition : rsResource.getConditions()) {
                 rsScopes = condition.getScopes();
                 for (String scopeName : rsScopes) {
-                   
+
                     // Check in cache
                     if (UmaResourceProtectionCache.getScope(scopeName) != null) {
                         log.debug("Scope - '" + scopeName + "' exists in cache.");
@@ -97,7 +97,8 @@ public class UmaResourceProtectionService {
                         scope = scopes.get(0);
                         if (scopes.size() > 1) {
                             log.error(scopes.size() + " UMA Scope with same name.");
-                            throw new WebApplicationException("Multiple UMA Scope with same name - "+scopeName,Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+                            throw new WebApplicationException("Multiple UMA Scope with same name - " + scopeName,
+                                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
                         }
                     }
 
@@ -131,8 +132,10 @@ public class UmaResourceProtectionService {
         for (RsResource rsResource : rsResourceList) {
 
             for (Condition condition : rsResource.getConditions()) {
-                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); //??todo: Puja -> To be reviewed by Yuriy Z
-                                                      
+                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); // ??todo: Puja ->
+                                                                                                    // To be reviewed by
+                                                                                                    // Yuriy Z
+
                 // Check in cache
                 if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
                     log.debug("UmaResource - '" + umaResourceName + "' exists in cache.");
@@ -162,7 +165,7 @@ public class UmaResourceProtectionService {
                     umaResource.setDn(umaResourceService.getDnForResource(id));
                     umaResource.setName(umaResourceName);
                     umaResource.setScopes(getScopes(condition.getScopes()));
-                                                                           
+
                     umaResourceService.addResource(umaResource);
                 }
 
@@ -173,17 +176,20 @@ public class UmaResourceProtectionService {
     }
 
     // ??todo: Puja -> To be reviewed by Yuriy Z
-    // Reason for this method::: This is required because the uma-rs-protect.json contains scope name example -> https://jans.io/oauth/config/scopes.readonly
-    // However when i verified existing UMAresource like oxTrust SCIM in LDAP it has scope inum + orgnization rather than name 
-    // Example: displayName = oxTrust api Resource , oxAuthUmaScope =inum=1122-BBCC,ou=scopes,o=gluu
-    // Is this fine? 
+    // Reason for this method::: This is required because the uma-rs-protect.json
+    // contains scope name example -> https://jans.io/oauth/config/scopes.readonly
+    // However when i verified existing UMAresource like oxTrust SCIM in LDAP it has
+    // scope inum + orgnization rather than name
+    // Example: displayName = oxTrust api Resource , oxAuthUmaScope
+    // =inum=1122-BBCC,ou=scopes,o=gluu
+    // Is this fine?
     private List<String> getScopes(List<String> resourceScopes) {
         List<String> scopes = new ArrayList();
         log.debug("getScopes() - resourceScopes= " + resourceScopes);
         for (String strScope : resourceScopes) {
             Scope scope = UmaResourceProtectionCache.getScope(strScope);
             if (scope != null) {
-                scopes.add(scope.getInum()+","+scope.getDn());
+                scopes.add(scope.getInum() + "," + scope.getDn());
             }
         }
         log.debug("getScopes() - scopes= " + scopes);

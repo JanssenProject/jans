@@ -32,7 +32,6 @@ public class OpenIdService extends Initializable implements Serializable {
 
     @Inject
     ConfigurationService configurationService;
-    
 
     private IntrospectionService introspectionService;
 
@@ -40,11 +39,11 @@ public class OpenIdService extends Initializable implements Serializable {
         init();
         return introspectionService;
     }
-    
+
     public String getIntrospectionEndpoint() {
         return configurationService.find().getIntrospectionEndpoint();
     }
-    
+
     public IntrospectionResponse getIntrospectionResponse(String header, String token) {
         return AuthClientFactory.getIntrospectionResponse(getIntrospectionEndpoint(), header, token, false);
     }
@@ -58,10 +57,10 @@ public class OpenIdService extends Initializable implements Serializable {
             throw new ConfigurationException("Failed to load oxAuth OpenId configuration", ex);
         }
     }
+
     private void loadOpenIdConfiguration() throws IOException {
-        log.debug(
-                "OpenIdService::loadOpenIdConfiguration() - configurationService.find().getIntrospectionEndpoint() = "
-                        + configurationService.find().getIntrospectionEndpoint());
+        log.debug("OpenIdService::loadOpenIdConfiguration() - configurationService.find().getIntrospectionEndpoint() = "
+                + configurationService.find().getIntrospectionEndpoint());
         String introspectionEndpoint = configurationService.find().getIntrospectionEndpoint();
         this.introspectionService = AuthClientFactory.getIntrospectionService(introspectionEndpoint, false);
 

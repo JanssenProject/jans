@@ -33,7 +33,7 @@ import javax.ws.rs.client.WebTarget;
 
 public class AuthClientFactory {
 
-    public static IntrospectionService getIntrospectionService(String url,boolean followRedirects) {
+    public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
     }
 
@@ -49,47 +49,29 @@ public class AuthClientFactory {
             boolean followRedirects) {
         return createUmaRptIntrospectionService(umaMetadata);
     }
-    
-    public static IntrospectionResponse getIntrospectionResponse(String url,String header, String token,boolean followRedirects) {
-        System.out.println("\n\n\n AuthClientFactory::getIntrospectionResponse() - url = "+url+" ,header="+header+" ,token = "+token);
-       /* ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-               .register(engine);
-         restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
-                .target(url);
-           Form form = new Form();
-         form.param("token", token);
-         Entity<Form> entity = Entity.form(form);
-         Response response = target.request(MediaType.APPLICATION_FORM_URLENCODED).post(entity);
-         System.out.println("\n\n\n AuthClientFactory::getIntrospectionResponse() - response = "+response);
-         //Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.form(new MultivaluedHashMap<String, String>(token)));
-         String value = response.readEntity(String.class);
-         System.out.println(value);
-         response.close();
-     */
+
+    public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
+            boolean followRedirects) {       
+       
         Client client = ResteasyClientBuilder.newClient();
         WebTarget target = client.target(url);
         Form form = new Form();
         form.param("token", token);
         Entity<Form> entity = Entity.form(form);
         Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", header).post(entity);
-        String value = response.readEntity(String.class);
-        System.out.println(value);
-        response.close();  
-        
-       return new IntrospectionResponse();
+        String value = response.readEntity(String.class);       
+        response.close();
+        return new IntrospectionResponse();
     }
 
     private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-               .register(engine);
+                .register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(url);
-         IntrospectionService proxy = target.proxy(IntrospectionService.class);
+        IntrospectionService proxy = target.proxy(IntrospectionService.class);
         return proxy;
-        
 
     }
 
@@ -122,7 +104,5 @@ public class AuthClientFactory {
         UmaRptIntrospectionService proxy = target.proxy(UmaRptIntrospectionService.class);
         return proxy;
     }
-    
-  
-    
+
 }
