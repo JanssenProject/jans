@@ -65,12 +65,6 @@ public class GluuOrganization extends Entry implements Serializable {
 
 	@AttributeName(name = "jansFaviconPath")
 	private String faviconPath;
-	
-	@AttributeName(name = "idpLogoPath")
-	private String idpLogoPath;
-
-	@AttributeName(name = "idpFaviconPath")
-	private String idpFaviconPath;
 
 	@AttributeName(name = "jansThemeColor")
 	private String themeColor;
@@ -212,21 +206,5 @@ public class GluuOrganization extends Entry implements Serializable {
 
 	public void setFaviconPath(String faviconPath) {
 		this.faviconPath = faviconPath;
-	}
-
-	public String getIdpLogoPath() {
-		return idpLogoPath;
-	}
-
-	public void setIdpLogoPath(String idpLogoPath) {
-		this.idpLogoPath = idpLogoPath;
-	}
-
-	public String getIdpFaviconPath() {
-		return idpFaviconPath;
-	}
-
-	public void setIdpFaviconPath(String idpFaviconPath) {
-		this.idpFaviconPath = idpFaviconPath;
 	}
 }
