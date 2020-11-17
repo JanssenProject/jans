@@ -39,8 +39,10 @@ client-api-start.bat
 Linux:
 
 ```
-sh oxd-start.sh
+sh client-api-start.sh
 ```
+
+After `jans-client-api` server is started you will able test status using `health-check` url: https://localhost:8443/health-check.
 
 ## Api Description
 
