@@ -102,8 +102,7 @@ public class UmaClient {
 
     public static RptIntrospectionResponse getRptStatus(UmaMetadata umaMetadata, String authorization,
             String rptToken) {
-        // introspectionEndpoint='https://pujavs.gluu42.server/oxauth/restv1/rpt/status',
-        // codeChallengeMethodsSupported=null}
+        
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder()
                 .baseUri(UriBuilder.fromPath(umaMetadata.getIntrospectionEndpoint()).build())
