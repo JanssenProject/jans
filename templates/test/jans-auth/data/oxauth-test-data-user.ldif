@@ -1,7 +1,6 @@
 dn: inum=7890,ou=groups,o=jans
 displayName: Jans Test Group 1
 inum: 7890
-jansGrpTyp: jansTestGroup1
 jansStatus: active
 objectClass: top
 objectClass: jansGrp
@@ -9,7 +8,6 @@ objectClass: jansGrp
 dn: inum=7891,ou=groups,o=jans
 displayName: Jans Test Group 2
 inum: 7891
-jansGrpTyp: jansTestGroup2
 jansStatus: active
 objectClass: top
 objectClass: jansGrp
