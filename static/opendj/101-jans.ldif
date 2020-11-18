@@ -702,7 +702,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.119 NAME 'jansHost'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.120 NAME 'jansIDPAuthn'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.120 NAME 'jansDbAuth'
   DESC 'Custom IDP authentication configuration'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
@@ -1635,7 +1635,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'jansAppConf'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ ou $ description $ displayName $ jansHostname $ jansLastUpd $ jansManager $ jansOrgProfileMgt $ jansScimEnabled $ jansEmail $ jansSmtpFromEmailAddr $ jansSmtpFromName $ jansSmtpHost $ jansSmtpPass $ jansSmtpPort $ jansSmtpRequiresAuthn $ jansSmtpRequiresSsl $ jansSmtpUsrName $ jansSslExpiry $ jansStatus $ jansUrl $ inum $ o $ jansAuthMode $ jansIDPAuthn $ jansLogViewerConfig $ jansLogConfigLocation $ jansSmtpConf $ jansCacheConf $ jansDocStoreConf $ jansSoftVer $ userPassword $ jansSmtpServerTrust $ jansConfDyn $ jansConfErrors $ jansConfStatic $ jansConfWebKeys $ jansRevision $ jansWebKeysSettings $ jansConfApp $ jansRevision $ jansConfDyn $ jansConfStatic $ jansRevision )
+  MAY ( c $ ou $ description $ displayName $ jansHostname $ jansLastUpd $ jansManager $ jansOrgProfileMgt $ jansScimEnabled $ jansEmail $ jansSmtpFromEmailAddr $ jansSmtpFromName $ jansSmtpHost $ jansSmtpPass $ jansSmtpPort $ jansSmtpRequiresAuthn $ jansSmtpRequiresSsl $ jansSmtpUsrName $ jansSslExpiry $ jansStatus $ jansUrl $ inum $ o $ jansAuthMode $ jansDbAuth $ jansLogViewerConfig $ jansLogConfigLocation $ jansSmtpConf $ jansCacheConf $ jansDocStoreConf $ jansSoftVer $ userPassword $ jansSmtpServerTrust $ jansConfDyn $ jansConfErrors $ jansConfStatic $ jansConfWebKeys $ jansRevision $ jansWebKeysSettings $ jansConfApp $ jansRevision $ jansConfDyn $ jansConfStatic $ jansRevision )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'jansAttr'
   SUP ( top )
