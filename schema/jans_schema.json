@@ -1320,7 +1320,7 @@
       "desc": "Custom IDP authentication configuration",
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansIDPAuthn"
+        "jansDbAuth"
       ],
       "json": true,
       "oid": "jansAttr",
@@ -3245,7 +3245,7 @@
         "inum",
         "o",
         "jansAuthMode",
-        "jansIDPAuthn",
+        "jansDbAuth",
         "jansLogViewerConfig",
         "jansLogConfigLocation",
         "jansSmtpConf",
