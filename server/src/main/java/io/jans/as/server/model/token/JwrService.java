@@ -90,6 +90,14 @@ public class JwrService {
     }
 
     private Jwe encryptJwe(Jwe jwe, Client client) throws Exception {
+
+        if (appConfiguration.getUseNestedJwtDuringEncryption()) {
+            JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
+            Jwt jwt = jwtSigner.newJwt();
+            jwt.setClaims(jwe.getClaims());
+            jwe.setSignedJWTPayload(signJwt(jwt, client));
+        }
+
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(jwe.getHeader().getClaimAsString(ALGORITHM));
         final BlockEncryptionAlgorithm encryptionMethod = jwe.getHeader().getEncryptionMethod();
 
