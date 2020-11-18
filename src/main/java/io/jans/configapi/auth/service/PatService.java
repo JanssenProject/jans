@@ -38,15 +38,12 @@ public class PatService {
 
     @Inject
     UmaMetadata umaMetadata;
-    // UmaService umaService;
 
-    // private UmaMetadata umaMetadata;
     private Token umaPat;
     private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
     private final ReentrantLock lock = new ReentrantLock();
 
     public Token getPatToken() throws Exception {
-        // this.umaMetadata = this.umaService.getUmaMetadata();
         if (isValidPatToken(this.umaPat, this.umaPatAccessTokenExpiration)) {
             return this.umaPat;
         }
@@ -94,20 +91,14 @@ public class PatService {
 
         try {
 
-            // ??todo: Puja -> To be reviewed by Yuriy Z -> Using ClientId and clientSecret
-            // based on discussion with @duttarnab ?????
-
-            /*
-             * this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
-             * umaClientKeyStoreFile, umaClientKeyStorePassword, getClientId(),
-             * getClientKeyId());
-             */
+            log.debug("\n\n umaPat = Calling requestPat with umaMetadata.getTokenEndpoint()  = "
+                    + umaMetadata.getTokenEndpoint() + " , ApiClientId = " + this.configurationFactory.getApiClientId()
+                    + " , ApiClientPassword = " + this.configurationFactory.getApiClientPassword());
 
             this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
                     this.configurationFactory.getApiClientId(), this.configurationFactory.getApiClientPassword(), null);
-            log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
-
-            if (this.umaPat == null) {
+            
+             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
             } else {
                 this.umaPatAccessTokenExpiration = computeAccessTokenExpirationTime(this.umaPat.getExpiresIn());
