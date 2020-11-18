@@ -87,8 +87,7 @@ public class UmaService implements Serializable {
         log.trace("Validating RPT, patToken:{}, authorization:{}, resourceId: {}, scopeIds: {} ", patToken, authorization, resourceId, scopeIds);
 
        if (patToken == null) {
-            log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has
-                                        // to be registered - DONE call done Permissions ticket
+            log.info("Token is blank"); 
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
             throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
         }
@@ -159,7 +158,6 @@ public class UmaService implements Serializable {
         String ticket = registerResourcePermission(patToken, resourceId, scopes);
         Response response = null;
         if (StringHelper.isEmpty(ticket)) {
-            // return null;
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             return response;
         }

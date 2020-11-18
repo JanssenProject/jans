@@ -1,11 +1,12 @@
 package io.jans.configapi.auth;
 
 import com.google.common.base.Preconditions;
-
+import io.jans.ca.rs.protect.Condition;
+import io.jans.ca.rs.protect.RsResource;
+import io.jans.ca.rs.protect.RsResourceList;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.auth.model.*;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.Jackson;
@@ -72,10 +73,7 @@ public class UmaResourceProtectionService {
 
     }
 
-    private void createScopeIfNeeded() { // todo rename createScopeIfNeeded
-        // todo - cache scopes in guava cache. Otherwise you check same scopes again and
-        // again
-
+    private void createScopeIfNeeded() { 
         List<String> rsScopes = null;
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
@@ -132,10 +130,10 @@ public class UmaResourceProtectionService {
         for (RsResource rsResource : rsResourceList) {
 
             for (Condition condition : rsResource.getConditions()) {
-                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); // ??todo: Puja ->
-                                                                                                    // To be reviewed by
-                                                                                                    // Yuriy Z
-
+                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); 
+                
+                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResourceName = "
+                        + umaResourceName + "\n\n");
                 // Check in cache
                 if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
                     log.debug("UmaResource - '" + umaResourceName + "' exists in cache.");
@@ -175,22 +173,11 @@ public class UmaResourceProtectionService {
         }
     }
 
-    // ??todo: Puja -> To be reviewed by Yuriy Z
-    // Reason for this method::: This is required because the uma-rs-protect.json
-    // contains scope name example -> https://jans.io/oauth/config/scopes.readonly
-    // However when i verified existing UMAresource like oxTrust SCIM in LDAP it has
-    // scope inum + orgnization rather than name
-    // Example: displayName = oxTrust api Resource , oxAuthUmaScope
-    // =inum=1122-BBCC,ou=scopes,o=gluu
-    // Is this fine?
     private List<String> getScopes(List<String> resourceScopes) {
         List<String> scopes = new ArrayList();
         log.debug("getScopes() - resourceScopes= " + resourceScopes);
         for (String strScope : resourceScopes) {
-            Scope scope = UmaResourceProtectionCache.getScope(strScope);
-            if (scope != null) {
-                scopes.add(scope.getInum() + "," + scope.getDn());
-            }
+            scopes.add(strScope);
         }
         log.debug("getScopes() - scopes= " + scopes);
         return scopes;
