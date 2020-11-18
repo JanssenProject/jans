@@ -44,7 +44,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@JsonObject
 	private DocumentStoreConfiguration documentStoreConfiguration;
 
-	@AttributeName(name = "jansIDPAuthn")
+	@AttributeName(name = "jansDbAuthn")
 	@JsonObject
 	private List<IDPAuthConf> idpAuthn;
 
