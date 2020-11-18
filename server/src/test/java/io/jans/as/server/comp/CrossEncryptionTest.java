@@ -12,6 +12,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -63,6 +64,7 @@ import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 
 public class CrossEncryptionTest {
 
@@ -340,7 +342,7 @@ public class CrossEncryptionTest {
         SignedJWT signedJWT = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(senderJWK.getKeyID()).build(),
                 new JWTClaimsSet.Builder()
-                        .subject("testi")
+                        .subject("testing")
                         .issuer("https:devgluu.saminet.local")
                         .build());
 
@@ -359,6 +361,7 @@ public class CrossEncryptionTest {
         final String jweString = jweObject.serialize();
 
         decryptAndValidateSignatureWithGluu(jweString);
+        decryptAndValidateSignatureWithNimbus(jweString);
     }
 
     @Test
@@ -371,8 +374,7 @@ public class CrossEncryptionTest {
         JSONWebKeySet keySet = new JSONWebKeySet();
         keySet.setKeys(keyArrayList);
 
-        final JwtSigner jwtSigner = new JwtSigner(appConfiguration, keySet, SignatureAlgorithm.RS256, "audience");
-        jwtSigner.setCryptoProvider(new AbstractCryptoProvider() {
+        final JwtSigner jwtSigner = new JwtSigner(appConfiguration, keySet, SignatureAlgorithm.RS256, "audience", null, new AbstractCryptoProvider() {
             @Override
             public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
                 return null;
@@ -410,7 +412,7 @@ public class CrossEncryptionTest {
 			}
         });
         Jwt jwt = jwtSigner.newJwt();
-        jwt.getClaims().setSubjectIdentifier("testi");
+        jwt.getClaims().setSubjectIdentifier("testing");
         jwt.getClaims().setIssuer("https:devgluu.saminet.local");
         jwt = jwtSigner.sign();
 
@@ -429,10 +431,15 @@ public class CrossEncryptionTest {
         String jweString = encrypter.encrypt(jwe).toString();
 
         decryptAndValidateSignatureWithGluu(jweString);
+        decryptAndValidateSignatureWithNimbus(jweString);
     }
 
     private JSONWebKey getSenderWebKey() throws JSONException {
         return JSONWebKey.fromJSONObject(new JSONObject(senderJwkJson));
+    }
+
+    public RSAPublicKey getSenderPublicKey() {
+        return RSAKeyFactory.valueOf(getSenderWebKey()).getPublicKey();
     }
 
     private void decryptAndValidateSignatureWithGluu(String jweString) throws ParseException, JOSEException, InvalidJweException, JSONException, InvalidJwtException {
@@ -453,5 +460,23 @@ public class CrossEncryptionTest {
         Assert.assertTrue(new RSASigner(SignatureAlgorithm.RS256, senderPublicKey).validate(jwt));
 
         System.out.println("Gluu decrypt and nested jwt signature verification succeed: " + jwt.getClaims().toJsonString());
+    }
+
+    private void decryptAndValidateSignatureWithNimbus(String jweString) throws ParseException, JOSEException {
+        JWK jwk = JWK.parse(recipientJwkJson);
+        RSAPrivateKey rsaPrivateKey = ((RSAKey) jwk).toRSAPrivateKey();
+
+        JWEObject jweObject = JWEObject.parse(jweString);
+
+        jweObject.decrypt(new RSADecrypter(rsaPrivateKey));
+        SignedJWT signedJWT = jweObject.getPayload().toSignedJWT();
+
+        assertNotNull("Payload not a signed JWT", signedJWT);
+
+        RSAKey senderJWK = (RSAKey) JWK.parse(senderJwkJson);
+        assertTrue(signedJWT.verify(new RSASSAVerifier(senderJWK)));
+
+        assertEquals("testing", signedJWT.getJWTClaimsSet().getSubject());
+        System.out.println("Nimbus decrypt and nested jwt signature verification succeed: " + signedJWT.getJWTClaimsSet().toJSONObject());
     }
 }

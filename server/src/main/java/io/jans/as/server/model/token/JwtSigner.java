@@ -38,18 +38,22 @@ public class JwtSigner {
 
     private Jwt jwt;
 
-    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
+    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) {
         this(appConfiguration, webKeys, signatureAlgorithm, audience, null);
     }
 
-    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
+    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) {
+        this(appConfiguration, webKeys, signatureAlgorithm, audience, hmacSharedSecret,null);
+    }
+
+    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret, AbstractCryptoProvider cryptoProvider) {
         this.appConfiguration = appConfiguration;
         this.webKeys = webKeys;
         this.signatureAlgorithm = signatureAlgorithm;
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
 
-        cryptoProvider = new ServerCryptoProvider(CdiUtil.bean(AbstractCryptoProvider.class));
+        this.cryptoProvider = cryptoProvider != null ? cryptoProvider : new ServerCryptoProvider( CdiUtil.bean(AbstractCryptoProvider.class));
     }
 
     public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {

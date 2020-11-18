@@ -10,9 +10,6 @@ import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.SignedJWT;
-
-import javax.crypto.spec.SecretKeySpec;
-
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.RSAPrivateKey;
@@ -24,6 +21,7 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.util.SecurityProviderUtility;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -112,7 +110,9 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
             final SignedJWT signedJWT = encryptedJwt.getPayload().toSignedJWT();
             if (signedJWT != null) {
-                jwe.setSignedJWTPayload(Jwt.parse(signedJWT.serialize()));
+                final Jwt jwt = Jwt.parse(signedJWT.serialize());
+                jwe.setSignedJWTPayload(jwt);
+                jwe.setClaims(jwt != null ? jwt.getClaims() : null);
             } else {
                 final String base64encodedPayload = encryptedJwt.getPayload().toString();
                 jwe.setClaims(new JwtClaims(base64encodedPayload));
