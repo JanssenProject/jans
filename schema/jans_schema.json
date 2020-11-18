@@ -1770,16 +1770,6 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansCacheRefreshServerIpAddr"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Specifies the exclude server which should run Cache refresh"
-    },
-    {
-      "equality": "caseIgnoreMatch",
-      "names": [
         "jansAddres"
       ],
       "oid": "jansAttr",
@@ -3263,7 +3253,6 @@
         "jansDocStoreConf",
         "jansSoftVer",
         "userPassword",
-        "jansCacheRefreshServerIpAddr",
         "jansSmtpServerTrust",
         "jansConfDyn",
         "jansConfErrors",
