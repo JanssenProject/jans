@@ -902,716 +902,711 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.154 NAME 'jansScr'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.155 NAME 'jansScrDn'
-  DESC 'Scr object DN'
-  EQUALITY distinguishedNameMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-  X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.156 NAME 'jansScrDn'
   DESC 'Script object DN'
   EQUALITY distinguishedNameMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.157 NAME 'jansScrTyp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.156 NAME 'jansScrTyp'
   DESC 'Attr that contains script type (e.g. python, java script)'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.158 NAME 'jansScrError'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.157 NAME 'jansScrError'
   DESC 'Attr that contains first error which application get during it execution'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.159 NAME 'jansSmtpConf'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.158 NAME 'jansSmtpConf'
   DESC 'SMTP configuration'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.160 NAME 'jansSourceAttr'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.159 NAME 'jansSourceAttr'
   DESC 'Source Attr for this Attr'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.161 NAME 'jansTicket'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.160 NAME 'jansTicket'
   DESC 'jans ticket'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.162 NAME 'jansActive'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.161 NAME 'jansActive'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.163 NAME 'jansCacheRefreshServerIpAddr'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.162 NAME 'jansCacheRefreshServerIpAddr'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Specifies the exclude server which should run Cache refresh' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.164 NAME 'jansAddres'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.163 NAME 'jansAddres'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.165 NAME 'jansConfApp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.164 NAME 'jansConfApp'
   DESC 'jans App Conf'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.166 NAME 'jansEmail'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.165 NAME 'jansEmail'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.167 NAME 'jansEntitlements'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.166 NAME 'jansEntitlements'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.168 NAME 'jansExternalId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.167 NAME 'jansExternalId'
   EQUALITY caseExactMatch
   SUBSTR caseExactSubStringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.169 NAME 'jansImsValue'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.168 NAME 'jansImsValue'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.170 NAME 'jansMetaCreated'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.169 NAME 'jansMetaCreated'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.171 NAME 'jansMetaLastMod'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.170 NAME 'jansMetaLastMod'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.172 NAME 'jansMetaLocation'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.171 NAME 'jansMetaLocation'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.173 NAME 'jansMetaVer'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.172 NAME 'jansMetaVer'
   EQUALITY caseExactMatch
   SUBSTR caseExactSubStringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.174 NAME 'jansNameFormatted'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.173 NAME 'jansNameFormatted'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.175 NAME 'jansPhoneValue'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.174 NAME 'jansPhoneValue'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.176 NAME 'jansPhotos'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.175 NAME 'jansPhotos'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.177 NAME 'jansProfileURL'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.176 NAME 'jansProfileURL'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.178 NAME 'jansRole'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.177 NAME 'jansRole'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.179 NAME 'jansTitle'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.178 NAME 'jansTitle'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.180 NAME 'jansUsrTyp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.179 NAME 'jansUsrTyp'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.181 NAME 'jansHonorificPrefix'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.180 NAME 'jansHonorificPrefix'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.182 NAME 'jansHonorificSuffix'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.181 NAME 'jansHonorificSuffix'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.183 NAME 'jans509Certificate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.182 NAME 'jans509Certificate'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.184 NAME 'jansTyp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.183 NAME 'jansTyp'
   DESC 'jans type'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.185 NAME 'jansUmaPermission'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.184 NAME 'jansUmaPermission'
   DESC 'jans uma permission'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.186 NAME 'persistentId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.185 NAME 'persistentId'
   DESC 'PersistentId'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Persistent ID reserved for SAML' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.187 NAME 'personInum'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.186 NAME 'personInum'
   DESC 'Inum of a person'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.188 NAME 'jansProgLng'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.187 NAME 'jansProgLng'
   DESC 'programming language'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.189 NAME 'registrationDate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.188 NAME 'registrationDate'
   DESC 'Registration date'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.190 NAME 'role'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.189 NAME 'role'
   DESC 'Role'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.191 NAME 'secretAnswer'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.190 NAME 'secretAnswer'
   DESC 'Secret Answer'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.192 NAME 'secretQuestion'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.191 NAME 'secretQuestion'
   DESC 'Secret Question'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.193 NAME 'jansSoftVer'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.192 NAME 'jansSoftVer'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.194 NAME 'transientId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.193 NAME 'transientId'
   DESC 'TransientId'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.195 NAME 'url'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.194 NAME 'url'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.196 NAME 'urn'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.195 NAME 'urn'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.197 NAME ( 'middleName' 'excludeMiddleName' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.196 NAME ( 'middleName' 'excludeMiddleName' )
   DESC 'Middle name(s)'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.198 NAME ( 'nickname' 'excludenickname' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.197 NAME ( 'nickname' 'excludenickname' )
   DESC 'Casual name of the End-Usr'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.199 NAME 'jansPrefUsrName'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.198 NAME 'jansPrefUsrName'
   DESC 'Shorthand Name'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.200 NAME 'profile'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.199 NAME 'profile'
   DESC 'Profile page URL of the person'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.201 NAME ( 'picture' 'photo1' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.200 NAME ( 'picture' 'photo1' )
   DESC 'Profile picture URL of the person'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.202 NAME 'website'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.201 NAME 'website'
   DESC 'Web page or blog URL of the person'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.203 NAME 'emailVerified'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.202 NAME 'emailVerified'
   DESC 'True if the e-mail address of the person has been verified; otherwise false'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.204 NAME 'gender'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.203 NAME 'gender'
   DESC 'Gender of the person either female or male'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.205 NAME 'birthdate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.204 NAME 'birthdate'
   DESC 'Birthday of the person, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.206 NAME ( 'zoneinfo' 'timezone' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.205 NAME ( 'zoneinfo' 'timezone' )
   DESC 'Time zone database representing the End-Usrs time zone. For example, Europe/Paris or America/Los_Angeles'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.207 NAME ( 'locale' 'excludeLocale' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.206 NAME ( 'locale' 'excludeLocale' )
   DESC 'Locale of the person, represented as a BCP47 [RFC5646] language tag'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.208 NAME 'phoneNumberVerified'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.207 NAME 'phoneNumberVerified'
   DESC 'True if the phone number of the person has been verified, otherwise false'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.209 NAME 'address'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.208 NAME 'address'
   DESC 'OpenID Connect formatted JSON object representing the address of the person'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.210 NAME 'updatedAt'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.209 NAME 'updatedAt'
   DESC 'Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.211 NAME 'jansRegExp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.210 NAME 'jansRegExp'
   DESC 'Regular expression used to validate attribute data'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.212 NAME 'jansTooltip'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.211 NAME 'jansTooltip'
   DESC 'Custom tooltip to be shown on the UI'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.213 NAME 'jansModuleProperty'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.212 NAME 'jansModuleProperty'
   DESC 'Module property'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.214 NAME 'jansConfProperty'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.213 NAME 'jansConfProperty'
   DESC 'Conf property'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.215 NAME 'jansSessAttr'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.214 NAME 'jansSessAttr'
   DESC 'jansSessAttr'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.216 NAME 'jansStartDate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.215 NAME 'jansStartDate'
   DESC 'Start date'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.217 NAME 'jansEndDate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.216 NAME 'jansEndDate'
   DESC 'End date'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.218 NAME 'jansMetricTyp'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.217 NAME 'jansMetricTyp'
   DESC 'Metric type'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.219 NAME 'jansData'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.218 NAME 'jansData'
   DESC 'OX data'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.220 NAME 'dat'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.219 NAME 'dat'
   DESC 'OX data'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.221 NAME 'jansCodeChallenge'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.220 NAME 'jansCodeChallenge'
   DESC 'OX PKCE code challenge'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.222 NAME 'chlng'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.221 NAME 'chlng'
   DESC 'OX PKCE code challenge'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.223 NAME 'chlngMth'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.222 NAME 'chlngMth'
   DESC 'OX PKCE code challenge method'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.224 NAME 'jansSectorIdentifier'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.223 NAME 'jansSectorIdentifier'
   DESC 'jans Sector Identifier'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.225 NAME 'jansPersistClntAuthzs'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.224 NAME 'jansPersistClntAuthzs'
   DESC 'jans Persist Clnt Authzs'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.226 NAME 'jansSessStateId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.225 NAME 'jansSessStateId'
   DESC 'jansSessStateId'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.227 NAME 'ssnId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.226 NAME 'ssnId'
   DESC 'jans Sess DN'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.228 NAME 'jansPassExpDate'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.227 NAME 'jansPassExpDate'
   DESC 'Pass Exp date, represented as an ISO 8601 (YYYY-MM-DD) format'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   ORDERING generalizedTimeOrderingMatch
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.229 NAME 'jansCountInvalidLogin'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.228 NAME 'jansCountInvalidLogin'
   DESC 'Invalid login attempts count'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.230 NAME 'jansIMAPData'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.229 NAME 'jansIMAPData'
   DESC 'This data has information about your imap connection'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.231 NAME 'jansValidation'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.230 NAME 'jansValidation'
   DESC 'This data has information about attribute Validation'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.232 NAME 'jansPPID'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.231 NAME 'jansPPID'
   DESC 'Persistent Pairwise ID for OpenID Connect'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.233 NAME 'jansSessId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.232 NAME 'jansSessId'
   DESC 'jans Sess Id'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.234 NAME 'jansCacheConf'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.233 NAME 'jansCacheConf'
   DESC 'Cache configuration'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.235 NAME 'jansLogConfigLocation'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.234 NAME 'jansLogConfigLocation'
   DESC 'Path to external log4j2.xml'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.236 NAME 'jansInclClaimsInIdTkn'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.235 NAME 'jansInclClaimsInIdTkn'
   DESC 'jans Incl Claims In Id Tkn'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.237 NAME 'jansClaimValues'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.236 NAME 'jansClaimValues'
   DESC 'Claim Values'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.238 NAME 'jansClaimRedirectURI'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.237 NAME 'jansClaimRedirectURI'
   DESC 'Claim Redirect URI'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.239 NAME 'jansAttrs'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.238 NAME 'jansAttrs'
   DESC 'Attrs'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.240 NAME 'attr'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.239 NAME 'attr'
   DESC 'Attrs'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.241 NAME 'jansRefreshTknLife'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.240 NAME 'jansRefreshTknLife'
   DESC 'Life of refresh token'
   EQUALITY integerMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.242 NAME 'jansPermissionGranted'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.241 NAME 'jansPermissionGranted'
   DESC 'jans Permission Granted'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.243 NAME 'jansNickName'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.242 NAME 'jansNickName'
   DESC 'jansNickName'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.244 NAME 'jansDeviceNotificationConf'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.243 NAME 'jansDeviceNotificationConf'
   DESC 'Extended push notification configuration'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.245 NAME 'clms'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.244 NAME 'clms'
   DESC 'jans Claims'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.246 NAME 'jansDisabled'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.245 NAME 'jansDisabled'
   DESC 'Status of client'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.247 NAME 'jansWebKeysSettings'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.246 NAME 'jansWebKeysSettings'
   DESC 'jans Web Keys Conf'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.248 NAME 'jansScopeExpression'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.247 NAME 'jansScopeExpression'
   DESC 'Scope expression'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.249 NAME 'jansPreferredMethod'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.248 NAME 'jansPreferredMethod'
   DESC 'Jans Casa - jansPref method to use for user authentication'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.250 NAME 'jansOTPDevices'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.249 NAME 'jansOTPDevices'
   DESC 'Jans Casa - Json representation of OTP devices. Complementary to jansExternalUid attribute'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.251 NAME 'jansMobileDevices'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.250 NAME 'jansMobileDevices'
   DESC 'Jans Casa - Json representation of mobile devices. Complementary to mobile attribute'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.252 NAME 'jansdId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.251 NAME 'jansdId'
   DESC 'jansd Id'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.253 NAME 'jansAuthorizedOrigins'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.252 NAME 'jansAuthorizedOrigins'
   DESC 'jans Authorized Origins'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.254 NAME 'jansStrongAuthPolicy'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.253 NAME 'jansStrongAuthPolicy'
   DESC 'Jans Casa - 2FA Enforcement Policy for Usr'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.255 NAME 'tknBndCnf'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.254 NAME 'tknBndCnf'
   DESC 'jansauth - Tkn Binding Id Hash'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.256 NAME 'jansUnlinkedExternalUids'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.255 NAME 'jansUnlinkedExternalUids'
   DESC 'Jans Casa - List of unlinked social accounts (ie disabled jansExternalUids)'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.257 NAME 'jansAccessTknAsJwt'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.256 NAME 'jansAccessTknAsJwt'
   DESC 'jansauth - indicator whether to return access token as JWT'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.258 NAME 'jansAccessTknSigAlg'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.257 NAME 'jansAccessTknSigAlg'
   DESC 'jansauth - access token signing algorithm'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.259 NAME 'jansRegistrationData'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.258 NAME 'jansRegistrationData'
   DESC 'jansRegistrationData'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.260 NAME 'jansAuthData'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.259 NAME 'jansAuthData'
   DESC 'jansAuthData'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.261 NAME 'jansPublicKeyId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.260 NAME 'jansPublicKeyId'
   DESC 'jansPublicKeyId'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.262 NAME 'jansAccessTknLife'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.261 NAME 'jansAccessTknLife'
   DESC 'Life of access token'
   EQUALITY integerMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.263 NAME 'jansSoftId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.262 NAME 'jansSoftId'
   DESC 'Soft Identifier'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.264 NAME 'jansSoftStatement'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.263 NAME 'jansSoftStatement'
   DESC 'Soft Statement'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.265 NAME 'jansRptAsJwt'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.264 NAME 'jansRptAsJwt'
   DESC 'jansRptAsJwt'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.266 NAME 'jansCodeChallengeHash'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.265 NAME 'jansCodeChallengeHash'
   DESC 'OX code challenge hash'
   EQUALITY integerMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.267 NAME 'del'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.266 NAME 'del'
   DESC 'del'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.268 NAME 'jansEnabled'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.267 NAME 'jansEnabled'
   DESC 'Status of the entry, used by many objectclasses'
   EQUALITY booleanMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.269 NAME 'jansAlias'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.268 NAME 'jansAlias'
   DESC 'jansAlias'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.270 NAME 'jansLogoPath'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.269 NAME 'jansLogoPath'
   DESC 'jansLogoPath'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.271 NAME 'jansFaviconPath'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.270 NAME 'jansFaviconPath'
   DESC 'jansFaviconPath'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.272 NAME 'jansSmtpServerTrust'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.271 NAME 'jansSmtpServerTrust'
   DESC 'Trust SMTP server'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.273 NAME 'jansBackchannelTknDeliveryMode'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.272 NAME 'jansBackchannelTknDeliveryMode'
   DESC 'jans Backchannel Tkn Delivery Mode'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.274 NAME 'jansBackchannelClntNotificationEndpoint'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.273 NAME 'jansBackchannelClntNotificationEndpoint'
   DESC 'jans Backchannel Clnt Notification Endpoint'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.275 NAME 'jansBackchannelAuthnReqSigAlg'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.274 NAME 'jansBackchannelAuthnReqSigAlg'
   DESC 'jans Backchannel Authn Req Sig Alg'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.276 NAME 'jansBackchannelUsrCodeParameter'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.275 NAME 'jansBackchannelUsrCodeParameter'
   DESC 'jans Backchannel Usr Code Parameter'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.277 NAME 'jansBackchannelDeviceRegistrationTkn'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.276 NAME 'jansBackchannelDeviceRegistrationTkn'
   DESC 'jans Backchannel Device Registration Tkn'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.278 NAME 'jansBackchannelUsrCode'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.277 NAME 'jansBackchannelUsrCode'
   DESC 'jans Backchannel Usr Code'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.279 NAME 'jansDocStoreConf'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.278 NAME 'jansDocStoreConf'
   DESC 'jansDocStoreConf'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.280 NAME 'authReqId'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.279 NAME 'authReqId'
   DESC 'Authn request id'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
@@ -1627,13 +1622,13 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.2 NAME 'jansPerson'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( jansAssociatedClnt $ c $ displayName $ givenName $ jansManagedOrganizations $ jansOptOuts $ jansStatus $ inum $ mail $ jansSLAManager $ memberOf $ o $ jansPersistentJWT $ jansCreationTimestamp $ jansExternalUid $ jansOTPCache $ jansLastLogonTime $ jansActive $ jansAddres $ jansEmail $ jansEntitlements $ jansExternalId $ jansImsValue $ jansMetaCreated $ jansMetaLastMod $ jansMetaLocation $ jansMetaVer $ jansNameFormatted $ jansPhoneValue $ jansPhotos $ jansProfileURL $ jansRole $ jansTitle $ jansUsrTyp $ jansHonorificPrefix $ jansHonorificSuffix $ jans509Certificate $ jansPassExpDate $ persistentId $ middleName $ nickname $ jansPrefUsrName $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ jansCountInvalidLogin $ jansEnrollmentCode $ jansIMAPData $ jansPPID $ jansGuid $ jansPreferredMethod $ userCertificate $ jansOTPDevices $ jansMobileDevices $ jansStrongAuthPolicy $ jansUnlinkedExternalUids $ jansBackchannelDeviceRegistrationTkn $ jansBackchannelUsrCode )
+  MAY ( jansAssociatedClnt $ c $ displayName $ givenName $ jansManagedOrganizations $ jansOptOuts $ jansStatus $ inum $ mail $ memberOf $ o $ jansPersistentJWT $ jansCreationTimestamp $ jansExternalUid $ jansOTPCache $ jansLastLogonTime $ jansActive $ jansAddres $ jansEmail $ jansEntitlements $ jansExternalId $ jansImsValue $ jansMetaCreated $ jansMetaLastMod $ jansMetaLocation $ jansMetaVer $ jansNameFormatted $ jansPhoneValue $ jansPhotos $ jansProfileURL $ jansRole $ jansTitle $ jansUsrTyp $ jansHonorificPrefix $ jansHonorificSuffix $ jans509Certificate $ jansPassExpDate $ persistentId $ middleName $ nickname $ jansPrefUsrName $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ jansCountInvalidLogin $ jansEnrollmentCode $ jansIMAPData $ jansPPID $ jansGuid $ jansPreferredMethod $ userCertificate $ jansOTPDevices $ jansMobileDevices $ jansStrongAuthPolicy $ jansUnlinkedExternalUids $ jansBackchannelDeviceRegistrationTkn $ jansBackchannelUsrCode )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.3 NAME 'jansGrp'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ description $ displayName $ jansGrpTyp $ jansGrpVisibility $ jansStatus $ inum $ member $ o $ owner $ seeAlso $ jansMetaCreated $ jansMetaLastMod $ jansMetaLocation $ jansMetaVer )
+  MAY ( c $ description $ displayName $ jansStatus $ inum $ member $ o $ owner $ seeAlso $ jansMetaCreated $ jansMetaLastMod $ jansMetaLocation $ jansMetaVer )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.4 NAME 'jansOrganization'
   SUP ( top )
@@ -1645,7 +1640,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'jansAppConf'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ ou $ description $ displayName $ jansHostname $ jansLastUpd $ jansManageIdentityPermission $ jansManager $ jansOrgProfileMgt $ jansScimEnabled $ jansEmail $ jansSmtpFromEmailAddr $ jansSmtpFromName $ jansSmtpHost $ jansSmtpPass $ jansSmtpPort $ jansSmtpRequiresAuthn $ jansSmtpRequiresSsl $ jansSmtpUsrName $ jansSslExpiry $ jansStatus $ jansTargetRAM $ jansUrl $ inum $ o $ jansAuthMode $ jansIDPAuthn $ jansLogViewerConfig $ jansLogConfigLocation $ jansSmtpConf $ jansCacheConf $ jansDocStoreConf $ jansSoftVer $ userPassword $ jansCacheRefreshServerIpAddr $ jansSmtpServerTrust $ jansConfDyn $ jansConfErrors $ jansConfStatic $ jansConfWebKeys $ jansRevision $ jansWebKeysSettings $ jansConfApp $ jansRevision $ jansConfDyn $ jansConfStatic $ jansRevision )
+  MAY ( c $ ou $ description $ displayName $ jansHostname $ jansLastUpd $ jansManager $ jansOrgProfileMgt $ jansScimEnabled $ jansEmail $ jansSmtpFromEmailAddr $ jansSmtpFromName $ jansSmtpHost $ jansSmtpPass $ jansSmtpPort $ jansSmtpRequiresAuthn $ jansSmtpRequiresSsl $ jansSmtpUsrName $ jansSslExpiry $ jansStatus $ jansUrl $ inum $ o $ jansAuthMode $ jansIDPAuthn $ jansLogViewerConfig $ jansLogConfigLocation $ jansSmtpConf $ jansCacheConf $ jansDocStoreConf $ jansSoftVer $ userPassword $ jansCacheRefreshServerIpAddr $ jansSmtpServerTrust $ jansConfDyn $ jansConfErrors $ jansConfStatic $ jansConfWebKeys $ jansRevision $ jansWebKeysSettings $ jansConfApp $ jansRevision $ jansConfDyn $ jansConfStatic $ jansRevision )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'jansAttr'
   SUP ( top )
