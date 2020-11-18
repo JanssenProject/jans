@@ -1,8 +1,8 @@
 dn: inum=XXXX.AAAA-1111,ou=people,o=jans
 birthdate: 20140101000000Z
 displayName: Test Aaaa 1111
-excludeEmail: {"value":"aaaa1111@test.email","type":"work","primary":false,"display":null}
-excludeExternalId: 11000
+jansEmail: {"value":"aaaa1111@test.email","type":"work","primary":false,"display":null}
+jansExternalId: 11000
 givenName: Aaaa 1111
 inum: XXXX.AAAA-1111
 jansStatus: active
@@ -18,7 +18,7 @@ dn: inum=XXXX.AAAA-2222,ou=people,o=jans
 birthdate: 20140210000000Z
 displayName: Test Aaaa 2222
 jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
-excludeExternalId: 12000
+jansExternalId: 12000
 givenName: Aaaa 2222
 inum: XXXX.AAAA-2222
 jansStatus: active
@@ -32,7 +32,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.AAAA-3333,ou=people,o=jans
 birthdate: 20140307000000Z
 displayName: Test Aaaa 3333
-excludeExternalId: 13000
+jansExternalId: 13000
 givenName: Aaaa 3333
 inum: XXXX.AAAA-3333
 jansStatus: active
@@ -46,7 +46,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.AAAA-4444,ou=people,o=jans
 birthdate: 20140425000000Z
 displayName: Test Aaaa 4444
-excludeExternalId: 14000
+jansExternalId: 14000
 givenName: Aaaa 4444
 inum: XXXX.AAAA-4444
 jansStatus: active
@@ -60,7 +60,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.AAAA-5555,ou=people,o=jans
 birthdate: 20140518000000Z
 displayName: Test Aaaa 5555
-excludeExternalId: 15000
+jansExternalId: 15000
 givenName: Aaaa 5555
 inum: XXXX.AAAA-5555
 jansStatus: active
@@ -74,8 +74,8 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-1111,ou=people,o=jans
 birthdate: 20150108000000Z
 displayName: Test Bbbb 1111
-excludeEmail: {"value":"bbbb1111@test.email","type":"home","primary":true,"display":null}
-excludeExternalId: 21000
+jansEmail: {"value":"bbbb1111@test.email","type":"home","primary":true,"display":null}
+jansExternalId: 21000
 givenName: Bbbb 1111
 inum: XXXX.BBBB-1111
 jansStatus: active
@@ -91,7 +91,7 @@ dn: inum=XXXX.BBBB-2222,ou=people,o=jans
 birthdate: 20150214000000Z
 displayName: Test Bbbb 2222
 jansAddres: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
-excludeExternalId: 22000
+jansExternalId: 22000
 givenName: Bbbb 2222
 inum: XXXX.BBBB-2222
 jansStatus: active
@@ -105,7 +105,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-3333,ou=people,o=jans
 birthdate: 20150321000000Z
 displayName: Test Bbbb 3333
-excludeExternalId: 23000
+jansExternalId: 23000
 givenName: Bbbb 3333
 inum: XXXX.BBBB-3333
 jansStatus: active
@@ -119,7 +119,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-4444,ou=people,o=jans
 birthdate: 20150420000000Z
 displayName: Test Bbbb 4444
-excludeExternalId: 24000
+jansExternalId: 24000
 givenName: Bbbb 4444
 inum: XXXX.BBBB-4444
 jansStatus: active
@@ -133,7 +133,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.BBBB-5555,ou=people,o=jans
 birthdate: 20150530000000Z
 displayName: Test Bbbb 5555
-excludeExternalId: 25000
+jansExternalId: 25000
 givenName: Bbbb 5555
 inum: XXXX.BBBB-5555
 jansStatus: active
@@ -147,8 +147,8 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-1111,ou=people,o=jans
 birthdate: 20160125000000Z
 displayName: Test Cccc 1111
-excludeEmail: {"value":"cccc1111@test.email","type":"work","primary":true,"display":null}
-excludeExternalId: 31000
+jansEmail: {"value":"cccc1111@test.email","type":"work","primary":true,"display":null}
+jansExternalId: 31000
 givenName: Cccc 1111
 inum: XXXX.CCCC-1111
 jansStatus: active
@@ -164,7 +164,7 @@ dn: inum=XXXX.CCCC-2222,ou=people,o=jans
 birthdate: 20160119000000Z
 displayName: Test Cccc 2222
 jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
-excludeExternalId: 32000
+jansExternalId: 32000
 givenName: Cccc 2222
 inum: XXXX.CCCC-2222
 jansStatus: active
@@ -178,7 +178,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-3333,ou=people,o=jans
 birthdate: 20160229194603Z
 displayName: Test Cccc 3333
-excludeExternalId: 33000
+jansExternalId: 33000
 givenName: Cccc 3333
 inum: XXXX.CCCC-3333
 jansStatus: active
@@ -192,7 +192,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-4444,ou=people,o=jans
 birthdate: 20160315000000Z
 displayName: Test Cccc 4444
-excludeExternalId: 34000
+jansExternalId: 34000
 givenName: Cccc 4444
 inum: XXXX.CCCC-4444
 jansStatus: active
@@ -206,7 +206,7 @@ userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
 dn: inum=XXXX.CCCC-5555,ou=people,o=jans
 birthdate: 20160413000000Z
 displayName: Test Cccc 5555
-excludeExternalId: 35000
+jansExternalId: 35000
 givenName: Cccc 5555
 inum: XXXX.CCCC-5555
 jansStatus: active
