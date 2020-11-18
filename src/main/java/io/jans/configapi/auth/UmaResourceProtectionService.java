@@ -162,7 +162,7 @@ public class UmaResourceProtectionService {
                     umaResource.setId(id);
                     umaResource.setDn(umaResourceService.getDnForResource(id));
                     umaResource.setName(umaResourceName);
-                    umaResource.setScopes(getScopes(condition.getScopes()));
+                    umaResource.setScopes(condition.getScopes());
 
                     umaResourceService.addResource(umaResource);
                 }
@@ -172,15 +172,5 @@ public class UmaResourceProtectionService {
             }
         }
     }
-
-    private List<String> getScopes(List<String> resourceScopes) {
-        List<String> scopes = new ArrayList();
-        log.debug("getScopes() - resourceScopes= " + resourceScopes);
-        for (String strScope : resourceScopes) {
-            scopes.add(strScope);
-        }
-        log.debug("getScopes() - scopes= " + scopes);
-        return scopes;
-
-    }
+   
 }
