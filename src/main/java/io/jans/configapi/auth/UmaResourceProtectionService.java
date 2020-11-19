@@ -10,10 +10,13 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.Jackson;
+import org.slf4j.Logger;
 
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,8 +24,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
 
 @ApplicationScoped
 public class UmaResourceProtectionService {
@@ -141,7 +142,10 @@ public class UmaResourceProtectionService {
                 }
 
                 // Check in DB
-                List<UmaResource> umaResources = umaResourceService.findResources(umaResourceName, 2);
+                List<UmaResource> umaResources = umaResourceService.findResourcesByName(umaResourceName, 2);
+                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - findResources() -> umaResources = "
+                        + umaResources + "\n\n");
+                
                 UmaResource umaResource = null;
 
                 if (umaResources != null && !umaResources.isEmpty()) {
@@ -149,7 +153,7 @@ public class UmaResourceProtectionService {
                     umaResource = umaResources.get(0);
                     if (umaResources.size() > 1) {
                         log.error(umaResources.size() + " UMA Resource with same name.");
-                        throw new WebApplicationException("Multiple UMA Resource with same name - "+umaResourceName,
+                        throw new WebApplicationException("Multiple UMA Resource with same name - " + umaResourceName,
                                 Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
                     }
                 }
@@ -163,14 +167,27 @@ public class UmaResourceProtectionService {
                     umaResource.setDn(umaResourceService.getDnForResource(id));
                     umaResource.setName(umaResourceName);
                     umaResource.setScopes(condition.getScopes());
-
-                    umaResourceService.addResource(umaResource);
+                    umaResource.setCreationDate(getCreationDate(rsResource));
+                    umaResource.setDescription("Config API Resource - "+umaResourceName);
+                    
+                   umaResourceService.addResource(umaResource);
                 }
 
                 // Add to cache
                 UmaResourceProtectionCache.putUmaResource(umaResourceName, umaResource);
             }
         }
+    }
+    
+    private Date getCreationDate(RsResource rsResource) {
+        final Calendar calendar = Calendar.getInstance();
+        Date iat = calendar.getTime();
+
+        if (rsResource.getIat() != null && rsResource.getIat() > 0) {
+            iat = new Date(rsResource.getIat() * 1000L);
+        }
+
+        return iat;
     }
    
 }
