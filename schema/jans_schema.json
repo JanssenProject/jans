@@ -287,94 +287,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Jans Server SMTP configuration",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpFromEmailAddr"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP From Name",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpFromName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Host",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpHost"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Usr Pass",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpPass"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Port",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpPort"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Requires Authn",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpRequiresAuthn"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Requires SSL",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpRequiresSsl"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
-      "desc": "SMTP Usr Name",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpUsrName"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "SAML Trust Relationship configuration",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -1252,7 +1164,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansExternalUid"
+        "jansExtUid"
       ],
       "multivalued": true,
       "oid": "jansAttr",
@@ -1261,7 +1173,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Stores a used OTP to prevent a hacker from using it again. Complementary to jansExternalUid attribute",
+      "desc": "Stores a used OTP to prevent a hacker from using it again. Complementary to jansExtUid attribute",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansOTPCache"
@@ -1812,7 +1724,7 @@
     {
       "equality": "caseExactMatch",
       "names": [
-        "jansExternalId"
+        "jansExtId"
       ],
       "oid": "jansAttr",
       "substr": "caseExactSubStringsMatch",
@@ -2697,7 +2609,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Jans Casa - Json representation of OTP devices. Complementary to jansExternalUid attribute",
+      "desc": "Jans Casa - Json representation of OTP devices. Complementary to jansExtUid attribute",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansOTPDevices"
@@ -2763,7 +2675,7 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Jans Casa - List of unlinked social accounts (ie disabled jansExternalUids)",
+      "desc": "Jans Casa - List of unlinked social accounts (ie disabled jansExtUids)",
       "equality": "caseIgnoreMatch",
       "names": [
         "jansUnlinkedExternalUids"
@@ -2933,17 +2845,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "Trust SMTP server",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "jansSmtpServerTrust"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "jans Backchannel Tkn Delivery Mode",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3069,14 +2970,14 @@
         "o",
         "jansPersistentJWT",
         "jansCreationTimestamp",
-        "jansExternalUid",
+        "jansExtUid",
         "jansOTPCache",
         "jansLastLogonTime",
         "jansActive",
         "jansAddres",
         "jansEmail",
         "jansEntitlements",
-        "jansExternalId",
+        "jansExtId",
         "jansImsValue",
         "jansMetaCreated",
         "jansMetaLastMod",
@@ -3231,14 +3132,7 @@
         "jansOrgProfileMgt",
         "jansScimEnabled",
         "jansEmail",
-        "jansSmtpFromEmailAddr",
-        "jansSmtpFromName",
-        "jansSmtpHost",
-        "jansSmtpPass",
-        "jansSmtpPort",
-        "jansSmtpRequiresAuthn",
-        "jansSmtpRequiresSsl",
-        "jansSmtpUsrName",
+        "jansSmtpConf",
         "jansSslExpiry",
         "jansStatus",
         "jansUrl",
@@ -3248,22 +3142,16 @@
         "jansDbAuth",
         "jansLogViewerConfig",
         "jansLogConfigLocation",
-        "jansSmtpConf",
         "jansCacheConf",
         "jansDocStoreConf",
         "jansSoftVer",
         "userPassword",
-        "jansSmtpServerTrust",
         "jansConfDyn",
         "jansConfErrors",
         "jansConfStatic",
         "jansConfWebKeys",
-        "jansRevision",
         "jansWebKeysSettings",
         "jansConfApp",
-        "jansRevision",
-        "jansConfDyn",
-        "jansConfStatic",
         "jansRevision"
       ],
       "must": [
