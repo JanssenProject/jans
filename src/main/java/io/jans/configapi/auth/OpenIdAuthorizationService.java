@@ -41,7 +41,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer " + token, token);
+        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim());
         log.debug("\n\n OpenIdAuthorizationService::processAuthorization() - introspectionResponse = " + introspectionResponse + "\n\n");
 
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
