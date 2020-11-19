@@ -49,13 +49,6 @@
     },
 
     {
-        "attribute": "jansClientId",
-        "type": "string",
-        "index": ["equality"],
-        "backend": ["userRoot"]
-    },
-
-    {
         "attribute": "clnId",
         "type": "string",
         "index": ["equality"],
@@ -63,7 +56,7 @@
     },
 
     {
-        "attribute": "jansClientSecretExpiresAt",
+        "attribute": "jansClntSecretExpAt",
         "type": "date",
         "index": ["ordering"],
         "backend": ["userRoot"]
@@ -110,7 +103,7 @@
     },
 
     {
-        "attribute": "jansScriptType",
+        "attribute": "jansScrTyp",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot", "site"]
@@ -131,21 +124,14 @@
     },
 
     {
-        "attribute": "lastModifiedTime",
-        "type": "date",
-        "index": ["ordering"],
-        "backend": ["userRoot"]
-    },
-
-    {
-        "attribute": "jansApplication",
+        "attribute": "jansApp",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
     },
 
     {
-        "attribute": "jansRequestId",
+        "attribute": "jansReqId",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -173,14 +159,14 @@
     },
 
     {
-        "attribute": "jansApplicationType",
+        "attribute": "jansAppTyp",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot", "metric"]
     },
 
     {
-        "attribute": "jansMetricType",
+        "attribute": "jansMetricTyp",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot", "metric"]
@@ -215,7 +201,7 @@
     },
 
     {
-        "attribute": "jansExternalUid",
+        "attribute": "jansExtUid",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -257,21 +243,14 @@
     },
 
     {
-        "attribute": "jansStatus",
+        "attribute": "jansAttrs",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
     },
 
     {
-        "attribute": "jansAttributes",
-        "type": "string",
-        "index": ["equality"],
-        "backend": ["userRoot"]
-    },
-
-    {
-        "attribute": "jansConfigurationCode",
+        "attribute": "jansConfCode",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -292,7 +271,7 @@
     },
 
     {
-        "attribute": "jansUserId",
+        "attribute": "jansUsrId",
         "type": "string",
         "index": ["equality"],
         "backend": ["userRoot"]
@@ -306,14 +285,14 @@
     },
 
     {
-        "attribute": "jansTrustExternalId",
+        "attribute": "jansExtId",
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
     },
 
     {
-        "attribute": "jansUserDN",
+        "attribute": "jansUsrDN",
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
