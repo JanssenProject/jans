@@ -310,6 +310,25 @@ objectClass: top
 objectClass: jansAttr
 urn: urn:jans:dir:attribute-def:secretAnswer
 
+dn: inum=6493,ou=attributes,o=jans
+description: Preferred Language
+displayName: Preferred Language
+inum: 6493
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: preferredLanguage
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansAttrViewTyp: whitePages
+jansSAML1URI: urn:mace:dir:attribute-def:preferredLanguage
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.39
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:preferredLanguage
+
 dn: inum=CAE3,ou=attributes,o=jans
 description: Primary Email Address
 displayName: Email
