@@ -13,7 +13,6 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.PairwiseIdentifier;
 import io.jans.as.persistence.model.SectorIdentifier;
-import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.orm.PersistenceEntryManager;
@@ -93,10 +92,6 @@ public class SectorIdentifierService {
         if (client == null) {
             log.trace("Client is null, return blank sub.");
             return "";
-        }
-
-        if (grant.getAuthorizationGrantType() == AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-            return user.getUserId();
         }
 
         return getSub(client, user, grant instanceof CIBAGrant);
