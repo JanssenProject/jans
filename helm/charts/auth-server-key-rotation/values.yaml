@@ -1,0 +1,24 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+# Default values for auth-server-key-rotation.
+image:
+  repository: janssenproject/certmanager
+  tag: 5.0.0_dev
+  pullPolicy: Always
+keysLife: 48
+nameOverride: ""
+fullnameOverride: ""
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 300Mi
+  requests:
+    cpu: 300m
+    memory: 300Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

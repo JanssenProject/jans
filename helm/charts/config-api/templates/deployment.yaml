@@ -1,0 +1,102 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "config-api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: config-api
+{{ include "config-api.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "config-api.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "config-api.name" . }}
+        release: {{ .Release.Name }}
+      {{- if .Values.global.istio.ingress }}
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+          command:
+            - /bin/sh
+            - -c 
+            - |
+                /usr/bin/python3 /scripts/updatelbip.py &
+                /app/scripts/entrypoint.sh
+          {{- end }}
+          ports:
+            - containerPort: 9444
+            - containerPort: 8074
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config-cm
+          livenessProbe:
+            httpGet:
+              path: /health-check/live
+              port: 8074
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health-check/ready
+              port: 8074
+            initialDelaySeconds: 25
+            periodSeconds: 25
+            timeoutSeconds: 5
+          volumeMounts:
+          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+            - name: cb-pass
+              mountPath: "/etc/jans/conf/couchbase_password"
+              subPath: couchbase_password
+            - name: cb-crt
+              mountPath: "/etc/certs/couchbase.crt"
+              subPath: couchbase.crt
+          {{- end }}
+            {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+            - name: {{ include "config-api.name" . }}-updatelbip
+              mountPath: /scripts
+            {{- end }}
+          {{- if or (eq .Values.global.provisioner "microk8s.io/hostpath" ) (eq .Values.global.provisioner "k8s.io/minikube-hostpath") }}
+          resources: {}
+          {{- else if .Values.global.cloud.testEnviroment }}
+          resources: {}
+          {{- else }}
+          resources:
+{{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+      volumes:
+      {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: cb-pass
+          secret:
+            secretName: {{ .Release.Name }}-cb-pass
+        - name: cb-crt
+          secret:
+            secretName: {{ .Release.Name }}-cb-crt
+      {{- end }}
+        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+        - name: {{ include "config-api.name" . }}-updatelbip
+          configMap:
+            name: {{ .Release.Name }}-updatelbip
+        {{- end }}
+      {{- if eq .Values.global.isDomainRegistered "false" }}
+      hostAliases:
+      - ip: {{ .Values.global.lbIp }}
+        hostnames:
+        - {{ .Values.global.domain }}
+      {{- end }}
+

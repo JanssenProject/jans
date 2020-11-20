@@ -1,0 +1,11 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "config.name" . }}-cn-role
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: [""] # "" refers to the core API group
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

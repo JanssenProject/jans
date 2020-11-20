@@ -1,0 +1,11 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: v1
+appVersion: "5.0.0"
+description: client-api chart
+name: client-api
+version: 1.2.16
+maintainers:
+- name: Janssen
+email: support@jans.io
+home: https://jans.io

@@ -1,0 +1,27 @@
+{{- if .Values.global.istio.ingress }}
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-fido2-configuration
+  namespace: {{.Release.Namespace}}
+spec:
+  hosts:
+  - {{ .Values.global.domain }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw 
+  http:
+  - name: {{ .Release.Name }}-istio-fido2-configuration
+    match:
+    - uri:
+        prefix: /.well-known/fido2-configuration
+    rewrite:
+      uri: /fido2/restv1/fido2/configuration
+    route:
+    - destination:
+        host: {{ .Values.service.fido2ServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100
+{{- end }}

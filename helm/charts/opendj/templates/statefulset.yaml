@@ -1,0 +1,87 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "opendj.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "opendj.labels" . | indent 4}}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "opendj.name" . }} 
+  serviceName: {{ include "opendj.name" . }}
+  replicas: {{ .Values.replicas }} 
+  template:
+    metadata:
+      labels:
+        app: {{ include "opendj.name" . }}
+      {{- if .Values.global.istio.ingress }}
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+    spec:
+      containers:
+      - name: {{ include "opendj.fullname" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        #securityContext:
+        #  runAsUser: 1000
+        #  runAsNonRoot: true
+        lifecycle:
+          preStop:
+            exec:
+              command: ["python3", "/app/scripts/deregister_peer.py"]
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        ports:
+        {{- range $key, $value := .Values.ports }}
+          - containerPort: {{ $value.targetPort }}
+            name: {{ $key }}
+        {{- end }}
+        volumeMounts:
+        {{- range $key, $values := .Values.volumeMounts }}
+          - mountPath: {{$values.mountPath}}
+            name: {{$values.name}}
+            subPath: {{$key}}
+        {{- end }}
+        livenessProbe:
+          exec:
+            command:
+            - python3
+            - /app/scripts/healthcheck.py
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 20
+        readinessProbe:
+          exec:
+            command:
+            - python3
+            - /app/scripts/healthcheck.py
+          initialDelaySeconds: 25
+          timeoutSeconds: 5
+          periodSeconds: 25
+          failureThreshold: 20
+        {{- if or (eq .Values.global.provisioner "microk8s.io/hostpath" ) (eq .Values.global.provisioner "k8s.io/minikube-hostpath") }}
+        resources: {}
+        {{- else if .Values.global.cloud.testEnviroment }}
+        resources: {}
+        {{- else }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: opendj-volume
+    spec:
+      accessModes:
+      - {{ .Values.persistence.accessModes }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}
+      storageClassName: {{ include "opendj.fullname" . | quote }}
+{{- end }}

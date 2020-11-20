@@ -1,0 +1,22 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.ldapServiceName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "opendj.labels" . | indent 4}}
+spec:
+  ports:
+    {{- range $key, $value := .Values.ports }}
+    - port: {{ $value.port }}
+      name: {{ $key }}
+      targetPort: {{ $value.targetPort }}
+      protocol: {{ $value.protocol}}
+    {{- end }}
+  clusterIP: None
+  selector:
+    app: {{ include "opendj.name" . }}
+{{- end }}
