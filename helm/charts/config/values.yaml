@@ -1,0 +1,77 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+# Required environment variables for generating Janssen server initial config
+#values for environment variables
+orgName: Janssen
+# email address of the administrator usually. Used for certificate creation
+email: support@jans.com
+# adminPass is administrator password for oxTrust
+adminPass: P@ssw0rd
+# ldapPass is the password for LDAP
+ldapPass: P@ssw0rd
+#redisPass is the password for redis admin if used
+redisPass: P@assw0rd
+# organisation location details
+countryCode: US
+state: TX
+city: SLC
+cnLdapInit: true
+cnLdapInitPort: 1636
+configmap:
+  cnConfigKubernetesConfigMap: cn
+  cnSecretKubernetesSecret: cn
+  cnClientApiApplicationCertCn: client-api
+  cnClientApiAdminCertCn: client-api
+  # used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
+  # NOTE: For the CB instalation please check the documentation
+  cnCouchbaseCrt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURlakNDQW1LZ0F3SUJBZ0lKQUwyem5UWlREUHFNTUEwR0NTcUdTSWIzRFFFQkN3VUFNQzB4S3pBcEJnTlYKQkFNTUlpb3VZMkpuYkhWMUxtUmxabUYxYkhRdWMzWmpMbU5zZFhOMFpYSXViRzlqWVd3d0hoY05NakF3TWpBMQpNRGt4T1RVeFdoY05NekF3TWpBeU1Ea3hPVFV4V2pBdE1Tc3dLUVlEVlFRRERDSXFMbU5pWjJ4MWRTNWtaV1poCmRXeDBMbk4yWXk1amJIVnpkR1Z5TG14dlkyRnNNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUIKQ2dLQ0FRRUFycmQ5T3lvSnRsVzhnNW5nWlJtL2FKWjJ2eUtubGU3dVFIUEw4Q2RJa1RNdjB0eHZhR1B5UkNQQgo3RE00RTFkLzhMaU5takdZZk41QjZjWjlRUmNCaG1VNmFyUDRKZUZ3c0x0cTFGT3MxaDlmWGo3d3NzcTYrYmlkCjV6Umw3UEE0YmdvOXVkUVRzU1UrWDJUUVRDc0dxVVVPWExrZ3NCMjI0RDNsdkFCbmZOeHcvYnFQa2ZCQTFxVzYKVXpxellMdHN6WE5GY0dQMFhtU3c4WjJuaFhhUGlva2pPT2dyMkMrbVFZK0htQ2xGUWRpd2g2ZjBYR0V0STMrKwoyMStTejdXRkF6RlFBVUp2MHIvZnk4TDRXZzh1YysvalgwTGQrc2NoQTlNQjh3YmJORUp2ZjNMOGZ5QjZ0cTd2CjF4b0FnL0g0S1dJaHdqSEN0dFVnWU1oU0xWV3UrUUlEQVFBQm80R2NNSUdaTUIwR0ExVWREZ1FXQkJTWmQxWU0KVGNIRVZjSENNUmp6ejczZitEVmxxREJkQmdOVkhTTUVWakJVZ0JTWmQxWU1UY0hFVmNIQ01Sanp6NzNmK0RWbApxS0V4cEM4d0xURXJNQ2tHQTFVRUF3d2lLaTVqWW1kc2RYVXVaR1ZtWVhWc2RDNXpkbU11WTJ4MWMzUmxjaTVzCmIyTmhiSUlKQUwyem5UWlREUHFNTUF3R0ExVWRFd1FGTUFNQkFmOHdDd1lEVlIwUEJBUURBZ0VHTUEwR0NTcUcKU0liM0RRRUJDd1VBQTRJQkFRQk9meTVWSHlKZCtWUTBXaUQ1aSs2cmhidGNpSmtFN0YwWVVVZnJ6UFN2YWVFWQp2NElVWStWOC9UNnE4Mk9vVWU1eCtvS2dzbFBsL01nZEg2SW9CRnVtaUFqek14RTdUYUhHcXJ5dk13Qk5IKzB5CnhadG9mSnFXQzhGeUlwTVFHTEs0RVBGd3VHRlJnazZMRGR2ZEN5NVdxWW1MQWdBZVh5VWNaNnlHYkdMTjRPUDUKZTFiaEFiLzRXWXRxRHVydFJrWjNEejlZcis4VWNCVTRLT005OHBZN05aaXFmKzlCZVkvOEhZaVQ2Q0RRWWgyTgoyK0VWRFBHcFE4UkVsRThhN1ZLL29MemlOaXFyRjllNDV1OU1KdjM1ZktmNUJjK2FKdWduTGcwaUZUYmNaT1prCkpuYkUvUENIUDZFWmxLaEFiZUdnendtS1dDbTZTL3g0TklRK2JtMmoKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  cnCouchbasePass: P@ssw0rd
+  # cnCouchbaseUrl is the couchbase service name
+  cnCouchbaseUrl: cbjans.default.svc.cluster.local
+  cnCouchbaseUser: admin
+  # cnCouchbasePassFile is the location of password file. Should be named `couchbase_password` containing only password file
+  cnCouchbasePassFile:  /etc/jans/conf/couchbase_password
+  # cnCouchbaseCertFile location of
+  cnCouchbaseCertFile: /etc/certs/couchbase.crt
+  # options: default/user/site/cache/statistic
+  # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
+  cnPersistenceLdapMapping: default
+  # options REDIS/NATIVE_PERSISTENCE
+  cnCacheType: NATIVE_PERSISTENCE
+  cnMaxRamPercent: "75.0"
+  configAdapterName: kubernetes
+  containerMetadataName: kubernetes
+  configSecretAdapter: kubernetes
+  # If REDIS is the Cache Type or if going to be used with clientApi
+  cnRedisUrl: redis:6379
+  cnRedisUseSsl: "false"
+  cnRedisType: STANDALONE
+  cnRedisSslTruststore: ""
+  cnRedisSentinelGroup: ""
+  cnAuthServerBackend: auth-server:8080
+  cnClientApiServerUrl: client-api:8443
+  cnClientApiBindIpAddresses: "*"
+  cnLdapUrl: opendj:1636
+  # Jackrabbit content repository
+  cnJackrabbitPostgresUser: jackrabbit
+  cnJackrabbitPostgresPasswordFile: /etc/jans/conf/postgres_password
+  cnJackrabbitPostgresDatabaseName: jackrabbit
+  cnJackrabbitPostgresHost: postgres.postgres.svc.cluster.local
+  cnJackrabbitPostgresPort: 5432
+  cnJackrabbitSyncInterval: 300
+  cnJackrabbitUrl: http://jackrabbit:8080
+  cnJackrabbitAdminId: admin
+  cnJackrabbitAdminPassFile: /etc/jans/conf/jackrabbit_admin_password
+  # Options LOCAL / JCA (jackrabbit)
+  cnDocumentStoreType: JCA
+  lbAddr: "" # axx-109xx52.us-west-2.elb.amazonaws.com
+  ldapServiceName: opendj
+  #support for oxtrust API
+  cnSamlEnabled: true
+
+nameOverride: ""
+fullNameOverride: ""
+
+image:
+  repository: janssenproject/configuration-manager
+  tag: 5.0.0_dev

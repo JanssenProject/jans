@@ -1,0 +1,14 @@
+{{- if .Values.global.istio.ingress }}
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-fido2-mtls
+  namespace: {{.Release.Namespace}}
+spec:
+  host: {{ .Values.service.fido2ServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}
