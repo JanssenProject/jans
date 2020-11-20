@@ -26,4 +26,5 @@ sudo apt-get instiall docker-ce docker-ce-cli containerd.io -y
 microk8s.kubectl create namespace jans
 microk8s.config > ~/.kube/config
 ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp="$ip"
+helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp="$ip" \
+|| echo "Please get ip of the instance and run helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp=<ip>"
