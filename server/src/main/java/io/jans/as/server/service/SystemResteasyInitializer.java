@@ -1,0 +1,34 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.as.server.service;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
+import io.jans.as.server.ws.rs.controller.HealthCheckController;
+
+/**
+ * Integration with Resteasy
+ * 
+ * @author Yuriy Movchan
+ * @version 0.1, 11/13/2020
+ */
+@ApplicationPath("/sys")
+public class SystemResteasyInitializer extends Application {	
+
+	@Override
+    public Set<Class<?>> getClasses() {
+        HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        classes.add(HealthCheckController.class);
+
+        return classes;
+    }
+
+}
