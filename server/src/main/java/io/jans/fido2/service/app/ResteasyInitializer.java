@@ -15,7 +15,6 @@ import javax.ws.rs.core.Application;
 import io.jans.fido2.ws.rs.controller.AssertionController;
 import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.fido2.ws.rs.controller.ConfigurationController;
-import io.jans.fido2.ws.rs.controller.HealthCheckController;
 
 /**
  * Integration with Resteasy
