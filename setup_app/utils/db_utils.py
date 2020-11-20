@@ -266,7 +266,7 @@ class DBUtils:
                     if 'add' in  entry and 'changetype' in entry:
                         base.logIt("LDAP modify add dn:{} entry:{}".format(dn, dict(entry)))
                         change_attr = entry['add'][0]
-                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_ADD, [entry[change_attr][0]])]})
+                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_ADD, entry[change_attr])]})
                         if not ldap_operation_result:
                             base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
                             base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
