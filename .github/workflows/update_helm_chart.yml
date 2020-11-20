@@ -37,7 +37,7 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: update-helm-chart
-          title: 'Update helm chart'
+          title: 'feat(helm): Update Helm Chart'
           body: |
             - Update Helm chart
             - Auto-generated due to a change in the main repo https://github.com/GluuFederation/cloud-native-edition
