@@ -117,10 +117,11 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                     for (String claimDn : scope.getClaims()) {
                         GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
-                        String attributeName = attribute.getName();
-                        Object attributeValue = clientService.getAttribute(client, attribute.getName());
+                        String ldapName = attribute.getName();
+                        Object attributeValue = clientService.getAttribute(client, ldapName);
 
-                        jsonObj.put(attributeName, attributeValue);
+                        String claimName = attribute.getClaimName();
+                        jsonObj.put(claimName, attributeValue);
                     }
                 }
             }

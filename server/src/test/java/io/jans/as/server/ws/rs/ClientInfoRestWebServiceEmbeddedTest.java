@@ -181,9 +181,9 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
-            assertTrue(jsonObj.has("displayName"), "Unexpected result: displayName not found");
+            assertTrue(jsonObj.has("name"), "Unexpected result: name not found");
             assertTrue(jsonObj.has("inum"), "Unexpected result: inum not found");
-            assertTrue(jsonObj.has("jansAppTyp"), "Unexpected result: jansAppTyp not found");
+            assertTrue(jsonObj.has("jansAppType"), "Unexpected result: jansAppTyp not found");
             assertTrue(jsonObj.has("jansIdTknSignedRespAlg"),
                     "Unexpected result: jansIdTknSignedRespAlg not found");
             assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
@@ -223,9 +223,9 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
-            assertTrue(jsonObj.has("displayName"), "Unexpected result: displayName not found");
+            assertTrue(jsonObj.has("name"), "Unexpected result: name not found");
             assertTrue(jsonObj.has("inum"), "Unexpected result: inum not found");
-            assertTrue(jsonObj.has("jansAppTyp"), "Unexpected result: jansAppTyp not found");
+            assertTrue(jsonObj.has("jansAppType"), "Unexpected result: jansAppTyp not found");
             assertTrue(jsonObj.has("jansIdTknSignedRespAlg"),
                     "Unexpected result: jansIdTknSignedRespAlg not found");
             assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
@@ -307,9 +307,9 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
-            assertTrue(jsonObj.has("displayName"), "Unexpected result: displayName not found");
+            assertTrue(jsonObj.has("name"), "Unexpected result: name not found");
             assertTrue(jsonObj.has("inum"), "Unexpected result: inum not found");
-            assertTrue(jsonObj.has("jansAppTyp"), "Unexpected result: oxAuthAppType not found");
+            assertTrue(jsonObj.has("jansAppType"), "Unexpected result: oxAuthAppType not found");
             assertTrue(jsonObj.has("jansIdTknSignedRespAlg"),
                     "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
             assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
