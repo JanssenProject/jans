@@ -12,27 +12,19 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import io.jans.eleven.rest.DeleteKeyRestServiceImpl;
-import io.jans.eleven.rest.GenerateKeyRestServiceImpl;
-import io.jans.eleven.rest.SignRestServiceImpl;
-import io.jans.eleven.rest.VerifySignatureRestServiceImpl;
-
 /**
  * Integration with Resteasy
  * 
  * @author Yuriy Movchan
- * @version 0.1, 03/21/2017
+ * @version 0.1, 11/13/2020
  */
-@ApplicationPath("/rest")
-public class ResteasyInitializer extends Application {	
+@ApplicationPath("/sys")
+public class SystemResteasyInitializer extends Application {	
 
 	@Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(GenerateKeyRestServiceImpl.class);
-        classes.add(DeleteKeyRestServiceImpl.class);
-        classes.add(SignRestServiceImpl.class);
-        classes.add(VerifySignatureRestServiceImpl.class);
+        classes.add(HealthCheckController.class);
 
         return classes;
     }
