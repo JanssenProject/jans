@@ -12,23 +12,21 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import io.jans.notify.rest.MetadataRestServiceImpl;
-import io.jans.notify.rest.NotifyRestServiceImpl;
+import io.jans.notify.service.HealthCheckController;
 
 /**
  * Integration with Resteasy
  * 
  * @author Yuriy Movchan
- * @version September 15, 2017
+ * @version 0.1, 11/13/2020
  */
-@ApplicationPath("/restv1")
-public class ResteasyInitializer extends Application {	
+@ApplicationPath("/sys")
+public class SystemResteasyInitializer extends Application {	
 
 	@Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(MetadataRestServiceImpl.class);
-        classes.add(NotifyRestServiceImpl.class);
+        classes.add(HealthCheckController.class);
 
         return classes;
     }
