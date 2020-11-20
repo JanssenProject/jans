@@ -105,6 +105,13 @@ public class UmaService implements Serializable {
                 boolean rptHasPermissions = isRptHasPermissions(rptStatusResponse);
 
                 if (rptHasPermissions) {
+                    
+                    // Verify exact resource
+                    boolean hasResourcePermission = this.hasResourcePermission(rptStatusResponse, resourceId);
+                    if (!hasResourcePermission) {
+                        log.error("Status response for RPT token: '{}', Resource Id '{}', not contains right resource permissions", rptToken,resourceId);
+                    }
+                    
                     // Collect all scopes
                     List<String> returnScopeIds = new LinkedList<String>();
                     for (UmaPermission umaPermission : rptStatusResponse.getPermissions()) {
@@ -129,6 +136,11 @@ public class UmaService implements Serializable {
 
     private boolean isRptHasPermissions(RptIntrospectionResponse umaRptStatusResponse) {
         return !((umaRptStatusResponse.getPermissions() == null) || umaRptStatusResponse.getPermissions().isEmpty());
+    }
+    
+    private boolean hasResourcePermission(RptIntrospectionResponse umaRptStatusResponse, String resourceId) {
+        return umaRptStatusResponse.getPermissions().stream()
+        .anyMatch(p -> p.getResourceId().equalsIgnoreCase(resourceId));
     }
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
