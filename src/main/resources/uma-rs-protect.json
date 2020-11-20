@@ -1,6 +1,6 @@
 {"resources":[
    {
-        "path":"/api/v1/scopes",
+        "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -17,7 +17,7 @@
         ]
     },
      {
-        "path":"/api/v1/scopes/{inum}",
+        "path":"/jans-config-api/api/v1/scopes/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -34,7 +34,7 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources",
+        "path":"/jans-config-api/api/v1/uma/resources",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -51,7 +51,7 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources/{id}",
+        "path":"/jans-config-api/api/v1/uma/resources/{id}",
         "conditions":[
             {
                 "httpMethods":["GET"],

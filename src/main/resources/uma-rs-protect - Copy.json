@@ -1,6 +1,6 @@
 {"resources":[
     {
-        "path":"/api/v1/acrs",
+        "path":"/jans-config-api/api/v1/acrs",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -17,7 +17,7 @@
         ]
     },
     {
-        "path":"/api/v1/attributes",
+        "path":"/jans-config-api/api/v1/attributes",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -34,7 +34,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/cache",
+        "path":"/jans-config-api/api/v1/config/cache",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -51,7 +51,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/cache/redis",
+        "path":"/jans-config-api/api/v1/config/cache/redis",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -68,7 +68,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/cache/in-memory",
+        "path":"/jans-config-api/api/v1/config/cache/in-memory",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -85,7 +85,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/cache/native-persistence",
+        "path":"/jans-config-api/api/v1/config/cache/native-persistence",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -102,7 +102,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/cache/memcached",
+        "path":"/jans-config-api/api/v1/config/cache/memcached",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -119,7 +119,7 @@
         ]
     },
     {
-        "path":"/api/v1/openid/clients",
+        "path":"/jans-config-api/api/v1/openid/clients",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -136,7 +136,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/oxauth",
+        "path":"/jans-config-api/api/v1/config/oxauth",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -153,7 +153,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/smtp",
+        "path":"/jans-config-api/api/v1/config/smtp",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -170,7 +170,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/smtp/test",
+        "path":"/jans-config-api/api/v1/config/smtp/test",
         "conditions":[
             {
                 "httpMethods":["POST"],
@@ -181,7 +181,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/database/couchbase",
+        "path":"/jans-config-api/api/v1/config/database/couchbase",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -198,7 +198,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/database/couchbase/test",
+        "path":"/jans-config-api/api/v1/config/database/couchbase/test",
         "conditions":[
             {
                 "httpMethods":["POST"],
@@ -209,7 +209,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/scripts",
+        "path":"/jans-config-api/api/v1/config/scripts",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -226,7 +226,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/scripts/type/{type}",
+        "path":"/jans-config-api/api/v1/config/scripts/type/{type}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -237,7 +237,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/scripts/inum/{inum}",
+        "path":"/jans-config-api/api/v1/config/scripts/inum/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -248,7 +248,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/scripts/{inum}",
+        "path":"/jans-config-api/api/v1/config/scripts/{inum}",
         "conditions":[
             {
                 "httpMethods":["DELETE"],
@@ -259,7 +259,7 @@
         ]
     },
      {
-        "path":"/api/v1/fido2/config",
+        "path":"/jans-config-api/api/v1/fido2/config",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -276,7 +276,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/jwks",
+        "path":"/jans-config-api/api/v1/config/jwks",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -293,7 +293,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap",
+        "path":"/jans-config-api/api/v1/config/database/ldap",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -310,7 +310,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap/{name}",
+        "path":"/jans-config-api/api/v1/config/database/ldap/{name}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -327,7 +327,7 @@
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap/test",
+        "path":"/jans-config-api/api/v1/config/database/ldap/test",
         "conditions":[
             {
                 "httpMethods":["POST"],
@@ -338,7 +338,7 @@
         ]
     },
      {
-        "path":"/api/v1/logging",
+        "path":"/jans-config-api/api/v1/logging",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -355,7 +355,7 @@
         ]
     },
      {
-        "path":"/api/v1/openid/sectoridentifiers",
+        "path":"/jans-config-api/api/v1/openid/sectoridentifiers",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -372,7 +372,7 @@
         ]
     },
      {
-        "path":"/api/v1/openid/sectoridentifiers/{inum}",
+        "path":"/jans-config-api/api/v1/openid/sectoridentifiers/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -389,7 +389,7 @@
         ]
     },
      {
-        "path":"/api/v1/scopes",
+        "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -406,7 +406,7 @@
         ]
     },
      {
-        "path":"/api/v1/scopes/{inum}",
+        "path":"/jans-config-api/api/v1/scopes/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -423,7 +423,7 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources",
+        "path":"/jans-config-api/api/v1/uma/resources",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -440,7 +440,7 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources/{id}",
+        "path":"/jans-config-api/api/v1/uma/resources/{id}",
         "conditions":[
             {
                 "httpMethods":["GET"],
