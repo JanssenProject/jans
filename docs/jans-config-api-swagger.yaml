@@ -32,7 +32,7 @@ tags:
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
 paths:
-  /api/v1/config/oxauth:
+  /jans-config-api/api/v1/oxauth/config/oxauth:
     get:
       summary: Gets all Jans authorization server configuration properties.
       description: Gets all Jans authorization server configuration properties.
@@ -85,7 +85,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/fido2/config:
+  /jans-config-api/api/v1/fido2/config:
     get:
       summary: Gets Jans Authorization Server Fido2 configuration properties.
       description: Gets Jans Authorization Server Fido2 configuration properties.
@@ -220,7 +220,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/attributes:
+  /jans-config-api/api/v1/attributes:
     get:
       summary: Gets a list of Gluu attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
@@ -318,7 +318,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  '/api/v1/attributes/{inum}':
+  '/jans-config-api/api/v1/attributes/{inum}':
     parameters:
       - name: inum
         in: path
@@ -391,7 +391,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/acrs:
+  /jans-config-api/api/v1/acrs:
     get:
       summary: Gets default authentication method.
       description: Gets default authentication method.
@@ -446,7 +446,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/database/ldap:
+  /jans-config-api/api/v1/config/database/ldap:
     get:
       summary: Gets list of existing LDAP configurations.
       description: Gets list of existing LDAP configurations. 
@@ -523,7 +523,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  '/api/v1/config/database/ldap/{name}':
+  '/jans-config-api/api/v1/config/database/ldap/{name}':
     parameters:
       - name: name
         in: path
@@ -598,7 +598,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/config/database/ldap/test:
+  /jans-config-api/api/v1/config/database/ldap/test:
     post:
       summary: Tests a LDAP configurations by name.
       description: Tests a LDAP configurations by name.
@@ -626,7 +626,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /api/v1/config/database/couchbase:
+  /jans-config-api/api/v1/config/database/couchbase:
     get:
       summary: Gets list of existing Couchbase configurations.
       description: Gets list of existing Couchbase configurations. 
@@ -703,7 +703,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/database/couchbase/{name}:
+  /jans-config-api/api/v1/config/database/couchbase/{name}:
     parameters:
       - name: name
         in: path
@@ -776,7 +776,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/config/database/couchbase/test:
+  /jans-config-api/api/v1/config/database/couchbase/test:
     post:
       summary: Tests a Couchbase configurations by name.
       description: Tests a Couchbase configurations by name.
@@ -804,7 +804,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /api/v1/config/scripts/type/:
+  /jans-config-api/api/v1/config/scripts/type/:
     get:
       summary: Gets a list of custom scripts.
       description: Gets a list of custom scripts.
@@ -869,7 +869,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/config/scripts/type/{type}:
+  /jans-config-api/api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
           type: string
@@ -933,7 +933,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /api/v1/config/scripts/inum/{inum}:
+  /jans-config-api/api/v1/config/scripts/inum/{inum}:
     parameters:
       - schema:
           type: string
@@ -962,7 +962,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /api/v1/config/scripts/{inum}:
+  /jans-config-api/api/v1/config/scripts/{inum}:
     parameters:
       - schema:
           type: string
@@ -987,7 +987,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/config/cache:
+  /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
       description: Returns cache configuration.
@@ -1384,7 +1384,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/config/cache/memcached:
+  /jans-config-api/api/v1/config/cache/memcached:
     get:
       summary: Returns Memcached cache configuration.
       description: Returns Memcached cache configuration.
@@ -1569,7 +1569,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/cache/redis:
+  /jans-config-api/api/v1/config/cache/redis:
     get:
       summary: Returns Redis cache configuration.
       description: Returns Redis cache configuration.
@@ -1854,7 +1854,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/cache/in-memory:
+  /jans-config-api/api/v1/config/cache/in-memory:
     get:
       summary: Returns in-Memory cache configuration.
       description: Returns in-Memory cache configuration.
@@ -1929,7 +1929,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/cache/native-persistence:
+  /jans-config-api/api/v1/config/cache/native-persistence:
     get:
       summary: Returns native persistence cache configuration.
       description: Returns native persistence cache configuration.
@@ -2040,7 +2040,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/smtp:
+  /jans-config-api/api/v1/config/smtp:
     get:
       summary: Returns SMTP server configuration.
       description: Returns SMTP server configuration.
@@ -2283,7 +2283,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/smtp/status:
+  /jans-config-api/api/v1/config/smtp/status:
     get:
       summary: Test SMTP server configuration.
       description: Test SMTP server configuration.
@@ -2315,7 +2315,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /api/v1/logging:
+  /jans-config-api/api/v1/logging:
     get:
       tags:
         - Configuration – Logging
@@ -2438,7 +2438,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
     parameters: []
-  /api/v1/config/jwks:
+  /jans-config-api/api/v1/config/jwks:
     get:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
@@ -2540,7 +2540,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/openid/clients:
+  /jans-config-api/api/v1/openid/clients:
     get:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -4460,7 +4460,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  '/api/v1/openid/clients/{inum}':
+  '/jans-config-api/api/v1/openid/clients/{inum}':
     parameters:
       - schema:
           type: string
@@ -5265,7 +5265,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/openid/sectoridentifiers:
+  /jans-config-api/api/v1/openid/sectoridentifiers:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5446,7 +5446,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/openid/sectoridentifiers/{inum}:
+  /jans-config-api/api/v1/openid/sectoridentifiers/{inum}:
     parameters:
       - name: inum
         in: path
@@ -5563,7 +5563,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
-  /api/v1/uma/resources:
+  /jans-config-api/api/v1/uma/resources:
     get:
       tags:
         - OAuth - UMA Resources
@@ -5790,7 +5790,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
-  '/api/v1/uma/resources/{id}':
+  '/jans-config-api/api/v1/uma/resources/{id}':
     parameters:
       - name: id
         in: path
@@ -5921,7 +5921,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
-  /api/v1/scopes:
+  /jans-config-api/api/v1/scopes:
     get:
       tags:
         - OAuth - Scopes
@@ -6012,7 +6012,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/scopes.write]
     parameters: []
-  /api/v1/scopes/{inum}:
+  /jans-config-api/api/v1/scopes/{inum}:
     parameters:
       - schema:
           type: string

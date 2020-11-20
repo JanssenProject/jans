@@ -91,14 +91,36 @@ public class PatService {
 
         try {
 
-            log.debug("\n\n umaPat = Calling requestPat with umaMetadata.getTokenEndpoint()  = "
-                    + umaMetadata.getTokenEndpoint() + " , ApiClientId = " + this.configurationFactory.getApiClientId()
-                    + " , ApiClientPassword = " + this.configurationFactory.getApiClientPassword());
-
-            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),
-                    this.configurationFactory.getApiClientId(), this.configurationFactory.getApiClientPassword(), null);
+            String clientId = this.configurationFactory.getApiClientId();
+            String clientPassword = this.configurationFactory.getApiClientPassword();
             
-             if (this.umaPat == null) {
+            log.debug("\n\n PatService:: retrievePatToken() - umaMetadata.getTokenEndpoint()  = "
+                    + umaMetadata.getTokenEndpoint() + " , clientId = " + clientId
+                    + " , clientPassword = " + clientPassword);
+            
+            if (StringHelper.isEmpty(clientId) || StringHelper.isEmpty(clientPassword)) {
+                log.error("Internal clientId or password is empty!!!");
+                throw new Exception("Internal clientId or password is empty!!!");
+            }
+
+            if (clientPassword != null) {
+                try {
+                    //clientPassword = encryptionService.encrypt(clientPassword);
+                    //log.debug("\n\n PatService:: retrievePatToken() - encrypted clientPassword = "+clientPassword);
+                    
+                    clientPassword = encryptionService.decrypt(clientPassword);
+                    
+                    //log.debug("\n\n PatService:: retrievePatToken() - decrypted clientPassword = "+clientPassword);
+                } catch (EncryptionException ex) {
+                    log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
+                }
+            }
+
+            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),clientId, clientPassword, null);
+            
+            log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
+
+            if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
             } else {
                 this.umaPatAccessTokenExpiration = computeAccessTokenExpirationTime(this.umaPat.getExpiresIn());
