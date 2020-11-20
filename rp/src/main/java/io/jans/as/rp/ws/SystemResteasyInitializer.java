@@ -12,14 +12,21 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath("/restv1")
-public class ResteasyInitializer extends Application {
+/**
+ * Integration with Resteasy
+ * 
+ * @author Yuriy Movchan
+ * @version 0.1, 11/13/2020
+ */
+@ApplicationPath("/sys")
+public class SystemResteasyInitializer extends Application {	
 
 	@Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(CibaClientNotificationEndpointImpl.class);
+        classes.add(HealthCheckController.class);
 
         return classes;
     }
+
 }
