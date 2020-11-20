@@ -8,7 +8,7 @@ jansAttrOrigin: jansClnt
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
-jansClaimName: jansAppTyp
+jansClaimName: jansAppType
 jansStatus: active
 objectClass: jansAttr
 objectClass: top
