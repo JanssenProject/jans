@@ -1,0 +1,21 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+image:
+  repository: janssenproject/auth-server
+  tag: 5.0.0_dev
+  pullPolicy: Always
+
+replicas: 1
+#Resources for the deployment
+requests:
+  memory: 1000Mi
+limits:
+  memory: 1536Mi
+
+#ports for the deployment
+ports:
+  containerPort: 8080
+
+# service
+service:
+  authServerServiceName: auth-server

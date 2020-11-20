@@ -1,0 +1,101 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fido2.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: fido2
+{{ include "fido2.labels" . | indent 4}}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "fido2.name" . }}
+  template:
+    metadata:
+      labels:
+        APP_NAME: fido2
+        app: {{ include "fido2.name" . }}
+      {{- if .Values.global.istio.ingress }}
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+    spec:
+      containers:
+      - name: {{ template "cn.fullname" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+              /usr/bin/python3 /scripts/updatelbip.py &
+              /app/scripts/entrypoint.sh
+        {{- end}}
+        ports:
+        - containerPort: {{ .Values.ports.containerPort }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        volumeMounts:
+        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+          - name: {{ include "fido2.fullname" .}}-updatelbip
+            mountPath: "/scripts"
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+          - name: cb-pass
+            mountPath: "/etc/jans/conf/couchbase_password"
+            subPath: couchbase_password
+          - name: cb-crt 
+            mountPath: "/etc/certs/couchbase.crt"
+            subPath: couchbase.crt 
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /jans-fido2/sys/health-check
+            port: {{ .Values.ports.containerPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path:  /jans-fido2/sys/health-check
+            port: {{ .Values.ports.containerPort }}
+          initialDelaySeconds: 25
+          periodSeconds: 25
+          timeoutSeconds: 5
+        {{- if or (eq .Values.global.provisioner "microk8s.io/hostpath" ) (eq .Values.global.provisioner "k8s.io/minikube-hostpath") }}
+        resources: {}
+        {{- else if .Values.global.cloud.testEnviroment }}
+        resources: {}
+        {{- else }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      {{- if eq .Values.global.isDomainRegistered "false" }}
+      hostAliases:
+      - ip: {{ .Values.global.lbIp }}
+        hostnames:
+        - {{ .Values.global.domain }}
+      {{- end }}
+      volumes:
+      {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+        - name: cb-pass
+          secret:
+            secretName: {{ .Release.Name }}-cb-pass
+        - name: cb-crt 
+          secret:
+            secretName: {{ .Release.Name }}-cb-crt 
+      {{- end }}
+      {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+        - name: {{ include "fido2.fullname" . }}-updatelbip
+          configMap:
+            name: {{ .Release.Name }}-updatelbip
+      {{- end }}
+      

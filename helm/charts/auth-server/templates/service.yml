@@ -1,0 +1,19 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.authServerServiceName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "auth-server.labels" . | indent 4}}
+spec:
+  {{- if .Values.global.alb.ingress }}
+  type: NodePort
+  {{- end }}
+  ports:
+  - port: {{ .Values.ports.containerPort }}
+    name: http-auth-server
+  selector:
+    app: {{ include "auth-server.name" . }} #auth-server
+    
