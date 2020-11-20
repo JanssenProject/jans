@@ -88,7 +88,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -196,7 +196,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
 
         // 4. Request user info should fail
@@ -315,7 +315,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -522,7 +522,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -642,7 +642,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -762,7 +762,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -885,7 +885,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1010,7 +1010,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1135,7 +1135,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1260,7 +1260,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1385,7 +1385,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1510,7 +1510,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1635,7 +1635,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1760,7 +1760,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
@@ -1885,7 +1885,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
         showClient(clientInfoClient);
         assertEquals(clientInfoResponse.getStatus(), 200, "Unexpected response code: " + clientInfoResponse.getStatus());
-        assertNotNull(clientInfoResponse.getClaim("displayName"), "Unexpected result: displayName not found");
+        assertNotNull(clientInfoResponse.getClaim("name"), "Unexpected result: displayName not found");
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
