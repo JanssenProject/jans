@@ -250,7 +250,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             if (privateKey == null) {
                 final String error = "Failed to find private key by kid: " + alias +
                         ", signatureAlgorithm: " + signatureAlgorithm +
-                        "(check whether web keys JSON in persistence corresponds to keystore file.)";
+                        "(check whether web keys JSON in persistence corresponds to keystore file), keySelectionStrategy: " + keySelectionStrategy;
                 LOG.error(error);
                 throw new RuntimeException(error);
             }
@@ -385,7 +385,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         final JSONWebKey selectedKey = keySelectionStrategy.select(keysByAlgAndUse);
         final String selectedKid = selectedKey != null ? selectedKey.getKid() : null;
-        LOG.trace("Selected kid: " + selectedKid);
+        LOG.trace("Selected kid: " + selectedKid + ", keySelection Strategy: " + keySelectionStrategy);
         return selectedKid;
     }
 
