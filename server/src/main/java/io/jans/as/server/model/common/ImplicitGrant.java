@@ -8,6 +8,7 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.GrantType;
 
 import java.util.Date;
 
@@ -55,6 +56,11 @@ public class ImplicitGrant extends AuthorizationGrant {
      */
     public ImplicitGrant(User user, Client client, Date authenticationTime) {
         init(user, client, authenticationTime);
+    }
+
+    @Override
+    public GrantType getGrantType() {
+        return GrantType.IMPLICIT;
     }
 
     public void init(User user, Client client, Date authenticationTime) {

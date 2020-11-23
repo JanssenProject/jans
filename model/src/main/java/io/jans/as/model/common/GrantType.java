@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public enum GrantType implements HasParamName, AttributeEnum {
 
+    NONE("none"),
+
     /**
      * The authorization code is obtained by using an authorization server as an
      * intermediary between the client and resource owner. Instead of requesting
