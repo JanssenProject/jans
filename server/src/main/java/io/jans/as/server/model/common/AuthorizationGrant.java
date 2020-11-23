@@ -50,7 +50,7 @@ import java.util.Set;
  * @author Yuriy Movchan
  * @version April 10, 2020
  */
-public class AuthorizationGrant extends AbstractAuthorizationGrant {
+public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorizationGrant.class);
 
