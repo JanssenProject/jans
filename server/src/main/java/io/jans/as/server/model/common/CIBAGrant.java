@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
 
 import javax.inject.Inject;
@@ -25,6 +26,11 @@ public class CIBAGrant extends AuthorizationGrant {
     private CacheService cacheService;
 
     public CIBAGrant() {
+    }
+
+    @Override
+    public GrantType getGrantType() {
+        return GrantType.CIBA;
     }
 
     public void init(CibaRequestCacheControl cibaRequest) {
