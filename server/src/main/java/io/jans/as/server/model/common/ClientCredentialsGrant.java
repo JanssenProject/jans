@@ -8,6 +8,7 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.GrantType;
 
 /**
  * The client credentials (or other forms of client authentication) can be used
@@ -35,6 +36,11 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
      */
     public ClientCredentialsGrant(User user, Client client) {
         init(user, client);
+    }
+
+    @Override
+    public GrantType getGrantType() {
+        return GrantType.CLIENT_CREDENTIALS;
     }
 
     public void init(User user, Client client) {

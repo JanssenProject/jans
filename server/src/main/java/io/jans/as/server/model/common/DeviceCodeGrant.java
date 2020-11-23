@@ -7,6 +7,7 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
 import org.apache.commons.lang.StringUtils;
 
@@ -30,6 +31,11 @@ public class DeviceCodeGrant extends AuthorizationGrant {
         setDeviceCode(cacheData.getDeviceCode());
         setIsCachedWithNoPersistence(true);
         setScopes(cacheData.getScopes());
+    }
+
+    @Override
+    public GrantType getGrantType() {
+        return GrantType.DEVICE_CODE;
     }
 
     @Override
