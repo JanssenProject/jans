@@ -6,10 +6,15 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.common.GrantType;
+
 /**
  * @author Yuriy Movchan
  * @version 02/13/2017
  */
 public class SimpleAuthorizationGrant extends AuthorizationGrant {
-
+    @Override
+    public GrantType getGrantType() {
+        return GrantType.NONE;
+    }
 }

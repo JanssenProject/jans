@@ -154,6 +154,9 @@ public class IdTokenFactory {
             String stateHash = AbstractToken.getHash(state, jwr.getHeader().getSignatureAlgorithm());
             jwr.setClaim(JwtClaimName.STATE_HASH, stateHash);
         }
+        if (authorizationGrant.getGrantType() != null) {
+            jwr.setClaim("grant", authorizationGrant.getGrantType().getValue());
+        }
         jwr.setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         User user = authorizationGrant.getUser();
