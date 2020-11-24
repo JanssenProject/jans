@@ -1,0 +1,17 @@
+dn: inum=%(admin_inum)s,ou=people,o=jans
+objectClass: top
+objectClass: jansPerson
+objectClass: jansCustomPerson
+inum: %(admin_inum)s
+uid: admin
+givenName: Admin
+middleName: Admin
+nickname: Admin
+sn: User
+userPassword: %(encoded_admin_password)s
+jansStatus: active
+memberOf: inum=60B7,ou=groups,o=jans
+displayName: Default Admin User
+mail: admin@%(hostname)s
+emailVerified: true
+
