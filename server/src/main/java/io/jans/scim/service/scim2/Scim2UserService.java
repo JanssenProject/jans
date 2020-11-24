@@ -212,7 +212,7 @@ public class Scim2UserService implements Serializable {
 
 		person.setAttribute("jansEntitlements", getComplexMultivaluedAsArray(res.getEntitlements()));
 		person.setAttribute("jansRole", getComplexMultivaluedAsArray(res.getRoles()));
-		person.setAttribute("jansx509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
+		person.setAttribute("jans509Certificate", getComplexMultivaluedAsArray(res.getX509Certificates()));
 
 		// Pairwise identifiers must not be supplied here... (they are mutability = readOnly)
 		transferExtendedAttributesToPerson(res, person);
