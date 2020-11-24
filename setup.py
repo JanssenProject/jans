@@ -194,7 +194,9 @@ class PostSetup:
     install_type = static.InstallOption.MONDATORY
 
 jansProgress.register(PostSetup)
-jansProgress.queue = queue
+
+if not argsp.no_progress:
+    jansProgress.queue = queue
 
 
 def do_installation():

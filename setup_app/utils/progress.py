@@ -125,14 +125,15 @@ class JansProgress:
                         self.services.remove(service)
 
     def start(self):
-        th = ShowProgress(self.services, self.queue)
-        th.setDaemon(True)
-        th.start()
+        if self.queue:
+            th = ShowProgress(self.services, self.queue)
+            th.setDaemon(True)
+            th.start()
 
     def progress(self, service_name, msg='', incr=False):
         if self.queue:
             self.queue.put({'current': service_name, 'msg': msg})
-        else:
+        elif service_name != static.COMPLETED:
             print("Process {}:{}".format(service_name, msg))
         
 jansProgress = JansProgress()
