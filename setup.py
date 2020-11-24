@@ -78,6 +78,12 @@ terminal_size = shutil.get_terminal_size()
 tty_rows=terminal_size.lines 
 tty_columns = terminal_size.columns
 
+# check if we are running in terminal
+try:
+    os.get_terminal_size()
+except:
+    argsp.no_progress = True
+
 if not argsp.n:
     base.check_resources()
 
