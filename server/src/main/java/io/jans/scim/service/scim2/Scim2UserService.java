@@ -159,7 +159,7 @@ public class Scim2UserService implements Serializable {
 		// NOTE: calling person.setAttribute("ATTR", null) is not changing the attribute in LDAP :(
 
 		// Set values trying to follow the order found in BaseScimResource class
-		person.setAttribute("jansExternalId", res.getExternalId());
+		person.setAttribute("jansExtId", res.getExternalId());
 		person.setCustomAttribute("jansMetaCreated", res.getMeta().getCreated());
 		person.setCustomAttribute("jansMetaLastMod", res.getMeta().getLastModified());
 		// When creating user, location will be set again when having an inum
@@ -276,7 +276,7 @@ public class Scim2UserService implements Serializable {
 		log.debug("transferAttributesToUserResource");
 
 		res.setId(person.getInum());
-		res.setExternalId(person.getAttribute("jansExternalId"));
+		res.setExternalId(person.getAttribute("jansExtId"));
 
 		Meta meta = new Meta();
 		meta.setResourceType(ScimResourceUtil.getType(res.getClass()));

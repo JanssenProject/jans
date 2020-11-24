@@ -57,7 +57,7 @@ public class BaseScimResource {
 
     @Attribute(description = "A String that is an identifier for the resource as defined by the provisioning client",
             isCaseExact = true)
-    @StoreReference(resourceType = {UserResource.class}, refs = {"jansExternalId"})
+    @StoreReference(resourceType = {UserResource.class}, refs = {"jansExtId"})
     private String externalId;
 
     @Attribute(description = "A complex attribute containing resource metadata",
