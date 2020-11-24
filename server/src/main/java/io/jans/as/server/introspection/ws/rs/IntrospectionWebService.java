@@ -163,6 +163,11 @@ public class IntrospectionWebService {
                 log.trace("Canceled changes made by external introspection script since method returned `false`.");
             }
 
+            // Make scopes conform as required by spec, see #1499
+            if (!appConfiguration.getIntrospectionResponseScopesBackwardCompatibility()) {
+            	String scopes = StringUtils.join(response.getScope().toArray(), " ");
+            	responseAsJsonObject.put("scope", scopes);
+            }
             if (Boolean.TRUE.toString().equalsIgnoreCase(responseAsJwt)) {
                 return Response.status(Response.Status.OK).entity(createResponseAsJwt(responseAsJsonObject, authorizationGrant)).build();
             }
