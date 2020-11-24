@@ -74,14 +74,14 @@ class PropertiesUtils(SetupUtils):
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
-        if not Config.oxtrust_admin_password and Config.ldapPass:
-            Config.oxtrust_admin_password = Config.ldapPass
+        if not Config.admin_password and Config.ldapPass:
+            Config.admin_password = Config.ldapPass
         
-        if not Config.oxtrust_admin_password:
-            Config.oxtrust_admin_password = self.getPW()
+        if not Config.admin_password:
+            Config.admin_password = self.getPW()
 
         if not Config.ldapPass:
-            Config.ldapPass = Config.oxtrust_admin_password
+            Config.ldapPass = Config.admin_password
 
         if Config.cb_install and not Config.get('cb_password'):
             Config.cb_password = Config.oxtrust_admin_password
