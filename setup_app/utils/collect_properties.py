@@ -158,11 +158,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.city = ssl_subj['L']
          
          #this is not good, but there is no way to retreive password from ldap
-        if not Config.get('oxtrust_admin_password'):
+        if not Config.get('admin_password'):
             if Config.get('ldapPass'):
-                Config.oxtrust_admin_password = Config.ldapPass
+                Config.admin_password = Config.ldapPass
             elif Config.get('cb_password'):
-                Config.oxtrust_admin_password = Config.cb_password
+                Config.admin_password = Config.cb_password
 
         if not Config.get('orgName'):
             Config.orgName = ssl_subj['O']

@@ -42,6 +42,7 @@ def get_setup_options():
     parser.add_argument('-state', help="State field used for generating X.509 certificates")
     parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
+    parser.add_argument('-admin-password', help="Used as the Administrator password")
     parser.add_argument('-application-max-ram', help="Total memory (in KB) to be used by Jannses applications")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--no-config-api', help="Do not install Jans Auth Config Api", action='store_true')
@@ -114,6 +115,11 @@ def get_setup_options():
 
     if argsp.ldap_admin_password:
         setupOptions['ldapPass'] = argsp.ldap_admin_password
+
+    if argsp.admin_password:
+        setupOptions['admin_password'] = argsp.admin_password
+    elif argsp.ldap_admin_password:
+        setupOptions['admin_password'] = argsp.ldap_admin_password
 
     if argsp.f:
         if os.path.isfile(argsp.f):
