@@ -209,7 +209,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
                 objcl = ObjectClass(o)
-                if 'gluuCustomPerson' in objcl.tokens['NAME']:
+                if 'jansCustomPerson' in objcl.tokens['NAME']:
                     may_list = list(objcl.tokens['MAY'])
                     for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
                         if not a in may_list:
