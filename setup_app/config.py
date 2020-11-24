@@ -88,6 +88,8 @@ class Config:
             def register(self, installer):
                 pass
 
+            def before_start(self):
+                pass
 
             def start(self):
                 pass

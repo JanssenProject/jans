@@ -55,6 +55,9 @@ def get_setup_options():
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")
     parser.add_argument('--dump-config-on-error', help="Dump configuration on error", action='store_true')
+    parser.add_argument('--no-progress', help="Use simple progress", action='store_true')
+
+
 
     argsp = parser.parse_args()
 
