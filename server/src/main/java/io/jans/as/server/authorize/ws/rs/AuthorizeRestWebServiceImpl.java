@@ -16,6 +16,7 @@ import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
@@ -332,15 +333,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 acrValues = Lists.newArrayList(client.getDefaultAcrValues());
             }
 
-            if (scopes.contains(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS)) {
-                if (!responseTypes.contains(io.jans.as.model.common.ResponseType.CODE)) {
+            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
+                if (!responseTypes.contains(ResponseType.CODE)) {
                     log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
-                    scopes.remove(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS);
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
                 }
 
-                if (scopes.contains(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(io.jans.as.model.common.Prompt.CONSENT)) {
+                if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
                     log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
-                    scopes.remove(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS);
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
                 }
             }
 
