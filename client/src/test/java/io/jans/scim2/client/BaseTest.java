@@ -15,6 +15,7 @@ import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim2.client.factory.ScimClientFactory;
 import io.jans.scim2.client.rest.ClientSideService;
+import io.jans.util.StringHelper;
 
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
@@ -46,14 +47,18 @@ public class BaseTest {
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
-
         SecurityProviderUtility.installBCProvider();
+
         logger.info("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
 
         //Properties with the file: preffix will point to real .json files stored under src/test/resources folder
-        String properties = context.getCurrentXmlTest().getParameter("file");
+        String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
+        if (StringHelper.isEmpty(propertiesFile)) {
+            propertiesFile = "target/test-classes/testng2.properties";
+        }
+
         Properties prop = new Properties();
-        prop.load(Files.newBufferedReader(Paths.get(properties), DEFAULT_CHARSET));     //do not bother much about IO issues here
+        prop.load(Files.newBufferedReader(Paths.get(propertiesFile), DEFAULT_CHARSET));     //do not bother much about IO issues here
 
         Map<String, String> parameters = new Hashtable<>();
         //do not bother about empty keys... but
@@ -66,7 +71,6 @@ public class BaseTest {
             setupClient(context.getSuite().getXmlSuite().getParameters());
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         }
-
     }
 
     @AfterSuite
