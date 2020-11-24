@@ -4,7 +4,7 @@
     "applicationUrl":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-scim/restv1",
 
-    "personCustomObjectClass":"gluuCustomPerson",
+    "personCustomObjectClass":"jansCustomPerson",
 
     "oxAuthIssuer":"https://%(hostname)s",
     "umaIssuer":"https://%(hostname)s",
