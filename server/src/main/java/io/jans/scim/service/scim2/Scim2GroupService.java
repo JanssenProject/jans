@@ -76,7 +76,7 @@ public class Scim2GroupService implements Serializable {
 
 	private void transferAttributesToGroup(GroupResource res, GluuGroup group, String usersUrl) {
 
-		// externalId (so jansExternalId) not part of LDAP schema
+		// externalId (so jansExtId) not part of LDAP schema
 		group.setAttribute("jansMetaCreated", res.getMeta().getCreated());
 		group.setAttribute("jansMetaLastMod", res.getMeta().getLastModified());
 		// When creating group, location will be set again when having an inum
