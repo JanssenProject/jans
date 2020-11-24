@@ -126,8 +126,8 @@ class Config:
 
         #passwords
         self.ldapPass = None
-        self.oxtrust_admin_password = None
-        self.encoded_admin_password = ''
+        self.admin_password = None
+        self.admin_password = ''
         self.cb_password = None
         self.encoded_cb_password = ''
 
