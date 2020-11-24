@@ -627,6 +627,17 @@ class PropertiesUtils(SetupUtils):
                 Config.ldapPass = ldapPass
                 Config.ldap_hostname = ldapHost
 
+
+            while True:
+                adminPass = self.getPrompt("Enter Password for Admin User", Config.ldapPass)
+                if len(ldapPass) > 3:
+                    break
+                else:
+                    print("Admin password should be at least four characters in length.")
+
+            Config.admin_password = adminPass
+
+
             if Config.cb_install == InstallTypes.REMOTE:
                 self.prompt_remote_couchbase()
 
