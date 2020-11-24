@@ -213,6 +213,7 @@ public class AppConfiguration implements Configuration {
     private Boolean refreshTokenExtendLifetimeOnRotation  = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+    private Boolean introspectionResponseScopesBackwardCompatibility = false;
 
     private String softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
     private String softwareStatementValidationClaimName;
@@ -350,6 +351,15 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionScriptBackwardCompatibility(Boolean introspectionScriptBackwardCompatibility) {
         this.introspectionScriptBackwardCompatibility = introspectionScriptBackwardCompatibility;
+    }
+    
+    public Boolean getIntrospectionResponseScopesBackwardCompatibility() {
+        if (introspectionResponseScopesBackwardCompatibility == null) introspectionResponseScopesBackwardCompatibility = false;
+        return introspectionScriptBackwardCompatibility;
+    }
+
+    public void setIntrospectionResponseScopesBackwardCompatibility(Boolean introspectionResponseScopesBackwardCompatibility) {
+        this.introspectionResponseScopesBackwardCompatibility = introspectionResponseScopesBackwardCompatibility;
     }
 
     public Boolean getConsentGatheringScriptBackwardCompatibility() {
