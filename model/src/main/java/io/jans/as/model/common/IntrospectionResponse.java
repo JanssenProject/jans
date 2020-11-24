@@ -6,9 +6,12 @@
 
 package io.jans.as.model.common;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import io.jans.as.model.common.converter.ListConverter;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ public class IntrospectionResponse {
     @JsonProperty(value = "active")
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
     @JsonProperty(value = "scope")
+    @JsonDeserialize(converter = ListConverter.class)	// Force use of List even when value in actual json content is String 
     private List<String> scope;
     @JsonProperty(value = "client_id")
     private String clientId;
