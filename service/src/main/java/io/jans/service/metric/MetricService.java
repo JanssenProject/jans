@@ -199,7 +199,7 @@ public abstract class MetricService implements Serializable {
             for (String metricDn : metricDns) {
                 List<Filter> metricTypeFilters = new ArrayList<Filter>();
 
-                Filter applicationTypeFilter = Filter.createEqualityFilter("jansAppType", applicationType.getValue());
+                Filter applicationTypeFilter = Filter.createEqualityFilter("jansAppTyp", applicationType.getValue());
                 Filter eventTypeTypeFilter = Filter.createEqualityFilter("jansMetricTyp", metricType.getValue());
                 Filter startDateFilter = Filter.createGreaterOrEqualFilter("jansStartDate", getEntryManager().encodeTime(metricDn, (startDate)));
                 Filter endDateFilter = Filter.createLessOrEqualFilter("jansEndDate", getEntryManager().encodeTime(metricDn, endDate));
