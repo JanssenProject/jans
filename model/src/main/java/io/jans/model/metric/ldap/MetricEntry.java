@@ -36,7 +36,7 @@ public class MetricEntry {
     @AttributeName(name = "jansEndDate")
     private Date endDate;
 
-    @AttributeName(name = "jansAppType")
+    @AttributeName(name = "jansAppTyp")
     private ApplicationType applicationType;
 
     @AttributeName(name = "jansMetricTyp")
