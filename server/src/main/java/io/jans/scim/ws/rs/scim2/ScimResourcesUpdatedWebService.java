@@ -43,7 +43,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Named
-@Path("/scim")
+@Path("/v2/UpdatedUsers")
 public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @Inject
@@ -71,7 +71,6 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
     private GroupWebService groupWebService;
 */
 
-    @Path("UpdatedUsers")
     @GET
     @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
     @ProtectedApi
