@@ -8,6 +8,7 @@ This module contains various helpers.
 import base64
 import contextlib
 import json
+import os
 import pathlib
 import random
 import re
@@ -16,6 +17,8 @@ import socket
 import ssl
 import string
 import subprocess
+from datetime import datetime
+from datetime import timedelta
 from typing import Any
 from typing import AnyStr
 from typing import Tuple
@@ -25,6 +28,13 @@ from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
+
+
 from ldap3.utils import hashed
 
 # Default charset
@@ -276,3 +286,75 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
 
     # decrypt the encrypted text
     return unpadder.update(padded_data) + unpadder.finalize()
+
+
+def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
+                         state, city, base_dir="/etc/certs"):
+    # generate key
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    # generate cert
+    subject = issuer = x509.Name([
+        x509.NameAttribute(NameOID.COUNTRY_NAME, country_code),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, city),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org_name),
+        x509.NameAttribute(NameOID.COMMON_NAME, hostname),
+        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
+    ])
+
+    now = datetime.utcnow()
+
+    cert = x509.CertificateBuilder().subject_name(
+        subject
+    ).issuer_name(
+        issuer
+    ).public_key(
+        key.public_key()
+    ).serial_number(
+        x509.random_serial_number()
+    ).not_valid_before(
+        now
+    ).not_valid_after(
+        now + timedelta(days=365)
+    ).add_extension(
+        x509.BasicConstraints(ca=False, path_length=None),
+        critical=False,
+    ).add_extension(
+        x509.SubjectAlternativeName([
+            x509.DNSName(hostname),
+            x509.DNSName(suffix),
+        ]),
+        critical=False,
+    ).add_extension(
+        x509.KeyUsage(
+            digital_signature=True,
+            content_commitment=True,
+            key_encipherment=True,
+            data_encipherment=False,
+            key_agreement=False,
+            key_cert_sign=False,
+            crl_sign=False,
+            encipher_only=False,
+            decipher_only=False,
+        ),
+        critical=False,
+    ).sign(key, hashes.SHA256())
+
+    # write cert and key to file
+    cert_file = os.path.join(base_dir, f"{suffix}.crt")
+    with open(cert_file, "wb") as f:
+        cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+        f.write(cert_pem)
+
+    key_file = os.path.join(base_dir, f"{suffix}.key")
+    with open(key_file, "wb") as f:
+        key_pem = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        f.write(key_pem)
+
+    # paths to cert and key respectively
+    return cert_file, key_file
