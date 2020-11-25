@@ -40,12 +40,11 @@ public class AttributeService extends io.jans.service.AttributeService {
 	@Any
 	private Event<Events> event;
 
-	public static final String CUSTOM_ATTRIBUTE_OBJECTCLASS_PREFIX = "ox-";
-
 	/**
 	 * Get SCIM related attributes
 	 * 
 	 * @return Attribute
+	 * @throws Exception Unexpected failure
 	 */
 	public List<GluuAttribute> getSCIMRelatedAttributes() throws Exception {
 		List<GluuAttribute> attributes = getAllAttributes();

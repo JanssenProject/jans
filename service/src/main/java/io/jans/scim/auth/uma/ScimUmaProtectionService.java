@@ -84,7 +84,7 @@ public class ScimUmaProtectionService extends BaseUmaProtectionService implement
      * This method checks whether the authorization header is present and valid before scim service methods can be actually
      * called.
      * @param headers An object holding HTTP headers
-     * @param uriInfo An object that allows access to request URI information
+     * @param resourceInfo An object that allows access to request URI information
      * @return A null value if the authorization was successful, otherwise a Response object is returned signaling an
      * authorization error
      */
