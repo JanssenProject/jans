@@ -10,13 +10,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 @Named("attributeService")
 public class AttributeService  extends io.jans.as.common.service.AttributeService {
 
-    @Inject
-    ConfigurationService configurationService;
-    
-    @Inject
-    private AppConfiguration appConfiguration = configurationService.find();
-
     protected boolean isUseLocalCache() {
-        return appConfiguration.getUseLocalCache();
+        return false;
     }
 }

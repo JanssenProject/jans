@@ -1,0 +1,113 @@
+{"clients":[
+  {
+     "inum": "1801.8dcd98ad-fe2c-4fd9-b717-d9436d9f2009",
+	 "applicationType": "web",
+      "accessTokenAsJwt": false,
+      "attributes": {
+          "additionalAudience": [],
+          "allowSpontaneousScopes": false,
+          "backchannelLogoutSessionRequired": false,
+          "backchannelLogoutUri": [],
+          "consentGatheringScripts": [],
+          "introspectionScripts": [],
+          "keepClientAuthorizationAfterExpiration": false,
+          "postAuthnScripts": [],
+          "rptClaimsScripts": [],
+          "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+          "spontaneousScopeScriptDns": [],
+          "spontaneousScopes": []
+      },
+      "claimRedirectUris": [
+          "https://pujavs.jans.server.1/jans-auth/restv1/uma/gather_claims"
+      ],
+      "deletable": false,
+      "disabled": false,
+      "clientName": "Config API Resource Server Client",
+      "description":"Server Client for Config API Resource",
+      "clientSecret": "IBpX7DsEAuaEx3MWwwE2ZA==",
+      "exp": "2120-09-28T23:00:00Z[UTC]",
+      "grantTypes": [
+		"AUTHORIZATION_CODE"
+      ],
+      "idTokenSignedResponseAlg": "HS256",
+      "frontChannelLogoutSessionRequired": true,
+      "logoutUri": [
+          "https://pujavs.jans.server.1/identity/ssologout.htm"
+      ],
+      "jansAppTyp": "NATIVE",
+      "persistClientAuthorizations": false,
+      "postLogoutRedirectUris": [
+          "https://pujavs.jans.server.1/identity/finishlogout.htm"
+      ],
+      "redirectUris": [
+          "https://pujavs.jans.server.1/identity/uri1"
+      ],
+      "scopes": [
+          "inum=6D99,ou=scopes,o=jans"
+      ],
+      "trustedClient": true,
+      "includeClaimsInIdToken": false,
+      "responseTypes": [
+          "CODE"
+      ],
+      "rptAsJwt": false,
+      "subjectType": "PAIRWISE",
+      "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC"   
+  },
+  {
+     "inum": "1802.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009",
+	 "applicationType": "web",
+      "accessTokenAsJwt": false,
+      "attributes": {
+          "additionalAudience": [],
+          "allowSpontaneousScopes": false,
+          "backchannelfrontChannelLogoutSessionRequired": false,
+          "backchannelLogoutUri": [],
+          "consentGatheringScripts": [],
+          "introspectionScripts": [],
+          "keepClientAuthorizationAfterExpiration": false,
+          "postAuthnScripts": [],
+          "rptClaimsScripts": [],
+          "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+          "spontaneousScopeScriptDns": [],
+          "spontaneousScopes": []
+      },
+      "claimRedirectUris": [
+          "https://pujavs.jans.server.1/jans-auth/restv1/uma/gather_claims"
+      ],
+      "deletable": false,
+      "disabled": false,
+      "clientName": "Config API Resource Server Client",
+      "description":"Server Client for Config API Resource",
+      "clientSecret": "IBpX7DsEAuaEx3MWwwE2ZA==",
+      "exp": "2120-09-28T23:00:00Z[UTC]",
+      "grantTypes": [
+       "AUTHORIZATION_CODE"
+      ],
+      "idTokenSignedResponseAlg": "HS256",
+      "frontChannelLogoutSessionRequired": true,
+      "logoutUri": [
+          "https://pujavs.jans.server.1/identity/ssologout.htm"
+      ],
+      "jansAppTyp": "NATIVE",
+      "persistClientAuthorizations": false,
+      "postLogoutRedirectUris": [
+          "https://pujavs.jans.server.1/identity/finishlogout.htm"
+      ],
+      "redirectUris": [
+          "https://pujavs.jans.server.1/identity/uri1"
+      ],
+      "scopes": [
+          "inum=cf1c6af9-be87-453e-a388-ebfdbabc1cca,ou=scopes,o=jans"
+      ],
+      "trustedClient": true,
+      "includeClaimsInIdToken": false,
+      "responseTypes": [
+          "CODE"
+      ],
+      "rptAsJwt": false,
+      "subjectType": "PAIRWISE",
+      "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC"   
+  }
+]
+}

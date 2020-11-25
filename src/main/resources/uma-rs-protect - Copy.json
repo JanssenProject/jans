@@ -136,7 +136,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/api/v1/config/oxauth",
+        "path":"/jans-config-api/api/v1/jans-auth-server/config",
         "conditions":[
             {
                 "httpMethods":["GET"],

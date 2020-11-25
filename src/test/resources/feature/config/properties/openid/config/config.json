@@ -15,12 +15,12 @@
     "en"
   ],
   "keepAuthenticatorAttributesOnAcrChange": false,
-  "checkSessionIFrame": "https://pujavs3.infinity.com/oxauth/opiframe.htm",
+  "checkSessionIFrame": "https://pujavs3.infinity.com/jans-auth/opiframe.htm",
   "clientWhiteList": [
     "*"
   ],
   "removeRefreshTokensForClientOnLogout": true,
-  "jwksUri": "https://pujavs3.infinity.com/oxauth/restv1/jwks",
+  "jwksUri": "https://pujavs3.infinity.com/jans-auth/restv1/jwks",
   "customHeadersWithAuthorizationResponse": true,
   "displayValuesSupported": [
     "page",
@@ -63,8 +63,8 @@
   "useCacheForAllImplicitFlowObjects": false,
   "requireRequestUriRegistration": false,
   "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
-  "opPolicyUri": "http://ox.gluu.org/doku.php?id=oxauth:policy",
-  "opTosUri": "http://ox.gluu.org/doku.php?id=oxauth:tos",
+  "opPolicyUri": "http://ox.gluu.org/doku.php?id=jans-auth:policy",
+  "opTosUri": "http://ox.gluu.org/doku.php?id=jans-auth:tos",
   "introspectionAccessTokenMustHaveUmaProtectionScope": false,
   "requestParameterSupported": true,
   "tokenEndpointAuthMethodsSupported": [

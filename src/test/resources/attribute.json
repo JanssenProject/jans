@@ -12,7 +12,7 @@
     ],
     "name": "qaattribute",
     "origin": "jansPerson",
-    "oxMultiValuedAttribute": false,
+    "jansMultivaluedAttr": false,
     "requred": false,
     "status": "ACTIVE",
     "urn": "urn:mace:dir:attribute-def:qaattribute",

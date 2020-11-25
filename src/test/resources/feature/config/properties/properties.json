@@ -10,7 +10,7 @@
     "en"
   ],
   "dynamicRegistrationPasswordGrantTypeEnabled": false,
-  "tokenRevocationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/revoke",
+  "tokenRevocationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/revoke",
   "logClientNameOnClientAuthentication": false,
   "trustedClientEnabled": true,
   "expirationNotificatorMapSizeLimit": 100000,
@@ -41,14 +41,14 @@
     "FORM_POST"
   ],
   "claimsParameterSupported": false,
-  "umaConfigurationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/uma2-configuration",
-  "keyStoreFile": "/etc/certs/oxauth-keys.jks",
+  "umaConfigurationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/uma2-configuration",
+  "keyStoreFile": "/etc/certs/jans-auth-keys.jks",
   "expirationNotificatorEnabled": false,
   "useCacheForAllImplicitFlowObjects": false,
   "requireRequestUriRegistration": false,
   "legacyDynamicRegistrationScopeParam": false,
   "sessionIdUnauthenticatedUnusedLifetime": 120,
-  "opTosUri": "http://ox.gluu.org/doku.php?id=oxauth:tos",
+  "opTosUri": "http://ox.gluu.org/doku.php?id=jans-auth:tos",
   "backchannelUserCodeParameterSupported": false,
   "umaPctLifetime": 2592000,
   "defaultSignatureAlgorithm": "RS256",
@@ -88,7 +88,7 @@
     "popup"
   ],
   "sessionAsJwt": false,
-  "tokenEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/token",
+  "tokenEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/token",
   "configurationUpdateInterval": 3600,
   "dynamicRegistrationScopesParamEnabled": true,
   "jmsPassword": "",
@@ -117,12 +117,12 @@
   "httpLoggingExludePaths": [
   ],
   "oxOpenIdConnectVersion": "openidconnect-1.0",
-  "userInfoEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/userinfo",
+  "userInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/userinfo",
   "imgLocation": "",
   "cibaGrantLifeExtraTimeSec": 180,
   "defaultSubjectType": "pairwise",
   "accessTokenLifetime": 300,
-  "registrationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/register",
+  "registrationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/register",
   "idTokenTokenBindingCnfValuesSupported": [
     "tbh"
   ],
@@ -146,16 +146,16 @@
   "httpLoggingEnabled": false,
   "backchannelAuthenticationRequestSigningAlgValuesSupported": [
   ],
-  "clientInfoEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/clientinfo",
+  "clientInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/clientinfo",
   "userInfoEncryptionEncValuesSupported": [
     "A128CBC+HS256",
     "A256CBC+HS512",
     "A128GCM",
     "A256GCM"
   ],
-  "backchannelAuthenticationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/bc-authorize",
+  "backchannelAuthenticationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/bc-authorize",
   "persistRefreshTokenInLdap": true,
-  "endSessionEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/end_session",
+  "endSessionEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/end_session",
   "clientAuthenticationFilters": [
     {
       "filter": "myCustomAttr1={0}",
@@ -166,7 +166,7 @@
   "returnClientSecretOnRead": false,
   "jmsBrokerURISet": [
   ],
-  "idGenerationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/id",
+  "idGenerationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/id",
   "updateUserLastLogonTime": false,
   "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject",
   "umaResourceLifetime": 2592000,
@@ -185,8 +185,8 @@
   "refreshTokenExtendLifetimeOnRotation": false,
   "keepAuthenticatorAttributesOnAcrChange": false,
   "umaRptAsJwt": false,
-  "checkSessionIFrame": "https://pujavs3.infinity.com/oxauth/opiframe.htm",
-  "introspectionEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/introspection",
+  "checkSessionIFrame": "https://pujavs3.infinity.com/jans-auth/opiframe.htm",
+  "introspectionEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/introspection",
   "removeRefreshTokensForClientOnLogout": true,
   "umaValidateClaimToken": false,
   "fapiCompatibility": false,
@@ -251,9 +251,9 @@
     "A128KW",
     "A256KW"
   ],
-  "authorizationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/authorize",
+  "authorizationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/authorize",
   "sessionIdPersistOnPromptNone": true,
-  "opPolicyUri": "http://ox.gluu.org/doku.php?id=oxauth:policy",
+  "opPolicyUri": "http://ox.gluu.org/doku.php?id=jans-auth:policy",
   "authorizationRequestCustomAllowedParameters": [
     "customParam2",
     "customParam3",
@@ -320,7 +320,7 @@
     "ES384",
     "ES512"
   ],
-  "jwksUri": "https://pujavs3.infinity.com/oxauth/restv1/jwks",
+  "jwksUri": "https://pujavs3.infinity.com/jans-auth/restv1/jwks",
   "dynamicGrantTypeDefault": [
     "REFRESH_TOKEN",
     "OXAUTH_UMA_TICKET",
@@ -328,14 +328,14 @@
     "CLIENT_CREDENTIALS",
     "AUTHORIZATION_CODE"
   ],
-  "baseEndpoint": "https://pujavs3.infinity.com/oxauth/restv1",
+  "baseEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1",
   "dynamicRegistrationCustomAttributes": [
-    "oxAuthTrustedClient"
+    "jansTrustedClnt"
   ],
   "oxId": "https://pujavs3.infinity.com/oxid/service/gluu/inum",
   "dynamicRegistrationExpirationTime": 10,
   "softwareStatementValidationType": "script",
-  "backchannelDeviceRegistrationEndpoint": "https://pujavs3.infinity.com/oxauth/restv1/bc-deviceRegistration",
+  "backchannelDeviceRegistrationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/bc-deviceRegistration",
   "umaTicketLifetime": 3600,
   "metricReporterKeepDataDays": 15,
   "invalidateSessionCookiesAfterAuthorizationFlow": false,
@@ -370,7 +370,7 @@
       "corsRequestDecorate": true
     }
   ],
-  "dnName": "CN=oxAuth CA Certificates",
+  "dnName": "CN=Jans CA Certificates",
   "keyStoreSecret": "malMCOjHHwFn",
   "sessionIdLifetime": 86400,
   "expirationNotificatorIntervalInSeconds": 600,
