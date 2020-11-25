@@ -4,9 +4,11 @@ import com.google.common.base.Preconditions;
 import io.jans.ca.rs.protect.Condition;
 import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.RsResourceList;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.service.ClientService;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
 import io.jans.configapi.util.Jackson;
@@ -41,6 +43,9 @@ public class UmaResourceProtectionService {
 
     @Inject
     UmaResourceService umaResourceService;
+    
+    @Inject
+    ClientService clientService;
 
     Collection<RsResource> rsResourceList;
 
@@ -69,8 +74,11 @@ public class UmaResourceProtectionService {
         createScopeIfNeeded();
 
         createResourceIfNeeded();
+        
+        createClientIfNeeded();
 
-        log.debug("\n\n UmaResourceProtectionCache.getAllUmaResources = " + UmaResourceProtectionCache.getAllUmaResources());
+        log.debug("\n\n UmaResourceProtectionService::UmaResourceProtectionCache.getAllUmaResources = "
+                + UmaResourceProtectionCache.getAllUmaResources());
 
     }
 
@@ -190,4 +198,55 @@ public class UmaResourceProtectionService {
         return iat;
     }
    
+    private void createClientIfNeeded() throws Exception { 
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = loader.getResourceAsStream("api-client.json");
+        
+        ClientList clientList = Jackson.createJsonMapper().readValue(inputStream, ClientList.class);
+        log.debug(
+                " \n\n UmaResourceProtectionService::createClientIfNeeded() - clientList = " + clientList + "\n\n");
+        List<Client> clients = clientList.getClients();
+
+        log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clients = "
+                + clients + "\n\n");
+
+        Preconditions.checkNotNull(clients, "Config Api Client list cannot be null !!!");
+        
+        //Create client
+        for (Client clt : clients) {
+            log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clt = "
+                    + clt + "\n\n");
+            // Check if exists
+            Client client = null;
+
+            try {
+                client = this.clientService.getClientByInum(clt.getClientId());
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Verify client = "
+                        + client + "\n\n");
+
+            } catch (Exception ex) {
+                log.error("Error while searching client "+ex);
+            }
+
+            if (client == null) {
+                // Create client           
+                clt.setDn(clientService.getDnForClient(clt.getClientId()));         
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Create clt = "
+                        + clt + "\n\n");
+                this.clientService.addClient(clt);
+            } else {
+                clt.setDn(clientService.getDnForClient(clt.getClientId()));
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Update clt = "
+                        + clt + "\n\n");
+                this.clientService.updateClient(clt);
+            }
+
+            client = this.clientService.getClientByInum(clt.getClientId());
+            log.debug(
+                    " \n\n UmaResourceProtectionService::createClientIfNeeded() - Final client = " + client + "\n\n");
+
+        }
+
+    }
+    
 }

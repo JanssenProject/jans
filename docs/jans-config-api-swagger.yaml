@@ -32,7 +32,7 @@ tags:
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
 paths:
-  /jans-config-api/api/v1/oxauth/config/oxauth:
+  /jans-config-api/api/v1/jans-auth-server/config:
     get:
       summary: Gets all Jans authorization server configuration properties.
       description: Gets all Jans authorization server configuration properties.
@@ -6745,7 +6745,7 @@ components:
           items:
             type: string
           enum:
-            - oxAuthTrustedClient
+            - jansTrustedClnt
         displayValuesSupported:
           type: array
           description: A list of the display parameter values that the OpenID Provider supports.
@@ -6817,11 +6817,11 @@ components:
         opPolicyUri:
           type: string
           description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.
-          example: 'http://ox.gluu.org/doku.php?id=oxauth:policy'
+          example: 'http://ox.gluu.org/doku.php?id=jans:policy'
         opTosUri:
           type: string
           description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
-          example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
+          example: 'http://ox.gluu.org/doku.php?id=jans:tos'
         authorizationCodeLifetime:
           type: integer
           description: The lifetime of the Authorization Code.
@@ -7177,12 +7177,12 @@ components:
           type: string
           description: DN of certificate issuer.
           minLength: 1
-          example: CN=oxAuth CA Certificates
+          example: CN=Jans CA Certificates
         keyStoreFile:
           type: string
           description: The Key Store File (JKS).
           minLength: 1
-          example: /etc/certs/oxauth-keys.jks
+          example: /etc/certs/jans-auth-keys.jks
         keyStoreSecret:
           type: string
           description: The password of the Key Store.
@@ -7235,7 +7235,7 @@ components:
           default: false
         loggingLevel:
           type: string
-          description: Logging level for oxAuth logger.
+          description: Logging level for jans-auth logger.
           enum:
             - TRACE
             - DEBUG
@@ -7660,7 +7660,7 @@ components:
         status:
           type: string
           description: Distinguished Name
-        oxMultiValuedAttribute:
+        jansMultivaluedAttr:
           type: boolean
           description: Boolean value indicating if the attribute is multi-value
         lifetime:
@@ -7688,7 +7688,7 @@ components:
           description: GluuAttributeUsageType
           items:
             type: string
-        oxAuthClaimName:
+        jansAttrName:
           type: string
         seeAlso:
           type: string
@@ -7698,7 +7698,7 @@ components:
           type: string
         urn:
           type: string
-        oxSCIMCustomAttribute:
+        jansSCIMCustomAttr:
           type: boolean
           description: Boolean value indicating if the attribute is a SCIM custom attribute
         custom:
@@ -7779,7 +7779,7 @@ components:
             - OpenID
             - Dynamic
             - OAuth
-        oxAuthClaims:
+        jansClaim:
           description: Claim attributes associated with the scope.
           type: array
           items:
