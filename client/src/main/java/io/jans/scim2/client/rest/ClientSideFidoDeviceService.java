@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response;
 /**
  * An interface that exhibits operations to manipulate FidoDevice SCIM resources.
  *
- * <p><a name="attrsList"> </a><b>Notes:</b></p>
  * <p>The parameters <i>attrsList</i> and <i>excludedAttrsList</i> found in methods of this interface are aimed at
  * specifying the "attributes" and "excludedAttributes" query params regarded in section 3.9 of SCIM spec protocol document
  * (RFC 7644).</p>
