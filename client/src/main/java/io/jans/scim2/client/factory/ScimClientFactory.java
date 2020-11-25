@@ -96,7 +96,7 @@ public class ScimClientFactory {
      *                       package {@link io.jans.scim2.client.rest gluu.scim2.client.rest} or {@link io.jans.scim.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}
      * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/identity/restv1}
      * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
-     * @param clientID ID of an already registered OIDC client in the Gluu Server
+     * @param clientId ID of an already registered OIDC client in the Gluu Server
      * @param clientSecret Secret of the corresponding client (see clientID parameter)
      * @param <T> The type the object returned will belong to.
      * @return An object that allows to invoke service methods
@@ -133,7 +133,7 @@ public class ScimClientFactory {
      * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/identity/restv1}
      * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
-     * @param clientID ID of an already registered OIDC client in the Gluu Server
+     * @param clientId ID of an already registered OIDC client in the Gluu Server
      * @param clientSecret Secret of the corresponding client (see clientID parameter)
      * @return An object that allows to invoke service methods
      * @throws Exception If there is initialization problem
