@@ -91,10 +91,16 @@ class PackageUtils(SetupUtils):
         paths.cmd_unzip = shutil.which('unzip')
 
 
-    def installPackage(self, packageName):
-        if base.clone_type == 'deb':
-            output = self.run([paths.cmd_dpkg, '--install', packageName])
+    def installPackage(self, packageName, remote=False):
+        install_command, update_command, query_command, check_text = self.get_install_commands()
+        if remote:
+            output = self.run(install_command.format(packageName), shell=True)
         else:
-            output = self.run([paths.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+            if base.clone_type == 'deb':
+                output = self.run([paths.cmd_dpkg, '--install', packageName])
+            else:
+                output = self.run([paths.cmd_rpm, '--install', '--verbose', '--hash', packageName])
 
         return output
+
+packageUtils = PackageUtils()
