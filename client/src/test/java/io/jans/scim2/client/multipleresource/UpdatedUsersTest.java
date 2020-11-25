@@ -59,11 +59,11 @@ public class UpdatedUsersTest extends UserBaseTest {
             assertEquals(response.getStatus(), CREATED.getStatusCode());
             user = response.readEntity(usrClass); 
             inums.add(user.getId());
-
-            // We will get isoDate from last request 
-        	isoDate = user.getMeta().getCreated();
-        	System.out.println(isoDate);
+            
+            if (j == i) {
+            	isoDate = user.getMeta().getCreated();
 //            	logger.info("{}-indexed user created at '{}'", j, isoDate);
+			}
 		}
 		
 		logger.info("Querying created users after '{}'", isoDate);
