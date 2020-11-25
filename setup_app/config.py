@@ -156,6 +156,7 @@ class Config:
         self.installConfigApi = True
         self.installCasa = False
         self.installOxd = False
+        self.installEleven = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
@@ -295,6 +296,7 @@ class Config:
                         'passport': ['opendj oxauth', 82],
                         'jans-auth-rp': ['opendj oxauth', 84],
                         'jans-radius': ['opendj oxauth', 86],
+                        'jans-eleven': ['opendj oxauth', 79],
                         }
 
         self.install_time_ldap = None
