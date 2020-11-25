@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.fido.FidoDeviceResource;
+import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
@@ -62,6 +63,9 @@ public class SearchResourcesWebService extends BaseScimWebService {
 
     @Inject
     private FidoDeviceWebService fidoWS;
+
+    @Inject
+    private Fido2DeviceWebService fido2WS;
 
     private ObjectMapper mapper=null;
 
@@ -131,7 +135,7 @@ public class SearchResourcesWebService extends BaseScimWebService {
         Integer startIndex_=searchRequest.getStartIndex();
         JsonNode tree=null;
 
-        //THIS ALGORITHM IS CONTRIVED, IF YOU CHANGE IT ENSURE TEST CASES STILL PASS...
+        //THIS ALGORITHM IS CONVOLUTED, IF YOU CHANGE IT ENSURE TEST CASES STILL PASS...
 
         //Move forward to skip the searches that might have no results and find the first one starting at index = searchRequest.getStartIndex()
         for (i=0; i< NUM_RESOURCE_TYPES && !resultsAvailable; i++) {
@@ -227,6 +231,9 @@ public class SearchResourcesWebService extends BaseScimWebService {
                 case 2:
                     r = fidoWS.searchDevicesPost(searchRequest, null);
                     break;
+                case 3:
+                    r = fido2WS.searchF2DevicesPost(searchRequest, null);
+                    break;
             }
 
             if (r.getStatus()!=OK.getStatusCode())
@@ -250,8 +257,8 @@ public class SearchResourcesWebService extends BaseScimWebService {
         endpointUrl=appConfiguration.getBaseEndpoint() + SearchResourcesWebService.class.getAnnotation(Path.class).value();
         mapper=new ObjectMapper();
 
-        //Do not alter the order of appearance
-        resourceClasses=new Class[]{UserResource.class, GroupResource.class, FidoDeviceResource.class};
+        //Do not alter the order of appearance (see getListResponseTree)
+        resourceClasses=new Class[]{UserResource.class, GroupResource.class, FidoDeviceResource.class, Fido2DeviceResource.class};
         NUM_RESOURCE_TYPES =resourceClasses.length;
     }
 
