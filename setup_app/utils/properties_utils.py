@@ -84,7 +84,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldapPass = Config.admin_password
 
         if Config.cb_install and not Config.get('cb_password'):
-            Config.cb_password = Config.oxtrust_admin_password
+            Config.cb_password = Config.admin_password
 
         if Config.cb_install and not Config.wrends_install:
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
@@ -183,8 +183,8 @@ class PropertiesUtils(SetupUtils):
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
 
-        if not 'oxtrust_admin_password' in properties_list:
-            Config.oxtrust_admin_password = p['ldapPass']
+        if not 'admin_password' in properties_list:
+            Config.admin_password = p['ldapPass']
             
         if p.get('ldap_hostname') != 'localhost':
             if p.get('remoteLdap','').lower() == 'true':
@@ -232,8 +232,8 @@ class PropertiesUtils(SetupUtils):
                 sys.exit(1)
 
 
-        if not 'oxtrust_admin_password' in p:
-            p['oxtrust_admin_password'] = p['ldapPass']
+        if not 'admin_password' in p:
+            p['admin_password'] = p['ldapPass']
 
 
         return p
@@ -282,11 +282,11 @@ class PropertiesUtils(SetupUtils):
             # TODO: uncomment later
             return
             
-            self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
+            self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
             
             Config.post_messages.append(
                 "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
-                prop_fn,  Config.oxtrust_admin_password, os.path.basename(prop_fn), os.path.basename(Config.setup_properties_fn)))
+                prop_fn,  Config.admin_password, os.path.basename(prop_fn), os.path.basename(Config.setup_properties_fn)))
             
             self.run(['rm', '-f', prop_fn])
             
@@ -523,6 +523,23 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installOxd')
 
 
+    def promptForEleven(self):
+        if Config.installed_instance and Config.installEleven:
+            return
+
+        promptForinstallEleven = self.getPrompt("Install Eleven Server?",
+                                            self.getDefaultOption(Config.installEleven)
+                                            )[0].lower()
+        
+        if promptForinstallEleven == 'y':
+            Config.installEleven = True
+        else:
+            Config.installEleven = False
+
+        if Config.installed_instance and Config.installEleven:
+            Config.addPostSetupService.append('installEleven')
+
+
     def promptForProperties(self):
 
         if Config.noPrompt:
@@ -584,7 +601,7 @@ class PropertiesUtils(SetupUtils):
             
             Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.application_max_ram))
 
-            oxtrust_admin_password = Config.oxtrust_admin_password if Config.oxtrust_admin_password else self.getPW(special='.*=!%&+/-')
+            admin_password = Config.admin_password if Config.admin_password else self.getPW(special='.*=!%&+/-')
 
             available_backends = self.getBackendTypes()
 
@@ -602,7 +619,7 @@ class PropertiesUtils(SetupUtils):
 
             if Config.wrends_install == InstallTypes.LOCAL:
 
-                ldapPass = (Config.ldapPass if Config.ldapPass else Config.oxtrust_admin_password) or self.getPW(6)
+                ldapPass = (Config.ldapPass if Config.ldapPass else Config.admin_password) or self.getPW(6)
 
 
                 while True:
@@ -648,7 +665,7 @@ class PropertiesUtils(SetupUtils):
                     Config.isCouchbaseUserAdmin = True
 
                     while True:
-                        cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), Config.oxtrust_admin_password)
+                        cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), Config.admin_password)
 
                         if self.checkPassword(cbPass):
                             break
@@ -723,6 +740,7 @@ class PropertiesUtils(SetupUtils):
 
         self.promptForScimServer()
         self.promptForFido2Server()
+        self.promptForEleven()
 
         #if (not Config.installOxd) and Config.oxd_package:
         #    self.promptForOxd()
