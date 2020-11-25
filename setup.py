@@ -27,8 +27,7 @@ from setup_app import static
 # second import module base, this makes some initial settings
 from setup_app.utils import base
 
-from setup_app.utils.package_utils import PackageUtils
-packageUtils = PackageUtils()
+from setup_app.utils.package_utils import packageUtils
 packageUtils.check_and_install_packages()
 
 from setup_app.messages import msg
@@ -55,6 +54,8 @@ from setup_app.installers.oxauth import OxauthInstaller
 from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.config_api import ConfigApiInstaller
+from setup_app.installers.eleven import ElevenInstaller
+
 #from setup_app.installers.oxd import OxdInstaller
 
 if base.snap:
@@ -146,13 +147,14 @@ oxauthInstaller = OxauthInstaller()
 configApiInstaller = ConfigApiInstaller()
 fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
-
+elevenInstaller = ElevenInstaller()
 #oxdInstaller = OxdInstaller()
 
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
                         oxauthInstaller, scimInstaller, fidoInstaller,
+                        elevenInstaller,
                         #oxdInstaller
                         ):
 
@@ -265,7 +267,9 @@ def do_installation():
         if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
 
-
+        if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(elevenInstaller.install_var)):
+            elevenInstaller.start_installation()
+            
         #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
         #    oxdInstaller.start_installation()
 
