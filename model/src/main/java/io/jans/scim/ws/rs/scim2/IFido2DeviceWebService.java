@@ -21,7 +21,6 @@ import java.util.List;
 
 /*
  * Shared interface of SCIM service methods to manipulate Fido 2 Devices.
- * Besides SCIM server code, this class is also used by SCIM java client, edit carefully.
  */
 public interface IFido2DeviceWebService {
 

@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * SCIM service interface with available methods to manipulate Fido devices.
  *
- * <p><a name="attrsList"> </a><b>Notes:</b></p>
  * <p>The parameters <i>attrsList</i> and <i>excludedAttrsList</i> found in methods of this interface are aimed at
  * specifying the "attributes" and "excludedAttributes" query params regarded in section 3.9 of SCIM spec protocol document
  * (RFC 7644).</p>
@@ -47,7 +46,6 @@ import java.util.List;
 /*
  * Created by jgomer on 2017-10-09.
  * Shared interface of SCIM service methods to manipulate Fido Devices.
- * Besides SCIM server code, this class is also used by SCIM java client, edit carefully.
  */
 public interface IFidoDeviceWebService {
 
