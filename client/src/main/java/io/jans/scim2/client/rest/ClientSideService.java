@@ -144,7 +144,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * @param itemsPerPage Maximum number of results to retrieve
      * @return An json object representing the results of the query. See the doc page for more information
      */    
-    @Path("/UpdatedUsers")
+    @Path("/v2/UpdatedUsers")
     @GET
     @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
     Response usersChangedAfter(@QueryParam("timeStamp") String isoDate,

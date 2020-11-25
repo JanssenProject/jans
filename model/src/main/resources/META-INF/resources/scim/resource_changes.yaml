@@ -7,13 +7,13 @@ info:
     Use this service to obtain the user entries that have been created or changed after a certain time stamp.
     See https://gluu.org/docs/ce/user-management/idm-sync/
   license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    name: Janssen license
+    url: 'https://github.com/JanssenProject/blob/master/LICENSE'
 
 #Your Gluu host
 host: your.gluu.org
 
-basePath: /identity/restv1/scim
+basePath: /scim/restv1/v2
 schemes:
  - https
 
