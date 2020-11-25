@@ -41,9 +41,9 @@
 	</repositories>
 
 	<scm>
-		<url>https://github.com/GluuFederation/scim</url>
-		<connection>scm:git:git://github.com/GluuFederation/scim.git</connection>
-		<developerConnection>scm:git:git@github.com:GluuFederation/scim.git</developerConnection>
+		<url>https://github.com/JanssenProject/jans-scim</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans-scim.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans-scim.git</developerConnection>
 	</scm>
 
 	<modules>
