@@ -164,7 +164,7 @@ public class IntrospectionWebService {
             }
 
             // Make scopes conform as required by spec, see #1499
-            if (!appConfiguration.getIntrospectionResponseScopesBackwardCompatibility()) {
+            if (response.getScope()!= null && !appConfiguration.getIntrospectionResponseScopesBackwardCompatibility()) {
             	String scopes = StringUtils.join(response.getScope().toArray(), " ");
             	responseAsJsonObject.put("scope", scopes);
             }
