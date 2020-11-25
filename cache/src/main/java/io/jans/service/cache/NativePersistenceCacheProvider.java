@@ -6,14 +6,15 @@
 
 package io.jans.service.cache;
 
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.search.filter.Filter;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.base.SimpleBranch;
-import io.jans.orm.search.filter.Filter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,22 +166,33 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 		
 		String originalKey = key;
 
+        key = hashKey(key);
+
+        NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
+        entity.setTtl(expirationInSeconds);
+        entity.setData(asString(object));
+        entity.setId(key);
+        entity.setDn(createDn(key));
+        entity.setCreationDate(creationDate);
+        entity.setExpirationDate(expirationDate.getTime());
+        entity.setDeletable(true);
+
         try {
-            key = hashKey(key);
-	
-			NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
-			entity.setTtl(expirationInSeconds);
-			entity.setData(asString(object));
-			entity.setId(key);
-			entity.setDn(createDn(key));
-			entity.setCreationDate(creationDate);
-			entity.setExpirationDate(expirationDate.getTime());
-			entity.setDeletable(true);
-	
 			if (!skipRemoveBeforePut) {
 				silentlyRemoveEntityIfExists(entity.getDn());
 			}
 			entryManager.persist(entity);
+        } catch (EntryPersistenceException e) {
+            if (e.getCause() instanceof DuplicateEntryException) { // on duplicate, remove entry and try to persist again
+                try {
+                    silentlyRemoveEntityIfExists(entity.getDn());
+                    entryManager.persist(entity);
+                    return;
+                } catch (Exception ex) {
+                    log.error("Failed to retry put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + ex.getMessage(), ex);
+                }
+            }
+            log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e);
         } catch (Exception e) {
         	log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
