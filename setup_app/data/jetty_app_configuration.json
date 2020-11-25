@@ -99,5 +99,18 @@
     },
     "installed": false,
     "name": "jans-scim"
+  },
+  "jans-eleven": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "metaspace_mb": 128,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.08
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-eleven"
   }
 }
