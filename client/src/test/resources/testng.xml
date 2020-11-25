@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="oxElevenClient">
-    <parameter name="generateKeyEndpoint" value="https://ce-dev5.gluu.org/oxeleven/rest/generateKey"/>
-    <parameter name="signEndpoint" value="https://ce-dev5.gluu.org/oxeleven/rest/sign"/>
-    <parameter name="verifySignatureEndpoint" value="https://ce-dev5.gluu.org/oxeleven/rest/verifySignature"/>
-    <parameter name="deleteKeyEndpoint" value="https://ce-dev5.gluu.org/oxeleven/rest/deleteKey"/>
+    <parameter name="generateKeyEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/generateKey"/>
+    <parameter name="signEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/sign"/>
+    <parameter name="verifySignatureEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/verifySignature"/>
+    <parameter name="deleteKeyEndpoint" value="https://jenkins-ldap.jans.io/jans-eleven/restv1/deleteKey"/>
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
     <parameter name="testModeToken" value="5be64765-7052-466b-ad1a-bd7dddcfdee4"/>

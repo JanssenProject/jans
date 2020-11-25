@@ -23,7 +23,7 @@ import io.jans.eleven.rest.VerifySignatureRestServiceImpl;
  * @author Yuriy Movchan
  * @version 0.1, 03/21/2017
  */
-@ApplicationPath("/rest")
+@ApplicationPath("/restv1")
 public class ResteasyInitializer extends Application {	
 
 	@Override
