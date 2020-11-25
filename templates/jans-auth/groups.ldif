@@ -1,7 +1,6 @@
 dn: inum=60B7,ou=groups,o=jans
 objectClass: top
 objectClass: jansGrp
-jansGrp: jansManagerGrp
 inum: 60B7
 jansStatus: active
 displayName: Jannsen Manager Group
