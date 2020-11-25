@@ -41,7 +41,7 @@ class ElevenInstaller(JettyInstaller):
                     packageUtils.installPackage('http://repo.okay.com.mx/centos/8/x86_64/release/softhsm-2.4.0-2.el8.x86_64.rpm', remote=True)
         elif base.clone_type == 'deb':
             self.logIt("Installing softhsm", pbar=self.service_name)
-            self.softhsm_path = '/lib64/pkcs11/libsofthsm2.so'
+            self.softhsm_path = '/usr/lib/softhsm/libsofthsm2.so'
             if not os.path.exists(self.softhsm_path):
                 packageUtils.installPackage('softhsm2', remote=True)
 
