@@ -49,6 +49,7 @@ def get_setup_options():
     #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
+    parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
@@ -72,6 +73,7 @@ def get_setup_options():
         'installScimServer': True,
         'installOxd': False,
         'installFido2': True,
+        'installEleven': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -91,6 +93,9 @@ def get_setup_options():
 
     if argsp.no_fido2:
         setupOptions['installFido2'] = False
+
+    if argsp.install_eleven:
+        setupOptions['installEleven'] = True
 
     if argsp.ip_address:
         setupOptions['ip'] = argsp.ip_address
