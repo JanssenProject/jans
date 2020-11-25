@@ -293,6 +293,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.restart('jans-auth')
 
+        if Config.installEleven:
+            eleven_tokens_package = os.path.join(Config.staticFolder, 'eleven/jans-eleven-tokens.tar.gz')
+            target_dir = '/var/lib/softhsm/tokens/'
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+            self.run([paths.cmd_tar, '-zxf', eleven_tokens_package, '-C', target_dir])
+
         # Prepare for tests run
         #install_command, update_command, query_command, check_text = self.get_install_commands()
         #self.run_command(install_command.format('git'))
