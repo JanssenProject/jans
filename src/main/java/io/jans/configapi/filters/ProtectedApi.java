@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 public @interface ProtectedApi {
 
     /**
-     * @return UMA scopes which application should have to access oxauth-config api.
+     * @return UMA scopes which application should have to access jans-config-api.
      */
     String[] scopes() default {};
 

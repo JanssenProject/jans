@@ -290,13 +290,16 @@ public class ConfigurationFactory {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
+        log.info("=============  createAuthorizationService() - ConfigurationFactory.getConfigAppPropertiesFile() = "+ConfigurationFactory.getConfigAppPropertiesFile());
         if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
+                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
+                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "+umaResourceProtectionService);
                 umaResourceProtectionService.verifyUmaResources(); //Verify UmaResources available 
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }

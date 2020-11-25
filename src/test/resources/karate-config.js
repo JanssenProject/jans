@@ -21,7 +21,7 @@ function() {
 	    healthUrl: baseUrl + '/health',
 	    fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
 	    acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
-	    authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/config/oxauth',
+	    authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
 	    scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
 	    cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
 	    ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
