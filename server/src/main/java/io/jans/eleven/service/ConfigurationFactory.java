@@ -48,7 +48,7 @@ public class ConfigurationFactory {
 	private static final String BASE_DIR;
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    private final String CONFIG_FILE_NAME = "jans-eleven-config.json";
+    private final String CONFIG_FILE_NAME = "jans-eleven.json";
 
 	private String confDir;
     private String configFilePath;
