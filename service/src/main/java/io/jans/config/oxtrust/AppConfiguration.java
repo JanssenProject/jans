@@ -105,13 +105,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String scimUmaClientKeyStoreFile;
     private String scimUmaClientKeyStorePassword;
 
-    private String passportUmaClientId;
-    private String passportUmaClientKeyId;
-    private String passportUmaResourceId;
-    private String passportUmaScope;
-    private String passportUmaClientKeyStoreFile;
-    private String passportUmaClientKeyStorePassword;
-
     private String apiUmaClientId;
     private String apiUmaClientKeyId;
     private String apiUmaResourceId;
@@ -144,6 +137,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String loggingLevel;
     private String loggingLayout;
+    private String externalLoggerConfiguration;
 
     private String shibbolethVersion;
     private String shibboleth3IdpRootDir;
@@ -576,54 +570,6 @@ public class AppConfiguration implements Configuration, Serializable {
         this.scimUmaClientKeyStorePassword = scimUmaClientKeyStorePassword;
     }
 
-    public String getPassportUmaClientId() {
-        return passportUmaClientId;
-    }
-
-    public void setPassportUmaClientId(String passportUmaClientId) {
-        this.passportUmaClientId = passportUmaClientId;
-    }
-
-    public String getPassportUmaClientKeyId() {
-        return passportUmaClientKeyId;
-    }
-
-    public void setPassportUmaClientKeyId(String passportUmaClientKeyId) {
-        this.passportUmaClientKeyId = passportUmaClientKeyId;
-    }
-
-    public String getPassportUmaResourceId() {
-        return passportUmaResourceId;
-    }
-
-    public void setPassportUmaResourceId(String passportUmaResourceId) {
-        this.passportUmaResourceId = passportUmaResourceId;
-    }
-
-    public String getPassportUmaScope() {
-        return passportUmaScope;
-    }
-
-    public void setPassportUmaScope(String passportUmaScope) {
-        this.passportUmaScope = passportUmaScope;
-    }
-
-    public String getPassportUmaClientKeyStoreFile() {
-        return passportUmaClientKeyStoreFile;
-    }
-
-    public void setPassportUmaClientKeyStoreFile(String passportUmaClientKeyStoreFile) {
-        this.passportUmaClientKeyStoreFile = passportUmaClientKeyStoreFile;
-    }
-
-    public String getPassportUmaClientKeyStorePassword() {
-        return passportUmaClientKeyStorePassword;
-    }
-
-    public void setPassportUmaClientKeyStorePassword(String passportUmaClientKeyStorePassword) {
-        this.passportUmaClientKeyStorePassword = passportUmaClientKeyStorePassword;
-    }
-
     public String getCssLocation() {
         return cssLocation;
     }
@@ -792,7 +738,15 @@ public class AppConfiguration implements Configuration, Serializable {
         this.loggingLayout = loggingLayout;
     }
 
-    public int getMetricReporterInterval() {
+    public String getExternalLoggerConfiguration() {
+		return externalLoggerConfiguration;
+	}
+
+	public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+		this.externalLoggerConfiguration = externalLoggerConfiguration;
+	}
+
+	public int getMetricReporterInterval() {
         return metricReporterInterval;
     }
 

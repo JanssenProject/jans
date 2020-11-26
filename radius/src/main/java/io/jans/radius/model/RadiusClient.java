@@ -14,7 +14,7 @@ import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
-@ObjectClass(value = "oxRadiusClient")
+@ObjectClass(value = "jansRadiusClient")
 public class RadiusClient implements Serializable {
 
 	private static final long serialVersionUID = -3145075159422463151L;

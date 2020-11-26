@@ -13,20 +13,20 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
 /**
- * @author Yuriy MOvchan
+ * @author Yuriy Movchan
  * @version May 12, 2020
  */
 @DataEntry
-@ObjectClass(value = "jsAppConfiguration")
+@ObjectClass(value = "jansAppConf")
 public class DbApplicationConfiguration {
     @DN
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "jsConfDyn")
+    @AttributeName(name = "jansConfDyn")
     private String dynamicConf;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public DbApplicationConfiguration() {

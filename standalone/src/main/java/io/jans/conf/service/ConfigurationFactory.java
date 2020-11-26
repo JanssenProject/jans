@@ -41,8 +41,8 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	private final Logger LOG = LoggerFactory.getLogger(ConfigurationFactory.class);
 
 	static {
-		if (System.getProperty("gluu.base") != null) {
-			BASE_DIR = System.getProperty("gluu.base");
+		if (System.getProperty("jans.base") != null) {
+			BASE_DIR = System.getProperty("jans.base");
 		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
@@ -57,7 +57,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
     public static final String BASE_DIR;
     public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
+	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
     public static final String DEFAULT_PROPERTIES_FILE = DIR + "openid.properties";
 
 	private static final String SALT_FILE_NAME = "salt";
@@ -293,7 +293,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	}
 
 	protected String getDefaultPersistanceConfigurationFileName() {
-		return "gluu-ldap.properties";
+		return "jans-ldap.properties";
 	}
 
 	public C getAppConfiguration() {

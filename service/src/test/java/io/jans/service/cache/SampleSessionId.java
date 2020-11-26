@@ -28,43 +28,43 @@ public class SampleSessionId implements Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "jsSessId")
+    @AttributeName(name = "jansSessId")
     private String id;
 
-    @AttributeName(name = "jsLastAccessTime")
+    @AttributeName(name = "jansLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "jsUsrDN")
+    @AttributeName(name = "jansUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "jsState")
+    @AttributeName(name = "jansState")
     private SessionIdState state;
 
     @AttributeName(name = "oxAuthSessionState")
     private String sessionState;
 
-    @AttributeName(name = "jsPermissionGranted")
+    @AttributeName(name = "jansPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jsAsJwt")
+    @AttributeName(name = "jansAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "jsJwt")
+    @AttributeName(name = "jansJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "jsPermissionGrantedMap")
+    @AttributeName(name = "jansPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
 
     @JsonObject
-    @AttributeName(name = "jsInvolvedClnts")
+    @AttributeName(name = "jansInvolvedClnts")
     private SessionIdAccessMap involvedClients;
 
     @JsonObject
-    @AttributeName(name = "jsSessAttr")
+    @AttributeName(name = "jansSessAttr")
     private Map<String, String> sessionAttributes;
 
     @Transient
