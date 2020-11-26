@@ -199,10 +199,10 @@ public abstract class MetricService implements Serializable {
             for (String metricDn : metricDns) {
                 List<Filter> metricTypeFilters = new ArrayList<Filter>();
 
-                Filter applicationTypeFilter = Filter.createEqualityFilter("jsAppType", applicationType.getValue());
-                Filter eventTypeTypeFilter = Filter.createEqualityFilter("jsMetricTyp", metricType.getValue());
-                Filter startDateFilter = Filter.createGreaterOrEqualFilter("jsStartDate", getEntryManager().encodeTime(metricDn, (startDate)));
-                Filter endDateFilter = Filter.createLessOrEqualFilter("jsEndDate", getEntryManager().encodeTime(metricDn, endDate));
+                Filter applicationTypeFilter = Filter.createEqualityFilter("jansAppTyp", applicationType.getValue());
+                Filter eventTypeTypeFilter = Filter.createEqualityFilter("jansMetricTyp", metricType.getValue());
+                Filter startDateFilter = Filter.createGreaterOrEqualFilter("jansStartDate", getEntryManager().encodeTime(metricDn, (startDate)));
+                Filter endDateFilter = Filter.createLessOrEqualFilter("jansEndDate", getEntryManager().encodeTime(metricDn, endDate));
 
                 metricTypeFilters.add(applicationTypeFilter);
                 metricTypeFilters.add(eventTypeTypeFilter);
@@ -226,7 +226,7 @@ public abstract class MetricService implements Serializable {
 
     public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
             int count, int chunkSize) {
-        Filter expiratioFilter = Filter.createLessOrEqualFilter("jsStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
+        Filter expiratioFilter = Filter.createLessOrEqualFilter("jansStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
 
         List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
                 new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);

@@ -21,7 +21,7 @@ import java.util.Date;
  * @author Yuriy Movchan Date: 01/21/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuConfiguration")
+@ObjectClass(value = "jansConfiguration")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SharedConfigurationEntry extends InumEntry implements Serializable {
 
@@ -33,7 +33,7 @@ public class SharedConfigurationEntry extends InumEntry implements Serializable 
 	@AttributeName
 	private String displayName;
 
-	@AttributeName(name = "jsLastUpd", updateOnly = true)
+	@AttributeName(name = "jansLastUpd", updateOnly = true)
 	private Date lastUpdate;
 
 	@AttributeName(name = "gluuConfigurationPollingInterval")
@@ -42,11 +42,11 @@ public class SharedConfigurationEntry extends InumEntry implements Serializable 
 	@AttributeName(name = "Janssen ProjectEmail")
 	private String contactEmail;
 
-	@AttributeName(name = "jsSmtpConf")
+	@AttributeName(name = "jansSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "jsCacheConf")
+	@AttributeName(name = "jansCacheConf")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
 

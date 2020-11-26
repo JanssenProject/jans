@@ -18,8 +18,8 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum ApplicationType implements AttributeEnum {
 
-    OX_AUTH("oxauth", "oxAuth"),
-    OX_TRUST("Janssen Project", "Janssen Project"),
+    OX_AUTH("jans_auth", "Jans Auth"),
+    OX_TRUST("oxtrust", "oxTrust"),
     FIDO2("fido2", "FIDO2");
 
     private String value;

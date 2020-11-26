@@ -17,7 +17,7 @@ import io.jans.orm.annotation.ObjectClass;
 
 
 @DataEntry
-@ObjectClass(value = "oxRadiusServerConfiguration")
+@ObjectClass(value = "jansRadiusServerConfiguration")
 public class ServerConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -1L;

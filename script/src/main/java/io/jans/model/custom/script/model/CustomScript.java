@@ -32,7 +32,7 @@ import io.jans.orm.model.base.BaseEntry;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @DataEntry(sortBy = "level")
-@ObjectClass("oxCustomScript")
+@ObjectClass("jansCustomScr")
 public class CustomScript extends BaseEntry {
 
     public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
@@ -46,40 +46,40 @@ public class CustomScript extends BaseEntry {
     @Size(min = 2, max = 60, message = "Length of the Name should be between 1 and 30")
     private String name;
     
-    @AttributeName(name = "jsAlias")
+    @AttributeName(name = "jansAlias")
     private List<String> aliases;
 
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "jsScr")
+    @AttributeName(name = "jansScr")
     private String script;
 
-    @AttributeName(name = "jsScrType")
+    @AttributeName(name = "jansScrTyp")
     private CustomScriptType scriptType;
 
-    @AttributeName(name = "programmingLanguage")
+    @AttributeName(name = "jansProgLng")
     private ProgrammingLanguage programmingLanguage;
 
     @JsonObject
-    @AttributeName(name = "jsModuleProperty")
+    @AttributeName(name = "jansModuleProperty")
     private List<SimpleCustomProperty> moduleProperties =new ArrayList<>();
 
     @JsonObject
-    @AttributeName(name = "jsConfProperty")
+    @AttributeName(name = "jansConfProperty")
     private List<SimpleExtendedCustomProperty> configurationProperties;
 
-    @AttributeName(name = "jsLevel")
+    @AttributeName(name = "jansLevel")
     private int level;
 
-    @AttributeName(name = "jsRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
-    @AttributeName(name = "jsEnabled")
+    @AttributeName(name = "jansEnabled")
     private boolean enabled;
 
     @JsonObject
-    @AttributeName(name = "jsScrError")
+    @AttributeName(name = "jansScrError")
     private ScriptError scriptError;
 
     @Transient
