@@ -81,7 +81,13 @@ public abstract class FacesLocalizationConfigPopulator extends ApplicationConfig
 		Pattern regexFilePatern = Pattern.compile(languageFilePattern);
 
 		File file = new File(path);
-		Collection<File> languageFiles = FileUtils.listFiles(file, regexFileFilter, DirectoryFileFilter.DIRECTORY);
+		Collection<File> languageFiles;
+		try {
+			languageFiles = FileUtils.listFiles(file, regexFileFilter, DirectoryFileFilter.DIRECTORY);
+		} catch (RuntimeException e) {
+			log.trace("Failed to find custom localizations");
+			return 0;
+		}
 
 		if (languageFiles.size() == 0) {
 			return 0;

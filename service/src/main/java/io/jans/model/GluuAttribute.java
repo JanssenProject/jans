@@ -30,7 +30,7 @@ import io.jans.orm.model.base.Entry;
  * @version May 2, 2019
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuAttribute")
+@ObjectClass(value = "jansAttr")
 public class GluuAttribute extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 4817004894646725606L;
@@ -43,19 +43,19 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName
 	private String lifetime;
 
-	@AttributeName(name = "jsSourceAttr")
+	@AttributeName(name = "jansSourceAttr")
 	private String sourceAttribute;
 
 	@AttributeName
 	private String salt;
 
-	@AttributeName(name = "jsNameIdType")
+	@AttributeName(name = "jansNameIdType")
 	private String nameIdType;
 
 	@NotNull
 	@Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Name should contain alphabetical and numeric characters only")
 	@Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-	@AttributeName(name = "jsAttrName")
+	@AttributeName(name = "jansAttrName")
 	private String name;
 
 	@NotNull
@@ -68,46 +68,46 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName
 	private String description;
 
-	@AttributeName(name = "jsAttrOrigin")
+	@AttributeName(name = "jansAttrOrigin")
 	private String origin;
 
 	@NotNull
-	@AttributeName(name = "jsAttrTyp")
+	@AttributeName(name = "jansAttrTyp")
 	private AttributeDataType dataType;
 
 	@NotNull
-	@AttributeName(name = "jsAttrEditTyp")
+	@AttributeName(name = "jansAttrEditTyp")
 	private GluuUserRole[] editType;
 
 	@NotNull
-	@AttributeName(name = "jsAttrViewTyp")
+	@AttributeName(name = "jansAttrViewTyp")
 	private GluuUserRole[] viewType;
 
-	@AttributeName(name = "jsAttrUsgTyp")
+	@AttributeName(name = "jansAttrUsgTyp")
 	private GluuAttributeUsageType[] usageType;
 
-	@AttributeName(name = "jsClaimName")
+	@AttributeName(name = "jansClaimName")
 	private String claimName;
 
 	@AttributeName(name = "seeAlso")
 	private String seeAlso;
 
-	@AttributeName(name = "jsStatus")
+	@AttributeName(name = "jansStatus")
 	private GluuStatus status;
 
-	@AttributeName(name = "jsSAML1URI")
+	@AttributeName(name = "jansSAML1URI")
 	private String saml1Uri;
 
-	@AttributeName(name = "jsSAML2URI")
+	@AttributeName(name = "jansSAML2URI")
 	private String saml2Uri;
 
 	@AttributeName(ignoreDuringUpdate = true)
 	private String urn;
 
-	@AttributeName(name = "jsSCIMCustomAttr")
+	@AttributeName(name = "jansSCIMCustomAttr")
 	private Boolean scimCustomAttr;
 
-	@AttributeName(name = "jsMultivaluedAttr")
+	@AttributeName(name = "jansMultivaluedAttr")
 	private Boolean oxMultiValuedAttribute;
 
 	@Transient
@@ -117,10 +117,10 @@ public class GluuAttribute extends Entry implements Serializable {
 	private boolean requred;
 
 	@JsonObject
-	@AttributeName(name = "jsValidation")
+	@AttributeName(name = "jansValidation")
 	private AttributeValidation attributeValidation;
 
-	@AttributeName(name = "jsTooltip")
+	@AttributeName(name = "jansTooltip")
 	private String tooltip;
 
 	public boolean isSelected() {

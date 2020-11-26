@@ -44,19 +44,19 @@ public class Attribute extends Entry implements Serializable {
     @AttributeName
     private String lifetime;
 
-    @AttributeName(name = "jsSourceAttr")
+    @AttributeName(name = "jansSourceAttr")
     private String sourceAttribute;
 
     @AttributeName
     private String salt;
 
-    @AttributeName(name = "jsNameIdType")
+    @AttributeName(name = "jansNameIdType")
     private String nameIdType;
 
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
     @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-    @AttributeName(name = "jsAttrName")
+    @AttributeName(name = "jansAttrName")
     private String name;
 
     @NotNull
@@ -69,53 +69,53 @@ public class Attribute extends Entry implements Serializable {
     @AttributeName
     private String description;
 
-    @AttributeName(name = "jsAttrOrigin")
+    @AttributeName(name = "jansAttrOrigin")
     private String origin;
 
     @NotNull
-    @AttributeName(name = "jsAttrTyp")
+    @AttributeName(name = "jansAttrTyp")
     private AttributeDataType dataType;
 
     @NotNull
-    @AttributeName(name = "jsAttrEditTyp")
+    @AttributeName(name = "jansAttrEditTyp")
     private UserRole[] editType;
 
     @NotNull
-    @AttributeName(name = "jsAttrViewTyp")
+    @AttributeName(name = "jansAttrViewTyp")
     private UserRole[] viewType;
 
-    @AttributeName(name = "jsAttrUsgTyp")
+    @AttributeName(name = "jansAttrUsgTyp")
     private AttributeUsageType[] usageType;
 
-    @AttributeName(name = "jsClaimName")
+    @AttributeName(name = "jansClaimName")
     private String claimName;
 
     @AttributeName(name = "seeAlso")
     private String seeAlso;
 
-    @AttributeName(name = "jsStatus")
+    @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
-    @AttributeName(name = "jsSAML1URI")
+    @AttributeName(name = "jansSAML1URI")
     private String saml1Uri;
 
-    @AttributeName(name = "jsSAML2URI")
+    @AttributeName(name = "jansSAML2URI")
     private String saml2Uri;
 
     @AttributeName(ignoreDuringUpdate = true)
     private String urn;
 
-    @AttributeName(name = "jsSCIMCustomAttr")
+    @AttributeName(name = "jansSCIMCustomAttr")
     private Boolean scimCustomAttr;
 
-    @AttributeName(name = "jsMultivaluedAttr")
+    @AttributeName(name = "jansMultivaluedAttr")
     private Boolean multiValuedAttribute;
 
     @JsonObject
-    @AttributeName(name = "jsValidation")
+    @AttributeName(name = "jansValidation")
     private AttributeValidation attributeValidation;
 
-    @AttributeName(name = "jsTooltip")
+    @AttributeName(name = "jansTooltip")
     private String tooltip;
 
     public String getInum() {

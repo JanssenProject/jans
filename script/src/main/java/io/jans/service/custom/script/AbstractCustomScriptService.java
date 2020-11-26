@@ -92,7 +92,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
         List<Filter> customScriptTypeFilters = new ArrayList<Filter>();
         for (CustomScriptType customScriptType : customScriptTypes) {
-            Filter customScriptTypeFilter = Filter.createEqualityFilter("jsScrType", customScriptType.getValue());
+            Filter customScriptTypeFilter = Filter.createEqualityFilter("jansScrTyp", customScriptType.getValue());
             customScriptTypeFilters.add(customScriptTypeFilter);
         }
 

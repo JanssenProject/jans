@@ -66,8 +66,8 @@ public class CustomScriptManager implements Serializable {
 	public static final String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
 	public static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
-	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "jsRevision", "jsScrType",
-			"jsModuleProperty", "jsEnabled" };
+	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "jansRevision", "jansScrTyp",
+			"jansModuleProperty", "jansEnabled" };
 
 	@Inject
 	protected Logger log;
@@ -242,9 +242,8 @@ public class CustomScriptManager implements Serializable {
 
 			CustomScriptConfiguration prevCustomScriptConfiguration = newCustomScriptConfigurations
 					.get(newSupportedCustomScriptInum);
-			boolean hasChanged = (prevCustomScriptConfiguration == null) || (prevCustomScriptConfiguration.getCustomScript()
-					.getRevision() != newCustomScript.getRevision());
-			if (hasChanged || ScriptLocationType.FILE == newCustomScript.getLocationType()) {
+			if (prevCustomScriptConfiguration == null || prevCustomScriptConfiguration.getCustomScript()
+                    .getRevision() != newCustomScript.getRevision()) {
 				// Destroy old version properly before creating new one
 				if (prevCustomScriptConfiguration != null) {
 					destroyCustomScript(prevCustomScriptConfiguration);
