@@ -48,7 +48,7 @@ public class ExternalPostAuthnContext extends ExternalScriptContext {
     public String toString() {
         return "ExternalPostAuthnContext{" +
                 "client=" + client +
-                ", session=" + session +
+                ", session=" + (session != null ? session.getId() : "") +
                 ", script=" + script +
                 "} " + super.toString();
     }
