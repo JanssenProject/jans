@@ -8,7 +8,7 @@ sudo apt-get update
 sudo apt-get install build-essential unzip -y
 sudo pip3 install requests --upgrade
 sudo pip3 install shiv
-git clone https://github.com/JanssenProject/jans-cloud-native.git
+git clone https://github.com/JanssenProject/jans-cloud-native.git || [ -d "./jans-cloud-native" ] && echo "Directory exists."
 cd jans-cloud-native
 sudo snap install microk8s --classic
 sudo microk8s.status --wait-ready
@@ -22,9 +22,9 @@ sudo apt-get install net-tools
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
-sudo apt-get instiall docker-ce docker-ce-cli containerd.io -y
+sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 microk8s.kubectl create namespace jans
 microk8s.config > ~/.kube/config
-ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp="$ip" \
-|| echo "Please get ip of the instance and run helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp=<ip>"
+default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
+ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }')
+helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp="$ip" || echo "Please get ip of the instance and run helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp=<ip>"
