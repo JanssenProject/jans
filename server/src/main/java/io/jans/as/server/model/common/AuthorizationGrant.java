@@ -209,6 +209,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("client_id", getClientId());
         jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
         jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
+        jwt.getClaims().setClaim("code", accessToken.getCode()); // guarantee uniqueness : without it we can get race condition
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
