@@ -64,6 +64,14 @@ class Config:
             pp = pprint.PrettyPrinter(indent=2)
             pp.pprint(myDict)
 
+    @classmethod
+    def calculate_mem(self):
+        if Config.wrends_install:
+            self.opendj_max_ram = int(int(Config.jans_max_mem) * .2) # 20% of mem_use
+            self.application_max_ram = int(int(Config.jans_max_mem) * .8) # 80% of mem_use
+        else:
+            self.opendj_max_ram = 0
+            self.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
     def init(self, install_dir=INSTALL_DIR):
@@ -190,9 +198,11 @@ class Config:
         self.state = None
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
-        self.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
         self.encode_salt = None
         self.admin_inum = None
+
+        self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
+        self.calculate_mem()
 
         self.ldapBaseFolderldapPass = None
 
@@ -352,3 +362,5 @@ class Config:
             'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar')
                 }
         Config.addPostSetupService = []
+
+    
