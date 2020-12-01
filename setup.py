@@ -283,8 +283,10 @@ def do_installation():
         propertiesUtils.save_properties()
         time.sleep(2)
 
-        jansInstaller.post_install_tasks()
+        openDjInstaller.restart()
 
+        jansInstaller.post_install_tasks()
+        
         for service in jansProgress.services:
             if service['app_type'] == static.AppType.SERVICE:
                 jansProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
