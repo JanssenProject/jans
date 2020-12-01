@@ -29,7 +29,7 @@ def get_setup_options():
 
     ldap_group = parser.add_mutually_exclusive_group()
     ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
-    ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
+    #ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
 
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
@@ -68,7 +68,6 @@ def get_setup_options():
         'downloadWars': False,
         'installOxAuth': True,
         'installConfigApi': True,
-        'wrends_install': InstallTypes.LOCAL,
         'installHTTPD': True,
         'installScimServer': True,
         'installOxd': False,
@@ -81,6 +80,12 @@ def get_setup_options():
         'loadData': True,
         'properties_password': None,
     }
+
+    if not argsp.remote_couchbase:
+        setupOptions['wrends_install'] = InstallTypes.LOCAL
+    else:
+        setupOptions['wrends_install'] = InstallTypes.NONE
+        setupOptions['cb_install'] = InstallTypes.REMOTE
 
     if argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
