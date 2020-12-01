@@ -31,7 +31,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'city'.ljust(30) + Config.city.rjust(35) + "\n"
                 txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
-                txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
+                txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
+
+                if Config.wrends_install:
+                    txt += 'OpenDJ max ram (MB)'.ljust(30) + str(Config.opendj_max_ram).rjust(35) + "\n"
+
                 bc = []
                 if Config.wrends_install:
                     t_ = 'wrends'
@@ -49,6 +53,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
 
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
+
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
