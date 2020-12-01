@@ -185,6 +185,9 @@ if argsp.shell:
     code.interact(local=locals())
     sys.exit()
 
+# re-calculate memory usage
+Config.calculate_mem()
+
 print()
 print(jansInstaller)
 

@@ -97,8 +97,8 @@ class PropertiesUtils(SetupUtils):
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
-        if not Config.application_max_ram:
-            Config.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
+        if not Config.jans_max_mem:
+            Config.jans_max_mem = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
         self.check_oxd_server_https()
 
@@ -599,7 +599,7 @@ class PropertiesUtils(SetupUtils):
                 else:
                     print("Please enter valid email address")
             
-            Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.application_max_ram))
+            Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
             admin_password = Config.admin_password if Config.admin_password else self.getPW(special='.*=!%&+/-')
 

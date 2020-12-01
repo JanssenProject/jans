@@ -43,7 +43,7 @@ def get_setup_options():
     parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
     parser.add_argument('-admin-password', help="Used as the Administrator password")
-    parser.add_argument('-application-max-ram', help="Total memory (in KB) to be used by Jannses applications")
+    parser.add_argument('-jans-max-mem', help="Total memory (in KB) to be used by Jannses Server")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--no-config-api', help="Do not install Jans Auth Config Api", action='store_true')
     #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
@@ -118,8 +118,8 @@ def get_setup_options():
     if argsp.country:
         setupOptions['countryCode'] = argsp.country
 
-    if argsp.application_max_ram:
-        setupOptions['application_max_ram'] = argsp.application_max_ram
+    if argsp.jans_max_mem:
+        setupOptions['jans_max_mem'] = argsp.jans_max_mem
 
     if argsp.ldap_admin_password:
         setupOptions['ldapPass'] = argsp.ldap_admin_password
