@@ -283,7 +283,8 @@ def do_installation():
         propertiesUtils.save_properties()
         time.sleep(2)
 
-        openDjInstaller.restart()
+        if Config.wrends_install:
+            openDjInstaller.restart()
 
         jansInstaller.post_install_tasks()
         
