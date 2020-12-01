@@ -611,7 +611,7 @@ class PropertiesUtils(SetupUtils):
                 Config.wrends_install = InstallTypes.LOCAL
                 
             elif Config.wrends_install != InstallTypes.REMOTE and (Config.cb_install == InstallTypes.REMOTE or 'couchbase' in available_backends):
-                promptForLDAP = self.getPrompt("Install Local WrenDS Server?", "Yes")[0].lower()
+                promptForLDAP = self.getPrompt("Install Local OpenDJ Server?", "Yes")[0].lower()
                 if promptForLDAP[0] == 'y':
                     Config.wrends_install = InstallTypes.LOCAL
                 else:
@@ -647,7 +647,7 @@ class PropertiesUtils(SetupUtils):
 
             while True:
                 adminPass = self.getPrompt("Enter Password for Admin User", Config.ldapPass)
-                if len(ldapPass) > 3:
+                if len(adminPass) > 3:
                     break
                 else:
                     print("Admin password should be at least four characters in length.")
