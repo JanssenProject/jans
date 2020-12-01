@@ -136,12 +136,11 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                           cwd='/opt/opendj',
                       )
 
-        #Append self.jre_home to OpenDj java.properties
-        opendj_java_properties_fn = os.path.join(Config.ldapBaseFolder, 'config/java.properties')
 
-        self.logIt("append self.jre_home to OpenDj %s" % opendj_java_properties_fn)
-        with open(opendj_java_properties_fn,'a') as f:
-            f.write('\ndefault.java-home={}\n'.format(Config.jre_home))
+        self.set_opendj_java_properties({
+            'default.java-home': Config.jre_home,
+            'start-ds.java-args': '-server -Xms{0}m -Xmx{0}m'.format(Config.opendj_max_ram),
+            })
 
         try:
             self.logIt('Stopping opendj server')
@@ -149,6 +148,31 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.run(cmd, shell=True)
         except:
             self.logIt("Error stopping opendj", True)
+
+
+    def set_opendj_java_properties(self, data):
+        
+        self.logIt("Setting OpenDJ params: {}".format(str(data)))
+
+        opendj_java_properties_fn = os.path.join(Config.ldapBaseFolder, 'config/java.properties')
+        opendj_java_properties = self.readFile(opendj_java_properties_fn)
+        opendj_java_properties_list = opendj_java_properties.splitlines()
+
+        for i, l in enumerate(opendj_java_properties_list[:]):
+            ls = l.strip()
+            if not ls or ls.startswith('#'):
+                continue
+            n = ls.find('=')
+            if n > -1:
+                jparam = ls[:n].strip()
+                if jparam in data:
+                    opendj_java_properties_list[i] = jparam + '=' + data.pop(jparam)
+
+        for jparam in data:
+            opendj_java_properties_list.append(jparam + '=' + data[jparam])
+
+        self.writeFile(opendj_java_properties_fn, '\n'.join(opendj_java_properties_list))
+
 
     def post_install_opendj(self):
         try:
