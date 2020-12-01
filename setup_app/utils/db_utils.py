@@ -12,7 +12,6 @@ from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
  
 
-
 class DBUtils:
 
     processedKeys = []
@@ -59,7 +58,7 @@ class DBUtils:
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
         elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_oxauth"'.format(self.default_bucket)
+            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth  "'.format(self.default_bucket)
             result = cbm.exec_query(n1ql)
             js = result.json()
             dn = js['results'][0][self.default_bucket]['dn']
@@ -93,13 +92,15 @@ class DBUtils:
             dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
             oxAuthConfDynamic.update(entries)
 
-            self.ldap_conn.modify(
+            ldap_operation_result = self.ldap_conn.modify(
                     dn,
                     {"jansConfDyn": [ldap3.MODIFY_REPLACE, json.dumps(oxAuthConfDynamic, indent=2)]}
                     )
+            self.log_ldap_result(ldap_operation_result)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
-                n1ql = 'UPDATE `{}` USE KEYS "configuration_oxauth" SET {}={}'.format(self.default_bucket, k, entries[k])
+                n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET {}={}'.format(self.default_bucket, k, entries[k])
                 self.cbm.exec_query(n1ql)
 
 
@@ -109,30 +110,34 @@ class DBUtils:
         oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
 
         if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.modify(
+            ldap_operation_result = self.ldap_conn.modify(
                     dn,
                     {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, oxTrustConfApplication_js]}
                     )
+            self.log_ldap_result(ldap_operation_result)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET `oxTrustConfApplication`={}'.format(self.default_bucket, json.dumps(oxTrustConfApplication_js))
             self.cbm.exec_query(n1ql)
 
     def enable_script(self, inum):
         if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.modify(
+            ldap_operation_result = self.ldap_conn.modify(
                     'inum={},ou=scripts,o=jans'.format(inum),
                     {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
+            self.log_ldap_result(ldap_operation_result)
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
             self.cbm.exec_query(n1ql)
 
     def enable_service(self, service):
         if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.modify(
+            ldap_operation_result = self.ldap_conn.modify(
                 'ou=configuration,o=jans',
                 {service: [ldap3.MODIFY_REPLACE, 'true']}
                 )
+            self.log_ldap_result(ldap_operation_result)
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
@@ -140,11 +145,11 @@ class DBUtils:
     def set_configuration(self, component, value):
         
         if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.modify(
+            ldap_operation_result = self.ldap_conn.modify(
                 'ou=configuration,o=jans',
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
-
+            self.log_ldap_result(ldap_operation_result)
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
             self.cbm.exec_query(n1ql)
@@ -203,30 +208,32 @@ class DBUtils:
 
         if backend_location == BackendTypes.LDAP:
             if self.dn_exists(dn):
-                for e in self.ldap_conn.response[0]['attributes'].get('oxConfigurationProperty', []):
+                for e in self.ldap_conn.response[0]['attributes'].get('jansConfProperty', []):
                     try:
-                        oxConfigurationProperty = json.loads(e)
+                        jansConfProperty = json.loads(e)
                     except:
                         continue
-                    if isinstance(oxConfigurationProperty, dict) and oxConfigurationProperty.get('value1') == 'allowed_clients':
-                        if not client_id in oxConfigurationProperty['value2']:
-                            oxConfigurationProperty['value2'] = self.add2strlist(client_id, oxConfigurationProperty['value2'])
-                            oxConfigurationProperty_js = json.dumps(oxConfigurationProperty)
-                            self.ldap_conn.modify(
+                    if isinstance(jansConfProperty, dict) and jansConfProperty.get('value1') == 'allowed_clients':
+                        if not client_id in jansConfProperty['value2']:
+                            jansConfProperty['value2'] = self.add2strlist(client_id, jansConfProperty['value2'])
+                            jansConfProperty_js = json.dumps(jansConfProperty)
+                            ldap_operation_result = self.ldap_conn.modify(
                                 dn,
-                                {'oxConfigurationProperty': [ldap3.MODIFY_DELETE, e]}
+                                {'jansConfProperty': [ldap3.MODIFY_DELETE, e]}
                                 )
-                            self.ldap_conn.modify(
+                            self.log_ldap_result(ldap_operation_result)
+                            ldap_operation_result = self.ldap_conn.modify(
                                 dn,
-                                {'oxConfigurationProperty': [ldap3.MODIFY_ADD, oxConfigurationProperty_js]}
+                                {'jansConfProperty': [ldap3.MODIFY_ADD, jansConfProperty_js]}
                                 )
+                            self.log_ldap_result(ldap_operation_result)
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
-            n1ql = 'SELECT oxConfigurationProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
+            n1ql = 'SELECT jansConfProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
 
-            oxConfigurationProperties = js['results'][0]['oxConfigurationProperty']
+            oxConfigurationProperties = js['results'][0]['jansConfProperty']
             for i, oxconfigprop_str in enumerate(oxConfigurationProperties):
                 oxconfigprop = json.loads(oxconfigprop_str)
                 if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
@@ -236,7 +243,7 @@ class DBUtils:
             else:
                 return
 
-            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `oxConfigurationProperty`={}'.format(bucket, script_inum, json.dumps(oxConfigurationProperties))
+            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `jansConfProperty`={}'.format(bucket, script_inum, json.dumps(oxConfigurationProperties))
             self.cbm.exec_query(n1ql)            
 
     def get_key_prefix(self, key):
@@ -252,7 +259,13 @@ class DBUtils:
             r = data.get('results', [])
             if r and r[0].get(attribute):
                 return r[0][attribute]
-            
+
+
+    def log_ldap_result(self, ldap_operation_result):
+        if not ldap_operation_result:
+            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
+            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
+
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
         for ldif_fn in ldif_files:
@@ -267,24 +280,18 @@ class DBUtils:
                         base.logIt("LDAP modify add dn:{} entry:{}".format(dn, dict(entry)))
                         change_attr = entry['add'][0]
                         ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_ADD, entry[change_attr])]})
-                        if not ldap_operation_result:
-                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
-                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
+                        self.log_ldap_result(ldap_operation_result)
 
                     elif 'replace' in  entry and 'changetype' in entry:
                         base.logIt("LDAP modify replace dn:{} entry:{}".format(dn, dict(entry)))
                         change_attr = entry['replace'][0]
                         ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_REPLACE, [entry[change_attr][0]])]})
-                        if not ldap_operation_result:
-                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
-                            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
+                        self.log_ldap_result(ldap_operation_result)
 
                     elif not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
                         ldap_operation_result = self.ldap_conn.add(dn, attributes=entry)
-                        if not ldap_operation_result:
-                            base.logIt("Ldap add operation failed {}".format(str(self.ldap_conn.result)))
-                            base.logIt("Ldap add operation failed {}".format(str(self.ldap_conn.result)), True)
+                        self.log_ldap_result(ldap_operation_result)
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
@@ -332,8 +339,8 @@ class DBUtils:
                 for entry_type in entry:
                     for e in entry[entry_type]:
                         base.logIt("Adding to schema, type: {}  value: {}".format(entry_type, e))
-                        self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
-
+                        ldap_operation_result = self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
+                        self.log_ldap_result(ldap_operation_result)
             #we need re-bind after schema operations
             self.ldap_conn.rebind()
 
