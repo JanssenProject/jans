@@ -53,14 +53,14 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
-        log.debug("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = " + info.getRequestUri() + "\n\n");
-        log.debug("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
-        log.debug("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI() + " request.toString() " + request.toString());
-        log.debug("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
+        log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
+        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
+        log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
+        log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        log.debug("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
 
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);

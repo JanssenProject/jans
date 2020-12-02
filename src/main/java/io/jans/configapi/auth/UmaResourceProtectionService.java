@@ -62,12 +62,14 @@ public class UmaResourceProtectionService {
         // Load the uma resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
-                
-        RsResourceList resourceList =  Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
-        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList+ "\n\n");
-        
+
+        RsResourceList resourceList = Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
+        log.debug(
+                " \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList + "\n\n");
         this.rsResourceList = resourceList.getResources();
-        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = " + rsResourceList+ "\n\n");
+
+        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
+                + rsResourceList + "\n\n");
 
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
@@ -131,8 +133,8 @@ public class UmaResourceProtectionService {
     }
 
     public void createResourceIfNeeded() {
-        log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = " + rsResourceList
-                + "\n\n");
+        log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
+                + rsResourceList + "\n\n");
 
         Map<String, UmaResource> allResources = UmaResourceProtectionCache.getAllUmaResources();
 
@@ -244,6 +246,11 @@ public class UmaResourceProtectionService {
             client = this.clientService.getClientByInum(clt.getClientId());
             log.debug(
                     " \n\n UmaResourceProtectionService::createClientIfNeeded() - Final client = " + client + "\n\n");
+
+            
+            //Check all scopes
+            log.debug(
+                    " \n\n UmaResourceProtectionService::createClientIfNeeded() - Final this.scopeService.getAllScopesList(25) = " + this.scopeService.getAllScopesList(25) + "\n\n");
 
         }
 

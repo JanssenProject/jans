@@ -77,8 +77,10 @@ public class AuthClientFactory {
     private static UmaMetadataService createUmaMetadataService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
+                .property("Content-Type", MediaType.APPLICATION_JSON)
                 .register(engine);
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .property("Content-Type", MediaType.APPLICATION_JSON)
                 .target(url);
         UmaMetadataService proxy = target.proxy(UmaMetadataService.class);
         return proxy;

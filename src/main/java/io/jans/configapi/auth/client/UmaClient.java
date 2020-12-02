@@ -9,12 +9,15 @@ package io.jans.configapi.auth.client;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
+import io.jans.as.client.TokenClient;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
@@ -67,6 +70,7 @@ public class UmaClient {
     public static TokenResponse executetPatRequest(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
 
+        //System.out.println("\n\n UmaClient::executetPatRequest() - tokenUrl = " + tokenUrl);
         Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope(scope);
@@ -85,14 +89,21 @@ public class UmaClient {
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(tokenUrl);
 
+        //System.out.println("\n\n UmaClient::executetPatRequest() - request = " + request);
+
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
 
         if (response.getStatus() == 200) {
             String entity = response.readEntity(String.class);
+            //System.out.println("\n\n UmaClient::executetPatRequest() - entity = " + entity);
+
             TokenResponse tokenResponse = new TokenResponse();
             tokenResponse.setEntity(entity);
             tokenResponse.injectDataFromJson(entity);
+            //System.out.println("\n\n UmaClient::executetPatRequest() - tokenResponse_1 = " + tokenResponse);
+            //System.out.println("\n\n UmaClient::executetPatRequest() - tokenResponse.getAccessToken()_1 = "
+            //        + tokenResponse.getAccessToken());
 
             return tokenResponse;
         }
@@ -102,7 +113,9 @@ public class UmaClient {
 
     public static RptIntrospectionResponse getRptStatus(UmaMetadata umaMetadata, String authorization,
             String rptToken) {
-        
+        //System.out.println("\n\n UmaClient::getRptStatus() - final  umaMetadata = " + umaMetadata + " ,authorization = "
+         //       + authorization + " , rptToken = " + rptToken);
+
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder()
                 .baseUri(UriBuilder.fromPath(umaMetadata.getIntrospectionEndpoint()).build())
@@ -112,7 +125,7 @@ public class UmaClient {
 
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .property("Content-Type", MediaType.APPLICATION_JSON).target(umaMetadata.getIntrospectionEndpoint());
-      
+        //System.out.println("\n\n\n = " + target);
         UmaRptIntrospectionService proxy = target.proxy(UmaRptIntrospectionService.class);
         return proxy.requestRptStatus(authorization, rptToken, "");
     }

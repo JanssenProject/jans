@@ -1,4 +1,21 @@
 {"resources":[
+    {
+        "path":"/jans-config-api/api/v1/jans-auth-server/config",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.write"
+                ]
+            }
+        ]
+    },
    {
         "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
