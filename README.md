@@ -347,3 +347,236 @@ This will install docker, microk8s, helm and Janssen with the default settings t
 | `auth-server-key-rotation.resources.requests.limits.memory`  | auth-server Key Rotation cpu limit                                                                                               | `300m`                              |
 | `auth-server-key-rotation.resources.requests.cpu`            | auth-server Key Rotation memory request                                                                                          | `300Mi`                             |
 | `auth-server-key-rotation.resources.requests.memory`         | auth-server Key Rotation cpu request                                                                                             | `300m`                              |     
+
+# Rotating Certificates and Keys in Kubernetes setup
+
+`jans-config-cm` in all examples refer to jans installation configuration parameters. In Helm the name is in the format of `<helms release name>-config-cm` and must be changed in the below examples.
+
+
+## web (ingress)
+    
+| Associated certificates and keys |
+| -------------------------------- |
+| /etc/certs/web_https.crt         |
+| /etc/certs/web_https.key         |
+    
+### Rotate
+    
+1. Create a file named `web-key-rotation.yaml` with the following contents :
+
+    ```yaml
+    # License terms and conditions for Janssen Cloud Native Edition:
+    # https://www.apache.org/licenses/LICENSE-2.0
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: web-key-rotation
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: web-key-rotation
+              image: janssenproject/certmanager:5.0.0_01
+              envFrom:
+              - configMapRef:
+                  name: jans-config-cm # This may be different in your setup
+              args: ["patch", "web"]
+    ```
+    
+1. Apply job
+
+    ```bash
+        kubectl apply -f web-key-rotation.yaml -n <jans-namespace>
+    ```            
+    
+### Load from existing source
+
+This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
+        
+1. Create a secret with `web_https.crt` and `web_https.key`. Note that this may already exist in your deployment.
+
+    ```bash
+        kubectl create secret generic web-cert-key --from-file=web_https.crt --from-file=web_https.key -n <jans-namespace>` 
+    ```
+    
+1. Create a file named `load-web-key-rotation.yaml` with the following contents :
+                   
+    ```yaml
+    # License terms and conditions for Janssen Cloud Native Edition:
+    # https://www.apache.org/licenses/LICENSE-2.0
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: load-web-key-rotation
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+          - name: web-cert
+            secret:
+              secretName: web-cert-key
+              items:
+                - key: web_https.crt
+                  path: web_https.crt
+          - name: web-key
+            secret:
+              secretName: web-cert-key
+              items:
+                - key: web_https.key
+                  path: web_https.key                              
+          containers:
+            - name: load-web-key-rotation
+              image: janssenproject/certmanager:5.0.0_01
+              envFrom:
+              - configMapRef:
+                  name: jans-config-cm  #This may be different in your setup
+              volumeMounts:
+                - name: web-cert
+                  mountPath: /etc/certs/web_https.crt
+                  subPath: web_https.crt
+                - name: web-key
+                  mountPath: /etc/certs/web_https.key
+                  subPath: web_https.key
+              args: ["patch", "web", "--opts", "source:from-files"]
+    ```
+
+1. Apply job
+
+    ```bash
+        kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
+    ```            
+        
+### Auth server
+
+Key rotation cronJob is usually installed with Janssen. Please make sure before deploying `kubectl get cronjobs -n <jans-namespace>`.
+
+| Associated certificates and keys |
+| -------------------------------- |
+| /etc/certs/auth-keys.json        |
+| /etc/certs/auth-keys.jks         |
+
+1. Create a file named `auth-server-key-rotation.yaml` with the following contents :
+
+    ```yaml
+    # License terms and conditions for Janssen Cloud Native Edition:
+    # https://www.apache.org/licenses/LICENSE-2.0
+    kind: CronJob
+    apiVersion: batch/v1beta1
+    metadata:
+      name: auth-key-rotation
+    spec:
+      schedule: "0 */48 * * *"
+      concurrencyPolicy: Forbid
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: auth-key-rotation
+                  image: janssenproject/certmanager:5.0.0_dev
+                  resources:
+                    requests:
+                      memory: "300Mi"
+                      cpu: "300m"
+                    limits:
+                      memory: "300Mi"
+                      cpu: "300m"
+                  envFrom:
+                    - configMapRef:
+                        name: jans-config-cm
+                  args: ["patch", "auth", "--opts", "interval:48"]
+              restartPolicy: Never
+    ```
+
+    Key rotation cronJob will try to push `auth-keys.jks` and `auth-keys.json` to auth-server pods. If the service account user does not have permissions to list pods the above will fail with a `403` Forbidden message. This action can be disabled forcing auth-server pods to pull from Kubernetes `Secret`s instead by setting the environment variable `CN_SYNC_JKS_ENABLED` to `true` inside the main config map i.e `jans-config-cm` and adding to the `args` of the above yaml `"--opts", "push-to-container:false"` so the `args` section would look like `args: ["patch", "auth", "--opts", "interval:48", "--opts", "push-to-container:false"]`.
+            
+1. Apply cron job
+
+    ```bash
+        kubectl apply -f auth-server-key-rotation.yaml -n <jans-namespace>
+    ```
+
+### Client API server
+
+| Associated certificates and keys           |
+| ------------------------------------------ |
+| /etc/certs/client_api_application.crt      |
+| /etc/certs/client_api_application.key      |   
+| /etc/certs/client_api_application.keystore |   
+| /etc/certs/client_api_admin.crt            |   
+| /etc/certs/client_api_admin.key            |   
+| /etc/certs/client_api_admin.keystore       |
+
+Application common name must match client-api service name. `kubectl get svc -n <jans-namespace>`. We assume it to be client-api server below.
+
+1. Create a file named `client-api-key-rotation.yaml` with the following contents :
+
+    ```yaml
+    # License terms and conditions for Janssen Cloud Native Edition:
+    # https://www.apache.org/licenses/LICENSE-2.0
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: client-api-key-rotation
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: client-api-key-rotation
+              image: janssenproject/certmanager:5.0.0_dev
+              envFrom:
+              - configMapRef:
+                  name: jans-config-cm
+              # Change application-cn:client-api and admin-cn:client-api to match client-api service name
+              args: ["patch", "client-api", "--opts", "application-cn:client-api", "--opts", "admin-cn:client-api"]
+    ``` 
+
+1. Apply job
+
+    ```bash
+        kubectl apply -f client-api-key-rotation.yaml -n <jans-namespace>
+    ```
+                 
+### LDAP
+
+Subject Alt Name must match opendj service.
+        
+| Associated certificates and keys    |
+| ----------------------------------- |
+| /etc/certs/opendj.crt               |
+| /etc/certs/opendj.key               |   
+| /etc/certs/opendj.pem               |   
+| /etc/certs/opendj.pkcs12            |   
+    
+1. Create a file named `ldap-key-rotation.yaml` with the following contents :
+
+    ```yaml
+    # License terms and conditions for Janssen Cloud Native Edition:
+    # https://www.apache.org/licenses/LICENSE-2.0
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: ldap-key-rotation
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: ldap-key-rotation
+              image: janssenproject/certmanager:5.0.0_dev
+              envFrom:
+              - configMapRef:
+                  name: jans-config-cm
+              args: ["patch", "ldap", "--opts", "subj-alt-name:opendj"] 
+    ```
+
+1. Apply job
+
+    ```bash
+        kubectl apply -f ldap-key-rotation.yaml -n <jans-namespace>
+    ```   
+                
+1. Restart pods.
