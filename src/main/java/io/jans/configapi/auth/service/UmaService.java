@@ -85,7 +85,10 @@ public class UmaService implements Serializable {
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
         log.trace("Validating RPT, patToken:{}, authorization:{}, resourceId: {}, scopeIds: {} ", patToken, authorization, resourceId, scopeIds);
-
+        log.debug("\n\n Validating RPT, patToken ="+patToken+", patToken.getAccessToken() = "+patToken.getAccessToken()+" ,authorization = "+authorization+" ,resourceId = "+ resourceId+" ,scopeIds = "+ scopeIds);
+        log.debug("\n\n Validating RPT, patToken ="+patToken.toString());
+        log.debug("\n\n Validating RPT, patToken.getAccessToken() ="+patToken.getAccessToken()+" , patToken.getAuthorizationCode() = "+patToken.getAuthorizationCode()+" , patToken.getIdToken() ="+patToken.getIdToken()+" , patToken.getRefreshToken() ="+patToken.getRefreshToken()+" , patToken.getScope() ="+patToken.getScope()+" , patToken.getExpiresIn() ="+patToken.getExpiresIn()+"\n\n\n");
+        
        if (patToken == null) {
             log.info("Token is blank"); 
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
@@ -98,6 +101,7 @@ public class UmaService implements Serializable {
 
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
             log.debug("RPT status response: {} ", rptStatusResponse);
+            log.debug("RPT status response: {} "+ rptStatusResponse);
             
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 log.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
@@ -145,7 +149,7 @@ public class UmaService implements Serializable {
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
         String authorization = "Bearer " + patToken.getAccessToken();
-        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization);
+        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization+" , rptToken = "+rptToken+"\n\n");
 
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
@@ -174,6 +178,7 @@ public class UmaService implements Serializable {
             return response;
         }
         log.debug("Construct response: HTTP 401 (Unauthorized), ticket: '{}'", ticket);
+        log.debug("Construct response: HTTP 401 (Unauthorized), ticket: '{}'"+ ticket);
         try {
             String authHeaderValue = String.format(
                     "UMA realm=\"Authorization required\", host_id=%s, as_uri=%s, ticket=%s",
@@ -193,9 +198,13 @@ public class UmaService implements Serializable {
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
         log.debug("\n\n\n UmaService::registerResourcePermission() FINAL - this.umaPermissionService = "
-                + this.umaPermissionService + " , patToken = " + patToken + "\n\n\n\n");
+                + this.umaPermissionService + " , patToken = " + patToken +" , resourceId = "+resourceId+" ,  scopes = "+scopes+"\n\n\n\n");
+        
+        log.debug("\n\n\n UmaService::registerResourcePermission() FINAL -patToken.getAccessToken() = " + patToken.getAccessToken() + "\n\n\n\n");
         PermissionTicket ticket = this.getUmaPermissionService()
                 .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(permission));
+        
+        log.debug("\n\n\n UmaService::registerResourcePermission() FINAL - ticket = " + ticket + "\n\n\n\n");
         if (ticket == null) {
             return null;
         }

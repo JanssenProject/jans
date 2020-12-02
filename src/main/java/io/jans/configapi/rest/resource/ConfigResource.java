@@ -19,7 +19,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path(ApiConstants.CONFIG)
+@Path(ApiConstants.JANS_AUTH + ApiConstants.CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigResource extends BaseResource {
