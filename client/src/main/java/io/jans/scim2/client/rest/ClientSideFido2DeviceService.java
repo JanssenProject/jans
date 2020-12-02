@@ -51,8 +51,8 @@ public interface ClientSideFido2DeviceService extends IFido2DeviceWebService, Cl
      *                   update on a destination resource. There is no need to supply a full resource, just provide one
      *                   with the attributes which are intended to be replaced in the destination.
      * @param id The id of the resource to update (destination)
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a FidoDeviceResource
      * in the entity body (the resource after the update took place)

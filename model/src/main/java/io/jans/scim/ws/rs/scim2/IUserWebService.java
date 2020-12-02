@@ -53,8 +53,8 @@ public interface IUserWebService {
     /**
      * Service method that allows creating a User resource via POST (as per section 3.3 of RFC 7644).
      * @param user An object that represents the User to create
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 201 (created) and a {@link UserResource}
      * in the entity body (the resource just created)
@@ -72,8 +72,8 @@ public interface IUserWebService {
     /**
      * Service method that retrieves a User resource using GET (as per section 3.4.1 of RFC 7644).
      * @param id The "id" attribute of the resource to retrieve
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a {@link UserResource}
      * in the entity body (the resource retrieved)
@@ -97,8 +97,8 @@ public interface IUserWebService {
      * @param user An object that contains the data to update on a destination resource. There is no need to supply a full
      *             resource, just provide one with the attributes which are intended to be replaced in the destination
      * @param id The "id" attribute of the resource to update (destination)
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a {@link UserResource}
      * in the entity body (the resource after the update took place)
@@ -140,8 +140,8 @@ public interface IUserWebService {
      *               the results will be sorted by userName attribute.
      * @param sortOrder The order in which the <code>sortBy</code> parameter is applied. Allowed values are "ascending"
      *                  or "descending", being "ascending" the default if null or an unknown value is passed.
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a {@link io.jans.scim.model.scim2.ListResponse
      * ListResponse} in the entity body (holding a collection of SCIM resources)
@@ -182,8 +182,8 @@ public interface IUserWebService {
      * of the target resource.</p>
      * @param request A <code>PatchRequest</code> that contains the operations to apply upon the resource being updated
      * @param id The id of the resource to update
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a {@link UserResource}
      * in the entity body (the resource after modifications took place)
