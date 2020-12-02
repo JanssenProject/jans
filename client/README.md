@@ -1,37 +1,34 @@
 SCIM-Client
 ===========
 
-SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema
-and the patterns for exchanging this schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving
-interoperability, security, and scalability in the context of identity management.
+A Java client for consumption of Jans-SCIM endpoints.
 
-Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality (create, update, retrieve and delete).
+# How to start
 
-This project consists of a ready-to-use Java client to interact with those endpoints.
+If you use maven, add the following to your pom.xml:
 
-Detailed specifications for SCIM can be found at [RFC 7642](https://tools.ietf.org/html/rfc7642),
-[RFC 7643](https://tools.ietf.org/html/rfc7643), and [RFC 7644](https://tools.ietf.org/html/rfc7644). Documentation of
-Gluu's implementation of SCIM service is available at [User Management with SCIM](https://www.gluu.org/docs/ce/user-management/scim2/).
+```
+<properties>
+	<scim.client.version>5.0.0-SNAPSHOT</scim.client.version>
+</properties>
+...
+<repositories>
+  <repository>
+    <id>gluu</id>
+    <name>Janssen repository</name>
+    <url>https://maven.jans.io/maven</url>
+  </repository>
+</repositories>
+...
+<dependency>
+  <groupId>io.jans</groupId>
+  <artifactId>jans-scim-client</artifactId>
+  <version>${scim.client.version}</version>
+</dependency>
+```
 
-Below is the link for the latest Gluu implementation of SCIM client:
+Alternatively you can grab the library jar from [here](https://maven.jans.io/maven/io/jans/jans-scim-client/) and manually add all other dependant jars. 
 
-* [SCIM stable client library binary](https://ox.gluu.org/maven/gluu/scim/client/scim-client2/5.0.0-SNAPSHOT/)
+## Sample code
 
-### How to run tests
-
-* Ensure you have a [working installation](https://gluu.org/docs/ce/installation-guide/) of Gluu Server
-
-* Enable and then protect your SCIM API using test mode or UMA (see [API protection](https://www.gluu.org/docs/ce/user-management/scim2/#api-protection))
-
-* Edit `profiles/default/config-scim-test.properties` or create a profile directory with your own copy of `config-scim-test.properties`.
-
-  Supply suitable values for properties file. Use [this](https://www.gluu.org/docs/ce/user-management/scim2/#testing-with-the-scim-client-uma)
-   as a guide if you are under UMA protection.
-
-* Load test data. If using Gluu 4.2 or higher, use `./setup.py -x -properties-password=<password_provided_at_installation>`
-
-* ... and run maven. Examples:
-
-   - `mvn test`
-   - `mvn -Dcfg=<profile-name> test`
-   - `mvn -Dtestmode=true test`
+TODO
