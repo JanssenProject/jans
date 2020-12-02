@@ -47,8 +47,8 @@ public interface ClientSideGroupService extends IGroupWebService, CloseableClien
     /**
      * Invokes a service method that allows creating a Group resource via POST (as per section 3.3 of RFC 7644).
      * @param jsonGroup A String with the payload for the operation. It represents the Group resource to create
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 201 (created) and a GroupResource
      * in the entity body (the resource just created)
@@ -74,8 +74,8 @@ public interface ClientSideGroupService extends IGroupWebService, CloseableClien
      *                  update on a destination resource. There is no need to supply a full resource, just provide one
      *                  with the attributes which are intended to be replaced in the destination.
      * @param id The "id" attribute of the resource to update (destination)
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a GroupResource
      * in the entity body (the resource after the update took place)
@@ -99,8 +99,8 @@ public interface ClientSideGroupService extends IGroupWebService, CloseableClien
      * @param jsonPatch A String with the payload for the operation. It represents a <code>PatchRequest</code> that
      *                  contains the operations to apply upon the resource being updated
      * @param id The id of the resource to update
-     * @param attrsList See notes about <a href="#attrsList">attributes</a> query param
-     * @param excludedAttrsList See notes about <a href="#attrsList">excludedAttributes</a> query param
+     * @param attrsList See notes about attributes query param in this interface description
+     * @param excludedAttrsList See notes about excludedAttributes query param in this interface description
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 200 and a GroupResource
      * in the entity body (the resource after modifications took place)
