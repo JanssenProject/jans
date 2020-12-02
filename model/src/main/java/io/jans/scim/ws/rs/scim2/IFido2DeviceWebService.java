@@ -46,7 +46,7 @@ public interface IFido2DeviceWebService {
     /**
      * Service method that allows updating a Fido 2 device resource via PUT (as per section 3.5.1 of RFC 7644).
      * <p>This operation is not suitable to delete/remove/nullify attributes. For this purpose you can use the PATCH
-     * operation instead. PUT is intended to do replacements using the (not-null) values supplied in <code>fido2DeviceResource</code>
+     * operation instead. PUT is intended to do replacements using the (not-null) values supplied in <code>fidoDeviceResource</code>
      * parameter.</p>
      * <p>To learn more about how the update works, read the replacement rules found at {@link io.jans.scim.model.scim2.util.ScimResourceUtil#transferToResourceReplace(BaseScimResource, BaseScimResource, List)
      * ScimResourceUtil#transferToResourceReplace}.</p>
