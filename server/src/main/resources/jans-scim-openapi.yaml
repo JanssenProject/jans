@@ -1,0 +1,2418 @@
+openapi: 3.0.1
+info:
+  title: SCIM API
+  description: |
+    Janssen SCIM 2.0 server API. Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality
+    (create, update, retrieve and delete) for identity management resources such as users, groups, and fido devices.
+  license:
+    name: Janssen License
+    url: https://github.com/JanssenProject/blob/master/LICENSE
+  version: 5.0.0
+servers:
+- url: https://jenkins-ldap.jans.io/scim/restv1/v2
+tags:
+- name: user
+  description: Endpoints for management of the User resource
+- name: group
+  description: Endpoints for management of the Group resource
+- name: discovery
+  description: Endpoints to facilitate discovery of SCIM service provider features
+paths:
+  /Groups:
+    get:
+      tags:
+      - group
+      description: Query Group resources (see section 3.4.2 of RFC 7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: See section 3.4.2.2 of RFC 7644
+        schema:
+          type: string
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+      - name: count
+        in: query
+        schema:
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOder
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponse'
+        400:
+          description: Parameter count exceeds the maximum allowed value or the filter
+            supplied was unparsable
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - group
+      description: Allows creating a Group resource via POST (see section 3.3 of RFC
+        7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      requestBody:
+        description: Payload that represents the Group to create
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/GroupResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupResource'
+        required: true
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+        400:
+          description: An invalid value was passed in the payload
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: There is a conflict with an already existing group. Uniqueness
+            is assumed over displayName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: group
+  /Groups/{id}:
+    get:
+      tags:
+      - group
+      description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - group
+      description: "Updates a Group resource (see section 3.5.1 of RFC 7644). Update\
+        \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
+        \ payload sent will replace the one in the existing resource representation.\
+        \ Attributes \nnot passed in the payload will be left intact.\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload with the data to replace in the existing group identified
+          by the id param
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/GroupResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupResource'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+        400:
+          description: |
+            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: There is a conflict with an already existing group. Uniqueness
+            is assumed over displayName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: group
+    delete:
+      tags:
+      - group
+      description: Deletes a group resource (see section 3.6 of RFC 7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: id
+        in: path
+        description: Identifier of the resource to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+      - group
+      description: "Updates one or more attributes of a Group resource using a sequence\
+        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
+        \ of RFC 7644\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload describing the patch operations to apply upon the resource
+          identified by param id
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResource'
+        400:
+          description: |
+            One or more operations supplied in the request are specified incorrectly, there were attempts to
+            modify immutable attributes, or the resulting resource cannot pass intrinsic validations
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /Groups/.search:
+    post:
+      tags:
+      - group
+      description: Query Group resources (see section 3.4.2 of RFC 7644)
+      security:
+        - testmode: []
+      requestBody:
+        description: Payload that represents the search criteria
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponse'
+        400:
+          description: |
+            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
+            or invalid schema in search request
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: searchRequest
+  /FidoDevices:
+    get:
+      description: Query Fido resources
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Used to restrict the search to fido resources owned by a specific
+          user
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: See section 3.4.2.2 of RFC 7644
+        schema:
+          type: string
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+      - name: count
+        in: query
+        schema:
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOder
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/FidoListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FidoListResponse'
+        400:
+          description: Parameter count exceeds the maximum allowed value or the filter
+            supplied was unparsable
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: If userId param was supplied and the user is not known
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /FidoDevices/{id}:
+    get:
+      description: Retrieves a U2F/Super Gluu device by Id
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/FidoDeviceResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FidoDeviceResource'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
+        \ every\nattribute value found in the payload sent will replace the one in\
+        \ the existing resource representation. Attributes \nnot passed in the payload\
+        \ will be left intact.\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload with the data to replace in the existing device identified
+          by the id param
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/FidoDeviceResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FidoDeviceResource'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/FidoDeviceResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FidoDeviceResource'
+        400:
+          description: |
+            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: fidoDeviceResource
+    delete:
+      description: Deletes a Fido resource
+      security:
+        - testmode: []
+      parameters:
+      - name: id
+        in: path
+        description: Identifier of the resource to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /FidoDevices/.search:
+    post:
+      description: Query Fido resources
+      security:
+        - testmode: []
+      parameters:
+      - name: userId
+        in: query
+        description: Used to restrict the search to fido resources owned by a specific
+          user
+        schema:
+          type: string
+      requestBody:
+        description: Payload that represents the search criteria
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/FidoListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FidoListResponse'
+        400:
+          description: |
+            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
+            or invalid schema in search request
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: If userId param was supplied and the user is not known
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: searchRequest
+  /Fido2Devices:
+    get:
+      description: Query Fido 2 resources
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: userId
+        in: query
+        description: Used to restrict the search to fido 2 resources owned by a specific
+          user
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: See section 3.4.2.2 of RFC 7644
+        schema:
+          type: string
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+      - name: count
+        in: query
+        schema:
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOder
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Fido2ListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2ListResponse'
+        400:
+          description: Parameter count exceeds the maximum allowed value or the filter
+            supplied was unparsable
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: If userId param was supplied and the user is not known
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /Fido2Devices/{id}:
+    get:
+      description: Retrieves a Fido 2 device by Id
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Fido2DeviceResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2DeviceResource'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      description: "Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58;\
+        \ every\nattribute value found in the payload sent will replace the one in\
+        \ the existing resource representation. Attributes \nnot passed in the payload\
+        \ will be left intact.\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload with the data to replace in the existing device identified
+          by the id param
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/Fido2DeviceResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fido2DeviceResource'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Fido2DeviceResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2DeviceResource'
+        400:
+          description: |
+            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: fidoDeviceResource
+    delete:
+      description: Deletes a Fido 2 resource
+      security:
+        - testmode: []
+      parameters:
+      - name: id
+        in: path
+        description: Identifier of the resource to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /Fido2Devices/.search:
+    post:
+      description: Query Fido 2 resources
+      security:
+        - testmode: []
+      parameters:
+      - name: userId
+        in: query
+        description: Used to restrict the search to fido 2 resources owned by a specific
+          user
+        schema:
+          type: string
+      requestBody:
+        description: Payload that represents the search criteria
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/Fido2ListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2ListResponse'
+        400:
+          description: |
+            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
+            or invalid schema in search request
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: If userId param was supplied and the user is not known
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: searchRequest
+  /Users:
+    get:
+      tags:
+      - user
+      description: Query User resources (see section 3.4.2 of RFC 7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: filter
+        in: query
+        description: See section 3.4.2.2 of RFC 7644
+        schema:
+          type: string
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+      - name: count
+        in: query
+        schema:
+          type: integer
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOder
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        400:
+          description: Parameter count exceeds the maximum allowed value or the filter
+            supplied was unparsable
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - user
+      description: Allows creating a User resource via POST (see section 3.3 of RFC
+        7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      requestBody:
+        description: Payload that represents the Group to create
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+        required: true
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        400:
+          description: An invalid value was passed in the payload
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: There is a conflict with an already existing user. Uniqueness
+            is assumed over userName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: user
+  /Users/{id}:
+    get:
+      tags:
+      - user
+      description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - user
+      description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
+        \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
+        \ payload sent will replace the one in the existing resource representation.\
+        \ Attributes \nnot passed in the payload will be left intact.\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload with the data to replace in the existing user identified
+          by the id param
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        400:
+          description: |
+            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: There is a conflict with an already existing group. Uniqueness
+            is assumed over displayName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: user
+    delete:
+      tags:
+      - user
+      description: Deletes a user resource
+      security:
+        - testmode: []
+      parameters:
+      - name: id
+        in: path
+        description: Identifier of the resource to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+      - user
+      description: "Updates one or more attributes of a User resource using a sequence\
+        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
+        \ of RFC 7644\n"
+      security:
+        - testmode: []
+      parameters:
+      - name: attributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: See section 3.9 of RFC 7644
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload describing the patch operations to apply upon the resource
+          identified by param id
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        400:
+          description: |
+            One or more operations supplied in the request are specified incorrectly, there were attempts to
+            modify immutable attributes, or the resulting resource cannot pass intrinsic validations
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /Users/.search:
+    post:
+      tags:
+      - user
+      description: Query User resources (see section 3.4.2 of RFC 7644)
+      security:
+        - testmode: []
+      requestBody:
+        description: Payload that represents the search criteria
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        400:
+          description: |
+            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
+            or invalid schema in search request
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: searchRequest
+  /.search:
+    post:
+      description: |
+        Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
+      security:
+        - testmode: []
+      requestBody:
+        description: Payload that represents the search criteria
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/GenericListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListResponse'
+        400:
+          description: |
+            Parameter count exceeds the maximum allowed value, the filter supplied was unparsable,
+            or invalid schema in search request
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: searchRequest
+  /Bulk:
+    post:
+      description: Send several resource operations in a single request (see section
+        3.7 of RFC 7644)
+      security:
+        - testmode: []
+      requestBody:
+        description: Payload describing the operations to perform
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/BulkRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            Successful operation. Every individual operation will report its own output status.
+            Reponses are only included for failed operations.
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/BulkData'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkData'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /ServiceProviderConfig:
+    get:
+      tags:
+      - discovery
+      description: Describes the SCIM specification features available (see section
+        5 of RFC 7644)
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ServiceProviderConfigResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceProviderConfigResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /ResourceTypes:
+    get:
+      tags:
+      - discovery
+      description: |
+        This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ResourceTypeListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceTypeListResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /ResourceTypes/{resource}:
+    get:
+      tags:
+      - discovery
+      description: "Describes the endpoint, schemas and extensions supported by a\
+        \ specific kind of resource.\nIt returns a specific portion of the ouput of\
+        \ the more general /Resources endpoint  \n"
+      parameters:
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - User
+          - Group
+          - FidoDevice
+          - Fido2Device
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ResourceType'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceType'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /Schemas:
+    get:
+      tags:
+      - discovery
+      description: "Endpoint used to retrieve information about schemas supported\
+        \ (see section \n4 of RFC 7644)\n"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/SchemaListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaListResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /Schemas/{uri}:
+    get:
+      tags:
+      - discovery
+      description: Retrieves information about a specific resource
+      parameters:
+      - name: uri
+        in: path
+        description: Schema URI of a particular resource type
+        required: true
+        schema:
+          type: string
+          enum:
+          - urn:ietf:params:scim:schemas:core:2.0:User
+          - urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+          - urn:ietf:params:scim:schemas:core:2.0:Group
+          - urn:ietf:params:scim:schemas:core:2.0:Fido2Device
+          - urn:ietf:params:scim:schemas:core:2.0:FidoDevice
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/SchemaResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaResource'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AnyValue:
+      description: Can be any value - string, number, boolean, array or object
+    SearchRequest:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:SearchRequest
+        attributes:
+          type: array
+          items:
+            type: string
+        excludedAttributes:
+          type: array
+          items:
+            type: string
+        filter:
+          type: string
+        sortBy:
+          type: string
+        sortOrder:
+          type: string
+        startIndex:
+          type: integer
+        count:
+          type: integer
+      description: See section 3.4.3 of RFC 7644
+    ErrorResponse:
+      required:
+      - status
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:Error
+        status:
+          type: string
+        scimType:
+          type: string
+        detail:
+          type: string
+      description: See section 3.12 of RFC 7644
+    ServiceProviderConfigResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig
+        meta:
+          type: object
+          properties:
+            resourceType:
+              type: string
+            location:
+              type: string
+        documentationUri:
+          type: string
+        patch:
+          type: object
+          properties:
+            supported:
+              type: boolean
+        bulk:
+          type: object
+          properties:
+            supported:
+              type: boolean
+            maxOperations:
+              type: integer
+            maxPayloadSize:
+              type: integer
+        filter:
+          type: object
+          properties:
+            supported:
+              type: boolean
+            maxResults:
+              type: integer
+        changePassword:
+          type: object
+          properties:
+            supported:
+              type: boolean
+        sort:
+          type: object
+          properties:
+            supported:
+              type: boolean
+        etag:
+          type: object
+          properties:
+            supported:
+              type: boolean
+        authenticationSchemes:
+          type: object
+          properties:
+            type:
+              type: string
+              example: oauth2
+            name:
+              type: string
+            description:
+              type: string
+            specUri:
+              type: string
+            documentationUri:
+              type: string
+            primary:
+              type: boolean
+      description: See section 5 of RFC 7643
+    ResourceType:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:ResourceType
+        id:
+          type: string
+        meta:
+          type: object
+          properties:
+            resourceType:
+              type: string
+            location:
+              type: string
+        name:
+          type: string
+        description:
+          type: string
+        endpoint:
+          type: string
+        schema:
+          type: string
+        schemaExtensions:
+          type: object
+          properties:
+            schema:
+              type: string
+            required:
+              type: boolean
+      description: See section 6 of RFC 7643
+    SchemaAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        subAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaAttribute'
+        multiValued:
+          type: boolean
+        description:
+          type: string
+        required:
+          type: string
+        canonicalValues:
+          type: array
+          items:
+            type: string
+        caseExact:
+          type: boolean
+        mutability:
+          type: string
+        returned:
+          type: string
+        uniqueness:
+          type: string
+        referenceTypes:
+          type: array
+          items:
+            type: string
+      description: A recursive definition. Note how property subAttributes reuses
+        SchemaAttribute for its definition
+    SchemaResource:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:schemas:core:2.0:Schema
+        id:
+          type: string
+        meta:
+          type: object
+          properties:
+            resourceType:
+              type: string
+            location:
+              type: string
+        name:
+          type: string
+        description:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaAttribute'
+    BasicListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:ListResponse
+        totalResults:
+          type: integer
+        startIndex:
+          type: integer
+        itemsPerPage:
+          type: integer
+    GroupListResponse:
+      description: See section 3.4.2.4 of RFC 7644
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/GroupResource'
+    FidoListResponse:
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/FidoDeviceResource'
+    Fido2ListResponse:
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/Fido2DeviceResource'
+    UserListResponse:
+      description: See section 3.4.2.4 of RFC 7644
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserResource'
+    ResourceTypeListResponse:
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceType'
+    SchemaListResponse:
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/SchemaResource'
+    PatchOperation:
+      required:
+      - operation
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - add
+          - remove
+          - replace
+        path:
+          type: string
+          description: Required when type is remove, optional otherwise
+        value:
+          $ref: '#/components/schemas/AnyValue'
+          description: Only required when type is add or replace
+      description: See section 3.5.2 of RFC 7644
+    PatchRequest:
+      required:
+      - Operations
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:PatchOp
+        Operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatchOperation'
+    BulkOperation:
+      type: object
+      properties:
+        method:
+          type: string
+          example: PUT
+        bulkId:
+          type: string
+          description: |
+            Used to bind the id generated for a created resource (via POST) to a named variable for later reuse
+        path:
+          type: string
+        data:
+          type: object
+          properties: {}
+          description: Payload associated to this operation
+        location:
+          type: string
+          description: Used in responses of POST operations
+        response:
+          type: object
+          properties: {}
+        status:
+          type: string
+      description: See section 3.7 of RFC 7644
+    BulkData:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+        Operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkOperation'
+    BulkRequest:
+      allOf:
+      - $ref: '#/components/schemas/BulkData'
+      - type: object
+      - type: object
+        properties:
+          failOnErrors:
+            type: integer
+    Meta:
+      type: object
+      properties:
+        resourceType:
+          type: string
+        created:
+          type: string
+        lastModified:
+          type: string
+        location:
+          type: string
+      description: See section 3.1 of RFC 7643
+    Member:
+      type: object
+      properties:
+        $ref:
+          type: string
+        type:
+          type: string
+        display:
+          type: string
+        value:
+          type: string
+    Name:
+      type: object
+      properties:
+        familyName:
+          type: string
+        givenName:
+          type: string
+        middleName:
+          type: string
+        honorificPrefix:
+          type: string
+        honorificSuffix:
+          type: string
+        formatted:
+          type: string
+      description: See section 4.1.1 of RFC 7643
+    Email:
+      type: object
+      properties:
+        value:
+          type: string
+          example: gossow@nsfw.com
+        display:
+          type: string
+        type:
+          type: string
+          example: work
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    PhoneNumber:
+      type: object
+      properties:
+        value:
+          type: string
+          example: +1-555-555-8377
+        display:
+          type: string
+        type:
+          type: string
+          example: fax
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    InstantMessagingAddress:
+      type: object
+      properties:
+        value:
+          type: string
+        display:
+          type: string
+        type:
+          type: string
+          example: gtalk
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    Photo:
+      type: object
+      properties:
+        value:
+          type: string
+          example: https://pics.nsfw.com/gossow.png
+        display:
+          type: string
+        type:
+          type: string
+          example: thumbnail
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    Address:
+      type: object
+      properties:
+        formatted:
+          type: string
+        streetAddress:
+          type: string
+          example: 56 Acacia Avenue
+        locality:
+          type: string
+        region:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        type:
+          type: string
+          example: home
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    Group:
+      type: object
+      properties:
+        value:
+          type: string
+          example: 180ee84f0671b1
+        $ref:
+          type: string
+          example: https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1
+        display:
+          type: string
+          example: Cult managers
+        type:
+          type: string
+          example: direct
+      description: See section 4.1.2 of RFC 7643
+    Entitlement:
+      type: object
+      properties:
+        value:
+          type: string
+          example: Stakeholder
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    Role:
+      type: object
+      properties:
+        value:
+          type: string
+          example: Project manager
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    X509Certificate:
+      type: object
+      properties:
+        value:
+          type: string
+          description: DER-encoded X.509 certificate
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+      description: See section 4.1.2 of RFC 7643
+    BaseResource:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+        id:
+          type: string
+          description: See section 3.1 of RFC 7643
+        meta:
+          $ref: '#/components/schemas/Meta'
+    GroupResource:
+      description: See section 4.2 of RFC 7643
+      allOf:
+      - $ref: '#/components/schemas/BaseResource'
+      - type: object
+      - type: object
+        properties:
+          displayName:
+            type: string
+          members:
+            type: array
+            items:
+              $ref: '#/components/schemas/Member'
+    FidoDeviceResource:
+      description: Represents a device enrollment like an U2F security key or a Super
+        Gluu device
+      allOf:
+      - $ref: '#/components/schemas/BaseResource'
+      - type: object
+      - type: object
+        properties:
+          userId:
+            type: string
+            description: Identifies the owner of the enrollment
+          creationDate:
+            type: string
+            description: Date of enrollment in ISO format
+            format: date-time
+          application:
+            type: string
+            description: Associated U2F application ID
+          counter:
+            type: integer
+            description: Value used in the Fido U2F endpoints
+          deviceData:
+            type: string
+            description: A Json representation of low-level attributes of this enrollment
+          deviceHashCode:
+            type: integer
+          deviceKeyHandle:
+            type: string
+          deviceRegistrationConf:
+            type: string
+          lastAccessTime:
+            type: string
+            description: When this device was last used (eg. in order to log into
+              an application)
+            format: date-time
+          status:
+            type: string
+            enum:
+            - active
+            - compromised
+          displayName:
+            type: string
+          description:
+            type: string
+    Fido2DeviceResource:
+      description: Represents a Fido 2 device enrollment
+      allOf:
+      - $ref: '#/components/schemas/BaseResource'
+      - type: object
+      - type: object
+        properties:
+          userId:
+            type: string
+            description: Identifies the owner of the enrollment
+          creationDate:
+            type: string
+            description: Date of enrollment in ISO format
+            format: date-time
+          counter:
+            type: integer
+            description: Value used in the Fido 2 endpoints
+          status:
+            type: string
+            enum:
+            - registered
+            - pending
+          displayName:
+            type: string
+    UserResource:
+      description: See section 4.1 of RFC 7643
+      allOf:
+      - $ref: '#/components/schemas/BaseResource'
+      - type: object
+      - type: object
+        properties:
+          externalId:
+            type: string
+            description: See section 3.1 of RFC 7643
+          userName:
+            type: string
+          name:
+            $ref: '#/components/schemas/Name'
+          displayName:
+            type: string
+          nickName:
+            type: string
+          profileUrl:
+            type: string
+          title:
+            type: string
+          userType:
+            type: string
+          preferredLanguage:
+            type: string
+          locale:
+            type: string
+          timezone:
+            type: string
+          active:
+            type: boolean
+          password:
+            type: string
+          emails:
+            type: array
+            items:
+              $ref: '#/components/schemas/Email'
+          phoneNumbers:
+            type: array
+            items:
+              $ref: '#/components/schemas/PhoneNumber'
+          ims:
+            type: array
+            items:
+              $ref: '#/components/schemas/InstantMessagingAddress'
+          photos:
+            type: array
+            items:
+              $ref: '#/components/schemas/Photo'
+          addresses:
+            type: array
+            items:
+              $ref: '#/components/schemas/Address'
+          groups:
+            type: array
+            items:
+              $ref: '#/components/schemas/Group'
+          entitlements:
+            type: array
+            items:
+              $ref: '#/components/schemas/Entitlement'
+          roles:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+          x509Certificates:
+            type: array
+            items:
+              $ref: '#/components/schemas/X509Certificate'
+          urn:ietf:params:scim:schemas:extension:gluu:2.0:User:
+            type: object
+            properties: {}
+            description: Extended attributes
+    GenericResource:
+      oneOf:
+        - $ref: '#/components/schemas/GroupResource'
+        - $ref: '#/components/schemas/UserResource'
+        - $ref: '#/components/schemas/FidoDeviceResource'
+        - $ref: '#/components/schemas/Fido2DeviceResource'
+    GenericListResponse:
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/GenericResource'
+  securitySchemes:
+    testmode:
+      type: oauth2
+      description: |
+        Endpoints protected by a bearer token passed in the Authorization header. 
+        It is assumed your jans-scim is configured to operate in test mode. Other protection
+        modes may be available, please check SCIM docs
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://jenkins-ldap.jans.io/oxauth/restv1/token'
+          scopes: {}
