@@ -51,7 +51,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  /app/scripts/entrypoint.sh patch auth-server --opts interval:{{ .Values.keysLife }}
+                  /app/scripts/entrypoint.sh patch auth --opts interval:{{ .Values.keysLife }}
                   curl -X POST http://localhost:15020/quitquitquit
               {{- else }}
               args: ["patch", "auth-server", "--opts", "interval:{{ .Values.keysLife }}"]
