@@ -45,9 +45,9 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     public void processAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
-                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
-                + method + " , path = " + path + "\n");
+        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = "
+                + rpt + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName()
+                + " , method = " + method + " , path = " + path + "\n");
 
         UmaResource umaResource = getUmaResource(resourceInfo, method, path);
         log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
@@ -72,8 +72,9 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
                 + method + " , path = " + path + "\n");
-        log.debug(" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
-                +UmaResourceProtectionCache.getAllUmaResources());
+        log.debug(
+                " UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
+                        + UmaResourceProtectionCache.getAllUmaResources());
 
         // Verify in cache
         Map<String, UmaResource> resources = UmaResourceProtectionCache.getAllUmaResources();
@@ -94,8 +95,8 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
             if (result != null && result.length > 1) {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
-                log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = "
-                        + pathUrl);
+                log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod
+                        + " , pathUrl = " + pathUrl);
                 if (path.equals(pathUrl)) {
                     // Matching url
                     log.debug(" UmaAuthorizationService::getUmaResource() - Matching url, path = " + path
@@ -104,7 +105,8 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
                     // Verify Method
                     if (httpmethod.contains(method)) {
                         umaResource = UmaResourceProtectionCache.getUmaResource(key);
-                        log.debug(" UmaAuthorizationService::getUmaResource() - Matching umaResource =" + umaResource);
+                        log.debug(
+                                " UmaAuthorizationService::getUmaResource() - Matching umaResource =" + umaResource);
                         break;
                     }
 
