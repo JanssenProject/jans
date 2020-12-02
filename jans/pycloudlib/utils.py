@@ -289,7 +289,7 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
 
 
 def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
-                         state, city, base_dir="/etc/certs"):
+                         state, city, base_dir="/etc/certs", extra_dn=""):
     # generate key
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
@@ -302,6 +302,7 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
         x509.NameAttribute(NameOID.COMMON_NAME, hostname),
         x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
     ])
+    extra_dn = extra_dn or suffix
 
     now = datetime.utcnow()
 
@@ -323,7 +324,7 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
     ).add_extension(
         x509.SubjectAlternativeName([
             x509.DNSName(hostname),
-            x509.DNSName(suffix),
+            x509.DNSName(extra_dn),
         ]),
         critical=False,
     ).add_extension(
