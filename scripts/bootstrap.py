@@ -3,7 +3,7 @@ import re
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_gluu_properties
+from jans.pycloudlib.persistence import render_base_properties
 from jans.pycloudlib.persistence import render_hybrid_properties
 from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
@@ -59,39 +59,39 @@ def modify_webdefault_xml():
 
 
 def main():
-    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/gluu/conf/salt")
-    render_gluu_properties("/app/templates/gluu.properties.tmpl", "/etc/gluu/conf/gluu.properties")
+    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
     if persistence_type in ("ldap", "hybrid"):
         render_ldap_properties(
             manager,
-            "/app/templates/gluu-ldap.properties.tmpl",
-            "/etc/gluu/conf/gluu-ldap.properties",
+            "/app/templates/jans-ldap.properties.tmpl",
+            "/etc/jans/conf/jans-ldap.properties",
         )
         sync_ldap_truststore(manager)
 
     if persistence_type in ("couchbase", "hybrid"):
         render_couchbase_properties(
             manager,
-            "/app/templates/gluu-couchbase.properties.tmpl",
-            "/etc/gluu/conf/gluu-couchbase.properties",
+            "/app/templates/jans-couchbase.properties.tmpl",
+            "/etc/jans/conf/jans-couchbase.properties",
         )
         sync_couchbase_truststore(manager)
 
     if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/gluu/conf/gluu-hybrid.properties")
+        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
-    if not os.path.isfile("/etc/certs/gluu_https.crt"):
-        if as_boolean(os.environ.get("JANS_SSL_CERT_FROM_SECRETS", False)):
-            manager.secret.to_file("ssl_cert", "/etc/certs/gluu_https.crt")
+    if not os.path.isfile("/etc/certs/jans_https.crt"):
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", False)):
+            manager.secret.to_file("ssl_cert", "/etc/certs/jans_https.crt")
         else:
-            get_server_certificate(manager.config.get("hostname"), 443, "/etc/certs/gluu_https.crt")
+            get_server_certificate(manager.config.get("hostname"), 443, "/etc/certs/jans_https.crt")
 
     cert_to_truststore(
-        "gluu_https",
-        "/etc/certs/gluu_https.crt",
+        "jans_https",
+        "/etc/certs/jans_https.crt",
         "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
         "changeit",
     )
