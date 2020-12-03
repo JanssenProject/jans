@@ -16,12 +16,12 @@ logger = logging.getLogger("jks_sync")
 
 
 def jks_created():
-    manager.secret.to_file("oxauth_jks_base64", "/etc/certs/oxauth-keys.jks", decode=True, binary_mode=True)
+    manager.secret.to_file("oxauth_jks_base64", "/etc/certs/auth-server-keys.jks", decode=True, binary_mode=True)
     return True
 
 
 def jwks_created():
-    with open("/etc/certs/oxauth-keys.json", "w") as f:
+    with open("/etc/certs/auth-server-keys.json", "w") as f:
         f.write(base64.b64decode(
             manager.secret.get("oxauth_openid_key_base64")
         ).decode())
@@ -45,28 +45,28 @@ def should_sync_jks():
 
 def sync_jks():
     if jks_created():
-        logger.info("oxauth-keys.jks has been synchronized")
+        logger.info("auth-server-keys.jks has been synchronized")
         return True
     return False
 
 
 def sync_jwks():
     if jwks_created():
-        logger.info("oxauth-keys.json has been synchronized")
+        logger.info("auth-server-keys.json has been synchronized")
         return True
     return False
 
 
 def main():
     sync_enabled = as_boolean(
-        os.environ.get("JANS_SYNC_JKS_ENABLED", False)
+        os.environ.get("CN_SYNC_JKS_ENABLED", False)
     )
     if not sync_enabled:
         logger.warning("JKS sync is disabled")
         return
 
     # delay between JKS sync (in seconds)
-    sync_interval = os.environ.get("JANS_SYNC_JKS_INTERVAL", 30)
+    sync_interval = os.environ.get("CN_SYNC_JKS_INTERVAL", 30)
 
     try:
         sync_interval = int(sync_interval)

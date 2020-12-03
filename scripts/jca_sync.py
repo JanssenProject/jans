@@ -8,7 +8,7 @@ from settings import LOGGING_CONFIG
 from jans.pycloudlib.document import RClone
 
 ROOT_DIR = "/repository/default"
-SYNC_DIR = "/opt/gluu/jetty/oxauth/custom"
+SYNC_DIR = "/opt/jans/jetty/jans-auth/custom"
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("webdav")
@@ -40,10 +40,10 @@ def sync_to_webdav(url, username, password):
 def get_sync_interval():
     default = 5 * 60  # 5 minutes
 
-    if "JANS_JCA_SYNC_INTERVAL" in os.environ:
-        env_name = "JANS_JCA_SYNC_INTERVAL"
+    if "CN_JCA_SYNC_INTERVAL" in os.environ:
+        env_name = "CN_JCA_SYNC_INTERVAL"
     else:
-        env_name = "JANS_JACKRABBIT_SYNC_INTERVAL"
+        env_name = "CN_JACKRABBIT_SYNC_INTERVAL"
 
     try:
         interval = int(os.environ.get(env_name, default))
@@ -53,25 +53,25 @@ def get_sync_interval():
 
 
 def get_jackrabbit_url():
-    if "JANS_JCA_URL" in os.environ:
-        return os.environ["JANS_JCA_URL"]
-    return os.environ.get("JANS_JACKRABBIT_URL", "http://localhost:8080")
+    if "CN_JCA_URL" in os.environ:
+        return os.environ["CN_JCA_URL"]
+    return os.environ.get("CN_JACKRABBIT_URL", "http://localhost:8080")
 
 
 def main():
-    store_type = os.environ.get("JANS_DOCUMENT_STORE_TYPE", "LOCAL")
+    store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "LOCAL")
     if store_type != "JCA":
         logger.warning(f"Using {store_type} document store; sync is disabled ...")
         return
 
     url = get_jackrabbit_url()
 
-    username = os.environ.get("JANS_JACKRABBIT_ADMIN_ID", "admin")
+    username = os.environ.get("CN_JACKRABBIT_ADMIN_ID", "admin")
     password = ""
 
     password_file = os.environ.get(
-        "JANS_JACKRABBIT_ADMIN_PASSWORD_FILE",
-        "/etc/gluu/conf/jackrabbit_admin_password",
+        "CN_JACKRABBIT_ADMIN_PASSWORD_FILE",
+        "/etc/jans/conf/jackrabbit_admin_password",
     )
     with contextlib.suppress(FileNotFoundError):
         with open(password_file) as f:

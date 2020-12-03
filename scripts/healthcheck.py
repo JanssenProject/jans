@@ -4,7 +4,7 @@ import requests
 
 
 def main():
-    req = requests.get("http://0.0.0.0:8080/oxauth/restv1/health-check")
+    req = requests.get("http://0.0.0.0:8080/jans-auth/sys/health-check")
     if not req.ok:
         sys.exit(1)
 

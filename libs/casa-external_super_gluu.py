@@ -128,7 +128,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Validate license
             try:
                 self.license_content = LicenseValidator.validate(license["public-key"], license["public-password"], license["license-password"], license["license"],
-                                          Product.SUPER_JANS, Date())
+                                          Product.SUPER_CN, Date())
                 self.valid_license = self.license_content.isValid()
             except:
                 print "Super-Gluu. Initialization. Failed to validate license. Exception: ", sys.exc_info()[1]

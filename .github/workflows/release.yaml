@@ -1,9 +1,8 @@
 name: release
-# This builds, packages and releases pygluu-kubernetes
 on:
   push:
     paths:
-      #- __version__.py
+      - __version__.py
     branches-ignore:
       - master
 jobs:
@@ -43,6 +42,7 @@ jobs:
         echo "::set-output name=pversion::$(python3 -c 'import __version__ ; print(__version__.__previous_version__)')"
         echo "::set-output name=gituser::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[0])')"
         echo "::set-output name=gitproject::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[1])')"
+        echo "::set-output name=gitbranch::$(python3 -c 'import os ; BRANCH = os.environ.get("GITHUB_REF") ; print(str(BRANCH).split("/")[2])')"
         echo "::set-output name=releasedate::$(date +'%d-%m-%Y')"
 
 
@@ -50,7 +50,7 @@ jobs:
       run: |
         cd /home/runner/work/test/
         sudo gem install github_changelog_generator
-        github_changelog_generator --user ${{ steps.get_version.outputs.gituser }} --project ${{ steps.get_version.outputs.gitproject }} --date-format "%m/%d/%Y" --header-label "# Release Notes" --output release_notes.md --token ${{ secrets.token }} --since-tag ${{ steps.get_version.outputs.pversion }} --author false
+        github_changelog_generator --user ${{ steps.get_version.outputs.gituser }} --project ${{ steps.get_version.outputs.gitproject }} --date-format "%m/%d/%Y" --header-label "# Release Notes" --output release_notes.md --token ${{ secrets.token }} --include-labels ${{ steps.get_version.outputs.gitbranch }} --since-tag v${{ steps.get_version.outputs.pversion }} --author false
         sed -i '$ d' release_notes.md
         github_changelog_generator --user ${{ steps.get_version.outputs.gituser }} --project ${{ steps.get_version.outputs.gitproject }} --date-format "%m/%d/%Y" --token ${{ secrets.token }} --author false
         sed -i '$ d' CHANGELOG.md
