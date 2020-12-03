@@ -12,7 +12,7 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "pygluu.containerlib": {
+        "jans.pycloudlib": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": True,
@@ -22,14 +22,5 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
-        # "wait": {
-        #     "handlers": ["console"],
-        #     "level": "INFO",
-        #     "propagate": False,
-        # },
     },
-    # "root": {
-    #     "level": "INFO",
-    #     "handlers": ["console"],
-    # },
 }

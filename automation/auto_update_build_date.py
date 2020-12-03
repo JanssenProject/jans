@@ -8,50 +8,20 @@ distributions_managed = {
         "url": "https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{}",
         "source_package": "opendj-server-legacy-{}.zip"
     },
-    "passport": {
-        "url": "https://ox.gluu.org/npm/passport",
-        "source_package": "passport-{}.tgz"
-    },
-    "oxtrust-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxtrust-server/{}",
-        "source_package": "oxtrust-server-{}.war"
-    },
     "oxauth-client": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxauth-client/{}",
+        "url": "https://maven.jans.io/maven/org/jans/oxauth-client/{}",
         "source_package": "oxauth-client-{}-jar-with-dependencies.jar"
     },
     "oxauth-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxauth-server/{}",
+        "url": "https://maven.jans.io/maven/org/jans/oxauth-server/{}",
         "source_package": "oxauth-server-{}.war"
     },
-    "casa": {
-        "url": "https://ox.gluu.org/maven/org/gluu/casa/{}",
-        "source_package": "casa-{}.war"
-    },
-    "oxd-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxd-server/{}",
-        "source_package": "oxd-server-{}-distribution.zip"
-    },
     "scim-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/scim-server/{}",
+        "url": "https://maven.jans.io/maven/org/jans/scim-server/{}",
         "source_package": "scim-server-{}.war"
     },
-    "oxshibbolethIdp": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{}",
-        "source_package": "oxshibbolethIdp-{}.war"
-    },
-    "oxShibbolethStatic": {
-        "url": "https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/{}",
-        "source_package": "oxShibbolethStatic-{}.jar"
-    },
-    "super-gluu-radius-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{}",
-        # There is another package super-gluu-radius-server-{}-distribution.zip
-        # but the version is the same so we can use one
-        "source_package": "super-gluu-radius-server-{}.jar"
-    },
     "fido2-server": {
-        "url": "https://ox.gluu.org/maven/org/gluu/fido2-server/{}",
+        "url": "https://maven.jans.io/maven/org/jans/fido2-server/{}",
         "source_package": "fido2-server-{}.war"
     },
 }
@@ -87,60 +57,60 @@ def parse_source(package_name, version):
     return None
 
 
-def find_current_gluu_package_version_and_build_date(dockerfile):
-    gluu_packages = ["oxtrust-server", "oxauth-client", "opendj-server-legacy",
-                     "oxauth-server", "casa", "oxd-server", "scim-server", "oxshibbolethIdp",
-                     "oxShibbolethStatic", "super-gluu-radius-server", "fido2-server", "passport"]
+def find_current_jans_package_version_and_build_date(dockerfile):
+    jans_packages = ["oxauth-client", "opendj-server-legacy",
+                     "oxauth-server","scim-server",
+                     "fido2-server"]
     wrends_version_search_string = "ENV WRENDS_VERSION="
     wrends_build_date_search_string = "ENV WRENDS_BUILD_DATE="
-    gluu_version_search_string = "ENV GLUU_VERSION="
-    gluu_build_date_search_string = "ENV GLUU_BUILD_DATE="
-    gluu_package = ""
-    gluu_version = ""
-    gluu_build_date = ""
+    jans_version_search_string = "ENV CN_VERSION="
+    jans_build_date_search_string = "ENV CN_BUILD_DATE="
+    jans_package = ""
+    jans_version = ""
+    jans_build_date = ""
     with open(dockerfile, "r") as file:
         lines = file.readlines()
         for line in lines:
-            if gluu_version_search_string in line:
-                gluu_version = line.strip(gluu_version_search_string)
-            elif gluu_build_date_search_string in line:
-                gluu_build_date = line.strip(gluu_build_date_search_string)
+            if jans_version_search_string in line:
+                jans_version = line.strip(jans_version_search_string)
+            elif jans_build_date_search_string in line:
+                jans_build_date = line.strip(jans_build_date_search_string)
             elif wrends_version_search_string in line:
-                gluu_version = line.strip(wrends_version_search_string)
+                jans_version = line.strip(wrends_version_search_string)
             elif wrends_build_date_search_string in line:
-                gluu_build_date = line.strip(gluu_build_date_search_string)
+                jans_build_date = line.strip(jans_build_date_search_string)
             else:
-                for package in gluu_packages:
+                for package in jans_packages:
                     if package in line:
-                        gluu_package = package
+                        jans_package = package
 
-    gluu_version = gluu_version.replace('"', "").strip("").strip("\n")
-    gluu_build_date = gluu_build_date.replace('"', "").strip("").strip("\n")
-    return gluu_version, gluu_build_date, gluu_package
+    jans_version = jans_version.replace('"', "").strip("").strip("\n")
+    jans_build_date = jans_build_date.replace('"', "").strip("").strip("\n")
+    return jans_version, jans_build_date, jans_package
 
 
 def update_build_date(dockerfile, old_build_date, new_build_date):
     wrends_build_date_search_string = 'WRENDS_BUILD_DATE=' + '"' + old_build_date + '"'
-    gluu_build_date_search_string = "GLUU_BUILD_DATE=" + '"' + old_build_date + '"'
+    jans_build_date_search_string = "CN_BUILD_DATE=" + '"' + old_build_date + '"'
     wrends_build_new_date_string = 'WRENDS_BUILD_DATE=' + '"' + new_build_date + '"'
-    gluu_build_new_date_string = "GLUU_BUILD_DATE=" + '"' + new_build_date + '"'
+    jans_build_new_date_string = "CN_BUILD_DATE=" + '"' + new_build_date + '"'
     with open(dockerfile, "r+") as file:
         contents = file.read()
         contents = contents.replace(wrends_build_date_search_string, wrends_build_new_date_string)
-        contents = contents.replace(gluu_build_date_search_string, gluu_build_new_date_string)
+        contents = contents.replace(jans_build_date_search_string, jans_build_new_date_string)
     with open(dockerfile, "w+") as file:
         file.write(contents)
 
 
 def main():
     dockerfile = Path("../Dockerfile")
-    gluu_version_in_dockerfile, gluu_build_date_in_dockerfile, gluu_package_name_in_dockerfile = \
-        find_current_gluu_package_version_and_build_date(dockerfile)
+    jans_version_in_dockerfile, jans_build_date_in_dockerfile, jans_package_name_in_dockerfile = \
+        find_current_jans_package_version_and_build_date(dockerfile)
 
-    gluu_package_source_timestamp_string = parse_source(gluu_package_name_in_dockerfile, gluu_version_in_dockerfile)
+    jans_package_source_timestamp_string = parse_source(jans_package_name_in_dockerfile, jans_version_in_dockerfile)
 
-    if gluu_package_source_timestamp_string > gluu_build_date_in_dockerfile:
-        update_build_date(dockerfile, gluu_build_date_in_dockerfile, gluu_package_source_timestamp_string)
+    if jans_package_source_timestamp_string > jans_build_date_in_dockerfile:
+        update_build_date(dockerfile, jans_build_date_in_dockerfile, jans_package_source_timestamp_string)
 
 
 if __name__ == '__main__':

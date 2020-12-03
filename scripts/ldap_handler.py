@@ -1,7 +1,7 @@
 import logging.config
 
-from pygluu.containerlib.utils import decode_text
-from pygluu.containerlib.utils import exec_cmd
+from jans.pycloudlib.utils import decode_text
+from jans.pycloudlib.utils import exec_cmd
 
 from base_handler import BaseHandler
 from settings import LOGGING_CONFIG

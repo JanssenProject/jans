@@ -2,4 +2,6 @@
 
 set -e
 
-exec python3 /app/scripts/entrypoint.py "$@"
+export CN_CONTAINER_METADATA_NAMESPACE=${CN_CONFIG_KUBERNETES_NAMESPACE}
+
+exec python3 /app/scripts/bootstrap.py "$@"

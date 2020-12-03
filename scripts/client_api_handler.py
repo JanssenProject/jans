@@ -1,6 +1,7 @@
 import logging.config
 
-from pygluu.containerlib.utils import exec_cmd
+from jans.pycloudlib.utils import exec_cmd
+from jans.pycloudlib.utils import generate_ssl_certkey
 
 from base_handler import BaseHandler
 from settings import LOGGING_CONFIG
@@ -9,26 +10,24 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("certmanager")
 
 
-class OxdHandler(BaseHandler):
-    @staticmethod
-    def generate_x509(cert_file, key_file, cert_cn):
-        out, err, code = exec_cmd(
-            "openssl req -x509 -newkey rsa:2048 "
-            f"-keyout {key_file} "
-            f"-out {cert_file} "
-            f"-subj '/CN={cert_cn}' "
-            "-days 365 "
-            "-nodes"
+class ClientApiHandler(BaseHandler):
+    def generate_x509(self, suffix, cert_cn):
+        cert_file, key_file = generate_ssl_certkey(
+            suffix,
+            self.manager.config.get("admin_email"),
+            self.manager.config.get("hostname"),
+            self.manager.config.get("orgName"),
+            self.manager.config.get("country_code"),
+            self.manager.config.get("state"),
+            self.manager.config.get("city"),
+            extra_dn=cert_cn,
         )
-        if code != 0:
-            logger.warning(f"Failed to generate cert and key; reason={err.decode()}")
-            return False
-        return True
+        return cert_file, key_file
 
     @staticmethod
     def generate_keystore(cert_file, key_file, keystore_file, keystore_password):
         out, err, code = exec_cmd(
-            "openssl pkcs12 -export -name oxd-server "
+            "openssl pkcs12 -export -name client-api "
             f"-out {keystore_file} "
             f"-inkey {key_file} "
             f"-in {cert_file} "
@@ -40,22 +39,22 @@ class OxdHandler(BaseHandler):
         return True
 
     def _patch_connector(self, conn_type):
-        cert_file = f"/etc/certs/oxd_{conn_type}.crt"
-        key_file = f"/etc/certs/oxd_{conn_type}.key"
+        suffix = f"client_api_{conn_type}"
+        cert_file, key_file = f"{suffix}.crt", f"{suffix}.key"
         cert_cn = self.opts.get(f"{conn_type}-cn", "localhost")
 
+        cert_file, key_file = self.generate_x509(suffix, cert_cn)
         logger.info(f"Generating new {cert_file} and {key_file} file(s)")
-        generated = self.generate_x509(cert_file, key_file, cert_cn)
-        if not self.dry_run and generated:
+        if not self.dry_run:
             self.manager.secret.from_file(
-                f"oxd_{conn_type}_cert", cert_file,
+                f"client_api_{conn_type}_cert", cert_file,
             )
             self.manager.secret.from_file(
-                f"oxd_{conn_type}_key", key_file,
+                f"client_api_{conn_type}_key", key_file,
             )
 
-        keystore_file = f"/etc/certs/oxd_{conn_type}.keystore"
-        keystore_password = self.manager.secret.get(f"oxd_{conn_type}_keystore_password")
+        keystore_file = f"/etc/certs/client_api_{conn_type}.keystore"
+        keystore_password = self.manager.secret.get(f"client_api_{conn_type}_keystore_password")
 
         logger.info(f"Generating new {keystore_file} file")
         generated = self.generate_keystore(
@@ -63,7 +62,7 @@ class OxdHandler(BaseHandler):
         )
         if not self.dry_run and generated:
             self.manager.secret.from_file(
-                f"oxd_{conn_type}_jks_base64",
+                f"client_api_{conn_type}_jks_base64",
                 keystore_file,
                 encode=True,
                 binary_mode=True,

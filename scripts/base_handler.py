@@ -1,8 +1,9 @@
 import logging.config
 
+from jans.pycloudlib.utils import generate_ssl_certkey
 from settings import LOGGING_CONFIG
 from utils import generate_keystore
-from utils import generate_ssl_certkey
+# from utils import generate_ssl_certkey
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("certmanager")
@@ -27,7 +28,7 @@ class BaseHandler(object):
         logger.info(f"Generating new {cert_fn} and {key_fn} files")
         generate_ssl_certkey(
             prefix,
-            cert_passwd,
+            # cert_passwd,
             self.manager.config.get("admin_email"),
             self.manager.config.get("hostname"),
             self.manager.config.get("orgName"),
