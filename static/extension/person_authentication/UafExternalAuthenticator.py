@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
@@ -13,17 +13,17 @@
 #   registration_uri: https://<idp_hostname>/identity/register
 #   qr_options: { width: 400, height: 400 }
 
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper, ArrayHelper
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.model.config import Constants
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import UserService
+from io.jans.util import StringHelper, ArrayHelper
+from io.jans.as.util import ServerUtil
+from io.jans.as.model.config import Constants
 from javax.ws.rs.core import Response
 from java.util import Arrays
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys

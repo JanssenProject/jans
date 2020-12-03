@@ -1,20 +1,20 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 # Author: Gasmyr Mougang
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.service import CacheService
-from org.gluu.util import StringHelper
-from org.gluu.persist.exception import AuthenticationException
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import UserService
+from io.jans.service import CacheService
+from io.jans.util import StringHelper
+from io.jans.orm.exception import AuthenticationException
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
 from java.time.format import DateTimeFormatter
 
@@ -240,6 +240,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return
         
         userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
+        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "false")
         updated_user = userService.updateUser(find_user_by_uid)
 
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
@@ -264,6 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
         userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
+        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "true")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         updated_user = userService.updateUser(find_user_by_uid)
 

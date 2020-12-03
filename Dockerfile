@@ -6,13 +6,12 @@ FROM alpine:3.11
 
 RUN apk update \
     && apk add --no-cache py3-pip curl tini \
-    && apk add --no-cache --virtual build-deps git wget
+    && apk add --no-cache --virtual build-deps git wget gcc musl-dev python3-dev libffi-dev openssl-dev
 
 # ======
 # Python
 # ======
 
-RUN apk add --no-cache py3-cryptography py3-multidict py3-yarl
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
@@ -36,78 +35,80 @@ COPY LICENSE /licenses/
 # Config ENV
 # ==========
 
-ENV JANS_CONFIG_ADAPTER=consul \
-    JANS_CONFIG_CONSUL_HOST=localhost \
-    JANS_CONFIG_CONSUL_PORT=8500 \
-    JANS_CONFIG_CONSUL_CONSISTENCY=stale \
-    JANS_CONFIG_CONSUL_SCHEME=http \
-    JANS_CONFIG_CONSUL_VERIFY=false \
-    JANS_CONFIG_CONSUL_CACERT_FILE=/etc/certs/consul_ca.crt \
-    JANS_CONFIG_CONSUL_CERT_FILE=/etc/certs/consul_client.crt \
-    JANS_CONFIG_CONSUL_KEY_FILE=/etc/certs/consul_client.key \
-    JANS_CONFIG_CONSUL_TOKEN_FILE=/etc/certs/consul_token \
-    JANS_CONFIG_KUBERNETES_NAMESPACE=default \
-    JANS_CONFIG_KUBERNETES_CONFIGMAP=gluu \
-    JANS_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
+ENV CN_CONFIG_ADAPTER=consul \
+    CN_CONFIG_CONSUL_HOST=localhost \
+    CN_CONFIG_CONSUL_PORT=8500 \
+    CN_CONFIG_CONSUL_CONSISTENCY=stale \
+    CN_CONFIG_CONSUL_SCHEME=http \
+    CN_CONFIG_CONSUL_VERIFY=false \
+    CN_CONFIG_CONSUL_CACERT_FILE=/etc/certs/consul_ca.crt \
+    CN_CONFIG_CONSUL_CERT_FILE=/etc/certs/consul_client.crt \
+    CN_CONFIG_CONSUL_KEY_FILE=/etc/certs/consul_client.key \
+    CN_CONFIG_CONSUL_TOKEN_FILE=/etc/certs/consul_token \
+    CN_CONFIG_KUBERNETES_NAMESPACE=default \
+    CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ==========
 # Secret ENV
 # ==========
 
-ENV JANS_SECRET_ADAPTER=vault \
-    JANS_SECRET_VAULT_SCHEME=http \
-    JANS_SECRET_VAULT_HOST=localhost \
-    JANS_SECRET_VAULT_PORT=8200 \
-    JANS_SECRET_VAULT_VERIFY=false \
-    JANS_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
-    JANS_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
-    JANS_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
-    JANS_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
-    JANS_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
-    JANS_SECRET_KUBERNETES_NAMESPACE=default \
-    JANS_SECRET_KUBERNETES_SECRET=gluu \
-    JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
+ENV CN_SECRET_ADAPTER=vault \
+    CN_SECRET_VAULT_SCHEME=http \
+    CN_SECRET_VAULT_HOST=localhost \
+    CN_SECRET_VAULT_PORT=8200 \
+    CN_SECRET_VAULT_VERIFY=false \
+    CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
+    CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
+    CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
+    CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
+    CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
+    CN_SECRET_KUBERNETES_NAMESPACE=default \
+    CN_SECRET_KUBERNETES_SECRET=jans \
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ===============
 # Persistence ENV
 # ===============
 
-ENV JANS_PERSISTENCE_TYPE=couchbase \
-    JANS_PERSISTENCE_LDAP_MAPPING=default \
-    JANS_COUCHBASE_URL=localhost \
-    JANS_COUCHBASE_USER=admin \
-    JANS_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
-    JANS_COUCHBASE_PASSWORD_FILE=/etc/gluu/conf/couchbase_password \
-    JANS_COUCHBASE_SUPERUSER="" \
-    JANS_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/gluu/conf/couchbase_superuser_password \
-    JANS_LDAP_URL=localhost:1636
+ENV CN_PERSISTENCE_TYPE=couchbase \
+    CN_PERSISTENCE_LDAP_MAPPING=default \
+    CN_COUCHBASE_URL=localhost \
+    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
+    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
+    CN_COUCHBASE_SUPERUSER="" \
+    CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
+    CN_COUCHBASE_INDEX_NUM_REPLICA=0 \
+    CN_LDAP_URL=localhost:1636
 
 # ===========
 # Generic ENV
 # ===========
 
-ENV JANS_CACHE_TYPE=NATIVE_PERSISTENCE \
-    JANS_REDIS_URL=localhost:6379 \
-    JANS_REDIS_TYPE=STANDALONE \
-    JANS_REDIS_USE_SSL=false \
-    JANS_REDIS_SSL_TRUSTSTORE="" \
-    JANS_REDIS_SENTINEL_GROUP="" \
-    JANS_MEMCACHED_URL=localhost:11211 \
-    JANS_WAIT_SLEEP_DURATION=10 \
-    JANS_OXTRUST_API_ENABLED=false \
-    JANS_OXTRUST_API_TEST_MODE=false \
-    JANS_CASA_ENABLED=false \
-    JANS_PASSPORT_ENABLED=false \
-    JANS_RADIUS_ENABLED=false \
-    JANS_SAML_ENABLED=false \
-    JANS_SCIM_ENABLED=false \
-    JANS_SCIM_TEST_MODE=false \
-    JANS_PERSISTENCE_SKIP_EXISTING=true \
-    JANS_DOCUMENT_STORE_TYPE=LOCAL \
-    JANS_JACKRABBIT_RMI_URL="" \
-    JANS_JACKRABBIT_URL=http://localhost:8080 \
-    JANS_JACKRABBIT_ADMIN_ID_FILE=/etc/gluu/conf/jackrabbit_admin_id \
-    JANS_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/gluu/conf/jackrabbit_admin_password
+ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
+    CN_REDIS_URL=localhost:6379 \
+    CN_REDIS_TYPE=STANDALONE \
+    CN_REDIS_USE_SSL=false \
+    CN_REDIS_SSL_TRUSTSTORE="" \
+    CN_REDIS_SENTINEL_GROUP="" \
+    CN_MEMCACHED_URL=localhost:11211 \
+    CN_WAIT_SLEEP_DURATION=10 \
+    CN_OXTRUST_API_ENABLED=false \
+    CN_OXTRUST_API_TEST_MODE=false \
+    CN_CASA_ENABLED=false \
+    CN_PASSPORT_ENABLED=false \
+    CN_RADIUS_ENABLED=false \
+    CN_SAML_ENABLED=false \
+    CN_SCIM_ENABLED=false \
+    CN_SCIM_TEST_MODE=false \
+    CN_PERSISTENCE_SKIP_EXISTING=true \
+    CN_DOCUMENT_STORE_TYPE=LOCAL \
+    CN_JACKRABBIT_RMI_URL="" \
+    CN_JACKRABBIT_URL=http://localhost:8080 \
+    CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
+    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
+    CN_NAMESPACE=jans
 
 # ====
 # misc
@@ -121,12 +122,23 @@ LABEL name="Persistence" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
-RUN mkdir -p /app/tmp /etc/certs /etc/gluu/conf
+RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 COPY static /app/static
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
+# # create non-root user
+RUN adduser -s /bin/sh -D -G root -u 1000 1000
+
+ # adjust ownership
+RUN chown -R 1000:1000 /tmp \
+    && chown -R 1000:1000 /app/tmp/ \
+    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
+    && chgrp -R 0 /app/tmp && chmod -R g=u /app/tmp \
+    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
+    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
+USER 1000
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

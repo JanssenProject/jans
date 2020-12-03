@@ -1,14 +1,14 @@
 # oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2014, Gluu
+# Copyright (c) 2014, Janssen
 #
 # Author: Jose Gonzalez
 #
-from org.gluu.model.custom.script.type.scim import ScimType
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.scim import ScimType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.gluu.oxtrust.ldap.service import PersonService
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxtrust.model import GluuCustomPerson
+from io.jans.oxtrust.ldap.service import PersonService
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.oxtrust.model import JanssenCustomPerson
 
 import java
 

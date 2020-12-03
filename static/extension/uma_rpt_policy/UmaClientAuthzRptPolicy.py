@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2017, Gluu
+# Copyright (c) 2017, Janssen
 #
 # Author: Jose Gonzalez
 # Adapted from previous 3.0.1 script of Yuriy Movchan
@@ -8,11 +8,11 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
-from org.gluu.oxauth.model.uma import UmaConstants
-from org.gluu.model.uma import ClaimDefinitionBuilder
-from org.gluu.model.custom.script.type.uma import UmaRptPolicyType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.as.model.uma import UmaConstants
+from io.jans.model.uma import ClaimDefinitionBuilder
+from io.jans.model.custom.script.type.uma import UmaRptPolicyType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 from java.lang import String
 
@@ -39,7 +39,7 @@ class UmaRptPolicy(UmaRptPolicyType):
         ]"""
         return ClaimDefinitionBuilder.build(json)
 
-    def authorize(self, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaAuthorizationContext
+    def authorize(self, context): # context is reference of io.jans.as.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
 
         client_id=context.getClient().getClientId()

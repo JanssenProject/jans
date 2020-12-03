@@ -1,13 +1,13 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2017, Gluu
+# Copyright (c) 2017, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.authz import ConsentGatheringType
-from org.gluu.util import StringHelper
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.authz import ConsentGatheringType
+from io.jans.util import StringHelper
 
 import java
 import random
@@ -34,7 +34,7 @@ class ConsentGathering(ConsentGatheringType):
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
-    def authorize(self, step, context): # context is reference of org.gluu.oxauth.service.external.context.ConsentGatheringContext
+    def authorize(self, step, context): # context is reference of io.jans.as.service.external.context.ConsentGatheringContext
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:

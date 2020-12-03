@@ -1,0 +1,10 @@
+dn: ou=configuration,o=jans
+jansCacheConf: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"%(redis_url)s", "defaultPutExpiration": 60, "redisProviderType": "%(redis_type)s", "password":"%(redis_pw_encoded)s", "useSSL":%(redis_use_ssl)s, "sslTrustStoreFilePath": "%(redis_ssl_truststore)s", "sentinelMasterGroupName":"%(redis_sentinel_group)s"}}
+jansDocStoreConf: {"documentStoreType":"%(document_store_type)s","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"%(jca_server_url)s","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":"%(jca_pw_encoded)s"},"webDavConfiguration":null}
+jansDbAuth: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled": false, "version": 0, "config": {"configId": "auth_ldap_server",           "servers": ["%(ldap_hostname)s:%(ldaps_port)s"],           "maxConnections": 1000,           "bindDN": "%(ldap_binddn)s",           "bindPassword": "%(encoded_ox_ldap_pw)s",           "useSSL": "true",           "baseDNs": ["ou=people,o=jans"],           "primaryKey": "uid",           "localPrimaryKey": "uid",           "useAnonymousBind": false,           "enabled": false} }
+jansOrgProfileMgt: false
+jansScimEnabled: %(jansScimEnabled)s
+jansAuthMode: simple_password_auth
+objectClass: top
+objectClass: jansAppConf
+ou: configuration

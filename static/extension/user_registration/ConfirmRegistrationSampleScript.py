@@ -1,16 +1,16 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.user import UserRegistrationType
-from org.gluu.service import MailService
-from org.gluu.oxtrust.service import PersonService
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.user import UserRegistrationType
+from io.jans.service import MailService
+from io.jans.oxtrust.service import PersonService
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.gluu.config.oxtrust import AppConfiguration
+from io.jans.config.oxtrust import AppConfiguration
 from javax.faces.context import ExternalContext
-from org.gluu.oxtrust.service import ConfigurationService
+from io.jans.oxtrust.service import ConfigurationService
 
 import java
 
@@ -30,7 +30,7 @@ class UserRegistration(UserRegistrationType):
         return True   
 
     # User registration init method
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def initRegistration(self, user, requestParameters, configurationAttributes):
@@ -40,7 +40,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration pre method
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def preRegistration(self, user, requestParameters, configurationAttributes):
@@ -54,7 +54,7 @@ class UserRegistration(UserRegistrationType):
         return True
 
     # User registration post method
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   requestParameters is java.util.Map<String, String[]>
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def postRegistration(self, user, requestParameters, configurationAttributes):

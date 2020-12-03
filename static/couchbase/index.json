@@ -1,42 +1,41 @@
 {
   "!bucket_prefix!_user": {
     "attributes": [
-      ["objectClass"],
-      ["creationDate"],
-      ["inum"],
-      ["del","exp"],
-      ["uid"],
-      ["mail"],
-      ["oxStatus"],
-      ["oxApplication"],
-      ["oxDeviceHashCode"],
+      ["objectClass"], 
+      ["creationDate"], 
+      ["inum"], 
+      ["del","exp"], 
+      ["uid"], 
+      ["mail"], 
+      ["oxStatus"], 
+      ["oxApplication"], 
+      ["oxDeviceHashCode"], 
       ["oxDeviceKeyHandle"],
       ["oxAuthClientId"],
       ["oxAuthUserId"]
     ],
     "static" : [
-      [["LOWER(`uid`)"], "objectClass = \"jansPerson\""],
-      [["LOWER(`mail`)"], "objectClass = \"jansPerson\""],
-      [["exp"], "del=true"],
-      [["distinct (array `oxExternalUid_` for `oxExternalUid_` in `oxExternalUid` end)"], "objectClass = \"jansPerson\""]
+      [["LOWER(`uid`)"], "objectClass = \"jansPerson\""], 
+      [["LOWER(`mail`)"], "objectClass = \"jansPerson\""], 
+      [["exp"], "del=true"] 
     ]
   },
 
   "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
-      ["oxScriptType"],
-      ["iat"],
-      ["oxAuthClientSecretExpiresAt"],
-      ["creationDate"],
-      ["tknCde"],
-      ["inum"],
-      ["displayName"],
-      ["oxAuthRegistrationAccessToken"],
-      ["oxAuthUmaScope"],
-      ["mail"],
-      ["oxId"],
-      ["oxTicket"],
+      ["oxScriptType"], 
+      ["iat"], 
+      ["oxAuthClientSecretExpiresAt"], 
+      ["creationDate"], 
+      ["tknCde"], 
+      ["inum"], 
+      ["displayName"], 
+      ["oxAuthRegistrationAccessToken"], 
+      ["oxAuthUmaScope"], 
+      ["mail"], 
+      ["oxId"], 
+      ["oxTicket"], 
       ["del"],
       ["ssnId"],
       ["oxAuthClientId"],
@@ -52,24 +51,24 @@
       [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
       [["exp"], "del=true"],
       [["oxStatus", "exp"], "objectClass = \"cibaRequest\""]
-
+        
     ]
   },
 
   "!bucket_prefix!_site": {
     "attributes": [
-        ["objectClass"],
+        ["objectClass"], 
         ["inum"]
-    ],
+    ], 
     "static" : [
     ]
   },
 
   "!bucket_prefix!_statistic": {
     "attributes": [
-      ["objectClass"],
-      ["oxStartDate"],
-      ["del"],
+      ["objectClass"], 
+      ["oxStartDate"], 
+      ["del"], 
       ["exp"]
     ],
     "static" : [
@@ -98,7 +97,8 @@
       ["oxAuthUserDN"]
     ],
     "static" : [
-        [["exp"], "objectClass = \"oxAuthSessionId\""]
+        [["sid"], "objectClass = \"jansSessId\""],
+        [["exp"], "objectClass = \"jansSessId\""]
     ]
   },
 

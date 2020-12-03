@@ -1,11 +1,11 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 #
 # Author: Yuriy Zabrovarnyy
 #
 #
 
-from org.gluu.model.custom.script.type.spontaneous import SpontaneousScopeType
+from io.jans.model.custom.script.type.spontaneous import SpontaneousScopeType
 from java.lang import String
 
 class SpontaneousScope(SpontaneousScopeType):
@@ -29,7 +29,7 @@ class SpontaneousScope(SpontaneousScopeType):
     # This method is called before spontaneous scope is persisted. It's possible to disable persistence via context.setAllowSpontaneousScopePersistence(false)
     # Also it's possible to manipulated already granted scopes, e.g. context.getGrantedScopes().remove("transaction:456")
     # Note :
-    # context is reference of org.gluu.oxauth.service.external.context.SpontaneousScopeExternalContext(in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.SpontaneousScopeExternalContext(in https://github.com/JanssenFederation/oxauth project, )
     def manipulateScopes(self, context):
         return
 

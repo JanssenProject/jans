@@ -1,12 +1,12 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 #
 # Author: Jose Gonzalez
 
-from org.gluu.model.custom.script.type.client import ClientRegistrationType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.service import ScopeService
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.client import ClientRegistrationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.service import ScopeService
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet, Date, GregorianCalendar
 
 import java
@@ -27,8 +27,8 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    #   registerRequest is org.gluu.oxauth.client.RegisterRequest
-    #   client is org.gluu.oxauth.model.registration.Client
+    #   registerRequest is io.jans.as.client.RegisterRequest
+    #   client is io.jans.as.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def createClient(self, registerRequest, client, configurationAttributes):
 
@@ -45,7 +45,7 @@ class ClientRegistration(ClientRegistrationType):
         if not credManagerClient:
             return True
 
-        print "Casa client registration. Client is Gluu Casa"
+        print "Casa client registration. Client is Janssen Casa"
         self.setClientScopes(client, configurationAttributes.get("scopes"))
         #Extend client lifetime for one year
         cal=GregorianCalendar()
@@ -55,8 +55,8 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    #   registerRequest is org.gluu.oxauth.client.RegisterRequest
-    #   client is org.gluu.oxauth.model.registration.Client
+    #   registerRequest is io.jans.as.client.RegisterRequest
+    #   client is io.jans.as.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
         print "Casa client registration. UpdateClient method"       

@@ -5,21 +5,21 @@ from java.nio.charset import Charset
 
 from org.apache.http.params import CoreConnectionPNames
 
-from org.oxauth.persistence.model.configuration import GluuConfiguration
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService
-from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.oxauth.service.custom import CustomScriptService
-from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.model import SimpleCustomProperty
-from org.gluu.model.casa import ApplicationConfiguration
-from org.gluu.model.custom.script import CustomScriptType
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.persist import PersistenceEntryManager
-from org.gluu.service import CacheService
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from org.oxauth.persistence.model.configuration import JanssenConfiguration
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService
+from io.jans.as.service.common import EncryptionService
+from io.jans.as.service.custom import CustomScriptService
+from io.jans.as.service.net import HttpService
+from io.jans.as.util import ServerUtil
+from io.jans.model import SimpleCustomProperty
+from io.jans.model.casa import ApplicationConfiguration
+from io.jans.model.custom.script import CustomScriptType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.persist import PersistenceEntryManager
+from io.jans.service import CacheService
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 try:
     import json
@@ -31,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
-        self.ACR_SG = "super_gluu"
+        self.ACR_SG = "super.jans.
         self.ACR_U2F = "u2f"
 
         self.modulePrefix = "casa-external_"
@@ -43,7 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.uid_attr = self.getLocalPrimaryKey()
 
         custScriptService = CdiUtil.bean(CustomScriptService)
-        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "oxEnabled", "oxLevel")
+        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "jansEnabled", "oxLevel")
         dynamicMethods = self.computeMethods(self.scriptsList)
 
         if len(dynamicMethods) > 0:
@@ -62,7 +62,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
                         configAttrs.put("u2f_application_id", SimpleCustomProperty("u2f_application_id", u2f_application_id))
                     elif acr == self.ACR_SG:
-                        application_id = configurationAttributes.get("supergluu_app_id").getValue2()
+                        application_id = configurationAttributes.get("supe.jans.app_id").getValue2()
                         configAttrs.put("application_id", SimpleCustomProperty("application_id", application_id))
 
                     if module.init(None, configAttrs):
@@ -296,8 +296,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getLocalPrimaryKey(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
-        config = GluuConfiguration()
-        config = entryManager.find(config.getClass(), "ou=configuration,o=gluu")
+        config = JanssenConfiguration()
+        config = entryManager.find(config.getClass(), "ou=configuration,o.jans.)
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
         uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
@@ -307,7 +307,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getSettings(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
         config = ApplicationConfiguration()
-        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o=gluu")
+        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o.jans.)
         settings = None
         try:
             settings = json.loads(config.getSettings())

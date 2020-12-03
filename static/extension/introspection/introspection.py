@@ -1,11 +1,11 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Gluu
+# Copyright (c) 2018, Janssen
 #
 # Author: Yuriy Zabrovarnyy
 #
 #
 
-from org.gluu.model.custom.script.type.introspection import IntrospectionType
+from io.jans.model.custom.script.type.introspection import IntrospectionType
 from java.lang import String
 
 class Introspection(IntrospectionType):
@@ -30,7 +30,7 @@ class Introspection(IntrospectionType):
     # This method is called after introspection response is ready. This method can modify introspection response.
     # Note :
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of org.gluu.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
         responseAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True

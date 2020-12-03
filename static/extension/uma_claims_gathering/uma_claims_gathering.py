@@ -1,10 +1,10 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2017, Gluu
+# Copyright (c) 2017, Janssen
 #
 # Author: Yuriy Zabrovarnyy
 #
 
-from org.gluu.model.custom.script.type.uma import UmaClaimsGatheringType
+from io.jans.model.custom.script.type.uma import UmaClaimsGatheringType
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
@@ -29,7 +29,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
     # Main gather method. Must return True (if gathering performed successfully) or False (if fail).
     # Method must set claim into context (via context.putClaim('name', value)) in order to persist it (otherwise it will be lost).
     # All user entered values can be access via Map<String, String> context.getPageClaims()
-    def gather(self, step, context): # context is reference of org.jans.oxauth.uma.authorization.UmaGatherContext
+    def gather(self, step, context): # context is reference of io.jans.as.uma.authorization.UmaGatherContext
         print "Claims-Gathering. Gathering ..."
 
         if step == 1:

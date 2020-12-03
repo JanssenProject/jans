@@ -1,26 +1,26 @@
 #
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.service.common import EncryptionService
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import UserService
+from io.jans.util import StringHelper
+from io.jans.as.util import ServerUtil
+from io.jans.as.service.common import EncryptionService
 from java.util import Arrays
-from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
-from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from org.gluu.oxauth.cert.validation.model import ValidationStatus
-from org.gluu.oxauth.util import CertUtil
-from org.gluu.oxauth.model.util import CertUtils
-from org.gluu.oxauth.service.net import HttpService
+from io.jans.as.cert.fingerprint import FingerprintHelper
+from io.jans.as.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from io.jans.as.cert.validation.model import ValidationStatus
+from io.jans.as.util import CertUtil
+from io.jans.as.model.util import CertUtils
+from io.jans.as.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
@@ -169,7 +169,7 @@ class PersonAuthentication(PersonAuthenticationType):
             cert_user_external_uid = "cert:%s" % x509CertificateFingerprint
             print "Cert. Authenticate for step 2. Attempting to find user by oxExternalUid attribute value %s" % cert_user_external_uid
 
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid, True)
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
             if find_user_by_external_uid == None:
                 print "Cert. Authenticate for step 2. Failed to find user"
                 
@@ -213,10 +213,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Double check just to make sure. We did checking in previous step
             # Check if there is user which has cert_user_external_uid
             # Avoid mapping user cert to more than one IDP account
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid, True)
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
             if find_user_by_external_uid == None:
                 # Add cert_user_external_uid to user's external GUID list
-                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid, True)
+                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
                 if find_user_by_external_uid == None:
                     print "Cert. Authenticate for step 3. Failed to update current user"
                     return False

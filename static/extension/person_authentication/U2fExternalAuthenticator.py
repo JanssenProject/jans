@@ -1,5 +1,5 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
@@ -7,18 +7,18 @@
 import java
 import sys
 from javax.ws.rs.core import Response
-from org.jboss.resteasy.client import ClientResponseFailure
+from javax.ws.rs import WebApplicationException
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.client.fido.u2f import FidoU2fClientFactory
-from org.gluu.oxauth.model.config import Constants
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.client.fido.u2f import FidoU2fClientFactory
+from io.jans.as.model.config import Constants
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import UserService
+from io.jans.as.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -39,16 +39,9 @@ class PersonAuthentication(PersonAuthenticationType):
             try:
                 self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
                 break
-            except ClientResponseFailure, ex:
+            except WebApplicationException, ex:
                 # Detect if last try or we still get Service Unavailable HTTP error
-                if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
-                    raise ex
-
-                java.lang.Thread.sleep(3000)
-                print "Attempting to load metadata: %d" % attempt
-            except ResteasyClientException, ex:
-                # Detect if last try or we still get Service Unavailable HTTP error
-                if attempt == max_attempts:
+                if (attempt == max_attempts) or (ex.getResponse().getStatus() != Response.Status.SERVICE_UNAVAILABLE.getStatusCode()):
                     raise ex
 
                 java.lang.Thread.sleep(3000)

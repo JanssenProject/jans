@@ -1,11 +1,11 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.model.custom.script.type.user import UpdateUserType
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.user import UpdateUserType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
 import java
@@ -44,7 +44,7 @@ class UpdateUser(UpdateUserType):
         return True
 
     # Update user entry before persistent it
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   persisted is boolean value to specify if operation type: add/modify
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, persisted, configurationAttributes):

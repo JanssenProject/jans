@@ -1,14 +1,14 @@
 # Author: ThumbSignIn
 
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.util import StringHelper
-from org.gluu.oxauth.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.server.service import AuthenticationService
+from io.jans.util import StringHelper
+from io.jans.as.util import ServerUtil
 from com.pramati.ts.thumbsignin_java_sdk import ThumbsigninApiController
 from org.json import JSONObject
-from org.gluu.oxauth.model.util import Base64Util
+from io.jans.as.model.util import Base64Util
 from java.lang import String
 
 import java
@@ -112,7 +112,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # elif (String(relying_party_id).startsWith("xyz")):
                 # relying_party_login_url = "xyz.com"
             else:
-                # If relying_party_login_url is empty, Gluu's default login URL will be used
+                # If relying_party_login_url is empty, Janssen's default login URL will be used
                 relying_party_login_url = ""
 
         print "ThumbSignIn. Value of relying_party_login_url is %s" % relying_party_login_url
@@ -231,7 +231,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "ThumbSignIn. Registration flow (step 2)"
             self.verify_user_login_flow(identity)
 
-            user = self.get_authenticated_user_from_gluu(authentication_service)
+            user = self.get_authenticated_user_from.jans.authentication_service)
             if user is None:
                 print "ThumbSignIn. Registration flow (step 2). Failed to determine user name"
                 return False
@@ -250,15 +250,15 @@ class PersonAuthentication(PersonAuthenticationType):
         print "ThumbSignIn. user_name: " + user_name
         logged_in = False
         if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = self.authenticate_user_in_gluu_ldap(authentication_service, user_name, user_password)
+            logged_in = self.authenticate_user_in.jans.ldap(authentication_service, user_name, user_password)
         return logged_in
 
     @staticmethod
-    def authenticate_user_in_gluu_ldap(authentication_service, user_name, user_password):
+    def authenticate_user_in.jans.ldap(authentication_service, user_name, user_password):
         return authentication_service.authenticate(user_name, user_password)
 
     @staticmethod
-    def get_authenticated_user_from_gluu(authentication_service):
+    def get_authenticated_user_from.jans.authentication_service):
         return authentication_service.getAuthenticatedUser()
 
     @staticmethod

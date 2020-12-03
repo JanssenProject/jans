@@ -1,18 +1,18 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
 # Requires the following custom properties and values:
 #   otp_type: totp/hotp
-#   issuer: Gluu Inc
+#   issuer: Janssen Inc
 #   otp_conf_file: /etc/certs/otp_configuration.json
 #
 # These are non mandatory custom properties and values:
-#   label: Gluu OTP
+#   label: Janssen OTP
 #   qr_options: { width: 400, height: 400 }
-#   registration_uri: https://ce-dev.gluu.org/identity/register
+#   registration_uri: https://ce-dev.jans.org/identity/register
 
 import jarray
 import json
@@ -29,14 +29,14 @@ from java.security import SecureRandom
 from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.jsf2.message import FacesMessages
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import UserService
+from io.jans.as.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -98,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if retry_current_step:
             print "OTP. Get next step. Retrying current step %s" % step
             # Remove old QR code
-            #identity.setWorkingParameter("super_gluu_request", "timeout")
+            #identity.setWorkingParameter("super.jans.request", "timeout")
             resultStep = step
             return resultStep
         return -1
@@ -439,7 +439,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -452,7 +452,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -482,7 +482,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
     
                         # Update moving factor in user entry
-                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid, True)
+                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid)
                         if find_user_by_external_uid != None:
                             return True
     

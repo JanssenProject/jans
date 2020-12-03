@@ -1,14 +1,14 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
+# Copyright (c) 2016, Janssen
 #
 # Author: Yuriy Movchan
 #
 
-from org.gluu.model.custom.script.type.user import CacheRefreshType
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.model.custom.script.type.user import CacheRefreshType
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
-from org.gluu.oxtrust.model import GluuCustomAttribute
-from org.gluu.model.custom.script.model.bind import BindCredentials
+from io.jans.oxtrust.model import JanssenCustomAttribute
+from io.jans.model.custom.script.model.bind import BindCredentials
 
 import java
 
@@ -38,7 +38,7 @@ class CacheRefresh(CacheRefreshType):
     # Get bind credentials required to access source server 
     #   configId is the source server
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    #   return None (use password from configuration) or org.gluu.model.custom.script.model.bind.BindCredentials
+    #   return None (use password from configuration) or io.jans.model.custom.script.model.bind.BindCredentials
     def getBindCredentials(self, configId, configurationAttributes):
         print "Cache refresh. GetBindCredentials method"
 #        if configId == "source":
@@ -47,7 +47,7 @@ class CacheRefresh(CacheRefreshType):
         return None
 
     # Update user entry before persist it
-    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   user is io.jans.oxtrust.model.JanssenCustomPerson
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, configurationAttributes):
         print "Cache refresh. UpdateUser method"
@@ -55,11 +55,11 @@ class CacheRefresh(CacheRefreshType):
         attributes = user.getCustomAttributes()
 
         # Add new attribute preferredLanguage
-        attrPrefferedLanguage = GluuCustomAttribute("preferredLanguage", "en-us")
+        attrPrefferedLanguage = JanssenCustomAttribute("preferredLanguage", "en-us")
         attributes.add(attrPrefferedLanguage)
 
         # Add new attribute userPassword
-        attrUserPassword = GluuCustomAttribute("userPassword", "test")
+        attrUserPassword = JanssenCustomAttribute("userPassword", "test")
         attributes.add(attrUserPassword)
 
         # Update givenName attribute

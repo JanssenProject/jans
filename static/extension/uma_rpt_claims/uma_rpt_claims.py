@@ -1,11 +1,11 @@
 # oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2020, Gluu
+# Copyright (c) 2020, Janssen
 #
 # Author: Yuriy Zabrovarnyy
 #
 #
 
-from org.gluu.model.custom.script.type.uma import UmaRptClaimsType
+from io.jans.model.custom.script.type.uma import UmaRptClaimsType
 from java.lang import String
 
 class UmaRptClaims(UmaRptClaimsType):
@@ -29,7 +29,7 @@ class UmaRptClaims(UmaRptClaimsType):
     # Returns boolean, true - apply changes from script method, false - ignore it.
     # Note :
     # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
-    # context is reference of org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext (in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of io.jans.as.service.external.context.ExternalUmaRptClaimsContext (in https://github.com/JanssenFederation/oxauth project, )
     def modify(self, rptAsJsonObject, context):
         rptAsJsonObject.accumulate("key_from_script", "value_from_script")
         return True

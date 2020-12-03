@@ -63,8 +63,8 @@ def find_current_jans_package_version_and_build_date(dockerfile):
                      "fido2-server"]
     wrends_version_search_string = "ENV WRENDS_VERSION="
     wrends_build_date_search_string = "ENV WRENDS_BUILD_DATE="
-    jans_version_search_string = "ENV JANS_VERSION="
-    jans_build_date_search_string = "ENV JANS_BUILD_DATE="
+    jans_version_search_string = "ENV CN_VERSION="
+    jans_build_date_search_string = "ENV CN_BUILD_DATE="
     jans_package = ""
     jans_version = ""
     jans_build_date = ""
@@ -91,9 +91,9 @@ def find_current_jans_package_version_and_build_date(dockerfile):
 
 def update_build_date(dockerfile, old_build_date, new_build_date):
     wrends_build_date_search_string = 'WRENDS_BUILD_DATE=' + '"' + old_build_date + '"'
-    jans_build_date_search_string = "JANS_BUILD_DATE=" + '"' + old_build_date + '"'
+    jans_build_date_search_string = "CN_BUILD_DATE=" + '"' + old_build_date + '"'
     wrends_build_new_date_string = 'WRENDS_BUILD_DATE=' + '"' + new_build_date + '"'
-    jans_build_new_date_string = "JANS_BUILD_DATE=" + '"' + new_build_date + '"'
+    jans_build_new_date_string = "CN_BUILD_DATE=" + '"' + new_build_date + '"'
     with open(dockerfile, "r+") as file:
         contents = file.read()
         contents = contents.replace(wrends_build_date_search_string, wrends_build_new_date_string)

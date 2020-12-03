@@ -1,11 +1,9 @@
 dn: inum=60B7,ou=groups,o=jans
 objectClass: top
-objectClass: jansGroup
-jansGroupType: jansManagerGroup
+objectClass: jansGrp
 inum: 60B7
 jansStatus: active
-displayName: Gluu Manager Group
+displayName: Jannsen Manager Group
 description: This group is for administrative purpose, with full acces to users
-jansGroupVisibility: private
 member: inum=%(admin_inum)s,ou=people,o=jans
 

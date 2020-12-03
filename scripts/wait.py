@@ -14,10 +14,10 @@ logger = logging.getLogger("wait")
 
 
 def main():
-    persistence_type = os.environ.get("JANS_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     validate_persistence_type(persistence_type)
 
-    ldap_mapping = os.environ.get("JANS_PERSISTENCE_LDAP_MAPPING", "default")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     validate_persistence_ldap_mapping(persistence_type, ldap_mapping)
 
     manager = get_manager()
