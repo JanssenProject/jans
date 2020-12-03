@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - __version__.py
+    branches-ignore:
+      - master
 jobs:
   build:
 

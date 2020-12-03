@@ -17,14 +17,10 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "config-init": {
+        "configuration-manager": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
     },
-    # "root": {
-    #     "level": "INFO",
-    #     "handlers": ["console"],
-    # },
 }

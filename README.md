@@ -1,45 +1,44 @@
 ## Overview
 
-ConfigInit is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.
+Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-configuration-initializer/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-initializer:5.0.0_dev`.
+See [Releases](https://github.com/JanssenProject/docker-jans-configuration-manager/releases) for stable versions.
+For bleeding-edge/unstable version, use `janssenproject/configuration-manager:5.0.0_dev`.
 
 ## Environment Variables
 
 The following environment variables are supported by the container:
 
-- `JANS_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default) or `kubernetes`.
-- `JANS_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
-- `JANS_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
-- `JANS_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
-- `JANS_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
-- `JANS_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
-- `JANS_CONFIG_CONSUL_CACERT_FILE`: path to Consul CA cert file (default to `/etc/certs/consul_ca.crt`). This file will be used if it exists and `JANS_CONFIG_CONSUL_VERIFY` set to `true`.
-- `JANS_CONFIG_CONSUL_CERT_FILE`: path to Consul cert file (default to `/etc/certs/consul_client.crt`).
-- `JANS_CONFIG_CONSUL_KEY_FILE`: path to Consul key file (default to `/etc/certs/consul_client.key`).
-- `JANS_CONFIG_CONSUL_TOKEN_FILE`: path to file contains ACL token (default to `/etc/certs/consul_token`).
-- `JANS_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
-- `JANS_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `janssen`).
-- `JANS_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `JANS_SECRET_ADAPTER`: The secrets adapter, can be `vault` or `kubernetes`.
-- `JANS_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
-- `JANS_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
-- `JANS_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
-- `JANS_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
-- `JANS_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
-- `JANS_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
-- `JANS_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
-- `JANS_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
-- `JANS_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `JANS_SECRET_VAULT_VERIFY` set to `true`.
-- `JANS_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
-- `JANS_SECRET_KUBERNETES_CONFIGMAP`: Kubernetes secrets name (default to `janssen`).
-- `JANS_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `JANS_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
-- `JANS_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
-- `JANS_OVERWRITE_ALL`: Overwrite all config (default to `false`).
+- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default) or `kubernetes`.
+- `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
+- `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
+- `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
+- `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
+- `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
+- `CN_CONFIG_CONSUL_CACERT_FILE`: path to Consul CA cert file (default to `/etc/certs/consul_ca.crt`). This file will be used if it exists and `CN_CONFIG_CONSUL_VERIFY` set to `true`.
+- `CN_CONFIG_CONSUL_CERT_FILE`: path to Consul cert file (default to `/etc/certs/consul_client.crt`).
+- `CN_CONFIG_CONSUL_KEY_FILE`: path to Consul key file (default to `/etc/certs/consul_client.key`).
+- `CN_CONFIG_CONSUL_TOKEN_FILE`: path to file contains ACL token (default to `/etc/certs/consul_token`).
+- `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
+- `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
+- `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
+- `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` or `kubernetes`.
+- `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
+- `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
+- `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
+- `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
+- `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
+- `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
+- `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
+- `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
+- `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+- `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
+- `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
+- `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
+- `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
+- `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 
 ## Commands
 
@@ -75,14 +74,14 @@ The load command can be used either to generate or restore config and secret for
     docker run \
         --rm \
         --network container:consul \
-        -e JANS_CONFIG_ADAPTER=consul \
-        -e JANS_CONFIG_CONSUL_HOST=consul \
-        -e JANS_SECRET_ADAPTER=vault \
-        -e JANS_SECRET_VAULT_HOST=vault \
-        -v /path/to/host/volume:/opt/config-init/db \
+        -e CN_CONFIG_ADAPTER=consul \
+        -e CN_CONFIG_CONSUL_HOST=consul \
+        -e CN_SECRET_ADAPTER=vault \
+        -e CN_SECRET_VAULT_HOST=vault \
+        -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/config-initializer:5.0.0_dev load
+        janssenproject/configuration-manager:5.0.0_dev load
     ```
 
 #### Kubernetes
@@ -115,7 +114,7 @@ The load command can be used either to generate or restore config and secret for
 	apiVersion: batch/v1
 	kind: Job
 	metadata:
-	  name: config-init-load-job
+	  name: configuration-manager-load-job
 	spec:
 	  template:
 	    spec:
@@ -125,10 +124,10 @@ The load command can be used either to generate or restore config and secret for
 	          configMap:
 	            name: config-generate-params
 	      containers:
-	        - name: config-init-load
-	          image: gluufederation/config-init:4.2.1_02
+	        - name: configuration-manager-load
+	          image: janssenproject/configuration-manager:5.0.0_dev
 	          volumeMounts:
-	            - mountPath: /opt/config-init/db/generate.json
+	            - mountPath: /app/db/generate.json
 	              name: config-generate-params
 	              subPath: generate.json
 	          envFrom:
@@ -137,7 +136,7 @@ The load command can be used either to generate or restore config and secret for
 	          args: ["load"]
     ```
 
--   To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/opt/config-init/db` inside the container:
+-   To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/app/db` inside the container:
 
 1. Create config map `config-params` and `secret-params`:
 
@@ -152,7 +151,7 @@ The load command can be used either to generate or restore config and secret for
 	apiVersion: batch/v1
 	kind: Job
 	metadata:
-	  name: config-init-load-job
+	  name: configuration-manager-load-job
 	spec:
 	  template:
 	    spec:
@@ -165,13 +164,13 @@ The load command can be used either to generate or restore config and secret for
 	          configMap:
 	            name: secret-params
 	      containers:
-	        - name: config-init-load
-	          image: gluufederation/config-init:4.2.1_02
+	        - name: configuration-manager-load
+	          image: janssenproject/configuration-manager:5.0.0_dev
 	          volumeMounts:
-	            - mountPath: /opt/config-init/db/config.json
+	            - mountPath: /app/db/config.json
 	              name: config-params
 	              subPath: config.json
-	            - mountPath: /opt/config-init/db/secret.json
+	            - mountPath: /app/db/secret.json
 	              name: secret-params
 	              subPath: secret.json
 	          envFrom:
@@ -183,24 +182,24 @@ The load command can be used either to generate or restore config and secret for
 
 ### dump
 
-The dump command will dump all configuration and secrets from the backends saved into the `/opt/config-init/db/config.json` and `/opt/config-init/db/secret.json` files.
+The dump command will dump all configuration and secrets from the backends saved into the `/app/db/config.json` and `/app/db/secret.json` files.
 
 #### Docker
 
-Please note that to dump this file into the host, mount a volume to the `/opt/config-init/db` directory as seen in the following example:
+Please note that to dump this file into the host, mount a volume to the `/app/db` directory as seen in the following example:
 
 ```sh
 docker run \
     --rm \
     --network container:consul \
-    -e JANS_CONFIG_ADAPTER=consul \
-    -e JANS_CONFIG_CONSUL_HOST=consul \
-    -e JANS_SECRET_ADAPTER=vault \
-    -e JANS_SECRET_VAULT_HOST=vault \
-    -v /path/to/host/volume:/opt/config-init/db \
+    -e CN_CONFIG_ADAPTER=consul \
+    -e CN_CONFIG_CONSUL_HOST=consul \
+    -e CN_SECRET_ADAPTER=vault \
+    -e CN_SECRET_VAULT_HOST=vault \
+    -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    gluufederation/config-init:4.2.1_02 dump
+    janssenproject/configuration-manager:5.0.0_dev dump
 ```
 
 #### Kubernetes
@@ -209,14 +208,14 @@ docker run \
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: config-init-load-job
+  name: configuration-manager-dump-job
 spec:
   template:
     spec:
       restartPolicy: Never
       containers:
-        - name: config-init-load
-          image: gluufederation/config-init:4.2.1_02
+        - name: configuration-manager-dump-job
+          image: janssenproject/configuration-manager:5.0.0_dev
           command:
             - /bin/sh
             - -c
@@ -230,4 +229,4 @@ spec:
 
 Copy over the files to host
 
-`kubectl cp config-init-load-job:opt/config-init/db .`
+`kubectl cp config-init-load-job:/app/db .`
