@@ -1,6 +1,14 @@
 servers: %(hostname)s
 
+# The connect timeout is used when a Bucket is opened.
+# If you feel the urge to change this value to something higher, there is a good chance that your network is not properly set up.
+# Connecting to the server should in practice not take longer than a second on a reasonably fast network.
+# Default SDK connectTimeout is 10s
 connection.connect-timeout: %(couchbase_conn_timeout)s
+
+# At startup when connection error is occurred persistence layer can make another attempt to open buckets.
+# Before make next try it pause process for 5 second. If after that total connection time is less than specified
+# in property above new attempt will be executed
 connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.operation-tracing-enabled: false
 
