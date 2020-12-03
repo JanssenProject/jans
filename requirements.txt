@@ -1,2 +1,2 @@
 ruamel.yaml==0.16.10
--e git+https://github.com/GluuFederation/pygluu-containerlib@2.2.0#egg=pygluu-containerlib
+-e git+https://github.com/JanssenProject/jans-pycloudlib@50f89eb85e6596e87cf33120d4e5919cb7e56446#egg=jans-pycloudlib

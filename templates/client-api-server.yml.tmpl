@@ -1,11 +1,13 @@
+
 # server configuration
 use_client_authentication_for_pat: true
 trust_all_certs: false
 trust_store_path: ''
 trust_store_password: ''
-crypt_provider_key_store_path: ''
-crypt_provider_key_store_password: ''
-crypt_provider_dn_name: ''
+enable_jwks_generation: true
+crypt_provider_key_store_path: '/opt/client-api/conf/client-api-jwks.keystore'
+crypt_provider_key_store_password: 'example'
+crypt_provider_dn_name: 'CN=oxd CA Certificates'
 support-google-logout: true
 state_expiration_in_minutes: 5
 nonce_expiration_in_minutes: 5
@@ -14,42 +16,32 @@ rp_cache_expiration_in_minutes: 60
 public_op_key_cache_expiration_in_minutes: 60
 protect_commands_with_access_token: true
 accept_id_token_without_signature: false
-protect_commands_with_oxd_id: []
+protect_commands_with_rp_id: []
 uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: false
 add_client_credentials_grant_type_automatically_during_client_registration: true
 migration_source_folder_path: ''
 allowed_op_hosts: []
-bind_ip_addresses: []
+storage: h2
 enable_tracing: false
 # tracer: jaeger or zipkin
 tracer: 'jaeger'
 tracer_host: 'localhost'
 tracer_port: 5775
-
-storage: gluu_server_configuration
 storage_configuration:
-  baseDn: o=gluu
-  type: /etc/gluu/conf/gluu.properties
-  salt: /etc/gluu/conf/salt
-  # default connection, will be overriden
-  connection: /etc/gluu/conf/gluu-ldap.properties
+  dbFileLocation: /opt/client-api/data/rp_db
 
 # Connectors
 server:
   applicationConnectors:
     - type: https
       port: 8443
-      # keyStorePath: /opt/oxd-server/conf/oxd-server.keystore
-      keyStorePath: /etc/certs/oxd_application.keystore
-      # default, will be overriden
+      keyStorePath: /opt/client-api/conf/client-api-server.keystore
       keyStorePassword: example
       validateCerts: false
   adminConnectors:
     - type: https
       port: 8444
-      # keyStorePath: /opt/oxd-server/conf/oxd-server.keystore
-      keyStorePath: /etc/certs/oxd_admin.keystore
-      # default, will be overriden
+      keyStorePath: /opt/client-api/conf/client-api-server.keystore
       keyStorePassword: example
       validateCerts: false
 
@@ -58,7 +50,7 @@ logging:
 
   # Logger-specific levels.
   loggers:
-    org.gluu: INFO
+    io.jans: TRACE
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
@@ -67,10 +59,10 @@ logging:
   appenders:
     - type: console
     # - type: file
-    #   threshold: INFO
+    #   threshold: TRACE
     #   logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-    #   currentLogFilename: /var/log/oxd-server/oxd-server.log
-    #   archivedLogFilenamePattern: /var/log/oxd-server/oxd-server-%d{yyyy-MM-dd}-%i.log.gz
+    #   currentLogFilename: /var/log/client-api/client-api.log
+    #   archivedLogFilenamePattern: /var/log/client-api/client-api-%d{yyyy-MM-dd}-%i.log.gz
     #   archivedFileCount: 7
     #   timeZone: UTC
     #   maxFileSize: 10MB
@@ -91,7 +83,7 @@ defaultSiteConfig:
   token_endpoint_auth_method: ''
   token_endpoint_auth_signing_alg: ''
   request_uris: []
-  front_channel_logout_uris: []
+  front_channel_logout_uri: []
   sector_identifier_uri: ''
   claims_redirect_uri: []
   client_id: ''

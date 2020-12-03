@@ -8,21 +8,29 @@ distributions_managed = {
         "url": "https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{}",
         "source_package": "opendj-server-legacy-{}.zip"
     },
-    "auth-server-client": {
-        "url": "https://maven.jans.io/maven/org/jans/auth-server-client/{}",
-        "source_package": "auth-server-client-{}-jar-with-dependencies.jar"
+    "jans-auth-client": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-auth-client/{}",
+        "source_package": "jans-auth-client-{}-SNAPSHOT-jar-with-dependencies.jar"
     },
-    "auth-server-server": {
-        "url": "https://maven.jans.io/maven/org/jans/auth-server-server/{}",
-        "source_package": "auth-server-server-{}.war"
+    "jans-auth-server": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-auth-server/{}",
+        "source_package": "jans-auth-server-{}.war"
     },
-    "scim-server": {
-        "url": "https://maven.jans.io/maven/org/jans/scim-server/{}",
-        "source_package": "scim-server-{}.war"
+    "jans-scim-server": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-scim-server/{}",
+        "source_package": "jans-scim-server-{}.war"
     },
-    "fido2-server": {
-        "url": "https://maven.jans.io/maven/org/jans/fido2-server/{}",
-        "source_package": "fido2-server-{}.war"
+    "jans-fido2-server": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-fido2-server/{}",
+        "source_package": "jans-fido2-server-{}.war"
+    },
+    "jans-client-api": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-client-api/{}",
+        "source_package": "jans-client-api-{}.jar"
+    },
+    "jans-config-api": {
+        "url": "https://maven.jans.io/maven/io/jans/jans-config-api/{}",
+        "source_package": "jans-config-api-{}-runner.jar"
     },
 }
 
@@ -58,13 +66,13 @@ def parse_source(package_name, version):
 
 
 def find_current_jans_package_version_and_build_date(dockerfile):
-    jans_packages = ["auth-server-client", "opendj-server-legacy",
-                     "auth-server-server","scim-server",
-                     "fido2-server"]
+    jans_packages = ["jans-auth-client", "opendj-server-legacy",
+                     "jans-auth-server", "jans-scim-server",
+                     "jans-fido2-server", "jans-client-api", "jans-config-api"]
     wrends_version_search_string = "ENV WRENDS_VERSION="
     wrends_build_date_search_string = "ENV WRENDS_BUILD_DATE="
-    jans_version_search_string = "ENV JANS_VERSION="
-    jans_build_date_search_string = "ENV JANS_BUILD_DATE="
+    jans_version_search_string = "ENV CN_VERSION="
+    jans_build_date_search_string = "ENV CN_BUILD_DATE="
     jans_package = ""
     jans_version = ""
     jans_build_date = ""
@@ -91,9 +99,9 @@ def find_current_jans_package_version_and_build_date(dockerfile):
 
 def update_build_date(dockerfile, old_build_date, new_build_date):
     wrends_build_date_search_string = 'WRENDS_BUILD_DATE=' + '"' + old_build_date + '"'
-    jans_build_date_search_string = "JANS_BUILD_DATE=" + '"' + old_build_date + '"'
+    jans_build_date_search_string = "CN_BUILD_DATE=" + '"' + old_build_date + '"'
     wrends_build_new_date_string = 'WRENDS_BUILD_DATE=' + '"' + new_build_date + '"'
-    jans_build_new_date_string = "JANS_BUILD_DATE=" + '"' + new_build_date + '"'
+    jans_build_new_date_string = "CN_BUILD_DATE=" + '"' + new_build_date + '"'
     with open(dockerfile, "r+") as file:
         contents = file.read()
         contents = contents.replace(wrends_build_date_search_string, wrends_build_new_date_string)

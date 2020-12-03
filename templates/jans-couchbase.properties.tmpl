@@ -1,7 +1,15 @@
 servers: %(hostname)s
 
-connection.connect-timeout:10000
-connection.connection-max-wait-time: 20000
+# The connect timeout is used when a Bucket is opened.
+# If you feel the urge to change this value to something higher, there is a good chance that your network is not properly set up.
+# Connecting to the server should in practice not take longer than a second on a reasonably fast network.
+# Default SDK connectTimeout is 10s
+connection.connect-timeout: %(couchbase_conn_timeout)s
+
+# At startup when connection error is occurred persistence layer can make another attempt to open buckets.
+# Before make next try it pause process for 5 second. If after that total connection time is less than specified
+# in property above new attempt will be executed
+connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.operation-tracing-enabled: false
 
 # If mutation tokens are enabled, they can be used for advanced durability requirements,
@@ -13,7 +21,7 @@ connection.mutation-tokens-enabled: false
 #connection.computation-pool-size: 5
 
 # Default scan consistency. Possible values are: not_bounded, request_plus, statement_plus
-connection.scan-consistency: not_bounded
+connection.scan-consistency: %(couchbase_scan_consistency)s
 
 # Enable scopes support. Default value: false
 # connection.enable-scope-support: true
