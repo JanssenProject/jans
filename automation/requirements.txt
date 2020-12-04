@@ -1,3 +1,4 @@
+setuptools
 python-dateutil
 dockerfile-parse
 requests-html
