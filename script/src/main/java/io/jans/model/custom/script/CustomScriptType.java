@@ -8,6 +8,7 @@ package io.jans.model.custom.script;
 
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
+import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import io.jans.model.custom.script.type.authz.ConsentGatheringType;
@@ -30,6 +31,8 @@ import io.jans.model.custom.script.type.persistence.DummyPeristenceType;
 import io.jans.model.custom.script.type.persistence.PersistenceType;
 import io.jans.model.custom.script.type.postauthn.DummyPostAuthnType;
 import io.jans.model.custom.script.type.postauthn.PostAuthnType;
+import io.jans.model.custom.script.type.revoke.DummyRevokeTokenType;
+import io.jans.model.custom.script.type.revoke.RevokeTokenType;
 import io.jans.model.custom.script.type.scim.DummyScimType;
 import io.jans.model.custom.script.type.scim.ScimType;
 import io.jans.model.custom.script.type.scope.DummyDynamicScopeType;
@@ -40,7 +43,6 @@ import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.*;
-import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
@@ -83,6 +85,7 @@ public enum CustomScriptType implements AttributeEnum {
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
+    REVOKE_TOKEN("revoke_token", "Revoke Token", RevokeTokenType.class, CustomScript.class, "RevokeToken", new DummyRevokeTokenType()),
     PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType());
 
