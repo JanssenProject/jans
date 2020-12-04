@@ -18,7 +18,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=5.0.0-SNAPSHOT
-ENV CN_BUILD_DATE="2020-12-03 07:36"
+ENV CN_BUILD_DATE="2020-12-04 02:17"
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
