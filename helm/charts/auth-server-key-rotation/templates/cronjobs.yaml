@@ -15,13 +15,13 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
         spec:
           containers:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-              securityContext:
-                runAsUser: 1000
-                runAsNonRoot: true
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
               volumeMounts:
@@ -54,7 +54,7 @@ spec:
                   /app/scripts/entrypoint.sh patch auth --opts interval:{{ .Values.keysLife }}
                   curl -X POST http://localhost:15020/quitquitquit
               {{- else }}
-              args: ["patch", "auth-server", "--opts", "interval:{{ .Values.keysLife }}"]
+              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
               {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
           volumes:
