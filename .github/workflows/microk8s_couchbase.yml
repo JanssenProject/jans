@@ -120,7 +120,7 @@ jobs:
           "COUCHBASE_CLUSTER_NAME": "cbjans",
           "COUCHBASE_URL": "cbjans.cbns.svc.cluster.local",
           "COUCHBASE_INDEX_NUM_REPLICA": "0",
-          "COUCHBASE_USER": "admin",
+          "COUCHBASE_USER": "jans",
           "COUCHBASE_SUPERUSER": "admin",
           "COUCHBASE_PASSWORD": "P@ssw0rd",
           "COUCHBASE_SUPERUSER_PASSWORD": "P@ssw0rd",
