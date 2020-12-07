@@ -331,11 +331,11 @@ class AuthHandler(BaseHandler):
         auth_containers = []
 
         if self.push_keys:
-            auth_containers = self.meta_client.get_containers("APP_NAME=jans-auth")
+            auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
             if not auth_containers:
                 logger.warning(
                     "Unable to find any jans-auth container; make sure "
-                    "to deploy jans-auth and set APP_NAME=jans-auth "
+                    "to deploy jans-auth and set APP_NAME=auth-server "
                     "label on container level"
                 )
                 # exit immediately to avoid persistence/secrets being modified
