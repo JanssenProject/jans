@@ -222,6 +222,8 @@ jobs:
           sudo mv config ~/.kube/config || echo ""
           sudo kubectl create ns jans
           sudo helm install jans -f helm/values.yaml helm -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set config.configmap.cnCouchbaseCrt=${{ steps.microk8s.outputs.crt }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="couchbase" --set config.configmap.cnCouchbaseUrl="$COUCHBASE_IP"
+          sudo kubectl delete secret jans-cb-crt -n jans
+          sudo kubectl create secret generic jans-cb-crt -n jans --from-file=./cloud-native-edition/couchbase_crts_keys/couchbase.crt
           sleep 30
           sudo kubectl get po -n jans
           sudo kubectl get po -n cbns
