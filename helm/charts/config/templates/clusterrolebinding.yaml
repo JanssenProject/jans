@@ -21,8 +21,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    app: {{ template "cn.name" . }}-load
-  name: cn-rolebinding
+    app: {{ include "config.name" . }}-load
+  name: {{ include "config.name" . }}-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
