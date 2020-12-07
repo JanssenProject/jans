@@ -1,6 +1,7 @@
 
 ![couchbase](https://github.com/JanssenProject/jans-cloud-native/workflows/couchbase/badge.svg)
 ![opendj](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj/badge.svg)
+![opendj-istio](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj-istio/badge.svg)
 
 ## System Requirements for cloud deployments
 
