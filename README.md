@@ -373,6 +373,9 @@ This will install docker, microk8s, helm and Janssen with the default settings t
       name: web-key-rotation
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"    
         spec:
           restartPolicy: Never
           containers:
@@ -411,6 +414,9 @@ This will load `web_https.crt` and `web_https.key` from `/etc/certs`.
       name: load-web-key-rotation
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"    
         spec:
           restartPolicy: Never
           volumes:
@@ -472,6 +478,9 @@ Key rotation cronJob is usually installed with Janssen. Please make sure before 
       jobTemplate:
         spec:
           template:
+            metadata:
+              annotations:
+                sidecar.istio.io/inject: "false"    
             spec:
               containers:
                 - name: auth-key-rotation
@@ -522,6 +531,9 @@ Application common name must match client-api service name. `kubectl get svc -n 
       name: client-api-key-rotation
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"    
         spec:
           restartPolicy: Never
           containers:
@@ -562,6 +574,9 @@ Subject Alt Name must match opendj service.
       name: ldap-key-rotation
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"   
         spec:
           restartPolicy: Never
           containers:
