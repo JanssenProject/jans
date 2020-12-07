@@ -1,4 +1,4 @@
-{{- if .Values.global.istio.enabled }}
+{{- if and ( .Values.global.istio.enabled) ( not .Values.secondaryCluster.enabled ) }}
 # License terms and conditions:
 # https://www.apache.org/licenses/LICENSE-2.0
 # Used with Istio
