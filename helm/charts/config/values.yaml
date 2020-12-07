@@ -11,6 +11,8 @@ adminPass: P@ssw0rd
 ldapPass: P@ssw0rd
 #redisPass is the password for redis admin if used
 redisPass: P@assw0rd
+secondaryCluster:
+  enabled: false
 # organisation location details
 countryCode: US
 state: TX

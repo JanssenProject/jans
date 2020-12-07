@@ -15,13 +15,13 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
         spec:
           containers:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-              securityContext:
-                runAsUser: 1000
-                runAsNonRoot: true
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
               volumeMounts:
@@ -43,19 +43,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              {{- if .Values.global.istio.enabled }}
-              command:
-                - tini
-                - -g
-                - --
-                - /bin/sh
-                - -c
-                - |
-                  /app/scripts/entrypoint.sh patch auth --opts interval:{{ .Values.keysLife }}
-                  curl -X POST http://localhost:15020/quitquitquit
-              {{- else }}
-              args: ["patch", "auth-server", "--opts", "interval:{{ .Values.keysLife }}"]
-              {{- end }}
+              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
           {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
           volumes:
             - name: cb-pass
