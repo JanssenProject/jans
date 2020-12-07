@@ -1,4 +1,4 @@
-{{- if not .Values.global.upgrade.enabled }}
+{{- if and ( not .Values.global.upgrade.enabled ) ( not .Values.secondaryCluster.enabled ) }}
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: batch/v1
