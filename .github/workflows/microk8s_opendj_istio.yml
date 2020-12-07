@@ -28,7 +28,7 @@ jobs:
         sudo microk8s.status --wait-ready
         sudo microk8s.enable dns registry ingress
         sudo microk8s.config > config
-        sudo mv config /home/runner/.kube/config
+        sudo mv config ~/.kube/config
 
     - name: Install helm
       run: |
@@ -40,10 +40,10 @@ jobs:
     - name: Install Istio
       id: istio
       run: |
-        curl -L https://istio.io/downloadIstio | sh -
+        sudo curl -L https://istio.io/downloadIstio | sh -
         cd istio-1.8.0
         export PATH=$PWD/bin:$PATH
-        istioctl install --set profile=demo -y
+        sudo istioctl install --set profile=demo -y
         cd ..
 
     - name: Test Janssen authorization server with LDAP backend
