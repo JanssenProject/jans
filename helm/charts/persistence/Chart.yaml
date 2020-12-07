@@ -1,10 +1,10 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v1
-appVersion: "5.0.0"
+appVersion: "5.0.0a1"
 description: A Helm chart for persistence layer for Janssen server
 name: persistence
-version: 1.2.16
+version: 5.0.0a1
 maintainers:
 - name: Janssen
 email: support@jans.io
