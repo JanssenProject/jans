@@ -1,13 +1,5 @@
 name: opendj-istio
 on:
-  push:
-    branches: [master]
-    paths:
-      - "helm/**"
-  pull_request:
-    branches: [master]
-    paths:
-      - "helm/**"
   workflow_dispatch:
 jobs:
   build:
@@ -28,6 +20,7 @@ jobs:
         sudo microk8s.status --wait-ready
         sudo microk8s.enable dns registry ingress
         sudo microk8s.config > config
+
         sudo mv config ~/.kube/config
 
     - name: Install helm
@@ -42,11 +35,11 @@ jobs:
       run: |
         sudo curl -L https://istio.io/downloadIstio | sh -
         cd istio-1.8.0
-        export PATH=$PWD/bin:$PATH
+        export PATH="$PATH:/home/runner/work/jans-cloud-native/jans-cloud-native/istio-1.8.0/bin
         sudo istioctl install --set profile=demo -y
         cd ..
 
-    - name: Test Janssen authorization server with LDAP backend
+    - name: Test Janssen authorization server with LDAP backend0
       id: test_kubernetes
       run: |
           sudo microk8s.kubectl create ns jans
