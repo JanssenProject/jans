@@ -1,9 +1,14 @@
 name: opendj
 on:
   push:
+    branches: [master]
     paths:
       - "helm/**"
   pull_request:
+    branches: [master]
+    paths:
+      - "helm/**"
+  workflow_dispatch:
 jobs:
   build:
 
