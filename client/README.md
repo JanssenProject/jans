@@ -9,7 +9,7 @@ If you use maven, add the following to your pom.xml:
 
 ```
 <properties>
-	<scim.client.version>5.0.0-SNAPSHOT</scim.client.version>
+	<scim.client.version>1.0.0-SNAPSHOT</scim.client.version>
 </properties>
 ...
 <repositories>
