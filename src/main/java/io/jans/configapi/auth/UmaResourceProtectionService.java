@@ -70,11 +70,11 @@ public class UmaResourceProtectionService {
         InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
 
         RsResourceList resourceList = Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
-        System.out.println(
+        log.debug(
                 " \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList + "\n\n");
         this.rsResourceList = resourceList.getResources();
 
-        System.out.println(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
+        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
                 + rsResourceList + "\n\n");
 
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
@@ -85,10 +85,10 @@ public class UmaResourceProtectionService {
         
         //createClientIfNeeded();
 
-        System.out.println("\n\n UmaResourceProtectionService::verifyUmaResources() - All getAllUmaResources = "
+        log.debug("\n\n UmaResourceProtectionService::verifyUmaResources() - All getAllUmaResources = "
                 + UmaResourceProtectionCache.getAllUmaResources());
         
-        System.out.println("\n\n UmaResourceProtectionService::verifyUmaResources() - All scopes = "
+        log.debug("\n\n UmaResourceProtectionService::verifyUmaResources() - All scopes = "
                 + UmaResourceProtectionCache.getAllScopes());
 
     }
@@ -102,7 +102,7 @@ public class UmaResourceProtectionService {
 
                     // Check in cache
                     if (UmaResourceProtectionCache.getScope(scopeName) != null) {
-                        System.out.println("Scope - '" + scopeName + "' exists in cache.");
+                        log.debug("Scope - '" + scopeName + "' exists in cache.");
                         break;
                     }
 
@@ -121,7 +121,7 @@ public class UmaResourceProtectionService {
                     }
 
                     if (scopes == null || scopes.isEmpty()) {
-                        System.out.println("Scope - '" + scopeName + "' does not exist, hence creating it.");
+                        log.debug("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope
                         scope = new Scope();
                         String inum = UUID.randomUUID().toString();
@@ -134,7 +134,7 @@ public class UmaResourceProtectionService {
                     }
                     else {
                         //Update resource
-                        System.out.println("Scope - '" + scopeName + "' already exists, hence updating it.");
+                        log.debug("Scope - '" + scopeName + "' already exists, hence updating it.");
                        
                         scope.setId(scopeName);
                         scope.setDisplayName(scopeName);
@@ -151,7 +151,7 @@ public class UmaResourceProtectionService {
     }
 
     public void createResourceIfNeeded() {
-        System.out.println(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
+        log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
                 + rsResourceList + "\n\n");
 
         Map<String, UmaResource> allResources = UmaResourceProtectionCache.getAllUmaResources();
@@ -161,17 +161,17 @@ public class UmaResourceProtectionService {
             for (Condition condition : rsResource.getConditions()) {
                 String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); 
                 
-                System.out.println(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResourceName = "
+                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResourceName = "
                         + umaResourceName + "\n\n");
                 // Check in cache
                 if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
-                    System.out.println("UmaResource - '" + umaResourceName + "' exists in cache.");
+                    log.debug("UmaResource - '" + umaResourceName + "' exists in cache.");
                     break;
                 }
 
                 // Check in DB
                 List<UmaResource> umaResources = umaResourceService.findResourcesByName(umaResourceName, 2);
-                System.out.println(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - findResources() -> umaResources = "
+                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - findResources() -> umaResources = "
                         + umaResources + "\n\n");
                 
                 UmaResource umaResource = null;
@@ -188,7 +188,7 @@ public class UmaResourceProtectionService {
 
                 // Create Resource
                 if (umaResources == null || umaResources.isEmpty()) {
-                    System.out.println("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
+                    log.debug("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
                     umaResource = new UmaResource();
                     String id = UUID.randomUUID().toString();
                     umaResource.setId(id);
@@ -202,7 +202,7 @@ public class UmaResourceProtectionService {
                 }
                 else {
                     //Update resource
-                    System.out.println("UmaResource - '" + umaResources + "' already exists, hence updating it.");
+                    log.debug("UmaResource - '" + umaResources + "' already exists, hence updating it.");
                     //umaResource.setDn(umaResource.getId());
                     umaResource.setName(umaResourceName);
                     umaResource.setScopes(condition.getScopes());
@@ -218,14 +218,14 @@ public class UmaResourceProtectionService {
     
     private List<String> getScopes(List<String> resourceScopes) {
         List<String> scopes = new ArrayList();
-        System.out.println("\n\n  ====================== getScopes() - resourceScopes= " + resourceScopes);
+        log.debug("\n\n  ====================== getScopes() - resourceScopes= " + resourceScopes);
         for (String strScope : resourceScopes) {
             Scope scope = UmaResourceProtectionCache.getScope(strScope);
             if (scope != null) {
                 scopes.add(scope.getInum());
             }
         }
-        System.out.println("\n\n ====================== getScopes() - scopes= " + scopes+"\n\n");
+        log.debug("\n\n ====================== getScopes() - scopes= " + scopes+"\n\n");
         return scopes;
     }
 
@@ -246,58 +246,58 @@ public class UmaResourceProtectionService {
         InputStream inputStream = loader.getResourceAsStream("api-client.json");
         
         ClientList clientList = Jackson.createJsonMapper().readValue(inputStream, ClientList.class);
-        System.out.println(
+        log.debug(
                 " \n\n UmaResourceProtectionService::createClientIfNeeded() - clientList = " + clientList + "\n\n");
         List<Client> clients = clientList.getClients();
 
-        System.out.println(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clients = "
+        log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clients = "
                 + clients + "\n\n");
 
         Preconditions.checkNotNull(clients, "Config Api Client list cannot be null !!!");
         
         //Create client
         for (Client clt : clients) {
-            System.out.println(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clt = "
+            log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clt = "
                     + clt + "\n\n");
             // Check if exists
             Client client = null;
 
             try {
                 client = this.clientService.getClientByInum(clt.getClientId());
-                System.out.println(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Verify client = "
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Verify client = "
                         + client + "\n\n");
 
             } catch (Exception ex) {
                 log.error("Error while searching client "+ex);
             }
             
-            System.out.println("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createClientIfNeeded() - Before encryption clt.getClientSecret()  = "+clt.getClientSecret() );
+            log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createClientIfNeeded() - Before encryption clt.getClientSecret()  = "+clt.getClientSecret() );
            /* if (clt.getClientSecret() != null) {
                 clt.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
             }
-            System.out.println("\\n\\n @@@@@@@@@@@@@@@@@@@@@@@  UmaResourceProtectionService::createClientIfNeeded() - After encryption clt.getClientSecret()  = "+clt.getClientSecret() );
+            log.debug("\\n\\n @@@@@@@@@@@@@@@@@@@@@@@  UmaResourceProtectionService::createClientIfNeeded() - After encryption clt.getClientSecret()  = "+clt.getClientSecret() );
             */
             if (client == null) {
                 // Create client           
                 clt.setDn(clientService.getDnForClient(clt.getClientId())); 
-                System.out.println(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Create clt = "
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Create clt = "
                         + clt + "\n\n");
                 this.clientService.addClient(clt);
             } else {
                 clt.setDn(clientService.getDnForClient(clt.getClientId()));
                
-                System.out.println(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Update clt = "
+                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Update clt = "
                         + clt + "\n\n");
                 this.clientService.updateClient(clt);
             }
 
             client = this.clientService.getClientByInum(clt.getClientId());
-            System.out.println(
+            log.debug(
                     " \n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createClientIfNeeded() - Final client = " + client + "\n\n");
 
             
             //Check all scopes
-            System.out.println(
+            log.debug(
                     " \n\n UmaResourceProtectionService::createClientIfNeeded() - Final this.scopeService.getAllScopesList(25) = " + this.scopeService.getAllScopesList(25) + "\n\n");
 
         }
@@ -306,10 +306,10 @@ public class UmaResourceProtectionService {
     
     
     private void createUmaRPT() { 
-        System.out.println("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - Entry");
+        log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - Entry");
         String clientId = "1802.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009";
         Client client = this.clientService.getClientByInum(clientId);
-        System.out.println("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - client = "+client+"\n\n");
+        log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - client = "+client+"\n\n");
         
         
     }
