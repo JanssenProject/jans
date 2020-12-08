@@ -94,7 +94,7 @@ public class PatService {
             String clientId = this.configurationFactory.getApiClientId();
             String clientPassword = this.configurationFactory.getApiClientPassword();
             
-            System.out.println("\n\n PatService:: retrievePatToken() - umaMetadata.getTokenEndpoint()  = "
+            log.debug("\n\n PatService:: retrievePatToken() - umaMetadata.getTokenEndpoint()  = "
                     + umaMetadata.getTokenEndpoint() + " , clientId = " + clientId
                     + " , clientPassword = " + clientPassword);
             
@@ -105,12 +105,12 @@ public class PatService {
 
             if (clientPassword != null) {
                 try {
-                    System.out.println("\n\n PatService:: retrievePatToken() - encrypted encryptionService.encrypt(this.configurationFactory.getApiClientPassword()) = "+encryptionService.encrypt(configurationFactory.getApiClientPassword()));
+                    log.debug("\n\n PatService:: retrievePatToken() - encrypted encryptionService.encrypt(this.configurationFactory.getApiClientPassword()) = "+encryptionService.encrypt(configurationFactory.getApiClientPassword()));
                     //clientPassword = encryptionService.encrypt(clientPassword);
-                    //System.out.println("\n\n PatService:: retrievePatToken() - encrypted clientPassword = "+clientPassword);
+                    //log.debug("\n\n PatService:: retrievePatToken() - encrypted clientPassword = "+clientPassword);
                     
                     //clientPassword = encryptionService.decrypt(clientPassword);
-                   System.out.println("\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ PatService:: retrievePatToken() - clientPassword = "+clientPassword+" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n\n");
+                   log.debug("\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ PatService:: retrievePatToken() - clientPassword = "+clientPassword+" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n\n");
                 } //catch (EncryptionException ex) {
                     catch (Exception ex) {
                     log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
@@ -119,7 +119,7 @@ public class PatService {
 
             this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),clientId, clientPassword, null);
             
-            System.out.println("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
+            log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
 
             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
