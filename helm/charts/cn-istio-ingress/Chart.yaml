@@ -2,5 +2,5 @@ apiVersion: v2
 name: cn-istio-ingress
 description: Istio ingress integration files
 type: application
-version: 5.0.0a1
-appVersion: "5.0.0a1"
+version: 1.0.0-alpha1
+appVersion: "1.0.0-alpha1"

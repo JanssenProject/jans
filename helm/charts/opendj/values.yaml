@@ -10,7 +10,7 @@ service:
   ldapServiceName: opendj
 image:
   repository: gluufederation/opendj
-  tag: 5.0.0_dev
+  tag: 1.0.0_dev
   pullPolicy: Always
   
 persistence:
