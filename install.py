@@ -16,7 +16,7 @@ setup_package_name = 'master.zip'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 
 app_versions = {
-  "JANS_APP_VERSION": "5.0.0",
+  "JANS_APP_VERSION": "1.0.0",
   "JANS_BUILD": "-SNAPSHOT", 
   "JETTY_VERSION": "9.4.31.v20200723", 
   "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
