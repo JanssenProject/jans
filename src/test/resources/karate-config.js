@@ -16,21 +16,16 @@ function() {
     var baseUrl = url + (port ? ':' + port : '');
     var config = {
 	    env: env,
-	    accessToken: '527bd668-78e3-4095-94ef-e537be1af91d',
+	    accessToken: '6b097721-c70a-4d05-9955-2c61544a4b51',
 	    baseUrl: baseUrl,
-	    healthUrl: baseUrl + '/health',
-	    fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
-	    acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
+	    
 	    authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
-	    scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
-	    cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
-	    ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
-	    openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
-	    scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
-	    openidsectors_url: baseUrl + '/jans-config-api/api/v1/openid/sectoridentifiers',
-	    umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
-	    attributes_url: baseUrl + '/jans-config-api/api/v1/attributes',
-	    smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp',
+	    
+	    //openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
+	    //scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
+	    
+	    //umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
+	    
     };
 
     karate.configure('connectTimeout', 30000);
