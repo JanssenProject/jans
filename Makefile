@@ -1,4 +1,4 @@
-CN_VERSION=5.0.0
+CN_VERSION=1.0.0
 IMAGE_NAME=janssenproject/fido2
 UNSTABLE_VERSION=dev
 
