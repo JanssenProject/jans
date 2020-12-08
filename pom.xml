@@ -17,7 +17,6 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
-		<janssen.parent.version>1.0.0-SNAPSHOT</janssen.parent.version>
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 	</properties>
 
@@ -56,25 +55,25 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-bom</artifactId>
-				<version>${janssen.parent.version}</version>
+				<version>${janssen.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
 
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-common</artifactId>
-				<version>${janssen.version}</version>
+				<artifactId>jans-auth-common</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-model</artifactId>
-				<version>${janssen.version}</version>
+				<artifactId>jans-auth-model</artifactId>
+                                <version>${project.version}</version>
 			</dependency>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>janssen-client</artifactId>
-                <version>${janssen.version}</version>
+                <artifactId>jans-auth-client</artifactId>
+                <version>${project.version}</version>
             </dependency>
 			<dependency>
 				<groupId>io.jans</groupId>

@@ -1,16 +1,16 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.model.conf;
 
 import java.util.List;
 
-import org.gluu.oxauth.model.configuration.Configuration;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.jans.as.model.configuration.Configuration;
 
 /**
  * Represents the configuration JSON file.

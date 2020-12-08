@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.u2f.service.persist;
 
 import java.io.IOException;
@@ -20,20 +26,20 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
-import org.gluu.oxauth.service.common.UserService;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.net.NetworkService;
-import org.gluu.util.StringHelper;
+import io.jans.as.common.service.common.UserService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.search.filter.Filter;
+import io.jans.service.net.NetworkService;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -91,7 +97,7 @@ public class DeviceRegistrationService {
 			}
 		}
 
-		Filter resultFilter = Filter.createEqualityFilter("oxStatus", DeviceRegistrationStatus.ACTIVE.getValue());
+		Filter resultFilter = Filter.createEqualityFilter("jansStatus", DeviceRegistrationStatus.ACTIVE.getValue());
 
 		List<DeviceRegistration> fidoRegistrations = persistenceEntryManager.findEntries(baseDn, DeviceRegistration.class, resultFilter,
 				returnAttributes);
@@ -181,12 +187,12 @@ public class DeviceRegistrationService {
 	/**
 	 * Build DN string for U2F user device
 	 */
-	public String getDnForU2fDevice(String userInum, String oxId) {
+	public String getDnForU2fDevice(String userInum, String jsId) {
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
-		if (StringHelper.isEmpty(oxId)) {
+		if (StringHelper.isEmpty(jsId)) {
 			return baseDnForU2fDevices;
 		}
-		return String.format("oxId=%s,%s", oxId, baseDnForU2fDevices);
+		return String.format("jansId=%s,%s", jsId, baseDnForU2fDevices);
 	}
 
 	public String getBaseDnForU2fUserDevices(String userInum) {

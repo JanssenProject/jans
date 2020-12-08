@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.verifier;
@@ -30,8 +30,8 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import org.gluu.service.net.NetworkService;
-import org.gluu.util.StringHelper;
+import io.jans.service.net.NetworkService;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

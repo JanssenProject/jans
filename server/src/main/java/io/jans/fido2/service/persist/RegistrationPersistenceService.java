@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.persist;
@@ -25,15 +25,15 @@ import io.jans.fido2.model.entry.Fido2RegistrationData;
 import io.jans.fido2.model.entry.Fido2RegistrationEntry;
 import io.jans.fido2.model.entry.Fido2RegistrationStatus;
 import io.jans.fido2.service.shared.UserService;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.util.StringHelper;
+import io.jans.as.common.model.common.User;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.ProcessBatchOperation;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**
@@ -136,7 +136,7 @@ public class RegistrationPersistenceService {
     public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
-        Filter publicKeyIdFilter = Filter.createEqualityFilter("oxPublicKeyId", publicKeyId);
+        Filter publicKeyIdFilter = Filter.createEqualityFilter("jansPublicKeyId", publicKeyId);
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
         
         if (fido2RegistrationnEntries.size() > 0) {
@@ -180,7 +180,7 @@ public class RegistrationPersistenceService {
         }
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-        Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
+        Filter registeredFilter = Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue());
         Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
 
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
@@ -191,8 +191,8 @@ public class RegistrationPersistenceService {
     public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
-        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("oxCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
@@ -200,17 +200,17 @@ public class RegistrationPersistenceService {
         return fido2RegistrationnEntries;
     }
 
-    public String getDnForRegistrationEntry(String userInum, String oxId) {
+    public String getDnForRegistrationEntry(String userInum, String jsId) {
         // Build DN string for Fido2 registration entry
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (StringHelper.isEmpty(oxId)) {
+        if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
-        return String.format("oxId=%s,%s", oxId, baseDn);
+        return String.format("jansId=%s,%s", jsId, baseDn);
     }
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=gluu"
+        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"
         if (StringHelper.isEmpty(userInum)) {
             return userBaseDn;
         }
@@ -244,7 +244,7 @@ public class RegistrationPersistenceService {
             }
         };
         String baseDn = getDnForUser(null);
-        persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"oxCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
+        persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         String branchDn = getDnForUser(null);
         if (persistenceEntryManager.hasBranchesSupport(branchDn)) {
@@ -274,8 +274,8 @@ public class RegistrationPersistenceService {
         final Date unfinishedRequestExpirationDate = calendar.getTime();
 
         // Build unfinished request expiration filter
-        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
-        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.compromised.getValue()));
+        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
+        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.compromised.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));

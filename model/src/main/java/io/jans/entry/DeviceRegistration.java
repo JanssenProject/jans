@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.entry;
@@ -12,13 +12,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.Expiration;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.BaseEntry;
+import io.jans.as.model.fido.u2f.protocol.DeviceData;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * U2F Device registration
@@ -26,12 +26,12 @@ import org.gluu.persist.model.base.BaseEntry;
  * @author Yuriy Movchan Date: 05/14/2015
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(value = "oxDeviceRegistration")
+@ObjectClass(value = "jansDeviceRegistration")
 public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920585L;
 
-	@AttributeName(ignoreDuringUpdate = true, name = "oxId")
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
 	private String id;
 
 	@AttributeName
@@ -40,40 +40,40 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	@AttributeName
 	private String description;
 
-	@AttributeName(name = "oxNickName")
+	@AttributeName(name = "jansNickName")
 	private String nickname;
 
     @JsonObject
-    @AttributeName(name = "oxDeviceRegistrationConf")
+    @AttributeName(name = "jansDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
     @JsonObject
-    @AttributeName(name = "oxDeviceNotificationConf")
+    @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
-    @AttributeName(name = "oxCounter")
+    @AttributeName(name = "jansCounter")
 	private long counter;
 
-    @AttributeName(name = "oxStatus")
+    @AttributeName(name = "jansStatus")
 	private DeviceRegistrationStatus status;
 
-	@AttributeName(name = "oxApplication")
+	@AttributeName(name = "jansApp")
 	private String application;
 
-	@AttributeName(name = "oxDeviceKeyHandle")
+	@AttributeName(name = "jansDeviceKeyHandle")
 	private String keyHandle;
 
-	@AttributeName(name = "oxDeviceHashCode")
+	@AttributeName(name = "jansDeviceHashCode")
 	private Integer keyHandleHashCode;
 
     @JsonObject
-	@AttributeName(name = "oxDeviceData")
+	@AttributeName(name = "jansDeviceData")
 	private DeviceData deviceData;
 
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
-    @AttributeName(name = "oxLastAccessTime")
+    @AttributeName(name = "jansLastAccessTime")
     private Date lastAccessTime;
 
     @AttributeName(name = "exp")

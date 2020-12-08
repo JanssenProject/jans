@@ -1,17 +1,17 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.model.entry;
 
 import java.util.Date;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.BaseEntry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * Fido2 base persistence entry
@@ -23,13 +23,13 @@ import org.gluu.persist.model.base.BaseEntry;
 @ObjectClass
 public class Fido2Entry extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
-    @AttributeName(name = "oxCodeChallenge")
+    @AttributeName(name = "jansCodeChallenge")
     private String challange;
 
-    @AttributeName(name = "oxCodeChallengeHash")
+    @AttributeName(name = "jansCodeChallengeHash")
     private String challangeHash;
 
     @AttributeName(name = "creationDate")

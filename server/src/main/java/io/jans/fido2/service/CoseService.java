@@ -1,6 +1,11 @@
 /*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+/*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +46,7 @@ import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseKeyType;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import org.gluu.oxauth.model.exception.SignatureException;
+import io.jans.as.model.exception.SignatureException;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.shared;
@@ -12,7 +12,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.common.util.AttributeConstants;
+import io.jans.as.model.config.StaticConfiguration;
 
 /**
  * Provides operations with users.
@@ -21,9 +22,9 @@ import org.gluu.oxauth.model.config.StaticConfiguration;
  * @version @version May 20, 2020
  */
 @ApplicationScoped
-public class UserService extends org.gluu.oxauth.service.common.UserService {
+public class UserService extends io.jans.as.common.service.common.UserService {
 
-	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
+	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.objectClassPerson };
 
     @Inject
     private StaticConfiguration staticConfiguration;

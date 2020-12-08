@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.fido2.service.mds;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
@@ -34,9 +40,9 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
-import org.gluu.service.cdi.event.ApplicationInitialized;
-import org.gluu.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

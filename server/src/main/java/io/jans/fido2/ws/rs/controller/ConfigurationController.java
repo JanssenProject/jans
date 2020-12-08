@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.ws.rs.controller;
@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author Yuriy Movchan Date: 12/19/2018
  */
 @ApplicationScoped
-@Path("/fido2/configuration")
+@Path("/configuration")
 public class ConfigurationController {
 
 	@Inject
@@ -51,15 +51,15 @@ public class ConfigurationController {
 
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);
-        attestation.put("base_path", baseEndpointUri + "/fido2/attestation");
-        attestation.put("options_enpoint", baseEndpointUri + "/fido2/attestation/options");
-        attestation.put("result_enpoint", baseEndpointUri + "/fido2/attestation/result");
+        attestation.put("base_path", baseEndpointUri + "/attestation");
+        attestation.put("options_enpoint", baseEndpointUri + "/attestation/options");
+        attestation.put("result_enpoint", baseEndpointUri + "/attestation/result");
 
         ObjectNode assertion = dataMapperService.createObjectNode();
         response.set("assertion", assertion);
-        assertion.put("base_path", baseEndpointUri + "/fido2/assertion");
-        assertion.put("options_enpoint", baseEndpointUri + "/fido2/assertion/options");
-        assertion.put("result_enpoint", baseEndpointUri + "/fido2/assertion/result");
+        assertion.put("base_path", baseEndpointUri + "/assertion");
+        assertion.put("options_enpoint", baseEndpointUri + "/assertion/options");
+        assertion.put("result_enpoint", baseEndpointUri + "/assertion/result");
 
         ResponseBuilder builder = Response.ok().entity(response.toString());
         return builder.build();
