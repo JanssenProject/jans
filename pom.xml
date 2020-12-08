@@ -15,7 +15,7 @@
 		<jans-core.version>1.0.0-SNAPSHOT</jans-core.version>
 		<jans-eleven.version>1.0.0-SNAPSHOT</jans-eleven.version>
 		<jans-notify.version>1.0.0-SNAPSHOT</jans-notify.version>
-		<jans-fido2.version>5.0.0-SNAPSHOT</jans-fido2.version>
+		<jans-fido2.version>1.0.0-SNAPSHOT</jans-fido2.version>
 
 		<json.version>20180813</json.version>
 		<jackson.version>2.10.1</jackson.version>
