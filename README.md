@@ -5,7 +5,7 @@ Docker image packaging for SCIM.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-scim/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/scim:5.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/scim:1.0.0_dev`.
 
 ## Environment Variables
 
