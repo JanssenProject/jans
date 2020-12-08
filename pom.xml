@@ -235,12 +235,12 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>eleven-client</artifactId>
+				<artifactId>jans-eleven-client</artifactId>
 				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>eleven-model</artifactId>
+				<artifactId>jans-eleven-model</artifactId>
 				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
