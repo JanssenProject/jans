@@ -1,13 +1,13 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.eleven.service;
 
-import java.security.Provider;
-import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -15,9 +15,8 @@ import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.slf4j.Logger;
+import java.security.Provider;
+import java.security.Security;
 
 /**
  * Initialize application level beans
