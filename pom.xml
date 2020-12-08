@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>jans-core</name>
 
 	<prerequisites>
@@ -17,7 +17,7 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<janssen.version>5.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 	</properties>
 
 	<scm>
