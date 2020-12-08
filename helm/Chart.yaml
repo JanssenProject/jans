@@ -1,53 +1,53 @@
 apiVersion: v2
-appVersion: "5.0.0a1"
+appVersion: "1.0.0-alpha1"
 home: https://jans.io
 maintainers:
 - name: Janssen
 email: support@jans.io
 description: A Helm chart for Janssen IDP
 name: jans
-version: 5.0.0a1
+version: 1.0.0-alpha1
 dependencies:
 - name: config
   condition: global.config.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: config-api
   condition: global.config-api.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: opendj
   condition: global.opendj.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: auth-server
   condition: global.auth-server.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: fido2
   condition: global.fido2.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: scim
   condition: global.scim.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: nginx-ingress
   condition: global.nginx-ingress.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: auth-server-key-rotation
   condition: global.auth-server-key-rotation.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: client-api
   condition: global.client-api.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: persistence
   condition: global.persistence.enabled
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
 
 - name: cn-istio-ingress
   condition: global.istio.ingress
-  version: 5.0.0a1
+  version: 1.0.0-alpha1
