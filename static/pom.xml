@@ -4,7 +4,7 @@
 
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-static</artifactId>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>jans-auth-static</name>
