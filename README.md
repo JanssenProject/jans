@@ -5,7 +5,7 @@ Docker image packaging for Janssen Authorization Server.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-auth-server/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/auth-server:5.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/auth-server:1.0.0_dev`.
 
 ## Environment Variables
 
