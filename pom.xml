@@ -583,6 +583,13 @@
 			    <version>42.2.18</version>
 			</dependency>
 
+			<!-- SQL Query -->
+			<dependency>
+			    <groupId>com.healthmarketscience.sqlbuilder</groupId>
+			    <artifactId>sqlbuilder</artifactId>
+			    <version>3.0.1</version>
+			</dependency>
+
 			<!-- Metrics -->
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
