@@ -118,7 +118,7 @@ LABEL name="Persistence" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="dev" \
+    release="a1" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
