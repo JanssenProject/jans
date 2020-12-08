@@ -153,12 +153,12 @@ public class UmaClient {
         tokenRequest.setScope(scope);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        //tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
          
         
         final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
         System.out.println("\n\n UmaClient::requestRpt() - multivaluedHashMap_1 = "+multivaluedHashMap.toString());
-        multivaluedHashMap.add("ticket","3783799e-3493-4ca3-a6e4-94686ada13ce");
+        multivaluedHashMap.add("ticket","0735d6a1-4894-4aff-86c2-9b5a6868362d");
         
         System.out.println("\n\n UmaClient::requestRpt() - multivaluedHashMap_2 = "+multivaluedHashMap.toString());
       
@@ -174,7 +174,7 @@ public class UmaClient {
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(tokenUrl);
 
-        System.out.println("\n\n UmaClient::executetPatRequest() - request = " + request);
+        System.out.println("\n\n UmaClient::requestRpt() - request = " + request);
 
         Response response = request.post(Entity.form(multivaluedHashMap));
                 //.post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));

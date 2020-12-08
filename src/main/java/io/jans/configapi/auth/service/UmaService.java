@@ -98,8 +98,10 @@ public class UmaService implements Serializable {
         }
 
         // for tetsing
+       String newToken = null;
         try {
-            testClientPermission(resourceId, scopeIds);
+            newToken = testClientPermission(resourceId, scopeIds);
+            System.out.println("\n\n validateRptToken() -  newToken ="+newToken+"\n\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -248,14 +250,14 @@ public class UmaService implements Serializable {
         try {
             // rptStatusResponse = this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
             tokenResponse = UmaClient.requestRpt("https://pujavs.jans.server/jans-auth/restv1/token", "1802.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009","test1234",scopes);
-            System.out.println("\n\n UmaService::getStatusResponse() - tokenResponse  = " + tokenResponse);
-            System.out.println("\n\n UmaService::getStatusResponse() - tokenResponse.toString()  = " + tokenResponse.toString());
-            System.out.println("\n\n UmaService::getStatusResponse() - okenResponse.getAccessToken()  = " + tokenResponse.getAccessToken());
+            System.out.println("\n\n UmaService::testClientPermission() - tokenResponse  = " + tokenResponse);
+            System.out.println("\n\n UmaService::testClientPermission() - tokenResponse.toString()  = " + tokenResponse.toString());
+            System.out.println("\n\n UmaService::testClientPermission() - okenResponse.getAccessToken()  = " + tokenResponse.getAccessToken());
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
         }
-        return ticket.getTicket();
+        return tokenResponse.getAccessToken();
     }
 
     private String getHost(String uri) throws MalformedURLException {

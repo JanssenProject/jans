@@ -16,7 +16,7 @@ function() {
     var baseUrl = url + (port ? ':' + port : '');
     var config = {
 	    env: env,
-	    accessToken: '6b097721-c70a-4d05-9955-2c61544a4b51',
+	    accessToken: '28cdf70b-f1eb-46a0-a865-f1eba51e796f',
 	    baseUrl: baseUrl,
 	    
 	    authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
