@@ -11,7 +11,7 @@
 
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-rp-spring-boot</artifactId>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>jans-auth-rp-spring-boot</name>
 	<description>jans demo project for Spring Boot</description>

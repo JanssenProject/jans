@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -391,7 +391,7 @@ public class AuthorizeAction {
         }
 
         ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest)externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
-        final boolean forceAuthorization = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
+        final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
         if (!hasConsentPrompt && !forceAuthorization) {
