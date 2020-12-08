@@ -4,14 +4,14 @@
     <artifactId>jans-client-api-gen</artifactId>
     <packaging>jar</packaging>
     <name>jans-client-api-gen</name>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <url>https://github.com/swagger-api/swagger-codegen</url>
     <description>Swagger Java</description>
 
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-client-api-parent</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <scm>
