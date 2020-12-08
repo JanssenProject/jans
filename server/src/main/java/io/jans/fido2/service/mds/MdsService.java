@@ -1,6 +1,11 @@
 /*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+/*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +46,8 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.client.ResteasyClientFactory;
 import io.jans.fido2.service.verifier.CommonVerifiers;
-import org.gluu.service.cdi.event.ApplicationInitialized;
-import org.gluu.util.StringHelper;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 

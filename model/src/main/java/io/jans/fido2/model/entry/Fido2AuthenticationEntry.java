@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.model.entry;
@@ -9,9 +9,9 @@ package io.jans.fido2.model.entry;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * Fido2 registration entry
@@ -19,17 +19,17 @@ import org.gluu.persist.annotation.ObjectClass;
  * @author Yuriy Movchan
  * @version 11/02/2018
  */
-@ObjectClass(value = "oxFido2AuthenticationEntry")
+@ObjectClass(value = "jansFido2AuthenticationEntry")
 public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
     @JsonObject
-    @AttributeName(name = "oxAuthenticationData")
+    @AttributeName(name = "jansenticationData")
     private Fido2AuthenticationData authenticationData;
 
     @JsonObject
-    @AttributeName(name = "oxStatus")
+    @AttributeName(name = "jansStatus")
     private Fido2AuthenticationStatus authenticationStatus;
 
     public Fido2AuthenticationEntry() {

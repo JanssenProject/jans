@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.app;
@@ -18,27 +18,27 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.exception.ConfigurationException;
+import io.jans.exception.ConfigurationException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Conf;
-import org.gluu.oxauth.model.config.BaseDnConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.Configuration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.persist.service.PersistanceFactoryService;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.BaseConfigurationReload;
-import org.gluu.service.cdi.event.ConfigurationEvent;
-import org.gluu.service.cdi.event.ConfigurationUpdate;
-import org.gluu.service.cdi.event.LdapConfigurationReload;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
-import org.gluu.util.StringHelper;
-import org.gluu.util.properties.FileConfiguration;
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.Configuration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
+import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.BaseConfigurationReload;
+import io.jans.service.cdi.event.ConfigurationEvent;
+import io.jans.service.cdi.event.ConfigurationUpdate;
+import io.jans.service.cdi.event.LdapConfigurationReload;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
+import io.jans.util.StringHelper;
+import io.jans.util.properties.FileConfiguration;
 import org.slf4j.Logger;
 
 /**
@@ -77,8 +77,8 @@ public class ConfigurationFactory {
 	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	static {
-		if (System.getProperty("gluu.base") != null) {
-			BASE_DIR = System.getProperty("gluu.base");
+		if (System.getProperty("jans.base") != null) {
+			BASE_DIR = System.getProperty("jans.base");
 		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
@@ -93,7 +93,7 @@ public class ConfigurationFactory {
 	private static final String BASE_DIR;
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-	private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
+	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
 	private static final String APP_PROPERTIES_FILE = DIR + "fido2.properties";
 
 	private final String SALT_FILE_NAME = "salt";
@@ -206,7 +206,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean isRevisionIncreased() {
-        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        final Conf conf = loadConfigurationFromLdap("jansRevision");
         if (conf == null) {
             return false;
         }

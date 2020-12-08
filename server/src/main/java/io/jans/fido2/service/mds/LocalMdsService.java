@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.fido2.service.mds;
 
 import java.io.BufferedReader;
@@ -18,8 +24,8 @@ import javax.inject.Inject;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.DataMapperService;
-import org.gluu.service.cdi.event.ApplicationInitialized;
-import org.gluu.util.StringHelper;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

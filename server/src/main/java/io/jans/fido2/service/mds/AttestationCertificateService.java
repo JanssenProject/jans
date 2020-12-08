@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.fido2.service.mds;
 
 import java.security.KeyStore;
@@ -25,7 +31,7 @@ import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.KeyStoreCreator;
 import io.jans.fido2.service.verifier.CommonVerifiers;
-import org.gluu.service.cdi.event.ApplicationInitialized;
+import io.jans.service.cdi.event.ApplicationInitialized;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

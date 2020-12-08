@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.shared;
@@ -10,41 +10,19 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.service.BaseCacheService;
-import org.gluu.util.StringHelper;
 
 /**
- * @author Yuriy Movchan
- * @version May 20, 2020
+ * @author Javier Rojas Blum
+ * @version May 30, 2018
  */
 @ApplicationScoped
-public class AttributeService extends org.gluu.service.AttributeService {
+public class AttributeService extends io.jans.as.common.service.AttributeService {
 
-	private static final long serialVersionUID = -990409035168814270L;
-
-    @Inject
-    private StaticConfiguration staticConfiguration;
-
-    @Inject
+	@Inject
 	private AppConfiguration appConfiguration;
 
-
-    public String getDnForAttribute(String inum) {
-        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
-        if (StringHelper.isEmpty(inum)) {
-            return attributesDn;
-        }
-
-        return String.format("inum=%s,%s", inum, attributesDn);
-    }
-
-    protected BaseCacheService getCacheService() {
-    	if (appConfiguration.isUseLocalCache()) {
-    		return localCacheService;
-    	}
-    	
-    	return cacheService;
+    protected boolean isUseLocalCache() {
+    	return appConfiguration.isUseLocalCache();
     }
 
 }

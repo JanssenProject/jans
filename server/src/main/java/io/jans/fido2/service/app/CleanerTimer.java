@@ -1,7 +1,7 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.service.app;
@@ -20,15 +20,15 @@ import javax.inject.Named;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.DeletableEntity;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.cache.CacheProvider;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.CleanerEvent;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.base.DeletableEntity;
+import io.jans.orm.search.filter.Filter;
+import io.jans.service.cache.CacheProvider;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.CleanerEvent;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
 import com.google.common.base.Stopwatch;

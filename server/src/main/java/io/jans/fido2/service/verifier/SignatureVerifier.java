@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.fido2.service.verifier;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -17,7 +23,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 
 /**

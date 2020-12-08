@@ -1,37 +1,37 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.fido2.model.conf;
 
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * @author Yuriy MOvchan
  * @version May 12, 2020
  */
 @DataEntry
-@ObjectClass(value = "gluuApplicationConfiguration")
+@ObjectClass(value = "jansAppConf")
 public class Conf {
     @DN
     private String dn;
 
     @JsonObject
-    @AttributeName(name = "gluuConfDynamic")
+    @AttributeName(name = "jansConfDyn")
     private AppConfiguration dynamicConf;
 
     @JsonObject
-    @AttributeName(name = "gluuConfStatic")
+    @AttributeName(name = "jansConfStatic")
     private StaticConfiguration staticConf;
 
-    @AttributeName(name = "oxRevision")
+    @AttributeName(name = "jansRevision")
     private long revision;
 
     public Conf() {
