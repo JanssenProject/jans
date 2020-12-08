@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>uma-rs-resteasy</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>UMA RS Resteasy</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-client-api-parent</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <properties>
