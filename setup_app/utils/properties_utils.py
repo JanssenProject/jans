@@ -713,13 +713,11 @@ class PropertiesUtils(SetupUtils):
                                                 )[0].lower()
             Config.installOxAuth = True if promptForOxAuth == 'y' else False
 
-            #promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
-            #                                self.getDefaultOption(Config.installConfigApi)
-            #                                    )[0].lower()
+            promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
+                                            self.getDefaultOption(Config.installConfigApi)
+                                                )[0].lower()
 
-            #Config.installConfigApi = True if promptForConfigApi == 'y' else False
-            
-            Config.installConfigApi = False
+            Config.installConfigApi = True if promptForConfigApi == 'y' else False
 
             couchbase_mappings_ = self.getMappingType('couchbase')
             buckets_ = [ 'jans_{}'.format(b) for b in couchbase_mappings_ ]
