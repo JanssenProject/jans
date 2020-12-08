@@ -90,8 +90,8 @@ def get_setup_options():
     if argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
 
-    if argsp.no_config_api:
-        setupOptions['installConfigApi'] = False
+    #if argsp.no_config_api:
+    #    setupOptions['installConfigApi'] = False
 
     if argsp.no_scim:
         setupOptions['installScimServer'] = False
