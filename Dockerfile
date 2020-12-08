@@ -17,8 +17,8 @@ RUN apk update \
 # Config API
 # ==========
 
-ENV CN_VERSION=5.0.0-SNAPSHOT
-ENV CN_BUILD_DATE="2020-11-09 09:50"
+ENV CN_VERSION=1.0.0-SNAPSHOT
+ENV CN_BUILD_DATE='2020-12-08 16:24'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
 
 RUN mkdir -p /opt/config-api \
@@ -121,7 +121,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="Config API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
-    version="5.0.0" \
+    version="1.0.0" \
     release="dev" \
     summary="Janssen Config API" \
     description=""
