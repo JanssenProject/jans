@@ -5,7 +5,7 @@ Configuration manager is a special container used to load (generate/restore) and
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-configuration-manager/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configuration-manager:5.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/configuration-manager:1.0.0_dev`.
 
 ## Environment Variables
 
@@ -81,7 +81,7 @@ The load command can be used either to generate or restore config and secret for
         -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configuration-manager:5.0.0_dev load
+        janssenproject/configuration-manager:1.0.0_dev load
     ```
 
 #### Kubernetes
@@ -125,7 +125,7 @@ The load command can be used either to generate or restore config and secret for
 	            name: config-generate-params
 	      containers:
 	        - name: configuration-manager-load
-	          image: janssenproject/configuration-manager:5.0.0_dev
+	          image: janssenproject/configuration-manager:1.0.0_dev
 	          volumeMounts:
 	            - mountPath: /app/db/generate.json
 	              name: config-generate-params
@@ -165,7 +165,7 @@ The load command can be used either to generate or restore config and secret for
 	            name: secret-params
 	      containers:
 	        - name: configuration-manager-load
-	          image: janssenproject/configuration-manager:5.0.0_dev
+	          image: janssenproject/configuration-manager:1.0.0_dev
 	          volumeMounts:
 	            - mountPath: /app/db/config.json
 	              name: config-params
@@ -199,7 +199,7 @@ docker run \
     -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configuration-manager:5.0.0_dev dump
+    janssenproject/configuration-manager:1.0.0_dev dump
 ```
 
 #### Kubernetes
@@ -215,7 +215,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configuration-manager-dump-job
-          image: janssenproject/configuration-manager:5.0.0_dev
+          image: janssenproject/configuration-manager:1.0.0_dev
           command:
             - /bin/sh
             - -c

@@ -19,8 +19,8 @@ RUN apk update \
 
 # @TODO: this package is deprecated; should downloads all required JARs from jans-auth-server.war
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=5.0.0-SNAPSHOT
-ENV CN_BUILD_DATE="2020-11-25 16:03"
+ENV CN_VERSION=1.0.0-SNAPSHOT
+ENV CN_BUILD_DATE='2020-12-08 09:31'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -111,7 +111,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL name="configuration-manager" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen" \
-    version="5.0.0" \
+    version="1.0.0" \
     release="dev" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
