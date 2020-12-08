@@ -6,13 +6,13 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-eleven-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>eleven</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<jans.bom.version>5.0.0-SNAPSHOT</jans.bom.version>
+		<jans.bom.version>1.0.0-SNAPSHOT</jans.bom.version>
 
 		<jettison.version>1.3.2</jettison.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
