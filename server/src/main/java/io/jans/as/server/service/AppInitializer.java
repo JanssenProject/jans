@@ -179,7 +179,11 @@ public class AppInitializer {
 
 	@PostConstruct
 	public void createApplicationComponents() {
-		SecurityProviderUtility.installBCProvider();
+		try {
+			SecurityProviderUtility.installBCProvider();
+		} catch (ClassCastException ex) {
+			log.error("Failed to install BC provider properly");
+		}
 	}
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
