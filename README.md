@@ -5,7 +5,7 @@ Persistence is a special container to load initial data for LDAP or Couchbase.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-persistence/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/persistence:5.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/persistence:1.0.0_dev`.
 
 ## Environment Variables
 
@@ -103,7 +103,7 @@ docker run --rm \
     -e CN_LDAP_URL=ldap:1636 \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/persistence:5.0.0_dev
+    janssenproject/persistence:1.0.0_dev
 ```
 
 The process may take awhile, check the output of the `persistence` container log.
@@ -139,7 +139,7 @@ docker run --rm \
     -v /path/to/couchbase_superuser_password:/etc/jans/conf/couchbase_superuser_password \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/persistence:5.0.0_dev
+    janssenproject/persistence:1.0.0_dev
 ```
 
 The process may take awhile, check the output of the `persistence` container log.
@@ -203,5 +203,5 @@ Hybrid is a mix of LDAP and Couchbase persistence backend. To initialize data fo
         -v /path/to/couchbase_superuser_password:/etc/jans/conf/couchbase_superuser_password \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/persistence:5.0.0_dev
+        janssenproject/persistence:1.0.0_dev
     ```
