@@ -6,7 +6,7 @@ The container designed to run as one-time command (or Job in kubernetes world).
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-certmanager/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/certmanager:5.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/certmanager:1.0.0_dev`.
 
 ## Environment Variables
 
@@ -182,7 +182,7 @@ docker run \
     -v $PWD/ssl.crt:/etc/certs/jans_https.crt \
     -v $PWD/ssl.key:/etc/certs/jans_https.key \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    janssenproject/certmanager:5.0.0_dev patch web --opts source:from-files
+    janssenproject/certmanager:1.0.0_dev patch web --opts source:from-files
 ```
 
 Kubernetes CronJob example:
@@ -201,7 +201,7 @@ spec:
         spec:
           containers:
             - name: oxauth-key-rotation
-              image: janssenproject/certmanager:5.0.0_dev
+              image: janssenproject/certmanager:1.0.0_dev
               resources:
                 requests:
                   memory: "300Mi"
