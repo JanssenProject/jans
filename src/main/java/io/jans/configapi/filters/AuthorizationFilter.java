@@ -52,24 +52,24 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     AuthorizationService authorizationService;
 
     public void filter(ContainerRequestContext context) {
-        System.out.println("=======================================================================");
-        System.out.println("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
-        System.out.println("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
-        System.out.println("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
-        System.out.println("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
-        System.out.println("======PERFORMING AUTHORIZATION=========================================");
+        log.info("=======================================================================");
+        log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
+        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
+        log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
+        log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
+        log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        System.out.println("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
 
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
-            System.out.println("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
+            log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
             this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
-            System.out.println("======AUTHORIZATION  GRANTED===========================================");
+            log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
             abortWithUnauthorized(context);
