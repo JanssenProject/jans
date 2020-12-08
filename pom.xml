@@ -5,17 +5,17 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<jans-core.version>5.0.0-SNAPSHOT</jans-core.version>
-		<jans-eleven.version>5.0.0-SNAPSHOT</jans-eleven.version>
-		<jans-notify.version>5.0.0-SNAPSHOT</jans-notify.version>
-		<jans-fido2.version>5.0.0-SNAPSHOT</jans-fido2.version>
+		<jans-core.version>1.0.0-SNAPSHOT</jans-core.version>
+		<jans-eleven.version>1.0.0-SNAPSHOT</jans-eleven.version>
+		<jans-notify.version>1.0.0-SNAPSHOT</jans-notify.version>
+		<jans-fido2.version>1.0.0-SNAPSHOT</jans-fido2.version>
 
 		<json.version>20180813</json.version>
 		<jackson.version>2.10.1</jackson.version>
@@ -100,8 +100,8 @@
 		<dependencies>
             <dependency>
                 <groupId>io.jans</groupId>
-                <artifactId>jans-core-bom</artifactId>
-                <version>5.0.0-SNAPSHOT</version>
+                <artifactId>jans-bom</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -235,12 +235,12 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>eleven-client</artifactId>
+				<artifactId>jans-eleven-client</artifactId>
 				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>eleven-model</artifactId>
+				<artifactId>jans-eleven-model</artifactId>
 				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
