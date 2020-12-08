@@ -8,7 +8,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
 	
@@ -18,7 +18,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
-		<janssen.version>5.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 		<gluu.version>5.0.0-SNAPSHOT</gluu.version>
         <weld.version>3.1.2.Final</weld.version>
 	</properties>
