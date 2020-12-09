@@ -48,7 +48,6 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                 .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
@@ -59,7 +58,7 @@ public class AuthClientFactory {
     
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
 
-        return proxy.introspectToken(token, token);
+        return proxy.introspectToken(header, token);
 
     }
 
