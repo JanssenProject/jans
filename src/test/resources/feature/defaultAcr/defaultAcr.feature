@@ -1,3 +1,4 @@
+@ignore
 Feature: Verify Default ACRS configuration endpoint
 
   	Background:

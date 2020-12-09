@@ -1,3 +1,4 @@
+@ignore
 Feature: Verify Cache configuration endpoint
 
   	Background:

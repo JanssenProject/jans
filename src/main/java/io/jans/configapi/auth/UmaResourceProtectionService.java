@@ -82,15 +82,7 @@ public class UmaResourceProtectionService {
         createScopeIfNeeded();
 
         createResourceIfNeeded();
-        
-        //createClientIfNeeded();
-
-        log.debug("\n\n UmaResourceProtectionService::verifyUmaResources() - All getAllUmaResources = "
-                + UmaResourceProtectionCache.getAllUmaResources());
-        
-        log.debug("\n\n UmaResourceProtectionService::verifyUmaResources() - All scopes = "
-                + UmaResourceProtectionCache.getAllScopes());
-
+      
     }
 
     private void createScopeIfNeeded() { 
@@ -216,20 +208,6 @@ public class UmaResourceProtectionService {
         }
     }
     
-    private List<String> getScopes(List<String> resourceScopes) {
-        List<String> scopes = new ArrayList();
-        log.debug("\n\n  ====================== getScopes() - resourceScopes= " + resourceScopes);
-        for (String strScope : resourceScopes) {
-            Scope scope = UmaResourceProtectionCache.getScope(strScope);
-            if (scope != null) {
-                scopes.add(scope.getInum());
-            }
-        }
-        log.debug("\n\n ====================== getScopes() - scopes= " + scopes+"\n\n");
-        return scopes;
-    }
-
-    
     private Date getCreationDate(RsResource rsResource) {
         final Calendar calendar = Calendar.getInstance();
         Date iat = calendar.getTime();
@@ -241,77 +219,6 @@ public class UmaResourceProtectionService {
         return iat;
     }
    
-    private void createClientIfNeeded() throws Exception { 
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream inputStream = loader.getResourceAsStream("api-client.json");
-        
-        ClientList clientList = Jackson.createJsonMapper().readValue(inputStream, ClientList.class);
-        log.debug(
-                " \n\n UmaResourceProtectionService::createClientIfNeeded() - clientList = " + clientList + "\n\n");
-        List<Client> clients = clientList.getClients();
-
-        log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clients = "
-                + clients + "\n\n");
-
-        Preconditions.checkNotNull(clients, "Config Api Client list cannot be null !!!");
-        
-        //Create client
-        for (Client clt : clients) {
-            log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - clt = "
-                    + clt + "\n\n");
-            // Check if exists
-            Client client = null;
-
-            try {
-                client = this.clientService.getClientByInum(clt.getClientId());
-                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Verify client = "
-                        + client + "\n\n");
-
-            } catch (Exception ex) {
-                log.error("Error while searching client "+ex);
-            }
-            
-            log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createClientIfNeeded() - Before encryption clt.getClientSecret()  = "+clt.getClientSecret() );
-           /* if (clt.getClientSecret() != null) {
-                clt.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
-            }
-            log.debug("\\n\\n @@@@@@@@@@@@@@@@@@@@@@@  UmaResourceProtectionService::createClientIfNeeded() - After encryption clt.getClientSecret()  = "+clt.getClientSecret() );
-            */
-            if (client == null) {
-                // Create client           
-                clt.setDn(clientService.getDnForClient(clt.getClientId())); 
-                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Create clt = "
-                        + clt + "\n\n");
-                this.clientService.addClient(clt);
-            } else {
-                clt.setDn(clientService.getDnForClient(clt.getClientId()));
-               
-                log.debug(" \n\n UmaResourceProtectionService::createClientIfNeeded() - Update clt = "
-                        + clt + "\n\n");
-                this.clientService.updateClient(clt);
-            }
-
-            client = this.clientService.getClientByInum(clt.getClientId());
-            log.debug(
-                    " \n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createClientIfNeeded() - Final client = " + client + "\n\n");
-
-            
-            //Check all scopes
-            log.debug(
-                    " \n\n UmaResourceProtectionService::createClientIfNeeded() - Final this.scopeService.getAllScopesList(25) = " + this.scopeService.getAllScopesList(25) + "\n\n");
-
-        }
-
-    }
     
-    
-    private void createUmaRPT() { 
-        log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - Entry");
-        String clientId = "1802.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009";
-        Client client = this.clientService.getClientByInum(clientId);
-        log.debug("\n\n @@@@@@@@@@@@@@@@@@@@@@@ UmaResourceProtectionService::createUmaRPT() - client = "+client+"\n\n");
-        
-        
-    }
     
 }
