@@ -11,6 +11,7 @@ import io.jans.model.metric.MetricType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
 
 import java.util.Date;
@@ -50,6 +51,10 @@ public class MetricEntry {
 
     @AttributeName(name = "exp")
     private Date expirationDate;
+
+    @Expiration
+    private Integer ttl;
+
     @AttributeName(name = "del")
     private boolean deletable = true;
 
@@ -134,7 +139,15 @@ public class MetricEntry {
         this.expirationDate = expirationDate;
     }
 
-    public boolean isDeletable() {
+    public Integer getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(Integer ttl) {
+		this.ttl = ttl;
+	}
+
+	public boolean isDeletable() {
         return deletable;
     }
 
@@ -144,8 +157,9 @@ public class MetricEntry {
 
     @Override
 	public String toString() {
-		return "MetricEntry [dn=" + dn + ", id=" + id + ", startDate=" + startDate + ", endDate=" + endDate + ", applicationType="
-				+ applicationType + ", metricType=" + metricType + ", creationDate=" + creationDate + ", nodeIndetifier=" + nodeIndetifier
-				+ ", expirationDate=" + expirationDate + ", deletable=" + deletable + "]";
+		return "MetricEntry [dn=" + dn + ", id=" + id + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", applicationType=" + applicationType + ", metricType=" + metricType + ", creationDate="
+				+ creationDate + ", nodeIndetifier=" + nodeIndetifier + ", expirationDate=" + expirationDate + ", ttl="
+				+ ttl + ", deletable=" + deletable + "]";
 	}
 }
