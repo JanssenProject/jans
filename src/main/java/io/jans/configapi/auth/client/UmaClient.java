@@ -138,8 +138,7 @@ public class UmaClient {
         tokenRequest.setScope(scope);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        //tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-         
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         
         final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
         multivaluedHashMap.add("ticket",ticket);
@@ -182,8 +181,7 @@ public class UmaClient {
                 
         UmaRptIntrospectionService proxy = target.proxy(UmaRptIntrospectionService.class);
         RptIntrospectionResponse response = proxy.requestRptStatus(authorization, rptToken, "");
-        
-        //return proxy.requestRptStatus(authorization, rptToken, "");
+  
         return response;
     }
 

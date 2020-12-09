@@ -12,6 +12,7 @@ Feature: Verify Auth configuration endpoint
     And print response
     And assert response.length != null
     
+    @ignore
     @auth-config-patch
   	Scenario: Patch loggingLevel Auth configuration
   	Given url  mainUrl
@@ -24,7 +25,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-
+    @ignore
     @auth-config-patch
   	Scenario: Patch cibaEnabled Auth configuration
   	Given url  mainUrl
@@ -48,8 +49,7 @@ Feature: Verify Auth configuration endpoint
 	Then print request
     When method PATCH
     Then status 200
-    And print response
-    
+    And print response    
    
     @ignore
     @auth-config-patch

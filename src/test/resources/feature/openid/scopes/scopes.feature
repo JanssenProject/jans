@@ -1,3 +1,4 @@
+@ignore
 Feature: Openid connect Scopes
 
 Scenario: Fetch all openid connect scopes without bearer token

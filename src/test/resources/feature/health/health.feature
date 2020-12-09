@@ -1,3 +1,4 @@
+@ignore
 Feature: Verify API HealthCheck
 
 Background:

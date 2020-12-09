@@ -1,3 +1,4 @@
+@ignore
 Feature: Openid connect clients to test Custom Attribute for Client Claim Management
 
 Background:

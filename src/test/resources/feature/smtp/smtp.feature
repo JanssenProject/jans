@@ -1,3 +1,4 @@
+@ignore
 Feature: Configure STMP server
 
 @CreateGetUpdateDelete

@@ -94,10 +94,6 @@ public class PatService {
             String clientId = this.configurationFactory.getApiClientId();
             String clientPassword = this.configurationFactory.getApiClientPassword();
             
-            log.debug("\n\n PatService:: retrievePatToken() - umaMetadata.getTokenEndpoint()  = "
-                    + umaMetadata.getTokenEndpoint() + " , clientId = " + clientId
-                    + " , clientPassword = " + clientPassword);
-            
             if (StringHelper.isEmpty(clientId) || StringHelper.isEmpty(clientPassword)) {
                 log.error("Internal clientId or password is empty!!!");
                 throw new Exception("Internal clientId or password is empty!!!");
@@ -105,22 +101,14 @@ public class PatService {
 
             if (clientPassword != null) {
                 try {
-                    log.debug("\n\n PatService:: retrievePatToken() - encrypted encryptionService.encrypt(this.configurationFactory.getApiClientPassword()) = "+encryptionService.encrypt(configurationFactory.getApiClientPassword()));
-                    //clientPassword = encryptionService.encrypt(clientPassword);
-                    //log.debug("\n\n PatService:: retrievePatToken() - encrypted clientPassword = "+clientPassword);
-                    
-                    //clientPassword = encryptionService.decrypt(clientPassword);
-                   log.debug("\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ PatService:: retrievePatToken() - clientPassword = "+clientPassword+" $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n\n");
-                } //catch (EncryptionException ex) {
-                    catch (Exception ex) {
+                    clientPassword = encryptionService.decrypt(clientPassword);
+                } catch (EncryptionException ex) {
                     log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
                 }
             }
 
             this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),clientId, clientPassword, null);
-            
-            log.debug("\n\n umaPat = " + umaPat + "\n\n"); // todo:???Remove later only for testing
-
+     
             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
             } else {
