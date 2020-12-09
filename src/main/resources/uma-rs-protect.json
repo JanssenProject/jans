@@ -56,13 +56,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.write"
+                    "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]
@@ -73,13 +73,13 @@
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.write"
+                    "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]

@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.UmaResourceService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
@@ -40,7 +41,7 @@ public class UmaResourcesResource extends BaseResource {
     UmaResourceService umaResourceService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_READ_ACCESS})
     public Response fetchUmaResources(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
                                       @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
         final List<UmaResource> resources;
@@ -54,13 +55,13 @@ public class UmaResourcesResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_READ_ACCESS})
     public Response getUmaResourceByImun(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         return Response.ok(findOrThrow(id)).build();
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS})
     public Response createUmaResource(@Valid UmaResource umaResource) {
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
         checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
@@ -84,7 +85,7 @@ public class UmaResourcesResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS})
     public Response updateUmaResource(@Valid UmaResource resource) {
         String id = resource.getId();
         checkNotNull(id, AttributeNames.ID);
@@ -98,7 +99,7 @@ public class UmaResourcesResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS})
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString) throws JsonPatchException, IOException {
         UmaResource existingResource = findOrThrow(id);
@@ -110,7 +111,7 @@ public class UmaResourcesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS})
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);

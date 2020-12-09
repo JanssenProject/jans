@@ -11,6 +11,7 @@ import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
 
@@ -32,14 +33,14 @@ public class JwksResource extends BaseResource {
     ConfigurationService configurationService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.JWKS_READ_ACCESS})
     public Response get() {
         final String json = configurationService.findConf().getWebKeys().toString();
         return Response.ok(json).build();
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.JWKS_WRITE_ACCESS})
     public Response put(WebKeysConfiguration webkeys) {
         final Conf conf = configurationService.findConf();
         conf.setWebKeys(webkeys);
@@ -49,7 +50,7 @@ public class JwksResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.JWKS_WRITE_ACCESS})
     public Response patch(String requestString) throws JsonPatchException, IOException {
         final Conf conf = configurationService.findConf();
         WebKeysConfiguration webKeys = conf.getWebKeys();

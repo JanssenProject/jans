@@ -11,6 +11,7 @@ import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.ConfigurationService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import javax.inject.Inject;
@@ -31,7 +32,7 @@ public class AcrsResource extends BaseResource {
     ConfigurationService configurationService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.ACRS_READ_ACCESS})
     public Response getDefaultAuthenticationMethod() {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -41,7 +42,7 @@ public class AcrsResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.ACRS_WRITE_ACCESS})
     public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());

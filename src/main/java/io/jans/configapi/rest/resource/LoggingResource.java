@@ -9,8 +9,10 @@ package io.jans.configapi.rest.resource;
 import com.couchbase.client.core.message.ResponseStatus;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.Logging;
 import io.jans.configapi.service.ConfigurationService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import org.apache.commons.lang.StringUtils;
 
@@ -29,6 +31,7 @@ public class LoggingResource {
     ConfigurationService configurationService;
 
     @GET
+    @ProtectedApi(scopes = {ApiAccessConstants.LOGGING_READ_ACCESS})
     public Response getLogging() {
         Logging logging = new Logging();
         AppConfiguration appConfiguration = configurationService.find();
@@ -47,6 +50,7 @@ public class LoggingResource {
     }
 
     @PUT
+    @ProtectedApi(scopes = {ApiAccessConstants.LOGGING_WRITE_ACCESS})
     public Response updateHero(@Valid Logging logging) {
         Conf conf = configurationService.findConf();
 
