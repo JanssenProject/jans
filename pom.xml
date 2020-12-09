@@ -19,7 +19,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
-		<gluu.version>5.0.0-SNAPSHOT</gluu.version>
+		<gluu.version>1.0.0-SNAPSHOT</gluu.version>
         <weld.version>3.1.2.Final</weld.version>
 	</properties>
 
