@@ -49,7 +49,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
-
+        log.debug("\n\n OpenIdAuthorizationService::processAuthorization() - introspectionResponse.getScope() = " + introspectionResponse.getScope() + "\n\n");
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
             log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
                     + introspectionResponse.getScope());
