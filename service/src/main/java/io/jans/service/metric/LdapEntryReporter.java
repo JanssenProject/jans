@@ -243,6 +243,9 @@ public final class LdapEntryReporter extends ScheduledReporter {
             metricEntry.setEndDate(endTime);
             metricEntry.setCreationDate(creationTime);
             metricEntry.setExpirationDate(DateUtils.addDays(creationTime, metricService.getEntryLifetimeInDays()));
+
+            int ttl = (int) ((metricEntry.getExpirationDate().getTime() - creationTime.getTime()) / 1000L);
+            metricEntry.setTtl(ttl);
         }
     }
 
