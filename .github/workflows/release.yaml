@@ -60,4 +60,4 @@ jobs:
           https://github.com/GluuFederation/cloud-native-edition/releases/tag/v${{ steps.get_version.outputs.version }}
 
         draft: false
-        prerelease: false
+        prerelease: true
