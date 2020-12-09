@@ -8,6 +8,7 @@ package io.jans.as.server.session.ws.rs;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -154,7 +155,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 }
             }
 
-            backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getOutsideSid());
+            backChannel(backchannelUris, pair.getSecond(), pair.getFirst());
             postLogoutRedirectUri = addStateInPostLogoutRedirectUri(postLogoutRedirectUri, state);
 
             if (frontchannelUris.isEmpty() && StringUtils.isNotBlank(postLogoutRedirectUri)) { // no front-channel
@@ -169,7 +170,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, message)).build();
                 }
             }
-
 
             return httpBased(frontchannelUris, postLogoutRedirectUri, state, pair, httpRequest);
         } catch (WebApplicationException e) {
@@ -211,16 +211,21 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
     }
 
-    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, String outsideSid) throws InterruptedException {
+    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, SessionId session) throws InterruptedException {
         if (backchannelUris.isEmpty()) {
             return;
         }
 
         log.trace("backchannel_redirect_uri's: " + backchannelUris);
 
+        User user = grant != null ? grant.getUser() : null;
+        if (user == null) {
+            user = sessionIdService.getUser(session);
+        }
+
         final ExecutorService executorService = EndSessionUtils.getExecutorService();
         for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
-            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), outsideSid, grant.getUser());
+            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), session.getOutsideSid(), user);
             if (logoutToken == null) {
                 log.error("Failed to create logout_token for client: " + entry.getValue().getClientId());
                 return;
@@ -424,7 +429,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         if (isExternalLogoutPresent) {
             String userName = pair.getFirst().getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, pair.getFirst());
-            log.info("End session result for '{}': '{}'", userName, "logout", externalLogoutResult);
+            log.info("End session result for '{}': '{}'", userName, externalLogoutResult);
         }
 
         boolean isGrantAndExternalLogoutSuccessful = isExternalLogoutPresent && externalLogoutResult;
