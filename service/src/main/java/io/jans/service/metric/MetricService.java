@@ -224,9 +224,14 @@ public abstract class MetricService implements Serializable {
         return result;
     }
 
-    public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate,
-            int count, int chunkSize) {
-        Filter expiratioFilter = Filter.createLessOrEqualFilter("jansStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
+    public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, ApplicationType applicationType, String baseDnForPeriod, Date expirationDate, int count, int chunkSize) {
+		Filter expiratioStartDateFilter = Filter.createLessOrEqualFilter("oxStartDate", getEntryManager().encodeTime(baseDnForPeriod, expirationDate));
+
+		Filter expiratioFilter = expiratioStartDateFilter;
+		if (applicationType != null) {
+			Filter applicationTypeFilter = Filter.createEqualityFilter("oxMetricType", applicationType.getValue());
+			expiratioFilter = Filter.createANDFilter(expiratioStartDateFilter, applicationTypeFilter);
+		}
 
         List<MetricEntry> metricEntries = getEntryManager().findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB,
                 new String[] { "uniqueIdentifier" }, batchOperation, 0, count, chunkSize);
@@ -245,7 +250,7 @@ public abstract class MetricService implements Serializable {
 
     public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, int count,
             int chunkSize) {
-        createApplicationBaseBranch(getApplicationType());
+        createApplicationBaseBranch(applicationType);
 
         final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, expirationDate, new Date());
         // Remove expired entries
@@ -263,33 +268,35 @@ public abstract class MetricService implements Serializable {
                     }
                 }
             };
-            getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, count, chunkSize);
+            getExpiredMetricEntries(metricEntryBatchOperation, applicationType, baseDnForPeriod, expirationDate, count, chunkSize);
         }
 
-        DefaultBatchOperation<SimpleBranch> batchOperation = new DefaultBatchOperation<SimpleBranch>() {
-            @Override
-            public boolean collectSearchResult(int size) {
-                return false;
-            }
-
-            @Override
-            public void performAction(List<SimpleBranch> objects) {
-                String baseDn = buildDn(null, null, applicationType);
-                Set<String> periodBranchesStrings = new HashSet<String>();
-                for (SimpleBranch periodBranch : objects) {
-                    if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
-                        periodBranchesStrings.add(periodBranch.getDn());
-                    }
-                }
-                periodBranchesStrings.removeAll(keepBaseDnForPeriod);
-
-                // Remove expired months
-                for (String baseDnForPeriod : periodBranchesStrings) {
-                    removeBranch(baseDnForPeriod);
-                }
-            }
-        };
-        findAllPeriodBranches(batchOperation, applicationType, count, chunkSize);
+        if (!getEntryManager().hasBranchesSupport(buildDn(null, null, applicationType))) {
+	        DefaultBatchOperation<SimpleBranch> batchOperation = new DefaultBatchOperation<SimpleBranch>() {
+	            @Override
+	            public boolean collectSearchResult(int size) {
+	                return false;
+	            }
+	
+	            @Override
+	            public void performAction(List<SimpleBranch> objects) {
+	                String baseDn = buildDn(null, null, applicationType);
+	                Set<String> periodBranchesStrings = new HashSet<String>();
+	                for (SimpleBranch periodBranch : objects) {
+	                    if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
+	                        periodBranchesStrings.add(periodBranch.getDn());
+	                    }
+	                }
+	                periodBranchesStrings.removeAll(keepBaseDnForPeriod);
+	
+	                // Remove expired months
+	                for (String baseDnForPeriod : periodBranchesStrings) {
+	                    removeBranch(baseDnForPeriod);
+	                }
+	            }
+	        };
+	        findAllPeriodBranches(batchOperation, applicationType, count, chunkSize);
+	    }
     }
 
     private Set<String> getBaseDnForPeriod(ApplicationType applicationType, Date startDate, Date endDate) {
