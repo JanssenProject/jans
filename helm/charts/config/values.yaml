@@ -76,4 +76,4 @@ fullNameOverride: ""
 
 image:
   repository: janssenproject/configuration-manager
-  tag: 1.0.0_dev
+  tag: 1.0.0_a1
