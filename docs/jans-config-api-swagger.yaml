@@ -7,7 +7,7 @@ info:
   license:
     name: License
     url: 'https://github.com/JanssenProject/blob/master/LICENSE'
-  version: '1.0'
+  version: '1.0.0'
 servers:
   - url: 'https://jans.io/'
 tags:
@@ -38,7 +38,7 @@ paths:
       description: Gets all Jans authorization server configuration properties.
       operationId: get-properties
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
       tags:
         - Configuration – Properties
       responses:
@@ -60,7 +60,7 @@ paths:
       description: Partially modifies Jans authorization server AppConfiguration properties.
       operationId: patch-properties
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.write]
       tags:
         - Configuration – Properties
       requestBody:
@@ -151,7 +151,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/fido2.readonly]
     put:
       summary: Updates Fido2 configuration properties.
       description: Updates Fido2 configuration properties.
@@ -218,7 +218,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/fido2.write]
     parameters: []
   /jans-config-api/api/v1/attributes:
     get:
@@ -243,7 +243,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/attributes.readonly]
       parameters:
         - schema:
             type: integer
@@ -286,7 +286,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/attributes.write]
     put:
       summary: Updates an existing attribute.
       description: Updates an existing attribute.
@@ -316,7 +316,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/attributes.write]
     parameters: []
   '/jans-config-api/api/v1/attributes/{inum}':
     parameters:
@@ -344,7 +344,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/attributes.readonly]
     delete:
       summary: Deletes an attribute based on inum.
       description: Deletes an attribute based on inum.
@@ -361,13 +361,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/attributes.write]
     patch:
       summary: Partially modify a GluuAttribute.
       description: Partially modify a GluuAttribute.
       operationId: patch-attributes-by-inum
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/attributes.write]
       tags:
         - Attribute
       requestBody:
@@ -417,7 +417,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/acrs.readonly]
     put:
       summary: Updates default authentication method.
       description: Updates default authentication method.
@@ -444,7 +444,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/acrs.write]
     parameters: []
   /jans-config-api/api/v1/config/database/ldap:
     get:
@@ -469,7 +469,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
     post:
       summary: Adds a new LDAP configuration.
       description: Adds a new LDAP configuration.
@@ -494,7 +494,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
     put:
       summary: Updates LDAP configuration.
       description: Updates LDAP configuration.
@@ -521,7 +521,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
     parameters: []
   '/jans-config-api/api/v1/config/database/ldap/{name}':
     parameters:
@@ -551,7 +551,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
     delete:
       summary: Deletes an LDAP configuration.
       description: Deletes an LDAP configuration.
@@ -568,13 +568,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
     patch:
       summary: Partially modify an LDAP configuration.
       description: Partially modify an LDAP configuration.
       operationId: patch-config-database-ldap-by-name
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
       tags:
         - Database - LDAP configuration
       requestBody:
@@ -625,7 +625,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
   /jans-config-api/api/v1/config/database/couchbase:
     get:
       summary: Gets list of existing Couchbase configurations.
@@ -649,7 +649,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.readonly]
     post:
       summary: Adds a new Couchbase configuration.
       description: Adds a new Couchbase configuration.
@@ -674,7 +674,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
     put:
       summary: Updates Couchbase configuration.
       description: Updates Couchbase configuration.
@@ -701,7 +701,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
     parameters: []
   /jans-config-api/api/v1/config/database/couchbase/{name}:
     parameters:
@@ -731,7 +731,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.readonly]
     patch:
       summary: Partially modify an Couchbase configuration.
       description: Partially modify an Couchbase configuration.
@@ -760,7 +760,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
     delete:
       summary: Deletes a Couchbase configurations by name.
       description: Deletes a Couchbase configurations by name.
@@ -775,7 +775,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
   /jans-config-api/api/v1/config/database/couchbase/test:
     post:
       summary: Tests a Couchbase configurations by name.
@@ -803,8 +803,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
-  /jans-config-api/api/v1/config/scripts/type/:
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.readonly]
+  /jans-config-api/api/v1/config/scripts:
     get:
       summary: Gets a list of custom scripts.
       description: Gets a list of custom scripts.
@@ -825,7 +825,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/scripts.readonly]
     post:
       summary: Adds a new custom script.
       description: Adds a new custom script.
@@ -844,7 +844,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'      
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scripts.write]
     put:
       summary: Updates a custom script.
       description: Updates a custom script.
@@ -868,7 +868,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scripts.write]
   /jans-config-api/api/v1/config/scripts/type/{type}:
     parameters:
       - schema:
@@ -932,7 +932,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/scripts.readonly]
   /jans-config-api/api/v1/config/scripts/inum/{inum}:
     parameters:
       - schema:
@@ -961,7 +961,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/scripts.readonly]
   /jans-config-api/api/v1/config/scripts/{inum}:
     parameters:
       - schema:
@@ -986,7 +986,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/scripts.write]
   /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
@@ -1182,7 +1182,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     patch:
       summary: Partially modifies cache configuration.
       description: Partially modifies cache configuration.
@@ -1383,7 +1383,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/memcached:
     get:
       summary: Returns Memcached cache configuration.
@@ -1449,7 +1449,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     put:
       summary: Updates Memcached cache configuration.
       description: Updates Memcached cache configuration.
@@ -1567,7 +1567,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
   /jans-config-api/api/v1/config/cache/redis:
     get:
@@ -1668,7 +1668,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     put:
       summary: Updates Redis cache configuration.
       description: Updates Redis cache configuration.
@@ -1852,7 +1852,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
   /jans-config-api/api/v1/config/cache/in-memory:
     get:
@@ -1883,7 +1883,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     put:
       summary: Updates in-Memory cache configuration.
       description: Updates in-Memory cache configuration.
@@ -1927,7 +1927,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
   /jans-config-api/api/v1/config/cache/native-persistence:
     get:
@@ -1970,7 +1970,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     put:
       summary: Updates native persistence cache configuration.
       description: Updates native persistence cache configuration.
@@ -2038,7 +2038,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
   /jans-config-api/api/v1/config/smtp:
     get:
@@ -2090,7 +2090,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/smtp.readonly]
     post:
       summary: Adds SMTP server configuration.
       description: Adds SMTP server configuration.
@@ -2176,7 +2176,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/smtp.write]
     put:
       summary: Updates SMTP server configuration.
       description: Updates SMTP server configuration.
@@ -2264,7 +2264,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/smtp.write]
     delete:
       summary: Deletes SMTP server configuration.
       description: Deletes SMTP server configuration.
@@ -2281,9 +2281,9 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/smtp.write]
     parameters: []
-  /jans-config-api/api/v1/config/smtp/status:
+  /jans-config-api/api/v1/config/smtp/test:
     get:
       summary: Test SMTP server configuration.
       description: Test SMTP server configuration.
@@ -2297,7 +2297,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: SMTP configuration status.
+                description: SMTP configuration test status.
                 properties:
                   service:
                     description: Service name.
@@ -2314,7 +2314,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/smtp.readonly]
   /jans-config-api/api/v1/logging:
     get:
       tags:
@@ -2374,7 +2374,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/logging.readonly]
     put:
       tags:
         - Configuration – Logging
@@ -2436,7 +2436,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/logging.write]
     parameters: []
   /jans-config-api/api/v1/config/jwks:
     get:
@@ -2486,7 +2486,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/jwks.readonly]
     put:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
@@ -2516,7 +2516,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/jwks.write]
     patch:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
@@ -2539,7 +2539,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/jwks.write]
   /jans-config-api/api/v1/openid/clients:
     get:
       tags:
@@ -2929,7 +2929,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.readonly]
       parameters:
         - schema:
             type: integer
@@ -3699,7 +3699,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
     put:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -4459,7 +4459,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
   '/jans-config-api/api/v1/openid/clients/{inum}':
     parameters:
       - schema:
@@ -4852,7 +4852,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.readonly]
     delete:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -4869,7 +4869,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
     patch:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -5264,7 +5264,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
   /jans-config-api/api/v1/openid/sectoridentifiers:
     get:
       tags:
@@ -5309,7 +5309,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.readonly]
     post:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5376,7 +5376,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
     put:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5445,7 +5445,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
   /jans-config-api/api/v1/openid/sectoridentifiers/{inum}:
     parameters:
       - name: inum
@@ -5495,7 +5495,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-read]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.readonly]
     delete:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5512,7 +5512,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
     patch:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -5562,7 +5562,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
   /jans-config-api/api/v1/uma/resources:
     get:
       tags:
@@ -5615,7 +5615,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma.resource.readonly]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.readonly]
       parameters:
         - schema:
             type: integer
@@ -5707,7 +5707,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
     put:
       tags:
         - OAuth - UMA Resources
@@ -5789,7 +5789,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
   '/jans-config-api/api/v1/uma/resources/{id}':
     parameters:
       - name: id
@@ -5846,7 +5846,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma.resource.readonly]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.readonly]
     delete:
       tags:
         - OAuth - UMA Resources
@@ -5863,7 +5863,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/scopes/config-api-write]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
     patch:
       tags:
         - OAuth - UMA Resources
@@ -5920,7 +5920,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma.resource.write]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
   /jans-config-api/api/v1/scopes:
     get:
       tags:
@@ -6094,14 +6094,40 @@ components:
       flows:
         clientCredentials:
           tokenUrl: 'https://{op-hostname}/.../token'
-          scopes:
+          scopes: 
+            https://jans.io/oauth/jans-auth-server/config/properties.readonly: View Auth Server properties related information
+            https://jans.io/oauth/jans-auth-server/config/properties.write: View and manage Auth Server properties related information
+            https://jans.io/oauth/jans-auth-server/config/fido2.readonly: View FIDO2 related information
+            https://jans.io/oauth/jans-auth-server/config/fido2.write: View and manage FIDO2 related information
+            https://jans.io/oauth/config/attributes.readonly: View attribute related information
+            https://jans.io/oauth/config/attributes.write: View and manage attribute related information
+            https://jans.io/oauth/config/acrs.readonly: View ACRS related information
+            https://jans.io/oauth/config/acrs.write: View and manage ACRS related information
+            https://jans.io/oauth/config/database/ldap.readonly: View LDAP database related information
+            https://jans.io/oauth/config/database/ldap.write: View and manage LDAP database related information
+            https://jans.io/oauth/config/database/couchbase.readonly: View Couchbase database information
+            https://jans.io/oauth/config/database/couchbase.write: View and manage Couchbase database related information
+            https://jans.io/oauth/config/scripts.readonly: View cache scripts information
+            https://jans.io/oauth/config/scripts.write: View and manage scripts related information
+            https://jans.io/oauth/config/cache.readonly: View cache related information
+            https://jans.io/oauth/config/cache.write: View and manage cache related information
+            https://jans.io/oauth/config/smtp.readonly: View SMTP related information	
+            https://jans.io/oauth/config/smtp.write: View and manage SMTP related information
+            https://jans.io/oauth/config/logging.readonly: View logging related information	
+            https://jans.io/oauth/config/logging.write: View and manage logging related information
+            https://jans.io/oauth/config/jwks.readonly: View JWKS related information	
+            https://jans.io/oauth/config/jwks.write: View and manage JWKS related information	
+            https://jans.io/oauth/config/openid/clients.readonly: View clients related information
+            https://jans.io/oauth/config/openid/clients.write: View and manage clients related information	
+            https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
+            https://jans.io/oauth/config/openid/sectoridentifiers.write: View and manage sector related information		
             https://jans.io/oauth/scopes/config-api-read: Grants read access
             https://jans.io/oauth/scopes/config-api-write: Grants write access
             https://jans.io/oauth/scopes/config-api-all: Grants all access
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: View and manage scope related information
-            https://jans.io/oauth/config/uma.resource.readonly: View UMA Resource related information
-            https://jans.io/oauth/config/uma.resource.write: View and manage UMA Resource related information
+            https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
+            https://jans.io/oauth/config/uma/resources.write: View and manage UMA Resource related information
   responses:
     Found:
       description: Resource Found.

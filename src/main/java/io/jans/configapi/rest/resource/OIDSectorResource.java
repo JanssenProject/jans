@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.persistence.model.SectorIdentifier;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.SectorService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
@@ -38,7 +39,7 @@ public class OIDSectorResource extends BaseResource {
     SectorService sectorIdentifierService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_READ_ACCESS})
     public Response getSectorIdentifiers(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -52,7 +53,7 @@ public class OIDSectorResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getSectorByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
@@ -61,7 +62,7 @@ public class OIDSectorResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS})
     public Response createNewOpenIDSector(@Valid SectorIdentifier sectorIdentifier) {
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
         String jsId = UUID.randomUUID().toString();
@@ -73,7 +74,7 @@ public class OIDSectorResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS})
     public Response updateSector(@Valid SectorIdentifier sectorIdentifier) {
         String inum = sectorIdentifier.getId();
         checkNotNull(inum, AttributeNames.INUM);
@@ -89,7 +90,7 @@ public class OIDSectorResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         SectorIdentifier existingSector = sectorIdentifierService.getSectorIdentifierById(inum);
@@ -101,7 +102,7 @@ public class OIDSectorResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS})
     public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
