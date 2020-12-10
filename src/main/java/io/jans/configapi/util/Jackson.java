@@ -7,16 +7,17 @@
 package io.jans.configapi.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Preconditions;
-
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,23 +52,27 @@ public class Jackson {
     @SuppressWarnings("unchecked")
     public static <T> T read(InputStream inputStream, T obj) throws IOException {
     	try {
-    		/*
-    		 Preconditions.checkNotNull(inputStream);
-         Preconditions.checkNotNull(obj);     
-         return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
-         */
+    	
     	 Preconditions.checkNotNull(inputStream); 
-         
-    	 //ObjectMapper objectMapper = JacksonMapperHolder.MAPPER;
     	 ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-         //return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
-         return (T) objectMapper.readValue(inputStream, obj.getClass());
+         return (T) JacksonUtils.newMapper().readValue(inputStream,obj.getClass());
     	}catch(Exception ex) {
     		ex.printStackTrace();
     		throw ex;
     	}
     }
     
+    @SuppressWarnings("unchecked")
+    public static <T> T getObject(String jsonString, T obj) throws JsonPatchException, IOException {
+        ObjectMapper objectMapper = JacksonUtils.newMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                return (T) objectMapper.readValue(jsonString, obj.getClass());
+    }
+
+    public static ObjectMapper createJsonMapper() {
+        return JacksonMapperHolder.MAPPER;
+    }
+
     private static class JacksonMapperHolder {
         private static final ObjectMapper MAPPER = jsonMapper();
 
@@ -82,7 +87,6 @@ public class Jackson {
             }
             return mapper;
         }
-    }
-    
+    }    
 
 }

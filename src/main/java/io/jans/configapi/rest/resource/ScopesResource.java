@@ -11,6 +11,7 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ScopeService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
@@ -31,9 +32,6 @@ import java.util.UUID;
 /**
  * Configures both OpenID Connect and UMA scopes.
  *
- * Scope type is defined by org.gluu.oxauth.model.common.ScopeType.
- *
- *
  * @author Mougang T.Gasmyr
  *
  */
@@ -52,7 +50,7 @@ public class ScopesResource extends BaseResource {
     UriInfo uriInfo;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_READ_ACCESS})
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -66,7 +64,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
@@ -75,7 +73,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
     public Response createOpenidScope(@Valid Scope scope) {
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
@@ -96,7 +94,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
     public Response updateScope(@Valid Scope scope) {
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
@@ -117,7 +115,7 @@ public class ScopesResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -129,7 +127,7 @@ public class ScopesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);

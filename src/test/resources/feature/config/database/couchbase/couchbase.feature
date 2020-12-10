@@ -1,3 +1,4 @@
+@ignore
 Feature: Couchbase connection configuration
 
   Background:

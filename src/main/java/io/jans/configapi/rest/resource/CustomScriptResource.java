@@ -7,6 +7,7 @@
 package io.jans.configapi.rest.resource;
 
 import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
@@ -46,7 +47,7 @@ public class CustomScriptResource extends BaseResource {
     CustomScriptService customScriptService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
     public Response getAllCustomScripts() {
         List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
         return Response.ok(customScripts).build();
@@ -54,7 +55,7 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
                                                   @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
                                                   @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
@@ -68,7 +69,7 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         CustomScript script = null;
         try {
@@ -83,7 +84,7 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
     public Response createPersonScript(@Valid CustomScript customScript) {
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
@@ -97,7 +98,7 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
     public Response updatePersonScript(@Valid @NotNull CustomScript customScript) {
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
@@ -108,7 +109,7 @@ public class CustomScriptResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
     public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
             CustomScript existingScript = customScriptService.getScriptByInum(inum);

@@ -40,8 +40,8 @@ public class UmaResourceProtectionCache {
 
     public static void putScope(Scope scope) {
         Preconditions.checkNotNull(scope);
-        if (scopeCache.getIfPresent(scope.getDisplayName()) == null) {
-            scopeCache.put(scope.getDisplayName(), scope);
+        if (scopeCache.getIfPresent(scope.getId()) == null) {
+            scopeCache.put(scope.getId(), scope);
         }
     }
 

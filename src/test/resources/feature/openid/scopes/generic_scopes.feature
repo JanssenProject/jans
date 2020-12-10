@@ -1,3 +1,4 @@
+@ignore
 Feature:  Scopes
 
 Scenario: Fetch all scopes without bearer token

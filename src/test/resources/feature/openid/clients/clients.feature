@@ -1,3 +1,4 @@
+@ignore
 Feature: Openid connect clients
 
 Scenario: Fetch all openid connect clients without bearer token

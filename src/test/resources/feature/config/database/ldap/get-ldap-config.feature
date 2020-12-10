@@ -1,3 +1,4 @@
+@ignore
 Feature: Verify LDAP configuration GET endpoint
 
   	Background:

@@ -5,7 +5,7 @@
     "defaultScope": false,
     "description": "Kudia's basic information.",
     "id": "kudia",
-    "oxAuthClaims": [
+    "jansClaim": [
         "inum=2B29,ou=attributes,o=gluu",
         "inum=0C85,ou=attributes,o=gluu"
     ],

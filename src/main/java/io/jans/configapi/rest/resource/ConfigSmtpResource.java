@@ -10,6 +10,7 @@ import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SmtpConfiguration;
 import io.jans.service.MailService;
@@ -43,14 +44,14 @@ public class ConfigSmtpResource extends BaseResource {
     MailService mailService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_READ_ACCESS})
     public Response getSmtpServerConfiguration() {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         return Response.ok(Objects.requireNonNullElseGet(smtpConfiguration, SmtpConfiguration::new)).build();
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
     public Response setupSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
@@ -64,7 +65,7 @@ public class ConfigSmtpResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
     public Response updateSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
@@ -78,7 +79,7 @@ public class ConfigSmtpResource extends BaseResource {
 
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_READ_ACCESS})
     public Response testSmtpConfiguration() throws EncryptionException {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
@@ -93,7 +94,7 @@ public class ConfigSmtpResource extends BaseResource {
     }
 
     @DELETE
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
     public Response removeSmtpConfiguration() {
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());

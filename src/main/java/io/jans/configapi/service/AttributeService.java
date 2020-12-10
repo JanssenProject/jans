@@ -1,3 +1,4 @@
+
 package io.jans.configapi.service;
 
 import javax.enterprise.context.ApplicationScoped;
