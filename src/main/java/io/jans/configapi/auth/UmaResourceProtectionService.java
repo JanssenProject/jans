@@ -1,7 +1,6 @@
 package io.jans.configapi.auth;
 
 import com.google.common.base.Preconditions;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
@@ -17,8 +16,6 @@ import io.jans.configapi.util.Jackson;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;

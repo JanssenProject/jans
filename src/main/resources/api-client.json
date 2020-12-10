@@ -9,7 +9,7 @@
       "deletable": false,
       "disabled": false,
       "clientName": "Config API Resource Server Client",
-      "clientSecret": "test1234",
+      "clientSecret": "IBpX7DsEAuaEx3MWwwE2ZA==",
       "exp": "2120-09-28T23:00:00Z[UTC]",
       "grantTypes": [
 		"authorization_code",
@@ -52,8 +52,8 @@
       ],
       "deletable": false,
       "disabled": false,
-      "clientName": "Config API Resource Server Client",
-      "clientSecret": "test1234",
+      "clientName": "Config API Test Client 1",
+      "clientSecret": "IBpX7DsEAuaEx3MWwwE2ZA==",
       "exp": "2120-09-28T23:00:00Z[UTC]",
        "grantTypes": [
         "authorization_code",
@@ -77,6 +77,44 @@
       "scopes": [
           "inum=cf1c6af9-be87-453e-a388-ebfdbabc1cca,ou=scopes,o=jans",
           "inum=b638c6e9-43ec-4bc9-9b3a-377bafd66288,ou=scopes,o=jans"
+      ],
+      "trustedClient": false,
+      "includeClaimsInIdToken": false,
+      "rptAsJwt": false,
+      "subjectType": "pairwise",
+      "tokenEndpointAuthMethod": "client_secret_basic"   
+  }
+  ,
+  {
+     "inum": "1803.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009",
+     "applicationType": "native",
+      "accessTokenAsJwt": false,
+      "claimRedirectUris": [
+          "https://pujavs.jans.server.1/jans-auth/restv1/uma/gather_claims"
+      ],
+      "deletable": false,
+      "disabled": false,
+      "clientName": "Config API Test Client 2",
+      "clientSecret": "IBpX7DsEAuaEx3MWwwE2ZA==",
+      "exp": "2120-09-28T23:00:00Z[UTC]",
+       "grantTypes": [
+        "authorization_code",
+        "implicit",
+        "refresh_token",
+        "client_credentials",
+        "password"
+      ],
+      "idTokenSignedResponseAlg": "HS256",
+      "frontChannelLogoutSessionRequired": false,
+      "logoutUri": [
+          "https://pujavs.jans.server.1/identity/ssologout.htm"
+      ],
+      "persistClientAuthorizations": false,
+      "postLogoutRedirectUris": [
+          "https://pujavs.jans.server.1/identity/finishlogout.htm"
+      ],
+      "redirectUris": [
+          "https://pujavs.jans.server.1/identity/uri1"
       ],
       "trustedClient": false,
       "includeClaimsInIdToken": false,
