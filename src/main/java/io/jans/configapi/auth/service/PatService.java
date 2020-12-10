@@ -3,7 +3,7 @@ package io.jans.configapi.auth.service;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.configapi.auth.UmaClient;
+import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.StringHelper;
@@ -37,7 +37,7 @@ public class PatService {
     private EncryptionService encryptionService;
 
     @Inject
-    private UmaMetadata umaMetadata;
+    UmaMetadata umaMetadata;
 
     private Token umaPat;
     private long umaPatAccessTokenExpiration = 0l; // When the "accessToken" will expire;
@@ -89,29 +89,26 @@ public class PatService {
             return;
         }
 
-        log.debug("\n\n getClientKeyStoreFile() = " + getClientKeyStoreFile() + " , getClientKeyStorePassword() = " + getClientKeyStorePassword() + " , getClientId() =" + getClientId() + " , getClientKeyId() = "+ getClientKeyId() + "\n\n");
-
-        // ??todo: Puja -> To be reviewed by Yuriy Z -> Will we have a folder on server
-        // /opt/configapi/conf/configapi-jwks.keystore ?? Need help for this part...
-        String umaClientKeyStoreFile = getClientKeyStoreFile();
-        String umaClientKeyStorePassword = getClientKeyStorePassword();
-        if (StringHelper.isEmpty(umaClientKeyStoreFile) || StringHelper.isEmpty(umaClientKeyStorePassword)) {
-            throw new Exception("UMA JKS keystore path or password is empty");
-        }
-
-        if (umaClientKeyStorePassword != null) {
-            try {
-                umaClientKeyStorePassword = encryptionService.decrypt(umaClientKeyStorePassword);
-            } catch (EncryptionException ex) {
-                log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-            }
-        }
-
         try {
 
-            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(), umaClientKeyStoreFile,
-                    umaClientKeyStorePassword, getClientId(), getClientKeyId());
+            String clientId = this.configurationFactory.getApiClientId();
+            String clientPassword = this.configurationFactory.getApiClientPassword();
+            
+            if (StringHelper.isEmpty(clientId) || StringHelper.isEmpty(clientPassword)) {
+                log.error("Internal clientId or password is empty!!!");
+                throw new Exception("Internal clientId or password is empty!!!");
+            }
 
+            if (clientPassword != null) {
+                try {
+                    clientPassword = encryptionService.decrypt(clientPassword);
+                } catch (EncryptionException ex) {
+                    log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
+                }
+            }
+
+            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),clientId, clientPassword, null);
+     
             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
             } else {

@@ -9,6 +9,7 @@ package io.jans.configapi.rest.resource;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.LdapConfigurationService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.ConnectionStatus;
 import io.jans.configapi.util.Jackson;
@@ -40,7 +41,7 @@ public class LdapConfigurationResource extends BaseResource {
     ConnectionStatus connectionStatus;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_READ_ACCESS})
     public Response getLdapConfiguration() {
         List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
         return Response.ok(ldapConfigurationList).build();
@@ -48,14 +49,14 @@ public class LdapConfigurationResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_READ_ACCESS})
     public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         return Response.ok(ldapConfiguration).build();
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS})
     public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         this.ldapConfigurationService.save(ldapConfiguration);
         ldapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
@@ -63,7 +64,7 @@ public class LdapConfigurationResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS})
     public Response updateLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         findLdapConfigurationByName(ldapConfiguration.getConfigId());
         this.ldapConfigurationService.update(ldapConfiguration);
@@ -72,7 +73,7 @@ public class LdapConfigurationResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS})
     public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
         findLdapConfigurationByName(name);
         logger.info("Delete Ldap Configuration by name " + name);
@@ -83,7 +84,7 @@ public class LdapConfigurationResource extends BaseResource {
     @PATCH
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS})
     public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws JsonPatchException, IOException {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         logger.info("Patch Ldap Configuration by name " + name);
@@ -94,7 +95,7 @@ public class LdapConfigurationResource extends BaseResource {
 
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_LDAP_READ_ACCESS})
     public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.info("Test ldapConfiguration " + ldapConfiguration);
         boolean status = connectionStatus.isUp(ldapConfiguration);

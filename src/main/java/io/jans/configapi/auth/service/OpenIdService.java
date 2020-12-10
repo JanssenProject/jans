@@ -6,20 +6,20 @@
 
 package io.jans.configapi.auth.service;
 
-import io.jans.configapi.auth.AuthClientFactory;
-import io.jans.configapi.auth.client.OpenIdClientService;
+import io.jans.as.client.service.IntrospectionService;
+import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.service.ConfigurationService;
-import io.jans.util.exception.ConfigurationException;
-import io.jans.util.init.Initializable;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.Serializable;
 import org.slf4j.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.inject.Inject;
+import java.io.Serializable;
+
 @ApplicationScoped
-public class OpenIdService extends Initializable implements Serializable {
+@Named("openIdService")
+public class OpenIdService implements Serializable {
 
     private static final long serialVersionUID = 4564959567069741194L;
 
@@ -29,26 +29,18 @@ public class OpenIdService extends Initializable implements Serializable {
     @Inject
     ConfigurationService configurationService;
 
-    private OpenIdClientService introspectionService;
+    private IntrospectionService introspectionService;
 
-    public OpenIdClientService getIntrospectionService() {
-        init();
+    public IntrospectionService getIntrospectionService() {
         return introspectionService;
     }
 
-    @Override
-    protected void initInternal() {
-        try {
-            loadOpenIdConfiguration();
-        } catch (IOException ex) {
-            log.error("Failed to load oxAuth OpenId configuration", ex);
-            throw new ConfigurationException("Failed to load oxAuth OpenId configuration", ex);
-        }
+    public String getIntrospectionEndpoint() {
+        return configurationService.find().getIntrospectionEndpoint();
     }
 
-    private void loadOpenIdConfiguration() throws IOException {
-        String introspectionEndpoint = configurationService.find().getIntrospectionEndpoint();
-        this.introspectionService = AuthClientFactory.getIntrospectionService(introspectionEndpoint, false);
+    public IntrospectionResponse getIntrospectionResponse(String header, String token) {
+        return AuthClientFactory.getIntrospectionResponse(getIntrospectionEndpoint(), header, token, false);
     }
 
 }

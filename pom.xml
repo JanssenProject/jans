@@ -14,10 +14,10 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <quarkus-plugin.version>1.8.3.Final</quarkus-plugin.version>
+        <quarkus-plugin.version>1.9.2.Final</quarkus-plugin.version>
         <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>1.8.3.Final</quarkus.platform.version>
+        <quarkus.platform.version>1.9.2.Final</quarkus.platform.version>
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
         <jans.version>1.0.0-SNAPSHOT</jans.version>
@@ -90,6 +90,28 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+        
+            <!-- logging-adapters -->
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>commons-logging-jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>log4j-jboss-logmanager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>log4j2-jboss-logmanager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.slf4j</groupId>
+            <artifactId>slf4j-jboss-logging</artifactId>
+        </dependency>
 
         <!-- jans dependencies -->
          <dependency>
@@ -138,10 +160,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logmanager</groupId>
-            <artifactId>log4j2-jboss-logmanager</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-service</artifactId>
             <exclusions>
@@ -156,11 +174,8 @@
             <artifactId>jans-client-api</artifactId>
             <version>${jans.version}</version>
         </dependency>
-		<dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-auth-client</artifactId>
-            <version>${jans.version}</version>
-        </dependency>
+
+        
         <!-- Karate -->
         <dependency>
             <groupId>com.intuit.karate</groupId>
@@ -174,11 +189,6 @@
             <artifactId>karate-apache</artifactId>
             <version>${karate.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
 
         <dependency>

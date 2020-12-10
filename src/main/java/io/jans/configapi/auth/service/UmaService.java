@@ -6,6 +6,7 @@
 
 package io.jans.configapi.auth.service;
 
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
@@ -15,7 +16,8 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.configapi.auth.*;
+import io.jans.configapi.auth.client.AuthClientFactory;
+import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -28,7 +30,9 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Arrays;
 import java.util.LinkedList;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -37,7 +41,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-public class UmaService extends Initializable implements Serializable {
+@Named("umaService")
+public class UmaService implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,75 +52,67 @@ public class UmaService extends Initializable implements Serializable {
     @Inject
     ConfigurationService configurationService;
 
-    private UmaMetadata umaMetadata;
-    private UmaPermissionService umaPermissionService;
-    private UmaRptIntrospectionService umaRptIntrospectionService;
+    UmaMetadata umaMetadata;
+    UmaMetadataService umaMetadataService;
+    UmaPermissionService umaPermissionService;
+    UmaRptIntrospectionService umaRptIntrospectionService;
 
-    @Override
-    protected void initInternal() {
-        try {
-            loadUmaConfigurationService();
-        } catch (Exception ex) {
-            throw new ConfigurationException("Failed to load oxAuth UMA configuration", ex);
-        }
-    }
-
-    public UmaMetadata getUmaMetadata() throws Exception {
-        init();
-        return this.umaMetadata;
-    }
-
-    public void loadUmaConfigurationService() throws Exception {
-        this.umaMetadata = getUmaMetadataConfiguration();
+    @PostConstruct
+    public void init() {
+        this.umaMetadataService = AuthClientFactory
+                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
+        this.umaMetadata = umaMetadataService.getMetadata();
         this.umaPermissionService = AuthClientFactory.getUmaPermissionService(this.umaMetadata, false);
         this.umaRptIntrospectionService = AuthClientFactory.getUmaRptIntrospectionService(this.umaMetadata, false);
     }
 
+    public UmaMetadataService getUmaMetadataService() {
+        return this.umaMetadataService;
+    }
+
     @Produces
     @ApplicationScoped
-    @Named("umaMetadataConfiguration")
-    public UmaMetadata getUmaMetadataConfiguration() throws OxIntializationException {
+    @Named("umaMetadata")
+    public UmaMetadata getUmaMetadata() {
+        return this.umaMetadata;
+    }
 
-        log.info("##### Getting UMA Metadata Service ...");
+    public UmaPermissionService getUmaPermissionService() {
+        return this.umaPermissionService;
+    }
 
-        UmaMetadataService umaMetadataService = AuthClientFactory
-                .getUmaMetadataService(configurationService.find().getUmaConfigurationEndpoint(), false);
-
-        log.info("##### Getting UMA Metadata ...");
-        UmaMetadata umaMetadata = umaMetadataService.getMetadata();
-        
-        log.info("##### Getting UMA metadata ... DONE");
-
-        if (umaMetadata == null) {
-            throw new OxIntializationException("UMA meta data configuration is invalid!");
-        }
-
-        return umaMetadata;
+    public UmaRptIntrospectionService getUmaRptIntrospectionService() {
+        return this.umaRptIntrospectionService;
     }
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
-
-        log.trace("Validating RPT, resourceId: {}, scopeIds: {}, authorization: {}", resourceId, scopeIds, authorization);
-
+        log.trace("Validating RPT, patToken:{}, authorization:{}, resourceId: {}, scopeIds: {} ", patToken, authorization, resourceId, scopeIds);
         if (patToken == null) {
-            log.info("Token is blank"); // todo yuriy-> puja: it's not enough to return unauthorize, in UMA ticket has
-                                        // to be registered - DONE call done Permissions ticket
+            log.info("Token is blank"); 
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
             throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
         }
-
+        
         if (StringHelper.isNotEmpty(authorization) && authorization.startsWith("Bearer ")) {
             String rptToken = authorization.substring(7);
+            log.debug("\n\n UmaService::validateRptToken() - rptToken  = " + rptToken);
 
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
-            log.trace("RPT status response: {} ", rptStatusResponse);
+            log.debug("RPT status response: {} ", rptStatusResponse);
+            log.debug("RPT status response: {} "+ rptStatusResponse);
             
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 log.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
             } else {
                 boolean rptHasPermissions = isRptHasPermissions(rptStatusResponse);
 
-                if (rptHasPermissions) {
+                if (rptHasPermissions) {                    
+                    // Verify exact resource
+                    boolean hasResourcePermission = this.hasResourcePermission(rptStatusResponse, resourceId);
+                    if (!hasResourcePermission) {
+                        log.error("Status response for RPT token: '{}', Resource Id '{}', not contains right resource permissions", rptToken,resourceId);
+                    }
+                    
                     // Collect all scopes
                     List<String> returnScopeIds = new LinkedList<String>();
                     for (UmaPermission umaPermission : rptStatusResponse.getPermissions()) {
@@ -141,14 +138,22 @@ public class UmaService extends Initializable implements Serializable {
     private boolean isRptHasPermissions(RptIntrospectionResponse umaRptStatusResponse) {
         return !((umaRptStatusResponse.getPermissions() == null) || umaRptStatusResponse.getPermissions().isEmpty());
     }
+    
+    private boolean hasResourcePermission(RptIntrospectionResponse umaRptStatusResponse, String resourceId) {
+        return umaRptStatusResponse.getPermissions().stream()
+        .anyMatch(p -> p.getResourceId().equalsIgnoreCase(resourceId));
+    }
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
         String authorization = "Bearer " + patToken.getAccessToken();
+        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization+" , rptToken = "+rptToken+"\n\n");
 
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
         try {
-            rptStatusResponse = this.umaRptIntrospectionService.requestRptStatus(authorization, rptToken, "");
+            // rptStatusResponse = this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
+            rptStatusResponse = UmaClient.getRptStatus(this.umaMetadata, authorization, rptToken);
+            log.debug("\n\n UmaService::getStatusResponse() - rptStatusResponse  = " + rptStatusResponse);
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
@@ -166,7 +171,6 @@ public class UmaService extends Initializable implements Serializable {
         String ticket = registerResourcePermission(patToken, resourceId, scopes);
         Response response = null;
         if (StringHelper.isEmpty(ticket)) {
-            // return null;
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             return response;
         }
@@ -190,13 +194,15 @@ public class UmaService extends Initializable implements Serializable {
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
-        PermissionTicket ticket = this.umaPermissionService.registerPermission("Bearer " + patToken.getAccessToken(),
-                UmaPermissionList.instance(permission));
+       
+        PermissionTicket ticket = this.getUmaPermissionService()
+                .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(permission));
+        
         if (ticket == null) {
             return null;
         }
         return ticket.getTicket();
-    }
+    }    
 
     private String getHost(String uri) throws MalformedURLException {
         URL url = new URL(uri);

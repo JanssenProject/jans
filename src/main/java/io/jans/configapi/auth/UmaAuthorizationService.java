@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
@@ -24,6 +25,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
+
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
@@ -40,11 +43,11 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
     @Inject
     PatService patService;
 
-    public void validateAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
+    public void processAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = " + rpt
-                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
-                + method + " , path = " + path + "\n");
+        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = "
+                + rpt + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName()
+                + " , method = " + method + " , path = " + path + "\n");
 
         UmaResource umaResource = getUmaResource(resourceInfo, method, path);
         log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
@@ -59,29 +62,19 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
         // Generate PAT token
         Token patToken = patService.getPatToken();
-        
+
         // Validate Token
         umaService.validateRptToken(patToken, rpt, umaResource.getId(), umaResource.getScopes());
 
     }
 
-    // ??todo: Puja -> To be reviewed by Yuriy Z
-    // Reason for this method :: is mismatch in format of UmaResource name compared
-    // to the method and path coming from filter
-    // Exmaple UMAResource name = [POST, PUT]:::/api/v1/scopes however coming from
-    // filter is simply PUT /api/v1/scopes=UmaResource
-    // Note that to avoid creating multiple UMAResources with same detail except
-    // http method we are combining the http methods.
-    // That is rather than creating two UMAResources as, PUT /api/v1/scopes and POST
-    // /api/v1/scopes we are creating one UmaResource as [POST,
-    // PUT]:::/api/v1/scopes
-    // Please let me know if there is a better approach than this?
     private UmaResource getUmaResource(ResourceInfo resourceInfo, String method, String path) {
         log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
                 + method + " , path = " + path + "\n");
-        log.debug(" UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
-                +UmaResourceProtectionCache.getAllUmaResources());
+        log.debug(
+                " UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
+                        + UmaResourceProtectionCache.getAllUmaResources());
 
         // Verify in cache
         Map<String, UmaResource> resources = UmaResourceProtectionCache.getAllUmaResources();
@@ -102,8 +95,8 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
             if (result != null && result.length > 1) {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
-                log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = "
-                        + pathUrl);
+                log.debug(" UmaAuthorizationService::getUmaResource() - httpmethod = " + httpmethod
+                        + " , pathUrl = " + pathUrl);
                 if (path.equals(pathUrl)) {
                     // Matching url
                     log.debug(" UmaAuthorizationService::getUmaResource() - Matching url, path = " + path
@@ -112,7 +105,8 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
                     // Verify Method
                     if (httpmethod.contains(method)) {
                         umaResource = UmaResourceProtectionCache.getUmaResource(key);
-                        log.debug(" UmaAuthorizationService::getUmaResource() - Matching umaResource =" + umaResource);
+                        log.debug(
+                                " UmaAuthorizationService::getUmaResource() - Matching umaResource =" + umaResource);
                         break;
                     }
 

@@ -1,3 +1,4 @@
+@ignore
 Feature: Uma Resource
 
 Scenario: Fetch all uma resources without bearer token
