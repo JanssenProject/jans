@@ -1,10 +1,12 @@
-# Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
-# Copyright (c) 2020, Janssen Project
+# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+# Copyright (c) 2017, Gluu
 #
 # Author: Yuriy Zabrovarnyy
 #
 
 from io.jans.model.custom.script.type.uma import UmaClaimsGatheringType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.uma.service import UmaPctService
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
@@ -85,6 +87,19 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         return 2
 
     def getPageForStep(self, step, context):
+        print "Trying to get claims from PCT ..."
+        pctCode = context.getRequestParameters().get("pct")
+        if pctCode is not None:
+            pct = CdiUtil.bean(UmaPctService).getByCode(pctCode[0])
+            country = pct.getClaims().getClaimAsString("country")
+            print "Country from pct: " + country
+            city = pct.getClaims().getClaimAsString("city")
+            print "City from pct: " + city
+
+            if country == 'US' and city == 'NY':
+                return ""
+
+        print "Claims not found in pct ..."
         if step == 1:
             return "/uma2/sample/country.xhtml"
         elif step == 2:
