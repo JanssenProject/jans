@@ -9,6 +9,7 @@ package io.jans.configapi.rest.resource;
 import io.jans.config.oxtrust.DbApplicationConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.Fido2Service;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
 
@@ -29,14 +30,14 @@ public class Fido2ConfigResource extends BaseResource {
     Fido2Service fido2Service;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS})
     public Response getFido2Configuration() throws Exception{
         DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
         return Response.ok(Jackson.asJsonNode(dbApplicationConfiguration.getDynamicConf())).build();
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS})
     public Response updateFido2Configuration(@NotNull String fido2ConfigJson) {
         checkResourceNotNull(fido2ConfigJson, FIDO2_CONFIGURATION);
          this.fido2Service.merge(fido2ConfigJson);

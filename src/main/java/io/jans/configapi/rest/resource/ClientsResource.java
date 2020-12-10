@@ -11,6 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ClientService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
@@ -48,7 +49,7 @@ public class ClientsResource extends BaseResource {
     EncryptionService encryptionService;
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS})
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -62,7 +63,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
@@ -71,7 +72,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         String inum = clientService.generateInumForNewClient();
         client.setClientId(inum);
@@ -87,7 +88,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
     public Response updateClient(@Valid Client client) throws EncryptionException {
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
@@ -110,7 +111,7 @@ public class ClientsResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         Client existingClient = clientService.getClientByInum(inum);
@@ -123,7 +124,7 @@ public class ClientsResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);

@@ -15,7 +15,7 @@
     "AUTHORIZATION_CODE"
   ],
   "dynamicRegistrationCustomAttributes": [
-    "oxAuthTrustedClient"
+    "jansTrustedClnt"
   ],
   "defaultSubjectType": "pairwise",
   "legacyDynamicRegistrationScopeParam": false

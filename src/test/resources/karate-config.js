@@ -15,22 +15,22 @@ function() {
     var port = props.get('karate.test.port');
     var baseUrl = url + (port ? ':' + port : '');
     var config = {
-	    env: env,
-	    accessToken: '766708fa-de7f-4f1f-bf93-71dd9323bfed',
-	    baseUrl: baseUrl,
-	    healthUrl: baseUrl + '/health',
-	    fido2Url: baseUrl + '/api/v1/fido2/config',
-	    acrsUrl: baseUrl + '/api/v1/acrs',
-	    authConfigurationUrl: baseUrl + '/api/v1/config/oxauth',
-	    scriptsUrl: baseUrl + '/api/v1/config/scripts',
-	    cacheUrl: baseUrl + '/api/v1/config/cache',
-	    ldapUrl: baseUrl + '/api/v1/config/database/ldap',
-	    openidclients_url: baseUrl + '/api/v1/openid/clients',
-	    scopes_url: baseUrl + '/api/v1/scopes',
-	    openidsectors_url: baseUrl + '/api/v1/openid/sectoridentifiers',
-	    umaresources_url: baseUrl + '/api/v1/uma/resources',
-	    attributes_url: baseUrl + '/api/v1/attributes',
-	    smtp_url: baseUrl + '/api/v1/config/smtp',
+        env: env,
+        accessToken: '4bf3914e-7bd0-47cf-9b5d-af2c0d7b7c7d',
+        baseUrl: baseUrl,
+        healthUrl: baseUrl + '/health',
+        fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
+        acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
+        authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
+        scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
+        cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
+        ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
+        openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
+        scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
+        openidsectors_url: baseUrl + '/jans-config-api/api/v1/openid/sectoridentifiers',
+        umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
+        attributes_url: baseUrl + '/jans-config-api/api/v1/attributes',
+        smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp',	    
     };
 
     karate.configure('connectTimeout', 30000);

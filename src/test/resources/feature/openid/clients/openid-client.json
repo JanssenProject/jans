@@ -15,7 +15,7 @@
         "spontaneousScopes": []
     },
     "claimRedirectURI": [
-        "https://gluu.gasmyr.com/oxauth/restv1/uma/gather_claims"
+        "https://gluu.gasmyr.com/jans-auth/restv1/uma/gather_claims"
     ],
     "deletable": false,
     "disabled": false,
@@ -31,19 +31,19 @@
     "logoutUri": [
         "https://gluu.gasmyr.com/identity/ssologout.htm"
     ],
-    "oxAuthAppType": "WEB",
-    "oxAuthPersistClientAuthorizations": false,
-    "oxAuthPostLogoutRedirectURIs": [
+    "jansAppTyp": "WEB",
+    "jansPersistClntAuthzs": false,
+    "jansPostLogoutRedirectURI": [
         "https://gluu.gasmyr.com/identity/finishlogout.htm"
     ],
-    "oxAuthRedirectURIs": [
+    "jansRedirectURI": [
         "https://gluu.gasmyr.com/identity/uri1"
     ],
-    "oxAuthScopes": [
+    "jansScope": [
         "inum=F0C4,ou=scopes,o=gluu"
     ],
-    "oxAuthTrustedClient": true,
-    "oxIncludeClaimsInIdToken": false,
+    "jansTrustedClnt": true,
+    "jansInclClaimsInIdTkn": false,
     "responseTypes": [
         "CODE"
     ],

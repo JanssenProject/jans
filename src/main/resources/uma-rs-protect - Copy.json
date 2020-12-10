@@ -1,395 +1,395 @@
 {"resources":[
     {
-        "path":"/api/v1/acrs",
+        "path":"/jans-config-api/api/v1/acrs",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/acrs.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/acrs.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/attributes",
+        "path":"/jans-config-api/api/v1/attributes",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/attributes.readonly"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/attributes.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/cache",
+        "path":"/jans-config-api/api/v1/config/cache",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/cache.readonly"
                 ]
             },
             {
                 "httpMethods":["PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/cache.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/cache/redis",
+        "path":"/jans-config-api/api/v1/config/cache/redis",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/cache.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/cache.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/cache/in-memory",
+        "path":"/jans-config-api/api/v1/config/cache/in-memory",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/cache.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/cache.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/cache/native-persistence",
+        "path":"/jans-config-api/api/v1/config/cache/native-persistence",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/cache.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/cache.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/cache/memcached",
+        "path":"/jans-config-api/api/v1/config/cache/memcached",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/cache.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/cache.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/openid/clients",
+        "path":"/jans-config-api/api/v1/openid/clients",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/openid/clients.readonly"
                 ]
             },
             {
                 "httpMethods":["PATCH","POST","PUT","DELETE"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/openid/clients.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/oxauth",
+        "path":"/jans-config-api/api/v1/jans-auth-server/config",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly"
                 ]
             },
             {
                 "httpMethods":["PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/jans-auth-server/config/properties.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/smtp",
+        "path":"/jans-config-api/api/v1/config/smtp",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
-                ]
-            },
-            {
-                "httpMethods":["PATCH","POST","PUT","DELETE"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
-                ]
-            }
-        ]
-    },
-    {
-        "path":"/api/v1/config/smtp/test",
-        "conditions":[
-            {
-                "httpMethods":["POST"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
-                ]
-            }
-        ]
-    },
-    {
-        "path":"/api/v1/config/database/couchbase",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
-                ]
-            },
-            {
-                "httpMethods":["PATCH","POST","PUT","DELETE"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
-                ]
-            }
-        ]
-    },
-    {
-        "path":"/api/v1/config/database/couchbase/test",
-        "conditions":[
-            {
-                "httpMethods":["POST"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
-                ]
-            }
-        ]
-    },
-    {
-        "path":"/api/v1/config/scripts",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/smtp.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT","DELETE"],
                 "scopes":[
+                    "https://jans.io/oauth/config/smtp.write"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/smtp/test",
+        "conditions":[
+            {
+                "httpMethods":["POST"],
+                "scopes":[
+                    "https://jans.io/oauth/config/smtp.readonly"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/database/couchbase",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/couchbase.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH","POST","PUT","DELETE"],
+                "scopes":[
                     "https://jans.io/oauth/scopes/config-api-write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/scripts/type/{type}",
+        "path":"/jans-config-api/api/v1/config/database/couchbase/test",
         "conditions":[
             {
-                "httpMethods":["GET"],
+                "httpMethods":["POST"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/database/couchbase.readonly"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/scripts/inum/{inum}",
+        "path":"/jans-config-api/api/v1/config/scripts",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/scripts.readonly"
+                ]
+            },
+            {
+                "httpMethods":["POST","PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scripts.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/scripts/{inum}",
+        "path":"/jans-config-api/api/v1/config/scripts/type/{type}",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scripts.readonly"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/scripts/inum/{inum}",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scripts.readonly"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/scripts/{inum}",
         "conditions":[
             {
                 "httpMethods":["DELETE"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/scripts.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/fido2/config",
+        "path":"/jans-config-api/api/v1/fido2/config",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/fido2.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/fido2.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/jwks",
+        "path":"/jans-config-api/api/v1/config/jwks",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/jwks.readonly"
                 ]
             },
             {
                 "httpMethods":["PATCH","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/jwks.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap",
+        "path":"/jans-config-api/api/v1/config/database/ldap",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/database/ldap.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/database/ldap.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap/{name}",
+        "path":"/jans-config-api/api/v1/config/database/ldap/{name}",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/database/ldap.readonly"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/database/ldap.write"
                 ]
             }
         ]
     },
     {
-        "path":"/api/v1/config/database/ldap/test",
+        "path":"/jans-config-api/api/v1/config/database/ldap/test",
         "conditions":[
             {
                 "httpMethods":["POST"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/database/ldap.readonly"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/logging",
+        "path":"/jans-config-api/api/v1/logging",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/logging.readonly"
                 ]
             },
             {
                 "httpMethods":["PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/logging.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/openid/sectoridentifiers",
+        "path":"/jans-config-api/api/v1/openid/sectoridentifiers",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/openid/sectoridentifiers.readonly"
                 ]
             },
             {
-                "httpMethods":["PUT"],
+                "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/openid/sectoridentifiers.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/openid/sectoridentifiers/{inum}",
+        "path":"/jans-config-api/api/v1/openid/sectoridentifiers/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-read"
+                    "https://jans.io/oauth/config/openid/sectoridentifiers.readonly"
                 ]
             },
             {
                 "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/scopes/config-api-write"
+                    "https://jans.io/oauth/config/openid/sectoridentifiers.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/scopes",
+        "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -406,7 +406,7 @@
         ]
     },
      {
-        "path":"/api/v1/scopes/{inum}",
+        "path":"/jans-config-api/api/v1/scopes/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -423,35 +423,35 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources",
+        "path":"/jans-config-api/api/v1/uma/resources",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                   "https://jans.io/oauth/config/uma.resources.write"
+                   "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/uma/resources/{id}",
+        "path":"/jans-config-api/api/v1/uma/resources/{id}",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.write"
+                    "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]

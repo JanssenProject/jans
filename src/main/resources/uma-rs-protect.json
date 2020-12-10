@@ -1,6 +1,23 @@
 {"resources":[
+    {
+        "path":"/jans-config-api/api/v1/jans-auth-server/config",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.write"
+                ]
+            }
+        ]
+    },
    {
-        "path":"/api/v1/scopes",
+        "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -17,7 +34,7 @@
         ]
     },
      {
-        "path":"/api/v1/scopes/{inum}",
+        "path":"/jans-config-api/api/v1/scopes/{inum}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -34,35 +51,35 @@
         ]
     },
      {
-        "path":"/api/v1/uma/resources",
+        "path":"/jans-config-api/api/v1/uma/resources",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                 "httpMethods":["POST","PUT"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.write"
+                    "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]
     },
      {
-        "path":"/api/v1/uma/resources/{id}",
+        "path":"/jans-config-api/api/v1/uma/resources/{id}",
         "conditions":[
             {
                 "httpMethods":["GET"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.readonly"
+                    "https://jans.io/oauth/config/uma/resources.readonly"
                 ]
             },
             {
                "httpMethods":["DELETE","PATCH"],
                 "scopes":[
-                    "https://jans.io/oauth/config/uma.resources.write"
+                    "https://jans.io/oauth/config/uma/resources.write"
                 ]
             }
         ]

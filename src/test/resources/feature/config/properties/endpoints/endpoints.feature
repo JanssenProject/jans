@@ -1,5 +1,5 @@
 @ignore
-Feature: Verify oxAuth available endpoints.
+Feature: Verify jans-auth available endpoints.
 
 	Background:
   	* def mainUrl = endpointsUrl

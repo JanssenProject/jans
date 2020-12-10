@@ -11,7 +11,7 @@ public class ApiConstants {
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
     public static final String JWKS = "/jwks";
-    public static final String OXAUTH = "/oxauth";
+    public static final String JANS_AUTH = "/jans-auth-server";
     public static final String LOGGING = "/logging";
     public static final String METRICS = "/metrics";
     public static final String BACKCHANNEL = "/backchannel";

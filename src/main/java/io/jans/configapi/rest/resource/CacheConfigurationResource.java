@@ -11,6 +11,7 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
+import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
@@ -53,14 +54,14 @@ public class CacheConfigurationResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
     public Response getCacheConfiguration() {
         return Response.ok(loadCacheConfiguration()).build();
     }
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
     public Response patchCacheConfiguration(@NotNull String requestString) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
@@ -74,14 +75,14 @@ public class CacheConfigurationResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
     public Response getRedisConfiguration() {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
 
     @PUT
     @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
     public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setRedisConfiguration(redisConfiguration);
@@ -92,14 +93,14 @@ public class CacheConfigurationResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
     public Response getInMemoryConfiguration() {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
 
     @PUT
     @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
     public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setInMemoryConfiguration(inMemoryConfiguration);
@@ -111,14 +112,14 @@ public class CacheConfigurationResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
     public Response getNativePersistenceConfiguration() {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
 
     @PUT
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
     public Response updateNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
@@ -129,14 +130,14 @@ public class CacheConfigurationResource extends BaseResource {
 
     @GET
     @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = {READ_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
     public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
 
     @PUT
     @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
     public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setMemcachedConfiguration(memcachedConfiguration);

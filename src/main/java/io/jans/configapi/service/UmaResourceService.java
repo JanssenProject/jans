@@ -6,6 +6,7 @@
 
 package io.jans.configapi.service;
 
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
@@ -16,6 +17,8 @@ import io.jans.util.StringHelper;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -40,10 +43,20 @@ public class UmaResourceService {
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
         Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-
-        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, jsIdFilter, sizeLimit);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
+        return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter, sizeLimit);
     }
-
+    
+    public List<UmaResource> findResourcesByName(String name, int sizeLimit) {
+        if (StringUtils.isNotBlank(name)) {
+            Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.displayName, name);
+            return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter,
+                    sizeLimit);
+        }
+        return null;
+    }
+    
     public List<UmaResource> getAllResources(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null, sizeLimit);
     }

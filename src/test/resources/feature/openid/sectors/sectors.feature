@@ -1,3 +1,4 @@
+@ignore
 Feature: Openid connect sectors
 
 Scenario: Fetch all openid connect sectors without bearer token

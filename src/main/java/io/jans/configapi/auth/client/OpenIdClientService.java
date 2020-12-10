@@ -1,11 +1,14 @@
 package io.jans.configapi.auth.client;
 
-import io.jans.as.model.common.IntrospectionResponse;
-
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.as.model.common.IntrospectionResponse;
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+@RegisterRestClient
+@ApplicationScoped
 public interface OpenIdClientService {
 
     @POST
