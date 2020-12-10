@@ -60,6 +60,8 @@ public class ConfigurationFactory {
         } else {
             BASE_DIR = null;
         }
+        
+        APP_EXECUTION_MODE = System.getProperty("app.mode");
     }
 
     private static final String BASE_DIR;
@@ -68,7 +70,8 @@ public class ConfigurationFactory {
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
-
+    private static final String APP_EXECUTION_MODE;
+    
     @Inject
     Logger log;
 
@@ -78,7 +81,7 @@ public class ConfigurationFactory {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
-
+    
     private AppConfiguration appConfiguration;
     private StaticConfiguration staticConf;
     private WebKeysConfiguration jwks;
@@ -129,8 +132,7 @@ public class ConfigurationFactory {
 
     public static String getConfigAppPropertiesFile() {
         return API_PROTECTION_TYPE;
-    }
- 
+    } 
 
     public static String getApiClientId() {
         return API_CLIENT_ID;
@@ -140,6 +142,9 @@ public class ConfigurationFactory {
         return API_UMA_CLIENT_PASSWORD;
     }
     
+    public static String getAppExecutionMode() {
+        return APP_EXECUTION_MODE;
+    }
     
     public void create() {
         loadBaseConfiguration();

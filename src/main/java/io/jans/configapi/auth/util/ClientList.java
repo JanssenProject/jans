@@ -1,4 +1,4 @@
-package io.jans.configapi.auth;
+package io.jans.configapi.auth.util;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

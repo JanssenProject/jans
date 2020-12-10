@@ -45,13 +45,12 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     public void processAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = "
+        log.trace(" UmaAuthorizationService::validateAuthorization() - rpt = "
                 + rpt + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName()
                 + " , method = " + method + " , path = " + path + "\n");
 
         UmaResource umaResource = getUmaResource(resourceInfo, method, path);
-        log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
-
+       
         if (umaResource.getScopes() == null || umaResource.getScopes().isEmpty())
             return; // nothing to validate. Resource is not protected.
 
@@ -69,13 +68,10 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
     }
 
     private UmaResource getUmaResource(ResourceInfo resourceInfo, String method, String path) {
-        log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
+        log.trace(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
                 + method + " , path = " + path + "\n");
-        log.debug(
-                " UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
-                        + UmaResourceProtectionCache.getAllUmaResources());
-
+    
         // Verify in cache
         Map<String, UmaResource> resources = UmaResourceProtectionCache.getAllUmaResources();
 
@@ -83,7 +79,6 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         Set<String> keys = resources.keySet();
         List<String> filteredPaths = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
 
-        log.debug(" UmaAuthorizationService::getUmaResource() - filteredPaths = " + filteredPaths);
         if (filteredPaths == null || filteredPaths.isEmpty()) {
             throw new WebApplicationException("No matching resource found .",
                     Response.status(Response.Status.UNAUTHORIZED).build());
