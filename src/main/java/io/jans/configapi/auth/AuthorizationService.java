@@ -7,6 +7,7 @@
 package io.jans.configapi.auth;
 
 import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.filters.ProtectedApi;
 import org.slf4j.Logger;
 
@@ -28,7 +29,7 @@ public abstract class AuthorizationService implements Serializable {
     Logger log;
     
     @Inject
-    UmaResourceProtectionCache resourceProtectionCache;
+    AuthUtil authUtil;
 
     public abstract void processAuthorization(String token, ResourceInfo resourceInfo, String method,
             String path) throws Exception;
@@ -38,21 +39,13 @@ public abstract class AuthorizationService implements Serializable {
     }
 
     public List<String> getRequestedScopes(String path) {
-        UmaResource resource = resourceProtectionCache.getUmaResource(path);
-        log.debug(" resource = "+resource);
-        return resource.getScopes(); 
+        return authUtil.getRequestedScopes(path); 
     }
     
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        Class<?> resourceClass = resourceInfo.getResourceClass();
-        ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<String>();
-        if (typeAnnotation == null) {
-            addMethodScopes(resourceInfo, scopes);
-        } else {
-            scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            addMethodScopes(resourceInfo, scopes);
-        }
+        scopes = authUtil.getRequestedScopes(resourceInfo);
+        addMethodScopes(resourceInfo, scopes);
         return scopes;
     }
 
