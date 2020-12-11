@@ -61,7 +61,7 @@ public class ConfigurationFactory {
             BASE_DIR = null;
         }
         
-        APP_EXECUTION_MODE = System.getProperty("app.mode");
+        APP_EXECUTION_MODE = System.getProperty("app.execution.mode");
     }
 
     private static final String BASE_DIR;
@@ -93,17 +93,17 @@ public class ConfigurationFactory {
     
 
     @Inject
-    @ConfigProperty(name = "apiUmaClientId")
+    @ConfigProperty(name = "api.client.id")
     private static String API_CLIENT_ID;
     
     @Inject
-    @ConfigProperty(name = "apiProtection.type")
-    private static String API_PROTECTION_TYPE;
+    @ConfigProperty(name = "api.test.client.id")
+    private static String API_TEST_CLIENT_ID;    
     
     @Inject
-    @ConfigProperty(name = "apiUmaClientPassword")
-    private static String API_UMA_CLIENT_PASSWORD;
-    
+    @ConfigProperty(name = "api.protection.type")
+    private static String API_PROTECTION_TYPE;
+
     @Inject
     UmaResourceProtectionService umaResourceProtectionService;
     
@@ -130,16 +130,16 @@ public class ConfigurationFactory {
         return APP_PROPERTIES_FILE;
     }
 
-    public static String getConfigAppPropertiesFile() {
+    public static String getApiProtectionType() {
         return API_PROTECTION_TYPE;
-    } 
-
+    }
+    
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
-    
-    public static String getApiClientPassword() {
-        return API_UMA_CLIENT_PASSWORD;
+
+    public static String getApiTestClientId() {
+        return API_TEST_CLIENT_ID;
     }
     
     public static String getAppExecutionMode() {
@@ -295,12 +295,12 @@ public class ConfigurationFactory {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info("=============  createAuthorizationService() - ConfigurationFactory.getConfigAppPropertiesFile() = "+ConfigurationFactory.getConfigAppPropertiesFile());
-        if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
+        log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "+ConfigurationFactory.getApiProtectionType());
+        if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
-            if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
+            if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
                 log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
