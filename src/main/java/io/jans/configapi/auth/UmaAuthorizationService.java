@@ -45,9 +45,7 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     public void processAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.trace(" UmaAuthorizationService::validateAuthorization() - rpt = "
-                + rpt + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName()
-                + " , method = " + method + " , path = " + path + "\n");
+        log.trace("UMA  Authorization parameters , rpt:{}, resourceInfo:{}, method: {}, path: {} ", rpt, resourceInfo, method, path);
 
         UmaResource umaResource = getUmaResource(resourceInfo, method, path);
        

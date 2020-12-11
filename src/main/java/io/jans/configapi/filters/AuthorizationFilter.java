@@ -7,6 +7,7 @@
 package io.jans.configapi.filters;
 
 import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.auth.util.AuthUtil;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -47,9 +48,11 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
     
-
     @Inject
     AuthorizationService authorizationService;
+    
+    @Inject
+    AuthUtil authUtil;
 
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
@@ -60,14 +63,20 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
-
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+authUtil.isTestMode()+"\n\n\n");
+        
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
+            if(authUtil.isTestMode())  {
+                authorizationHeader = this.testAuthenticationPrep(resourceInfo, context.getMethod(), request.getRequestURI());
+            }
+            log.info("\n\n\n AuthorizationFilter::filter() - after testAuthenticationPrep() -  authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+authUtil.isTestMode()+"\n\n\n");
+            
+            //Api protection validation
             this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
@@ -86,5 +95,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
+    
+    private String testAuthenticationPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
+        log.trace("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
+        String token = AUTHENTICATION_SCHEME + authUtil.testPrep(resourceInfo,  method,  path);
+       return token;
+    }
+
 
 }
