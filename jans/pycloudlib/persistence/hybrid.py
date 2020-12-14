@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.persistence.hybrid
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains various helpers related to hybrid (LDAP + Couchbase) persistence.
 """
@@ -8,17 +8,17 @@ This module contains various helpers related to hybrid (LDAP + Couchbase) persis
 import os
 
 from jans.pycloudlib.persistence.couchbase import get_couchbase_mappings
-from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
+from jans.pycloudlib.persistence.couchbase import prefixed_couchbase_mappings
 
 
 def render_hybrid_properties(dest: str) -> None:
     """Render file contains properties to connect to hybrid
-    persistence, i.e. ``/etc/gluu/conf/gluu-hybrid.properties``.
+    persistence, i.e. ``/etc/jans/conf/jans-hybrid.properties``.
 
     :params dest: Absolute path where generated file is located.
     """
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
     if ldap_mapping == "default":
         default_storage = "ldap"
@@ -32,7 +32,7 @@ def render_hybrid_properties(dest: str) -> None:
         for name, mapping in _couchbase_mappings.items()
         if mapping["mapping"] and name != ldap_mapping
     ])
-    ldap_mappings = COUCHBASE_MAPPINGS.get(ldap_mapping, {}).get("mapping") or "default"
+    ldap_mappings = prefixed_couchbase_mappings().get(ldap_mapping, {}).get("mapping") or "default"
 
     out = "\n".join([
         "storages: ldap, couchbase",

@@ -54,29 +54,6 @@ def test_get_sys_random_chars(size):
     assert len(get_sys_random_chars(size)) == size
 
 
-# def test_get_quad():
-#     from jans.pycloudlib.utils import get_quad
-#     assert len(get_quad()) == 4
-
-
-# def test_join_quad_str():
-#     from jans.pycloudlib.utils import join_quad_str
-
-#     # should have dot char
-#     assert join_quad_str(2).find(".") != 0
-#     assert len(join_quad_str(2)) == 9
-
-
-# @pytest.mark.parametrize("val, expected", [
-#     ("@1234", "1234"),
-#     ("!1234", "1234"),
-#     (".1234", "1234")
-# ])
-# def test_safe_inum_str(val, expected):
-#     from jans.pycloudlib.utils import safe_inum_str
-#     assert safe_inum_str(val) == expected
-
-
 @pytest.mark.parametrize("cmd", ["echo foobar"])
 def test_exec_cmd(cmd):
     from jans.pycloudlib.utils import exec_cmd
@@ -146,8 +123,8 @@ def test_cert_to_truststore(tmpdir):
     from jans.pycloudlib.utils import cert_to_truststore
 
     tmp = tmpdir.mkdir("jans")
-    keystore_file = tmp.join("gluu.jks")
-    cert_file = tmp.join("gluu.crt")
+    keystore_file = tmp.join("jans.jks")
+    cert_file = tmp.join("jans.crt")
 
     # dummy cert
     cert_file.write("""-----BEGIN CERTIFICATE-----
@@ -176,7 +153,7 @@ FRnpMhUJ4+bn+h0kxS4agwb2uCSO4Ge7edViq6ZFZnnfOG6zsz3VJRV71Zw2CQAL
 -----END CERTIFICATE-----""")
 
     _, _, code = cert_to_truststore(
-        "gluu_https", str(cert_file), str(keystore_file), "secret",
+        "jans_https", str(cert_file), str(keystore_file), "secret",
     )
     assert code == 0
 
@@ -185,7 +162,7 @@ def test_get_server_certificate(tmpdir, httpsserver):
     from jans.pycloudlib.utils import get_server_certificate
 
     host, port = httpsserver.server_address
-    filepath = tmpdir.mkdir("jans").join("gluu.crt")
+    filepath = tmpdir.mkdir("jans").join("jans.crt")
 
     cert = get_server_certificate(host, port, str(filepath))
     assert cert == filepath.read()

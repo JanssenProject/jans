@@ -1,25 +1,21 @@
 """
 jans.pycloudlib.secret.vault_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains secret adapter class to interact with Vault.
 """
 
 import logging
 import os
-from typing import (
-    Any,
-    Tuple,
-    Union,
-)
+from typing import Any
+from typing import Tuple
+from typing import Union
 
 import hvac
 
 from jans.pycloudlib.secret.base_secret import BaseSecret
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
 
@@ -29,79 +25,82 @@ class VaultSecret(BaseSecret):
 
     The following environment variables are used to instantiate the client:
 
-    - ``GLUU_SECRET_VAULT_HOST``
-    - ``GLUU_SECRET_VAULT_PORT``
-    - ``GLUU_SECRET_VAULT_SCHEME``
-    - ``GLUU_SECRET_VAULT_VERIFY``
-    - ``GLUU_SECRET_VAULT_ROLE_ID_FILE``
-    - ``GLUU_SECRET_VAULT_SECRET_ID_FILE``
-    - ``GLUU_SECRET_VAULT_CERT_FILE``
-    - ``GLUU_SECRET_VAULT_KEY_FILE``
-    - ``GLUU_SECRET_VAULT_CACERT_FILE``
+    - ``CN_SECRET_VAULT_HOST``
+    - ``CN_SECRET_VAULT_PORT``
+    - ``CN_SECRET_VAULT_SCHEME``
+    - ``CN_SECRET_VAULT_VERIFY``
+    - ``CN_SECRET_VAULT_ROLE_ID_FILE``
+    - ``CN_SECRET_VAULT_SECRET_ID_FILE``
+    - ``CN_SECRET_VAULT_CERT_FILE``
+    - ``CN_SECRET_VAULT_KEY_FILE``
+    - ``CN_SECRET_VAULT_CACERT_FILE``
+    - ``CN_SECRET_VAULT_NAMESPACE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("GLUU_SECRET_VAULT_")
+            if k.isupper() and k.startswith("CN_SECRET_VAULT_")
         }
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_HOST", "localhost",
+            "CN_SECRET_VAULT_HOST", "localhost",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_PORT", 8200,
+            "CN_SECRET_VAULT_PORT", 8200,
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_SCHEME", "http",
+            "CN_SECRET_VAULT_SCHEME", "http",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_VERIFY", False,
+            "CN_SECRET_VAULT_VERIFY", False,
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
+            "CN_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
         ),
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_SECRET_ID_FILE", "/etc/certs/vault_secret_id",
+            "CN_SECRET_VAULT_SECRET_ID_FILE", "/etc/certs/vault_secret_id",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_CERT_FILE", "/etc/certs/vault_client.crt",
+            "CN_SECRET_VAULT_CERT_FILE", "/etc/certs/vault_client.crt",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_KEY_FILE", "/etc/certs/vault_client.key",
+            "CN_SECRET_VAULT_KEY_FILE", "/etc/certs/vault_client.key",
         )
         self.settings.setdefault(
-            "GLUU_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
+            "CN_SECRET_VAULT_CACERT_FILE", "/etc/certs/vault_ca.crt",
         )
+
+        self.settings.setdefault("CN_SECRET_VAULT_NAMESPACE", "jans")
 
         cert, verify = self._verify_cert(
-            self.settings["GLUU_SECRET_VAULT_SCHEME"],
-            self.settings["GLUU_SECRET_VAULT_VERIFY"],
-            self.settings["GLUU_SECRET_VAULT_CACERT_FILE"],
-            self.settings["GLUU_SECRET_VAULT_CERT_FILE"],
-            self.settings["GLUU_SECRET_VAULT_KEY_FILE"],
+            self.settings["CN_SECRET_VAULT_SCHEME"],
+            self.settings["CN_SECRET_VAULT_VERIFY"],
+            self.settings["CN_SECRET_VAULT_CACERT_FILE"],
+            self.settings["CN_SECRET_VAULT_CERT_FILE"],
+            self.settings["CN_SECRET_VAULT_KEY_FILE"],
         )
 
-        self._request_warning(self.settings["GLUU_SECRET_VAULT_SCHEME"], verify)
+        self._request_warning(self.settings["CN_SECRET_VAULT_SCHEME"], verify)
 
         self.client = hvac.Client(
             url="{}://{}:{}".format(
-                self.settings["GLUU_SECRET_VAULT_SCHEME"],
-                self.settings["GLUU_SECRET_VAULT_HOST"],
-                self.settings["GLUU_SECRET_VAULT_PORT"],
+                self.settings["CN_SECRET_VAULT_SCHEME"],
+                self.settings["CN_SECRET_VAULT_HOST"],
+                self.settings["CN_SECRET_VAULT_PORT"],
             ),
             cert=cert,
             verify=verify,
         )
-        self.prefix = "secret/gluu"
+        self.prefix = f"secret/{self.settings['CN_SECRET_VAULT_NAMESPACE']}"
 
     @property
     def role_id(self):
         """Get the Role ID from file where location is determined
-        by ``GLUU_SECRET_VAULT_ROLE_ID_FILE`` environment variable.
+        by ``CN_SECRET_VAULT_ROLE_ID_FILE`` environment variable.
         """
         try:
-            with open(self.settings["GLUU_SECRET_VAULT_ROLE_ID_FILE"]) as f:
+            with open(self.settings["CN_SECRET_VAULT_ROLE_ID_FILE"]) as f:
                 role_id = f.read()
         except FileNotFoundError:
             role_id = ""
@@ -110,10 +109,10 @@ class VaultSecret(BaseSecret):
     @property
     def secret_id(self):
         """Get the Secret ID from file where location is determined
-        by ``GLUU_SECRET_VAULT_SECRET_ID_FILE`` environment variable.
+        by ``CN_SECRET_VAULT_SECRET_ID_FILE`` environment variable.
         """
         try:
-            with open(self.settings["GLUU_SECRET_VAULT_SECRET_ID_FILE"]) as f:
+            with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
                 secret_id = f.read()
         except FileNotFoundError:
             secret_id = ""
@@ -183,8 +182,8 @@ class VaultSecret(BaseSecret):
             urllib3.disable_warnings()
             logger.warning(
                 "All requests to Vault will be unverified. "
-                "Please adjust GLUU_SECRET_VAULT_SCHEME and "
-                "GLUU_SECRET_VAULT_VERIFY environment variables."
+                "Please adjust CN_SECRET_VAULT_SCHEME and "
+                "CN_SECRET_VAULT_VERIFY environment variables."
             )
 
     def _verify_cert(self, scheme, verify, cacert_file, cert_file, key_file) -> Tuple[Union[None, tuple], Union[bool, str]]:

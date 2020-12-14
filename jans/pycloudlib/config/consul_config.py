@@ -1,25 +1,21 @@
 """
 jans.pycloudlib.config.consul_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains config adapter class to interact with Consul.
 """
 
 import logging
 import os
-from typing import (
-    Any,
-    Tuple,
-    Union,
-)
+from typing import Any
+from typing import Tuple
+from typing import Union
 
 from consul import Consul
 
 from jans.pycloudlib.config.base_config import BaseConfig
-from jans.pycloudlib.utils import (
-    as_boolean,
-    safe_value,
-)
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
 
@@ -30,77 +26,80 @@ class ConsulConfig(BaseConfig):
 
     The following environment variables are used to instantiate the client:
 
-    - ``GLUU_CONFIG_CONSUL_HOST``
-    - ``GLUU_CONFIG_CONSUL_PORT``
-    - ``GLUU_CONFIG_CONSUL_CONSISTENCY``
-    - ``GLUU_CONFIG_CONSUL_SCHEME``
-    - ``GLUU_CONFIG_CONSUL_VERIFY``
-    - ``GLUU_CONFIG_CONSUL_CACERT_FILE``
-    - ``GLUU_CONFIG_CONSUL_CERT_FILE``
-    - ``GLUU_CONFIG_CONSUL_KEY_FILE``
-    - ``GLUU_CONFIG_CONSUL_TOKEN_FILE``
+    - ``CN_CONFIG_CONSUL_HOST``
+    - ``CN_CONFIG_CONSUL_PORT``
+    - ``CN_CONFIG_CONSUL_CONSISTENCY``
+    - ``CN_CONFIG_CONSUL_SCHEME``
+    - ``CN_CONFIG_CONSUL_VERIFY``
+    - ``CN_CONFIG_CONSUL_CACERT_FILE``
+    - ``CN_CONFIG_CONSUL_CERT_FILE``
+    - ``CN_CONFIG_CONSUL_KEY_FILE``
+    - ``CN_CONFIG_CONSUL_TOKEN_FILE``
+    - ``CN_CONFIG_CONSUL_NAMESPACE``
     """
 
     def __init__(self):
         self.settings = {
             k: v
             for k, v in os.environ.items()
-            if k.isupper() and k.startswith("GLUU_CONFIG_CONSUL_")
+            if k.isupper() and k.startswith("CN_CONFIG_CONSUL_")
         }
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_HOST", "localhost",
+            "CN_CONFIG_CONSUL_HOST", "localhost",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_PORT", 8500,
+            "CN_CONFIG_CONSUL_PORT", 8500,
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CONSISTENCY", "stale",
+            "CN_CONFIG_CONSUL_CONSISTENCY", "stale",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_SCHEME", "http",
+            "CN_CONFIG_CONSUL_SCHEME", "http",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_VERIFY", False,
+            "CN_CONFIG_CONSUL_VERIFY", False,
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
+            "CN_CONFIG_CONSUL_CACERT_FILE", "/etc/certs/consul_ca.crt",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
+            "CN_CONFIG_CONSUL_CERT_FILE", "/etc/certs/consul_client.crt",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
+            "CN_CONFIG_CONSUL_KEY_FILE", "/etc/certs/consul_client.key",
         )
 
         self.settings.setdefault(
-            "GLUU_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
+            "CN_CONFIG_CONSUL_TOKEN_FILE", "/etc/certs/consul_token",
         )
 
-        self.prefix = "gluu/config/"
+        self.settings.setdefault("CN_CONFIG_CONSUL_NAMESPACE", "jans")
+
+        self.prefix = f"{self.settings['CN_CONFIG_CONSUL_NAMESPACE']}/config/"
         cert, verify = self._verify_cert(
-            self.settings["GLUU_CONFIG_CONSUL_SCHEME"],
-            self.settings["GLUU_CONFIG_CONSUL_VERIFY"],
-            self.settings["GLUU_CONFIG_CONSUL_CACERT_FILE"],
-            self.settings["GLUU_CONFIG_CONSUL_CERT_FILE"],
-            self.settings["GLUU_CONFIG_CONSUL_KEY_FILE"],
+            self.settings["CN_CONFIG_CONSUL_SCHEME"],
+            self.settings["CN_CONFIG_CONSUL_VERIFY"],
+            self.settings["CN_CONFIG_CONSUL_CACERT_FILE"],
+            self.settings["CN_CONFIG_CONSUL_CERT_FILE"],
+            self.settings["CN_CONFIG_CONSUL_KEY_FILE"],
         )
 
-        self._request_warning(self.settings["GLUU_CONFIG_CONSUL_SCHEME"], verify)
+        self._request_warning(self.settings["CN_CONFIG_CONSUL_SCHEME"], verify)
 
         self.client = Consul(
-            host=self.settings["GLUU_CONFIG_CONSUL_HOST"],
-            port=self.settings["GLUU_CONFIG_CONSUL_PORT"],
-            token=self._token_from_file(self.settings["GLUU_CONFIG_CONSUL_TOKEN_FILE"]),
-            scheme=self.settings["GLUU_CONFIG_CONSUL_SCHEME"],
-            consistency=self.settings["GLUU_CONFIG_CONSUL_CONSISTENCY"],
+            host=self.settings["CN_CONFIG_CONSUL_HOST"],
+            port=self.settings["CN_CONFIG_CONSUL_PORT"],
+            token=self._token_from_file(self.settings["CN_CONFIG_CONSUL_TOKEN_FILE"]),
+            scheme=self.settings["CN_CONFIG_CONSUL_SCHEME"],
+            consistency=self.settings["CN_CONFIG_CONSUL_CONSISTENCY"],
             verify=verify,
             cert=cert,
         )
@@ -108,8 +107,8 @@ class ConsulConfig(BaseConfig):
     def _merge_path(self, key: str) -> str:
         """Add prefix to the key.
 
-        For example, given the prefix is ``gluu/config`` and key ``random``,
-        calling this method returns ``gluu/config/random`` key.
+        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
+        and key ``random``, calling this method returns ``jans/config/random`` key.
 
         :params key: Key name as relative path.
         :returns: Absolute path to prefixed key.
@@ -119,8 +118,8 @@ class ConsulConfig(BaseConfig):
     def _unmerge_path(self, key: str) -> str:
         """Remove prefix from the key.
 
-        For example, given the prefix is ``gluu/config`` and an absolute path
-        ``gluu/config/random``, calling this method returns ``random`` key.
+        For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
+        and an absolute path``jans/config/random``, calling this method returns ``random`` key.
 
         :params key: Key name as relative path.
         :returns: Relative path to key.
@@ -176,8 +175,8 @@ class ConsulConfig(BaseConfig):
             urllib3.disable_warnings()
             logger.warning(
                 "All requests to Consul will be unverified. "
-                "Please adjust GLUU_CONFIG_CONSUL_SCHEME and "
-                "GLUU_CONFIG_CONSUL_VERIFY environment variables."
+                "Please adjust CN_CONFIG_CONSUL_SCHEME and "
+                "CN_CONFIG_CONSUL_VERIFY environment variables."
             )
 
     def _token_from_file(self, path) -> str:

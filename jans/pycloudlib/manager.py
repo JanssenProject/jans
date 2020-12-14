@@ -1,30 +1,22 @@
 """
 jans.pycloudlib.manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains config and secret helpers.
 """
 
 import os
 from collections import namedtuple
-from typing import (
-    Any,
-    AnyStr,
-    NamedTuple,
-)
+from typing import Any
+from typing import AnyStr
+from typing import NamedTuple
 
-from jans.pycloudlib.config import (
-    ConsulConfig,
-    KubernetesConfig,
-)
-from jans.pycloudlib.secret import (
-    KubernetesSecret,
-    VaultSecret,
-)
-from jans.pycloudlib.utils import (
-    decode_text,
-    encode_text,
-)
+from jans.pycloudlib.config import ConsulConfig
+from jans.pycloudlib.config import KubernetesConfig
+from jans.pycloudlib.secret import KubernetesSecret
+from jans.pycloudlib.secret import VaultSecret
+from jans.pycloudlib.utils import decode_text
+from jans.pycloudlib.utils import encode_text
 
 
 class ConfigManager:
@@ -36,7 +28,7 @@ class ConfigManager:
     - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
     """
     def __init__(self):
-        _adapter = os.environ.get("GLUU_CONFIG_ADAPTER", "consul",)
+        _adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul",)
         if _adapter == "consul":
             self.adapter = ConsulConfig()
         elif _adapter == "kubernetes":
@@ -80,7 +72,7 @@ class SecretManager:
     """
 
     def __init__(self):
-        _adapter = os.environ.get("GLUU_SECRET_ADAPTER", "vault",)
+        _adapter = os.environ.get("CN_SECRET_ADAPTER", "vault",)
         if _adapter == "vault":
             self.adapter = VaultSecret()
         elif _adapter == "kubernetes":

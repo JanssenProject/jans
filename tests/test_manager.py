@@ -22,11 +22,11 @@ class GAdapter(object):
 def test_config_manager(adapter, adapter_cls):
     from jans.pycloudlib.manager import ConfigManager
 
-    os.environ["GLUU_CONFIG_ADAPTER"] = adapter
+    os.environ["CN_CONFIG_ADAPTER"] = adapter
     manager = ConfigManager()
 
     assert manager.adapter.__class__.__name__ == adapter_cls
-    os.environ.pop("GLUU_CONFIG_ADAPTER", None)
+    os.environ.pop("CN_CONFIG_ADAPTER", None)
 
 
 @pytest.mark.parametrize("adapter, adapter_cls", [
@@ -37,11 +37,11 @@ def test_config_manager(adapter, adapter_cls):
 def test_secret_manager(adapter, adapter_cls):
     from jans.pycloudlib.manager import SecretManager
 
-    os.environ["GLUU_SECRET_ADAPTER"] = adapter
+    os.environ["CN_SECRET_ADAPTER"] = adapter
     manager = SecretManager()
 
     assert manager.adapter.__class__.__name__ == adapter_cls
-    os.environ.pop("GLUU_SECRET_ADAPTER", None)
+    os.environ.pop("CN_SECRET_ADAPTER", None)
 
 
 def test_config_manager_methods():

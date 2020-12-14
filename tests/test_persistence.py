@@ -41,29 +41,29 @@ def test_render_salt(tmpdir, gmanager, monkeypatch):
     assert dest.read() == f"encodeSalt = {gmanager.secret.get('encoded_salt')}"
 
 
-def test_render_gluu_properties(tmpdir):
-    from jans.pycloudlib.persistence import render_gluu_properties
+def test_render_base_properties(tmpdir):
+    from jans.pycloudlib.persistence import render_base_properties
 
     persistence_type = "ldap"
-    os.environ["GLUU_PERSISTENCE_TYPE"] = persistence_type
+    namespace = "jans"
+    os.environ["CN_PERSISTENCE_TYPE"] = persistence_type
+    os.environ["CN_NAMESPACE"] = namespace
 
-    src = tmpdir.join("gluu.properties.tmpl")
+    src = tmpdir.join("jans.properties.tmpl")
     src.write("""
 persistence.type=%(persistence_type)s
-certsDir=%(certFolder)s
-pythonModulesDir=%(gluuOptPythonFolder)s/libs
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=%(namespace)s
 """.strip())
-    dest = tmpdir.join("gluu.properties")
+    dest = tmpdir.join("jans.properties")
 
     expected = f"""
 persistence.type={persistence_type}
-certsDir=/etc/certs
-pythonModulesDir=/opt/gluu/python/libs
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o={namespace}
 """.strip()
 
-    render_gluu_properties(str(src), str(dest))
+    render_base_properties(str(src), str(dest))
     assert dest.read() == expected
-    os.environ["GLUU_PERSISTENCE_TYPE"] = ""
+    os.environ.clear()
 
 # ====
 # LDAP
@@ -90,9 +90,9 @@ ssl.trustStoreFile: {gmanager.config.get("ldapTrustStoreFn")}
 ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
 """.strip()
 
-    src = tmpdir.join("gluu-ldap.properties.tmpl")
+    src = tmpdir.join("jans-ldap.properties.tmpl")
     src.write(tmpl)
-    dest = tmpdir.join("gluu-ldap.properties")
+    dest = tmpdir.join("jans-ldap.properties")
 
     render_ldap_properties(gmanager, str(src), str(dest))
     assert dest.read() == expected
@@ -113,9 +113,9 @@ ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
 def test_get_couchbase_user(gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 
-    os.environ["GLUU_COUCHBASE_USER"] = "root"
+    os.environ["CN_COUCHBASE_USER"] = "root"
     assert get_couchbase_user(gmanager) == "root"
-    os.environ.pop("GLUU_COUCHBASE_USER", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_password(tmpdir, gmanager):
@@ -124,9 +124,9 @@ def test_get_couchbase_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
 
-    os.environ["GLUU_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_password(gmanager) == "secret"
-    os.environ.pop("GLUU_COUCHBASE_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_encoded_couchbase_password(tmpdir, gmanager):
@@ -135,17 +135,17 @@ def test_get_encoded_couchbase_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
 
-    os.environ["GLUU_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_password(gmanager) != "secret"
-    os.environ.pop("GLUU_COUCHBASE_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_superuser(gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 
-    os.environ["GLUU_COUCHBASE_SUPERUSER"] = ""
+    os.environ["CN_COUCHBASE_SUPERUSER"] = ""
     assert get_couchbase_superuser(gmanager) == ""
-    os.environ.pop("GLUU_COUCHBASE_SUPERUSER", None)
+    os.environ.clear()
 
 
 def test_get_couchbase_superuser_password(tmpdir, gmanager):
@@ -154,9 +154,9 @@ def test_get_couchbase_superuser_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
-    os.environ["GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_couchbase_superuser_password(gmanager) == "secret"
-    os.environ.pop("GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
@@ -165,9 +165,9 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
-    os.environ["GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
+    os.environ["CN_COUCHBASE_SUPERUSER_PASSWORD_FILE"] = str(passwd_file)
     assert get_encoded_couchbase_superuser_password(gmanager) != "secret"
-    os.environ.pop("GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE", None)
+    os.environ.clear()
 
 
 # @pytest.mark.skipif(
@@ -183,11 +183,11 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 #     # dummy cert
 #     cert_file.write(DUMMY_COUCHBASE_CERT)
 
-#     os.environ["GLUU_COUCHBASE_CERT_FILE"] = str(cert_file)
+#     os.environ["CN_COUCHBASE_CERT_FILE"] = str(cert_file)
 #     # gmanager.config.set("couchbaseTrustStoreFn", str(keystore_file))
 #     sync_couchbase_truststore(gmanager)
 #     assert os.path.exists(str(keystore_file))
-#     os.environ.pop("GLUU_COUCHBASE_CERT_FILE", None)
+#     os.environ.clear()
 
 
 @pytest.mark.parametrize("timeout, expected", [
@@ -197,7 +197,7 @@ def test_get_encoded_couchbase_superuser_password(tmpdir, gmanager):
 def test_get_couchbase_conn_timeout(timeout, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_conn_timeout
 
-    os.environ["GLUU_COUCHBASE_CONN_TIMEOUT"] = str(timeout)
+    os.environ["CN_COUCHBASE_CONN_TIMEOUT"] = str(timeout)
     assert get_couchbase_conn_timeout() == expected
 
 
@@ -208,7 +208,7 @@ def test_get_couchbase_conn_timeout(timeout, expected):
 def test_get_couchbase_conn_max_wait(max_wait, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_conn_max_wait
 
-    os.environ["GLUU_COUCHBASE_CONN_MAX_WAIT"] = str(max_wait)
+    os.environ["CN_COUCHBASE_CONN_MAX_WAIT"] = str(max_wait)
     assert get_couchbase_conn_max_wait() == expected
 
 
@@ -221,7 +221,7 @@ def test_get_couchbase_conn_max_wait(max_wait, expected):
 def test_get_couchbase_scan_consistency(scan, expected):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_scan_consistency
 
-    os.environ["GLUU_COUCHBASE_SCAN_CONSISTENCY"] = scan
+    os.environ["CN_COUCHBASE_SCAN_CONSISTENCY"] = scan
     assert get_couchbase_scan_consistency() == expected
 
 
@@ -230,7 +230,7 @@ def test_sync_couchbase_cert(tmpdir):
 
     cert_file = tmpdir.join("couchbase.crt")
     cert_file.write(DUMMY_COUCHBASE_CERT)
-    os.environ["GLUU_COUCHBASE_CERT_FILE"] = str(cert_file)
+    os.environ["CN_COUCHBASE_CERT_FILE"] = str(cert_file)
     assert sync_couchbase_cert() == DUMMY_COUCHBASE_CERT
     os.environ.clear()
 
@@ -269,8 +269,8 @@ def test_client_session_unverified():
 def test_client_session_verified(given, expected):
     from jans.pycloudlib.persistence.couchbase import BaseClient
 
-    os.environ["GLUU_COUCHBASE_VERIFY"] = "true"
-    os.environ["GLUU_COUCHBASE_CERT_FILE"] = given
+    os.environ["CN_COUCHBASE_VERIFY"] = "true"
+    os.environ["CN_COUCHBASE_CERT_FILE"] = given
     client = BaseClient("localhost", "admin", "password")
     assert client.session.verify == expected
     os.environ.clear()
@@ -283,8 +283,8 @@ def test_client_session_verified(given, expected):
 def test_client_session_verified_host(given, expected):
     from jans.pycloudlib.persistence.couchbase import BaseClient
 
-    os.environ["GLUU_COUCHBASE_VERIFY"] = "true"
-    os.environ["GLUU_COUCHBASE_HOST_HEADER"] = given
+    os.environ["CN_COUCHBASE_VERIFY"] = "true"
+    os.environ["CN_COUCHBASE_HOST_HEADER"] = given
     client = BaseClient("localhost", "admin", "password")
     assert client.session.headers["Host"] == expected
     os.environ.clear()
@@ -294,7 +294,7 @@ def test_n1ql_request_body_positional_params():
     from jans.pycloudlib.persistence.couchbase import build_n1ql_request_body
 
     body = build_n1ql_request_body(
-        "SELECT * FROM gluu WHERE del = $1 and active = $2",
+        "SELECT * FROM jans WHERE del = $1 and active = $2",
         False,
         True,
     )
@@ -305,7 +305,7 @@ def test_n1ql_request_body_named_params():
     from jans.pycloudlib.persistence.couchbase import build_n1ql_request_body
 
     body = build_n1ql_request_body(
-        "SELECT * FROM gluu WHERE del = $deleted and active = $active",
+        "SELECT * FROM jans WHERE del = $deleted and active = $active",
         deleted=False,
         active=True,
     )
@@ -321,7 +321,7 @@ def test_n1ql_request_body_named_params():
 def test_render_hybrid_properties_default(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
 
     expected = """
 storages: ldap, couchbase
@@ -330,17 +330,17 @@ storage.ldap.mapping: default
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
 
 
 def test_render_hybrid_properties_user(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "user"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "user"
 
     expected = """
 storages: ldap, couchbase
@@ -349,19 +349,19 @@ storage.ldap.mapping: people, groups, authorizations
 storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_token(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "token"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "token"
 
     expected = """
 storages: ldap, couchbase
@@ -370,19 +370,19 @@ storage.ldap.mapping: tokens
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_session(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "session"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "session"
 
     expected = """
 storages: ldap, couchbase
@@ -391,19 +391,19 @@ storage.ldap.mapping: sessions
 storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_cache(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "cache"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "cache"
 
     expected = """
 storages: ldap, couchbase
@@ -412,19 +412,19 @@ storage.ldap.mapping: cache
 storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)
 
 
 def test_render_hybrid_properties_site(tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
-    os.environ["GLUU_PERSISTENCE_TYPE"] = "hybrid"
-    os.environ["GLUU_PERSISTENCE_LDAP_MAPPING"] = "site"
+    os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
+    os.environ["CN_PERSISTENCE_LDAP_MAPPING"] = "site"
 
     expected = """
 storages: ldap, couchbase
@@ -433,9 +433,9 @@ storage.ldap.mapping: cache-refresh
 storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessions
 """.strip()
 
-    dest = tmpdir.join("gluu-hybrid.properties")
+    dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
 
-    os.environ.pop("GLUU_PERSISTENCE_TYPE", None)
-    os.environ.pop("GLUU_PERSISTENCE_LDAP_MAPPING", None)
+    os.environ.pop("CN_PERSISTENCE_TYPE", None)
+    os.environ.pop("CN_PERSISTENCE_LDAP_MAPPING", None)

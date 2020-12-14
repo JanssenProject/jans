@@ -28,4 +28,4 @@ Preferred installation method is using `pip3`:
 
 .. code-block:: sh
 
-    pip3 install -e git+https://github.com/JanssenProject/jans-pycloudlib@v2#egg=jans-pycloudlib
+    pip3 install -e git+https://github.com/JanssenProject/jans-pycloudlib@master#egg=jans-pycloudlib

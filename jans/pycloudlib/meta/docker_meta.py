@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.meta.docker_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module consists of class to interact with Docker API.
 """
@@ -37,6 +37,7 @@ class DockerMeta(BaseMeta):
         """
         for _, network in container.attrs["NetworkSettings"]["Networks"].items():
             return network["IPAddress"]
+        return ""
 
     def get_container_name(self, container) -> str:
         """Get container's name.

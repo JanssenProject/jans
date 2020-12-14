@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.persistence.couchbase
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains various helpers related to Couchbase persistence.
 """
@@ -14,40 +14,37 @@ from typing import NoReturn
 import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 
-from jans.pycloudlib.utils import (
-    encode_text,
-    cert_to_truststore,
-    as_boolean,
-)
-from jans.pycloudlib.constants import COUCHBASE_MAPPINGS
+from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import as_boolean
 
-GLUU_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
+CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
 logger = logging.getLogger(__name__)
 
 
 def get_couchbase_user(manager=None) -> str:
-    """Get Couchbase username from ``GLUU_COUCHBASE_USER``
+    """Get Couchbase username from ``CN_COUCHBASE_USER``
     environment variable (default to ``admin``).
 
     :params manager: A no-op argument, preserved for backward compatibility.
     :returns: Couchbase username.
     """
-    return os.environ.get("GLUU_COUCHBASE_USER", "admin")
+    return os.environ.get("CN_COUCHBASE_USER", "admin")
 
 
 def get_couchbase_password(manager, plaintext: bool = True) -> str:
-    """Get Couchbase user's password from file (default to
-    ``/etc/gluu/conf/couchbase_password``).
+    """Get Couchbase user's password from file
+    (default to ``/etc/jans/conf/couchbase_password``).
 
-    To change the location, simply pass ``GLUU_COUCHBASE_PASSWORD_FILE`` environment variable.
+    To change the location, simply pass ``CN_COUCHBASE_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params plaintext: Whether to return plaintext or encoded password.
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "GLUU_COUCHBASE_PASSWORD_FILE", "/etc/gluu/conf/couchbase_password"
+        "CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password"
     )
 
     with open(password_file) as f:
@@ -65,27 +62,27 @@ get_encoded_couchbase_password = partial(get_couchbase_password, plaintext=False
 
 
 def get_couchbase_superuser(manager=None) -> str:
-    """Get Couchbase username from ``GLUU_COUCHBASE_SUPERUSER``
+    """Get Couchbase username from ``CN_COUCHBASE_SUPERUSER``
     environment variable (default to empty-string).
 
     :params manager: A no-op argument, preserved for backward compatibility.
     :returns: Couchbase username.
     """
-    return os.environ.get("GLUU_COUCHBASE_SUPERUSER", "")
+    return os.environ.get("CN_COUCHBASE_SUPERUSER", "")
 
 
 def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
     """Get Couchbase superuser's password from file (default to
-    ``/etc/gluu/conf/couchbase_superuser_password``).
+    ``/etc/jans/conf/couchbase_superuser_password``).
 
-    To change the location, simply pass ``GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
+    To change the location, simply pass ``CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params plaintext: Whether to return plaintext or encoded password.
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
-        "GLUU_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/gluu/conf/couchbase_superuser_password"
+        "CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password"
     )
 
     with open(password_file) as f:
@@ -100,6 +97,19 @@ def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
 #: This is a shortcut of :func:`get_couchbase_superuser_password` with ``plaintext``
 #: argument set as ``False``.
 get_encoded_couchbase_superuser_password = partial(get_couchbase_superuser_password, plaintext=False)
+
+
+def prefixed_couchbase_mappings():
+    prefix = os.environ.get("CN_NAMESPACE", "jans")
+    mappings = {
+        "default": {"bucket": prefix, "mapping": ""},
+        "user": {"bucket": f"{prefix}_user", "mapping": "people, groups, authorizations"},
+        "cache": {"bucket": f"{prefix}_cache", "mapping": "cache"},
+        "site": {"bucket": f"{prefix}_site", "mapping": "cache-refresh"},
+        "token": {"bucket": f"{prefix}_token", "mapping": "tokens"},
+        "session": {"bucket": f"{prefix}_session", "mapping": "sessions"},
+    }
+    return mappings
 
 
 def get_couchbase_mappings(persistence_type: str, ldap_mapping: str) -> dict:
@@ -124,27 +134,29 @@ def get_couchbase_mappings(persistence_type: str, ldap_mapping: str) -> dict:
     :params ldap_mapping: Mapping that stored in LDAP persistence.
     :returns: A map of Couchbase buckets.
     """
+    mappings = prefixed_couchbase_mappings()
+
     if persistence_type == "hybrid":
         return {
             name: mapping
-            for name, mapping in COUCHBASE_MAPPINGS.items()
+            for name, mapping in mappings.items()
             if name != ldap_mapping
         }
-    return COUCHBASE_MAPPINGS
+    return mappings
 
 
 def get_couchbase_conn_timeout() -> int:
     """Get connection timeout to Couchbase server.
 
     Default connection timeout is 10000  milliseconds. To change the value, pass
-    `GLUU_COUCHBASE_CONN_TIMEOUT` environment variable.
+    `CN_COUCHBASE_CONN_TIMEOUT` environment variable.
 
     :returns: Connection timeout (in milliseconds).
     """
     default = 10000
 
     try:
-        val = int(os.environ.get("GLUU_COUCHBASE_CONN_TIMEOUT", default))
+        val = int(os.environ.get("CN_COUCHBASE_CONN_TIMEOUT", default))
     except ValueError:
         val = default
     return val
@@ -154,14 +166,14 @@ def get_couchbase_conn_max_wait() -> int:
     """Get connection maximum wait time to Couchbase server.
 
     Default time is 20000  milliseconds. To change the value, pass
-    `GLUU_COUCHBASE_CONN_MAX_WAIT` environment variable.
+    `CN_COUCHBASE_CONN_MAX_WAIT` environment variable.
 
     :returns: Connection wait time (in milliseconds).
     """
     default = 20000
 
     try:
-        val = int(os.environ.get("GLUU_COUCHBASE_CONN_MAX_WAIT", default))
+        val = int(os.environ.get("CN_COUCHBASE_CONN_MAX_WAIT", default))
     except ValueError:
         val = default
     return val
@@ -180,7 +192,7 @@ def get_couchbase_scan_consistency() -> str:
     """
     opts = ("not_bounded", "request_plus", "statement_plus")
     default = "not_bounded"
-    opt = os.environ.get("GLUU_COUCHBASE_SCAN_CONSISTENCY", default)
+    opt = os.environ.get("CN_COUCHBASE_SCAN_CONSISTENCY", default)
     if opt not in opts:
         opt = default
     return opt
@@ -188,15 +200,15 @@ def get_couchbase_scan_consistency() -> str:
 
 def render_couchbase_properties(manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Couchbase server,
-    i.e. ``/etc/gluu/conf/gluu-couchbase.properties``.
+    i.e. ``/etc/jans/conf/jans-couchbase.properties``.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
     """
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
-    hostname = os.environ.get("GLUU_COUCHBASE_URL", "localhost")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
+    hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
 
     _couchbase_mappings = get_couchbase_mappings(persistence_type, ldap_mapping)
     couchbase_buckets = []
@@ -212,9 +224,9 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
             f"bucket.{mapping['bucket']}.mapping: {mapping['mapping']}"
         )
 
-    # always have `gluu` as default bucket
-    if "gluu" not in couchbase_buckets:
-        couchbase_buckets.insert(0, "gluu")
+    bucket_prefix = os.environ.get("CN_NAMESPACE", "jans")
+    if bucket_prefix not in couchbase_buckets:
+        couchbase_buckets.insert(0, bucket_prefix)
 
     with open(src) as fr:
         txt = fr.read()
@@ -225,13 +237,13 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "couchbase_server_user": get_couchbase_user(manager),
                 "encoded_couchbase_server_pw": get_encoded_couchbase_password(manager),
                 "couchbase_buckets": ", ".join(couchbase_buckets),
-                "default_bucket": "gluu",
+                "default_bucket": bucket_prefix,
                 "couchbase_mappings": "\n".join(couchbase_mappings),
                 "encryption_method": "SSHA-256",
                 "ssl_enabled": "true",
                 "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn"),
                 "encoded_couchbaseTrustStorePass": encode_text(
-                    GLUU_COUCHBASE_TRUSTSTORE_PASSWORD,
+                    CN_COUCHBASE_TRUSTSTORE_PASSWORD,
                     manager.secret.get("encoded_salt"),
                 ).decode(),
                 "couchbase_conn_timeout": get_couchbase_conn_timeout(),
@@ -243,7 +255,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
 
 # DEPRECATED
 def sync_couchbase_cert(manager=None) -> str:
-    cert_file = os.environ.get("GLUU_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     with open(cert_file) as f:
         return f.read()
 
@@ -255,10 +267,10 @@ def sync_couchbase_truststore(manager, dest: str = "") -> None:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params dest: Absolute path where generated file is located.
     """
-    cert_file = os.environ.get("GLUU_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
-        "gluu_couchbase", cert_file, dest, GLUU_COUCHBASE_TRUSTSTORE_PASSWORD,
+        "couchbase", cert_file, dest, CN_COUCHBASE_TRUSTSTORE_PASSWORD,
     )
 
 
@@ -268,7 +280,7 @@ class BaseClient:
 
     def __init__(self, hosts, user, password):
         self._hosts = hosts
-        self.host = None
+        self.host = ""
         self.user = user
         self.password = password
         self._session = None
@@ -281,21 +293,23 @@ class BaseClient:
 
         To enable certificate verification:
 
-        - set ``GLUU_COUCHBASE_VERIFY`` environment variable to ``true`` (default to ``false``)
-        - ensure ``GLUU_COUCHBASE_CERT_FILE`` pointed to valid Couchbase cluster
+        - set ``CN_COUCHBASE_VERIFY`` environment variable to ``true`` (default to ``false``)
+        - ensure ``CN_COUCHBASE_CERT_FILE`` pointed to valid Couchbase cluster
           certificate (default to ``/etc/certs/couchbase.crt``)
-        - optionally, set ``GLUU_COUCHBASE_HOST_HEADER`` to match Common Name
+        - optionally, set ``CN_COUCHBASE_HOST_HEADER`` to match Common Name
           or any of SubjectAltName defined in certificate (default to ``localhost``)
         """
+        suppress_verification_warning()
+
         if not self._session:
             self._session = requests.Session()
             self._session.verify = False
 
-            verify = as_boolean(os.environ.get("GLUU_COUCHBASE_VERIFY", False))
+            verify = as_boolean(os.environ.get("CN_COUCHBASE_VERIFY", False))
             if verify:
                 self._session.mount("https://", HostHeaderSSLAdapter())
-                self._session.verify = os.environ.get("GLUU_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
-                self._session.headers["Host"] = os.environ.get("GLUU_COUCHBASE_HOST_HEADER") or "localhost"
+                self._session.verify = os.environ.get("CN_COUCHBASE_CERT_FILE") or "/etc/certs/couchbase.crt"
+                self._session.headers["Host"] = os.environ.get("CN_COUCHBASE_HOST_HEADER") or "localhost"
         return self._session
 
     def resolve_host(self) -> str:
@@ -310,10 +324,11 @@ class BaseClient:
                 resp = self.healthcheck(_host)
                 if resp.ok:
                     self.host = _host
-                    return self.host
+                    break
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={resp.reason}")
             except Exception as exc:
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={exc}")
+        return self.host
 
     def healthcheck(self, host) -> NoReturn:
         """Run healthcheck to a host.
@@ -531,3 +546,17 @@ class CouchbaseClient:
         return self.rest_client.exec_api(
             f"settings/rbac/users/local/{username}", data=data, method="PUT",
         )
+
+    def get_index_nodes(self):
+        resp = self.rest_client.exec_api("pools/default", method="GET")
+        if not resp.ok:
+            return []
+        return [node for node in resp.json()["nodes"] if "index" in node["services"]]
+
+
+# backward-compat
+def suppress_verification_warning():
+    import urllib3
+
+    if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", True)):
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

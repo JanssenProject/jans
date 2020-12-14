@@ -56,7 +56,7 @@ def test_vault_secret_role_id(gvault_secret, tmpdir):
     file_ = tmpdir.join("vault_role_id.txt")
     file_.write("role-id")
 
-    gvault_secret.settings["GLUU_SECRET_VAULT_ROLE_ID_FILE"] = str(file_)
+    gvault_secret.settings["CN_SECRET_VAULT_ROLE_ID_FILE"] = str(file_)
     assert gvault_secret.role_id == "role-id"
 
 
@@ -68,7 +68,7 @@ def test_vault_secret_secret_id(gvault_secret, tmpdir):
     file_ = tmpdir.join("vault_secret_id.txt")
     file_.write("secret-id")
 
-    gvault_secret.settings["GLUU_SECRET_VAULT_SECRET_ID_FILE"] = str(file_)
+    gvault_secret.settings["CN_SECRET_VAULT_SECRET_ID_FILE"] = str(file_)
     assert gvault_secret.secret_id == "secret-id"
 
 

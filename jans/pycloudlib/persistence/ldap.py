@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.persistence.ldap
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains various helpers related to LDAP persistence.
 """
@@ -9,14 +9,13 @@ import os
 
 
 def render_ldap_properties(manager, src: str, dest: str) -> None:
-    """Render file contains properties to connect to LDAP server,
-    i.e. ``/etc/gluu/conf/gluu-ldap.properties``.
+    """Render file contains properties to connect to LDAP server.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
     """
-    ldap_url = os.environ.get("GLUU_LDAP_URL", "localhost:1636")
+    ldap_url = os.environ.get("CN_LDAP_URL", "localhost:1636")
     ldap_hostname, ldaps_port = ldap_url.split(":")
 
     with open(src) as f:

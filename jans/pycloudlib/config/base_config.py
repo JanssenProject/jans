@@ -1,14 +1,12 @@
 """
 jans.pycloudlib.config.base_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains base class for config adapter.
 """
 
-from typing import (
-    Any,
-    NoReturn,
-)
+from typing import Any
+from typing import NoReturn
 
 
 class BaseConfig:

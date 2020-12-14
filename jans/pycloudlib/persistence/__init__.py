@@ -1,18 +1,15 @@
 import os
 
-from jans.pycloudlib.persistence.couchbase import (  # noqa: F401
-    render_couchbase_properties,
-    sync_couchbase_truststore,
-)
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties  # noqa: F401
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore  # noqa: F401
+
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties  # noqa: F401
-from jans.pycloudlib.persistence.ldap import (  # noqa: F401
-    render_ldap_properties,
-    sync_ldap_truststore,
-)
+from jans.pycloudlib.persistence.ldap import render_ldap_properties  # noqa: F401
+from jans.pycloudlib.persistence.ldap import sync_ldap_truststore  # noqa: F401
 
 
 def render_salt(manager, src: str, dest: str) -> None:
-    """Render file contains salt string, i.e. ``/etc/gluu/conf/salt``.
+    """Render file contains salt string.
 
     The generated file has the following contents:
 
@@ -34,9 +31,8 @@ def render_salt(manager, src: str, dest: str) -> None:
         f.write(rendered_txt)
 
 
-def render_gluu_properties(src: str, dest: str) -> None:
-    """Render file contains properties for Gluu Server,
-    i.e. ``/etc/gluu/conf/gluu.properties``.
+def render_base_properties(src: str, dest: str) -> None:
+    """Render file contains properties for Janssen Server.
 
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
@@ -46,8 +42,7 @@ def render_gluu_properties(src: str, dest: str) -> None:
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
-            "gluuOptPythonFolder": "/opt/gluu/python",
-            "certFolder": "/etc/certs",
-            "persistence_type": os.environ.get("GLUU_PERSISTENCE_TYPE", "ldap"),
+            "persistence_type": os.environ.get("CN_PERSISTENCE_TYPE", "ldap"),
+            "namespace": os.environ.get("CN_NAMESPACE", "jans"),
         }
         f.write(rendered_txt)

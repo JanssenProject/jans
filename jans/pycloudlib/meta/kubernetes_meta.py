@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.meta.kubernetes_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module consists of class to interact with Kubernetes API.
 """
@@ -43,7 +43,8 @@ class KubernetesMeta(BaseMeta):
         :params label: Label name, i.e. ``APP_NAME=oxauth``.
         :returns: List of container objects.
         """
-        return self.client.list_pod_for_all_namespaces(label_selector=label).items
+        namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
+        return self.client.list_namespaced_pod(namespace, label_selector=label).items
 
     def get_container_ip(self, container) -> str:
         """Get container's IP address.
@@ -77,6 +78,7 @@ class KubernetesMeta(BaseMeta):
             container.metadata.name,
             container.metadata.namespace,
             command=["tar", "xvf", "-", "-C", "/"],
+            container=self._get_main_container_name(container),
             stderr=True,
             stdin=True,
             stdout=True,
@@ -119,8 +121,27 @@ class KubernetesMeta(BaseMeta):
             container.metadata.name,
             container.metadata.namespace,
             command=shlex.split(cmd),
+            container=self._get_main_container_name(container),
             stderr=True,
             stdin=True,
             stdout=True,
             tty=False,
         )
+
+    def _get_main_container_name(self, container) -> str:
+        """Get the pod's main container name.
+
+        :params container: Container object.
+        """
+        name = ""
+        for cntr in container.spec.containers:
+            if not cntr.env:
+                continue
+
+            for env in cntr.env:
+                if env.name == "CN_CONTAINER_MAIN_NAME":
+                    name = env.value
+                    break
+
+        # add fallback (if needed)
+        return name or container.spec.containers[0].name

@@ -1,6 +1,6 @@
 """
 jans.pycloudlib.wait
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 This module consists of startup order utilities.
 """
@@ -14,15 +14,11 @@ import backoff
 import ldap3
 import requests
 
-from jans.pycloudlib.persistence.couchbase import (
-    get_couchbase_user,
-    get_couchbase_password,
-    CouchbaseClient,
-)
-from jans.pycloudlib.utils import (
-    as_boolean,
-    decode_text,
-)
+from jans.pycloudlib.persistence.couchbase import get_couchbase_user
+from jans.pycloudlib.persistence.couchbase import get_couchbase_password
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import decode_text
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +34,7 @@ def get_wait_max_time() -> int:
     """Get maximum time accepted by ``wait_for`` function.
 
     Default maximum time is 300 seconds. To change the value, pass
-    `GLUU_WAIT_MAX_TIME` environment variable.
+    `CN_WAIT_MAX_TIME` environment variable.
 
     .. code-block:: python
 
@@ -47,7 +43,7 @@ def get_wait_max_time() -> int:
         from jans.pycloudlib import get_manager
         from jans.pycloudlib.wait import wait_for_config
 
-        os.environ["GLUU_WAIT_MAX_TIME"] = "1200"
+        os.environ["CN_WAIT_MAX_TIME"] = "1200"
 
         manager = get_manager()
         wait_for_config(manager)
@@ -56,7 +52,7 @@ def get_wait_max_time() -> int:
     """
     default = 60 * 5
     try:
-        max_time = int(os.environ.get("GLUU_WAIT_MAX_TIME", default))
+        max_time = int(os.environ.get("CN_WAIT_MAX_TIME", default))
     except ValueError:
         max_time = default
     return max(1, max_time)
@@ -66,7 +62,7 @@ def get_wait_interval() -> int:
     """Get interval time between each execution of ``wait_for`` function.
 
     Default interval time is 10 seconds. To change the value, pass
-    `GLUU_WAIT_SLEEP_DURATION` environment variable.
+    `CN_WAIT_SLEEP_DURATION` environment variable.
 
     .. code-block:: python
 
@@ -75,7 +71,7 @@ def get_wait_interval() -> int:
         from jans.pycloudlib import get_manager
         from jans.pycloudlib.wait import wait_for_config
 
-        os.environ["GLUU_WAIT_SLEEP_DURATION"] = "10"
+        os.environ["CN_WAIT_SLEEP_DURATION"] = "10"
 
         manager = get_manager()
         wait_for_config(manager)
@@ -84,7 +80,7 @@ def get_wait_interval() -> int:
     """
     default = 10
     try:
-        interval = int(os.environ.get("GLUU_WAIT_SLEEP_DURATION", default))
+        interval = int(os.environ.get("CN_WAIT_SLEEP_DURATION", default))
     except ValueError:
         interval = default
     return max(1, interval)
@@ -169,32 +165,32 @@ def wait_for_ldap(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("GLUU_LDAP_URL", "localhost:1636")
+    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
     user = manager.config.get("ldap_binddn")
     password = decode_text(
         manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
     )
 
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "ldap")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
+    namespace = os.environ.get("CN_NAMESPACE", "jans")
 
-    # a minimum service stack is having oxTrust, hence check whether entry
-    # for oxTrust exists in LDAP
+    # a minimum service stack is having auth-server configuration
     default_search = (
-        "ou=oxtrust,ou=configuration,o=gluu",
-        "(objectClass=oxTrustConfiguration)",
+        f"ou=jans-auth,ou=configuration,o={namespace}",
+        "(objectClass=jansAppConf)",
     )
 
     if persistence_type == "hybrid":
         # `cache` and `token` mapping only have base entries
         search_mapping = {
             "default": default_search,
-            "user": ("inum=60B7,ou=groups,o=gluu", "(objectClass=gluuGroup)"),
+            "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=jansGrp)"),
             "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
-            "cache": ("ou=cache,o=gluu", "(ou=cache)"),
-            "token": ("ou=tokens,o=gluu", "(ou=tokens)"),
-            "session": ("ou=sessions,o=gluu", "(ou=sessions)"),
+            "cache": (f"ou=cache,o={namespace}", "(ou=cache)"),
+            "token": (f"ou=tokens,o={namespace}", "(ou=tokens)"),
+            "session": (f"ou=sessions,o={namespace}", "(ou=sessions)"),
         }
         search = search_mapping[ldap_mapping]
     else:
@@ -219,7 +215,7 @@ def wait_for_ldap_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("GLUU_LDAP_URL", "localhost:1636")
+    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
     user = manager.config.get("ldap_binddn")
     password = decode_text(
         manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
@@ -246,22 +242,22 @@ def wait_for_couchbase(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("GLUU_COUCHBASE_URL", "localhost")
+    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
     user = get_couchbase_user(manager)
     password = get_couchbase_password(manager)
 
-    persistence_type = os.environ.get("GLUU_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("GLUU_PERSISTENCE_LDAP_MAPPING", "default")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
+    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
+    bucket_prefix = os.environ.get("CN_NAMESPACE", "jans")
 
-    # only `gluu` and `gluu_user` buckets that may have initial data;
+    # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;
-    # by default we will choose the `gluu` bucket
-    bucket, key = "gluu", "configuration_oxtrust"
+    bucket, key = bucket_prefix, "configuration_jans-auth"
 
     # if `hybrid` is selected and default mapping is stored in LDAP,
-    # the `gluu` bucket won't have data, hence we check the `gluu_user` instead
+    # the default bucket won't have data, hence we check the user bucket instead
     if persistence_type == "hybrid" and ldap_mapping == "default":
-        bucket, key = "gluu_user", "groups_60B7"
+        bucket, key = f"{bucket_prefix}_user", "groups_60B7"
 
     cb_client = CouchbaseClient(host, user, password)
 
@@ -290,7 +286,7 @@ def wait_for_couchbase_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("GLUU_COUCHBASE_URL", "localhost")
+    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
     user = get_couchbase_user(manager)
     password = get_couchbase_password(manager)
 
@@ -309,7 +305,7 @@ def wait_for_oxauth(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    addr = os.environ.get("GLUU_OXAUTH_BACKEND", "localhost:8081")
+    addr = os.environ.get("CN_OXAUTH_BACKEND", "localhost:8081")
     url = f"http://{addr}/oxauth/.well-known/openid-configuration"
     req = requests.get(url)
 
@@ -325,7 +321,7 @@ def wait_for_oxtrust(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    addr = os.environ.get("GLUU_OXTRUST_BACKEND", "localhost:8082")
+    addr = os.environ.get("CN_OXTRUST_BACKEND", "localhost:8082")
     url = f"http://{addr}/identity/finishlogout.htm"
     req = requests.get(url)
 
@@ -345,9 +341,10 @@ def wait_for_oxd(manager, **kwargs):
 
     urllib3.disable_warnings()
 
-    addr = os.environ.get("GLUU_OXD_SERVER_URL", "localhost:8443")
+    addr = os.environ.get("CN_OXD_SERVER_URL", "localhost:8443")
+    verify = as_boolean(os.environ.get("CN_OXD_SERVER_VERIFY", False))
     url = f"https://{addr}/health-check"
-    req = requests.get(url, verify=False)
+    req = requests.get(url, verify=verify)
 
     if not req.ok:
         raise WaitError(req.reason)

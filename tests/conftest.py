@@ -24,9 +24,9 @@ def gk8s_config():
     from jans.pycloudlib.config import KubernetesConfig
 
     config = KubernetesConfig()
-    config.settings["GLUU_CONFIG_KUBERNETES_USE_KUBE_CONFIG"] = True
-    config.settings["GLUU_CONFIG_KUBERNETES_NAMESPACE"] = "testing"
-    config.settings["GLUU_CONFIG_KUBERNETES_CONFIGMAP"] = "testing"
+    config.settings["CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG"] = True
+    config.settings["CN_CONFIG_KUBERNETES_NAMESPACE"] = "testing"
+    config.settings["CN_CONFIG_KUBERNETES_CONFIGMAP"] = "testing"
     config.kubeconfig_file = "tests/kubeconfig"
     yield config
 
@@ -54,9 +54,9 @@ def gk8s_secret():
     from jans.pycloudlib.secret import KubernetesSecret
 
     secret = KubernetesSecret()
-    secret.settings["GLUU_SECRET_KUBERNETES_USE_KUBE_CONFIG"] = True
-    secret.settings["GLUU_SECRET_KUBERNETES_NAMESPACE"] = "testing"
-    secret.settings["GLUU_SECRET_KUBERNETES_SECRET"] = "testing"
+    secret.settings["CN_SECRET_KUBERNETES_USE_KUBE_CONFIG"] = True
+    secret.settings["CN_SECRET_KUBERNETES_NAMESPACE"] = "testing"
+    secret.settings["CN_SECRET_KUBERNETES_SECRET"] = "testing"
     secret.kubeconfig_file = "tests/kubeconfig"
     yield secret
 

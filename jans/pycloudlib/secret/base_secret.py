@@ -1,14 +1,12 @@
 """
 jans.pycloudlib.secret.base_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module contains base class for secret adapter.
 """
 
-from typing import (
-    Any,
-    NoReturn,
-)
+from typing import Any
+from typing import NoReturn
 
 
 class BaseSecret(object):

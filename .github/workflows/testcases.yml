@@ -4,7 +4,13 @@ on:
   push:
     branches:
       - master
-      - v2
+    paths:
+      - "jans/**"
+      - "tests/**"
+      - "setup.py"
+  pull_request:
+    branches:
+      - master
     paths:
       - "jans/**"
       - "tests/**"
@@ -29,3 +35,14 @@ jobs:
     - name: Test with pytest
       run: |
         tox
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        files: ./coverage1.xml,./coverage2.xml
+        directory: ./coverage/reports/
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
