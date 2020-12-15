@@ -300,12 +300,15 @@ public class ConfigurationFactory {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
+
+            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); //Verify Resources available 
+            
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
                 log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
                 log.info("=============  createAuthorizationService() - UmaAuthorizationService = "+umaResourceProtectionService);
-                umaResourceProtectionService.verifyUmaResources(); //Verify UmaResources available 
+               
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }
         } catch (Exception ex) {
