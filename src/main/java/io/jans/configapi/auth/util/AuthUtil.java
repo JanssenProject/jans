@@ -36,7 +36,9 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -72,6 +74,9 @@ public class AuthUtil {
     ClientService clientService;
 
     @Inject
+    ScopeService scopeService;
+
+    @Inject
     UmaResourceProtectionCache resourceProtectionCache;
 
     @Inject
@@ -83,10 +88,10 @@ public class AuthUtil {
     @PostConstruct
     public void init() throws Exception {
         // Create clients if needed
-        createClientIfNeeded();
+        createClientIfNeeded(); // Todo: Uncomment later - ???
 
         // If test mode then create create token with scopes
-        System.out.println("\n\n isTestMode() = " + isTestMode() + "\n\n");
+        System.out.println("\n AuthUtil::init() - Entry - isTestMode() = " + isTestMode() + "\n");
     }
 
     public String getClientId() {
@@ -110,23 +115,23 @@ public class AuthUtil {
 
     public String getTokenUrl() {
         System.out.println("AuthUtil:::getTokenUrl() - this.configurationService.find().getTokenEndpoint() = "
-                + this.configurationService.find().getTokenEndpoint() + " \n\n");
+                + this.configurationService.find().getTokenEndpoint() + " \n");
         return this.configurationService.find().getTokenEndpoint();
     }
 
     public Client getClient(String clientId) {
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::getClient() - clientId = " + clientId + "\n\n\n\n");
+        System.out.println("\n $$$$$$$$$$$$$$$$$ AuthUtil::getClient() - clientId = " + clientId + "\n");
 
         // Get client
         Client client = clientService.getClientByInum(clientId);
-        System.out.println("\n\n\n AuthUtil::getClient() - client = " + client + " , client.getClientId() = "
-                + client.getClientId() + " , client.getClientSecret() = " + client.getClientSecret() + "\n\n\n\n");
+        System.out.println("\n AuthUtil::getClient() - client = " + client + " , client.getClientId() = "
+                + client.getClientId() + " , client.getClientSecret() = " + client.getClientSecret() + "\n");
 
         return client;
     }
 
     public String getClientPassword(String clientId) {
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::getClient() - clientId = " + clientId + "\n\n\n\n");
+        System.out.println("\n $$$$$$$$$$$$$$$$$ AuthUtil::getClientPassword() - clientId = " + clientId + "\n");
         return this.getClient(clientId).getClientSecret();
     }
 
@@ -138,12 +143,28 @@ public class AuthUtil {
         String decryptedPassword = null;
         if (clientPassword != null) {
             try {
+                System.out.println(
+                        "\n $$$$$$$$$$$$$$$$$ AuthUtil::decryptPassword() - clientPassword = " + clientPassword + "\n");
                 decryptedPassword = encryptionService.decrypt(clientPassword);
             } catch (EncryptionException ex) {
                 log.error("Failed to decrypt password", ex);
             }
         }
         return decryptedPassword;
+    }
+
+    public String encryptPassword(String clientPassword) {
+        String encryptedPassword = null;
+        if (clientPassword != null) {
+            try {
+                System.out.println(
+                        "\n $$$$$$$$$$$$$$$$$ AuthUtil::encryptPassword() - clientPassword = " + clientPassword + "\n");
+                encryptedPassword = encryptionService.encrypt(clientPassword);
+            } catch (EncryptionException ex) {
+                log.error("Failed to decrypt password", ex);
+            }
+        }
+        return encryptedPassword;
     }
 
     public List<String> getRequestedScopes(String path) {
@@ -153,17 +174,94 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
+        System.out.println(
+                " AuthUtil:::getRequestedScopes() - resourceInfo.toString() = " + resourceInfo.toString() + "\n");
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<String>();
-        if (typeAnnotation != null) {
+        if (typeAnnotation == null) {
+            addMethodScopes(resourceInfo, scopes);
+            System.out.println(
+                    " AuthUtil:::getRequestedScopes() - If typeAnnotation==null then - resourceClass.getName() = "
+                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
+        } else {
             scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
+            System.out.println(
+                    " AuthUtil:::getRequestedScopes() - If typeAnnotation NOT null then - resourceClass.getName() _1 = "
+                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
+            addMethodScopes(resourceInfo, scopes);
+            System.out.println(
+                    " AuthUtil:::getRequestedScopes() - If typeAnnotation NOT null then - resourceClass.getName() _2 = "
+                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
         }
+        System.out.println(" AuthUtil:::getRequestedScopes() Exit - resourceInfo.getResourceClass() = "
+                + resourceInfo.getResourceClass() + " , scopes = " + scopes + "\n\n");
         return scopes;
     }
 
+    public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
+        System.out.println(" AuthUtil:::validateScope() - authScopes = " + authScopes + " , resourceScopes = "
+                + resourceScopes + '\n');
+        Set<String> authScopeSet = new HashSet<String>(authScopes);
+        Set<String> resourceScopeSet = new HashSet<String>(resourceScopes);
+        return authScopeSet.containsAll(resourceScopeSet);
+    }
+
+    private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
+        System.out.println(
+                " AuthUtil:::addMethodScopes() - resourceInfo = " + resourceInfo + " , scopes = " + scopes + '\n');
+        Method resourceMethod = resourceInfo.getResourceMethod();
+        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+        if (methodAnnotation != null) {
+            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+        }
+        System.out.println(" AuthUtil:::addMethodScopes() - FINAL -resourceInfo = " + resourceInfo + " , scopes = "
+                + scopes + '\n');
+    }
+
+    public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
+            throws Exception {
+        System.out.println("\n AuthUtil::requestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId
+                + " ,scopes = " + scopes + "\n");
+
+        // Get clientSecret
+        String clientSecret = this.getClientPassword(clientId);
+        clientSecret = "test1234"; // Todo: Remove later - ???
+        
+        // distinct scopes
+        Set<String> scopesSet = new HashSet<String>(scopes);
+
+        // String scope = scopeType.getValue();
+        String scope = new String();
+        if (scopesSet != null && scopesSet.size() > 0) {
+            for (String s : scopes) {
+                scope = scope + " " + s;
+            }
+        }
+
+        System.out.println("\n AuthUtil::requestAccessToken() - scope = " + scope + "\n");
+        TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+        //
+        System.out.println(
+                "\n AuthUtil::requestAccessToken() - tokenResponse.toString() = " + tokenResponse.toString() + "\n");
+        if (tokenResponse != null) {
+
+            final String accessToken = tokenResponse.getAccessToken();
+
+            final Integer expiresIn = tokenResponse.getExpiresIn();
+            System.out.println("\n AuthUtil::requestAccessToken() - tokenResponse.getScope() = "
+                    + tokenResponse.getScope() + "\n");
+            if (Util.allNotBlank(accessToken)) {
+                return new Token(null, null, accessToken, scope, expiresIn);
+            }
+        }
+        return null;
+    }
+
     public Token requestPat(final String tokenUrl, final String clientId, final List<String> scopes) throws Exception {
-        return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopes);
+        // return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId),
+        // scopes);
+        return request(tokenUrl, clientId, "test1234", scopes);
     }
 
     public Token request(final String tokenUrl, final String clientId, final String clientSecret,
@@ -175,18 +273,23 @@ public class AuthUtil {
             UmaScopeType scopeType, List<String> scopes) throws Exception {
 
         String scope = scopeType.getValue();
+        // String scope = new String();
         if (scopes != null && scopes.size() > 0) {
             for (String s : scopes) {
-                scope = scope + " " + s;
+                scope = scope.trim() + " " + s;
             }
         }
-
+        System.out.println("\n AuthUtil::request() - scope = " + scope + "\n");
         TokenResponse tokenResponse = AuthClientFactory.patRequest(tokenUrl, clientId, clientSecret, scope);
-
+        // TokenResponse tokenResponse = AuthClientFactory.patRequest_2(tokenUrl,
+        // clientId, clientSecret, scope);
+        System.out.println("\n AuthUtil::request() - tokenResponse.toString() = " + tokenResponse.toString() + "\n");
         if (tokenResponse != null) {
 
             final String patToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
+            System.out
+                    .println("\n AuthUtil::request() - tokenResponse.getScope() = " + tokenResponse.getScope() + "\n");
             if (Util.allNotBlank(patToken)) {
                 return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
             }
@@ -196,14 +299,13 @@ public class AuthUtil {
 
     public TokenResponse requestRpt(final String clientId, final String resourceId, final List<String> scopes,
             Token patToken) throws Exception {
-        System.out.println(
-                "\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::requestRpt() - clientId = " + clientId + " ,  resourceId = "
-                        + resourceId + " ,  scopes = " + scopes + " , patToken  = " + patToken + " \n\n\n\n");
+        System.out.println("\n $$$$$$$$$$$$$$$$$ AuthUtil::requestRpt() - clientId = " + clientId + " ,  resourceId = "
+                + resourceId + " ,  scopes = " + scopes + " , patToken  = " + patToken + " \n");
 
         // Get client
         Client client = getClient(clientId);
-        System.out.println("\n\n\n AuthUtil::requestPat() - client = " + client + " , client.getClientId() = "
-                + client.getClientId() + " , client.getClientSecret() = " + client.getClientSecret() + "\n\n\n\n");
+        System.out.println("\n AuthUtil::requestPat() - client = " + client + " , client.getClientId() = "
+                + client.getClientId() + " , client.getClientSecret() = " + client.getClientSecret() + "\n");
 
         // Generate Token with required scope for testing
         String scope = UmaScopeType.PROTECTION.getValue();
@@ -217,13 +319,11 @@ public class AuthUtil {
         UmaPermission umaPermission = new UmaPermission();
         umaPermission.setResourceId(resourceId);
         umaPermission.setScopes(scopes);
-        System.out.println(
-                "\n\n\n AuthUtil::registerTestClientRptTicket() - UmaPermission = " + umaPermission + "\n\n\n\n");
+        System.out.println("\n AuthUtil::requestRpt() - UmaPermission = " + umaPermission + "\n");
         PermissionTicket permissionTicket = umaService.getUmaPermissionService()
                 .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(umaPermission));
 
-        System.out.println("\n\n\n AuthUtil::registerTestClientRptTicket() FINAL - permissionTicket = "
-                + permissionTicket + "\n\n\n\n");
+        System.out.println("\n AuthUtil::requestRpt() FINAL - permissionTicket = " + permissionTicket + "\n");
         if (permissionTicket == null) {
             return null;
         }
@@ -233,15 +333,25 @@ public class AuthUtil {
         try {
             // rptStatusResponse =
             // this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
-            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), client.getClientId(),
-                    this.decryptPassword(client.getClientSecret()), scopes, permissionTicket.getTicket(),
-                    GrantType.OXAUTH_UMA_TICKET, AuthenticationMethod.CLIENT_SECRET_BASIC);
+            /*
+             * tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(),
+             * client.getClientId(), this.decryptPassword(client.getClientSecret()), scopes,
+             * permissionTicket.getTicket(), GrantType.OXAUTH_UMA_TICKET,
+             * AuthenticationMethod.CLIENT_SECRET_BASIC);
+             */
+            // Error - 14:40:40 ERROR [io.ja.co.au.ut.AuthUtil] (executor-thread-2) Failed
+            // to decrypt password:
+            // io.jans.util.security.StringEncrypter$EncryptionException:
+            // javax.crypto.BadPaddingException: Given final block not properly padded. Such
+            // issues can arise if a bad key is used during decryption.
+            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), client.getClientId(), "test1234", scopes,
+                    permissionTicket.getTicket(), GrantType.OXAUTH_UMA_TICKET,
+                    AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-            System.out.println("\n\n AuthUtil::getStatusResponse() - tokenResponse  = " + tokenResponse);
+            System.out.println("\n AuthUtil::requestRpt() - tokenResponse  = " + tokenResponse);
+            System.out.println("\n AuthUtil::requestRpt() - tokenResponse.toString()  = " + tokenResponse.toString());
             System.out.println(
-                    "\n\n AuthUtil::getStatusResponse() - tokenResponse.toString()  = " + tokenResponse.toString());
-            System.out.println("\n\n AuthUtil::getStatusResponse() - okenResponse.getAccessToken()  = "
-                    + tokenResponse.getAccessToken());
+                    "\n\n AuthUtil::requestRpt() - okenResponse.getAccessToken()  = " + tokenResponse.getAccessToken());
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
@@ -251,12 +361,21 @@ public class AuthUtil {
     }
 
     public String testPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
+        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::testPrep() - Entry -  method = " + method + " ,path = "
+                + path + "\n");
         Token token = null;
+        
+        //Assign scopes t client
+        assignScope(this.getTestClientId(),this.getRequestedScopes(resourceInfo));
+        
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(this.getApiProtectionType())) {
-            token = requestPat(getTokenUrl(), this.getClientId(), getRequestedScopes(resourceInfo));
+            // token = requestPat(getTokenUrl(), this.getTestClientId(),
+            // this.getRequestedScopes(resourceInfo));
+            token = requestAccessToken(getTokenUrl(), this.getTestClientId(), this.getRequestedScopes(resourceInfo));
         } else {
             token = registerTestClientRptTicket(resourceInfo, method, path);
         }
+        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::testPrep() - token = " + token + "\n");
         if (token != null) {
             return token.getAccessToken();
         }
@@ -264,25 +383,24 @@ public class AuthUtil {
     }
 
     public Token registerTestClientRptTicket(ResourceInfo resourceInfo, String method, String path) throws Exception {
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - resourceInfo = "
-                + resourceInfo + "\n\n\n\n");
-
-        List<String> scopes = this.getRequestedScopes(resourceInfo);
         System.out.println(
-                "\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - scopes = " + scopes + "\n\n");
+                "\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - resourceInfo = " + resourceInfo + "\n");
+
+        List<String> scopes = this.getRequestedScopes(path);
+        System.out.println("\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - scopes = " + scopes + "\n");
 
         // Get Pat
         Token patToken = requestPat(this.getTokenUrl(), this.getClientId(), scopes);
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - patToken = " + patToken
-                + "\n\n\n\n");
+        System.out.println(
+                "\n $$$$$$$$$$$$$$$$$ AuthUtil::registerTestClientRptTicket() - patToken = " + patToken + "\n");
 
         UmaResource umaResource = this.getUmaResource(resourceInfo, method, path);
         if (patToken != null && umaResource != null) {
 
             // Register RPT token
             TokenResponse tokenResponse = this.requestRpt(this.getClientId(), umaResource.getId(), scopes, patToken);
-            System.out.println("\n\n\n AuthUtil::registerTestClientRptTicket() FINAL - tokenResponse = " + tokenResponse
-                    + "\n\n\n\n");
+            System.out.println(
+                    "\n AuthUtil::registerTestClientRptTicket() FINAL - tokenResponse = " + tokenResponse + "\n");
 
             if (tokenResponse != null) {
                 final String token = tokenResponse.getAccessToken();
@@ -300,46 +418,43 @@ public class AuthUtil {
         InputStream inputStream = loader.getResourceAsStream("api-client.json");
 
         ClientList clientList = Jackson.createJsonMapper().readValue(inputStream, ClientList.class);
-        System.out.println(" \n\n AuthUtil::createClientIfNeeded() - clientList = " + clientList + "\n\n");
+        System.out.println(" \n AuthUtil::createClientIfNeeded() - clientList = " + clientList + "\n");
         List<Client> clients = clientList.getClients();
 
-        System.out.println(" \n\n AuthUtil::createClientIfNeeded() - clients = " + clients + "\n\n");
+        System.out.println(" \n AuthUtil::createClientIfNeeded() - clients = " + clients + "\n");
 
         Preconditions.checkNotNull(clients, "Config Api Client list cannot be null !!!");
 
         // Create client
         for (Client clt : clients) {
-            System.out.println(" \n\n AuthUtil::createClientIfNeeded() - clt = " + clt + "\n\n");
+            System.out.println(" \n AuthUtil::createClientIfNeeded() - clt = " + clt + "\n");
             // Check if exists
             Client client = null;
 
             try {
                 client = this.clientService.getClientByInum(clt.getClientId());
-                System.out.println(" \n\n AuthUtil::createClientIfNeeded() - Verify client = " + client + "\n\n");
+                System.out.println(" \n AuthUtil::createClientIfNeeded() - Verify client = " + client + "\n");
 
             } catch (Exception ex) {
                 log.error("Error while searching client " + ex);
             }
 
-            System.out.println(
-                    "\n\n @@@@@@@@@@@@@@@@@@@@@@@ AuthUtil::createClientIfNeeded() - Before encryption clt.getClientSecret()  = "
-                            + clt.getClientSecret());
-
             if (client == null) {
                 // Create client
                 clt.setDn(clientService.getDnForClient(clt.getClientId()));
-                System.out.println(" \n\n AuthUtil::createClientIfNeeded() - Create clt = " + clt + "\n\n");
+                clt.setClientSecret(encryptPassword("test1234"));
+                System.out.println(" \n AuthUtil::createClientIfNeeded() - Create clt = " + clt + "\n");
                 this.clientService.addClient(clt);
             } else {
                 clt.setDn(clientService.getDnForClient(clt.getClientId()));
-
-                System.out.println(" \n\n AuthUtil::createClientIfNeeded() - Update clt = " + clt + "\n\n");
+                clt.setClientSecret(encryptPassword("test1234"));
+                System.out.println(" \n AuthUtil::createClientIfNeeded() - Update clt = " + clt + "\n");
                 this.clientService.updateClient(clt);
             }
 
             client = this.clientService.getClientByInum(clt.getClientId());
-            System.out.println(" \n\n @@@@@@@@@@@@@@@@@@@@@@@ AuthUtil::createClientIfNeeded() - Final client = "
-                    + client + "\n\n");
+            System.out.println(
+                    " \n @@@@@@@@@@@@@@@@@@@@@@@ AuthUtil::createClientIfNeeded() - Final client = " + client + "\n");
 
         }
 
@@ -386,6 +501,45 @@ public class AuthUtil {
 
         }
         return umaResource;
+    }
+
+    public void assignScope(final String clientId, final List<String> scopes) {
+        System.out.println("\n AuthClientFactory::assignScope() - Entry - clientId = "+clientId+" , scopes = "+scopes);        
+        //Get Scopes
+        List<String> scopeList = geScopeWithDn(scopes);
+        
+        //Get Client
+        Client client = this.clientService.getClientByInum(clientId);
+        if(client != null && scopeList!=null) {
+            
+            System.out.println(" \n AuthUtil::createClientIfNeeded() - Verify client = " + client + "\n");
+            if (client != null) {
+                //Assign scope                
+                client.setScopes((String[]) scopeList.toArray());
+                this.clientService.updateClient(client);          
+            }
+        }
+        client = this.clientService.getClientByInum(clientId);
+        System.out.println(" \n AuthUtil::assignScope() - Final client = " + client + "\n");
+     
+    }
+
+    public List<String> geScopeWithDn(List<String> scopes) {
+        System.out.println("\n AuthClientFactory::geScopeWithDn() -Exit - scopes = " + scopes + "\n");
+        List<String> scopeList = null;
+        if (scopes != null && scopes.size() > 0) {
+            scopeList = new ArrayList<String>();
+            for (String id : scopes) {
+                List<Scope> searchedScope = this.scopeService.searchScopes(id, 1);
+                if (searchedScope != null && searchedScope.size() > 0) {
+                    for (Scope scope : searchedScope) {
+                        scopeList.add(this.scopeService.getDnForScope(scope.getInum()));
+                    }
+                }
+            }
+        }
+        System.out.println("\n AuthClientFactory::geScopeWithDn() -Exit - scopeList = " + scopeList + "\n");
+        return scopeList;
     }
 
 }

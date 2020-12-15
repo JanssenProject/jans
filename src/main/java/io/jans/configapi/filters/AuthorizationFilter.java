@@ -55,6 +55,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     AuthUtil authUtil;
 
     public void filter(ContainerRequestContext context) {
+        System.out.println("\n\n\n\n AuthorizationFilter::filter() - Entry - authUtil.isTestMode() = " + authUtil.isTestMode() + "\n\n\n");
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
         log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
@@ -83,6 +84,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
             abortWithUnauthorized(context);
         }
+        finally {
+            //TODO::if test mode delete tokens that were created for test client --- ???
+        }
 
     }
 
@@ -98,7 +102,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     
     private String testAuthenticationPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
         log.trace("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
-        String token = AUTHENTICATION_SCHEME + authUtil.testPrep(resourceInfo,  method,  path);
+        System.out.println("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
+        String token = AUTHENTICATION_SCHEME +" "+ authUtil.testPrep(resourceInfo,  method,  path);
        return token;
     }
 

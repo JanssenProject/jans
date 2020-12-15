@@ -13,6 +13,7 @@ import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
@@ -24,6 +25,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
@@ -58,6 +60,7 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
+        System.out.println("\n AuthClientFactory::getIntrospectionResponse() - url = "+url+" ,header = "+header+" ,token = "+token+" , followRedirects = "+followRedirects+"\n");
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                 .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
@@ -72,9 +75,56 @@ public class AuthClientFactory {
 
     }
     
+    public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
+            final String clientSecret, final String scope) {
+        System.out.println("\n AuthClientFactory::requestAccessToken() - tokenUrl = "+tokenUrl+" ,clientId = "+clientId+" ,clientSecret = "+clientSecret+" ,scope = " +scope+"\n");
+           
+        
+        Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        
+        
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        System.out.println("\n AuthClientFactory::requestAccessToken() - multivaluedHashMap = "+multivaluedHashMap+"\n\n");
+
+
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(tokenUrl);
+
+        
+       // Response response = request
+         //       .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        Response response = request.post(Entity.form(multivaluedHashMap));
+        System.out.println("\n AuthClientFactory::requestAccessToken() - response = "+response+"\n\n");
+        
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            
+            return tokenResponse;
+        }
+        return null;
+
+    }//patRequest_2
+    
     public static TokenResponse patRequest(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-
+        System.out.println("\n AuthClientFactory::patRequest() - tokenUrl = "+tokenUrl+" ,clientId = "+clientId+" ,clientSecret = "+clientSecret+" ,scope = " +scope+"\n");
         Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope(scope);
