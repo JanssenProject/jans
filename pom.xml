@@ -48,8 +48,13 @@
 		</repository>
 		<repository>
 			<id>jans</id>
-			<name>Janssen repository</name>
+			<name>Janssen project repository</name>
 			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>bouncycastle</id>
+			<name>Bouncy Castle</name>
+			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 
