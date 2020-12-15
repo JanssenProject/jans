@@ -43,22 +43,19 @@ public abstract class AuthorizationService implements Serializable {
     }
     
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        List<String> scopes = new ArrayList<String>();
-        scopes = authUtil.getRequestedScopes(resourceInfo);
-        addMethodScopes(resourceInfo, scopes);
-        return scopes;
+        return authUtil.getRequestedScopes(resourceInfo);
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        return authScopes.containsAll(resourceScopes);
+        return authUtil.validateScope(authScopes, resourceScopes);
     }
-
-    private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
-        Method resourceMethod = resourceInfo.getResourceMethod();
-        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
-        if (methodAnnotation != null) {
-            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
-        }
-    }
+    /*
+     * private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes)
+     * { Method resourceMethod = resourceInfo.getResourceMethod(); ProtectedApi
+     * methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class); if
+     * (methodAnnotation != null) {
+     * scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList(
+     * ))); } }
+     */
 
 }
