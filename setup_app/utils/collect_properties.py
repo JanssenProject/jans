@@ -122,6 +122,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('oxauth_client_id', '1001.'),
                     ('scim_rs_client_id', '1201.'),
                     ('scim_rp_client_id', '1202.'),
+                    ('jca_client_id', '1801.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'})
                     ]
         self.check_clients(client_var_id_list)
 
@@ -209,4 +210,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'config-api'))
 
     def save(self):
+        if os.path.exists(Config.setup_properties_fn):
+            self.backupFile(Config.setup_properties_fn)
+        last_prop = Config.setup_properties_fn + '.last'
+        if os.path.exists(last_prop):
+            self.backupFile(last_prop)
+
         propertiesUtils.save_properties()
