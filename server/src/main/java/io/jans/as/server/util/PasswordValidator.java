@@ -9,6 +9,7 @@ package io.jans.as.server.util;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.model.attribute.AttributeValidation;
 import io.jans.service.AttributeService;
+import io.jans.service.cdi.util.CdiUtil;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;
@@ -22,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApplicationScoped
-@FacesValidator("gluuPasswordValidator")
+@FacesValidator(value = "gluuPasswordValidator", managed = true)
 public class PasswordValidator implements javax.faces.validator.Validator {
 
 	private static final String USER_PASSWORD = "userPassword";
@@ -37,12 +38,16 @@ public class PasswordValidator implements javax.faces.validator.Validator {
 	@Inject
 	private LanguageBean languageBean;
 
-	public PasswordValidator() {
-
-	}
-
 	@Override
 	public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
+		// This is workaround unless this bug will be fixed in JSF
+		if (attributeService == null) {
+			attributeService = CdiUtil.bean(AttributeService.class);
+		}
+		if (languageBean == null) {
+			languageBean = CdiUtil.bean(LanguageBean.class);
+		}
+
 		AttributeValidation validation = attributeService.getAttributeByName(USER_PASSWORD).getAttributeValidation();
 		if (validation != null) {
 			String regexp = validation.getRegexp();
