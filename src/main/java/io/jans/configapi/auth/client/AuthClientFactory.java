@@ -75,9 +75,55 @@ public class AuthClientFactory {
 
     }
     
+    public static TokenResponse revokeToken(final String revokeTokenUrl, final String clientId, final String clientSecret, final String token) {
+        System.out.println("\n ********** AuthClientFactory::revokeToken() - revokeTokenUrl = "+revokeTokenUrl+" ,clientId = "+clientId+" ,clientSecret = "+clientSecret+" ,token = " +token+" **********  \n");
+           
+        
+        Builder request = ResteasyClientBuilder.newClient().target(revokeTokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+                
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
+        multivaluedHashMap.add(token, "token");
+        multivaluedHashMap.add(clientId, "clientId");
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        System.out.println("\n AuthClientFactory::revokeToken() - multivaluedHashMap = "+multivaluedHashMap+"\n\n");
+
+
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(revokeTokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(revokeTokenUrl);
+
+        
+       // Response response = request
+         //       .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        Response response = request.post(Entity.form(multivaluedHashMap));
+        System.out.println("\n AuthClientFactory::revokeToken() - response = "+response+"\n\n");
+        
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            
+            return tokenResponse;
+        }
+        return null;
+
+    }
+    
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        System.out.println("\n AuthClientFactory::requestAccessToken() - tokenUrl = "+tokenUrl+" ,clientId = "+clientId+" ,clientSecret = "+clientSecret+" ,scope = " +scope+"\n");
+        System.out.println("\n ********** AuthClientFactory::requestAccessToken() - tokenUrl = "+tokenUrl+" ,clientId = "+clientId+" ,clientSecret = "+clientSecret+" ,scope = " +scope+" **********  \n");
            
         
         Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
@@ -120,7 +166,7 @@ public class AuthClientFactory {
         }
         return null;
 
-    }//patRequest_2
+    }
     
     public static TokenResponse patRequest(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {

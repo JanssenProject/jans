@@ -107,27 +107,20 @@ public class AuthUtil {
     }
 
     public boolean isTestMode() {
-        System.out.println("AuthUtil:::isTestMode() - configurationFactory.getAppExecutionMode() = "
-                + configurationFactory.getAppExecutionMode());
         return configurationFactory.getAppExecutionMode() != null
                 && "TEST".equalsIgnoreCase(configurationFactory.getAppExecutionMode());
     }
 
     public String getTokenUrl() {
-        System.out.println("AuthUtil:::getTokenUrl() - this.configurationService.find().getTokenEndpoint() = "
-                + this.configurationService.find().getTokenEndpoint() + " \n");
         return this.configurationService.find().getTokenEndpoint();
+    }
+    
+    public String getTokenRevocationEndpoint() {
+        return this.configurationService.find().getTokenRevocationEndpoint();
     }
 
     public Client getClient(String clientId) {
-        System.out.println("\n $$$$$$$$$$$$$$$$$ AuthUtil::getClient() - clientId = " + clientId + "\n");
-
-        // Get client
-        Client client = clientService.getClientByInum(clientId);
-        System.out.println("\n AuthUtil::getClient() - client = " + client + " , client.getClientId() = "
-                + client.getClientId() + " , client.getClientSecret() = " + client.getClientSecret() + "\n");
-
-        return client;
+        return clientService.getClientByInum(clientId);
     }
 
     public String getClientPassword(String clientId) {
@@ -143,8 +136,6 @@ public class AuthUtil {
         String decryptedPassword = null;
         if (clientPassword != null) {
             try {
-                System.out.println(
-                        "\n $$$$$$$$$$$$$$$$$ AuthUtil::decryptPassword() - clientPassword = " + clientPassword + "\n");
                 decryptedPassword = encryptionService.decrypt(clientPassword);
             } catch (EncryptionException ex) {
                 log.error("Failed to decrypt password", ex);
@@ -157,8 +148,6 @@ public class AuthUtil {
         String encryptedPassword = null;
         if (clientPassword != null) {
             try {
-                System.out.println(
-                        "\n $$$$$$$$$$$$$$$$$ AuthUtil::encryptPassword() - clientPassword = " + clientPassword + "\n");
                 encryptedPassword = encryptionService.encrypt(clientPassword);
             } catch (EncryptionException ex) {
                 log.error("Failed to decrypt password", ex);
@@ -174,56 +163,53 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        System.out.println(
-                " AuthUtil:::getRequestedScopes() - resourceInfo.toString() = " + resourceInfo.toString() + "\n");
+        
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<String>();
         if (typeAnnotation == null) {
             addMethodScopes(resourceInfo, scopes);
-            System.out.println(
-                    " AuthUtil:::getRequestedScopes() - If typeAnnotation==null then - resourceClass.getName() = "
-                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
         } else {
             scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            System.out.println(
-                    " AuthUtil:::getRequestedScopes() - If typeAnnotation NOT null then - resourceClass.getName() _1 = "
-                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
             addMethodScopes(resourceInfo, scopes);
-            System.out.println(
-                    " AuthUtil:::getRequestedScopes() - If typeAnnotation NOT null then - resourceClass.getName() _2 = "
-                            + resourceClass.getName() + " , scopes = " + scopes + '\n');
         }
-        System.out.println(" AuthUtil:::getRequestedScopes() Exit - resourceInfo.getResourceClass() = "
-                + resourceInfo.getResourceClass() + " , scopes = " + scopes + "\n\n");
         return scopes;
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        System.out.println(" AuthUtil:::validateScope() - authScopes = " + authScopes + " , resourceScopes = "
-                + resourceScopes + '\n');
         Set<String> authScopeSet = new HashSet<String>(authScopes);
         Set<String> resourceScopeSet = new HashSet<String>(resourceScopes);
         return authScopeSet.containsAll(resourceScopeSet);
     }
 
     private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
-        System.out.println(
-                " AuthUtil:::addMethodScopes() - resourceInfo = " + resourceInfo + " , scopes = " + scopes + '\n');
         Method resourceMethod = resourceInfo.getResourceMethod();
         ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
         if (methodAnnotation != null) {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
-        System.out.println(" AuthUtil:::addMethodScopes() - FINAL -resourceInfo = " + resourceInfo + " , scopes = "
-                + scopes + '\n');
     }
 
+    public void  revokeToken( final String token) throws Exception {
+        revokeToken( this.getTestClientId(), token);
+    }
+    
+    public void  revokeToken( final String clientId, final String token) throws Exception {
+        System.out.println("\n AuthUtil::revokeToken() - clientId = "+clientId+" ,token = " + token + "\n");       
+       
+        // Get clientSecret
+        String clientSecret = this.getClientPassword(clientId);
+        clientSecret = "test1234"; // Todo: Remove later - ???
+        TokenResponse tokenResponse = AuthClientFactory.revokeToken(this.getTokenRevocationEndpoint(), clientId, clientSecret, token);
+       
+
+    }
+    
     public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
             throws Exception {
         System.out.println("\n AuthUtil::requestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId
                 + " ,scopes = " + scopes + "\n");
-
+        
         // Get clientSecret
         String clientSecret = this.getClientPassword(clientId);
         clientSecret = "test1234"; // Todo: Remove later - ???
@@ -231,28 +217,21 @@ public class AuthUtil {
         // distinct scopes
         Set<String> scopesSet = new HashSet<String>(scopes);
 
-        // String scope = scopeType.getValue();
-        String scope = new String();
+        String scope = ScopeType.OPENID.getValue();
         if (scopesSet != null && scopesSet.size() > 0) {
             for (String s : scopes) {
                 scope = scope + " " + s;
             }
         }
 
-        System.out.println("\n AuthUtil::requestAccessToken() - scope = " + scope + "\n");
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
-        //
-        System.out.println(
-                "\n AuthUtil::requestAccessToken() - tokenResponse.toString() = " + tokenResponse.toString() + "\n");
         if (tokenResponse != null) {
-
+            System.out
+            .println("\n AuthUtil::requestAccessToken() - tokenResponse.getScope() = " + tokenResponse.getScope() + "\n");
             final String accessToken = tokenResponse.getAccessToken();
-
             final Integer expiresIn = tokenResponse.getExpiresIn();
-            System.out.println("\n AuthUtil::requestAccessToken() - tokenResponse.getScope() = "
-                    + tokenResponse.getScope() + "\n");
             if (Util.allNotBlank(accessToken)) {
-                return new Token(null, null, accessToken, scope, expiresIn);
+                return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
             }
         }
         return null;
@@ -273,7 +252,6 @@ public class AuthUtil {
             UmaScopeType scopeType, List<String> scopes) throws Exception {
 
         String scope = scopeType.getValue();
-        // String scope = new String();
         if (scopes != null && scopes.size() > 0) {
             for (String s : scopes) {
                 scope = scope.trim() + " " + s;
@@ -502,6 +480,39 @@ public class AuthUtil {
         }
         return umaResource;
     }
+    
+    public void assignAllScope(final String clientId) {
+        System.out.println("\n AuthUtil::assignAllScope() - Entry - clientId = "+clientId+"\n");        
+        
+        //Get Client
+        Client client = this.clientService.getClientByInum(clientId);
+        if(client != null) {
+            
+            System.out.println(" \n AuthUtil::assignScope() -  client.getAllScope() = " + client.getClientId() + ", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
+            if (client != null) {
+                //Assign scope 
+                client.setScopes(addScopes(client,geScopeWithDn(getAllScopes())));
+                this.clientService.updateClient(client);          
+            }
+        }
+        client = this.clientService.getClientByInum(clientId);
+        System.out.println(" \n AuthUtil::assignScope() - Final -  client.getAllScope() = " + client.getClientId() +", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");     
+    }
+    
+    public List<String> getAllScopes(){
+        List<String> scopes = new ArrayList<String>();
+        
+         // Verify in cache
+         Map<String, Scope> scopeMap = UmaResourceProtectionCache.getAllScopes();
+        
+         Set<String> keys = scopeMap.keySet();
+         
+         for (String id : keys) {
+             Scope scope = UmaResourceProtectionCache.getScope(id);
+             scopes.add(scope.getId());            
+        }
+        return scopes;         
+    }
 
     public void assignScope(final String clientId, final List<String> scopes) {
         System.out.println("\n AuthUtil::assignScope() - Entry - clientId = "+clientId+" , scopes = "+scopes);        
@@ -523,7 +534,6 @@ public class AuthUtil {
     }
 
     public List<String> geScopeWithDn(List<String> scopes) {
-        System.out.println("\n AuthUtil::geScopeWithDn() -Entry - scopes = " + scopes + "\n");
         List<String> scopeList = null;
         if (scopes != null && scopes.size() > 0) {
             scopeList = new ArrayList<String>();
@@ -542,23 +552,20 @@ public class AuthUtil {
     }
     
     public String[] addScopes(Client client, List<String> scopes) {
-        System.out.println("\n AuthUtil::addScopes() - Entry - client.getClientId() = " + client.getClientId() + ", scopes = "+scopes+"\n");
    
         String[] clientScopes = client.getScopes();
-        System.out.println("\n AuthUtil::addScopes() - Arrays.asList(clientScopes) = " + Arrays.asList(clientScopes)+"\n");
        
         //distinct resources
         Set<String> scopeSet = new HashSet<String>(scopes);
-        System.out.println("\n AuthUtil::addScopes() -  scopeSet = "+scopeSet+"\n");
         
+        /*
         if(clientScopes.length>0) {
             for (int i=0;i<clientScopes.length;i++) {
                 scopeSet.add(clientScopes[i]);
             }
-        }
+        }*/
  
         scopes = new ArrayList<String>(scopeSet);
-        System.out.println("\n AuthUtil::addScopes() -  scopes = "+scopes+"\n");
         
         String[] scopeArray = null;
         if(scopes!=null && !scopes.isEmpty()) {
