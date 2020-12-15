@@ -504,42 +504,72 @@ public class AuthUtil {
     }
 
     public void assignScope(final String clientId, final List<String> scopes) {
-        System.out.println("\n AuthClientFactory::assignScope() - Entry - clientId = "+clientId+" , scopes = "+scopes);        
-        //Get Scopes
-        List<String> scopeList = geScopeWithDn(scopes);
+        System.out.println("\n AuthUtil::assignScope() - Entry - clientId = "+clientId+" , scopes = "+scopes);        
         
         //Get Client
         Client client = this.clientService.getClientByInum(clientId);
-        if(client != null && scopeList!=null) {
+        if(client != null) {
             
-            System.out.println(" \n AuthUtil::createClientIfNeeded() - Verify client = " + client + "\n");
+            System.out.println(" \n AuthUtil::assignScope() -  client.getClientId() = " + client.getClientId() + ", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
             if (client != null) {
-                //Assign scope                
-                client.setScopes((String[]) scopeList.toArray());
+                //Assign scope 
+                client.setScopes(addScopes(client,geScopeWithDn(scopes)));
                 this.clientService.updateClient(client);          
             }
         }
         client = this.clientService.getClientByInum(clientId);
-        System.out.println(" \n AuthUtil::assignScope() - Final client = " + client + "\n");
+        System.out.println(" \n AuthUtil::assignScope() - Final -  client.getClientId() = " + client.getClientId() +", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
      
     }
 
     public List<String> geScopeWithDn(List<String> scopes) {
-        System.out.println("\n AuthClientFactory::geScopeWithDn() -Exit - scopes = " + scopes + "\n");
+        System.out.println("\n AuthUtil::geScopeWithDn() -Entry - scopes = " + scopes + "\n");
         List<String> scopeList = null;
         if (scopes != null && scopes.size() > 0) {
             scopeList = new ArrayList<String>();
             for (String id : scopes) {
                 List<Scope> searchedScope = this.scopeService.searchScopes(id, 1);
                 if (searchedScope != null && searchedScope.size() > 0) {
-                    for (Scope scope : searchedScope) {
+                    for (int i=0;i<searchedScope.size();i++) {
+                        Scope scope = searchedScope.get(i);
                         scopeList.add(this.scopeService.getDnForScope(scope.getInum()));
                     }
                 }
             }
         }
-        System.out.println("\n AuthClientFactory::geScopeWithDn() -Exit - scopeList = " + scopeList + "\n");
+        System.out.println("\n AuthUtil::geScopeWithDn() - Exit - scopeList = " + scopeList + "\n");
         return scopeList;
+    }
+    
+    public String[] addScopes(Client client, List<String> scopes) {
+        System.out.println("\n AuthUtil::addScopes() - Entry - client.getClientId() = " + client.getClientId() + ", scopes = "+scopes+"\n");
+   
+        String[] clientScopes = client.getScopes();
+        System.out.println("\n AuthUtil::addScopes() - Arrays.asList(clientScopes) = " + Arrays.asList(clientScopes)+"\n");
+       
+        //distinct resources
+        Set<String> scopeSet = new HashSet<String>(scopes);
+        System.out.println("\n AuthUtil::addScopes() -  scopeSet = "+scopeSet+"\n");
+        
+        if(clientScopes.length>0) {
+            for (int i=0;i<clientScopes.length;i++) {
+                scopeSet.add(clientScopes[i]);
+            }
+        }
+ 
+        scopes = new ArrayList<String>(scopeSet);
+        System.out.println("\n AuthUtil::addScopes() -  scopes = "+scopes+"\n");
+        
+        String[] scopeArray = null;
+        if(scopes!=null && !scopes.isEmpty()) {
+            scopeArray = new String[scopes.size()];
+            for (int i=0;i<scopes.size();i++) {
+                scopeArray[i] = scopes.get(i);         
+            }
+        }
+        
+        System.out.println("\n AuthUtil::addScopes() - scopeArray = " + Arrays.toString(scopeArray)+"\n");
+        return scopeArray;
     }
 
 }
