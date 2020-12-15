@@ -86,6 +86,13 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
         finally {
             //TODO::if test mode delete tokens that were created for test client --- ???
+            try {
+                if(authUtil.isTestMode())  {
+                    authUtil.revokeToken(authorizationHeader.substring("Bearer".length()).trim());
+                }
+            }  catch (Exception ex) {
+                log.error("====== Test Revoke Token  FAILED ===========================================", ex);
+            }
         }
 
     }
