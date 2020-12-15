@@ -19,6 +19,8 @@ import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
+import io.jans.as.server.service.external.ExternalRevokeTokenService;
+import io.jans.as.server.service.external.context.RevokeTokenContext;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +63,9 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ExternalRevokeTokenService externalRevokeTokenService;
 
     @Override
     public Response requestAccessToken(String token, String tokenTypeHint, String clientId,
@@ -110,6 +115,13 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         }
         if (!authorizationGrant.getClientId().equals(client.getClientId())) {
             log.trace("Token was issued with client {} but revoke is requested with client {}. Skip revoking.", authorizationGrant.getClientId(), client.getClientId());
+            return response(builder, oAuth2AuditLog);
+        }
+
+        RevokeTokenContext revokeTokenContext = new RevokeTokenContext(request, client, authorizationGrant, builder);
+        final boolean scriptResult = externalRevokeTokenService.revokeTokenMethods(revokeTokenContext);
+        if (!scriptResult) {
+            log.trace("Revoke is forbidden by 'Revoke Token' custom script (method returned false). Exit without revoking.");
             return response(builder, oAuth2AuditLog);
         }
 
