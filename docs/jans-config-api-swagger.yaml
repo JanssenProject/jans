@@ -6121,9 +6121,6 @@ components:
             https://jans.io/oauth/config/openid/clients.write: View and manage clients related information	
             https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
             https://jans.io/oauth/config/openid/sectoridentifiers.write: View and manage sector related information		
-            https://jans.io/oauth/scopes/config-api-read: Grants read access
-            https://jans.io/oauth/scopes/config-api-write: Grants write access
-            https://jans.io/oauth/scopes/config-api-all: Grants all access
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: View and manage scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
