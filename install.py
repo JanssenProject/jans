@@ -84,6 +84,9 @@ for filename in setup_zip.namelist():
 
 shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
 
+download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/src/main/resources/uma-rs-protect.json'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/uma-rs-protect.json'))
+
+
 print("Launcing Janssen Setup")
 setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
 
