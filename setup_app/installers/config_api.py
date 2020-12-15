@@ -26,8 +26,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.root_dir = os.path.join(Config.jansOptFolder, 'config-api')
         self.conf_dir = os.path.join(self.root_dir, 'config')
         self.log_dir = os.path.join(self.root_dir, 'logs')
-        self.temp_dir = os.path.join(Config.templateFolder, self.service_name)
-
+        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.application_properties_tmp = os.path.join(self.templates_folder, 'application.properties')
         self.uma_rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/uma-rs-protect.json')
         self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
@@ -44,17 +44,11 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.copyFile(self.source_files[0][0], self.root_dir)
 
         self.copyFile(
-                os.path.join(Config.templateFolder, self.service_name, 'application.properties'),
-                self.conf_dir
-                )
-
-        self.copyFile(
                 os.path.join(Config.staticFolder, 'system/initd', self.service_name),
                 os.path.join(Config.distFolder, 'scripts')
                 )
 
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
-
 
 
     def installed(self):
@@ -161,4 +155,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         clients_ldif_fd.close()
 
     def render_import_templates(self):
+        
+        self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
+        self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
+
         self.dbUtils.import_ldif([self.scope_ldif_fn, self.resources_ldif_fn, self.clients_ldif_fn])
