@@ -9,9 +9,11 @@ import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.RsResourceList;
 
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ClientService;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
 import org.slf4j.Logger;
 
@@ -30,7 +32,7 @@ import javax.ws.rs.core.Response;
 @ApplicationScoped
 public class UmaResourceProtectionService {
 
-    public static final String PROTECTION_CONFIGURATION_FILE_NAME = "uma-rs-protect.json";
+    public static final String PROTECTION_CONFIGURATION_FILE_NAME = "resource.json";
 
     @Inject
     Logger log;
@@ -60,29 +62,29 @@ public class UmaResourceProtectionService {
         return rsResourceList;
     }
 
-    public void verifyUmaResources() throws Exception {
-
+    public void verifyResources(String apiProtectionType) throws Exception {
+        System.out.println("\n UmaResourceProtectionService::verifyResources() - apiProtectionType = "+apiProtectionType+"\n");
         // Load the uma resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
 
         RsResourceList resourceList = Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
         log.debug(
-                " \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList + "\n\n");
+                " \n\n UmaResourceProtectionService::verifyResources() - resourceList = " + resourceList + "\n\n");
         this.rsResourceList = resourceList.getResources();
 
-        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
+        log.debug(" \n\n UmaResourceProtectionService::verifyResources() - rsResourceList = "
                 + rsResourceList + "\n\n");
 
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
-        createScopeIfNeeded();
+        createScopeIfNeeded(apiProtectionType);
 
         createResourceIfNeeded();
       
     }
-
-    private void createScopeIfNeeded() { 
+    
+    private void createScopeIfNeeded(String apiProtectionType) { 
         List<String> rsScopes = null;
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
@@ -108,7 +110,12 @@ public class UmaResourceProtectionService {
                                     Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
                         }
                     }
-
+                    
+                    ScopeType scopeType = ScopeType.UMA;
+                    if(ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
+                        scopeType = ScopeType.OPENID;
+                    }
+                    
                     if (scopes == null || scopes.isEmpty()) {
                         log.debug("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope
@@ -118,7 +125,7 @@ public class UmaResourceProtectionService {
                         scope.setDisplayName(scopeName);
                         scope.setInum(inum);
                         scope.setDn(scopeService.getDnForScope(inum));
-                        scope.setScopeType(ScopeType.UMA);
+                        scope.setScopeType(scopeType);
                         scopeService.addScope(scope);
                     }
                     else {
@@ -128,7 +135,7 @@ public class UmaResourceProtectionService {
                         scope.setId(scopeName);
                         scope.setDisplayName(scopeName);
                         scope.setDn(scopeService.getDnForScope(scope.getInum()));
-                        scope.setScopeType(ScopeType.UMA);
+                        scope.setScopeType(scopeType);
                         scopeService.updateScope(scope);
                     }
 
