@@ -63,13 +63,26 @@ class BaseInstaller:
     def check_clients(self, client_var_id_list, resource=False):
         field_name, ou = ('jansId', 'resources') if resource else ('inum', 'clients')
 
-        for client_var_name, client_id_prefix in client_var_id_list:
+        for cids in client_var_id_list:
+            client_var_name = cids[0] 
+            client_id_prefix = cids[1]
+            if len(cids) > 2:
+                client_pw = cids[2]['pw']
+                client_encoded_pw = cids[2]['encoded']
+            else:
+                client_pw = None
+                client_encoded_pw = None
+
             self.logIt("Checking ID for client {}".format(client_var_name))
             if not Config.get(client_var_name):
                 result = self.dbUtils.search('ou={},o=jans'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
+                    if client_encoded_pw:
+                        if 'jansClntSecret' in result:
+                            setattr(Config, client_encoded_pw, result['jansClntSecret'])
+                            setattr(Config, client_pw, self.unobscure(result['jansClntSecret']))
 
             if not Config.get(client_var_name):
                 setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
