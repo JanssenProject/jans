@@ -64,6 +64,18 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def generate_configuration(self):
+        
+        uma_rs_protects = self.readFile(self.uma_rs_protect_fn)
+        uma_rs_protect = json.loads(uma_rs_protects)
+        try:
+            config_api_swagger_yaml_fn = os.path.join(Config.install_dir, 'setup_app/data/jans-config-api-swagger.yaml')
+            yml_str = self.readFile(config_api_swagger_yaml_fn)
+            yml_str = yml_str.replace('\t', ' ')
+            cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+            scopes_def = cfg_yml['components']['securitySchemes']['jans-auth']['flows']['clientCredentials']['scopes']
+        except:
+            scopes_def = {}
+
         uma_rs_protects = self.readFile(self.uma_rs_protect_fn)
         uma_rs_protect = json.loads(uma_rs_protects)
 
@@ -91,11 +103,12 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                         inum = 'CACA-' + os.urandom(2).hex().upper()
                         scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
                         scopes[scope] = {'dn': scope_dn}
+                        display_name = 'Config API scope {}'.format(scope)
                         ldif_scopes_writer.unparse(
                                 scope_dn, {
                                     'objectclass': ['top', 'jansScope'],
-                                    'description': ['Config API {}'.format(scope)],
-                                    'displayName': ['Config API {}'.format(scope)],
+                                    'description': [scopes_def.get(scope, display_name)],
+                                    'displayName': [display_name],
                                     'inum': ['inum={}'.format(inum)],
                                     'jansDefScope': ['true'],
                                     'jansId': [scope],
@@ -155,7 +168,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         clients_ldif_fd.close()
 
     def render_import_templates(self):
-        
+
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
 
