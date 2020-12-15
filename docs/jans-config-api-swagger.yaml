@@ -6097,8 +6097,8 @@ components:
           scopes: 
             https://jans.io/oauth/jans-auth-server/config/properties.readonly: View Auth Server properties related information
             https://jans.io/oauth/jans-auth-server/config/properties.write: View and manage Auth Server properties related information
-            https://jans.io/oauth/jans-auth-server/config/fido2.readonly: View FIDO2 related information
-            https://jans.io/oauth/jans-auth-server/config/fido2.write: View and manage FIDO2 related information
+            https://jans.io/oauth/config/fido2.readonly: View FIDO2 related information
+            https://jans.io/oauth/config/fido2.write: View and manage FIDO2 related information
             https://jans.io/oauth/config/attributes.readonly: View attribute related information
             https://jans.io/oauth/config/attributes.write: View and manage attribute related information
             https://jans.io/oauth/config/acrs.readonly: View ACRS related information
