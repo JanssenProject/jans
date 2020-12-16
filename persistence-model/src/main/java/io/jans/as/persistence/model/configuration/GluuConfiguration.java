@@ -24,7 +24,7 @@ import java.util.List;
  * @author Yuriy Movchan Date: 08.27.2012
  */
 @DataEntry
-@ObjectClass(value = "jansConf")
+@ObjectClass(value = "jansAppConf")
 public class GluuConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -2818003894646725601L;
