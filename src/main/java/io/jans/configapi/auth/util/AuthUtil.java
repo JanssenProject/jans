@@ -114,7 +114,7 @@ public class AuthUtil {
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
     }
-    
+
     public String getTokenRevocationEndpoint() {
         return this.configurationService.find().getTokenRevocationEndpoint();
     }
@@ -163,7 +163,7 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        
+
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<String>();
@@ -190,30 +190,30 @@ public class AuthUtil {
         }
     }
 
-    public void  revokeToken( final String token) throws Exception {
-        revokeToken( this.getTestClientId(), token);
+    public void revokeToken(final String token) throws Exception {
+        revokeToken(this.getTestClientId(), token);
     }
-    
-    public void  revokeToken( final String clientId, final String token) throws Exception {
-        System.out.println("\n AuthUtil::revokeToken() - clientId = "+clientId+" ,token = " + token + "\n");       
-       
+
+    public void revokeToken(final String clientId, final String token) throws Exception {
+        System.out.println("\n AuthUtil::revokeToken() - clientId = " + clientId + " ,token = " + token + "\n");
+
         // Get clientSecret
         String clientSecret = this.getClientPassword(clientId);
         clientSecret = "test1234"; // Todo: Remove later - ???
-        TokenResponse tokenResponse = AuthClientFactory.revokeToken(this.getTokenRevocationEndpoint(), clientId, clientSecret, token);
-       
+        TokenResponse tokenResponse = AuthClientFactory.revokeToken(this.getTokenRevocationEndpoint(), clientId,
+                clientSecret, token);
 
     }
-    
+
     public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
             throws Exception {
         System.out.println("\n AuthUtil::requestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId
                 + " ,scopes = " + scopes + "\n");
-        
+
         // Get clientSecret
         String clientSecret = this.getClientPassword(clientId);
         clientSecret = "test1234"; // Todo: Remove later - ???
-        
+
         // distinct scopes
         Set<String> scopesSet = new HashSet<String>(scopes);
 
@@ -226,8 +226,8 @@ public class AuthUtil {
 
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
-            System.out
-            .println("\n AuthUtil::requestAccessToken() - tokenResponse.getScope() = " + tokenResponse.getScope() + "\n");
+            System.out.println("\n AuthUtil::requestAccessToken() - tokenResponse.getScope() = "
+                    + tokenResponse.getScope() + "\n");
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {
@@ -342,10 +342,7 @@ public class AuthUtil {
         System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ AuthUtil::testPrep() - Entry -  method = " + method + " ,path = "
                 + path + "\n");
         Token token = null;
-        
-        //Assign scopes t client
-        assignScope(this.getTestClientId(),this.getRequestedScopes(resourceInfo));
-        
+
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(this.getApiProtectionType())) {
             // token = requestPat(getTokenUrl(), this.getTestClientId(),
             // this.getRequestedScopes(resourceInfo));
@@ -434,6 +431,8 @@ public class AuthUtil {
             System.out.println(
                     " \n @@@@@@@@@@@@@@@@@@@@@@@ AuthUtil::createClientIfNeeded() - Final client = " + client + "\n");
 
+            // assign all scopes
+            assignAllScope(this.getTestClientId());
         }
 
     }
@@ -480,103 +479,72 @@ public class AuthUtil {
         }
         return umaResource;
     }
-    
+
     public void assignAllScope(final String clientId) {
-        System.out.println("\n AuthUtil::assignAllScope() - Entry - clientId = "+clientId+"\n");        
-        
-        //Get Client
+        System.out.println("\n AuthUtil::assignAllScope() - Entry - clientId = " + clientId + "\n");
+
+        // Get Client
         Client client = this.clientService.getClientByInum(clientId);
-        if(client != null) {
-            
-            System.out.println(" \n AuthUtil::assignScope() -  client.getAllScope() = " + client.getClientId() + ", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
+        if (client != null) {
+
+            // Prepare scope array
+            List<String> scopes = geScopeWithDn(getAllScopes());
+            String[] scopeArray = this.getAllScopesArray(scopes);
+
+            System.out.println(" \n AuthUtil::assignScope() -  client.getAllScope() = " + client.getClientId()
+                    + ",scopeArray = " + Arrays.asList(scopeArray) + "\n");
             if (client != null) {
-                //Assign scope 
-                client.setScopes(addScopes(client,geScopeWithDn(getAllScopes())));
-                this.clientService.updateClient(client);          
+                // Assign scope
+                client.setScopes(scopeArray);
+                this.clientService.updateClient(client);
             }
         }
         client = this.clientService.getClientByInum(clientId);
-        System.out.println(" \n AuthUtil::assignScope() - Final -  client.getAllScope() = " + client.getClientId() +", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");     
-    }
-    
-    public List<String> getAllScopes(){
-        List<String> scopes = new ArrayList<String>();
-        
-         // Verify in cache
-         Map<String, Scope> scopeMap = UmaResourceProtectionCache.getAllScopes();
-        
-         Set<String> keys = scopeMap.keySet();
-         
-         for (String id : keys) {
-             Scope scope = UmaResourceProtectionCache.getScope(id);
-             scopes.add(scope.getId());            
-        }
-        return scopes;         
+        System.out.println(" \n AuthUtil::assignScope() - Final -  client.getAllScope() = " + client.getClientId()
+                + ", Arrays.asList(client.getScopes()) = " + Arrays.asList(client.getScopes()) + "\n");
     }
 
-    public void assignScope(final String clientId, final List<String> scopes) {
-        System.out.println("\n AuthUtil::assignScope() - Entry - clientId = "+clientId+" , scopes = "+scopes);        
-        
-        //Get Client
-        Client client = this.clientService.getClientByInum(clientId);
-        if(client != null) {
-            
-            System.out.println(" \n AuthUtil::assignScope() -  client.getClientId() = " + client.getClientId() + ", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
-            if (client != null) {
-                //Assign scope 
-                client.setScopes(addScopes(client,geScopeWithDn(scopes)));
-                this.clientService.updateClient(client);          
+    public List<String> getAllScopes() {
+        List<String> scopes = new ArrayList<String>();
+
+        // Verify in cache
+        Map<String, Scope> scopeMap = UmaResourceProtectionCache.getAllScopes();
+        System.out.println(" \n AuthUtil::getAllScopes() - scopeMap = " + scopeMap);
+        Set<String> keys = scopeMap.keySet();
+
+        for (String id : keys) {
+            Scope scope = UmaResourceProtectionCache.getScope(id);
+            scopes.add(scope.getInum());
+        }
+
+        System.out.println(" \n AuthUtil::getAllScopes() - scopes = " + scopes);
+        return scopes;
+    }
+
+    public String[] getAllScopesArray(List<String> scopes) {
+        System.out.println(" \n AuthUtil::getAllScopesArray() - scopes = " + scopes);
+        String[] scopeArray = null;
+
+        if (scopes != null && !scopes.isEmpty()) {
+            scopeArray = new String[scopes.size()];
+            for (int i = 0; i < scopes.size(); i++) {
+                scopeArray[i] = scopes.get(i);
             }
         }
-        client = this.clientService.getClientByInum(clientId);
-        System.out.println(" \n AuthUtil::assignScope() - Final -  client.getClientId() = " + client.getClientId() +", Arrays.asList(client.getScopes()) = "+Arrays.asList(client.getScopes())+"\n");
-     
+        System.out.println(" \n AuthUtil::getAllScopesArray() - Return - scopeArray = " + Arrays.asList(scopeArray));
+        return scopeArray;
     }
 
     public List<String> geScopeWithDn(List<String> scopes) {
+        System.out.println(" \n AuthUtil::geScopeWithDn() - scopes = " + scopes);
         List<String> scopeList = null;
-        if (scopes != null && scopes.size() > 0) {
+        if (scopes!=null && !scopes.isEmpty()) {
             scopeList = new ArrayList<String>();
             for (String id : scopes) {
-                List<Scope> searchedScope = this.scopeService.searchScopes(id, 1);
-                if (searchedScope != null && searchedScope.size() > 0) {
-                    for (int i=0;i<searchedScope.size();i++) {
-                        Scope scope = searchedScope.get(i);
-                        scopeList.add(this.scopeService.getDnForScope(scope.getInum()));
-                    }
+                scopeList.add(this.scopeService.getDnForScope(id));
                 }
-            }
         }
         System.out.println("\n AuthUtil::geScopeWithDn() - Exit - scopeList = " + scopeList + "\n");
         return scopeList;
     }
-    
-    public String[] addScopes(Client client, List<String> scopes) {
-   
-        String[] clientScopes = client.getScopes();
-       
-        //distinct resources
-        Set<String> scopeSet = new HashSet<String>(scopes);
-        
-        /*
-        if(clientScopes.length>0) {
-            for (int i=0;i<clientScopes.length;i++) {
-                scopeSet.add(clientScopes[i]);
-            }
-        }*/
- 
-        scopes = new ArrayList<String>(scopeSet);
-        
-        String[] scopeArray = null;
-        if(scopes!=null && !scopes.isEmpty()) {
-            scopeArray = new String[scopes.size()];
-            for (int i=0;i<scopes.size();i++) {
-                scopeArray[i] = scopes.get(i);         
-            }
-        }
-        
-        System.out.println("\n AuthUtil::addScopes() - scopeArray = " + Arrays.toString(scopeArray)+"\n");
-        return scopeArray;
-    }
-
 }
