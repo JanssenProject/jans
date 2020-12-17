@@ -99,16 +99,14 @@ public class ConfigurationFactory {
     
 
     @Inject
-    //@ConfigProperty(name = "api.client.id")
     @ConfigProperty(name = "apiUmaClientId")
     private static String API_CLIENT_ID;
-    
+
     @Inject
     @ConfigProperty(name = "apiUmaClientPassword")
-    private static String API_CLIENT_PWD;    
-       
+    private static String API_CLIENT_PWD;
+
     @Inject
-    //@ConfigProperty(name = "api.protection.type")
     @ConfigProperty(name = "apiProtection.type")
     private static String API_PROTECTION_TYPE;
 
@@ -141,20 +139,19 @@ public class ConfigurationFactory {
     public static String getApiProtectionType() {
         return API_PROTECTION_TYPE;
     }
-    
+
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
-    
+
     public static String getApiClientPwd() {
         return API_CLIENT_PWD;
     }
 
-    
     public static String getAppExecutionMode() {
         return APP_EXECUTION_MODE;
     }
-    
+
     public static Client getApiTestClient() {
         return apiTestClient;
     }
@@ -310,20 +307,25 @@ public class ConfigurationFactory {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "+ConfigurationFactory.getApiProtectionType());
+        log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
+                + ConfigurationFactory.getApiProtectionType());
         if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
 
-            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); //Verify Resources available
-            
+            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); // Verify
+                                                                                                       // Resources
+                                                                                                       // available
+
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
-                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
+                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "
+                        + umaResourceProtectionService);
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
-                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "+umaResourceProtectionService);
-               
+                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "
+                        + umaResourceProtectionService);
+
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }
         } catch (Exception ex) {
@@ -331,21 +333,23 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-    
+
     @Produces
     @ApplicationScoped
     @Named("apiTestClient")
     private Client createApiTestClient() {
         try {
-        log.info("=============ConfigurationFactory::createApiTestClient() - ConfigurationFactory.getAppExecutionMode() = "+ConfigurationFactory.getAppExecutionMode());
-        if (StringHelper.isNotEmptyString(ConfigurationFactory.getAppExecutionMode())) {
-            return this.apiTestMode.init();
-        }
-        return null;
+            log.info(
+                    "=============ConfigurationFactory::createApiTestClient() - ConfigurationFactory.getAppExecutionMode() = "
+                            + ConfigurationFactory.getAppExecutionMode());
+            if (StringHelper.isNotEmptyString(ConfigurationFactory.getAppExecutionMode())) {
+                return this.apiTestMode.init();
+            }
+            return null;
         } catch (Exception ex) {
             log.error("Failed to create Test Client", ex);
             throw new ConfigurationException("Failed to create Test Client", ex);
         }
     }
-    
+
 }

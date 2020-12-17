@@ -24,7 +24,7 @@ return temp;
   	
   	@ignore
   	@ldap-config-delete
-  	Scenario: Retrieve LDAP configuration
+  	Scenario: Delete LDAP configuration
 	Given url  mainUrl + '/new_auth_ldap_server'
     And  header Authorization = 'Bearer ' + accessToken
     When method DELETE
