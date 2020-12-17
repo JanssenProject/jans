@@ -86,33 +86,36 @@ public class UmaService implements Serializable {
     }
 
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
-        log.trace("Validating RPT, patToken:{}, authorization:{}, resourceId: {}, scopeIds: {} ", patToken, authorization, resourceId, scopeIds);
+        log.trace("Validating RPT, patToken: {}, authorization: {}, resourceId: {}, scopeIds: {} ", patToken,
+                authorization, resourceId, scopeIds);
+        
         if (patToken == null) {
-            log.info("Token is blank"); 
+            log.warn("Token is blank");
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
             throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
         }
-        
+
         if (StringHelper.isNotEmpty(authorization) && authorization.startsWith("Bearer ")) {
             String rptToken = authorization.substring(7);
-            log.debug("\n\n UmaService::validateRptToken() - rptToken  = " + rptToken);
+            log.trace("rptToken: {} " + rptToken);
 
             RptIntrospectionResponse rptStatusResponse = getStatusResponse(patToken, rptToken);
-            log.debug("RPT status response: {} ", rptStatusResponse);
-            log.debug("RPT status response: {} "+ rptStatusResponse);
-            
+            log.trace("rptStatusResponse: {} ", rptStatusResponse);
+
             if ((rptStatusResponse == null) || !rptStatusResponse.getActive()) {
                 log.warn("Status response for RPT token: '{}' is invalid, will do a retry", rptToken);
             } else {
                 boolean rptHasPermissions = isRptHasPermissions(rptStatusResponse);
 
-                if (rptHasPermissions) {                    
+                if (rptHasPermissions) {
                     // Verify exact resource
                     boolean hasResourcePermission = this.hasResourcePermission(rptStatusResponse, resourceId);
                     if (!hasResourcePermission) {
-                        log.error("Status response for RPT token: '{}', Resource Id '{}', not contains right resource permissions", rptToken,resourceId);
+                        log.error(
+                                "Status response for RPT token: '{}', Resource Id '{}', not contains right resource permissions",
+                                rptToken, resourceId);
                     }
-                    
+
                     // Collect all scopes
                     List<String> returnScopeIds = new LinkedList<String>();
                     for (UmaPermission umaPermission : rptStatusResponse.getPermissions()) {
@@ -138,22 +141,23 @@ public class UmaService implements Serializable {
     private boolean isRptHasPermissions(RptIntrospectionResponse umaRptStatusResponse) {
         return !((umaRptStatusResponse.getPermissions() == null) || umaRptStatusResponse.getPermissions().isEmpty());
     }
-    
+
     private boolean hasResourcePermission(RptIntrospectionResponse umaRptStatusResponse, String resourceId) {
         return umaRptStatusResponse.getPermissions().stream()
-        .anyMatch(p -> p.getResourceId().equalsIgnoreCase(resourceId));
+                .anyMatch(p -> p.getResourceId().equalsIgnoreCase(resourceId));
     }
 
     private RptIntrospectionResponse getStatusResponse(Token patToken, String rptToken) {
         String authorization = "Bearer " + patToken.getAccessToken();
-        log.debug("\n\n UmaService::getStatusResponse() - authorization  = " + authorization+" , rptToken = "+rptToken+"\n\n");
+        log.trace("ResponseStatus, patToken: {}, rptToken: {} ", patToken, rptToken);
 
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
         try {
-            // rptStatusResponse = this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
+            // rptStatusResponse =
+            // this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
             rptStatusResponse = UmaClient.getRptStatus(this.umaMetadata, authorization, rptToken);
-            log.debug("\n\n UmaService::getStatusResponse() - rptStatusResponse  = " + rptStatusResponse);
+            log.trace(" rptStatusResponse: {}" + rptStatusResponse);
         } catch (Exception ex) {
             log.error("Failed to determine RPT status", ex);
             ex.printStackTrace();
@@ -174,7 +178,7 @@ public class UmaService implements Serializable {
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             return response;
         }
-        log.debug("Construct response: HTTP 401 (Unauthorized), ticket: '{}'", ticket);
+        log.trace("Construct response: HTTP 401 (Unauthorized), ticket: '{}'", ticket);
 
         try {
             String authHeaderValue = String.format(
@@ -194,15 +198,15 @@ public class UmaService implements Serializable {
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
-       
+
         PermissionTicket ticket = this.getUmaPermissionService()
                 .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(permission));
-        
+
         if (ticket == null) {
             return null;
         }
         return ticket.getTicket();
-    }    
+    }
 
     private String getHost(String uri) throws MalformedURLException {
         URL url = new URL(uri);

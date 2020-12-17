@@ -55,10 +55,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     ApiTestMode apiTestMode;
 
     public void filter(ContainerRequestContext context) {
-        System.out.println("\n\n\n\n AuthorizationFilter::filter() - Entry - apiTestMode.isTestMode() = " + apiTestMode.isTestMode() + "\n\n\n");
+
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
-        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
+        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString()+" , apiTestMode.isTestMode() = "+apiTestMode.isTestMode());
         log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
@@ -72,8 +72,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            if(apiTestMode.isTestMode())  {
-                authorizationHeader = this.testAuthenticationPrep(resourceInfo, context.getMethod(), request.getRequestURI());
+            if (apiTestMode.isTestMode()) {
+                authorizationHeader = this.testAuthenticationPrep(resourceInfo, context.getMethod(),
+                        request.getRequestURI());
             }
             log.info("\n\n\n AuthorizationFilter::filter() - after testAuthenticationPrep() -  authorizationHeader = " + authorizationHeader+" , apiTestMode.isTestMode() = "+apiTestMode.isTestMode()+"\n\n\n");
             
@@ -85,12 +86,11 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             abortWithUnauthorized(context);
         }
         finally {
-            //TODO::if test mode delete test client that were created for test client --- ???
             try {
-                if(apiTestMode.isTestMode())  {
-                    //apiTestMode.deleteTestClient();
+                if (apiTestMode.isTestMode()) {
+                    //apiTestMode.deleteTestClient(); //TODO: later - ???
                 }
-            }  catch (Exception ex) {
+            } catch (Exception ex) {
                 log.error("====== Test Revoke Token  FAILED ===========================================", ex);
             }
         }
@@ -108,11 +108,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     }
     
     private String testAuthenticationPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
-        log.trace("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
-        System.out.println("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
-        String token = AUTHENTICATION_SCHEME +" "+ apiTestMode.createTestToken(resourceInfo,  method,  path);
-       return token;
+        log.trace("testAuthenticationPrep(), resourceInfo: {}, method: {}, path: {} ", resourceInfo, method, path);
+        String token = AUTHENTICATION_SCHEME + " " + apiTestMode.createTestToken(resourceInfo, method, path);
+        return token;
     }
-
 
 }
