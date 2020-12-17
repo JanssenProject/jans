@@ -193,7 +193,7 @@ public class AuthClientFactory {
         
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
-        
+        System.out.println("\n AuthClientFactory::patRequest() - response = "+response+"\n");
         if (response.getStatus() == 200) {
             String entity = response.readEntity(String.class);
             
