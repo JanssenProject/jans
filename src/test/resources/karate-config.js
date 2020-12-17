@@ -16,7 +16,7 @@ function() {
     var baseUrl = url + (port ? ':' + port : '');
     var config = {
         env: env,
-        accessToken: '4bf3914e-7bd0-47cf-9b5d-af2c0d7b7c7d',
+        accessToken: '8281f24e-1a7b-4342-96d1-9afbe3e24491',
         baseUrl: baseUrl,
         healthUrl: baseUrl + '/health',
         fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
