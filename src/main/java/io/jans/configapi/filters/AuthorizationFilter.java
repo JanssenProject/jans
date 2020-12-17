@@ -7,7 +7,7 @@
 package io.jans.configapi.filters;
 
 import io.jans.configapi.auth.AuthorizationService;
-import io.jans.configapi.auth.util.AuthUtil;
+import io.jans.configapi.auth.util.ApiTestMode;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -52,10 +52,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     AuthorizationService authorizationService;
     
     @Inject
-    AuthUtil authUtil;
+    ApiTestMode apiTestMode;
 
     public void filter(ContainerRequestContext context) {
-        System.out.println("\n\n\n\n AuthorizationFilter::filter() - Entry - authUtil.isTestMode() = " + authUtil.isTestMode() + "\n\n\n");
+        System.out.println("\n\n\n\n AuthorizationFilter::filter() - Entry - apiTestMode.isTestMode() = " + apiTestMode.isTestMode() + "\n\n\n");
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
         log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
@@ -64,7 +64,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+authUtil.isTestMode()+"\n\n\n");
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+apiTestMode.isTestMode()+"\n\n\n");
         
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
@@ -72,10 +72,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            if(authUtil.isTestMode())  {
+            if(apiTestMode.isTestMode())  {
                 authorizationHeader = this.testAuthenticationPrep(resourceInfo, context.getMethod(), request.getRequestURI());
             }
-            log.info("\n\n\n AuthorizationFilter::filter() - after testAuthenticationPrep() -  authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+authUtil.isTestMode()+"\n\n\n");
+            log.info("\n\n\n AuthorizationFilter::filter() - after testAuthenticationPrep() -  authorizationHeader = " + authorizationHeader+" , apiTestMode.isTestMode() = "+apiTestMode.isTestMode()+"\n\n\n");
             
             //Api protection validation
             this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
@@ -85,10 +85,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             abortWithUnauthorized(context);
         }
         finally {
-            //TODO::if test mode delete tokens that were created for test client --- ???
+            //TODO::if test mode delete test client that were created for test client --- ???
             try {
-                if(authUtil.isTestMode())  {
-                    authUtil.revokeToken(authorizationHeader.substring("Bearer".length()).trim());
+                if(apiTestMode.isTestMode())  {
+                    //apiTestMode.deleteTestClient();
                 }
             }  catch (Exception ex) {
                 log.error("====== Test Revoke Token  FAILED ===========================================", ex);
@@ -110,7 +110,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private String testAuthenticationPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
         log.trace("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
         System.out.println("testAuthenticationPrep() - resourceInfo = "+ resourceInfo +" , method = "+method+" , path = "+path+"\n\n");
-        String token = AUTHENTICATION_SCHEME +" "+ authUtil.testPrep(resourceInfo,  method,  path);
+        String token = AUTHENTICATION_SCHEME +" "+ apiTestMode.createTestToken(resourceInfo,  method,  path);
        return token;
     }
 
