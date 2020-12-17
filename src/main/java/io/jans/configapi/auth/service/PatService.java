@@ -1,6 +1,7 @@
 package io.jans.configapi.auth.service;
 
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
 //import io.jans.configapi.auth.client.UmaClient;
@@ -94,8 +95,7 @@ public class PatService {
         try {
 
             String clientId = authUtil.getClientId();
-            this.umaPat = authUtil.requestPat(this.umaMetadata.getTokenEndpoint(), clientId, null);
-            this.umaPat = authUtil.requestPat(this.umaMetadata.getTokenEndpoint(), clientId, null);
+            this.umaPat = authUtil.requestPat(this.umaMetadata.getTokenEndpoint(), clientId, ScopeType.UMA,null);
             
            //String clientSecret = authUtil.decryptPassword(clientId);            
             //this.umaPat = authUtil.requestPat(this.umaMetadata.getTokenEndpoint(), clientId, clientSecret,null);           

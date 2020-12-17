@@ -2,7 +2,7 @@
 Feature: Couchbase connection configuration
 
   Background:
-    * def mainUrl = baseUrl + '/api/v1/config/database/couchbase'
+    * def mainUrl = baseUrl + '/jans-config-api/api/v1/config/database/couchbase'
 
   Scenario: Retrieve Couchbase configuration
     Given url  mainUrl

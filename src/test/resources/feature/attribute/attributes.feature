@@ -1,6 +1,6 @@
+@ignore
 Feature: Attributes 
 
-@ignore
 Scenario: Fetch all attributes without bearer token 
 	Given url attributes_url 
 	When method GET 
@@ -11,10 +11,10 @@ Scenario: Fetch all attributes
 	And  header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 200 
+	And print response
 	And assert response.length != null 
 	And assert response.length >= 10 
 
-@ignore
 Scenario: Fetch the first three attributes 
 	Given url attributes_url 
 	And  header Authorization = 'Bearer ' + accessToken 
@@ -23,7 +23,6 @@ Scenario: Fetch the first three attributes
 	Then status 200 
 	And assert response.length == 3 
 
-@ignore
 Scenario: Search attributes given a search pattern 
 	Given url attributes_url 
 	And  header Authorization = 'Bearer ' + accessToken 
@@ -32,7 +31,6 @@ Scenario: Search attributes given a search pattern
 	Then status 200 
 	And assert response.length == 1 
 
-@ignore
 Scenario: Fetch the first three active attributes 
 	Given url attributes_url 
 	And  header Authorization = 'Bearer ' + accessToken 
@@ -58,7 +56,6 @@ Scenario: Fetch the first three inactive attributes
 	And assert response[1].status == 'INACTIVE'
 	And assert response[2].status == 'INACTIVE'		
 
-@ignore
 @CreateUpdateDelete 
 Scenario: Create new attribute 
 	Given url attributes_url 
@@ -81,21 +78,18 @@ Scenario: Create new attribute
 	When method DELETE 
 	Then status 204 
 
-@ignore
 Scenario: Delete a non-existion attribute by inum 
 	Given url attributes_url + '/1402.66633-8675-473e-a749' 
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 404 
 	
-@ignore
 Scenario: Get an attribute by inum(unexisting attribute) 
 	Given url attributes_url + '/53553532727272772' 
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 404 
 
-@ignore
 Scenario: Get an attribute by inum 
 	Given url attributes_url 
 	And header Authorization = 'Bearer ' + accessToken 

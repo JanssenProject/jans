@@ -13,10 +13,12 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.UmaAuthorizationService;
 import io.jans.configapi.auth.UmaResourceProtectionService;
+import io.jans.configapi.auth.util.ApiTestMode;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -71,7 +73,8 @@ public class ConfigurationFactory {
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
     private static final String APP_EXECUTION_MODE;
-    
+    private static Client apiTestClient;
+
     @Inject
     Logger log;
 
@@ -81,6 +84,9 @@ public class ConfigurationFactory {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
+    
+    @Inject
+    ApiTestMode apiTestMode;
     
     private AppConfiguration appConfiguration;
     private StaticConfiguration staticConf;
@@ -93,15 +99,17 @@ public class ConfigurationFactory {
     
 
     @Inject
-    @ConfigProperty(name = "api.client.id")
+    //@ConfigProperty(name = "api.client.id")
+    @ConfigProperty(name = "apiUmaClientId")
     private static String API_CLIENT_ID;
     
     @Inject
-    @ConfigProperty(name = "api.test.client.id")
-    private static String API_TEST_CLIENT_ID;    
-    
+    @ConfigProperty(name = "apiUmaClientPassword")
+    private static String API_CLIENT_PWD;    
+       
     @Inject
-    @ConfigProperty(name = "api.protection.type")
+    //@ConfigProperty(name = "api.protection.type")
+    @ConfigProperty(name = "apiProtection.type")
     private static String API_PROTECTION_TYPE;
 
     @Inject
@@ -137,13 +145,18 @@ public class ConfigurationFactory {
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
-
-    public static String getApiTestClientId() {
-        return API_TEST_CLIENT_ID;
+    
+    public static String getApiClientPwd() {
+        return API_CLIENT_PWD;
     }
+
     
     public static String getAppExecutionMode() {
         return APP_EXECUTION_MODE;
+    }
+    
+    public static Client getApiTestClient() {
+        return apiTestClient;
     }
     
     public void create() {
@@ -161,6 +174,8 @@ public class ConfigurationFactory {
         }
 
         createAuthorizationService();
+        
+        this.apiTestClient = createApiTestClient();
         
     }
 
@@ -301,7 +316,7 @@ public class ConfigurationFactory {
         }
         try {
 
-            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); //Verify Resources available 
+            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); //Verify Resources available
             
             if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
                 log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
@@ -316,4 +331,21 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
+    
+    @Produces
+    @ApplicationScoped
+    @Named("apiTestClient")
+    private Client createApiTestClient() {
+        try {
+        log.info("=============ConfigurationFactory::createApiTestClient() - ConfigurationFactory.getAppExecutionMode() = "+ConfigurationFactory.getAppExecutionMode());
+        if (StringHelper.isNotEmptyString(ConfigurationFactory.getAppExecutionMode())) {
+            return this.apiTestMode.init();
+        }
+        return null;
+        } catch (Exception ex) {
+            log.error("Failed to create Test Client", ex);
+            throw new ConfigurationException("Failed to create Test Client", ex);
+        }
+    }
+    
 }

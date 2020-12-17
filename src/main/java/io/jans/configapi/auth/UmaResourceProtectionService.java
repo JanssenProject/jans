@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 @ApplicationScoped
 public class UmaResourceProtectionService {
 
-    public static final String PROTECTION_CONFIGURATION_FILE_NAME = "resource.json";
+    public static final String PROTECTION_CONFIGURATION_FILE_NAME = "uma-rs-protect.json";
 
     @Inject
     Logger log;
@@ -112,9 +112,9 @@ public class UmaResourceProtectionService {
                     }
                     
                     ScopeType scopeType = ScopeType.UMA;
-                    if(ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
+                   /* if(ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
                         scopeType = ScopeType.OPENID;
-                    }
+                    }*/
                     
                     if (scopes == null || scopes.isEmpty()) {
                         log.debug("Scope - '" + scopeName + "' does not exist, hence creating it.");
