@@ -88,7 +88,7 @@ public class ApiTestMode {
     }
 
     private String getTestClientId() {
-        if(this.configurationFactory.getApiTestClient()!=null) {        
+        if (this.configurationFactory.getApiTestClient() != null) {
             return this.configurationFactory.getApiTestClient().getClientId();
         }
         return null;
@@ -98,51 +98,47 @@ public class ApiTestMode {
         return configurationFactory.getAppExecutionMode() != null
                 && "TEST".equalsIgnoreCase(configurationFactory.getAppExecutionMode());
     }
-    
 
     public String getApiProtectionType() {
         return this.configurationFactory.getApiProtectionType();
     }
 
     public String createTestToken(ResourceInfo resourceInfo, String method, String path) throws Exception {
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ ApiTestMode::createTestToken() - Entry -  method = " + method + " ,path = "
-                + path + "\n");
+        log.trace(" Creating Test Token, resourceInfo: {}, method: {}, path: {} ", resourceInfo, method, path);
         Token token = null;
 
-      //Get all scopes
-        List<String> scopes= this.authUtil. getRequestedScopes(resourceInfo);
+        // Get all scopes
+        List<String> scopes = this.authUtil.getRequestedScopes(resourceInfo);
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(this.getApiProtectionType())) {
-            //token = this.authUtil.requestPat(this.authUtil.getTokenUrl(), this.getTestClientId(),ScopeType.OPENID, scopes);
             token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), this.getTestClientId(), scopes);
         } else {
-            token = registerRptTicket(resourceInfo, method, path,scopes);
+            token = registerRptTicket(resourceInfo, method, path, scopes);
         }
-        System.out.println("\n\n\n $$$$$$$$$$$$$$$$$ ApiTestMode::createTestToken() - token = " + token + "\n");
+        log.trace("Generated token: {} ", token);
+
         if (token != null) {
             return token.getAccessToken();
         }
         return null;
     }
-    
-    private Token registerRptTicket(ResourceInfo resourceInfo, String method, String path, List<String> scopes) throws Exception {
-        System.out.println(
-                "\n $$$$$$$$$$$$$$$$$ ApiTestMode::registerRptTicket() - resourceInfo = " + resourceInfo +" , method = "+method
-                +" , path = "+path
-                +" , scopes = "+scopes+"\n");
 
-        
-              // Get Pat
-        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), this.getTestClientId(), ScopeType.UMA, scopes);
-        System.out.println(
-                "\n $$$$$$$$$$$$$$$$$ ApiTestMode::registerRptTicket() - patToken = " + patToken + "\n");
+    private Token registerRptTicket(ResourceInfo resourceInfo, String method, String path, List<String> scopes)
+            throws Exception {
+        log.trace(" Register Rpt Ticket, resourceInfo: {}, method: {}, path: {}, scopes: {}", resourceInfo, method,
+                path, scopes);
+
+        // Get Pat
+        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), this.getTestClientId(), ScopeType.UMA,
+                scopes);
+        log.trace(" Rpt patToken: {}", patToken);
 
         UmaResource umaResource = this.authUtil.getUmaResource(resourceInfo, method, path);
         if (patToken != null && umaResource != null) {
 
             // Register RPT token
-            TokenResponse tokenResponse = this.authUtil.requestRpt(this.getTestClientId(), umaResource.getId(), scopes, patToken);
-            System.out.println(
-                    "\n ApiTestMode::registerRptTicket() FINAL - tokenResponse = " + tokenResponse + "\n");
+            TokenResponse tokenResponse = this.authUtil.requestRpt(this.getTestClientId(), umaResource.getId(), scopes,
+                    patToken);
+            log.debug("tokenResponse = " + tokenResponse + "\n");
 
             if (tokenResponse != null) {
                 final String token = tokenResponse.getAccessToken();
@@ -154,7 +150,6 @@ public class ApiTestMode {
         }
         return null;
     }
-
 
     private Client createTestClient() throws Exception {
         // Create test client
@@ -175,19 +170,16 @@ public class ApiTestMode {
         client.setDn(this.clientService.getDnForClient(inum));
         this.clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
-        System.out.println("\n ApiTestMode::createTestClient() =  client.getClientId() = " + client.getClientId()
+        log.debug("New test client details,  client.getClientId() = " + client.getClientId()
                 + " ,client.getClientName() = " + client.getClientName() + " , client.getDn() = " + client.getDn()
-                + " ,client.getScopes() = "+Arrays.asList(client.getScopes())
-                );
-        
+                + " ,client.getScopes() = " + Arrays.asList(client.getScopes()));
 
         return result;
     }
 
     public void deleteTestClient() {
-        System.out.println("\n ApiTestMode::deleteTestClient() - getTestClientId() = "+getTestClientId()+"\n"); 
         Client client = this.clientService.getClientByInum(getTestClientId());
-        System.out.println("\n ApiTestMode::deleteTestClient() - client = "+client+"\n"); 
+        log.trace("Client to delete " + client.getClientId());
         if (client != null) {
             this.clientService.removeClient(client);
         }
@@ -205,7 +197,6 @@ public class ApiTestMode {
         if (rsResource.getIat() != null && rsResource.getIat() > 0) {
             iat = new Date(rsResource.getIat() * 1000L);
         }
-
         return iat;
     }
 
@@ -214,8 +205,6 @@ public class ApiTestMode {
         calendar.setTime(new Date()); // Now use today date.
         calendar.add(Calendar.DATE, 1); // Adds 1 days
         Date exp = calendar.getTime();
-        System.out.println("\n ApiTestMode::getExpDate() - exp = " + exp + "\n");
-
         return exp;
     }
 

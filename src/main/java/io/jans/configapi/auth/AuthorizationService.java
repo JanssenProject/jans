@@ -6,20 +6,14 @@
 
 package io.jans.configapi.auth;
 
-import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.auth.util.AuthUtil;
-import io.jans.configapi.filters.ProtectedApi;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class AuthorizationService implements Serializable {
 
@@ -48,14 +42,6 @@ public abstract class AuthorizationService implements Serializable {
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
         return authUtil.validateScope(authScopes, resourceScopes);
-    }
-    /*
-     * private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes)
-     * { Method resourceMethod = resourceInfo.getResourceMethod(); ProtectedApi
-     * methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class); if
-     * (methodAnnotation != null) {
-     * scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList(
-     * ))); } }
-     */
+    }   
 
 }

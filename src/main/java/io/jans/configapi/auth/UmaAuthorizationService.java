@@ -10,23 +10,19 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.auth.service.PatService;
 import io.jans.configapi.auth.service.UmaService;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
