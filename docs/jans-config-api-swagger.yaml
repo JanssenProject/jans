@@ -3034,38 +3034,8 @@ paths:
               schema:
                 title: UMA Resource list.
                 description: List of UMA Resource.
-                type: array
                 items:
-                  type: object
-                  description: UMAResource
-                  required:
-                    - id
-                    - name
-                  properties:
-                    id:
-                      description: Resource id.
-                      type: string
-                    name:
-                      description: A human-readable name of the scope.
-                      type: string
-                    iconUrl:
-                      description: A URL for a graphic icon representing the resource.
-                      type: string
-                    scopes:
-                      description: Applicable resource scopes.
-                      type: array
-                      items:
-                        type: string
-                    scopeExpression:
-                      description: List of resource scope expression.
-                      type: array
-                      items:
-                        type: string
-                    clients:
-                      description: List of associated clients.
-                      type: array
-                      items:
-                        type: string
+                 $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3094,35 +3064,7 @@ paths:
         content:
           application/json:
             schema:
-              title: UMAResource
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: Resource id.
-                  type: string
-                name:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the resource.
-                  type: string
-                scopes:
-                  description: Applicable resource scopes.
-                  type: array
-                  items:
-                    type: string
-                scopeExpression:
-                  description: List of resource scope expression.
-                  type: array
-                  items:
-                    type: string
-                clients:
-                  description: List of associated clients.
-                  type: array
-                  items:
-                    type: string
+              $ref: '#/components/schemas/UmaResource'
       responses:
         '201':
           description: Created
@@ -3130,34 +3072,7 @@ paths:
             application/json:
               schema:
                 title: UMAResource
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: Resource id.
-                    type: string
-                  name:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the resource.
-                    type: string
-                  scopes:
-                    description: Applicable resource scopes.
-                    type: array
-                    items:
-                      type: string
-                  scopeExpression:
-                    description: List of resource scope expression.
-                    type: array
-                    items:
-                      type: string
-                  clients:
-                    description: List of associated clients.
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3174,70 +3089,14 @@ paths:
         content:
           application/json:
             schema:
-              title: UMAResource
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: Resource id.
-                  type: string
-                name:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the resource.
-                  type: string
-                scopes:
-                  description: Applicable resource scopes.
-                  type: array
-                  items:
-                    type: string
-                scopeExpression:
-                  description: List of resource scope expression.
-                  type: array
-                  items:
-                    type: string
-                clients:
-                  description: List of associated clients.
-                  type: array
-                  items:
-                    type: string
+              $ref: '#/components/schemas/UmaResource'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                title: UMAResource
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: Resource id.
-                    type: string
-                  name:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the resource.
-                    type: string
-                  scopes:
-                    description: Applicable resource scopes.
-                    type: array
-                    items:
-                      type: string
-                  scopeExpression:
-                    description: List of resource scope expression.
-                    type: array
-                    items:
-                      type: string
-                  clients:
-                    description: List of associated clients.
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3267,34 +3126,7 @@ paths:
             application/json:
               schema:
                 title: UMAResource
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: Resource id.
-                    type: string
-                  name:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the resource.
-                    type: string
-                  scopes:
-                    description: Applicable resource scopes.
-                    type: array
-                    items:
-                      type: string
-                  scopeExpression:
-                    description: List of resource scope expression.
-                    type: array
-                    items:
-                      type: string
-                  clients:
-                    description: List of associated clients.
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3328,12 +3160,13 @@ paths:
       operationId: patch-oauth-uma-resources-by-id
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
       responses:
         '200':
           description: OK
@@ -3341,34 +3174,7 @@ paths:
             application/json:
               schema:
                 title: UMAResource
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: Resource id.
-                    type: string
-                  name:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the resource.
-                    type: string
-                  scopes:
-                    description: Applicable resource scopes.
-                    type: array
-                    items:
-                      type: string
-                  scopeExpression:
-                    description: List of resource scope expression.
-                    type: array
-                    items:
-                      type: string
-                  clients:
-                    description: List of associated clients.
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3521,12 +3327,13 @@ paths:
       operationId: patch-oauth-scopes-by-id
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: defaultScope, value: true } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
       responses:
         '200':
           description: OK
@@ -5724,4 +5531,63 @@ components:
         jansId:
           description: Attribute Scope Id.
           type: string
-          
+    UmaResource:
+      title: UMAResource object
+      description: UMAResource
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          description: XRI i-number. Client Identifier to uniquely identify the UMAResource.
+          type: string
+        id:
+          description: Resource id.
+          type: string
+        name:
+          description: A human-readable name of the scope.
+          type: string
+        iconUrl:
+          description: A URL for a graphic icon representing the resource.
+          type: string
+        scopes:
+          description: Applicable resource scopes.
+          type: array
+          items:
+            type: string
+        scopeExpression:
+          description: Resource scope expression.
+          type: string
+        clients:
+          description: List of client assosiated with the resource.
+          type: array
+          items:
+            type: string
+        resources:
+          description: List of assosiated resource.
+          type: array
+          items:
+            type: string
+        rev:
+          description: Resource revision.
+          type: string
+        creator:
+          description: Resource creator or owner.
+          type: string
+        description:
+          description: Resource description.
+          type: string
+        type:
+          description: Resource type.
+          type: string
+        creationDate:
+          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will created.'
+          type: string
+          format: date  
+        expirationDate:
+          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire.'
+          type: string
+          format: date      
+        deletable:
+          description: Specifies whether client is deletable.
+          type: boolean 
