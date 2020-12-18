@@ -34,6 +34,9 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
     def gather(self, step, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaGatherContext
         print "Claims-Gathering. Gathering ..."
 
+        if context.getClaim("country") == 'US' and context.getClaim("city") == 'NY':
+            return True
+
         if step == 1:
             if (context.getPageClaims().containsKey("country")):
                 country = context.getPageClaims().get("country")
@@ -90,16 +93,29 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         print "Trying to get claims from PCT ..."
         pctCode = context.getRequestParameters().get("pct")
         if pctCode is not None:
-            pct = CdiUtil.bean(UmaPctService).getByCode(pctCode[0])
-            country = pct.getClaims().getClaimAsString("country")
-            print "Country from pct: " + country
-            city = pct.getClaims().getClaimAsString("city")
-            print "City from pct: " + city
+            try:
+                pct = CdiUtil.bean(UmaPctService).getByCode(pctCode[0])
 
-            if country == 'US' and city == 'NY':
-                return ""
+                country = pct.getClaims().getClaimAsString("country")
+                print "Country from pct: " + country
+                context.putClaim("country", country)
+
+                city = pct.getClaims().getClaimAsString("city")
+                print "City from pct: " + city
+                context.putClaim("city", city)
+
+                stepsCount = 2
+                print "stepsCount: " + str(stepsCount)
+                for x in range(1, stepsCount):
+                    context.addSessionAttribute("uma_step_passed_" + str(x), str(True))
+                context.setStep(stepsCount)
+
+                return "/uma2/sample/claims_resolved.xhtml"
+            except:
+                print "Exception occured. Unable to resolve pct from client."
 
         print "Claims not found in pct ..."
+
         if step == 1:
             return "/uma2/sample/country.xhtml"
         elif step == 2:
