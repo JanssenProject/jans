@@ -49,6 +49,8 @@ public class AppConfiguration implements Configuration {
 
     private Boolean sessionAsJwt = false;
 
+    public int sectorIdentifierCacheLifetimeInMinutes = 1440;
+
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
     private int umaRptLifetime;
@@ -307,6 +309,14 @@ public class AppConfiguration implements Configuration {
 
     public void setRefreshTokenExtendLifetimeOnRotation(Boolean refreshTokenExtendLifetimeOnRotation) {
         this.refreshTokenExtendLifetimeOnRotation = refreshTokenExtendLifetimeOnRotation;
+    }
+
+    public int getSectorIdentifierCacheLifetimeInMinutes() {
+        return sectorIdentifierCacheLifetimeInMinutes;
+    }
+
+    public void setSectorIdentifierCacheLifetimeInMinutes(int sectorIdentifierCacheLifetimeInMinutes) {
+        this.sectorIdentifierCacheLifetimeInMinutes = sectorIdentifierCacheLifetimeInMinutes;
     }
 
     public Boolean getExpirationNotificatorEnabled() {
