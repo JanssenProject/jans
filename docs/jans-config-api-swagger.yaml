@@ -2734,32 +2734,10 @@ paths:
           content:
             application/json:
               schema:
-                title: List of OpenID Connect Sector Identifiers.
-                description: List of OpenID Connect Sector Identifiers.
-                type: array
+                title: SectorIdentifier list.
+                description: List of SectorIdentifier.
                 items:
-                  type: object
-                  description: Sector Identifier Details.
-                  properties:
-                    id:
-                      description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                      type: string
-                    description:
-                      description: A human-readable string describing the sector.
-                      type: string
-                    redirect_uris:
-                      description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                      type: array
-                      items:
-                        type: string
-                      example:
-                        - 'https://client.example.org/cb'
-                    client_id:
-                      description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                      type: array
-                      items:
-                        type: string
-                      example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+                 $ref: '#/components/schemas/SectorIdentifier'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2776,57 +2754,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              description: Sector Identifier Details.
-              properties:
-                id:
-                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                  type: string
-                description:
-                  description: A human-readable string describing the sector.
-                  type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                client_id:
-                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+              $ref: '#/components/schemas/SectorIdentifier'
       responses:
         '201':
           description: Created
           content:
-            application/json:
-              schema:
-                title: Newly added OpenID Connect Sector Identifier.
-                description: Newly added OpenID Connect Sector Identifier.
-                type: object
-                properties:
-                  id:
-                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                    type: string
-                  description:
-                    description: A human-readable string describing the sector.
-                    type: string
-                  redirect_uris:
-                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - 'https://client.example.org/cb'
-                  client_id:
-                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                    type: array
-                    items:
-                      type: string
-                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+           application/json:
+            schema:
+              $ref: '#/components/schemas/SectorIdentifier'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2843,57 +2778,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              description: Sector Identifier Details.
-              properties:
-                id:
-                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                  type: string
-                description:
-                  description: A human-readable string describing the sector.
-                  type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                client_id:
-                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+              $ref: '#/components/schemas/SectorIdentifier'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                title: Newly added OpenID Connect Sector Identifier.
-                description: Newly added OpenID Connect Sector Identifier.
-                type: object
-                properties:
-                  id:
-                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                    type: string
-                  description:
-                    description: A human-readable string describing the sector.
-                    type: string
-                  redirect_uris:
-                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - 'https://client.example.org/cb'
-                  client_id:
-                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                    type: array
-                    items:
-                      type: string
-                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+                $ref: '#/components/schemas/SectorIdentifier'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2922,28 +2814,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Sector Identifier Details.
-                properties:
-                  id:
-                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                    type: string
-                  description:
-                    description: A human-readable string describing the sector.
-                    type: string
-                  redirect_uris:
-                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - 'https://client.example.org/cb'
-                  client_id:
-                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                    type: array
-                    items:
-                      type: string
-                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+                $ref: '#/components/schemas/SectorIdentifier'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2977,40 +2848,20 @@ paths:
       operationId: patch-oauth-openid-sectors-by-id
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: redirect_uris/2, value: https://client.example.org/cb/new } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.ss
+                example: '[ {op:replace, path: redirect_uris/2, value: https://client.example.org/cb/new } ]'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                description: Sector Identifier Details.
-                properties:
-                  id:
-                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                    type: string
-                  description:
-                    description: A human-readable string describing the sector.
-                    type: string
-                  redirect_uris:
-                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - 'https://client.example.org/cb'
-                  client_id:
-                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                    type: array
-                    items:
-                      type: string
-                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+                $ref: '#/components/schemas/SectorIdentifier'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -5591,3 +5442,26 @@ components:
         deletable:
           description: Specifies whether client is deletable.
           type: boolean 
+    SectorIdentifier:
+      type: object
+      description: Sector Identifier Details.
+      properties:
+        id:
+          description: XRI i-number. Sector Identifier to uniquely identify the sector.
+          type: string
+        description:
+          description: A human-readable string describing the sector.
+          type: string
+        redirectUris:
+          description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+          type: array
+          items:
+            type: string
+          example:
+            - 'https://client.example.org/cb'
+        clientIds:
+          description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
+          type: array
+          items:
+            type: string
+          example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.

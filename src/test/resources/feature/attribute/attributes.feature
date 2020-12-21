@@ -1,4 +1,4 @@
-
+@ignore
 Feature: Attributes 
 @ignore
 Scenario: Fetch all attributes without bearer token 
