@@ -1,0 +1,475 @@
+openapi: 3.0.1
+
+info:
+  title: jans-config-api
+  description: jans-config-api - Authorization services
+  contact:
+    email: xxx@gluu.org
+  license:
+    name: License
+    url: 'https://github.com/JanssenProject/blob/master/LICENSE'
+  version: '1.0.0'
+
+servers:
+  - url: 'https://c2.gluu.org'
+
+tags:
+  - name: Database - LDAP configuration
+  - name: OAuth - Scopes
+
+
+paths:
+  /jans-config-api/api/v1/config/database/ldap:
+    get:
+      summary: Gets list of existing LDAP configurations.
+      description: Gets list of existing LDAP configurations. 
+      operationId: get-config-database-ldap
+      tags:
+        - Database - LDAP configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: LdapConfiguration
+                description: List of configured LDAP configuration.
+                type: array
+                items:
+                  $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
+
+    post:
+      summary: Adds a new LDAP configuration.
+      description: Adds a new LDAP configuration.
+      operationId: post-config-database-ldap
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
+    put:
+      summary: Updates LDAP configuration.
+      description: Updates LDAP configuration.
+      operationId: put-config-database-ldap
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
+    parameters: []
+
+  /jans-config-api/api/v1/scopes:
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Gets list of Scopes.
+      description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+      operationId: get-oauth-scopes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope description list.
+                description: List of scope description.
+                items:
+                  $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/scopes.readonly]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: type
+          description: Scope type.
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+    post:
+      tags:
+        - OAuth - Scopes
+      summary: Create Scope.
+      description: Create Scope.
+      operationId: post-oauth-scopes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scope'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
+    put:
+      tags:
+        - OAuth - Scopes
+      summary: Updates existing Scope.
+      description: Updates existing Scope.
+      operationId: put-oauth-scopes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scope'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
+    parameters: []
+  /jans-config-api/api/v1/scopes/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        required: true
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Get Scope by Inum
+      description: Get Scope by Inum
+      operationId: get-oauth-scopes-by-inum
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: ['https://jans.io/oauth/config/scopes.readonly']
+    delete:
+      tags:
+        - OAuth - Scopes
+      summary: Delete Scope.
+      description: Delete Scope.
+      operationId: delete-oauth-scopes-by-id
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
+    patch:
+      tags:
+        - OAuth - Scopes
+      summary: Update modified attributes of existing Scope by Inum.
+      description: Update modified attributes of existing Scope by Inum.
+      operationId: patch-oauth-scopes-by-id
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/scopes.write]
+
+
+components:
+  securitySchemes:
+    jans-auth:
+      type: oauth2
+      description: Authorization
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://{op-hostname}/.../token'
+          scopes: 
+            https://jans.io/oauth/config/database/ldap.readonly: View LDAP database related information
+            https://jans.io/oauth/config/database/ldap.write: View and manage LDAP database related information
+            https://jans.io/oauth/config/scopes.readonly: View scope related information
+            https://jans.io/oauth/config/scopes.write: View and manage scope related information
+
+  responses:
+    Found:
+      description: Resource Found.
+      content: {}
+    InvalidRequest:
+      description: Invalid parameters are provided to endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Access token is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    AccessDenied:
+      description: Invalid details provided hence access denied.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource Not Found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAcceptable:
+      description: Request Not Acceptable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal error occurred. Please check log file for details.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      required:
+        - error_code
+        - error_description
+      type: object
+      properties:
+        error_code:
+          type: string
+        error_description:
+          type: string
+        details:
+          type: string
+
+    LdapConfiguration:
+      type: object
+      required:
+        - configId
+        - bindDN
+        - maxConnections
+        - primaryKey
+        - localPrimaryKey
+        - servers
+        - baseDNs
+        - useSSL
+      properties:
+        configId:
+          type: string
+          description: Unique identifier - Name
+          example: auth_ldap_server
+        bindDN:
+          type: string
+          description: User Distingusihed Name for binding.
+        maxConnections:
+          type: integer
+          description: Total number of simultaneous connections allowed.
+          format: int32
+          default: 2
+        primaryKey:
+          type: string
+          description: Used to search and bind operations in configured LDAP server.
+          example: 'SAMAccountName,uid, email'
+        localPrimaryKey:
+          type: string
+          description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+          example: 'uid, email'
+        servers:
+          type: array
+          description: List of LDAP authentication servers.
+          items:
+            type: string
+            description: Unique name of the authentication server and port number.
+            example: 'authserver.org:63'
+        baseDNs:
+          type: array
+          description: list of LDAP base Distingusihed Name
+          items:
+            type: string
+        useSSL:
+          type: boolean
+        bindPassword:
+          type: string
+          description: User password for binding.
+        useAnonymousBind:
+          type: boolean
+          description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+        enabled:
+          type: boolean
+        version:
+          type: integer
+    Scope:
+      title: Scope
+      description: Auth Scope.
+      type: object
+      properties:
+        dn:
+          type: string
+        id:
+          description: The base64url encoded id.
+          type: string
+        inum:
+          description: Unique id identifying the attribute
+          type: string
+        displayName:
+          description: A human-readable name of the scope.
+          type: string
+        description:
+          description: A human-readable string describing the scope.
+          type: string
+        iconUrl:
+          description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+          type: string
+        authorizationPolicies:
+          description: Policies associated with all scopes.
+          type: array
+          items:
+            type: string
+        defaultScope:
+          description: Boolean value to specify default scope.
+          type: boolean
+        scopeType:
+          description: The scopes type associated with Access Tokens determine what resources will.
+          type: string
+          enum:
+            - openid
+            - dynamic
+            - oauth
+            - uma
+        jansClaim:
+          description: Claim attributes associated with the scope.
+          type: array
+          items:
+            type: string
+        umaType:
+          type: boolean
+        umaAuthorizationPolicies:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          description: ScopeAttributes
+          properties:
+            spontaneousClientId:
+              type: string
+            spontaneousClientScopes:
+              type: array
+              items:
+                type: string
+            showInConfigurationEndpoint:
+              type: boolean
+    PatchRequest: 
+      description: A JSONPatch document as defined by RFC 6902 
+      required:
+       - "op"
+       - "path"
+      properties: 
+       op: 
+        type: string 
+        description: The operation to be performed 
+        enum:
+         - "add"
+         - "remove"
+         - "replace"
+         - "move"
+         - "copy"
+         - "test"
+       path: 
+        type: string 
+        description: A JSON-Pointer 
+       value: 
+        type: object 
+        description: The value to be used within the operations.
