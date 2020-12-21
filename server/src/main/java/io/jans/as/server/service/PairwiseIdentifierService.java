@@ -75,7 +75,7 @@ public class PairwiseIdentifierService {
 
             String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
 
-            Filter filter = null;
+            final Filter filter;
             if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
             	Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
                 Filter userInumFilter = Filter.createEqualityFilter("jansUsrId", userInum);
@@ -107,9 +107,9 @@ public class PairwiseIdentifierService {
                     userInum : userInum + clientId;
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
-                    sectorIdentifierUri, localAccountId, key, salt, appConfiguration);
+                    sectorIdentifier, localAccountId, key, salt, appConfiguration);
 
-            PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId, userInum);
+            PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier, clientId, userInum);
             pairwiseIdentifier.setId(calculatedSub);
 
             return pairwiseIdentifier;
