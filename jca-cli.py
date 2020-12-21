@@ -333,14 +333,16 @@ class JCA_CLI:
                 return security['jans-auth'][0]
 
 
-    def unmap_model(self, model):
-        data_unmaped = {}
-        data = model.to_dict()
-
-        for key_ in data:
-            data_unmaped[model.attribute_map[key_]] = data[key_]
-
-        return data_unmaped
+    def unmap_model(self, model, data_dict):
+        
+        for key_ in model.attribute_map:
+            val = getattr(model, key_)
+            if hasattr(val, 'swagger_types'):
+                sub_data_dict = {}
+                self.unmap_model(val, sub_data_dict)
+                data_dict[model.attribute_map[key_]] = sub_data_dict
+            else:
+                data_dict[model.attribute_map[key_]] = val
 
     def process_get(self, endpoint, return_value=False):
         clear()
@@ -372,13 +374,17 @@ class JCA_CLI:
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-','_'))
 
         api_response = api_caller(**parameters)
-
+        
         api_response_unmapped = []
         if isinstance(api_response, list):
             for model in api_response:
-                api_response_unmapped.append(self.unmap_model(model))
+                data_dict = {}
+                self.unmap_model(model, data_dict)
+                api_response_unmapped.append(data_dict)
         else:
-            api_response_unmapped = self.unmap_model(api_response)
+            data_dict = {}
+            self.unmap_model(api_response, data_dict)
+            api_response_unmapped = data_dict
 
         if return_value:
             return api_response_unmapped
