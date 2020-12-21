@@ -7,6 +7,7 @@
 package io.jans.as.server.service;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.common.model.registration.Client;
@@ -28,6 +29,7 @@ import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +53,9 @@ public class RedirectionUriService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private LocalResponseCache localResponseCache;
+
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
         Client client = clientService.getClient(clientIdentifier);
         if (client == null) {
@@ -59,28 +64,43 @@ public class RedirectionUriService {
         return validateRedirectionUri(client, redirectionUri);
     }
 
+    public List<String> getSectorRedirectUris(String sectorIdentiferUri) throws Exception {
+        List<String> result = Lists.newArrayList();
+        if (StringUtils.isBlank(sectorIdentiferUri)) {
+            return result;
+        }
+
+        final List<String> sectorRedirectUris = localResponseCache.getSectorRedirectUris(sectorIdentiferUri);
+        if (sectorRedirectUris != null) {
+            return sectorRedirectUris;
+        }
+
+        ClientRequest clientRequest = new ClientRequest(sectorIdentiferUri);
+        clientRequest.setHttpMethod(HttpMethod.GET);
+
+        ClientResponse<String> clientResponse = clientRequest.get(String.class);
+        int status = clientResponse.getStatus();
+        if (status != 200) {
+            return result;
+        }
+
+        String entity = clientResponse.getEntity(String.class);
+        JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+
+        for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
+            result.add(sectorIdentifierJsonArray.getString(i));
+        }
+        localResponseCache.putSectorRedirectUris(sectorIdentiferUri, result);
+        return result;
+    }
+
     public String validateRedirectionUri(@NotNull Client client, String redirectionUri) {
         try {
             String sectorIdentifierUri = client.getSectorIdentifierUri();
             String[] redirectUris = client.getRedirectUris();
 
             if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-                ClientRequest clientRequest = new ClientRequest(sectorIdentifierUri);
-                clientRequest.setHttpMethod(HttpMethod.GET);
-
-                ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                int status = clientResponse.getStatus();
-
-                if (status == 200) {
-                    String entity = clientResponse.getEntity(String.class);
-                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-                    redirectUris = new String[sectorIdentifierJsonArray.length()];
-                    for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
-                        redirectUris[i] = sectorIdentifierJsonArray.getString(i);
-                    }
-                } else {
-                    return null;
-                }
+                redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
             }
 
             if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
