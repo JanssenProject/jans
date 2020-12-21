@@ -2555,9 +2555,8 @@ paths:
               schema:
                 title: OpenID Clients.
                 description: List of OpenID clients.
-                type: array
                 items:
-                  $ref: '#/components/schemas/Client'
+                 $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2588,9 +2587,7 @@ paths:
             schema:
               title: OpenID Connect Client Details.
               description: OpenID Connect Client Details.
-              type: object
-              items:
-                $ref: '#/components/schemas/Client'
+              $ref: '#/components/schemas/Client'
       responses:
         '201':
           description: Created
@@ -2598,10 +2595,7 @@ paths:
             application/json:
               schema:
                 title: OpenID Connect Client Details.
-                description: OpenID Connect Client Details.
-                type: object
-                items:
-                  $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2619,10 +2613,7 @@ paths:
           application/json:
             schema:
               title: OpenID Connect Client Details.
-              description: OpenID Connect Client Details.
-              type: object
-              items:
-                $ref: '#/components/schemas/Client'
+              $ref: '#/components/schemas/Client'
       responses:
         '200':
           description: OK
@@ -2630,10 +2621,7 @@ paths:
             application/json:
               schema:
                 title: OpenID Connect Client Details.
-                description: OpenID Connect Client Details.
-                type: object
-                items:
-                  $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2662,10 +2650,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Client Details.
-                items:
-                  $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2697,22 +2682,21 @@ paths:
       operationId: patch-oauth-openid-clients-by-inum
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: backchannel_authentication_request_signing_alg, value: false } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: backchannel_authentication_request_signing_alg, value: false } ]'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                description: Client Details.
-                items:
-                  $ref: '#/components/schemas/Client'
+                title: Client Details.
+                $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3210,35 +3194,35 @@ components:
           tokenUrl: 'https://{op-hostname}/.../token'
           scopes: 
             https://jans.io/oauth/jans-auth-server/config/properties.readonly: View Auth Server properties related information
-            https://jans.io/oauth/jans-auth-server/config/properties.write: View and manage Auth Server properties related information
+            https://jans.io/oauth/jans-auth-server/config/properties.write: Manage Auth Server properties related information
             https://jans.io/oauth/config/fido2.readonly: View FIDO2 related information
-            https://jans.io/oauth/config/fido2.write: View and manage FIDO2 related information
+            https://jans.io/oauth/config/fido2.write: Manage FIDO2 related information
             https://jans.io/oauth/config/attributes.readonly: View attribute related information
-            https://jans.io/oauth/config/attributes.write: View and manage attribute related information
+            https://jans.io/oauth/config/attributes.write: Manage attribute related information
             https://jans.io/oauth/config/acrs.readonly: View ACRS related information
-            https://jans.io/oauth/config/acrs.write: View and manage ACRS related information
+            https://jans.io/oauth/config/acrs.write: Manage ACRS related information
             https://jans.io/oauth/config/database/ldap.readonly: View LDAP database related information
-            https://jans.io/oauth/config/database/ldap.write: View and manage LDAP database related information
+            https://jans.io/oauth/config/database/ldap.write: Manage LDAP database related information
             https://jans.io/oauth/config/database/couchbase.readonly: View Couchbase database information
-            https://jans.io/oauth/config/database/couchbase.write: View and manage Couchbase database related information
+            https://jans.io/oauth/config/database/couchbase.write: Manage Couchbase database related information
             https://jans.io/oauth/config/scripts.readonly: View cache scripts information
-            https://jans.io/oauth/config/scripts.write: View and manage scripts related information
+            https://jans.io/oauth/config/scripts.write: Manage scripts related information
             https://jans.io/oauth/config/cache.readonly: View cache related information
-            https://jans.io/oauth/config/cache.write: View and manage cache related information
+            https://jans.io/oauth/config/cache.write: Manage cache related information
             https://jans.io/oauth/config/smtp.readonly: View SMTP related information	
-            https://jans.io/oauth/config/smtp.write: View and manage SMTP related information
+            https://jans.io/oauth/config/smtp.write: Manage SMTP related information
             https://jans.io/oauth/config/logging.readonly: View logging related information	
-            https://jans.io/oauth/config/logging.write: View and manage logging related information
+            https://jans.io/oauth/config/logging.write: Manage logging related information
             https://jans.io/oauth/config/jwks.readonly: View JWKS related information	
-            https://jans.io/oauth/config/jwks.write: View and manage JWKS related information	
+            https://jans.io/oauth/config/jwks.write: Manage JWKS related information	
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
-            https://jans.io/oauth/config/openid/clients.write: View and manage clients related information	
+            https://jans.io/oauth/config/openid/clients.write: Manage clients related information	
             https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.write: View and manage sector related information		
+            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information		
             https://jans.io/oauth/config/scopes.readonly: View scope related information
-            https://jans.io/oauth/config/scopes.write: View and manage scope related information
+            https://jans.io/oauth/config/scopes.write: Manage scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
-            https://jans.io/oauth/config/uma/resources.write: View and manage UMA Resource related information
+            https://jans.io/oauth/config/uma/resources.write: Manage UMA Resource related information
   responses:
     Found:
       description: Resource Found.
@@ -3532,14 +3516,6 @@ components:
           items:
             type: string
     JsonWebKey:
-      required:
-        - alg
-        - exp
-        - key_ops
-        - kid
-        - kty
-        - use
-        - x5c
       type: object
       properties:
         kid:
@@ -3559,13 +3535,13 @@ components:
           type: array
           items:
             type: string
-        'n':
+        n:
           type: string
         e:
           type: string
         x:
           type: string
-        'y':
+        y:
           type: string
  
     AppConfiguration:
@@ -4890,7 +4866,7 @@ components:
           description: The base64url encoded id.
           type: string
         inum:
-          description: Unique id identifying the attribute
+          description: Unique id identifying the .
           type: string
         displayName:
           description: A human-readable name of the scope.
@@ -5013,10 +4989,12 @@ components:
       description: Client.
       type: object
       properties:
+        dn:
+          type: string
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
-        client_secret:
+        clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
         frontChannelLogoutUri:
@@ -5031,7 +5009,7 @@ components:
         clientSecretExpiresAt:
           type: string
           format: date	
-        redirect_uris:
+        redirectUris:
           description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
           type: array
           items:
@@ -5049,29 +5027,29 @@ components:
           items:
             type: string
             enum:
-              - CODE
-              - TOKEN
-              - ID_TOKEN        
+              - code
+              - token
+              - id_token        
         grantTypes:
           description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
           type: array
           items:
             type: string
             enum:
-              - AUTHORIZATION_CODE
-              - IMPLICIT
-              - RESOURCE_OWNER_PASSWORD_CREDENTIALS
-              - CLIENT_CREDENTIALS
-              - REFRESH_TOKEN
-              - OXAUTH_UMA_TICKET
-              - CIBA
-              - DEVICE_CODE        
+              - authorization_code
+              - implicit
+              - password
+              - client_credentials
+              - refresh_token
+              - urn:ietf:params:oauth:grant-type:uma-ticket
+              - urn:openid:params:grant-type:ciba
+              - urn:ietf:params:oauth:grant-type:device_code     
         applicationType:
           description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
           type: string
           enum:
-            - Web
-            - Native        
+            - web
+            - native        
         contacts:
           description: e-mail addresses of people responsible for this Client.
           type: array
@@ -5100,9 +5078,7 @@ components:
           type: string
         jwks:
           description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
-          type: array
-          items:
-            $ref: '#/components/schemas/JsonWebKey'
+          type: string
           example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
         sectorIdentifierUri:
           description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
@@ -5111,13 +5087,24 @@ components:
           description: Subject type requested for the Client ID. Valid types include pairwise and public.
           type: string
           enum:
-            - PAIRWISE
-            - PUBLIC          
+            - pairwise
+            - public          
         idTokenSignedResponseAlg:
           description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
           type: string
           enum:
-            - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+            - HS256
+            - HS384
+            - HS512
+            - RS256
+            - RS384
+            - RS512
+            - ES256
+            - ES384
+            - ES512
+            - PS256
+            - PS384
+            - PS512
         idTokenEncryptedResponseAlg:
           description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
           type: string
@@ -5344,8 +5331,7 @@ components:
           type: string
         attributes:
           type: object
-          items:
-            $ref: '#/components/schemas/ClientAttributes'        
+          $ref: '#/components/schemas/ClientAttributes'        
         backchannelTokenDeliveryMode:
           description: specifies how backchannel token will be delivered.
           type: string
