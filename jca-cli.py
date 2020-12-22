@@ -175,6 +175,9 @@ class JCA_CLI:
             print("Error while getting access token")
             print(response.data)
 
+    def colored_text(self, text, color=255):
+        return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
+
     def check_type(self, val, vtype):
         if vtype == 'string':
             return str(val)
@@ -201,6 +204,9 @@ class JCA_CLI:
         if itype:
             if itype == 'array':
                 type_text = "Type: array of {} seperated by _,".format(sitype)
+            elif itype == 'boolean':
+                if default is None:
+                    default = False
             else:
                 type_text = "Type: " + itype
 
@@ -210,12 +216,16 @@ class JCA_CLI:
             help_text = type_text
 
         if help_text:
-            print(u"\u001b[38;5;244m«{}»\u001b[0m".format(help_text))
-
-        if default:
-            text += ' [{}]'.format(default)
+            print(self.colored_text('«{}»'.format(help_text), 244))
+        
+        if not default is None:
+            default_text = str(default).lower() if itype == 'boolean' else str(default)
+            text += ' [{}]'.format(self.colored_text(default_text, 10))
             if itype=='integer':
                 default=int(default)
+        else:
+            enforce = False
+
         text += ': '
 
         if itype=='boolean' and not values:
@@ -225,6 +235,9 @@ class JCA_CLI:
             selection = input(text)
             selection = selection.strip()
 
+            if itype == 'boolean' and not selection:
+                return False
+
             if enforce and not selection:
                 continue
 
@@ -232,8 +245,12 @@ class JCA_CLI:
                 print("Quiting...")
                 sys.exit()
 
+            if itype == 'array' and default and not selection:
+                return default
+
             if default and not selection:
                 selection = default
+
 
             if itype == 'array' and sitype:
                 selection = selection.split('_,')
@@ -271,7 +288,6 @@ class JCA_CLI:
                 
                 if not values and selection:
                     break
-
 
         if selection == '_null':
             selection = None
@@ -339,15 +355,18 @@ class JCA_CLI:
         for key_ in model.attribute_map:
             val = getattr(model, key_)
             if hasattr(val, 'swagger_types'):
-                print("syb unmap", key_)
                 sub_data_dict = {}
                 self.unmap_model(val, sub_data_dict)
                 data_dict[model.attribute_map[key_]] = sub_data_dict
-                print(data_dict[model.attribute_map[key_]])
             else:
                 data_dict[model.attribute_map[key_]] = val
             
         return data_dict
+
+    def get_model_key_map(self, model, key):
+        for key_ in model.attribute_map:
+            if model.attribute_map[key_] == key:
+                return key_
 
     def process_get(self, endpoint, return_value=False):
         clear()
@@ -379,6 +398,9 @@ class JCA_CLI:
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-','_'))
 
         api_response = api_caller(**parameters)
+
+        if return_value:
+            return api_response
         
         api_response_unmapped = []
         if isinstance(api_response, list):
@@ -389,8 +411,6 @@ class JCA_CLI:
             data_dict = self.unmap_model(api_response)
             api_response_unmapped = data_dict
 
-        if return_value:
-            return api_response_unmapped
 
         print()
         print(json.dumps(api_response_unmapped, indent=2))
@@ -416,12 +436,13 @@ class JCA_CLI:
         schema = endpoint.info['requestBody']['content']['application/json']['schema']
 
         if '$ref' in schema:
-            schema_path_list = schema.pop('$ref').strip('/#').split('/')
-            schema = self.cfg_yml[schema_path_list[0]]
+            schema_ = schema.copy()
+            schema_path_list = schema_.pop('$ref').strip('/#').split('/')
+            schema_ = self.cfg_yml[schema_path_list[0]]
             for p in schema_path_list[1:]:
-                schema = schema[p]
+                schema_ = schema_[p]
         
-        return schema
+        return schema_
 
 
     def get_swagger_name(self, model, name):
@@ -436,7 +457,7 @@ class JCA_CLI:
 
 
     def get_input_for_schema_(self, schema, model):
-        
+
         for prop in schema['properties']:
             item = schema['properties'][prop]
 
@@ -448,13 +469,17 @@ class JCA_CLI:
                 setattr(model, swagger_name, sub_model)
 
             else:
+                prop_ = self.get_model_key_map(model, prop)
+                default = getattr(model, prop_)
+                enforce = True if item['type'] == 'boolean' else False
                 val = self.get_input(
                         values=item.get('enum', []),
                         text=prop,
-                        #default=default,
+                        default=default,
                         itype=item['type'],
                         help_text=item.get('description'),
-                        sitype=item.get('items', {}).get('type')
+                        sitype=item.get('items', {}).get('type'),
+                        enforce=enforce
                         )
 
                 swagger_name = self.get_swagger_name(model, prop)
@@ -510,32 +535,34 @@ class JCA_CLI:
 
     def process_put(self, endpoint):
 
-        """
-        cur_values = None
+        schema = self.get_scheme_for_endpoint(endpoint)
+        
+        cur_model = None
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
-                cur_values = self.process_get(m, return_value=True)
+                cur_model = self.process_get(m, return_value=True)
         
-        if cur_values:
-            print(cur_values)
-
-        schema = endpoint.info['requestBody']['content']['application/json']['schema']
-
-        if '$ref' in schema:
-            schema_path_list = schema['$ref'].strip('/#').split('/')
-            schema = self.cfg_yml[schema_path_list[0]]
-            for p in schema_path_list[1:]:
-                schema = schema[p]
-
-        print(json.dumps(schema, indent=2))
-        """
-        print("PUT mehod for '{}' is not implemented yet".format(endpoint))
+        if cur_model:
+            cur_data_dict = self.unmap_model(cur_model)
+            self.get_input_for_schema_(schema, cur_model)
         
+            print("Obtained Data:")
+            print(cur_model)
+
+            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
+            
+            if selection == 'y':
+                api_caller = self.get_api_caller(endpoint)
+                print("Please wait while posting data ...\n")
+                api_response = api_caller(body=cur_model)
+                pprint(api_response)
+        else:
+            print("Can't obtain data")
+
         selection = self.get_input(['b'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
-
-
+        
     def display_menu(self, menu):
         clear()
         self.current_menu = menu

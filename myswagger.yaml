@@ -428,7 +428,7 @@ components:
             - dynamic
             - oauth
             - uma
-        jansClaim:
+        claims:
           description: Claim attributes associated with the scope.
           type: array
           items:
