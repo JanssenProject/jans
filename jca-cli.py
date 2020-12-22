@@ -517,9 +517,10 @@ class JCA_CLI:
         model = model_class()
         self.get_input_for_schema_(schema, model)
 
-        print("Obtained Data:")
-        print(model)
-
+        print("Obtained Data:\n")
+        model_unmapped = self.unmap_model(model)
+        self.print_colored_output(model_unmapped)
+        print()
         selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
         
         if selection == 'y':
