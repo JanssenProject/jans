@@ -529,6 +529,7 @@ class JCA_CLI:
             api_response_unmapped = self.unmap_model(api_response)
             self.print_colored_output(api_response_unmapped)
 
+        selection = self.get_input(values=['q', 'b'])
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
             
