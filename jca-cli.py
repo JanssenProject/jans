@@ -588,7 +588,7 @@ class JCA_CLI:
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
-        
+
         if cur_model:
             cur_data_dict = self.unmap_model(cur_model)
             self.get_input_for_schema_(schema, cur_model)
@@ -596,7 +596,7 @@ class JCA_CLI:
             print("Obtained Data:")
             print(cur_model)
 
-            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
+            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
             
             if selection == 'y':
                 api_caller = self.get_api_caller(endpoint)
