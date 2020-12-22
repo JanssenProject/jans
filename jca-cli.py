@@ -376,27 +376,18 @@ class JCA_CLI:
 
         self.print_underlined(title)
 
-        client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
-
-        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
-
-        security = self.get_scope_for_endpoint(endpoint)
-
         parameters = self.obtain_parameters(endpoint)
         
         for param in parameters.copy():
             if not parameters[param]:
                 del parameters[param]
-        
-        self.get_access_token(security)
 
         if parameters:
             print("Calling Api with parameters:", parameters)
 
         print("Please wait while retreiving data ...\n")
 
-        api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-','_'))
-
+        api_caller = self.get_api_caller(endpoint)
         api_response = api_caller(**parameters)
 
         if return_value:
