@@ -220,7 +220,7 @@ class JCA_CLI:
         
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += ' [{}]'.format(self.colored_text(default_text, 10))
+            text += ' [{}]'.format(self.colored_text(default_text, 11))
             if itype=='integer':
                 default=int(default)
         else:
@@ -300,6 +300,10 @@ class JCA_CLI:
         print()
         print(text)
         print('-' * len(text.splitlines()[-1]))
+
+    def print_colored_output(self, data):
+        data_json = json.dumps(data, indent=2)
+        print(self.colored_text(data_json, 10))
 
     def get_endpiont_url_param(self, endpoint):
         param = {}
@@ -404,7 +408,7 @@ class JCA_CLI:
 
 
         print()
-        print(json.dumps(api_response_unmapped, indent=2))
+        self.print_colored_output(api_response_unmapped)
 
         while True:
             selection = self.get_input(['q', 'b', 'w', 'r'])
@@ -516,9 +520,9 @@ class JCA_CLI:
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
             api_response = api_caller(body=model)
-            pprint(api_response)
-            
-            
+            api_response_unmapped = self.unmap_model(api_response)
+            self.print_colored_output(api_response_unmapped)
+
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
             
@@ -532,13 +536,8 @@ class JCA_CLI:
     def process_patch(self, endpoint):
         schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
 
-        #model = swagger_client.PatchRequest()
-        
-        #data = self.get_input_for_schema_(schema, model)
-        
         url_param = self.get_endpiont_url_param(endpoint)
         url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
-
 
         body = []
 
@@ -565,7 +564,8 @@ class JCA_CLI:
         api_caller = self.get_api_caller(endpoint)
         api_response = api_caller(url_param_val, body=body)
 
-        print(json.dumps(self.unmap_model(api_response), indent=2))
+        api_response_unmapped = self.unmap_model(api_response)
+        self.print_colored_output(api_response_unmapped)
 
         selection = self.get_input(['b'])
         if selection == 'b':
@@ -593,7 +593,8 @@ class JCA_CLI:
                 api_caller = self.get_api_caller(endpoint)
                 print("Please wait while posting data ...\n")
                 api_response = api_caller(body=cur_model)
-                pprint(api_response)
+                api_response_unmapped = self.unmap_model(api_response)
+                self.print_colored_output(api_response_unmapped)
         else:
             print("Can't obtain data")
 
