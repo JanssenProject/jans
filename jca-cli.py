@@ -432,16 +432,28 @@ class JCA_CLI:
                     print("An error ocurred while saving data")
                     print(e)
 
+    def get_schema_from_reference(self, ref):
+        schema_path_list = ref.strip('/#').split('/')
+        schema = self.cfg_yml[schema_path_list[0]]
+        schema_ = schema.copy()
+
+        for p in schema_path_list[1:]:
+            schema_ = schema_[p]
+
+        return schema_
+
+
     def get_scheme_for_endpoint(self, endpoint):
-        schema = endpoint.info['requestBody']['content']['application/json']['schema']
+        for content_type in endpoint.info['requestBody']['content']:
+            if 'schema' in endpoint.info['requestBody']['content'][content_type]:
+                schema = endpoint.info['requestBody']['content'][content_type]['schema']
+                break
 
         if '$ref' in schema:
             schema_ = schema.copy()
-            schema_path_list = schema_.pop('$ref').strip('/#').split('/')
-            schema_ = self.cfg_yml[schema_path_list[0]]
-            for p in schema_path_list[1:]:
-                schema_ = schema_[p]
-        
+            schema_ref_ = self.get_schema_from_reference(schema_.pop('$ref'))
+            schema_.update(schema_ref_)
+
         return schema_
 
 
@@ -527,8 +539,43 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
 
     def process_patch(self, endpoint):
-        print("PATCH mehod for '{}' is not implemented yet".format(endpoint))
+        schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
+
+        #model = swagger_client.PatchRequest()
         
+        #data = self.get_input_for_schema_(schema, model)
+        
+        url_param = self.get_endpiont_url_param(endpoint)
+        url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
+
+
+        body = []
+
+        while True:
+            data = {}
+            for param in ('op', 'path', 'value'):
+                itype = schema[param]['type']
+                if itype=='object':
+                    itype = 'string'
+                val_ = self.get_input(text=schema[param]['description'].strip('.'), values=schema[param].get('enum',[]), itype=itype)
+                data[param] = val_
+                if param == 'path' and data['op'] == 'remove':
+                    break
+            if not data['path'].startswith('/'):
+                data['path'] = '/' + data['path']
+            
+            model = swagger_client.PatchRequest(**data)
+            body.append(model)
+            selection = self.get_input(text='Patch another param?', values=['y', 'n'])
+            if selection == 'n':
+                break
+
+        print("Please wait patching")
+        api_caller = self.get_api_caller(endpoint)
+        api_response = api_caller(url_param_val, body=body)
+
+        print(json.dumps(self.unmap_model(api_response), indent=2))
+
         selection = self.get_input(['b'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
