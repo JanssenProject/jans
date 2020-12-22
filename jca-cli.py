@@ -14,6 +14,9 @@ from urllib.parse import urljoin
 
 import swagger_client
 
+#reset previous color
+print('\033[0m',end='')
+
 clear = lambda: os.system('clear')
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
@@ -232,7 +235,10 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            selection = input(text)
+            print(text, end='')
+            print('\033[1m', end='')
+            selection = input()
+            print('\033[0m')
             selection = selection.strip()
 
             if itype == 'boolean' and not selection:
