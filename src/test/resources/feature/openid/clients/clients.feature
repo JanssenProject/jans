@@ -20,6 +20,7 @@ And header Authorization = 'Bearer ' + accessToken
 And param limit = 3
 When method GET
 Then status 200
+And print response
 And assert response.length == 3
 
 Scenario: Search openid connect clients given a serach pattern
@@ -28,6 +29,7 @@ And header Authorization = 'Bearer ' + accessToken
 And param pattern = 'oxTrust'
 When method GET
 Then status 200
+And print response
 And assert response.length == 1
 
 
@@ -46,6 +48,7 @@ Given url openidclients_url + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+And print response
 
 @CreateUpdateDelete
 Scenario: Create new OpenId Connect Client
