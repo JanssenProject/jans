@@ -18,10 +18,6 @@ public class AuthenticationMethod implements Serializable {
     @Size(min = 1)
     private String defaultAcr;
 
-    @NotBlank
-    @Size(min = 1)
-    private String oxtrustAcr;
-
     public String getDefaultAcr() {
         return defaultAcr;
     }
@@ -30,11 +26,4 @@ public class AuthenticationMethod implements Serializable {
         this.defaultAcr = defaultAcr;
     }
 
-    public String getOxtrustAcr() {
-        return oxtrustAcr;
-    }
-
-    public void setOxtrustAcr(String oxtrustAcr) {
-        this.oxtrustAcr = oxtrustAcr;
-    }
 }

@@ -403,14 +403,7 @@ paths:
           content:
             application/json:
               schema:
-                title: AuthenticationMethod
-                description: Default authentication method.
-                type: object
-                properties:
-                  defaultAcr:
-                    type: string
-                  oxtrustAcr:
-                    type: string
+                $ref: '#/components/schemas/AuthenticationMethod'                  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -427,14 +420,7 @@ paths:
         content:
           application/json:
             schema:
-              title: AuthenticationMethod
-              description: Authentication method to be updated as default.
-              type: object
-              properties:
-                defaultAcr:
-                  type: string
-                oxtrustAcr:
-                  type: string
+                $ref: '#/components/schemas/AuthenticationMethod'
       responses:
         '200':
           description: OK
@@ -4647,3 +4633,12 @@ components:
           items:
             $ref: '#/components/schemas/JsonWebKey'
        
+    AuthenticationMethod:
+      type: object
+      description: Authentication Method Configuration
+      properties:
+        defaultAcr:
+          type: string
+          description: This field controls the default authentication mechanism that is presented to users from all applications that leverage Janssen Server for authentication.
+
+	  
