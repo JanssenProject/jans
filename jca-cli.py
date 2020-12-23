@@ -441,6 +441,8 @@ class JCA_CLI:
         for p in schema_path_list[1:]:
             schema_ = schema_[p]
 
+        if not 'title' in schema_:
+            schema_['title'] = p
         return schema_
 
 
@@ -457,12 +459,6 @@ class JCA_CLI:
 
         return schema_
 
-
-    def get_swagger_name(self, model, name):
-        for attribute in model.attribute_map:
-            if model.attribute_map[attribute] == name:
-                return attribute
-
     def get_swagger_types(self, model, name):
         for attribute in model.swagger_types:
             if model.swagger_types[attribute] == name:
@@ -471,19 +467,23 @@ class JCA_CLI:
 
     def get_input_for_schema_(self, schema, model):
 
+        data = {}
+
         for prop in schema['properties']:
             item = schema['properties'][prop]
+            prop_ = self.get_model_key_map(model, prop)
 
             if item['type'] == 'object':
                 sub_model_class = getattr(swagger_client.models, item['description'])
-                sub_model = sub_model_class()
-                self.get_input_for_schema_(item, sub_model)
-                swagger_name = self.get_swagger_types(model, item['description'])
-                setattr(model, swagger_name, sub_model)
+                result = self.get_input_for_schema_(item, sub_model_class)
+                setattr(model, prop_, result)
 
             else:
-                prop_ = self.get_model_key_map(model, prop)
+                
+                print("Porp", prop_, prop)
                 default = getattr(model, prop_)
+                if isinstance(default, property):
+                    default = None
                 enforce = True if item['type'] == 'boolean' else False
                 val = self.get_input(
                         values=item.get('enum', []),
@@ -494,9 +494,11 @@ class JCA_CLI:
                         sitype=item.get('items', {}).get('type'),
                         enforce=enforce
                         )
+                data[prop_] = val
+        
+        modelObject = model(**data)
 
-                swagger_name = self.get_swagger_name(model, prop)
-                setattr(model, swagger_name, val)
+        return modelObject
 
     def get_api_caller(self, endpoint):
         security = self.get_scope_for_endpoint(endpoint)
@@ -514,8 +516,8 @@ class JCA_CLI:
         title = schema.get('description') or schema['title']
         data_dict = {}
         model_class = getattr(swagger_client.models, schema['title'])
-        model = model_class()
-        self.get_input_for_schema_(schema, model)
+        
+        model = self.get_input_for_schema_(schema, model_class)
 
         print("Obtained Data:\n")
         model_unmapped = self.unmap_model(model)
