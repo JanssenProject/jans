@@ -394,32 +394,44 @@ class JCA_CLI:
 
         print("Please wait while retreiving data ...\n")
 
+
         api_caller = self.get_api_caller(endpoint)
-        api_response = api_caller(**parameters)
+
+        api_response = None
+
+        try:
+            api_response = api_caller(**parameters)
+        except swagger_client.rest.ApiException as e:
+            print('\u001b[38;5;196m')
+            print(e.reason)
+            print(e.body)
+            print('\u001b[0m')
 
         if return_value:
             return api_response
-        
-        api_response_unmapped = []
-        if isinstance(api_response, list):
-            for model in api_response:
-                data_dict = self.unmap_model(model)
-                api_response_unmapped.append(data_dict)
-        else:
-            data_dict = self.unmap_model(api_response)
-            api_response_unmapped = data_dict
 
+        selections = ['q', 'b']
 
-        print()
-        self.print_colored_output(api_response_unmapped)
+        if api_response:
+            selections.append('w')
+            api_response_unmapped = []
+            if isinstance(api_response, list):
+                for model in api_response:
+                    data_dict = self.unmap_model(model)
+                    api_response_unmapped.append(data_dict)
+            else:
+                data_dict = self.unmap_model(api_response)
+                api_response_unmapped = data_dict
+
+            print()
+            self.print_colored_output(api_response_unmapped)
+            print()
 
         while True:
-            selection = self.get_input(['q', 'b', 'w', 'r'])
+            selection = self.get_input(selections)
             if selection == 'b':
                 self.display_menu(endpoint.parent)
                 break
-            elif selection == 'r':
-                self.process_get(endpoint)
             elif selection == 'w':
                 fn = input('File name: ')
                 try:
@@ -622,26 +634,27 @@ class JCA_CLI:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
 
-        if not cur_model:
-            schema = self.get_scheme_for_endpoint(endpoint)
-            cur_model = getattr(swagger_client.models, schema['__schema_name__'])
-            
-        self.get_input_for_schema_(schema, cur_model)
-    
-        print("Obtained Data:")
-        print()
-        model_unmapped = self.unmap_model(cur_model)
-        self.print_colored_output(model_unmapped)
-        print()
-
-        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+        #if not cur_model:
+        #    schema = self.get_scheme_for_endpoint(endpoint)
+        #    cur_model = getattr(swagger_client.models, schema['__schema_name__'])
         
-        if selection == 'y':
-            api_caller = self.get_api_caller(endpoint)
-            print("Please wait while posting data ...\n")
-            api_response = api_caller(body=cur_model)
-            api_response_unmapped = self.unmap_model(api_response)
-            self.print_colored_output(api_response_unmapped)
+        if cur_model:
+            self.get_input_for_schema_(schema, cur_model)
+        
+            print("Obtained Data:")
+            print()
+            model_unmapped = self.unmap_model(cur_model)
+            self.print_colored_output(model_unmapped)
+            print()
+
+            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+            
+            if selection == 'y':
+                api_caller = self.get_api_caller(endpoint)
+                print("Please wait while posting data ...\n")
+                api_response = api_caller(body=cur_model)
+                api_response_unmapped = self.unmap_model(api_response)
+                self.print_colored_output(api_response_unmapped)
 
 
         selection = self.get_input(['b'])
