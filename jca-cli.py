@@ -598,7 +598,10 @@ class JCA_CLI:
             self.get_input_for_schema_(schema, cur_model)
         
             print("Obtained Data:")
-            print(cur_model)
+            print()
+            model_unmapped = self.unmap_model(cur_model)
+            self.print_colored_output(model_unmapped)
+            print()
 
             selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
             
