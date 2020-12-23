@@ -235,10 +235,7 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            print(text, end='')
-            print('\033[1m', end='')
-            selection = input()
-            print('\033[0m')
+            selection = input(self.colored_text(text, 15))
             selection = selection.strip()
 
             if itype == 'boolean' and not selection:
@@ -474,13 +471,14 @@ class JCA_CLI:
             prop_ = self.get_model_key_map(model, prop)
 
             if item['type'] == 'object':
-                sub_model_class = getattr(swagger_client.models, item['description'])
-                result = self.get_input_for_schema_(item, sub_model_class)
-                setattr(model, prop_, result)
-
+                if model.__class__.__name__ == 'type':
+                    sub_model_class = getattr(swagger_client.models, item['description'])
+                    result = self.get_input_for_schema_(item, sub_model_class)
+                    setattr(model, prop_, result)
+                else:
+                    sub_model = getattr(model, prop_)
+                    self.get_input_for_schema_(item, sub_model)
             else:
-                
-                print("Porp", prop_, prop)
                 default = getattr(model, prop_)
                 if isinstance(default, property):
                     default = None
@@ -495,10 +493,15 @@ class JCA_CLI:
                         enforce=enforce
                         )
                 data[prop_] = val
-        
-        modelObject = model(**data)
 
-        return modelObject
+        if model.__class__.__name__ == 'type':
+            modelObject = model(**data)
+            return modelObject
+        else:
+            for key_ in data:
+                setattr(model, key_, data[key_])
+            return model
+
 
     def get_api_caller(self, endpoint):
         security = self.get_scope_for_endpoint(endpoint)
