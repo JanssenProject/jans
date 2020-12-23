@@ -4383,12 +4383,6 @@ components:
     MemcachedConfiguration:
       description: Memcached cache configuration.
       type: object
-      required:
-        - servers
-        - maxOperationQueueLength
-        - bufferSize
-        - defaultPutExpiration
-        - memcachedConnectionFactoryType
       properties:
         servers:
           type: string
@@ -4398,31 +4392,13 @@ components:
         maxOperationQueueLength:
           type: integer
           description: Maximum operation Queue Length.
-          default: 99999999
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         bufferSize:
           type: integer
           description: Buffer Size.
-          default: 32768
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         defaultPutExpiration:
           type: integer
           description: Expiration timeout value.
-          default: 60
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
-        memcachedConnectionFactoryType:
+        connectionFactoryType:
           type: string
           description: The MemcachedConnectionFactoryType Type.
           enum:
@@ -4445,23 +4421,15 @@ components:
           type: string
           title: servers
           format: url
-          minLength: 3
         password:
           description: Redis password.
           type: string
-          minLength: 0
         defaultPutExpiration:
           description: defaultPutExpiration timeout value.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         sentinelMasterGroupName:
           description: Sentinel Master Group Name (required if SENTINEL type of connection is selected).
           type: string
-          minLength: 1
         useSSL:
           description: Enable SSL communication between Gluu Server and Redis cache.
           type: boolean
@@ -4469,47 +4437,21 @@ components:
           description: Directory Path to Trust Store.
           type: string
           format: url
-          minLength: 1
         maxIdleConnections:
           description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         maxTotalConnections:
           description: The number of maximum connection instances in the pool.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         connectionTimeout:
           description: Connection time out.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         soTimeout:
           description: With this option set to a non-zero timeout a read() call on the InputStream associated with this Socket will block for only this amount of time. If the timeout expires a java.net.SocketTimeoutException is raised though the Socket is still valid. The option must be enabled prior to entering the blocking operation to have effect. The timeout must be > 0. A timeout of zero is interpreted as an infinite timeout.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         maxRetryAttempts:
           description: Maximum retry attempts in case of failure.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
     InMemoryConfiguration:
       type: object
       description: Cache configuration.
@@ -4517,11 +4459,6 @@ components:
         defaultPutExpiration:
           description: defaultPutExpiration timeout value.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          exclusiveMaximum: false
-          exclusiveMinimum: false
     NativePersistenceConfiguration:
       type: object
       description: Cache configuration.
@@ -4529,21 +4466,9 @@ components:
         defaultPutExpiration:
           description: defaultPutExpiration timeout value.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 1
-          default: 60
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         defaultCleanupBatchSize:
           description: defaultCleanupBatchSize page size.
           type: integer
-          multipleOf: 1
-          maximum: 2147483647
-          minimum: 25
-          default: 25
-          exclusiveMaximum: false
-          exclusiveMinimum: false
         deleteExpiredOnGetRequest:
           type: boolean
     SmtpConfiguration:
