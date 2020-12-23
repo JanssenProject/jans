@@ -129,6 +129,7 @@ LABEL name="Config API" \
 RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
+RUN touch /etc/hosts.back
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # # create non-root user
@@ -138,6 +139,10 @@ RUN adduser -s /bin/sh -D -G root -u 1000 1000
 RUN chown -R 1000:1000 /etc/jans \
     && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
+    && chown -R 1000:1000 /etc/hosts.back \
+    && chown -R 1000:1000 /opt/jans \
+    && chgrp -R 0 /etc/hosts.back && chmod -R g=u /etc/hosts.back \
+    && chgrp -R 0 /opt/jans && chmod -R g=u /opt/jans \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
