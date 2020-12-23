@@ -112,9 +112,9 @@ class JCA_CLI:
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         
         self.swagger_configuration.verify_ssl = False
-        self.swagger_configuration.debug = False
+        #self.swagger_configuration.debug = True
         if self.swagger_configuration.debug:
-            configuration.logger_file='swagger.log'
+            self.swagger_configuration.logger_file='swagger.log'
 
         self.swagger_yaml_fn = 'myswagger.yaml'
         self.cfg_yml = self.get_yaml()
@@ -440,6 +440,8 @@ class JCA_CLI:
 
         if not 'title' in schema_:
             schema_['title'] = p
+            
+        schema_['__schema_name__'] = p
         return schema_
 
 
@@ -532,8 +534,11 @@ class JCA_CLI:
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
             api_response = api_caller(body=model)
-            api_response_unmapped = self.unmap_model(api_response)
-            self.print_colored_output(api_response_unmapped)
+            try:
+                api_response_unmapped = self.unmap_model(api_response)
+                self.print_colored_output(api_response_unmapped)
+            except:
+                print(self.colored_text(str(api_response), 10))
 
         selection = self.get_input(values=['q', 'b'])
         if selection in ('b', 'n'):
@@ -593,26 +598,27 @@ class JCA_CLI:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
 
-        if cur_model:
-            cur_data_dict = self.unmap_model(cur_model)
-            self.get_input_for_schema_(schema, cur_model)
-        
-            print("Obtained Data:")
-            print()
-            model_unmapped = self.unmap_model(cur_model)
-            self.print_colored_output(model_unmapped)
-            print()
-
-            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+        if not cur_model:
+            schema = self.get_scheme_for_endpoint(endpoint)
+            cur_model = getattr(swagger_client.models, schema['__schema_name__'])
             
-            if selection == 'y':
-                api_caller = self.get_api_caller(endpoint)
-                print("Please wait while posting data ...\n")
-                api_response = api_caller(body=cur_model)
-                api_response_unmapped = self.unmap_model(api_response)
-                self.print_colored_output(api_response_unmapped)
-        else:
-            print("Can't obtain data")
+        self.get_input_for_schema_(schema, cur_model)
+    
+        print("Obtained Data:")
+        print()
+        model_unmapped = self.unmap_model(cur_model)
+        self.print_colored_output(model_unmapped)
+        print()
+
+        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+        
+        if selection == 'y':
+            api_caller = self.get_api_caller(endpoint)
+            print("Please wait while posting data ...\n")
+            api_response = api_caller(body=cur_model)
+            api_response_unmapped = self.unmap_model(api_response)
+            self.print_colored_output(api_response_unmapped)
+
 
         selection = self.get_input(['b'])
         if selection == 'b':

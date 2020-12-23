@@ -98,6 +98,112 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
     parameters: []
 
+  '/jans-config-api/api/v1/config/database/ldap/{name}':
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Name of LDAP configuration.
+        schema:
+          type: string
+    get:
+      summary: Gets an LDAP configuration by name.
+      description: Gets an LDAP configuration by name.
+      operationId: get-config-database-ldap-by-name
+      tags:
+        - Database - LDAP configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
+    delete:
+      summary: Deletes an LDAP configuration.
+      description: Deletes an LDAP configuration.
+      operationId: delete-config-database-ldap-by-name
+      tags:
+        - Database - LDAP configuration
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
+    patch:
+      summary: Partially modify an LDAP configuration.
+      description: Partially modify an LDAP configuration.
+      operationId: patch-config-database-ldap-by-name
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: maxConnections, value: 8 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /jans-config-api/api/v1/config/database/ldap/test:
+    post:
+      summary: Tests a LDAP configurations by name.
+      description: Tests a LDAP configurations by name.
+      operationId: post-config-database-ldap-test
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: LDAP connection status true if connection is successfully established.
+                  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
+
+
   /jans-config-api/api/v1/scopes:
     get:
       tags:
