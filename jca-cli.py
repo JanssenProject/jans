@@ -228,14 +228,14 @@ class JCA_CLI:
                 default=int(default)
         else:
             enforce = False
-
-        text += ': '
+        if not text.endswith('?'):
+            text += ':'
 
         if itype=='boolean' and not values:
             values = ['_true', '_false']
 
         while True:
-            selection = input(self.colored_text(text, 15))
+            selection = input(self.colored_text(text, 15)+' ')
             selection = selection.strip()
 
             if itype == 'boolean' and not selection:
@@ -545,9 +545,22 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
             
     def process_delete(self, endpoint):
-        print("DELETE mehod for '{}' is not implemented yet".format(endpoint))
-        
-        selection = self.get_input(['b'])
+        url_param = self.get_endpiont_url_param(endpoint)
+        url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be deleted')
+        selection = self.get_input(text="Are you sure want to delete {} ?".format(url_param_val), values=['b','y','n','q'])
+        if selection in ('b', 'n'):
+            self.display_menu(endpoint.parent)
+        elif selection == 'y':
+            api_caller = self.get_api_caller(endpoint)
+            print("Please wait while deleting {}".format(url_param_val))
+            api_response = api_caller(url_param_val)
+            try:
+                api_response_unmapped = self.unmap_model(api_response)
+                self.print_colored_output(api_response_unmapped)
+            except:
+                print(self.colored_text(str(api_response), 10))
+
+        selection = self.get_input(['b', 'q'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
