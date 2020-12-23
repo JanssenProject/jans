@@ -99,54 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                title: Fido2 configuration
-                items:
-                  type: object
-                  description: Fido2 configuration properties.
-                  properties:
-                    authenticatorCertsFolder:
-                      description: Authenticators certificates fodler.
-                      type: string
-                      minLength: 1
-                    mdsAccessToken:
-                      description: MDS Access token.
-                      type: string
-                      minLength: 1
-                    mdsCertsFolder:
-                      description: MDS TOC root certificates folder.
-                      type: string
-                      minLength: 1
-                    mdsTocsFolder:
-                      description: MDS TOC files folder.
-                      type: string
-                      minLength: 1
-                    userAutoEnrollment:
-                      description: Allow to enroll users on enrollment/authentication requests.
-                      type: boolean
-                    unfinishedRequestExpiration:
-                      description: Expiration time in seconds for pending enrollment/authentication requests
-                      type: integer
-                      multipleOf: 1
-                      maximum: 2147483647
-                      minimum: 0
-                      exclusiveMaximum: false
-                      exclusiveMinimum: false
-                    authenticationHistoryExpiration:
-                      description: Expiration time in seconds for approved authentication requests.
-                      type: integer
-                      multipleOf: 1
-                      maximum: 2147483647
-                      minimum: 0
-                      exclusiveMaximum: false
-                      exclusiveMinimum: false
-                    serverMetadataFolder:
-                      description: Authenticators metadata in json format.
-                      type: string
-                      minLength: 1
-                      example: virtual devices
-                    disableFido2:
-                      description: Enable/Disable Fido2 endpoints.
-                      type: boolean
+                $ref: '#/components/schemas/JansFido2DynConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -163,54 +116,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Fido2 configuration
-              items:
-                type: object
-                description: Fido2 configuration properties.
-                properties:
-                  authenticatorCertsFolder:
-                    description: Authenticators certificates fodler.
-                    type: string
-                    minLength: 1
-                  mdsAccessToken:
-                    description: MDS Access token.
-                    type: string
-                    minLength: 1
-                  mdsCertsFolder:
-                    description: MDS TOC root certificates folder.
-                    type: string
-                    minLength: 1
-                  mdsTocsFolder:
-                    description: MDS TOC files folder.
-                    type: string
-                    minLength: 1
-                  userAutoEnrollment:
-                    description: Allow to enroll users on enrollment/authentication requests.
-                    type: boolean
-                  unfinishedRequestExpiration:
-                    description: Expiration time in seconds for pending enrollment/authentication requests
-                    type: integer
-                    multipleOf: 1
-                    maximum: 2147483647
-                    minimum: 0
-                    exclusiveMaximum: false
-                    exclusiveMinimum: false
-                  authenticationHistoryExpiration:
-                    description: Expiration time in seconds for approved authentication requests.
-                    type: integer
-                    multipleOf: 1
-                    maximum: 2147483647
-                    minimum: 0
-                    exclusiveMaximum: false
-                    exclusiveMinimum: false
-                  serverMetadataFolder:
-                    description: Authenticators metadata in json format.
-                    type: string
-                    minLength: 1
-                    example: virtual devices
-                  disableFido2:
-                    description: Enable/Disable Fido2 endpoints.
-                    type: boolean
+              $ref: '#/components/schemas/JansFido2DynConfiguration'
       responses:
         '200':
           description: OK
@@ -4566,4 +4472,104 @@ components:
           type: string
           description: This field controls the default authentication mechanism that is presented to users from all applications that leverage Janssen Server for authentication.
 
-	  
+    JansFido2DynConfiguration:
+      type: object
+      description: Jans Fido2 dynamic configuration properties.
+      properties:
+        issuer:
+          type: string
+          description: URL using the https scheme for Issuer identifier.
+          example: 'https://server.example.com/'
+        baseEndpoint:
+          type: string
+          description: The base URL for Fido2 endpoints.
+          example: 'https://server.example.com/fido2/restv1'
+        cleanServiceInterval:
+          type: integer
+          description: Time interval for the Clean Service in seconds.
+        cleanServiceBatchChunkSize:
+          type: integer
+          description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. 
+        useLocalCache:
+          description: Boolean value to indicate if Local Cache is to be used.
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+          description: Boolean value specifying whether to enable JDK Loggers.
+        loggingLevel:
+          type: string
+          description: Logging level for Fido2 logger.
+        loggingLayout:
+          type: string
+          description: Logging layout used for Fido2.
+        externalLoggerConfiguration:
+          type: string
+          description: Path to external Fido2 logging configuration.
+        metricReporterInterval:
+          type: integer
+          description: The interval for metric reporter in seconds.
+        metricReporterKeepDataDays:
+          type: integer
+          description: The days to keep report data.
+        metricReporterEnabled:
+          type: boolean
+          description: Boolean value specifying whether to enable Metric Reporter.
+        personCustomObjectClassList:
+          type: array
+          description: Custom object class list for dynamic person enrolment.
+          items:
+            type: string
+        fido2Configuration:
+          description: Fido2Configuration.
+          $ref: '#/components/schemas/Fido2Configuration'
+		
+    Fido2Configuration:
+      type: object
+      description: Fido2 configuration properties.
+      properties:
+        authenticatorCertsFolder:
+          description: Authenticators certificates fodler.
+          type: string
+        mdsCertsFolder:
+          description: MDS TOC root certificates folder.
+          type: string
+        mdsTocsFolder:
+          description: MDS TOC files folder.
+          type: string
+        serverMetadataFolder:
+          description: Authenticators metadata in json format.
+          type: string
+        requestedParties:
+          description: Authenticators metadata in json format.
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParties'
+        userAutoEnrollment:
+          description: Allow to enroll users on enrollment/authentication requests.
+          type: boolean
+        unfinishedRequestExpiration:
+          description: Expiration time in seconds for pending enrollment/authentication requests
+          type: integer
+        authenticationHistoryExpiration:
+          description: Expiration time in seconds for approved authentication requests.
+          type: integer
+        requestedCredentialTypes:
+          description: List of Requested Credential Types.
+          type: array
+          items:
+            type: string
+		  
+		  
+    RequestedParties:
+      type: object
+      description: Credential Type.
+      properties:
+        name:
+          description: Name of the Requested Party.
+          type: string
+          format: url
+        domains:
+          description: Requested Party domains.
+          type: array
+          items:
+            type: string
