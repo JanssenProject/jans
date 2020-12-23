@@ -553,12 +553,23 @@ class JCA_CLI:
         elif selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while deleting {}".format(url_param_val))
-            api_response = api_caller(url_param_val)
+            api_response = '__result__'
+
             try:
-                api_response_unmapped = self.unmap_model(api_response)
-                self.print_colored_output(api_response_unmapped)
-            except:
-                print(self.colored_text(str(api_response), 10))
+                api_response = api_caller(url_param_val)
+            except swagger_client.rest.ApiException as e:
+                print('\u001b[38;5;196m')
+                print(e.reason)
+                print(e.body)
+                print('\u001b[0m')
+
+            if api_response is None:
+                print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), 10))
+                #try:
+                #    api_response_unmapped = self.unmap_model(api_response)
+                #    self.print_colored_output(api_response_unmapped)
+                #except:
+                #    print(self.colored_text(str(api_response), 10))
 
         selection = self.get_input(['b', 'q'])
         if selection == 'b':
