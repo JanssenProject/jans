@@ -470,12 +470,13 @@ paths:
         - Database - LDAP configuration
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: maxConnections, value: 8 } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: maxConnections, value: 8 } ]'
       responses:
         '200':
           description: OK
@@ -491,8 +492,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/config/database/ldap/test:
     post:
-      summary: Tests a LDAP configurations by name.
-      description: Tests a LDAP configurations by name.
+      summary: Tests an LDAP configuration.
+      description: Tests an LDAP configuration.
       operationId: post-config-database-ldap-test
       tags:
         - Database - LDAP configuration
@@ -669,8 +670,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
   /jans-config-api/api/v1/config/database/couchbase/test:
     post:
-      summary: Tests a Couchbase configurations by name.
-      description: Tests a Couchbase configurations by name.
+      summary: Tests a Couchbase configuration.
+      description: Tests a Couchbase configuration.
       operationId: post-config-database-couchbase-test
       tags:
         - Database - Couchbase configuration
@@ -2177,15 +2178,6 @@ components:
           description: boolean value indicating if the script is interanl.
     LdapConfiguration:
       type: object
-      required:
-        - configId
-        - bindDN
-        - maxConnections
-        - primaryKey
-        - localPrimaryKey
-        - servers
-        - baseDNs
-        - useSSL
       properties:
         configId:
           type: string
@@ -2193,12 +2185,30 @@ components:
           example: auth_ldap_server
         bindDN:
           type: string
-          description: User Distingusihed Name for binding.
+          description: This contains the username to connect to the backend server. You need to use full DN here. As for example, cn=jans,dc=company,dc=org.
+        bindPassword:
+          type: string
+          description: Ldap password for binding.
+        servers:
+          type: array
+          description: List of LDAP authentication servers.
+          items:
+            type: string
+            description: Unique name of the authentication server and port number.
+            example: 'authserver.org:63'
         maxConnections:
           type: integer
-          description: Total number of simultaneous connections allowed.
+          description: This value defines the maximum number of connections that are allowed to read the backend Active Directory/LDAP server.
           format: int32
           default: 2
+        useSSL:
+          type: boolean
+          description: Enable SSL communication between Jans Server and LDAP server.   
+        baseDNs:
+          type: array
+          description: List contains the location of the Active Directory/LDAP tree from where the Gluu Server shall read the user information.
+          items:
+            type: string          
         primaryKey:
           type: string
           description: Used to search and bind operations in configured LDAP server.
@@ -2207,30 +2217,18 @@ components:
           type: string
           description: Used to search local user entry in Gluu Server’s internal LDAP directory.
           example: 'uid, email'
-        servers:
-          type: array
-          description: List of LDAP authentication servers.
-          items:
-            type: string
-            description: Unique name of the authentication server and port number.
-            example: 'authserver.org:63'
-        baseDNs:
-          type: array
-          description: list of LDAP base Distingusihed Name
-          items:
-            type: string
-        useSSL:
-          type: boolean
-        bindPassword:
-          type: string
-          description: User password for binding.
         useAnonymousBind:
           type: boolean
           description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
         enabled:
           type: boolean
+          description: Boolean value used to indicate if the LDAP Server is enabled. Do not use this unless the server administrator has entered all the required values.
         version:
           type: integer
+          description: LDAP server version.
+        level:
+          type: integer
+          description: A string that indicates the level. 
     CouchbaseConfiguration:
       type: object
       properties:

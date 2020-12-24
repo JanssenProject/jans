@@ -58,5 +58,11 @@ public class BaseResource {
                 .withMessage("The requested " + objectName + " doesn't exist").build();
         return Response.status(Response.Status.NOT_FOUND).entity(error).build();
     }
+    
+    protected static Response getNotAcceptableException(String msg) {
+        ApiError error = new ApiError.ErrorBuilder().withCode(String.valueOf(Response.Status.NOT_ACCEPTABLE.getStatusCode()))
+                .withMessage(msg).build();
+        return Response.status(Response.Status.NOT_ACCEPTABLE).entity(error).build();
+    }
 
 }
