@@ -32,6 +32,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: clients
 
+dn: ou=stat,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: stat
+
 dn: ou=sessions,o=jans
 objectClass: top
 objectClass: organizationalUnit
