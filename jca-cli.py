@@ -420,8 +420,6 @@ class JCA_CLI:
         if return_value:
             return api_response
 
-        print(api_response)
-
         selections = ['q', 'b']
 
         if api_response:
@@ -437,7 +435,6 @@ class JCA_CLI:
 
             print()
             self.print_colored_output(api_response_unmapped)
-            print()
 
         while True:
             selection = self.get_input(selections)
@@ -462,10 +459,15 @@ class JCA_CLI:
         for p in schema_path_list[1:]:
             schema_ = schema_[p]
 
+        for key_ in schema_['properties']:
+            if '$ref' in schema_['properties'][key_]:
+                schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
+        
         if not 'title' in schema_:
             schema_['title'] = p
             
         schema_['__schema_name__'] = p
+
         return schema_
 
 
@@ -551,7 +553,7 @@ class JCA_CLI:
         print("Obtained Data:\n")
         model_unmapped = self.unmap_model(model)
         self.print_colored_output(model_unmapped)
-        print()
+
         selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
         
         if selection == 'y':
@@ -690,7 +692,6 @@ class JCA_CLI:
             print()
             model_unmapped = self.unmap_model(cur_model)
             self.print_colored_output(model_unmapped)
-            print()
 
             selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
             
