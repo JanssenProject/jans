@@ -1194,7 +1194,7 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/smtp.write]
     parameters: []
   /jans-config-api/api/v1/config/smtp/test:
-    get:
+    post:
       summary: Test SMTP server configuration.
       description: Test SMTP server configuration.
       operationId: test-config-smtp
@@ -4389,7 +4389,7 @@ components:
           format: int32
           multipleOf: 1
         requiresSsl:
-          description: 'Boolean value with default value false. If true, SSL will be enabled.'
+          description: Boolean value with default value false. If true, SSL will be enabled.
           type: boolean
         serverTrust:
           type: boolean
