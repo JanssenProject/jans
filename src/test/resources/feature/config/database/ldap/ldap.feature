@@ -22,15 +22,6 @@ return temp;
 }
 """
   	
-  	@ignore
-  	@ldap-config-delete
-  	Scenario: Retrieve LDAP configuration
-	Given url  mainUrl + '/new_auth_ldap_server'
-    And  header Authorization = 'Bearer ' + accessToken
-    When method DELETE
-    Then status 204
-    And print response
-    And assert response.length != null  
  	    
     @ldap-config-get-by-name
   	Scenario: Get LDAP configuration By Name    
@@ -73,6 +64,15 @@ return temp;
     And assert response.length != null
     And print response.configId
     And print response.version
+    
+    @ldap-config-post-same-name-ldap-error
+  	Scenario: Add LDAP configuration with same name as existing
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request read('ldap.json')
+    When method POST
+    Then status 406
+    And print response
     
     @ldap-config-put
   	Scenario: Update LDAP configuration
@@ -125,18 +125,17 @@ return temp;
     Then status 200
     And print response
     
-    @ignore
     @ldap-config-test
     Scenario: Test LDAP configuration
-    Given url  mainUrl
+    #Given url  mainUrl
+    Given url  mainUrl + '/' +'auth_ldap_server'
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
-    And print response[0].configId
-    And print response[0].version
-    And def result = response[0] 
+    And def result = response
+    And print result
   	Given url  mainUrl + '/test/'
     And  header Authorization = 'Bearer ' + accessToken
   	And request result
