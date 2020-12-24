@@ -1745,4 +1745,9 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.32 NAME 'jansCibaReq'
   MUST ( objectclass )
   MAY ( authReqId $ clnId $ usrId $ creationDate $ exp $ jansStatus )
   X-ORIGIN 'Jans created objectclass' )
-
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.33 NAME 'jansStatEntry'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( jansId $ dat $ attr )
+  X-ORIGIN 'Gluu created objectclass' )
