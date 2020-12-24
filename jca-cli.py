@@ -595,8 +595,10 @@ class JCA_CLI:
     def process_patch(self, endpoint):
         schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
 
+        url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
-        url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
+        if 'name' in url_param:
+            url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be patched')
 
         body = []
 
@@ -625,7 +627,10 @@ class JCA_CLI:
         print("Please wait patching...\n")
 
         try:
-            api_response = api_caller(url_param_val, body=body)
+            if url_param_val:
+                api_response = api_caller(url_param_val, body=body)
+            else:
+                api_response = api_caller(body=body)
         except swagger_client.rest.ApiException as e:
             api_response = None
             print('\u001b[38;5;196m')
