@@ -46,7 +46,7 @@ class Configuration(six.with_metaclass(TypeWithDefault, object)):
     def __init__(self):
         """Constructor"""
         # Default Base url
-        self.host = "https://c2.gluu.org"
+        self.host = "https://jans.io/"
         # Temp file folder for downloading files
         self.temp_folder_path = None
 

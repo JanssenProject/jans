@@ -116,7 +116,7 @@ class JCA_CLI:
         if self.swagger_configuration.debug:
             self.swagger_configuration.logger_file='swagger.log'
 
-        self.swagger_yaml_fn = 'myswagger.yaml'
+        self.swagger_yaml_fn = 'jans-config-api-swagger.yaml'
         self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
@@ -253,7 +253,6 @@ class JCA_CLI:
 
             if default and not selection:
                 selection = default
-
 
             if itype == 'array' and sitype:
                 selection = selection.split('_,')
@@ -545,12 +544,22 @@ class JCA_CLI:
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
-            api_response = api_caller(body=model)
+
             try:
-                api_response_unmapped = self.unmap_model(api_response)
-                self.print_colored_output(api_response_unmapped)
-            except:
-                print(self.colored_text(str(api_response), 10))
+                api_response = api_caller(body=model)
+            except swagger_client.rest.ApiException as e:
+                api_response = None
+                print('\u001b[38;5;196m')
+                print(e.reason)
+                print(e.body)
+                print('\u001b[0m')
+            
+            if api_response:
+                try:
+                    api_response_unmapped = self.unmap_model(api_response)
+                    self.print_colored_output(api_response_unmapped)
+                except:
+                    print(self.colored_text(str(api_response), 10))
 
         selection = self.get_input(values=['q', 'b'])
         if selection in ('b', 'n'):
@@ -564,7 +573,7 @@ class JCA_CLI:
             self.display_menu(endpoint.parent)
         elif selection == 'y':
             api_caller = self.get_api_caller(endpoint)
-            print("Please wait while deleting {}".format(url_param_val))
+            print("Please wait while deleting {} ...\n".format(url_param_val))
             api_response = '__result__'
 
             try:
@@ -577,11 +586,7 @@ class JCA_CLI:
 
             if api_response is None:
                 print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), 10))
-                #try:
-                #    api_response_unmapped = self.unmap_model(api_response)
-                #    self.print_colored_output(api_response_unmapped)
-                #except:
-                #    print(self.colored_text(str(api_response), 10))
+
 
         selection = self.get_input(['b', 'q'])
         if selection == 'b':
@@ -614,12 +619,23 @@ class JCA_CLI:
             if selection == 'n':
                 break
 
-        print("Please wait patching")
+        
         api_caller = self.get_api_caller(endpoint)
-        api_response = api_caller(url_param_val, body=body)
+        
+        print("Please wait patching...\n")
 
-        api_response_unmapped = self.unmap_model(api_response)
-        self.print_colored_output(api_response_unmapped)
+        try:
+            api_response = api_caller(url_param_val, body=body)
+        except swagger_client.rest.ApiException as e:
+            api_response = None
+            print('\u001b[38;5;196m')
+            print(e.reason)
+            print(e.body)
+            print('\u001b[0m')
+
+        if api_response:
+            api_response_unmapped = self.unmap_model(api_response)
+            self.print_colored_output(api_response_unmapped)
 
         selection = self.get_input(['b'])
         if selection == 'b':
@@ -651,10 +667,20 @@ class JCA_CLI:
             
             if selection == 'y':
                 api_caller = self.get_api_caller(endpoint)
-                print("Please wait while posting data ...\n")
-                api_response = api_caller(body=cur_model)
-                api_response_unmapped = self.unmap_model(api_response)
-                self.print_colored_output(api_response_unmapped)
+                print("Please wait while posting data ...\n")                
+
+                try:
+                    api_response = api_caller(body=cur_model)
+                except swagger_client.rest.ApiException as e:
+                    api_response = None
+                    print('\u001b[38;5;196m')
+                    print(e.reason)
+                    print(e.body)
+                    print('\u001b[0m')
+                
+                if api_response:
+                    api_response_unmapped = self.unmap_model(api_response)
+                    self.print_colored_output(api_response_unmapped)
 
 
         selection = self.get_input(['b'])
