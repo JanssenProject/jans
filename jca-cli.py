@@ -317,7 +317,7 @@ class JCA_CLI:
 
     def obtain_parameters(self, endpoint):
         parameters = {}
-        
+
         endpoint_parameters = []
         if 'parameters' in endpoint.info:
             endpoint_parameters = endpoint.info['parameters']
@@ -359,8 +359,19 @@ class JCA_CLI:
         if data_dict is None:
             data_dict = {}
         for key_ in model.attribute_map:
+            
             val = getattr(model, key_)
-            if hasattr(val, 'swagger_types'):
+            if isinstance(val, list):
+                sub_list = []
+                for entry in val:
+                    if hasattr(entry, 'swagger_types'):
+                        sub_list_dict = {}
+                        self.unmap_model(entry, sub_list_dict)
+                        sub_list.append(sub_list_dict)
+                    else:
+                        sub_list.append(entry)
+                data_dict[model.attribute_map[key_]] = sub_list
+            elif hasattr(val, 'swagger_types'):
                 sub_data_dict = {}
                 self.unmap_model(val, sub_data_dict)
                 data_dict[model.attribute_map[key_]] = sub_data_dict
@@ -408,6 +419,8 @@ class JCA_CLI:
 
         if return_value:
             return api_response
+
+        print(api_response)
 
         selections = ['q', 'b']
 
