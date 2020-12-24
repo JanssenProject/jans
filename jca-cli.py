@@ -202,7 +202,7 @@ class JCA_CLI:
         raise TypeError(error_text)
 
     def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce=True):
-
+        print()
         type_text = ''
         if itype:
             if itype == 'array':
@@ -621,26 +621,32 @@ class JCA_CLI:
             if selection == 'n':
                 break
 
-        
-        api_caller = self.get_api_caller(endpoint)
-        
-        print("Please wait patching...\n")
+        api_input_unmapped = self.unmap_model(model)
+        self.print_colored_output(api_input_unmapped)
+            
+        selection = self.get_input(values=['y', 'n'], text='Coninue?')
 
-        try:
-            if url_param_val:
-                api_response = api_caller(url_param_val, body=body)
-            else:
-                api_response = api_caller(body=body)
-        except swagger_client.rest.ApiException as e:
-            api_response = None
-            print('\u001b[38;5;196m')
-            print(e.reason)
-            print(e.body)
-            print('\u001b[0m')
+        if selection == 'y':
 
-        if api_response:
-            api_response_unmapped = self.unmap_model(api_response)
-            self.print_colored_output(api_response_unmapped)
+            api_caller = self.get_api_caller(endpoint)
+            
+            print("Please wait patching...\n")
+
+            try:
+                if url_param_val:
+                    api_response = api_caller(url_param_val, body=body)
+                else:
+                    api_response = api_caller(body=body)
+            except swagger_client.rest.ApiException as e:
+                api_response = None
+                print('\u001b[38;5;196m')
+                print(e.reason)
+                print(e.body)
+                print('\u001b[0m')
+
+            if api_response:
+                api_response_unmapped = self.unmap_model(api_response)
+                self.print_colored_output(api_response_unmapped)
 
         selection = self.get_input(['b'])
         if selection == 'b':
