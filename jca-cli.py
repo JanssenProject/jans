@@ -337,7 +337,7 @@ class JCA_CLI:
         return parameters
 
     def get_api_class_name(self, name):
-        namle_list = name.replace('-','').split()
+        namle_list = name.replace('-','').replace('–','').split()
         for i, w in enumerate(namle_list[:]):
             if len(w) > 1:
                 w = w[0].upper()+w[1:]
@@ -655,9 +655,14 @@ class JCA_CLI:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
 
-        #if not cur_model:
-        #    schema = self.get_scheme_for_endpoint(endpoint)
-        #    cur_model = getattr(swagger_client.models, schema['__schema_name__'])
+        if not cur_model:
+            for m in endpoint.parent:
+                if m.method=='get' and not m.path.endswith('}'):
+                    cur_model = self.process_get(m, return_value=True)
+
+        if not cur_model:            
+            schema = self.get_scheme_for_endpoint(endpoint)
+            cur_model = getattr(swagger_client.models, schema['__schema_name__'])
         
         if cur_model:
             self.get_input_for_schema_(schema, cur_model)
