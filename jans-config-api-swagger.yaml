@@ -3575,6 +3575,13 @@ components:
       title: GluuAttribute
       description: Attribute.
       type: object
+      required:
+        - description
+        - displayName
+        - dataType
+        - name
+        - editType
+        - viewType
       properties:
         dn:
           type: string
