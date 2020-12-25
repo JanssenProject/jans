@@ -17,6 +17,7 @@ import swagger_client
 #reset previous color
 print('\033[0m',end='')
 
+warning_color = 214
 clear = lambda: os.system('clear')
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
@@ -70,7 +71,7 @@ class Menu(object):
             child = child.parent
 
         return n
-    
+
     def __print_child(self, menu):
         if menu.children:
             for child in menu.children:
@@ -182,7 +183,7 @@ class JCA_CLI:
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
 
     def check_type(self, val, vtype):
-        if vtype == 'string':
+        if vtype == 'string' and val:
             return str(val)
         elif vtype == 'integer':
             if isinstance(val, int):
@@ -199,10 +200,10 @@ class JCA_CLI:
         if vtype == 'boolean':
             error_text += ': _true, _false'
 
-        raise TypeError(error_text)
+        raise TypeError(self.colored_text(error_text, warning_color))
 
-    def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce=True):
-        print()
+    def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce='__true__'):
+
         type_text = ''
         if itype:
             if itype == 'array':
@@ -226,14 +227,17 @@ class JCA_CLI:
             text += ' [{}]'.format(self.colored_text(default_text, 11))
             if itype=='integer':
                 default=int(default)
-        else:
-            enforce = False
+        #else:
+        #    if not enforce=='__true__':
+        #        enforce = False
+
         if not text.endswith('?'):
             text += ':'
 
         if itype=='boolean' and not values:
             values = ['_true', '_false']
 
+        
         while True:
             selection = input(self.colored_text(text, 15)+' ')
             selection = selection.strip()
@@ -241,8 +245,16 @@ class JCA_CLI:
             if itype == 'boolean' and not selection:
                 return False
 
+            if not selection and default:
+                return default
+
             if enforce and not selection:
                 continue
+
+            if not enforce and not selection:
+                if itype == 'array':
+                    return []
+                return None
 
             if 'q' in values and selection == 'q':
                 print("Quiting...")
@@ -250,9 +262,6 @@ class JCA_CLI:
 
             if itype == 'array' and default and not selection:
                 return default
-
-            if default and not selection:
-                selection = default
 
             if itype == 'array' and sitype:
                 selection = selection.split('_,')
@@ -262,6 +271,11 @@ class JCA_CLI:
                         selection[i] = self.check_type(item.strip(), sitype)
                         if selection[i] == '_null':
                             selection[i] = None
+                        if values:
+                            if not selection[i] in values:
+                                data_ok = False
+                                print(self.colored_text("Please enter array of {} seperated by _,".format(values), warning_color))
+                                break
                     except TypeError as e:
                         print(e)
                         data_ok = False
@@ -272,7 +286,9 @@ class JCA_CLI:
                     try:
                         selection = self.check_type(selection, itype)
                     except TypeError as e:
-                        print(e)
+                        if enforce:
+                            print(e)
+                            continue
 
                 if values:
                     if selection in values:
@@ -283,7 +299,7 @@ class JCA_CLI:
                         else:
                             continue
                     else:
-                        print('Please enter one of ', ', '.join(values))
+                        print(self.colored_text('Please enter one of {}'.format(', '.join(values)), warning_color))
 
                 if not values and not selection and not enforce:
                     break
@@ -297,6 +313,7 @@ class JCA_CLI:
             selection = 'q'
 
         return selection
+
 
     def print_underlined(self, text):
         print()
@@ -462,7 +479,14 @@ class JCA_CLI:
         for key_ in schema_['properties']:
             if '$ref' in schema_['properties'][key_]:
                 schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
-        
+            elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
+                ref_path = schema_['properties'][key_]['items'].pop('$ref')
+                ref_schema = self.get_schema_from_reference(ref_path)
+                schema_['properties'][key_]['properties'] = ref_schema['properties']
+                schema_['properties'][key_]['title'] = ref_schema['title']
+                schema_['properties'][key_]['description'] = ref_schema['description']
+                schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
+                
         if not 'title' in schema_:
             schema_['title'] = p
             
@@ -493,26 +517,54 @@ class JCA_CLI:
     def get_input_for_schema_(self, schema, model):
 
         data = {}
-
         for prop in schema['properties']:
             item = schema['properties'][prop]
             prop_ = self.get_model_key_map(model, prop)
 
             if item['type'] == 'object':
                 if model.__class__.__name__ == 'type':
-                    sub_model_class = getattr(swagger_client.models, item['description'])
+                    model_name = item.get('__schema_name__') or item['description']
+                    sub_model_class = getattr(swagger_client.models, model_name)
                     result = self.get_input_for_schema_(item, sub_model_class)
                     setattr(model, prop_, result)
                 else:
                     sub_model = getattr(model, prop_)
                     self.get_input_for_schema_(item, sub_model)
+            elif item['type'] == 'array' and '__schema_name__' in item:
+                model_name = item['__schema_name__']
+                sub_model_class = getattr(swagger_client.models, model_name)
+                sub_model_list = []
+                
+                sub_model_list_title_text = item.get('description') or item.get('title') or item.get('__schema_name__')
+                
+                sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'])
+                if sub_model_list_selection == 'y':
+                    while True:
+                        sub_model_list_data = self.get_input_for_schema_(item, sub_model_class)
+                        sub_model_list.append(sub_model_list_data)
+                        sub_model_list_selection = self.get_input(text="Add another {}?".format(sub_model_list_title_text), values=['y','n'])
+                        if sub_model_list_selection == 'n':
+                            break
+                data[prop_] = sub_model_list
+
             else:
                 default = getattr(model, prop_)
                 if isinstance(default, property):
                     default = None
                 enforce = True if item['type'] == 'boolean' else False
+
+                if prop in schema.get('required', []):
+                    enforce = True
+                
+                if not default:
+                    default = item.get('default')
+
+                values_ = item.get('enum', [])
+                if not values_ and item['type'] == 'array' and 'enum' in item['items']:
+                    values_ = item['items']['enum']
+
                 val = self.get_input(
-                        values=item.get('enum', []),
+                        values=values_,
                         text=prop,
                         default=default,
                         itype=item['type'],
@@ -527,7 +579,8 @@ class JCA_CLI:
             return modelObject
         else:
             for key_ in data:
-                setattr(model, key_, data[key_])
+                if data[key_]:
+                    setattr(model, key_, data[key_])
             return model
 
 
@@ -546,7 +599,9 @@ class JCA_CLI:
         
         title = schema.get('description') or schema['title']
         data_dict = {}
-        model_class = getattr(swagger_client.models, schema['title'])
+        print(schema['title'], endpoint.method,  endpoint.path)
+        
+        model_class = getattr(swagger_client.models, schema['__schema_name__'])
         
         model = self.get_input_for_schema_(schema, model_class)
 
@@ -716,7 +771,7 @@ class JCA_CLI:
         selection = self.get_input(['b'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
-        
+
     def display_menu(self, menu):
         clear()
         self.current_menu = menu

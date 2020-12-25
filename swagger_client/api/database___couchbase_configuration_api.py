@@ -512,9 +512,9 @@ class DatabaseCouchbaseConfigurationApi(object):
             collection_formats=collection_formats)
 
     def post_config_database_couchbase_test(self, body, **kwargs):  # noqa: E501
-        """Tests an Couchbase configuration.  # noqa: E501
+        """Tests a Couchbase configuration.  # noqa: E501
 
-        Tests an Couchbase configuration.  # noqa: E501
+        Tests a Couchbase configuration.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.post_config_database_couchbase_test(body, async_req=True)
@@ -534,9 +534,9 @@ class DatabaseCouchbaseConfigurationApi(object):
             return data
 
     def post_config_database_couchbase_test_with_http_info(self, body, **kwargs):  # noqa: E501
-        """Tests an Couchbase configuration.  # noqa: E501
+        """Tests a Couchbase configuration.  # noqa: E501
 
-        Tests an Couchbase configuration.  # noqa: E501
+        Tests a Couchbase configuration.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.post_config_database_couchbase_test_with_http_info(body, async_req=True)

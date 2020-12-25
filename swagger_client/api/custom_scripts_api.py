@@ -418,6 +418,7 @@ class CustomScriptsApi(object):
         >>> result = thread.get()
 
         :param async_req bool
+        :param CustomScript body:
         :return: CustomScript
                  If the method is called asynchronously,
                  returns the request thread.
@@ -439,12 +440,13 @@ class CustomScriptsApi(object):
         >>> result = thread.get()
 
         :param async_req bool
+        :param CustomScript body:
         :return: CustomScript
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = []  # noqa: E501
+        all_params = ['body']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -472,8 +474,14 @@ class CustomScriptsApi(object):
         local_var_files = {}
 
         body_params = None
+        if 'body' in params:
+            body_params = params['body']
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
             ['application/json'])  # noqa: E501
 
         # Authentication setting
@@ -506,7 +514,7 @@ class CustomScriptsApi(object):
 
         :param async_req bool
         :param CustomScript body:
-        :return: None
+        :return: CustomScript
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -528,7 +536,7 @@ class CustomScriptsApi(object):
 
         :param async_req bool
         :param CustomScript body:
-        :return: None
+        :return: CustomScript
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -582,7 +590,7 @@ class CustomScriptsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type=None,  # noqa: E501
+            response_type='CustomScript',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
