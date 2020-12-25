@@ -123,14 +123,10 @@ class GluuAttribute(object):
             self.inum = inum
         if selected is not None:
             self.selected = selected
-        if name is not None:
-            self.name = name
-        if display_name is not None:
-            self.display_name = display_name
-        if description is not None:
-            self.description = description
-        if data_type is not None:
-            self.data_type = data_type
+        self.name = name
+        self.display_name = display_name
+        self.description = description
+        self.data_type = data_type
         if status is not None:
             self.status = status
         if lifetime is not None:
@@ -143,10 +139,8 @@ class GluuAttribute(object):
             self.name_id_type = name_id_type
         if origin is not None:
             self.origin = origin
-        if edit_type is not None:
-            self.edit_type = edit_type
-        if view_type is not None:
-            self.view_type = view_type
+        self.edit_type = edit_type
+        self.view_type = view_type
         if usage_type is not None:
             self.usage_type = usage_type
         if claim_name is not None:
@@ -259,6 +253,8 @@ class GluuAttribute(object):
         :param name: The name of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if name is None:
+            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
 
@@ -280,6 +276,8 @@ class GluuAttribute(object):
         :param display_name: The display_name of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if display_name is None:
+            raise ValueError("Invalid value for `display_name`, must not be `None`")  # noqa: E501
 
         self._display_name = display_name
 
@@ -303,6 +301,8 @@ class GluuAttribute(object):
         :param description: The description of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if description is None:
+            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
 
         self._description = description
 
@@ -326,6 +326,8 @@ class GluuAttribute(object):
         :param data_type: The data_type of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if data_type is None:
+            raise ValueError("Invalid value for `data_type`, must not be `None`")  # noqa: E501
         allowed_values = ["STRING", "NUMERIC", "BOOLEAN", "BINARY", "CERTIFICATE", "DATE"]  # noqa: E501
         if data_type not in allowed_values:
             raise ValueError(
@@ -489,6 +491,8 @@ class GluuAttribute(object):
         :param edit_type: The edit_type of this GluuAttribute.  # noqa: E501
         :type: list[str]
         """
+        if edit_type is None:
+            raise ValueError("Invalid value for `edit_type`, must not be `None`")  # noqa: E501
         allowed_values = ["ADMIN", "OWNER", "MANAGER", "USER", "WHITEPAGES"]  # noqa: E501
         if not set(edit_type).issubset(set(allowed_values)):
             raise ValueError(
@@ -519,6 +523,8 @@ class GluuAttribute(object):
         :param view_type: The view_type of this GluuAttribute.  # noqa: E501
         :type: list[str]
         """
+        if view_type is None:
+            raise ValueError("Invalid value for `view_type`, must not be `None`")  # noqa: E501
         allowed_values = ["ADMIN", "OWNER", "MANAGER", "USER", "WHITEPAGES"]  # noqa: E501
         if not set(view_type).issubset(set(allowed_values)):
             raise ValueError(
