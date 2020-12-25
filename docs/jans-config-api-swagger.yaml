@@ -3829,6 +3829,17 @@ components:
       title: Client object
       description: Client.
       type: object
+      required:
+        - displayName
+        - accessTokenSigningAlg
+        - customObjectClasses
+        - responseTypes
+        - grantTypes
+        - subjectType
+        - idTokenSignedResponseAlg
+        - tokenEndpointAuthMethod
+        - scopes
+        - applicationType
       properties:
         dn:
           type: string
