@@ -334,6 +334,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationMethod'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2119,32 +2123,32 @@ components:
           type: string
           description: Type of script.
           enum:
-            - person_authentication
-            - introspection
-            - resource_owner_password_credentials
-            - application_session
-            - cache_refresh
-            - update_user
-            - user_registration
-            - client_registration
-            - id_generator
-            - uma_rpt_policy
-            - uma_rpt_claims
-            - uma_claims_gathering
-            - consent_gathering
-            - dynamic_scope
-            - spontaneous_scope
-            - end_session
-            - post_authn
-            - scim
-            - ciba_end_user_notification
-            - persistence_extension
-            - idp
+            - PERSON_AUTHENTICATION
+            - INTROSPECTION
+            - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            - APPLICATION_SESSION
+            - CACHE_REFRESH
+            - UPDATE_USER
+            - USER_REGISTRATION
+            - CLIENT_REGISTRATION
+            - ID_GENERATOR
+            - UMA_RPT_POLICY
+            - UMA_RPT_CLAIMS
+            - UMA_CLAIMS_GATHERING
+            - CONSENT_GATHERING
+            - DYNAMIC_SCOPE
+            - SPONTANEOUS_SCOPE
+            - END_SESSION
+            - POST_AUTHN
+            - SCIM
+            - CIBA_END_USER_NOTIFICATION
+            - PERSISTENCE_EXTENSION
+            - IDP
         programmingLanguage:
           type: string
           enum:
-            - python
-            - javascript
+            - PYTHON
+            - JAVASCRIPT
           description: Programming language of the custom script.
         moduleProperties:
           type: array
@@ -3601,7 +3605,12 @@ components:
             - DATE
         status:
           type: string
-          description: Distinguished Name
+          description: Attrubute status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         lifetime:
           type: string
         sourceAttribute:
@@ -3830,14 +3839,9 @@ components:
       description: Client.
       type: object
       required:
-        - accessTokenSigningAlg
         - clientName
-        - responseTypes
         - grantTypes
-        - subjectType
-        - idTokenSignedResponseAlg
         - tokenEndpointAuthMethod
-        - scopes
         - applicationType
       properties:
         dn:
@@ -4138,7 +4142,7 @@ components:
         customObjectClasses:
           type: array
           items:
-            type: string        
+            type: string
         rptAsJwt:
           description: Specifies whether RPT should be return as signed JWT.
           type: boolean

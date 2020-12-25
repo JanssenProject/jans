@@ -273,7 +273,7 @@ class CustomScript(object):
         :param script_type: The script_type of this CustomScript.  # noqa: E501
         :type: str
         """
-        allowed_values = ["person_authentication", "introspection", "resource_owner_password_credentials", "application_session", "cache_refresh", "update_user", "user_registration", "client_registration", "id_generator", "uma_rpt_policy", "uma_rpt_claims", "uma_claims_gathering", "consent_gathering", "dynamic_scope", "spontaneous_scope", "end_session", "post_authn", "scim", "ciba_end_user_notification", "persistence_extension", "idp"]  # noqa: E501
+        allowed_values = ["PERSON_AUTHENTICATION", "INTROSPECTION", "RESOURCE_OWNER_PASSWORD_CREDENTIALS", "APPLICATION_SESSION", "CACHE_REFRESH", "UPDATE_USER", "USER_REGISTRATION", "CLIENT_REGISTRATION", "ID_GENERATOR", "UMA_RPT_POLICY", "UMA_RPT_CLAIMS", "UMA_CLAIMS_GATHERING", "CONSENT_GATHERING", "DYNAMIC_SCOPE", "SPONTANEOUS_SCOPE", "END_SESSION", "POST_AUTHN", "SCIM", "CIBA_END_USER_NOTIFICATION", "PERSISTENCE_EXTENSION", "IDP"]  # noqa: E501
         if script_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `script_type` ({0}), must be one of {1}"  # noqa: E501
@@ -302,7 +302,7 @@ class CustomScript(object):
         :param programming_language: The programming_language of this CustomScript.  # noqa: E501
         :type: str
         """
-        allowed_values = ["python", "javascript"]  # noqa: E501
+        allowed_values = ["PYTHON", "JAVASCRIPT"]  # noqa: E501
         if programming_language not in allowed_values:
             raise ValueError(
                 "Invalid value for `programming_language` ({0}), must be one of {1}"  # noqa: E501

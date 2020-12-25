@@ -339,7 +339,7 @@ class GluuAttribute(object):
     def status(self):
         """Gets the status of this GluuAttribute.  # noqa: E501
 
-        Distinguished Name  # noqa: E501
+        Attrubute status  # noqa: E501
 
         :return: The status of this GluuAttribute.  # noqa: E501
         :rtype: str
@@ -350,11 +350,17 @@ class GluuAttribute(object):
     def status(self, status):
         """Sets the status of this GluuAttribute.
 
-        Distinguished Name  # noqa: E501
+        Attrubute status  # noqa: E501
 
         :param status: The status of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        allowed_values = ["ACTIVE", "INACTIVE", "EXPIRED", "REGISTER"]  # noqa: E501
+        if status not in allowed_values:
+            raise ValueError(
+                "Invalid value for `status` ({0}), must be one of {1}"  # noqa: E501
+                .format(status, allowed_values)
+            )
 
         self._status = status
 
