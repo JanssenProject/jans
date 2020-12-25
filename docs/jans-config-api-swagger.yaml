@@ -1306,6 +1306,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebKeysConfiguration'  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1330,6 +1334,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebKeysConfiguration'  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2319,29 +2327,40 @@ components:
       properties:
         kid:
           type: string
+          description: The unique identifier for the key.
         kty:
           type: string
+          description: The family of cryptographic algorithms used with the key.
         use:
           type: string
+          description: How the key was meant to be used; sig represents the signature.
         alg:
           type: string
+          description: The specific cryptographic algorithm used with the key.
         crv:
           type: string
+          description: The crv member identifies the cryptographic curve used with the key. Values defined by this specification are P-256, P-384 and P-521. Additional crv values MAY be used, provided they are understood by implementations using that Elliptic Curve key. The crv value is case sensitive.
         exp:
           type: integer
           format: int64
+          description: Contains the token expiration timestamp
         x5c:
           type: array
+          description: The x.509 certificate chain. The first entry in the array is the certificate to use for token verification; the other certificates can be used to verify this first certificate.
           items:
             type: string
         n:
           type: string
+          description: The modulus for the RSA public key.
         e:
           type: string
+          description: The exponent for the RSA public key.
         x:
           type: string
+          description: The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
         y:
           type: string
+          description: The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
  
     AppConfiguration:
       title: AppConfiguration
