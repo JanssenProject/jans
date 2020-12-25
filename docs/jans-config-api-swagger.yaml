@@ -3840,13 +3840,8 @@ components:
       type: object
       required:
         - clientName
-        - accessTokenSigningAlg
-        - responseTypes
         - grantTypes
-        - subjectType
-        - idTokenSignedResponseAlg
         - tokenEndpointAuthMethod
-        - scopes
         - applicationType
       properties:
         dn:
