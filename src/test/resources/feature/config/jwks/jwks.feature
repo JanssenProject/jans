@@ -1,35 +1,46 @@
 @ignore
 Feature: JWKS endpoint
 
-  Background:
-    * def jwksUrl = baseUrl + '/api/v1/config/jwks'
+	Background:
+  	* def mainUrl = jwksUrl
 
   Scenario: Retrieve JWKS
-    Given url  jwksUrl
-    And  header Authorization = 'Bearer ' + accessToken
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
 
-  Scenario: Patch JWKS with new key
-    Given url  jwksUrl
-    And  header Authorization = 'Bearer ' + accessToken
+   Scenario: Patch JWKS with new key
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+  	Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request read('jwks_patch.json')
-    Then print request
+    And print response.keys[0].exp
+    And request "[ {\"op\":\"replace\", \"path\": \"/keys/0/exp\", \"value\":\""+response.keys[0].exp+"\" } ]"
+	Then print request
     When method PATCH
     Then status 200
     And print response
 
   Scenario: Put JWKS
-    Given url  jwksUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
-    And header Accept = 'application/json'
-    And request read('jwks.json')
-    Then print request
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    Then print response
+    Then def first_response = response 
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And request first_response 
     When method PUT
     Then status 200
     And print response
+    And assert response.length != null
