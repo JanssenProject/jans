@@ -130,7 +130,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
 
         :param async_req bool
         :param list[PatchRequest] body:
-        :return: None
+        :return: WebKeysConfiguration
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -152,7 +152,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
 
         :param async_req bool
         :param list[PatchRequest] body:
-        :return: None
+        :return: WebKeysConfiguration
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -206,7 +206,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type=None,  # noqa: E501
+            response_type='WebKeysConfiguration',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -225,7 +225,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
 
         :param async_req bool
         :param WebKeysConfiguration body:
-        :return: None
+        :return: WebKeysConfiguration
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -247,7 +247,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
 
         :param async_req bool
         :param WebKeysConfiguration body:
-        :return: None
+        :return: WebKeysConfiguration
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -301,7 +301,7 @@ class ConfigurationJWKJSONWebKeyJWKApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type=None,  # noqa: E501
+            response_type='WebKeysConfiguration',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),

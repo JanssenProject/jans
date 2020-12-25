@@ -120,6 +120,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JansFido2DynConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -670,8 +674,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
   /jans-config-api/api/v1/config/database/couchbase/test:
     post:
-      summary: Tests an Couchbase configuration.
-      description: Tests an Couchbase configuration.
+      summary: Tests a Couchbase configuration.
+      description: Tests a Couchbase configuration.
       operationId: post-config-database-couchbase-test
       tags:
         - Database - Couchbase configuration
@@ -723,6 +727,11 @@ paths:
       operationId: post-config-scripts
       tags:
         - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
       responses:
         '201':
           description: CREATED
@@ -750,6 +759,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1194,7 +1207,7 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/smtp.write]
     parameters: []
   /jans-config-api/api/v1/config/smtp/test:
-    get:
+    post:
       summary: Test SMTP server configuration.
       description: Test SMTP server configuration.
       operationId: test-config-smtp
@@ -1302,6 +1315,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebKeysConfiguration'  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1326,6 +1343,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebKeysConfiguration'  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2315,29 +2336,40 @@ components:
       properties:
         kid:
           type: string
+          description: The unique identifier for the key.
         kty:
           type: string
+          description: The family of cryptographic algorithms used with the key.
         use:
           type: string
+          description: How the key was meant to be used; sig represents the signature.
         alg:
           type: string
+          description: The specific cryptographic algorithm used with the key.
         crv:
           type: string
+          description: The crv member identifies the cryptographic curve used with the key. Values defined by this specification are P-256, P-384 and P-521. Additional crv values MAY be used, provided they are understood by implementations using that Elliptic Curve key. The crv value is case sensitive.
         exp:
           type: integer
           format: int64
+          description: Contains the token expiration timestamp
         x5c:
           type: array
+          description: The x.509 certificate chain. The first entry in the array is the certificate to use for token verification; the other certificates can be used to verify this first certificate.
           items:
             type: string
         n:
           type: string
+          description: The modulus for the RSA public key.
         e:
           type: string
+          description: The exponent for the RSA public key.
         x:
           type: string
+          description: The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
         y:
           type: string
+          description: The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
  
     AppConfiguration:
       title: AppConfiguration
@@ -3698,10 +3730,9 @@ components:
           description: The scopes type associated with Access Tokens determine what resources will.
           type: string
           enum:
-            - openid
-            - dynamic
-            - oauth
-            - uma
+            - OpenID
+            - Dynamic
+            - OAuth
         jansClaim:
           description: Claim attributes associated with the scope.
           type: array
@@ -3798,6 +3829,16 @@ components:
       title: Client object
       description: Client.
       type: object
+      required:
+        - accessTokenSigningAlg
+        - clientName
+        - responseTypes
+        - grantTypes
+        - subjectType
+        - idTokenSignedResponseAlg
+        - tokenEndpointAuthMethod
+        - scopes
+        - applicationType
       properties:
         dn:
           type: string
@@ -3825,7 +3866,7 @@ components:
           items:
             type: string
           example:
-            - 'https://client.example.org/cb' 
+            - 'https://client.example.org/cb'        
         claimRedirectUris:
           description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
           type: array
@@ -4390,7 +4431,7 @@ components:
           format: int32
           multipleOf: 1
         requiresSsl:
-          description: 'Boolean value with default value false. If true, SSL will be enabled.'
+          description: Boolean value with default value false. If true, SSL will be enabled.
           type: boolean
         serverTrust:
           type: boolean
@@ -4557,8 +4598,8 @@ components:
           type: array
           items:
             type: string
-
-
+  
+  
     RequestedParties:
       type: object
       description: Credential Type.

@@ -468,7 +468,7 @@ class ConfigurationSMTPApi(object):
         auth_settings = ['jans-auth']  # noqa: E501
 
         return self.api_client.call_api(
-            '/jans-config-api/api/v1/config/smtp/test', 'GET',
+            '/jans-config-api/api/v1/config/smtp/test', 'POST',
             path_params,
             query_params,
             header_params,
