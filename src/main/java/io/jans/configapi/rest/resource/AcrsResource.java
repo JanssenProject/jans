@@ -47,7 +47,7 @@ public class AcrsResource extends BaseResource {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
         configurationService.merge(gluuConfiguration);
-        return Response.ok(ResponseStatus.SUCCESS).build();
+        return Response.ok(authenticationMethod).build();
     }
 
 }
