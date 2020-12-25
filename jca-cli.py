@@ -113,7 +113,7 @@ class JCA_CLI:
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         
         self.swagger_configuration.verify_ssl = False
-        #self.swagger_configuration.debug = True
+        self.swagger_configuration.debug = False
         if self.swagger_configuration.debug:
             self.swagger_configuration.logger_file='swagger.log'
 
@@ -127,7 +127,7 @@ class JCA_CLI:
 
         with open(self.swagger_yaml_fn) as f:
             self.cfg_yml = ruamel.yaml.load(f.read(), ruamel.yaml.RoundTripLoader)
-        
+
         return self.cfg_yml
 
 
@@ -190,6 +190,13 @@ class JCA_CLI:
                 return val
             if val.isnumeric():
                 return int(val)
+        elif vtype=='object':
+            try:
+                retVal = json.loads(val)
+                if isinstance(retVal, dict):
+                    return retVal
+            except:
+                pass
         elif vtype=='boolean':
             if val == '_false':
                 return False
@@ -202,13 +209,16 @@ class JCA_CLI:
 
         raise TypeError(self.colored_text(error_text, warning_color))
 
-    def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce='__true__'):
-
+    def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce='__true__', example=None):
+        print()
         type_text = ''
         if itype:
             if itype == 'array':
                 type_text = "Type: array of {} seperated by _,".format(sitype)
+                if values:
+                    type_text += ' Valid values: {}'.format(', '.join(values))
             elif itype == 'boolean':
+                type_text = "Type: " + itype
                 if default is None:
                     default = False
             else:
@@ -221,6 +231,13 @@ class JCA_CLI:
 
         if help_text:
             print(self.colored_text('«{}»'.format(help_text), 244))
+        
+        if example:
+            if isinstance(example, list):
+                example_str = ', '.join(example)
+            else:
+                example_str = str(example)
+            print(self.colored_text('Example: {}'.format(example_str), 244))
         
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
@@ -237,7 +254,6 @@ class JCA_CLI:
         if itype=='boolean' and not values:
             values = ['_true', '_false']
 
-        
         while True:
             selection = input(self.colored_text(text, 15)+' ')
             selection = selection.strip()
@@ -260,6 +276,24 @@ class JCA_CLI:
                 print("Quiting...")
                 sys.exit()
 
+            if itype == 'object' and sitype:
+                try:
+                    object_ = self.check_type(selection, itype)
+                except Exception as e:
+                    print(e)
+                    continue
+
+                data_ok = True
+                for items in object_:
+                    try:
+                        self.check_type(object_[items], sitype)
+                    except Exception as e:
+                        data_ok = False
+                if data_ok:
+                    return object_
+                else:
+                    continue
+
             if itype == 'array' and default and not selection:
                 return default
 
@@ -274,7 +308,7 @@ class JCA_CLI:
                         if values:
                             if not selection[i] in values:
                                 data_ok = False
-                                print(self.colored_text("Please enter array of {} seperated by _,".format(values), warning_color))
+                                print(self.colored_text("Please enter array of {} seperated by _,".format(', '.join(values)), warning_color))
                                 break
                     except TypeError as e:
                         print(e)
@@ -521,8 +555,9 @@ class JCA_CLI:
             item = schema['properties'][prop]
             prop_ = self.get_model_key_map(model, prop)
 
-            if item['type'] == 'object':
-                if model.__class__.__name__ == 'type':
+            if item['type'] == 'object' and 'properties' in item:
+
+                if getattr(model, prop_).__class__.__name__ == 'type':
                     model_name = item.get('__schema_name__') or item['description']
                     sub_model_class = getattr(swagger_client.models, model_name)
                     result = self.get_input_for_schema_(item, sub_model_class)
@@ -530,6 +565,7 @@ class JCA_CLI:
                 else:
                     sub_model = getattr(model, prop_)
                     self.get_input_for_schema_(item, sub_model)
+
             elif item['type'] == 'array' and '__schema_name__' in item:
                 model_name = item['__schema_name__']
                 sub_model_class = getattr(swagger_client.models, model_name)
@@ -562,6 +598,8 @@ class JCA_CLI:
                 values_ = item.get('enum', [])
                 if not values_ and item['type'] == 'array' and 'enum' in item['items']:
                     values_ = item['items']['enum']
+                if item['type'] == 'object' and not default:
+                    default = {}
 
                 val = self.get_input(
                         values=values_,
@@ -570,7 +608,8 @@ class JCA_CLI:
                         itype=item['type'],
                         help_text=item.get('description'),
                         sitype=item.get('items', {}).get('type'),
-                        enforce=enforce
+                        enforce=enforce,
+                        example=item.get('example')
                         )
                 data[prop_] = val
 
@@ -581,6 +620,8 @@ class JCA_CLI:
             for key_ in data:
                 if data[key_]:
                     setattr(model, key_, data[key_])
+            
+            
             return model
 
 
@@ -605,11 +646,19 @@ class JCA_CLI:
         
         model = self.get_input_for_schema_(schema, model_class)
 
+        #print("MODEL")
+        #print(model)
+        #print("-"*10)
+        #print(type(model.custom_attributes[0]))
+        #print("-"*10)
+
         print("Obtained Data:\n")
         model_unmapped = self.unmap_model(model)
         self.print_colored_output(model_unmapped)
 
         selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
+        
+        
         
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)

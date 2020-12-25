@@ -260,7 +260,8 @@ class Client(object):
             self.redirect_uris = redirect_uris
         if claim_redirect_uris is not None:
             self.claim_redirect_uris = claim_redirect_uris
-        self.response_types = response_types
+        if response_types is not None:
+            self.response_types = response_types
         self.grant_types = grant_types
         self.application_type = application_type
         if contacts is not None:
@@ -282,8 +283,10 @@ class Client(object):
             self.jwks = jwks
         if sector_identifier_uri is not None:
             self.sector_identifier_uri = sector_identifier_uri
-        self.subject_type = subject_type
-        self.id_token_signed_response_alg = id_token_signed_response_alg
+        if subject_type is not None:
+            self.subject_type = subject_type
+        if id_token_signed_response_alg is not None:
+            self.id_token_signed_response_alg = id_token_signed_response_alg
         if id_token_encrypted_response_alg is not None:
             self.id_token_encrypted_response_alg = id_token_encrypted_response_alg
         if id_token_encrypted_response_enc is not None:
@@ -315,7 +318,8 @@ class Client(object):
             self.post_logout_redirect_uris = post_logout_redirect_uris
         if request_uris is not None:
             self.request_uris = request_uris
-        self.scopes = scopes
+        if scopes is not None:
+            self.scopes = scopes
         if claims is not None:
             self.claims = claims
         if trusted_client is not None:
@@ -340,7 +344,8 @@ class Client(object):
             self.rpt_as_jwt = rpt_as_jwt
         if access_token_as_jwt is not None:
             self.access_token_as_jwt = access_token_as_jwt
-        self.access_token_signing_alg = access_token_signing_alg
+        if access_token_signing_alg is not None:
+            self.access_token_signing_alg = access_token_signing_alg
         if disabled is not None:
             self.disabled = disabled
         if authorized_origins is not None:
@@ -606,8 +611,6 @@ class Client(object):
         :param response_types: The response_types of this Client.  # noqa: E501
         :type: list[str]
         """
-        if response_types is None:
-            raise ValueError("Invalid value for `response_types`, must not be `None`")  # noqa: E501
         allowed_values = ["code", "token", "id_token"]  # noqa: E501
         if not set(response_types).issubset(set(allowed_values)):
             raise ValueError(
@@ -933,8 +936,6 @@ class Client(object):
         :param subject_type: The subject_type of this Client.  # noqa: E501
         :type: str
         """
-        if subject_type is None:
-            raise ValueError("Invalid value for `subject_type`, must not be `None`")  # noqa: E501
         allowed_values = ["pairwise", "public"]  # noqa: E501
         if subject_type not in allowed_values:
             raise ValueError(
@@ -964,8 +965,6 @@ class Client(object):
         :param id_token_signed_response_alg: The id_token_signed_response_alg of this Client.  # noqa: E501
         :type: str
         """
-        if id_token_signed_response_alg is None:
-            raise ValueError("Invalid value for `id_token_signed_response_alg`, must not be `None`")  # noqa: E501
         allowed_values = ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"]  # noqa: E501
         if id_token_signed_response_alg not in allowed_values:
             raise ValueError(
@@ -1425,8 +1424,6 @@ class Client(object):
         :param scopes: The scopes of this Client.  # noqa: E501
         :type: list[str]
         """
-        if scopes is None:
-            raise ValueError("Invalid value for `scopes`, must not be `None`")  # noqa: E501
 
         self._scopes = scopes
 
@@ -1722,8 +1719,6 @@ class Client(object):
         :param access_token_signing_alg: The access_token_signing_alg of this Client.  # noqa: E501
         :type: str
         """
-        if access_token_signing_alg is None:
-            raise ValueError("Invalid value for `access_token_signing_alg`, must not be `None`")  # noqa: E501
         allowed_values = ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"]  # noqa: E501
         if access_token_signing_alg not in allowed_values:
             raise ValueError(
