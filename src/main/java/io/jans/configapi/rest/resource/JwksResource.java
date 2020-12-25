@@ -45,7 +45,8 @@ public class JwksResource extends BaseResource {
         final Conf conf = configurationService.findConf();
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
-        return Response.ok().build();
+        final String json = configurationService.findConf().getWebKeys().toString();
+        return Response.ok(json).build();
     }
 
     @PATCH
@@ -57,6 +58,7 @@ public class JwksResource extends BaseResource {
         webKeys = Jackson.applyPatch(requestString, webKeys);
         conf.setWebKeys(webKeys);
         configurationService.merge(conf);
-        return Response.ok(webKeys.toString()).build();
+        final String json = configurationService.findConf().getWebKeys().toString();
+        return Response.ok(json).build();
     }
 }
