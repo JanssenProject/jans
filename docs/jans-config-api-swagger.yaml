@@ -334,6 +334,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationMethod'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3601,7 +3605,12 @@ components:
             - DATE
         status:
           type: string
-          description: Distinguished Name
+          description: Attrubute status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         lifetime:
           type: string
         sourceAttribute:
@@ -3830,9 +3839,8 @@ components:
       description: Client.
       type: object
       required:
-        - displayName
+        - clientName
         - accessTokenSigningAlg
-        - customObjectClasses
         - responseTypes
         - grantTypes
         - subjectType
