@@ -120,6 +120,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JansFido2DynConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
