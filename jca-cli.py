@@ -209,7 +209,10 @@ class JCA_CLI:
 
         raise TypeError(self.colored_text(error_text, warning_color))
 
-    def get_input(self, values=[], text='Selection', default=None, itype=None, help_text=None, sitype=None, enforce='__true__', example=None):
+    def get_input(self, values=[], text='Selection', default=None, itype=None, 
+                        help_text=None, sitype=None, enforce='__true__', 
+                        example=None, spacing=0
+                        ):
         print()
         type_text = ''
         if itype:
@@ -230,14 +233,14 @@ class JCA_CLI:
             help_text = type_text
 
         if help_text:
-            print(self.colored_text('«{}»'.format(help_text), 244))
+            print(' '*spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
         
         if example:
             if isinstance(example, list):
                 example_str = ', '.join(example)
             else:
                 example_str = str(example)
-            print(self.colored_text('Example: {}'.format(example_str), 244))
+            print(' '*spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
         
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
@@ -255,7 +258,7 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            selection = input(self.colored_text(text, 15)+' ')
+            selection = input(' '*spacing + self.colored_text(text, 15)+' ')
             selection = selection.strip()
 
             if itype == 'boolean' and not selection:
@@ -280,7 +283,7 @@ class JCA_CLI:
                 try:
                     object_ = self.check_type(selection, itype)
                 except Exception as e:
-                    print(e)
+                    print(' '*spacing, e, sep='')
                     continue
 
                 data_ok = True
@@ -288,6 +291,7 @@ class JCA_CLI:
                     try:
                         self.check_type(object_[items], sitype)
                     except Exception as e:
+                        print(' '*spacing, e, sep='')
                         data_ok = False
                 if data_ok:
                     return object_
@@ -308,10 +312,10 @@ class JCA_CLI:
                         if values:
                             if not selection[i] in values:
                                 data_ok = False
-                                print(self.colored_text("Please enter array of {} seperated by _,".format(', '.join(values)), warning_color))
+                                print(' '*spacing, self.colored_text("Please enter array of {} seperated by _,".format(', '.join(values)), warning_color), sep='')
                                 break
                     except TypeError as e:
-                        print(e)
+                        print(' '*spacing, e, sep='')
                         data_ok = False
                 if data_ok:
                     break
@@ -321,7 +325,7 @@ class JCA_CLI:
                         selection = self.check_type(selection, itype)
                     except TypeError as e:
                         if enforce:
-                            print(e)
+                            print(' '*spacing, e, sep='')
                             continue
 
                 if values:
@@ -333,7 +337,7 @@ class JCA_CLI:
                         else:
                             continue
                     else:
-                        print(self.colored_text('Please enter one of {}'.format(', '.join(values)), warning_color))
+                        print(' '*spacing, self.colored_text('Please enter one of {}'.format(', '.join(values)), warning_color), sep='')
 
                 if not values and not selection and not enforce:
                     break
@@ -548,7 +552,7 @@ class JCA_CLI:
                 return attribute
 
 
-    def get_input_for_schema_(self, schema, model):
+    def get_input_for_schema_(self, schema, model, spacing=0):
 
         data = {}
         for prop in schema['properties']:
@@ -556,15 +560,21 @@ class JCA_CLI:
             prop_ = self.get_model_key_map(model, prop)
 
             if item['type'] == 'object' and 'properties' in item:
+                print()
+                print("Data for object {}. {}".format(prop, item.get('description','')))
 
                 if getattr(model, prop_).__class__.__name__ == 'type':
                     model_name = item.get('__schema_name__') or item['description']
                     sub_model_class = getattr(swagger_client.models, model_name)
-                    result = self.get_input_for_schema_(item, sub_model_class)
+                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3)
+                    setattr(model, prop_, result)
+                elif hasattr(swagger_client.models, model.swagger_types[prop_]):
+                    sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
+                    result = self.get_input_for_schema_(item, sub_model, spacing=3)
                     setattr(model, prop_, result)
                 else:
                     sub_model = getattr(model, prop_)
-                    self.get_input_for_schema_(item, sub_model)
+                    self.get_input_for_schema_(item, sub_model, spacing=3)
 
             elif item['type'] == 'array' and '__schema_name__' in item:
                 model_name = item['__schema_name__']
@@ -609,7 +619,8 @@ class JCA_CLI:
                         help_text=item.get('description'),
                         sitype=item.get('items', {}).get('type'),
                         enforce=enforce,
-                        example=item.get('example')
+                        example=item.get('example'),
+                        spacing=spacing
                         )
                 data[prop_] = val
 
@@ -640,7 +651,6 @@ class JCA_CLI:
         
         title = schema.get('description') or schema['title']
         data_dict = {}
-        print(schema['title'], endpoint.method,  endpoint.path)
         
         model_class = getattr(swagger_client.models, schema['__schema_name__'])
         
