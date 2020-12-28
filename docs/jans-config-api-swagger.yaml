@@ -2154,28 +2154,12 @@ components:
           type: array
           description: Module-level properties applicable to the script.
           items:
-            type: object
-            properties:
-              value1:
-                type: string
-              value2:
-                type: string
-              description:
-                type: string
+            $ref: '#/components/schemas/SimpleCustomProperty'
         configurationProperties:
           type: array
           description: Configuration properties applicable to the script.
           items:
-            type: object
-            properties:
-              value1:
-                type: string
-              value2:
-                type: string
-              description:
-                type: string
-              hide:
-                type: boolean
+            $ref: '#/components/schemas/SimpleExtendedCustomProperty'
         level:
           type: integer
           description: Script level.
@@ -2189,12 +2173,7 @@ components:
         scriptError:
           type: object
           description: Possible errors assosiated with the script.
-          properties:
-            raisedAt:
-              type: string
-              format: date
-            stackTrace:
-              type: string
+          $ref: '#/components/schemas/ScriptError'
         modified:
           type: boolean
           description: boolean value indicating if the script is modified.
@@ -4608,8 +4587,6 @@ components:
           type: array
           items:
             type: string
-		  
-		  
     RequestedParties:
       type: object
       description: Credential Type.
@@ -4623,3 +4600,34 @@ components:
           type: array
           items:
             type: string
+    SimpleCustomProperty:
+      type: object
+      description: Simple Property.
+      properties:
+        value1:
+          type: string
+        value2:
+          type: string
+        description:
+          type: string
+    SimpleExtendedCustomProperty:
+      type: object
+      description: Simple Extended Property.
+      properties:
+        value1:
+          type: string
+        value2:
+          type: string
+        description:
+          type: string
+        hide:
+          type: boolean
+    ScriptError:
+      type: object
+      description: Possible errors assosiated with the script.
+      properties:
+        raisedAt:
+          type: string
+          format: date
+        stackTrace:
+          type: string
