@@ -85,15 +85,15 @@ public class Response {
         fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
         DocumentBuilder builder = fty.newDocumentBuilder();
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes("UTF-8"));
         xmlDoc = builder.parse(bais);
     }
 
     public void loadXmlFromBase64(String response) throws ParserConfigurationException, SAXException, IOException {
         Base64 base64 = new Base64();
         byte[] decodedResponse = base64.decode(response);
-        String decodedS = new String(decodedResponse);
-        loadXml(decodedS);
+        String decoded = new String(decodedResponse, "UTF-8");
+        loadXml(decoded);
     }
 
     public boolean isValid() throws Exception {
@@ -115,7 +115,30 @@ public class Response {
         return xmlSignature.validate(ctx);
     }
 
-    public boolean isAuthnFailed() throws Exception {
+	public boolean isValidNew() throws Exception {
+		NodeList nodes = xmlDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+
+		if (nodes == null || nodes.getLength() == 0) {
+			throw new Exception("Can't find signature in document.");
+		}
+
+		if (setIdAttributeExists()) {
+			tagIdAttributes(xmlDoc);
+		}
+
+		X509Certificate cert = samlSettings.getCertificate();
+
+		// It's do initialization only on first call
+		org.apache.xml.security.Init.init();
+
+		Element sigElement = (Element) nodes.item(0);
+		org.apache.xml.security.signature.XMLSignature signature = new org.apache.xml.security.signature.XMLSignature(
+				sigElement, null);
+
+		return signature.checkSignatureValue(cert);
+	}
+
+	public boolean isAuthnFailed() throws Exception {
         XPath xPath = XPathFactory.newInstance().newXPath();
 
         xPath.setNamespaceContext(NAMESPACES);
