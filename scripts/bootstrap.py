@@ -286,10 +286,10 @@ class CtxGenerator:
     def config_api_ctx(self):
         client_id = f"1801.{uuid.uuid4()}"
         self.set_config("jca_client_id", client_id)
-        client_encoded_pw = encode_text(
-            get_random_chars(),
-            self.get_secret("encoded_salt"),
-        )
+
+        client_pw = get_random_chars()
+        self.set_secret("jca_client_pw", client_pw)
+        client_encoded_pw = encode_text(client_pw, self.get_secret("encoded_salt"))
         self.set_secret("jca_client_encoded_pw", client_encoded_pw)
 
     def scim_rs_ctx(self):
