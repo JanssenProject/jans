@@ -50,7 +50,7 @@ from setup_app.installers.couchbase import CouchbaseInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
-from setup_app.installers.oxauth import OxauthInstaller
+from setup_app.installers.jans_auth import JansAuthInstaller
 from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.config_api import ConfigApiInstaller
@@ -143,7 +143,7 @@ jythonInstaller = JythonInstaller()
 openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
 httpdinstaller = HttpdInstaller()
-oxauthInstaller = OxauthInstaller()
+jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
 fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
@@ -153,7 +153,7 @@ elevenInstaller = ElevenInstaller()
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
-                        oxauthInstaller, scimInstaller, fidoInstaller,
+                        jansAuthInstaller, scimInstaller, fidoInstaller,
                         elevenInstaller,
                         #oxdInstaller
                         ):
@@ -221,7 +221,7 @@ def do_installation():
         if not Config.installed_instance:
             jansInstaller.configureSystem()
             jansInstaller.make_salt()
-            oxauthInstaller.make_salt()
+            jansAuthInstaller.make_salt()
 
             if not base.snap:
                 jreInstaller.start_installation()
@@ -259,7 +259,7 @@ def do_installation():
             httpdinstaller.configure()
 
         if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuth):
-            oxauthInstaller.start_installation()
+            jansAuthInstaller.start_installation()
 
         if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
             configApiInstaller.start_installation()
