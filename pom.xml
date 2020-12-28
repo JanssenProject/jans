@@ -556,6 +556,11 @@
 				<artifactId>opensaml</artifactId>
 				<version>2.6.4</version>
 			</dependency>
+			<dependency>
+			    <groupId>org.apache.santuario</groupId>
+			    <artifactId>xmlsec</artifactId>
+			    <version>2.2.1</version>
+			</dependency>
 
 			<!-- LDAP -->
 			<dependency>
