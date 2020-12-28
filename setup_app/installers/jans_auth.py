@@ -9,7 +9,7 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.static import AppType, InstallOption
 
-class OxauthInstaller(JettyInstaller):
+class JansAuthInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'jans-auth'
@@ -28,11 +28,11 @@ class OxauthInstaller(JettyInstaller):
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_clients = os.path.join(self.output_folder, 'clients.ldif')
-        self.oxauth_config_json = os.path.join(self.output_folder, 'oxauth-config.json')
-        self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'oxauth-static-conf.json')
-        self.oxauth_error_json = os.path.join(self.templates_folder, 'oxauth-errors.json')
-        self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'oxauth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'oxauth-keys.jks')
+        self.oxauth_config_json = os.path.join(self.output_folder, 'jans-auth-config.json')
+        self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
+        self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
+        self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
+        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.jks')
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
