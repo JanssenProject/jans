@@ -67,12 +67,10 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
-            <version>2.6.4</version>
         </dependency>
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>2.3.3</version>
+		    <groupId>org.apache.santuario</groupId>
+		    <artifactId>xmlsec</artifactId>
 		</dependency>
 	</dependencies>
 </project>
