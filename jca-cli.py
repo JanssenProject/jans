@@ -6,6 +6,8 @@ import json
 import re
 import urllib3
 import configparser
+import argparse
+import inspect
 
 import ruamel.yaml
 from pprint import pprint
@@ -13,9 +15,6 @@ from functools import partial
 from urllib.parse import urljoin
 
 import swagger_client
-
-#reset previous color
-print('\033[0m',end='')
 
 warning_color = 214
 clear = lambda: os.system('clear')
@@ -25,13 +24,45 @@ config = configparser.ConfigParser()
 host =  os.environ.get('jans_host')
 client_id = os.environ.get('jans_client_id')
 client_secret = os.environ.get('jans_client_secret')
+debug = os.environ.get('jans_client_debug')
+debug_log_file = os.environ.get('jans_debug_log_file')
 
-if not (host and client_secret and client_secret):
+##################### arguments #####################
+op_list = []
+
+for api_name in dir(swagger_client.api):
+    if api_name.endswith and inspect.isclass(getattr(swagger_client.api, api_name)):
+        op_list.append(api_name[:-3])
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", help="Hostname of server")
+parser.add_argument("--client-id", help="Jans Config Api Client ID")
+parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("-debug", help="Run in debug mode", action='store_true')
+parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
+parser.add_argument("--operation", choices=op_list, help="Operation to be done")
+parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
+parser.add_argument("--endpoint-args", help="Arguments to pass endpoint seperated by comma. For example limit:5,status:INACTIVE")
+parser.add_argument("--data", help="Path to json data file")
+args = parser.parse_args()
+
+################## end of arguments #################
+
+if not (host and client_id and client_secret):
+    host = args.host
+    client_id = args.client_id
+    client_secret = args.client_secret
+    debug = args.debug
+    debug_log_file = args.debug_log_file
+
+if not (host and client_id and client_secret):
     if os.path.exists('config.ini'):
         config.read('config.ini')
         host = config['DEFAULT']['jans_host']
         client_id = config['DEFAULT']['jans_client_id']
         client_secret = config['DEFAULT']['jans_client_secret']
+        debug = config['DEFAULT']['debug']
+        debug_log_file = config['DEFAULT']['debug_log_file']
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net', 'jans_client_id':'your client id', 'jans_client_secret': 'client secret for you client id'}
         with open('config.ini', 'w') as configfile:
@@ -40,6 +71,10 @@ if not (host and client_secret and client_secret):
         print("Pelase fill config.ini or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run")
         sys.exit()
 
+if str(debug).lower() in ('yes', 'true', '1', 'on'):
+    debug = True
+else:
+    debug = False
 class Menu(object):
 
     def __init__(self, name, method='', info='', path=''):
@@ -113,9 +148,9 @@ class JCA_CLI:
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         
         self.swagger_configuration.verify_ssl = False
-        self.swagger_configuration.debug = False
+        self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file='swagger.log'
+            self.swagger_configuration.logger_file = debug_log_file
 
         self.swagger_yaml_fn = 'jans-config-api-swagger.yaml'
         self.cfg_yml = self.get_yaml()
@@ -153,8 +188,7 @@ class JCA_CLI:
 
 
     def get_access_token(self, scope):
-        print("Getting access token for scope", scope)
-        
+        sys.stderr.write("Getting access token for scope {}\n".format(scope))
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = urljoin(self.swagger_configuration.host, 'jans-auth/restv1/token')
@@ -173,14 +207,18 @@ class JCA_CLI:
             if 'access_token' in data:
                 self.swagger_configuration.access_token = data['access_token']
             else:
-                print("Error while getting access token")
-                print(data)
+                sys.stderr.write("Error while getting access token")
+                sys.stderr.write(data)
+                sys.stderr.write('\n')
         except:
             print("Error while getting access token")
-            print(response.data)
+            sys.stderr.write(response.data)
+            sys.stderr.write('\n')
+
 
     def colored_text(self, text, color=255):
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
+
 
     def check_type(self, val, vtype):
         if vtype == 'string' and val:
@@ -208,6 +246,7 @@ class JCA_CLI:
             error_text += ': _true, _false'
 
         raise TypeError(self.colored_text(error_text, warning_color))
+
 
     def get_input(self, values=[], text='Selection', default=None, itype=None, 
                         help_text=None, sitype=None, enforce='__true__', 
@@ -247,9 +286,6 @@ class JCA_CLI:
             text += ' [{}]'.format(self.colored_text(default_text, 11))
             if itype=='integer':
                 default=int(default)
-        #else:
-        #    if not enforce=='__true__':
-        #        enforce = False
 
         if not text.endswith('?'):
             text += ':'
@@ -358,9 +394,11 @@ class JCA_CLI:
         print(text)
         print('-' * len(text.splitlines()[-1]))
 
+
     def print_colored_output(self, data):
         data_json = json.dumps(data, indent=2)
         print(self.colored_text(data_json, 10))
+
 
     def get_endpiont_url_param(self, endpoint):
         param = {}
@@ -369,6 +407,7 @@ class JCA_CLI:
             param = {'name': pname, 'description':pname, 'schema': {'type': 'string'}}
 
         return param
+
 
     def obtain_parameters(self, endpoint):
         parameters = {}
@@ -391,6 +430,7 @@ class JCA_CLI:
 
         return parameters
 
+
     def get_api_class_name(self, name):
         namle_list = re.sub(r'[^0-9a-zA-Z\s]+','', name).split()
         for i, w in enumerate(namle_list[:]):
@@ -403,6 +443,16 @@ class JCA_CLI:
 
         return ''.join(namle_list)+'Api'
 
+    def get_tag_from_api_name(self, api_name, method):
+        for tag in self.cfg_yml['tags']:
+            api_class_name = self.get_api_class_name(tag['name'])
+            if api_class_name == api_name:
+                break
+
+        for path in self.cfg_yml['paths']:
+            for method in self.cfg_yml['paths'][path]:
+                if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                    return self.cfg_yml['paths'][path][method]
 
     def get_scope_for_endpoint(self, endpoint):
         for security in endpoint.info['security']:
@@ -434,6 +484,7 @@ class JCA_CLI:
                 data_dict[model.attribute_map[key_]] = val
             
         return data_dict
+
 
     def get_model_key_map(self, model, key):
         for key_ in model.attribute_map:
@@ -506,6 +557,7 @@ class JCA_CLI:
                     print("An error ocurred while saving data")
                     print(e)
 
+
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
         schema = self.cfg_yml[schema_path_list[0]]
@@ -545,6 +597,7 @@ class JCA_CLI:
             schema_.update(schema_ref_)
 
         return schema_
+
 
     def get_swagger_types(self, model, name):
         for attribute in model.swagger_types:
@@ -640,10 +693,12 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
+
         api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-','_'))
 
         return api_caller
+
 
     def process_post(self, endpoint):
         
@@ -656,20 +711,12 @@ class JCA_CLI:
         
         model = self.get_input_for_schema_(schema, model_class)
 
-        #print("MODEL")
-        #print(model)
-        #print("-"*10)
-        #print(type(model.custom_attributes[0]))
-        #print("-"*10)
-
         print("Obtained Data:\n")
         model_unmapped = self.unmap_model(model)
         self.print_colored_output(model_unmapped)
 
         selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
-        
-        
-        
+
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
             print("Please wait while posting data ...\n")
@@ -693,7 +740,8 @@ class JCA_CLI:
         selection = self.get_input(values=['q', 'b'])
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
-            
+
+
     def process_delete(self, endpoint):
         url_param = self.get_endpiont_url_param(endpoint)
         url_param_val = self.get_input(text=url_param['name'], help_text='Entry to be deleted')
@@ -720,6 +768,7 @@ class JCA_CLI:
         selection = self.get_input(['b', 'q'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
+
 
     def process_patch(self, endpoint):
         schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
@@ -781,6 +830,7 @@ class JCA_CLI:
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
+
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
@@ -831,6 +881,7 @@ class JCA_CLI:
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
+
     def display_menu(self, menu):
         clear()
         self.current_menu = menu
@@ -858,12 +909,80 @@ class JCA_CLI:
             getattr(self, 'process_' + m.method)(m)
 
 
+    def parse_args(self, args, path):
+        param_names = []
+        for param in path['parameters']:
+            param_names.append(param['name'])
+
+        args_dict = {}
+        if args:
+            for arg in args.split(','):
+                neq = arg.find(':')
+                if neq > 1:
+                    arg_name = arg[:neq].strip()
+                    arg_val = arg[neq+1:].strip()
+                    if not arg_name in param_names:
+                        sys.stderr.write("valid endpoint args are: {}".format(', '.join(param_names)))
+                        sys.exit()
+                    if arg_name and arg_val:
+                        args_dict[arg_name] = arg_val
+
+        return args_dict
+
+
+    def process_command_get(self, op, args):
+
+        path = self.get_tag_from_api_name(op, 'get')
+
+        security = path['security'][0]['jans-auth'][0]
+
+        self.get_access_token(security)
+        client = getattr(swagger_client, op)
+
+        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
+        api_caller = getattr(api_instance, path['operationId'].replace('-','_'))
+
+        api_response = None
+
+        args = self.parse_args(args, path)
+
+        sys.stderr.write("Calling with params {}\n".format(str(args)))
+
+        try:
+            api_response = api_caller(**args)
+        except swagger_client.rest.ApiException as e:
+
+            sys.stderr.write(e.reason)
+            sys.stderr.write(e.body)
+            sys.stderr.write('\n')
+            sys.exit()
+
+        api_response_unmapped = []
+        if isinstance(api_response, list):
+            for model in api_response:
+                data_dict = self.unmap_model(model)
+                api_response_unmapped.append(data_dict)
+        else:
+            data_dict = self.unmap_model(api_response)
+            api_response_unmapped = data_dict
+
+        print(json.dumps(api_response_unmapped, indent=2))
+
+
     def runApp(self):
         clear()
         self.display_menu(self.menu)
             
 
 cliObject = JCA_CLI(host, client_id, client_secret)
-cliObject.runApp()
 
+if not args.operation:
+    #reset previous color
+    print('\033[0m',end='')
+    cliObject.runApp()
+else:
+    op = args.operation + 'Api'
+    caller_name = 'process_command_' + args.op_mode
+    caller = getattr(cliObject, caller_name)
+    caller(op, args.endpoint_args)
 
