@@ -132,6 +132,8 @@ jobs:
           "COUCHBASE_CRT": "",
           "COUCHBASE_CN": "Couchbase CN",
           "COUCHBASE_SUBJECT_ALT_NAME": "",
+          "COUCHBASE_BUCKET_PREFIX": "jans",
+          "GLUU_LDAP_MULTI_CLUSTER": "N",
           "COUCHBASE_USE_LOW_RESOURCES": "Y",
           "COUCHBASE_DATA_NODES": "",
           "COUCHBASE_QUERY_NODES": "",
