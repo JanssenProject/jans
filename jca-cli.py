@@ -392,7 +392,7 @@ class JCA_CLI:
         return parameters
 
     def get_api_class_name(self, name):
-        namle_list = name.replace('-','').replace('–','').split()
+        namle_list = re.sub(r'[^0-9a-zA-Z\s]+','', name).split()
         for i, w in enumerate(namle_list[:]):
             if len(w) > 1:
                 w = w[0].upper()+w[1:]
