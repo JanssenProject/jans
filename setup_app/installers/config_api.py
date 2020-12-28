@@ -109,7 +109,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                                     'objectclass': ['top', 'jansScope'],
                                     'description': [scopes_def.get(scope, display_name)],
                                     'displayName': [display_name],
-                                    'inum': ['inum={}'.format(inum)],
+                                    'inum': [inum],
                                     'jansDefScope': ['true'],
                                     'jansId': [scope],
                                     'jansScopeTyp': ['uma'],
