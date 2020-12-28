@@ -283,6 +283,15 @@ class CtxGenerator:
                 encode_text(fr.read(), encoded_salt),
             )
 
+    def config_api_ctx(self):
+        client_id = f"1801.{uuid.uuid4()}"
+        self.set_config("jca_client_id", client_id)
+        client_encoded_pw = encode_text(
+            get_random_chars(),
+            self.get_secret("encoded_salt"),
+        )
+        self.set_secret("jca_client_encoded_pw", client_encoded_pw)
+
     def scim_rs_ctx(self):
         self.set_config("scim_rs_client_id", "1201.{}".format(uuid.uuid4()))
         scim_rs_client_jks_fn = self.set_config("scim_rs_client_jks_fn", "/etc/certs/scim-rs.jks")
@@ -796,6 +805,7 @@ class CtxGenerator:
         self.ldap_ctx()
         self.redis_ctx()
         self.oxauth_ctx()
+        self.config_api_ctx()
         self.scim_rs_ctx()
         self.scim_rp_ctx()
         # self.passport_rs_ctx()
