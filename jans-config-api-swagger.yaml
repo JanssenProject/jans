@@ -3580,7 +3580,6 @@ components:
         - displayName
         - dataType
         - name
-        - editType
         - viewType
       properties:
         dn:
@@ -3746,9 +3745,10 @@ components:
           description: The scopes type associated with Access Tokens determine what resources will.
           type: string
           enum:
-            - OpenID
-            - Dynamic
-            - OAuth
+            - openid
+            - dynamic
+            - oauth
+            - uma
         jansClaim:
           description: Claim attributes associated with the scope.
           type: array

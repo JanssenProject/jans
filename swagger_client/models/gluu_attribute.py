@@ -139,7 +139,8 @@ class GluuAttribute(object):
             self.name_id_type = name_id_type
         if origin is not None:
             self.origin = origin
-        self.edit_type = edit_type
+        if edit_type is not None:
+            self.edit_type = edit_type
         self.view_type = view_type
         if usage_type is not None:
             self.usage_type = usage_type
@@ -491,8 +492,6 @@ class GluuAttribute(object):
         :param edit_type: The edit_type of this GluuAttribute.  # noqa: E501
         :type: list[str]
         """
-        if edit_type is None:
-            raise ValueError("Invalid value for `edit_type`, must not be `None`")  # noqa: E501
         allowed_values = ["ADMIN", "OWNER", "MANAGER", "USER", "WHITEPAGES"]  # noqa: E501
         if not set(edit_type).issubset(set(allowed_values)):
             raise ValueError(
