@@ -66,9 +66,9 @@ public class ExternalPersistenceExtensionService extends ExternalScriptService {
 			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
 			
 			executeExternalOnAfterCreateMethod(persistenceExternalContext);
-
-			setPersistenceExtension(persistenceEntryManager);
 		}
+
+		setPersistenceExtension(persistenceEntryManager);
 	}
 
 	public void executePersistenceExtensionAfterDestroy(PersistenceEntryManager persistenceEntryManager) {
