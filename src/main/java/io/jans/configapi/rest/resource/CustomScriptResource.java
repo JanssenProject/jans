@@ -60,7 +60,7 @@ public class CustomScriptResource extends BaseResource {
                                                   @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
                                                   @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
-                CustomScriptType.getByValue(type), limit);
+                CustomScriptType.getByValue(type.toLowerCase()), limit);
         if (customScripts != null && !customScripts.isEmpty())
             return Response.ok(customScripts).build();
         else
