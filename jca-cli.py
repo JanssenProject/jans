@@ -13,6 +13,7 @@ import ruamel.yaml
 from pprint import pprint
 from functools import partial
 from urllib.parse import urljoin
+from collections import OrderedDict
 
 import swagger_client
 
@@ -41,8 +42,10 @@ parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
 parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
 parser.add_argument("--operation", choices=op_list, help="Operation to be done")
+parser.add_argument("--info", choices=op_list, help="Help for operation")
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
 parser.add_argument("--endpoint-args", help="Arguments to pass endpoint seperated by comma. For example limit:5,status:INACTIVE")
+parser.add_argument("--schema", help="Get sample json schema")
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
@@ -443,16 +446,24 @@ class JCA_CLI:
 
         return ''.join(namle_list)+'Api'
 
-    def get_tag_from_api_name(self, api_name, method):
+
+    def get_tag_from_api_name(self, api_name, method=None):
         for tag in self.cfg_yml['tags']:
             api_class_name = self.get_api_class_name(tag['name'])
             if api_class_name == api_name:
                 break
 
+        paths = OrderedDict()
+        
         for path in self.cfg_yml['paths']:
+
             for method in self.cfg_yml['paths'][path]:
                 if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
-                    return self.cfg_yml['paths'][path][method]
+                    if method:
+                        return self.cfg_yml['paths'][path]
+                    paths[method] = self.cfg_yml['paths'][path]
+                    
+        return paths
 
     def get_scope_for_endpoint(self, endpoint):
         for security in endpoint.info['security']:
@@ -930,6 +941,39 @@ class JCA_CLI:
         return args_dict
 
 
+    def help_for(self, op):
+        path = self.get_tag_from_api_name(op)
+
+        schema = None
+
+        for method in path:
+            if 'tags' in path[method]:
+                print('Method: ', method)
+                print(' Description:', path[method]['description'])
+
+                if 'parameters' in path[method]:
+                    param_names = []
+                    for param in path[method]['parameters']:
+                        desc = param['description']
+                        param_type = param.get('schema', {}).get('type')
+                        if param_type:
+                            desc += ' [{}]'.format(param_type)
+                        param_names.append((param['name'], desc))
+                    if param_names:
+                        print(' Parameters:')
+                        for param in param_names:
+                            print('  {}: {}'.format(param[0], param[1]))
+
+                if 'requestBody' in path[method]:
+                    for apptype in path[method]['requestBody'].get('content',{}):
+                        if 'schema' in path[method]['requestBody']['content'][apptype]:
+                            schema = path[method]['requestBody']['content'][apptype]['schema']['$ref'][1:]
+                            print(' Schema: {}'.format(schema))
+                            
+                            
+        if schema:
+            print()
+            print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema))
     def process_command_get(self, op, args):
 
         path = self.get_tag_from_api_name(op, 'get')
@@ -969,6 +1013,16 @@ class JCA_CLI:
         print(json.dumps(api_response_unmapped, indent=2))
 
 
+    def get_sample_schema(self, ref):
+        schema = self.get_schema_from_reference('#'+args.schema)
+        x = ref.split('/')
+        
+        m = getattr(swagger_client.models, x[-1])
+        print(m())
+        
+        #print(schema)
+
+
     def runApp(self):
         clear()
         self.display_menu(self.menu)
@@ -976,13 +1030,25 @@ class JCA_CLI:
 
 cliObject = JCA_CLI(host, client_id, client_secret)
 
-if not args.operation:
+if not (args.operation or args.info or args.schema):
     #reset previous color
     print('\033[0m',end='')
     cliObject.runApp()
 else:
-    op = args.operation + 'Api'
-    caller_name = 'process_command_' + args.op_mode
-    caller = getattr(cliObject, caller_name)
-    caller(op, args.endpoint_args)
+    api_name = None
+
+    if args.info:
+        api_name = args.info
+    elif args.operation:
+        api_name = args.operation
+
+    if api_name:
+        op = api_name + 'Api' 
+        cliObject.help_for(op)
+    elif args.schema:
+        cliObject.get_sample_schema(args.schema)
+    else:
+        caller_name = 'process_command_' + args.op_mode
+        caller = getattr(cliObject, caller_name)
+        caller(op, args.endpoint_args)
 
