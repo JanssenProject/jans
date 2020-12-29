@@ -2358,9 +2358,6 @@ components:
       title: AppConfiguration
       description: App configuration properties.
       properties:
-        sessionAsJwt:
-          type: boolean
-          description: Boolean value true saves session data as a JWT.
         issuer:
           type: string
           description: URL using the https scheme that OP asserts as Issuer identifier.
@@ -2399,7 +2396,7 @@ components:
           example: 'https://server.example.com/restv1/end_session'
         jwksUri:
           type: string
-          description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
+          description: URL of the OP\'s JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
           example: 'https://server.example.com/restv1/jwks'
         registrationEndpoint:
           type: string
@@ -2421,38 +2418,50 @@ components:
           type: string
           description: URL for the Introspection Endpoint.
           example: 'https://server.example.com/restv1/introspection'
-        introspectionAccessTokenMustHaveUmaProtectionScope:
+        deviceAuthzEndpoint:
+          type: string
+          description: URL for the Device Authorization.
+          example: 'https://server.example.com/restv1/device_authorization'
+        sessionAsJwt:
           type: boolean
-          description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
-          default: false
+          description: Boolean value true saves session data as a JWT.		  
+        sectorIdentifierCacheLifetimeInMinutes:
+          type: integer
+          description:  Sector Identifier cache lifetime in minutes.
         umaConfigurationEndpoint:
           type: string
           description: URL for the UMA Configuration Endpoint.
           example: 'https://server.example.com/restv1/uma2-configuration'
-        sectorIdentifierEndpoint:
-          type: string
-          description: URL for the Sector Identifier Endpoint.
-          example: null
-        oxElevenGenerateKeyEndpoint:
-          type: string
-          description: URL for the oxEleven Generate Key Endpoint.
-          example: 'https://server.example.com/oxeleven/rest/oxeleven/generateKey'
-        oxElevenSignEndpoint:
-          type: string
-          description: URL for the oxEleven Sign Endpoint.
-          example: 'https://server.example.com/oxeleven/rest/oxeleven/sign'
-        oxElevenVerifySignatureEndpoint:
-          type: string
-          description: URL for the oxEleven Verify Signature Endpoint.
-          example: 'https://server.example.com/oxeleven/rest/oxeleven/verifySignature'
-        oxElevenDeleteKeyEndpoint:
-          type: string
-          description: URL for the oxEleven Delete Key Endpoint.
-          example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
-        oxElevenJwksEndpoint:
-          type: string
-          description: URL for the oxEleven JWKS Endpoint.
-          example: null
+        umaRptAsJwt:
+          type: boolean
+          description: Issue RPT as JWT or as random string.
+        umaRptLifetime:
+          type: integer
+          description: UMA RPT lifetime.
+        umaTicketLifetime:
+          type: integer
+          description: UMA ticket lifetime.
+        umaPctLifetime:
+          type: integer
+          description: UMA PCT lifetime.
+        umaResourceLifetime:
+          type: integer
+          description: UMA PCT lifetime.
+        umaAddScopesAutomatically:
+          type: boolean
+          description: Add UMA scopes automatically if it is not registered yet.
+        umaValidateClaimToken:
+          type: boolean
+          description: Validate claim_token as id_token assuming it is issued by local idp.
+        umaGrantAccessIfNoPolicies:
+          type: boolean
+          description: Specifies whether to grant access to resources if there are no any policies associated with scopes.
+        umaRestrictResourceToAssociatedClient:
+          type: boolean
+          description: Restrict access to resource by associated client.
+        spontaneousScopeLifetime:
+          type: integer
+          description: The lifetime of spontaneous scope in seconds.
         openidSubAttribute:
           type: string
           description: Specifies which LDAP attribute is used for the subject identifier claim.
@@ -2460,7 +2469,6 @@ components:
         responseTypesSupported:
           type: array
           description: A list of the OAuth 2.0 response_type values that this OP supports.
-          minItems: 1
           items:
             type: string
           enum:
@@ -2489,19 +2497,6 @@ components:
             - refresh_token
             - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
             - '\urn\:openid\:params\:grant-type\:ciba'
-        dynamicGrantTypeDefault:
-          type: array
-          description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
-          items:
-            type: string
-          enum:
-            - authorization_code
-            - implicit
-            - password
-            - client_credentials
-            - refresh_token
-            - 'urn:ietf:params:oauth:grant-type:uma-ticket'
-            - 'urn:openid:params:grant-type:ciba'
         subjectTypesSupported:
           type: array
           description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
@@ -2684,6 +2679,23 @@ components:
             type: string
           enum:
             - normal
+        jwksAlgorithmsSupported:
+          type: array
+          description: A list of algorithms that will be used in JWKS endpoint.
+          items:
+            type: string
+          enum:
+            - RS256
+            - RS384
+            - RS512
+            - ES256
+            - ES384
+            - ES512
+            - PS256
+            - PS384
+            - PS512
+            - RSA1_5
+            - RSA-OAEP
         serviceDocumentation:
           type: string
           description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider.
@@ -2700,7 +2712,7 @@ components:
             - en
         idTokenTokenBindingCnfValuesSupported:
           type: array
-          description: 'Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.'
+          description: Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.
           items:
             type: string
           enum:
@@ -2713,33 +2725,24 @@ components:
           enum:
             - en
             - es
-        persistIdTokenInLdap:
-          type: boolean
-          description: Specifies whether to persist id_token into LDAP (otherwise saves into cache).
-          default: false
-        persistRefreshTokenInLdap:
-          type: boolean
-          description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).
-          default: true
         claimsParameterSupported:
           type: boolean
           description: Specifies whether the OP supports use of the claim’s parameter.
-          default: false
         requestParameterSupported:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request parameter.
-          default: false
         requestUriParameterSupported:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri parameter.
-          default: false
+        requestUriHashVerificationEnabled:
+          type: boolean
+          description: Boolean value specifying whether the OP supports use of the request_uri hash verification.
         requireRequestUriRegistration:
           type: boolean
           description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
-          default: false
         opPolicyUri:
           type: string
-          description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.
+          description: URL that the OpenID Provider provides to the person registering the Client to read about the OP\'s requirements on how the Relying Party can use the data provided by the OP.
           example: 'http://ox.gluu.org/doku.php?id=jans:policy'
         opTosUri:
           type: string
@@ -2748,138 +2751,41 @@ components:
         authorizationCodeLifetime:
           type: integer
           description: The lifetime of the Authorization Code.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 60
         refreshTokenLifetime:
           type: integer
           description: The lifetime of the Refresh Token.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 14400
         idTokenLifetime:
           type: integer
           description: The lifetime of the ID Token.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
           example: 3600
+        idTokenFilterClaimsBasedOnAccessToken:
+          type: boolean
+          description: Boolean value specifying whether idToken filters claims based on accessToken.
         accessTokenLifetime:
           type: integer
           description: The lifetime of the short-lived Access Token.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
           example: 3600
-        umaRptLifetime:
-          type: integer
-          description: UMA RPT lifetime.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 3600
-        umaTicketLifetime:
-          type: integer
-          description: UMA ticket lifetime.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 3600
-        umaPctLifetime:
-          type: integer
-          description: UMA PCT lifetime.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 3600
-        umaResourceLifetime:
-          type: integer
-          description: UMA PCT lifetime.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 3600
-        umaAddScopesAutomatically:
-          type: boolean
-          description: Add UMA scopes automatically if it is not registered yet.
-          default: false
-        umaValidateClaimToken:
-          type: boolean
-          description: Validate claim_token as id_token assuming it is issued by local idp.
-          default: false
-        umaGrantAccessIfNoPolicies:
-          type: boolean
-          description: Specifies whether to grant access to resources if there are no any policies associated with scopes.
-          default: false
-        umaRestrictResourceToAssociatedClient:
-          type: boolean
-          description: Restrict access to resource by associated client.
-          default: false
-        umaKeepClientDuringResourceSetRegistration:
-          type: boolean
-          description: Save client information during resource registration.
-          default: false
-        umaRptAsJwt:
-          type: boolean
-          description: Issue RPT as JWT or as random string.
-          default: false
         cleanServiceInterval:
           type: integer
           description: Time interval for the Clean Service in seconds.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
           example: 60
+        cleanServiceBatchChunkSize:
+          type: integer
+          description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
+          example: 10000
         cleanServiceBaseDns:
           type: array
           description: List of additional base dns under which AS will look up for expired entities.
           items:
             type: string
-          minItems: 0
-          uniqueItems: true
           example:
             - ssn
-        cleanServiceBatchChunkSize:
-          type: integer
-          description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 10000
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
-          default: false
         keyRegenerationInterval:
           type: integer
           description: The interval for key regeneration in hours.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
           example: 48
         defaultSignatureAlgorithm:
           type: string
@@ -2899,232 +2805,260 @@ components:
         oxOpenIdConnectVersion:
           type: string
           description: OpenID Connect Version.
-          minLength: 1
           example: openidconnect-1.0
-        jansId:
+        oxId:
           type: string
           description: URL for the Inum generator Service.
           format: url
-          minLength: 1
-          example: 'https://server.example.com/oxid/service/gluu/inum'
+          example: 'https://server.example.com/oxid/service/jans/inum'
         dynamicRegistrationEnabled:
           type: boolean
           description: Boolean value specifying whether to enable Dynamic Registration.
-          default: false
         dynamicRegistrationExpirationTime:
           type: integer
-          description: 'Expiration time in seconds for clients created with dynamic registration, -1 means never expire.'
-          multipleOf: 1
-          minimum: 0
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          default: -1
+          description: Expiration time in seconds for clients created with dynamic registration, -1 means never expire.
+          example: -1
         dynamicRegistrationPersistClientAuthorizations:
           type: boolean
           description: Boolean value specifying whether to persist client authorizations.
-          default: false
         trustedClientEnabled:
           type: boolean
           description: Boolean value specifying whether a client is trusted and no authorization is required.
-          default: false
+        skipAuthorizationForOpenIdScopeAndPairwiseId:
+          type: boolean
+          description: If a client has only openid scope and pairwise id, person should not have to authorize.
         dynamicRegistrationScopesParamEnabled:
           type: boolean
           description: Boolean value specifying whether to enable scopes parameter in dynamic registration.
-          default: false
+        dynamicRegistrationPasswordGrantTypeEnabled:
+          type: boolean
+          description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
+        dynamicRegistrationAllowedPasswordGrantScopes:
+          type: array
+          description: List of grant scopes for dynamic registration.
+          items:
+            type: string
         dynamicRegistrationCustomObjectClass:
           type: string
           description: LDAP custom object class for dynamic registration.
-          minLength: 1
         personCustomObjectClassList:
           type: array
           description: LDAP custom object class list for dynamic person enrolment.
-          uniqueItems: true
-          minItems: 0
           items:
             type: string
           enum:
             - gluuCustomPerson
             - gluuPerson
+        persistIdTokenInLdap:
+          type: boolean
+          description: Specifies whether to persist id_token into LDAP (otherwise saves into cache).
+        persistRefreshTokenInLdap:
+          type: boolean
+          description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).
+        allowPostLogoutRedirectWithoutValidation:
+          type: boolean
+          description: Allows post logout redirect without validation for End Session Endpoint.
+        invalidateSessionCookiesAfterAuthorizationFlow:
+          type: boolean
+          description: Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.
+        returnClientSecretOnRead:
+          type: boolean
+          description: Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.
+        rejectJwtWithNoneAlg:
+          type: boolean
+          description: Boolean value specifying whether reject JWT requested or validated with algorithm None.
+        expirationNotificatorEnabled:
+          type: boolean
+          description: Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).
+        useNestedJwtDuringEncryption:
+          type: boolean
+          description: Boolean value specifying whether to use nested Jwt during encryption.
+        expirationNotificatorMapSizeLimit:
+          type: integer
+          description: The expiration notificator maximum size limit.
+          example: 100000
+        expirationNotificatorIntervalInSeconds:
+          type: integer
+          description: The expiration notificator interval in seconds.
+          example: 600
         authenticationFiltersEnabled:
           type: boolean
           description: Boolean value specifying whether to enable user authentication filters.
-          default: false
         clientAuthenticationFiltersEnabled:
           type: boolean
           description: Boolean value specifying whether to enable client authentication filters.
-          default: false
+        clientRegDefaultToCodeFlowWithRefresh:
+          type: boolean
+          description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
         authenticationFilters:
           type: array
-          description: User authentication filters.
-          uniqueItems: false
-          minItems: 1
+          description: List of authentication filters.
           items:
-            type: object
-            properties:
-              filter:
-                type: string
-                example: '(&(mail=*{0}*)(inum={1}))'
-              bind:
-                type: boolean
-                default: false
-              bind-password-attribute:
-                type: string
-              base-dn:
-                type: string
-                example: 'ou=people,o=gluu'
+            $ref: '#/components/schemas/AuthenticationFilters' 
         clientAuthenticationFilters:
           type: array
-          description: Client authentication filters.
-          uniqueItems: false
-          minItems: 1
+          description: List of client authentication filters.
           items:
-            type: object
-            properties:
-              filter:
-                type: string
-                example: 'myCustomAttr1={0}'
-              bind:
-                type: boolean
-                default: false
-              bind-password-attribute:
-                type: string
-              base-dn:
-                type: string
-                example: 'ou=clients,o=gluu'
+            $ref: '#/components/schemas/AuthenticationFilters'
+        corsConfigurationFilters:
+          type: array
+          description: CORS Configuration filters.
+          items:
+            $ref: '#/components/schemas/CorsConfigurationFilter'
         sessionIdUnusedLifetime:
           type: integer
           description: The lifetime for unused session states.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 86400
         sessionIdUnauthenticatedUnusedLifetime:
           type: integer
           description: The lifetime for unused unauthenticated session states.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          default: 120
-          example: 800
-        sessionIdLifetime:
-          type: integer
-          description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
-          multipleOf: 1
-          minimum: -1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          default: 86400
-          example: 86400
         sessionIdEnabled:
           type: boolean
           description: Boolean value specifying whether to enable authentication by session_id.
-          default: false
         sessionIdPersistOnPromptNone:
           type: boolean
           description: Boolean value specifying whether to persist session ID on prompt none.
-          default: false
+        sessionIdRequestParameterEnabled:
+          type: boolean
+          description: Boolean value specifying whether to enable session_id HTTP request parameter.
+        changeSessionIdOnAuthentication:
+          type: boolean
+          description: Boolean value specifying whether to change session_id on authentication.
+        sessionIdPersistInCache:
+          type: boolean
+          description: Boolean value specifying whether to persist session_id in cache.
+        sessionIdLifetime:
+          type: integer
+          description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
+        serverSessionIdLifetime:
+          type: integer
+          description: The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
         configurationUpdateInterval:
           type: integer
           description: The interval for configuration update in seconds.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 3600
+        enableClientGrantTypeUpdate:
+          type: boolean
+          description: Boolean value to specify if client can update Grant Type values.
+        dynamicGrantTypeDefault:
+          type: array
+          description: list of the OAuth 2.0 Grant Type values that it\'s possible to set via client registration API..
+          items:
+            type: string
+          enum:
+            - none
+            - authorization_code
+            - implicit
+            - password
+            - client_credentials
+            - refresh_token
+            - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+            - 'urn:openid:params:grant-type:ciba'
+            - 'urn:ietf:params:oauth:grant-type:device_code'
         cssLocation:
           type: string
           description: The location for CSS files.
-          minLength: 1
         jsLocation:
           type: string
           description: The location for JavaScript files.
-          minLength: 1
         imgLocation:
           type: string
           description: The location for image files.
-          minLength: 1
         metricReporterInterval:
           type: integer
           description: The interval for metric reporter in seconds.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 300
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep metric reported data.
-          multipleOf: 1
-          minimum: 1
-          exclusiveMinimum: false
-          maximum: 2147483647
-          exclusiveMaximum: false
-          example: 15
         metricReporterEnabled:
           type: boolean
           description: Boolean value specifying whether to enable Metric Reporter.
-          default: true
         pairwiseIdType:
           type: string
           description: The pairwise ID type.
           items:
             type: string
-          enum:
-            - persistent
-            - algorithmic
         pairwiseCalculationKey:
           type: string
           description: Key to calculate algorithmic pairwise IDs.
-          minLength: 1
         pairwiseCalculationSalt:
           type: string
           description: Salt to calculate algorithmic pairwise IDs.
-          minLength: 1
         shareSubjectIdBetweenClientsWithSameSectorId:
           type: boolean
           description: Share Subject ID between clients with same Sector ID.
-          default: false
         webKeysStorage:
           type: string
           description: Web Key Storage Type.
-          format: enum - keystore - pkcs11
+          enum:
+            - keystore
+            - pkcs11
         dnName:
           type: string
           description: DN of certificate issuer.
-          minLength: 1
-          example: CN=Jans CA Certificates
         keyStoreFile:
           type: string
           description: The Key Store File (JKS).
-          minLength: 1
           example: /etc/certs/jans-auth-keys.jks
         keyStoreSecret:
           type: string
           description: The password of the Key Store.
-          minLength: 1
+        keySelectionStrategy:
+          type: string
+          description: Key Selection Strategy.
+          enum:
+            - OLDER
+            - NEWER
+            - FIRST
+        oxElevenTestModeToken:
+          type: string
+          description: oxEleven Test Mode Token.
+        oxElevenGenerateKeyEndpoint:
+          type: string
+          description: URL for the oxEleven Generate Key Endpoint.
+          example: 'https://server.example.com/oxeleven/rest/oxeleven/generateKey'
+        oxElevenSignEndpoint:
+          type: string
+          description: URL for the oxEleven Sign Endpoint.
+          example: 'https://server.example.com/oxeleven/rest/oxeleven/sign'
+        oxElevenVerifySignatureEndpoint:
+          type: string
+          description: URL for the oxEleven Verify Signature Endpoint.
+          example: 'https://server.example.com/oxeleven/rest/oxeleven/verifySignature'
+        oxElevenDeleteKeyEndpoint:
+          type: string
+          description: URL for the oxEleven Delete Key Endpoint.
+          example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
+        introspectionAccessTokenMustHaveUmaProtectionScope:
+          type: boolean
+          description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
         endSessionWithAccessToken:
           type: boolean
           description: Accept access token to call end_session endpoint.
+        cookieDomain:
+          type: string
+          description: Sets cookie domain for all cookies created by OP.
+        enabledOAuthAuditLogging:
+          type: boolean
+          description: enabled OAuth Audit Logging.
+        jmsBrokerURISet:
+          type: array
+          description: JMS Broker URI Set.
+          format: select
+          items:
+            type: string
+        jmsUserName:
+          type: string
+          description: JMS UserName.
+        jmsPassword:
+          type: string
+          description: JMS Password.
         clientWhiteList:
           type: array
           description: White List for Client Redirection URIs.
-          uniqueItems: true
-          minItems: 0
           items:
             type: string
         clientBlackList:
           type: array
           description: Black List for Client Redirection URIs.
-          uniqueItems: true
-          minItems: 0
           items:
             type: string
         legacyIdTokenClaims:
@@ -3136,26 +3070,6 @@ components:
         frontChannelLogoutSessionSupported:
           type: boolean
           description: Boolean value to specify support for front channel logout session.
-        useCacheForAllImplicitFlowObjects:
-          type: boolean
-          description: Boolean value to specify whether to persist all objects into cache during Implicit Flow.
-          default: false
-        invalidateSessionCookiesAfterAuthorizationFlow:
-          type: boolean
-          description: Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.
-          default: false
-        updateUserLastLogonTime:
-          type: boolean
-          description: Boolean value to specify if application should update oxLastLogonTime attribute on user authentication.
-          default: false
-        updateClientAccessTime:
-          type: boolean
-          description: Boolean value to specify if application should update oxLastAccessTime/oxLastLogonTime attributes on client authentication.
-          default: false
-        enableClientGrantTypeUpdate:
-          type: boolean
-          description: Boolean value to specify if client can update Grant Type values.
-          default: false
         loggingLevel:
           type: string
           description: Logging level for jans-auth logger.
@@ -3166,63 +3080,30 @@ components:
             - WARN
             - ERROR
             - FATAL
-            - 'OFF'
-        corsConfigurationFilters:
-          type: array
-          description: CORS Configuration filters.
-          minItems: 1
-          uniqueItems: false
-          items:
-            type: object
-            properties:
-              filterName:
-                type: string
-                minLength: 1
-              corsEnabled:
-                type: boolean
-                default: true
-              corsAllowedOrigins:
-                type: string
-                minLength: 1
-                default: \*
-              corsAllowedMethods:
-                type: string
-                default: 'GET, POST, HEAD, OPTIONS'
-              corsAllowedHeaders:
-                type: string
-                minLength: 1
-                default: 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
-              corsExposedHeaders:
-                type: string
-                minLength: 1
-              corsSupportCredentials:
-                type: boolean
-                default: true
-              corsLoggingEnabled:
-                type: boolean
-                default: false
-              corsPreflightMaxAge:
-                type: integer
-                multipleOf: 1
-                minimum: 1
-                exclusiveMinimum: false
-                maximum: 2147483647
-                exclusiveMaximum: false
-                default: 1800
-              corsRequestDecorate:
-                type: boolean
-                default: true
+            - OFF
+        loggingLayout:
+          type: string
+          description: Logging layout used for Jans Authorization Server loggers.
+            - text
+            - json
+        updateUserLastLogonTime:
+          type: boolean
+          description: Boolean value to specify if application should update oxLastLogonTime attribute on user authentication.
+        updateClientAccessTime:
+          type: boolean
+          description: Boolean value to specify if application should update oxLastAccessTime/oxLastLogonTime attributes on client authentication.
         logClientIdOnClientAuthentication:
           type: boolean
           description: Boolean value to specify if application should log the Client ID on client authentication.
         logClientNameOnClientAuthentication:
           type: boolean
           description: Boolean value to specify if application should log the Client Name on client authentication.
+        disableJdkLogger:
+          type: boolean
+          description: Boolean value specifying whether to enable JDK Loggers.
         authorizationRequestCustomAllowedParameters:
           type: array
           description: Authorization Request Custom Allowed Parameters.
-          minItems: 0
-          uniqueItems: true
           items:
             type: string
         legacyDynamicRegistrationScopeParam:
@@ -3230,314 +3111,134 @@ components:
           description: Legacy Dynamic Registration Scopes JSON Array Param.
         openidScopeBackwardCompatibility:
           type: boolean
-          description: 'Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.'
-          default: false
-        skipAuthorizationForOpenIdScopeAndPairwiseId:
-          type: boolean
-          description: 'If a client has only openid scope and pairwise id, person should not have to authorize.'
-          default: false
-        allowPostLogoutRedirectWithoutValidation:
-          type: boolean
-          description: Allows post logout redirect without validation for End Session Endpoint.
-          default: false
-        httpLoggingEnabled:
-          type: boolean
-          description: Enable/Disable request/response logging filter.
-          default: false
-        httpLoggingExludePaths:
-          type: array
-          description: List of base URI for which request/response logging filter should not record activity.
-          minItems: 0
-          uniqueItems: true
-          items:
-            type: string
-          example: '\"/auth/img\", \"/auth/stylesheet\"'
-        externalLoggerConfiguration:
-          type: string
-          description: Path to external log4j2 logging configuration.
-          minLength: 1
-          example: /identity/logviewer/configure
+          description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
         disableU2fEndpoint:
           type: boolean
           description: Enable/Disable U2F endpoints.
-          default: false
-        disableJdkLogger:
-          type: boolean
-          description: Boolean value specifying whether to enable JDK Loggers.
-          default: true
-        jmsUserName:
-          type: string
-          description: JMS UserName.
-          minLength: 1
-        jmsPassword:
-          type: string
-          description: JMS Password.
-          minLength: 1
-        jmsBrokerURISet:
-          type: array
-          description: JMS Broker URI Set.
-          format: select
-          items:
-            type: string
-        oxElevenTestModeToken:
-          type: string
-          description: oxEleven Test Mode Token.
-          minLength: 1
-        enabledOAuthAuditLogging:
-          type: boolean
-          description: enabled OAuth Audit Logging.
-        authenticationProtectionConfiguration:
-          type: object
-          description: Authentication Brute Force Protection Configuration.
-          properties:
-            attemptExpiration:
-              type: integer
-              multipleOf: 1
-              minimum: 1
-              maximum: 2147483647
-              exclusiveMinimum: false
-              exclusiveMaximum: false
-            maximumAllowedAttemptsWithoutDelay:
-              type: integer
-              multipleOf: 1
-              minimum: 1
-              maximum: 2147483647
-              exclusiveMinimum: false
-              exclusiveMaximum: false
-            delayTime:
-              type: integer
-              multipleOf: 1
-              minimum: 1
-              maximum: 2147483647
-              exclusiveMinimum: false
-              exclusiveMaximum: false
-            bruteForceProtectionEnabled:
-              type: boolean
-        errorHandlingMethod:
-          type: string
-          description: A list of possible error handling methods.
-          format: enum - internal - remote
         useLocalCache:
           type: boolean
-          description: 'Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.'
-          default: false
-        spontaneousScopeLifetime:
-          type: integer
-          description: The lifetime of spontaneous scope in seconds.
-          multipleOf: 1
-          minimum: 1
-          maximum: 2147483647
-          exclusiveMinimum: false
-          exclusiveMaximum: false
-        jwksAlgorithmsSupported:
-          type: array
-          description: A list of algorithms that will be used in JWKS endpoint.
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-          enum:
-            - RS256
-            - RS384
-            - RS512
-            - ES256
-            - ES384
-            - ES512
-            - PS256
-            - PS384
-            - PS512
-            - RSA1_5
-            - RSA-OAEP
-        dynamicRegistrationPasswordGrantTypeEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
-          default: false
-        returnClientSecretOnRead:
-          type: boolean
-          description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.
-          default: false
-        rejectJwtWithNoneAlg:
-          type: boolean
-          description: Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true.
-          default: true
-        expirationNotificatorEnabled:
-          type: boolean
-          description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
-          default: true
-        expirationNotificatorMapSizeLimit:
-          type: integer
-          description: The expiration notificator maximum size limit.
-          default: 100000
-        expirationNotificatorIntervalInSeconds:
-          type: integer
-          description: The expiration notificator interval in seconds.
-          default: 600
-        clientRegDefaultToCodeFlowWithRefresh:
-          type: boolean
-          description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
-        sessionIdRequestParameterEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable session_id HTTP request parameter.
-          default: false
-        changeSessionIdOnAuthentication:
-          type: boolean
-          description: Boolean value specifying whether to enable session_id HTTP request parameter.
-          default: true
-        serverSessionIdLifetime:
-          type: integer
-          description: The sessionId lifetime in seconds for sessionId.
-          default: 86400
-        cookieDomain:
-          type: string
-          description: Sets cookie domain for all cookies created by OP.
-        loggingLayout:
-          type: string
-          description: Logging layout used for Jans Authorization Server loggers.
-          enum:
-            - text
-            - json
+          description: Boolean value specifying whether to enable local in-memory cache.
         fapiCompatibility:
           type: boolean
           description: Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
-          default: false
         forceIdTokenHintPrecense:
           type: boolean
-          description: Boolean value specifying whether force id_token_hint parameter presence (false by default).
-          default: false
+          description: Boolean value specifying whether force id_token_hint parameter presence.
         forceOfflineAccessScopeToEnableRefreshToken:
           type: boolean
-          description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true.
-          default: true
+          description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
         errorReasonEnabled:
           type: boolean
-          description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false.
-          default: false
+          description: Boolean value specifying whether to return detailed reason of the error from AS..
         removeRefreshTokensForClientOnLogout:
           type: boolean
-          description: Boolean value specifying whether to remove refresh tokens on logout. Default value is true.
-          default: true
+          description: Boolean value specifying whether to remove refresh tokens on logout. 
+        skipRefreshTokenDuringRefreshing:
+          type: boolean
+          description: Boolean value specifying whether to skip refreshing tokens on refreshing.
+        refreshTokenExtendLifetimeOnRotation:
+          type: boolean
+          description: Boolean value specifying whether to extend refresh tokens on rotation.
         consentGatheringScriptBackwardCompatibility:
           type: boolean
-          description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration.
-          default: false
+          description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.
         introspectionScriptBackwardCompatibility:
           type: boolean
-          description: Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false.
-          default: false
+          description: Boolean value specifying whether switch off client\'s introspection scripts (true value) and run all scripts that exists on server.
+        introspectionResponseScopesBackwardCompatibility:
+          type: boolean
+          description: Boolean value specifying introspection response backward compatibility mode.
+        softwareStatementValidationType:
+          type: string
+          description: Validation type used for software statement.
+          enum:
+            - none
+            - jwks
+            - jwks_uri
+            - script
+        softwareStatementValidationClaimName:
+          type: string
+          description: Validation claim name for software statement.
+        authenticationProtectionConfiguration:
+          type: object
+          description: Authentication Brute Force Protection Configuration.
+          $ref: '#/components/schemas/AuthenticationProtectionConfiguration' 
+        errorHandlingMethod:
+          type: string
+          description: A list of possible error handling methods.
+          enum:  
+           - internal
+           - remote
         keepAuthenticatorAttributesOnAcrChange:
           type: boolean
           description: Boolean value specifying whether to keep authenticator attributes on ACR change.
-          default: false
+        deviceAuthzRequestExpiresIn:
+          type: integer
+          description: Expiration time given for device authorization requests.
+        deviceAuthzTokenPollInterval:
+          type: integer
+          description: Default interval returned to the client to process device token requests.
+        deviceAuthzResponseTypeToProcessAuthz:
+          type: string
+          description: Response type used to process device authz requests.
         backchannelClientId:
           type: string
           description: Backchannel Client Id.
-          minLength: 0
         backchannelRedirectUri:
           type: string
           description: Backchannel Redirect Uri.
-          minLength: 0
           example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
         backchannelAuthenticationEndpoint:
           type: string
           description: Backchannel Authentication Endpoint.
-          minLength: 0
           example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
         backchannelDeviceRegistrationEndpoint:
           type: string
           description: Backchannel Device Registration Endpoint.
-          minLength: 0
           example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
         backchannelTokenDeliveryModesSupported:
           type: array
           description: Backchannel Token Delivery Modes Supported.
-          minItems: 0
-          uniqueItems: true
           items:
             type: string
-          format: select - poll - ping - push
+            enum: 
+              - poll 
+              - ping
+              - push
         backchannelAuthenticationRequestSigningAlgValuesSupported:
           type: array
           description: Backchannel Authentication Request Signing Alg Values Supported.
-          minItems: 0
-          uniqueItems: true
           items:
             type: string
-          format: select - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+            enum: 
+              - RS512 
+              - ES256
+              - ES384
+              - ES512
+              - PS256
+              - PS384
+              - PS512
         backchannelUserCodeParameterSupported:
           type: boolean
           description: Backchannel User Code Parameter Supported
         backchannelBindingMessagePattern:
           type: string
           description: Backchannel Binding Message Pattern.
-          minLength: 0
         backchannelAuthenticationResponseExpiresIn:
           type: integer
           description: Backchannel Authentication Response Expires In.
-          multipleOf: 1
-          minimum: 1
-          maximum: 2147483647
-          exclusiveMinimum: false
-          exclusiveMaximum: false
         backchannelAuthenticationResponseInterval:
           type: integer
           description: Backchannel Authentication Response Interval.
-          multipleOf: 1
-          minimum: 1
-          maximum: 2147483647
-          exclusiveMinimum: false
-          exclusiveMaximum: false
         backchannelLoginHintClaims:
           type: array
           description: Backchannel Login Hint Claims.
-          minItems: 0
-          uniqueItems: true
           items:
             type: string
         cibaEndUserNotificationConfig:
           type: object
           description: CIBA End User Notification Config.
-          required:
-            - apiKey
-            - authDomain
-            - databaseURL
-            - projectId
-            - storageBucket
-            - messagingSenderId
-            - appId
-            - notificationUrl
-            - notificationKey
-            - publicVapidKey
-          properties:
-            apiKey:
-              type: string
-              minLength: 1
-            authDomain:
-              type: string
-              minLength: 1
-            databaseURL:
-              type: string
-              minLength: 1
-            projectId:
-              type: string
-              minLength: 1
-            storageBucket:
-              type: string
-              minLength: 1
-            messagingSenderId:
-              type: string
-              minLength: 1
-            appId:
-              type: string
-              minLength: 1
-            notificationUrl:
-              type: string
-              minLength: 1
-            notificationKey:
-              type: string
-              minLength: 1
-            publicVapidKey:
-              type: string
-              minLength: 1
+          $ref: '#/components/schemas/CIBAEndUserNotificationConfig' 
         backchannelRequestsProcessorJobIntervalSec:
           type: integer
           description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
@@ -3550,6 +3251,26 @@ components:
         cibaMaxExpirationTimeAllowedSec:
           type: integer
           description: Specifies the CIBA token expiration time in seconds.
+        cibaEnabled:
+          type: boolean
+          description: Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.
+        discoveryCacheLifetimeInMinutes:
+          type: integer
+          description: Lifetime of discovery cache.
+        httpLoggingEnabled:
+          type: boolean
+          description: Enable/Disable request/response logging filter.
+        httpLoggingExludePaths:
+          type: array
+          description: List of base URI for which request/response logging filter should not record activity.
+          items:
+            type: string
+          example: '\"/auth/img\", \"/auth/stylesheet\"'
+        externalLoggerConfiguration:
+          type: string
+          description: Path to external log4j2 logging configuration.
+          example: /identity/logviewer/configure
+ 
     GluuAttribute:
       title: GluuAttribute
       description: Attribute.
@@ -3724,9 +3445,11 @@ components:
           description: The scopes type associated with Access Tokens determine what resources will.
           type: string
           enum:
-            - OpenID
-            - Dynamic
-            - OAuth
+            - openid
+            - dynamic
+            - uma
+            - spontaneous
+            - oauth
         jansClaim:
           description: Claim attributes associated with the scope.
           type: array
@@ -4631,3 +4354,127 @@ components:
           format: date
         stackTrace:
           type: string
+    AuthenticationFilters:
+      type: object
+      description: Represents the authentication filter.
+      properties:
+        filter:
+          type: string
+          description: Filter to be used.
+          example: 'myCustomAttr1={0}'
+        bind:
+          type: boolean
+          description: Filter bind.
+        bind-password-attribute:
+          type: string
+          description: Filter bind password attribute.
+        base-dn:
+          type: string
+          description: Bind filter base distinguished name.
+          example: 'ou=clients,o=gluu'
+    CorsConfigurationFilter:
+      type: object
+      description: CORS Configuration Filter.
+      properties:
+        filterName:
+          type: string
+          description: Filter name.
+        corsEnabled:
+          type: boolean
+          description: Boolean value indicating if the filter is enabled.
+        corsAllowedOrigins:
+          type: string
+          description: A list of origins that are allowed to access the resource. A * can be specified to enable access to resource from any origin. Otherwise, a whitelist of comma separated origins can be provided.
+        corsAllowedMethods:
+          type: string
+          description: A comma separated list of HTTP methods that can be used to access the resource, using cross-origin requests. These are the methods which will also be included as part of Access-Control-Allow-Methods header in pre-flight response.
+        corsAllowedHeaders:
+          type: string
+          description: The names of the supported author request headers.
+        corsExposedHeaders:
+          type: string
+          description: A comma separated list of request headers that can be used when making an actual request. These headers will also be returned as part of Access-Control-Allow-Headers header in a pre-flight response.
+        corsSupportCredentials:
+          type: boolean
+          description: A flag that indicates whether the resource supports user credentials. This flag is exposed as part of Access-Control-Allow-Credentials header in a pre-flight response. It helps browser determine whether or not an actual request can be made using credentials.
+        corsLoggingEnabled:
+          type: boolean
+          description: Value to enable logging, Setting the value to False will disable logging.
+        corsPreflightMaxAge:
+          type: integer
+          description: The duration in seconds the browser is allowed to cache the result of the pre-flight request.
+        corsRequestDecorate:
+          type: boolean
+          description: A flag to control if CORS specific attributes should be added to the HttpServletRequest object.
+        
+    AuthenticationProtectionConfiguration:
+          type: object
+          description: Authentication Brute Force Protection Configuration.
+          properties:
+            attemptExpiration:
+              type: integer
+              description: How long store in cache information about particular login attempt. It's needed to count login attempts withing specified period of time.
+            maximumAllowedAttemptsWithoutDelay:
+              type: integer
+              description: How many attempts application allow without delay.
+            delayTime:
+              type: integer
+              description: Delay time in seconds after reaching maximumAllowedAttemptsWithoutDelay limit.
+            bruteForceProtectionEnabled:
+              type: boolean
+              description: Enable or disable service, This functionality can be enabled dynamically.		  
+			  
+    CIBAEndUserNotificationConfig:
+      type: object
+      description: CIBA End User Notification Config.
+      properties:
+        apiKey:
+          type: string
+          description: API Key
+        authDomain:
+          type: string
+          description: Auth Domain
+        databaseURL:
+          type: string
+          description: Database URL
+        projectId:
+          type: string
+          description: Project ID
+        storageBucket:
+          type: string
+          description: Storage Bucket
+        messagingSenderId:
+          type: string
+          description: Messaging Sender ID
+        appId:
+          type: string
+          description: App ID
+        notificationUrl:
+          type: string
+          description: Notification URL
+        notificationKey:
+          type: string
+          description: Notification Key
+        publicVapidKey:
+          type: string
+          description: Public Vapid Key
+			  
+
+
+        
+
+        
+    
+
+
+
+        
+
+
+
+
+
+
+ 
+
+
