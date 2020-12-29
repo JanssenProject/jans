@@ -45,15 +45,15 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: v${{ steps.get_version.outputs.version }}
-        release_name: v${{ steps.get_version.outputs.version }}
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: ${{ steps.get_version.outputs.version }}
         body: |
           # Release Notes
 
-          ## [v${{ steps.get_version.outputs.version }}](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/tree/v${{ steps.get_version.outputs.version }}) (${{ steps.get_version.outputs.releasedate }})
+          ## [${{ steps.get_version.outputs.version }}](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/tree/${{ steps.get_version.outputs.version }}) (${{ steps.get_version.outputs.releasedate }})
 
 
-          [Full Changelog](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/compare/v${{ steps.get_version.outputs.pversion }}...v${{ steps.get_version.outputs.version }})
+          [Full Changelog](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/compare/${{ steps.get_version.outputs.pversion }}...v${{ steps.get_version.outputs.version }})
 
           ## Please find release notes below :
 
