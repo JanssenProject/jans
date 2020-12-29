@@ -2259,6 +2259,7 @@ components:
           description: List of buckets defining mapping rules.
         passwordEncryptionMethod:
           type: string
+          description: A list of the password encryption algorithms.
           enum:
             - SHA
             - SSHA
@@ -2279,20 +2280,21 @@ components:
             - PKCS5S2
         operationTracingEnabled:
           type: boolean
-          default: false
+          description: Boolean value True if tracing is enabled on the environment.
         mutationTokensEnabled:
           type: boolean
-          description: 'If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.'
-          default: false
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
         connectTimeout:
           type: integer
+          description: The default timeout for connection timeout.
           format: int32
         computationPoolSize:
           type: integer
           format: int32
-          description: 'Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.'
+          description: Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.
         useSSL:
           type: boolean
+          description: Identifies if SSL should be enabled.
         sslTrustStoreFile:
           type: string
           description: The path to the trust store file to use. It contains the trusted certificates.
