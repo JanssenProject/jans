@@ -81,6 +81,9 @@ def get_bucket_mappings():
                 "jans-fido2/configuration.ldif",
                 "jans-scim/configuration.ldif",
                 "jans-scim/clients.ldif",
+                "jans-config-api/scopes.ldif",
+                "jans-config-api/clients.ldif",
+                "jans-config-api/resources.ldif",
                 # "oxidp.ldif",
                 # "oxtrust_api.ldif",
                 # "passport.ldif",
@@ -428,6 +431,8 @@ def get_base_ctx(manager):
         "casa_enable_script": str(as_boolean(CN_CASA_ENABLED)).lower(),
         "oxd_hostname": "localhost",
         "oxd_port": "8443",
+        "jca_client_id": manager.config.get("jca_client_id"),
+        "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
     return ctx
 
@@ -853,6 +858,9 @@ class LDAPBackend(object):
                 "jans-fido2/configuration.ldif",
                 "jans-scim/configuration.ldif",
                 "jans-scim/clients.ldif",
+                "jans-config-api/scopes.ldif",
+                "jans-config-api/clients.ldif",
+                "jans-config-api/resources.ldif",
                 # "oxidp.ldif",
                 # "oxtrust_api.ldif",
                 # "passport.ldif",
