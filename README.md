@@ -486,7 +486,7 @@ Key rotation cronJob is usually installed with Janssen. Please make sure before 
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: janssenproject/certmanager:1.0.0_a1
+                  image: janssenproject/certmanager:1.0.0_a2
                   resources:
                     requests:
                       memory: "300Mi"
@@ -540,7 +540,7 @@ Application common name must match client-api service name. `kubectl get svc -n 
           restartPolicy: Never
           containers:
             - name: client-api-key-rotation
-              image: janssenproject/certmanager:1.0.0_a1
+              image: janssenproject/certmanager:1.0.0_a2
               envFrom:
               - configMapRef:
                   name: jans-config-cm
@@ -583,7 +583,7 @@ Subject Alt Name must match opendj service.
           restartPolicy: Never
           containers:
             - name: ldap-key-rotation
-              image: janssenproject/certmanager:1.0.0_a1
+              image: janssenproject/certmanager:1.0.0_a2
               envFrom:
               - configMapRef:
                   name: jans-config-cm
