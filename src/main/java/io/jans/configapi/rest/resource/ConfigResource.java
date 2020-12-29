@@ -44,6 +44,7 @@ public class ConfigResource extends BaseResource {
         conf.setDynamic(appConfiguration);
 
         configurationService.merge(conf);
+        appConfiguration = configurationService.find();
         return Response.ok(appConfiguration).build();
     }
 }

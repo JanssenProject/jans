@@ -50,8 +50,7 @@ paths:
               schema:
                 title: AppConfiguration
                 description: Jans Authorization Server config properties.
-                items:
-                  $ref: '#/components/schemas/AppConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -66,12 +65,13 @@ paths:
         - Configuration – Properties
       requestBody:
         content:
-          application/json:
+          application/json-patch+json:
             schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
       responses:
         '200':
           description: OK
@@ -80,8 +80,7 @@ paths:
               schema:
                 title: AppConfiguration
                 description: Jans authorization server config properties.
-                items:
-                  $ref: '#/components/schemas/AppConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -4459,22 +4458,3 @@ components:
           type: string
           description: Public Vapid Key
 			  
-
-
-        
-
-        
-    
-
-
-
-        
-
-
-
-
-
-
- 
-
-
