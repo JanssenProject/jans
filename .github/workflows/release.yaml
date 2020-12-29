@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - __version__.py
-    workflow_dispatch:
+  workflow_dispatch:
 jobs:
   build:
 
@@ -82,4 +82,4 @@ jobs:
 
           ${{ steps.changelog.outputs.body }}
         draft: false
-        prerelease: false
+        prerelease: true
