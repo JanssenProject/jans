@@ -3,8 +3,7 @@ on:
   push:
     paths:
       - __version__.py
-    branches-ignore:
-      - master
+    workflow_dispatch:
 jobs:
   build:
 
