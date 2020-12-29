@@ -9,16 +9,12 @@ if [ ! -f /deploy/touched  ]; then
     touch /deploy/touched
 fi
 
-# quarkus.log.file.enable=false
-# quarkus.log.file.path=logs/config_api.log
-
+cd /opt/jans/config-api
 exec java \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
     -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE \
     -Djans.base=/etc/jans \
-    -Dquarkus.http.insecure-requests=enabled \
-    -Dquarkus.http.port=8074 \
-    -Dquarkus.http.ssl-port=9444 \
+    -Dquarkus.profile=prod \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/config-api/jans-config-api-runner.jar
+    -jar /opt/jans/config-api/jans-config-api-runner.jar

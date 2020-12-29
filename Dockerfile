@@ -21,8 +21,8 @@ ENV CN_VERSION=1.0.0-SNAPSHOT
 ENV CN_BUILD_DATE='2020-12-28 13:42'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
 
-RUN mkdir -p /opt/config-api \
-    && wget -q ${CN_SOURCE_URL} -O /opt/config-api/jans-config-api-runner.jar
+RUN mkdir -p /opt/jans/config-api \
+    && wget -q ${CN_SOURCE_URL} -O /opt/jans/config-api/jans-config-api-runner.jar
 
 EXPOSE 8074
 EXPOSE 9444
@@ -111,7 +111,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
-    CN_SSL_CERT_FROM_SECRETS=false \
+    CN_SSL_CERT_FROM_SECRETS=true \
     CN_NAMESPACE=jans
 
 # ====
@@ -126,31 +126,36 @@ LABEL name="Config API" \
     summary="Janssen Config API" \
     description=""
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf
+RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/jans/config-api/logs /opt/jans/config-api/config
+RUN touch /etc/hosts.back
+# config_api.log jans-config-api-access.log
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
-RUN touch /etc/hosts.back config_api.log jans-config-api-access.log
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
+
+# && chown -R 1000:1000 config_api.log \
+# && chown -R 1000:1000 jans-config-api-access.log \
+# && chgrp -R 0 jans-config-api-access.log && chmod -R g=u jans-config-api-access.log \
+# && chgrp -R 0 config_api.log && chmod -R g=u config_api.log \
 
  # adjust ownership
 RUN chown -R 1000:1000 /etc/jans \
     && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /etc/hosts.back \
-    && chown -R 1000:1000 config_api.log \
-    && chown -R 1000:1000 jans-config-api-access.log \
+    && chown -R 1000:1000 /opt/jans \
     && chgrp -R 0 /etc/hosts.back && chmod -R g=u /etc/hosts.back \
-    && chgrp -R 0 config_api.log && chmod -R g=u config_api.log \
-    && chgrp -R 0 jans-config-api-access.log && chmod -R g=u jans-config-api-access.log \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
-USER 1000
+    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
+    && chgrp -R 0 /opt/jans && chmod -R g=u /opt/jans \
+    && chgrp -R 0 /usr/lib/jvm/default-jvm/jre/lib/security/cacerts && chmod -R g=u /usr/lib/jvm/default-jvm/jre/lib/security/cacerts
 
+USER 1000
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

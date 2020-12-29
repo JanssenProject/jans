@@ -1,0 +1,17 @@
+%prod.quarkus.http.port=8074
+%prod.quarkus.http.ssl-port=9444
+%prod.quarkus.http.ssl.certificate.file=/etc/certs/web_https.crt
+%prod.quarkus.http.ssl.certificate.key-file=/etc/certs/web_https.key
+%prod.quarkus.http.insecure-requests=enabled
+
+quarkus.http.access-log.base-file-name=logs/jans-config-api-access
+
+# logging
+quarkus.log.category."io.jans.configapi".level=%(jca_log_level)s
+%prod.quarkus.log.file.path=logs/config_api.log
+quarkus.log.file.level=%(jca_log_level)s
+
+# API protection
+apiUmaClientId=%(jca_client_id)s
+apiUmaClientPassword=%(jca_client_encoded_pw)s
+apiProtection.type=oauth2

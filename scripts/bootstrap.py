@@ -8,9 +8,25 @@ from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.utils import get_server_certificate
 from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import safe_render
+
+
+def render_app_properties(manager):
+    client_id = manager.config.get("jca_client_id")
+    client_encoded_pw = manager.secret.get("jca_client_encoded_pw")
+
+    ctx = {
+        "jca_log_level": os.environ.get("CN_CONFIG_API_LOG_LEVEL", "INFO"),
+        "jca_client_id": client_id,
+        "jca_client_encoded_pw": client_encoded_pw,
+    }
+
+    with open("/app/templates/application.properties.tmpl") as f:
+        txt = safe_render(f.read(), ctx)
+
+    with open("/opt/jans/config-api/config/application.properties", "w") as f:
+        f.write(txt)
 
 
 def main():
@@ -40,54 +56,21 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
-    # config-api requires /etc/certs/httpd.crt
-    if not os.path.isfile("/etc/certs/httpd.crt"):
-        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", False)):
-            manager.secret.to_file("ssl_cert", "/etc/certs/httpd.crt")
-            manager.secret.to_file("ssl_key", "/etc/certs/httpd.key")
-        else:
-            get_server_certificate(manager.config.get("hostname"), 443, "/etc/certs/httpd.crt")
+    if not all([
+        os.path.isfile("/etc/certs/web_https.crt"),
+        os.path.isfile("/etc/certs/web_https.key"),
+    ]):
+        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        manager.secret.to_file("ssl_key", "/etc/certs/web_https.key")
 
     cert_to_truststore(
         "web_https",
-        "/etc/certs/httpd.crt",
+        "/etc/certs/web_https.crt",
         "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
         "changeit",
     )
 
-    # if not os.path.isfile("/etc/certs/idp-signing.crt"):
-    #     manager.secret.to_file("idp3SigningCertificateText", "/etc/certs/idp-signing.crt")
-
-    # manager.secret.to_file("passport_rp_jks_base64", "/etc/certs/passport-rp.jks",
-    #                        decode=True, binary_mode=True)
-
-    # manager.secret.to_file("api_rp_jks_base64", "/etc/certs/api-rp.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("api_rp_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("api_rp_client_base64_jwks")).decode(),
-    #     )
-
-    # manager.secret.to_file("api_rs_jks_base64", "/etc/certs/api-rs.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("api_rs_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("api_rs_client_base64_jwks")).decode(),
-    #     )
-
-    # modify_jetty_xml()
-    # modify_webdefault_xml()
-
-    # sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
-    # if not sync_enabled:
-    #     manager.secret.to_file(
-    #         "oxauth_jks_base64",
-    #         "/etc/certs/oxauth-keys.jks",
-    #         decode=True,
-    #         binary_mode=True,
-    #     )
-    #     with open("/etc/certs/oxauth-keys.json", "w") as f:
-    #         f.write(base64.b64decode(manager.secret.get("oxauth_openid_key_base64")).decode())
+    render_app_properties(manager)
 
 
 if __name__ == "__main__":
