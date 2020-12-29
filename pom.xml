@@ -109,6 +109,11 @@
             </dependency>
 
             <dependency>
+                <groupId>net.agkn</groupId>
+                <artifactId>hll</artifactId>
+                <version>1.6.0</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.interceptor</groupId>
                 <artifactId>javax.interceptor-api</artifactId>
                 <version>1.2</version>
