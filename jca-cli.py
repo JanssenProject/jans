@@ -1028,8 +1028,8 @@ class JCA_CLI:
         model_obj = model(**model_data)
         return model_obj
 
-    def process_command_post(self, op, args, data_fn):
-        path, api_caller = self.get_path_api_caller_for_op(op, 'post')
+    def process_command_post(self, op, args, data_fn, metod='post'):
+        path, api_caller = self.get_path_api_caller_for_op(op, metod)
 
         class DummyEndpoint:
             pass
@@ -1057,6 +1057,10 @@ class JCA_CLI:
         sys.stderr.write("Server Response:\n")
         print(json.dumps(unmapped_response, indent=2))
 
+
+
+    def process_command_put(self, op, args, data_fn):
+        self.process_command_post(op, args, data_fn, metod='put')
 
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
 
