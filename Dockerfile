@@ -61,7 +61,7 @@ ENV CN_VERSION=1.0.0-SNAPSHOT
 ENV CN_BUILD_DATE='2020-12-30 02:15'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
-# Install oxAuth
+# Install Jans Auth
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
     && mkdir -p ${JETTY_BASE}/jans-auth/webapps/jans-auth \
     && unzip -qq /tmp/jans-auth.war -d ${JETTY_BASE}/jans-auth/webapps/jans-auth \

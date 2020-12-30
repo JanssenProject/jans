@@ -16,20 +16,20 @@ logger = logging.getLogger("jks_sync")
 
 
 def jks_created():
-    manager.secret.to_file("oxauth_jks_base64", "/etc/certs/auth-server-keys.jks", decode=True, binary_mode=True)
+    manager.secret.to_file("auth_jks_base64", "/etc/certs/auth-keys.jks", decode=True, binary_mode=True)
     return True
 
 
 def jwks_created():
     with open("/etc/certs/auth-server-keys.json", "w") as f:
         f.write(base64.b64decode(
-            manager.secret.get("oxauth_openid_key_base64")
+            manager.secret.get("auth_openid_key_base64")
         ).decode())
     return True
 
 
 def should_sync_jks():
-    last_rotation = manager.config.get("oxauth_key_rotated_at")
+    last_rotation = manager.config.get("auth_key_rotated_at")
 
     # keys are not rotated yet
     if not last_rotation:
@@ -37,7 +37,7 @@ def should_sync_jks():
 
     # check modification time of local JKS; we dont need to check JSON
     try:
-        mtime = int(os.path.getmtime(manager.config.get("oxauth_openid_jks_fn")))
+        mtime = int(os.path.getmtime(manager.config.get("auth_openid_jks_fn")))
     except OSError:
         mtime = 0
     return mtime < int(last_rotation)

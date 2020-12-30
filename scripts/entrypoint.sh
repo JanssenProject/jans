@@ -47,7 +47,7 @@ python3 /app/scripts/jks_sync.py &
 python3 /app/scripts/jca_sync.py &
 python3 /app/scripts/mod_context.py
 
-# run oxAuth server
+# run auth-server
 cd /opt/jans/jetty/jans-auth
 mkdir -p /opt/jetty/temp
 exec java \

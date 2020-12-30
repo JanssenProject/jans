@@ -125,13 +125,13 @@ def main():
     sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
     if not sync_enabled:
         manager.secret.to_file(
-            "oxauth_jks_base64",
-            "/etc/certs/oxauth-keys.jks",
+            "auth_jks_base64",
+            "/etc/certs/auth-keys.jks",
             decode=True,
             binary_mode=True,
         )
-        with open("/etc/certs/oxauth-keys.json", "w") as f:
-            f.write(base64.b64decode(manager.secret.get("oxauth_openid_key_base64")).decode())
+        with open("/etc/certs/auth-keys.json", "w") as f:
+            f.write(base64.b64decode(manager.secret.get("auth_openid_key_base64")).decode())
 
 
 if __name__ == "__main__":
