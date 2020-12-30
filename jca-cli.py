@@ -1175,7 +1175,7 @@ class JCA_CLI:
         m = getattr(swagger_client.models, schema['__schema_name__'])
         sample_data = {}
 
-        populate_fields = schema['required']
+        populate_fields = schema.get('required', [])
         
         for field_name in schema['properties']:
             field = schema['properties'][field_name]
