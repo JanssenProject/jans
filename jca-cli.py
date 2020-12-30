@@ -80,6 +80,7 @@ if str(debug).lower() in ('yes', 'true', '1', 'on'):
     debug = True
 else:
     debug = False
+
 class Menu(object):
 
     def __init__(self, name, method='', info='', path=''):
@@ -461,11 +462,14 @@ class JCA_CLI:
         for path in self.cfg_yml['paths']:
 
             for method in self.cfg_yml['paths'][path]:
+                
                 if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                    retVal = self.cfg_yml['paths'][path][method].copy()
+                    retVal['__path__'] = path
                     if qmethod and method == qmethod:
-                        return self.cfg_yml['paths'][path][method]
-                    paths[method] = self.cfg_yml['paths'][path][method]
-                    
+                        return retVal
+                    paths[method] = retVal
+
         return paths
 
     def get_scope_for_endpoint(self, endpoint):
@@ -925,6 +929,7 @@ class JCA_CLI:
 
     def parse_args(self, args, path):
         param_names = []
+
         for param in path['parameters']:
             param_names.append(param['name'])
 
@@ -972,16 +977,17 @@ class JCA_CLI:
                         if 'schema' in path[method]['requestBody']['content'][apptype]:
                             if path[method]['requestBody']['content'][apptype]['schema'].get('type') == 'array':
                                 schema_path = path[method]['requestBody']['content'][apptype]['schema']['items']['$ref']
+                                print(' Schema: Array of {}'.format(schema_path[1:]))
                             else:
                                 schema_path = path[method]['requestBody']['content'][apptype]['schema']['$ref']
-                            print(' Schema: {}'.format(schema_path[1:]))
+                                print(' Schema: {}'.format(schema_path[1:]))
 
         if schema_path:
             print()
             print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
 
-    def get_path_api_caller_for_op(self, op, metod):
-        path = self.get_tag_from_api_name(op, metod)
+    def get_path_api_caller_for_op(self, op, method):
+        path = self.get_tag_from_api_name(op, method)
         security = path['security'][0]['jans-auth'][0]
         self.get_access_token(security)
         client = getattr(swagger_client, op)
@@ -1030,22 +1036,17 @@ class JCA_CLI:
         model_obj = model(**model_data)
         return model_obj
 
-    def process_command_post(self, op, args, data_fn, metod='post'):
-        path, api_caller = self.get_path_api_caller_for_op(op, metod)
+    def process_command_post(self, op, args, data_fn, method='post'):
+        path, api_caller = self.get_path_api_caller_for_op(op, method)
 
-        class DummyEndpoint:
-            pass
-
-        endpoint = DummyEndpoint()
-        endpoint.info = path
-        
+        endpoint = Menu(name=op, info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
-        
+
         model = getattr(swagger_client.models, schema['__schema_name__'])
         
         with open(data_fn) as f:
             data = json.load(f)
-        
+
         body = self.populate_model(model, data)
 
         try:
@@ -1062,11 +1063,53 @@ class JCA_CLI:
 
 
     def process_command_put(self, op, args, data_fn):
-        self.process_command_post(op, args, data_fn, metod='put')
+        self.process_command_post(op, args, data_fn, method='put')
 
 
-    def process_command_path(self, op, args, data_fn):
-        pass
+    def process_command_patch(self, op, args, data_fn):
+
+        args_dict = {}
+        for a in args.split(','):
+            k,v = a.split(':')
+            args_dict[k.strip()] = v.strip()
+
+
+        with open(data_fn) as f:
+            data = json.load(f)
+
+        if not isinstance(data, list):
+            sys.stderr.write("{} must be array of /components/schemas/PatchRequest\n".format(data_fn))
+            sys.exit()
+
+        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        for item in data:
+            if not item['op'] in op_modes:
+                print("op must be one of {}".format(', '.join(op_modes)))
+                sys.exit()
+            if not item['path'].startswith('/'):
+                item['path'] = '/'+item['path']
+
+        path, api_caller = self.get_path_api_caller_for_op(op, 'patch')
+
+
+        endpoint = Menu(name=op, path=path['__path__'])
+        endpoint_param_dict = self.get_endpiont_url_param(endpoint)
+        endpoint_param = endpoint_param_dict.get('name')
+        if endpoint_param and not endpoint_param in args_dict:
+            sys.stderr.write("This operation needs endpoint argument {}\n".format(endpoint_param))
+            sys.exit()
+
+        try:
+            api_response = api_caller(args_dict[endpoint_param], body=data)
+        except swagger_client.rest.ApiException as e:
+            print(e.reason)
+            print(e.body)
+            sys.exit()
+
+        unmapped_response = self.unmap_model(api_response)
+        sys.stderr.write("Server Response:\n")
+        print(json.dumps(unmapped_response, indent=2))
+
 
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
 
@@ -1098,7 +1141,6 @@ class JCA_CLI:
         schema = self.get_schema_from_reference('#'+args.schema)
         m = getattr(swagger_client.models, schema['__schema_name__'])
         sample_data = {}
-
 
         populate_fields = schema['required']
         
