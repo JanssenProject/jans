@@ -88,7 +88,7 @@ class Connector:
                 self.manager.config.get("country_code"),
                 self.manager.config.get("state"),
                 self.manager.config.get("city"),
-                extra_dn=self.cert_cn,
+                extra_dns=[self.cert_cn],
             )
             # save cert and key to secrets for later use
             self.manager.secret.from_file(f"client_api_{self.type}_cert", self.cert_file)
