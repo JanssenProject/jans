@@ -304,7 +304,7 @@ class Scope(object):
         :param scope_type: The scope_type of this Scope.  # noqa: E501
         :type: str
         """
-        allowed_values = ["openid", "dynamic", "oauth", "uma"]  # noqa: E501
+        allowed_values = ["openid", "dynamic", "uma", "spontaneous", "oauth"]  # noqa: E501
         if scope_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `scope_type` ({0}), must be one of {1}"  # noqa: E501

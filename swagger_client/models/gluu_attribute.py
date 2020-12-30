@@ -126,8 +126,7 @@ class GluuAttribute(object):
         self.name = name
         self.display_name = display_name
         self.description = description
-        if data_type is not None:
-            self.data_type = data_type
+        self.data_type = data_type
         if status is not None:
             self.status = status
         if lifetime is not None:
@@ -328,6 +327,8 @@ class GluuAttribute(object):
         :param data_type: The data_type of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if data_type is None:
+            raise ValueError("Invalid value for `data_type`, must not be `None`")  # noqa: E501
         allowed_values = ["STRING", "NUMERIC", "BOOLEAN", "BINARY", "CERTIFICATE", "DATE"]  # noqa: E501
         if data_type not in allowed_values:
             raise ValueError(

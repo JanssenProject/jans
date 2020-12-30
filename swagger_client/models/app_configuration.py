@@ -28,7 +28,6 @@ class AppConfiguration(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'session_as_jwt': 'bool',
         'issuer': 'str',
         'base_endpoint': 'str',
         'authorization_endpoint': 'str',
@@ -44,19 +43,24 @@ class AppConfiguration(object):
         'open_id_configuration_endpoint': 'str',
         'id_generation_endpoint': 'str',
         'introspection_endpoint': 'str',
-        'introspection_access_token_must_have_uma_protection_scope': 'bool',
+        'device_authz_endpoint': 'str',
+        'session_as_jwt': 'bool',
+        'sector_identifier_cache_lifetime_in_minutes': 'int',
         'uma_configuration_endpoint': 'str',
-        'sector_identifier_endpoint': 'str',
-        'ox_eleven_generate_key_endpoint': 'str',
-        'ox_eleven_sign_endpoint': 'str',
-        'ox_eleven_verify_signature_endpoint': 'str',
-        'ox_eleven_delete_key_endpoint': 'str',
-        'ox_eleven_jwks_endpoint': 'str',
+        'uma_rpt_as_jwt': 'bool',
+        'uma_rpt_lifetime': 'int',
+        'uma_ticket_lifetime': 'int',
+        'uma_pct_lifetime': 'int',
+        'uma_resource_lifetime': 'int',
+        'uma_add_scopes_automatically': 'bool',
+        'uma_validate_claim_token': 'bool',
+        'uma_grant_access_if_no_policies': 'bool',
+        'uma_restrict_resource_to_associated_client': 'bool',
+        'spontaneous_scope_lifetime': 'int',
         'openid_sub_attribute': 'str',
         'response_types_supported': 'list[str]',
         'response_modes_supported': 'list[str]',
         'grant_types_supported': 'list[str]',
-        'dynamic_grant_type_default': 'list[str]',
         'subject_types_supported': 'list[str]',
         'default_subject_type': 'list[str]',
         'user_info_signing_alg_values_supported': 'list[str]',
@@ -73,57 +77,69 @@ class AppConfiguration(object):
         'dynamic_registration_custom_attributes': 'list[str]',
         'display_values_supported': 'list[str]',
         'claim_types_supported': 'list[str]',
+        'jwks_algorithms_supported': 'list[str]',
         'service_documentation': 'list[str]',
         'claims_locales_supported': 'list[str]',
         'id_token_token_binding_cnf_values_supported': 'list[str]',
         'ui_locales_supported': 'list[str]',
-        'persist_id_token_in_ldap': 'bool',
-        'persist_refresh_token_in_ldap': 'bool',
         'claims_parameter_supported': 'bool',
         'request_parameter_supported': 'bool',
         'request_uri_parameter_supported': 'bool',
+        'request_uri_hash_verification_enabled': 'bool',
         'require_request_uri_registration': 'bool',
         'op_policy_uri': 'str',
         'op_tos_uri': 'str',
         'authorization_code_lifetime': 'int',
         'refresh_token_lifetime': 'int',
         'id_token_lifetime': 'int',
+        'id_token_filter_claims_based_on_access_token': 'bool',
         'access_token_lifetime': 'int',
-        'uma_rpt_lifetime': 'int',
-        'uma_ticket_lifetime': 'int',
-        'uma_pct_lifetime': 'int',
-        'uma_resource_lifetime': 'int',
-        'uma_add_scopes_automatically': 'bool',
-        'uma_validate_claim_token': 'bool',
-        'uma_grant_access_if_no_policies': 'bool',
-        'uma_restrict_resource_to_associated_client': 'bool',
-        'uma_keep_client_during_resource_set_registration': 'bool',
-        'uma_rpt_as_jwt': 'bool',
         'clean_service_interval': 'int',
-        'clean_service_base_dns': 'list[str]',
         'clean_service_batch_chunk_size': 'int',
+        'clean_service_base_dns': 'list[str]',
         'key_regeneration_enabled': 'bool',
         'key_regeneration_interval': 'int',
         'default_signature_algorithm': 'list[str]',
         'ox_open_id_connect_version': 'str',
-        'jans_id': 'str',
+        'ox_id': 'str',
         'dynamic_registration_enabled': 'bool',
         'dynamic_registration_expiration_time': 'int',
         'dynamic_registration_persist_client_authorizations': 'bool',
         'trusted_client_enabled': 'bool',
+        'skip_authorization_for_open_id_scope_and_pairwise_id': 'bool',
         'dynamic_registration_scopes_param_enabled': 'bool',
+        'dynamic_registration_password_grant_type_enabled': 'bool',
+        'dynamic_registration_allowed_password_grant_scopes': 'list[str]',
         'dynamic_registration_custom_object_class': 'str',
         'person_custom_object_class_list': 'list[str]',
+        'persist_id_token_in_ldap': 'bool',
+        'persist_refresh_token_in_ldap': 'bool',
+        'allow_post_logout_redirect_without_validation': 'bool',
+        'invalidate_session_cookies_after_authorization_flow': 'bool',
+        'return_client_secret_on_read': 'bool',
+        'reject_jwt_with_none_alg': 'bool',
+        'expiration_notificator_enabled': 'bool',
+        'use_nested_jwt_during_encryption': 'bool',
+        'expiration_notificator_map_size_limit': 'int',
+        'expiration_notificator_interval_in_seconds': 'int',
         'authentication_filters_enabled': 'bool',
         'client_authentication_filters_enabled': 'bool',
-        'authentication_filters': 'list[AppConfigurationAuthenticationFilters]',
-        'client_authentication_filters': 'list[AppConfigurationClientAuthenticationFilters]',
+        'client_reg_default_to_code_flow_with_refresh': 'bool',
+        'authentication_filters': 'list[AuthenticationFilters]',
+        'client_authentication_filters': 'list[AuthenticationFilters]',
+        'cors_configuration_filters': 'list[CorsConfigurationFilter]',
         'session_id_unused_lifetime': 'int',
         'session_id_unauthenticated_unused_lifetime': 'int',
-        'session_id_lifetime': 'int',
         'session_id_enabled': 'bool',
         'session_id_persist_on_prompt_none': 'bool',
+        'session_id_request_parameter_enabled': 'bool',
+        'change_session_id_on_authentication': 'bool',
+        'session_id_persist_in_cache': 'bool',
+        'session_id_lifetime': 'int',
+        'server_session_id_lifetime': 'int',
         'configuration_update_interval': 'int',
+        'enable_client_grant_type_update': 'bool',
+        'dynamic_grant_type_default': 'list[str]',
         'css_location': 'str',
         'js_location': 'str',
         'img_location': 'str',
@@ -138,61 +154,54 @@ class AppConfiguration(object):
         'dn_name': 'str',
         'key_store_file': 'str',
         'key_store_secret': 'str',
+        'key_selection_strategy': 'str',
+        'ox_eleven_test_mode_token': 'str',
+        'ox_eleven_generate_key_endpoint': 'str',
+        'ox_eleven_sign_endpoint': 'str',
+        'ox_eleven_verify_signature_endpoint': 'str',
+        'ox_eleven_delete_key_endpoint': 'str',
+        'introspection_access_token_must_have_uma_protection_scope': 'bool',
         'end_session_with_access_token': 'bool',
+        'cookie_domain': 'str',
+        'enabled_o_auth_audit_logging': 'bool',
+        'jms_broker_uri_set': 'list[str]',
+        'jms_user_name': 'str',
+        'jms_password': 'str',
         'client_white_list': 'list[str]',
         'client_black_list': 'list[str]',
         'legacy_id_token_claims': 'bool',
         'custom_headers_with_authorization_response': 'bool',
         'front_channel_logout_session_supported': 'bool',
-        'use_cache_for_all_implicit_flow_objects': 'bool',
-        'invalidate_session_cookies_after_authorization_flow': 'bool',
+        'logging_level': 'str',
+        'logging_layout': 'str',
         'update_user_last_logon_time': 'bool',
         'update_client_access_time': 'bool',
-        'enable_client_grant_type_update': 'bool',
-        'logging_level': 'str',
-        'cors_configuration_filters': 'list[AppConfigurationCorsConfigurationFilters]',
         'log_client_id_on_client_authentication': 'bool',
         'log_client_name_on_client_authentication': 'bool',
+        'disable_jdk_logger': 'bool',
         'authorization_request_custom_allowed_parameters': 'list[str]',
         'legacy_dynamic_registration_scope_param': 'bool',
         'openid_scope_backward_compatibility': 'bool',
-        'skip_authorization_for_open_id_scope_and_pairwise_id': 'bool',
-        'allow_post_logout_redirect_without_validation': 'bool',
-        'http_logging_enabled': 'bool',
-        'http_logging_exlude_paths': 'list[str]',
-        'external_logger_configuration': 'str',
         'disable_u2f_endpoint': 'bool',
-        'disable_jdk_logger': 'bool',
-        'jms_user_name': 'str',
-        'jms_password': 'str',
-        'jms_broker_uri_set': 'list[str]',
-        'ox_eleven_test_mode_token': 'str',
-        'enabled_o_auth_audit_logging': 'bool',
-        'authentication_protection_configuration': 'AppConfigurationAuthenticationProtectionConfiguration',
-        'error_handling_method': 'str',
         'use_local_cache': 'bool',
-        'spontaneous_scope_lifetime': 'int',
-        'jwks_algorithms_supported': 'list[str]',
-        'dynamic_registration_password_grant_type_enabled': 'bool',
-        'return_client_secret_on_read': 'bool',
-        'reject_jwt_with_none_alg': 'bool',
-        'expiration_notificator_enabled': 'bool',
-        'expiration_notificator_map_size_limit': 'int',
-        'expiration_notificator_interval_in_seconds': 'int',
-        'client_reg_default_to_code_flow_with_refresh': 'bool',
-        'session_id_request_parameter_enabled': 'bool',
-        'change_session_id_on_authentication': 'bool',
-        'server_session_id_lifetime': 'int',
-        'cookie_domain': 'str',
-        'logging_layout': 'str',
         'fapi_compatibility': 'bool',
         'force_id_token_hint_precense': 'bool',
         'force_offline_access_scope_to_enable_refresh_token': 'bool',
         'error_reason_enabled': 'bool',
         'remove_refresh_tokens_for_client_on_logout': 'bool',
+        'skip_refresh_token_during_refreshing': 'bool',
+        'refresh_token_extend_lifetime_on_rotation': 'bool',
         'consent_gathering_script_backward_compatibility': 'bool',
         'introspection_script_backward_compatibility': 'bool',
+        'introspection_response_scopes_backward_compatibility': 'bool',
+        'software_statement_validation_type': 'str',
+        'software_statement_validation_claim_name': 'str',
+        'authentication_protection_configuration': 'AuthenticationProtectionConfiguration',
+        'error_handling_method': 'str',
         'keep_authenticator_attributes_on_acr_change': 'bool',
+        'device_authz_request_expires_in': 'int',
+        'device_authz_token_poll_interval': 'int',
+        'device_authz_response_type_to_process_authz': 'str',
         'backchannel_client_id': 'str',
         'backchannel_redirect_uri': 'str',
         'backchannel_authentication_endpoint': 'str',
@@ -204,15 +213,19 @@ class AppConfiguration(object):
         'backchannel_authentication_response_expires_in': 'int',
         'backchannel_authentication_response_interval': 'int',
         'backchannel_login_hint_claims': 'list[str]',
-        'ciba_end_user_notification_config': 'AppConfigurationCibaEndUserNotificationConfig',
+        'ciba_end_user_notification_config': 'CIBAEndUserNotificationConfig',
         'backchannel_requests_processor_job_interval_sec': 'int',
         'backchannel_requests_processor_job_chunk_size': 'int',
         'ciba_grant_life_extra_time_sec': 'int',
-        'ciba_max_expiration_time_allowed_sec': 'int'
+        'ciba_max_expiration_time_allowed_sec': 'int',
+        'ciba_enabled': 'bool',
+        'discovery_cache_lifetime_in_minutes': 'int',
+        'http_logging_enabled': 'bool',
+        'http_logging_exlude_paths': 'list[str]',
+        'external_logger_configuration': 'str'
     }
 
     attribute_map = {
-        'session_as_jwt': 'sessionAsJwt',
         'issuer': 'issuer',
         'base_endpoint': 'baseEndpoint',
         'authorization_endpoint': 'authorizationEndpoint',
@@ -228,19 +241,24 @@ class AppConfiguration(object):
         'open_id_configuration_endpoint': 'openIdConfigurationEndpoint',
         'id_generation_endpoint': 'idGenerationEndpoint',
         'introspection_endpoint': 'introspectionEndpoint',
-        'introspection_access_token_must_have_uma_protection_scope': 'introspectionAccessTokenMustHaveUmaProtectionScope',
+        'device_authz_endpoint': 'deviceAuthzEndpoint',
+        'session_as_jwt': 'sessionAsJwt',
+        'sector_identifier_cache_lifetime_in_minutes': 'sectorIdentifierCacheLifetimeInMinutes',
         'uma_configuration_endpoint': 'umaConfigurationEndpoint',
-        'sector_identifier_endpoint': 'sectorIdentifierEndpoint',
-        'ox_eleven_generate_key_endpoint': 'oxElevenGenerateKeyEndpoint',
-        'ox_eleven_sign_endpoint': 'oxElevenSignEndpoint',
-        'ox_eleven_verify_signature_endpoint': 'oxElevenVerifySignatureEndpoint',
-        'ox_eleven_delete_key_endpoint': 'oxElevenDeleteKeyEndpoint',
-        'ox_eleven_jwks_endpoint': 'oxElevenJwksEndpoint',
+        'uma_rpt_as_jwt': 'umaRptAsJwt',
+        'uma_rpt_lifetime': 'umaRptLifetime',
+        'uma_ticket_lifetime': 'umaTicketLifetime',
+        'uma_pct_lifetime': 'umaPctLifetime',
+        'uma_resource_lifetime': 'umaResourceLifetime',
+        'uma_add_scopes_automatically': 'umaAddScopesAutomatically',
+        'uma_validate_claim_token': 'umaValidateClaimToken',
+        'uma_grant_access_if_no_policies': 'umaGrantAccessIfNoPolicies',
+        'uma_restrict_resource_to_associated_client': 'umaRestrictResourceToAssociatedClient',
+        'spontaneous_scope_lifetime': 'spontaneousScopeLifetime',
         'openid_sub_attribute': 'openidSubAttribute',
         'response_types_supported': 'responseTypesSupported',
         'response_modes_supported': 'responseModesSupported',
         'grant_types_supported': 'grantTypesSupported',
-        'dynamic_grant_type_default': 'dynamicGrantTypeDefault',
         'subject_types_supported': 'subjectTypesSupported',
         'default_subject_type': 'defaultSubjectType',
         'user_info_signing_alg_values_supported': 'userInfoSigningAlgValuesSupported',
@@ -257,57 +275,69 @@ class AppConfiguration(object):
         'dynamic_registration_custom_attributes': 'dynamicRegistrationCustomAttributes',
         'display_values_supported': 'displayValuesSupported',
         'claim_types_supported': 'claimTypesSupported',
+        'jwks_algorithms_supported': 'jwksAlgorithmsSupported',
         'service_documentation': 'serviceDocumentation',
         'claims_locales_supported': 'claimsLocalesSupported',
         'id_token_token_binding_cnf_values_supported': 'idTokenTokenBindingCnfValuesSupported',
         'ui_locales_supported': 'uiLocalesSupported',
-        'persist_id_token_in_ldap': 'persistIdTokenInLdap',
-        'persist_refresh_token_in_ldap': 'persistRefreshTokenInLdap',
         'claims_parameter_supported': 'claimsParameterSupported',
         'request_parameter_supported': 'requestParameterSupported',
         'request_uri_parameter_supported': 'requestUriParameterSupported',
+        'request_uri_hash_verification_enabled': 'requestUriHashVerificationEnabled',
         'require_request_uri_registration': 'requireRequestUriRegistration',
         'op_policy_uri': 'opPolicyUri',
         'op_tos_uri': 'opTosUri',
         'authorization_code_lifetime': 'authorizationCodeLifetime',
         'refresh_token_lifetime': 'refreshTokenLifetime',
         'id_token_lifetime': 'idTokenLifetime',
+        'id_token_filter_claims_based_on_access_token': 'idTokenFilterClaimsBasedOnAccessToken',
         'access_token_lifetime': 'accessTokenLifetime',
-        'uma_rpt_lifetime': 'umaRptLifetime',
-        'uma_ticket_lifetime': 'umaTicketLifetime',
-        'uma_pct_lifetime': 'umaPctLifetime',
-        'uma_resource_lifetime': 'umaResourceLifetime',
-        'uma_add_scopes_automatically': 'umaAddScopesAutomatically',
-        'uma_validate_claim_token': 'umaValidateClaimToken',
-        'uma_grant_access_if_no_policies': 'umaGrantAccessIfNoPolicies',
-        'uma_restrict_resource_to_associated_client': 'umaRestrictResourceToAssociatedClient',
-        'uma_keep_client_during_resource_set_registration': 'umaKeepClientDuringResourceSetRegistration',
-        'uma_rpt_as_jwt': 'umaRptAsJwt',
         'clean_service_interval': 'cleanServiceInterval',
-        'clean_service_base_dns': 'cleanServiceBaseDns',
         'clean_service_batch_chunk_size': 'cleanServiceBatchChunkSize',
+        'clean_service_base_dns': 'cleanServiceBaseDns',
         'key_regeneration_enabled': 'keyRegenerationEnabled',
         'key_regeneration_interval': 'keyRegenerationInterval',
         'default_signature_algorithm': 'defaultSignatureAlgorithm',
         'ox_open_id_connect_version': 'oxOpenIdConnectVersion',
-        'jans_id': 'jansId',
+        'ox_id': 'oxId',
         'dynamic_registration_enabled': 'dynamicRegistrationEnabled',
         'dynamic_registration_expiration_time': 'dynamicRegistrationExpirationTime',
         'dynamic_registration_persist_client_authorizations': 'dynamicRegistrationPersistClientAuthorizations',
         'trusted_client_enabled': 'trustedClientEnabled',
+        'skip_authorization_for_open_id_scope_and_pairwise_id': 'skipAuthorizationForOpenIdScopeAndPairwiseId',
         'dynamic_registration_scopes_param_enabled': 'dynamicRegistrationScopesParamEnabled',
+        'dynamic_registration_password_grant_type_enabled': 'dynamicRegistrationPasswordGrantTypeEnabled',
+        'dynamic_registration_allowed_password_grant_scopes': 'dynamicRegistrationAllowedPasswordGrantScopes',
         'dynamic_registration_custom_object_class': 'dynamicRegistrationCustomObjectClass',
         'person_custom_object_class_list': 'personCustomObjectClassList',
+        'persist_id_token_in_ldap': 'persistIdTokenInLdap',
+        'persist_refresh_token_in_ldap': 'persistRefreshTokenInLdap',
+        'allow_post_logout_redirect_without_validation': 'allowPostLogoutRedirectWithoutValidation',
+        'invalidate_session_cookies_after_authorization_flow': 'invalidateSessionCookiesAfterAuthorizationFlow',
+        'return_client_secret_on_read': 'returnClientSecretOnRead',
+        'reject_jwt_with_none_alg': 'rejectJwtWithNoneAlg',
+        'expiration_notificator_enabled': 'expirationNotificatorEnabled',
+        'use_nested_jwt_during_encryption': 'useNestedJwtDuringEncryption',
+        'expiration_notificator_map_size_limit': 'expirationNotificatorMapSizeLimit',
+        'expiration_notificator_interval_in_seconds': 'expirationNotificatorIntervalInSeconds',
         'authentication_filters_enabled': 'authenticationFiltersEnabled',
         'client_authentication_filters_enabled': 'clientAuthenticationFiltersEnabled',
+        'client_reg_default_to_code_flow_with_refresh': 'clientRegDefaultToCodeFlowWithRefresh',
         'authentication_filters': 'authenticationFilters',
         'client_authentication_filters': 'clientAuthenticationFilters',
+        'cors_configuration_filters': 'corsConfigurationFilters',
         'session_id_unused_lifetime': 'sessionIdUnusedLifetime',
         'session_id_unauthenticated_unused_lifetime': 'sessionIdUnauthenticatedUnusedLifetime',
-        'session_id_lifetime': 'sessionIdLifetime',
         'session_id_enabled': 'sessionIdEnabled',
         'session_id_persist_on_prompt_none': 'sessionIdPersistOnPromptNone',
+        'session_id_request_parameter_enabled': 'sessionIdRequestParameterEnabled',
+        'change_session_id_on_authentication': 'changeSessionIdOnAuthentication',
+        'session_id_persist_in_cache': 'sessionIdPersistInCache',
+        'session_id_lifetime': 'sessionIdLifetime',
+        'server_session_id_lifetime': 'serverSessionIdLifetime',
         'configuration_update_interval': 'configurationUpdateInterval',
+        'enable_client_grant_type_update': 'enableClientGrantTypeUpdate',
+        'dynamic_grant_type_default': 'dynamicGrantTypeDefault',
         'css_location': 'cssLocation',
         'js_location': 'jsLocation',
         'img_location': 'imgLocation',
@@ -322,61 +352,54 @@ class AppConfiguration(object):
         'dn_name': 'dnName',
         'key_store_file': 'keyStoreFile',
         'key_store_secret': 'keyStoreSecret',
+        'key_selection_strategy': 'keySelectionStrategy',
+        'ox_eleven_test_mode_token': 'oxElevenTestModeToken',
+        'ox_eleven_generate_key_endpoint': 'oxElevenGenerateKeyEndpoint',
+        'ox_eleven_sign_endpoint': 'oxElevenSignEndpoint',
+        'ox_eleven_verify_signature_endpoint': 'oxElevenVerifySignatureEndpoint',
+        'ox_eleven_delete_key_endpoint': 'oxElevenDeleteKeyEndpoint',
+        'introspection_access_token_must_have_uma_protection_scope': 'introspectionAccessTokenMustHaveUmaProtectionScope',
         'end_session_with_access_token': 'endSessionWithAccessToken',
+        'cookie_domain': 'cookieDomain',
+        'enabled_o_auth_audit_logging': 'enabledOAuthAuditLogging',
+        'jms_broker_uri_set': 'jmsBrokerURISet',
+        'jms_user_name': 'jmsUserName',
+        'jms_password': 'jmsPassword',
         'client_white_list': 'clientWhiteList',
         'client_black_list': 'clientBlackList',
         'legacy_id_token_claims': 'legacyIdTokenClaims',
         'custom_headers_with_authorization_response': 'customHeadersWithAuthorizationResponse',
         'front_channel_logout_session_supported': 'frontChannelLogoutSessionSupported',
-        'use_cache_for_all_implicit_flow_objects': 'useCacheForAllImplicitFlowObjects',
-        'invalidate_session_cookies_after_authorization_flow': 'invalidateSessionCookiesAfterAuthorizationFlow',
+        'logging_level': 'loggingLevel',
+        'logging_layout': 'loggingLayout',
         'update_user_last_logon_time': 'updateUserLastLogonTime',
         'update_client_access_time': 'updateClientAccessTime',
-        'enable_client_grant_type_update': 'enableClientGrantTypeUpdate',
-        'logging_level': 'loggingLevel',
-        'cors_configuration_filters': 'corsConfigurationFilters',
         'log_client_id_on_client_authentication': 'logClientIdOnClientAuthentication',
         'log_client_name_on_client_authentication': 'logClientNameOnClientAuthentication',
+        'disable_jdk_logger': 'disableJdkLogger',
         'authorization_request_custom_allowed_parameters': 'authorizationRequestCustomAllowedParameters',
         'legacy_dynamic_registration_scope_param': 'legacyDynamicRegistrationScopeParam',
         'openid_scope_backward_compatibility': 'openidScopeBackwardCompatibility',
-        'skip_authorization_for_open_id_scope_and_pairwise_id': 'skipAuthorizationForOpenIdScopeAndPairwiseId',
-        'allow_post_logout_redirect_without_validation': 'allowPostLogoutRedirectWithoutValidation',
-        'http_logging_enabled': 'httpLoggingEnabled',
-        'http_logging_exlude_paths': 'httpLoggingExludePaths',
-        'external_logger_configuration': 'externalLoggerConfiguration',
         'disable_u2f_endpoint': 'disableU2fEndpoint',
-        'disable_jdk_logger': 'disableJdkLogger',
-        'jms_user_name': 'jmsUserName',
-        'jms_password': 'jmsPassword',
-        'jms_broker_uri_set': 'jmsBrokerURISet',
-        'ox_eleven_test_mode_token': 'oxElevenTestModeToken',
-        'enabled_o_auth_audit_logging': 'enabledOAuthAuditLogging',
-        'authentication_protection_configuration': 'authenticationProtectionConfiguration',
-        'error_handling_method': 'errorHandlingMethod',
         'use_local_cache': 'useLocalCache',
-        'spontaneous_scope_lifetime': 'spontaneousScopeLifetime',
-        'jwks_algorithms_supported': 'jwksAlgorithmsSupported',
-        'dynamic_registration_password_grant_type_enabled': 'dynamicRegistrationPasswordGrantTypeEnabled',
-        'return_client_secret_on_read': 'returnClientSecretOnRead',
-        'reject_jwt_with_none_alg': 'rejectJwtWithNoneAlg',
-        'expiration_notificator_enabled': 'expirationNotificatorEnabled',
-        'expiration_notificator_map_size_limit': 'expirationNotificatorMapSizeLimit',
-        'expiration_notificator_interval_in_seconds': 'expirationNotificatorIntervalInSeconds',
-        'client_reg_default_to_code_flow_with_refresh': 'clientRegDefaultToCodeFlowWithRefresh',
-        'session_id_request_parameter_enabled': 'sessionIdRequestParameterEnabled',
-        'change_session_id_on_authentication': 'changeSessionIdOnAuthentication',
-        'server_session_id_lifetime': 'serverSessionIdLifetime',
-        'cookie_domain': 'cookieDomain',
-        'logging_layout': 'loggingLayout',
         'fapi_compatibility': 'fapiCompatibility',
         'force_id_token_hint_precense': 'forceIdTokenHintPrecense',
         'force_offline_access_scope_to_enable_refresh_token': 'forceOfflineAccessScopeToEnableRefreshToken',
         'error_reason_enabled': 'errorReasonEnabled',
         'remove_refresh_tokens_for_client_on_logout': 'removeRefreshTokensForClientOnLogout',
+        'skip_refresh_token_during_refreshing': 'skipRefreshTokenDuringRefreshing',
+        'refresh_token_extend_lifetime_on_rotation': 'refreshTokenExtendLifetimeOnRotation',
         'consent_gathering_script_backward_compatibility': 'consentGatheringScriptBackwardCompatibility',
         'introspection_script_backward_compatibility': 'introspectionScriptBackwardCompatibility',
+        'introspection_response_scopes_backward_compatibility': 'introspectionResponseScopesBackwardCompatibility',
+        'software_statement_validation_type': 'softwareStatementValidationType',
+        'software_statement_validation_claim_name': 'softwareStatementValidationClaimName',
+        'authentication_protection_configuration': 'authenticationProtectionConfiguration',
+        'error_handling_method': 'errorHandlingMethod',
         'keep_authenticator_attributes_on_acr_change': 'keepAuthenticatorAttributesOnAcrChange',
+        'device_authz_request_expires_in': 'deviceAuthzRequestExpiresIn',
+        'device_authz_token_poll_interval': 'deviceAuthzTokenPollInterval',
+        'device_authz_response_type_to_process_authz': 'deviceAuthzResponseTypeToProcessAuthz',
         'backchannel_client_id': 'backchannelClientId',
         'backchannel_redirect_uri': 'backchannelRedirectUri',
         'backchannel_authentication_endpoint': 'backchannelAuthenticationEndpoint',
@@ -392,12 +415,16 @@ class AppConfiguration(object):
         'backchannel_requests_processor_job_interval_sec': 'backchannelRequestsProcessorJobIntervalSec',
         'backchannel_requests_processor_job_chunk_size': 'backchannelRequestsProcessorJobChunkSize',
         'ciba_grant_life_extra_time_sec': 'cibaGrantLifeExtraTimeSec',
-        'ciba_max_expiration_time_allowed_sec': 'cibaMaxExpirationTimeAllowedSec'
+        'ciba_max_expiration_time_allowed_sec': 'cibaMaxExpirationTimeAllowedSec',
+        'ciba_enabled': 'cibaEnabled',
+        'discovery_cache_lifetime_in_minutes': 'discoveryCacheLifetimeInMinutes',
+        'http_logging_enabled': 'httpLoggingEnabled',
+        'http_logging_exlude_paths': 'httpLoggingExludePaths',
+        'external_logger_configuration': 'externalLoggerConfiguration'
     }
 
-    def __init__(self, session_as_jwt=None, issuer=None, base_endpoint=None, authorization_endpoint=None, token_endpoint=None, token_revocation_endpoint=None, user_info_endpoint=None, client_info_endpoint=None, check_session_i_frame=None, end_session_endpoint=None, jwks_uri=None, registration_endpoint=None, open_id_discovery_endpoint=None, open_id_configuration_endpoint=None, id_generation_endpoint=None, introspection_endpoint=None, introspection_access_token_must_have_uma_protection_scope=False, uma_configuration_endpoint=None, sector_identifier_endpoint=None, ox_eleven_generate_key_endpoint=None, ox_eleven_sign_endpoint=None, ox_eleven_verify_signature_endpoint=None, ox_eleven_delete_key_endpoint=None, ox_eleven_jwks_endpoint=None, openid_sub_attribute=None, response_types_supported=None, response_modes_supported=None, grant_types_supported=None, dynamic_grant_type_default=None, subject_types_supported=None, default_subject_type=None, user_info_signing_alg_values_supported=None, user_info_encryption_alg_values_supported=None, user_info_encryption_enc_values_supported=None, id_token_signing_alg_values_supported=None, id_token_encryption_alg_values_supported=None, id_token_encryption_enc_values_supported=None, request_object_signing_alg_values_supported=None, request_object_encryption_alg_values_supported=None, request_object_encryption_enc_values_supported=None, token_endpoint_auth_methods_supported=None, token_endpoint_auth_signing_alg_values_supported=None, dynamic_registration_custom_attributes=None, display_values_supported=None, claim_types_supported=None, service_documentation=None, claims_locales_supported=None, id_token_token_binding_cnf_values_supported=None, ui_locales_supported=None, persist_id_token_in_ldap=False, persist_refresh_token_in_ldap=True, claims_parameter_supported=False, request_parameter_supported=False, request_uri_parameter_supported=False, require_request_uri_registration=False, op_policy_uri=None, op_tos_uri=None, authorization_code_lifetime=None, refresh_token_lifetime=None, id_token_lifetime=None, access_token_lifetime=None, uma_rpt_lifetime=None, uma_ticket_lifetime=None, uma_pct_lifetime=None, uma_resource_lifetime=None, uma_add_scopes_automatically=False, uma_validate_claim_token=False, uma_grant_access_if_no_policies=False, uma_restrict_resource_to_associated_client=False, uma_keep_client_during_resource_set_registration=False, uma_rpt_as_jwt=False, clean_service_interval=None, clean_service_base_dns=None, clean_service_batch_chunk_size=None, key_regeneration_enabled=False, key_regeneration_interval=None, default_signature_algorithm=None, ox_open_id_connect_version=None, jans_id=None, dynamic_registration_enabled=False, dynamic_registration_expiration_time=-1, dynamic_registration_persist_client_authorizations=False, trusted_client_enabled=False, dynamic_registration_scopes_param_enabled=False, dynamic_registration_custom_object_class=None, person_custom_object_class_list=None, authentication_filters_enabled=False, client_authentication_filters_enabled=False, authentication_filters=None, client_authentication_filters=None, session_id_unused_lifetime=None, session_id_unauthenticated_unused_lifetime=120, session_id_lifetime=86400, session_id_enabled=False, session_id_persist_on_prompt_none=False, configuration_update_interval=None, css_location=None, js_location=None, img_location=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, metric_reporter_enabled=True, pairwise_id_type=None, pairwise_calculation_key=None, pairwise_calculation_salt=None, share_subject_id_between_clients_with_same_sector_id=False, web_keys_storage=None, dn_name=None, key_store_file=None, key_store_secret=None, end_session_with_access_token=None, client_white_list=None, client_black_list=None, legacy_id_token_claims=None, custom_headers_with_authorization_response=None, front_channel_logout_session_supported=None, use_cache_for_all_implicit_flow_objects=False, invalidate_session_cookies_after_authorization_flow=False, update_user_last_logon_time=False, update_client_access_time=False, enable_client_grant_type_update=False, logging_level=None, cors_configuration_filters=None, log_client_id_on_client_authentication=None, log_client_name_on_client_authentication=None, authorization_request_custom_allowed_parameters=None, legacy_dynamic_registration_scope_param=None, openid_scope_backward_compatibility=False, skip_authorization_for_open_id_scope_and_pairwise_id=False, allow_post_logout_redirect_without_validation=False, http_logging_enabled=False, http_logging_exlude_paths=None, external_logger_configuration=None, disable_u2f_endpoint=False, disable_jdk_logger=True, jms_user_name=None, jms_password=None, jms_broker_uri_set=None, ox_eleven_test_mode_token=None, enabled_o_auth_audit_logging=None, authentication_protection_configuration=None, error_handling_method=None, use_local_cache=False, spontaneous_scope_lifetime=None, jwks_algorithms_supported=None, dynamic_registration_password_grant_type_enabled=False, return_client_secret_on_read=False, reject_jwt_with_none_alg=True, expiration_notificator_enabled=True, expiration_notificator_map_size_limit=100000, expiration_notificator_interval_in_seconds=600, client_reg_default_to_code_flow_with_refresh=None, session_id_request_parameter_enabled=False, change_session_id_on_authentication=True, server_session_id_lifetime=86400, cookie_domain=None, logging_layout=None, fapi_compatibility=False, force_id_token_hint_precense=False, force_offline_access_scope_to_enable_refresh_token=True, error_reason_enabled=False, remove_refresh_tokens_for_client_on_logout=True, consent_gathering_script_backward_compatibility=False, introspection_script_backward_compatibility=False, keep_authenticator_attributes_on_acr_change=False, backchannel_client_id=None, backchannel_redirect_uri=None, backchannel_authentication_endpoint=None, backchannel_device_registration_endpoint=None, backchannel_token_delivery_modes_supported=None, backchannel_authentication_request_signing_alg_values_supported=None, backchannel_user_code_parameter_supported=None, backchannel_binding_message_pattern=None, backchannel_authentication_response_expires_in=None, backchannel_authentication_response_interval=None, backchannel_login_hint_claims=None, ciba_end_user_notification_config=None, backchannel_requests_processor_job_interval_sec=None, backchannel_requests_processor_job_chunk_size=None, ciba_grant_life_extra_time_sec=None, ciba_max_expiration_time_allowed_sec=None):  # noqa: E501
+    def __init__(self, issuer=None, base_endpoint=None, authorization_endpoint=None, token_endpoint=None, token_revocation_endpoint=None, user_info_endpoint=None, client_info_endpoint=None, check_session_i_frame=None, end_session_endpoint=None, jwks_uri=None, registration_endpoint=None, open_id_discovery_endpoint=None, open_id_configuration_endpoint=None, id_generation_endpoint=None, introspection_endpoint=None, device_authz_endpoint=None, session_as_jwt=None, sector_identifier_cache_lifetime_in_minutes=None, uma_configuration_endpoint=None, uma_rpt_as_jwt=None, uma_rpt_lifetime=None, uma_ticket_lifetime=None, uma_pct_lifetime=None, uma_resource_lifetime=None, uma_add_scopes_automatically=None, uma_validate_claim_token=None, uma_grant_access_if_no_policies=None, uma_restrict_resource_to_associated_client=None, spontaneous_scope_lifetime=None, openid_sub_attribute=None, response_types_supported=None, response_modes_supported=None, grant_types_supported=None, subject_types_supported=None, default_subject_type=None, user_info_signing_alg_values_supported=None, user_info_encryption_alg_values_supported=None, user_info_encryption_enc_values_supported=None, id_token_signing_alg_values_supported=None, id_token_encryption_alg_values_supported=None, id_token_encryption_enc_values_supported=None, request_object_signing_alg_values_supported=None, request_object_encryption_alg_values_supported=None, request_object_encryption_enc_values_supported=None, token_endpoint_auth_methods_supported=None, token_endpoint_auth_signing_alg_values_supported=None, dynamic_registration_custom_attributes=None, display_values_supported=None, claim_types_supported=None, jwks_algorithms_supported=None, service_documentation=None, claims_locales_supported=None, id_token_token_binding_cnf_values_supported=None, ui_locales_supported=None, claims_parameter_supported=None, request_parameter_supported=None, request_uri_parameter_supported=None, request_uri_hash_verification_enabled=None, require_request_uri_registration=None, op_policy_uri=None, op_tos_uri=None, authorization_code_lifetime=None, refresh_token_lifetime=None, id_token_lifetime=None, id_token_filter_claims_based_on_access_token=None, access_token_lifetime=None, clean_service_interval=None, clean_service_batch_chunk_size=None, clean_service_base_dns=None, key_regeneration_enabled=None, key_regeneration_interval=None, default_signature_algorithm=None, ox_open_id_connect_version=None, ox_id=None, dynamic_registration_enabled=None, dynamic_registration_expiration_time=None, dynamic_registration_persist_client_authorizations=None, trusted_client_enabled=None, skip_authorization_for_open_id_scope_and_pairwise_id=None, dynamic_registration_scopes_param_enabled=None, dynamic_registration_password_grant_type_enabled=None, dynamic_registration_allowed_password_grant_scopes=None, dynamic_registration_custom_object_class=None, person_custom_object_class_list=None, persist_id_token_in_ldap=None, persist_refresh_token_in_ldap=None, allow_post_logout_redirect_without_validation=None, invalidate_session_cookies_after_authorization_flow=None, return_client_secret_on_read=None, reject_jwt_with_none_alg=None, expiration_notificator_enabled=None, use_nested_jwt_during_encryption=None, expiration_notificator_map_size_limit=None, expiration_notificator_interval_in_seconds=None, authentication_filters_enabled=None, client_authentication_filters_enabled=None, client_reg_default_to_code_flow_with_refresh=None, authentication_filters=None, client_authentication_filters=None, cors_configuration_filters=None, session_id_unused_lifetime=None, session_id_unauthenticated_unused_lifetime=None, session_id_enabled=None, session_id_persist_on_prompt_none=None, session_id_request_parameter_enabled=None, change_session_id_on_authentication=None, session_id_persist_in_cache=None, session_id_lifetime=None, server_session_id_lifetime=None, configuration_update_interval=None, enable_client_grant_type_update=None, dynamic_grant_type_default=None, css_location=None, js_location=None, img_location=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, metric_reporter_enabled=None, pairwise_id_type=None, pairwise_calculation_key=None, pairwise_calculation_salt=None, share_subject_id_between_clients_with_same_sector_id=None, web_keys_storage=None, dn_name=None, key_store_file=None, key_store_secret=None, key_selection_strategy=None, ox_eleven_test_mode_token=None, ox_eleven_generate_key_endpoint=None, ox_eleven_sign_endpoint=None, ox_eleven_verify_signature_endpoint=None, ox_eleven_delete_key_endpoint=None, introspection_access_token_must_have_uma_protection_scope=None, end_session_with_access_token=None, cookie_domain=None, enabled_o_auth_audit_logging=None, jms_broker_uri_set=None, jms_user_name=None, jms_password=None, client_white_list=None, client_black_list=None, legacy_id_token_claims=None, custom_headers_with_authorization_response=None, front_channel_logout_session_supported=None, logging_level=None, logging_layout=None, update_user_last_logon_time=None, update_client_access_time=None, log_client_id_on_client_authentication=None, log_client_name_on_client_authentication=None, disable_jdk_logger=None, authorization_request_custom_allowed_parameters=None, legacy_dynamic_registration_scope_param=None, openid_scope_backward_compatibility=None, disable_u2f_endpoint=None, use_local_cache=None, fapi_compatibility=None, force_id_token_hint_precense=None, force_offline_access_scope_to_enable_refresh_token=None, error_reason_enabled=None, remove_refresh_tokens_for_client_on_logout=None, skip_refresh_token_during_refreshing=None, refresh_token_extend_lifetime_on_rotation=None, consent_gathering_script_backward_compatibility=None, introspection_script_backward_compatibility=None, introspection_response_scopes_backward_compatibility=None, software_statement_validation_type=None, software_statement_validation_claim_name=None, authentication_protection_configuration=None, error_handling_method=None, keep_authenticator_attributes_on_acr_change=None, device_authz_request_expires_in=None, device_authz_token_poll_interval=None, device_authz_response_type_to_process_authz=None, backchannel_client_id=None, backchannel_redirect_uri=None, backchannel_authentication_endpoint=None, backchannel_device_registration_endpoint=None, backchannel_token_delivery_modes_supported=None, backchannel_authentication_request_signing_alg_values_supported=None, backchannel_user_code_parameter_supported=None, backchannel_binding_message_pattern=None, backchannel_authentication_response_expires_in=None, backchannel_authentication_response_interval=None, backchannel_login_hint_claims=None, ciba_end_user_notification_config=None, backchannel_requests_processor_job_interval_sec=None, backchannel_requests_processor_job_chunk_size=None, ciba_grant_life_extra_time_sec=None, ciba_max_expiration_time_allowed_sec=None, ciba_enabled=None, discovery_cache_lifetime_in_minutes=None, http_logging_enabled=None, http_logging_exlude_paths=None, external_logger_configuration=None):  # noqa: E501
         """AppConfiguration - a model defined in Swagger"""  # noqa: E501
-        self._session_as_jwt = None
         self._issuer = None
         self._base_endpoint = None
         self._authorization_endpoint = None
@@ -413,19 +440,24 @@ class AppConfiguration(object):
         self._open_id_configuration_endpoint = None
         self._id_generation_endpoint = None
         self._introspection_endpoint = None
-        self._introspection_access_token_must_have_uma_protection_scope = None
+        self._device_authz_endpoint = None
+        self._session_as_jwt = None
+        self._sector_identifier_cache_lifetime_in_minutes = None
         self._uma_configuration_endpoint = None
-        self._sector_identifier_endpoint = None
-        self._ox_eleven_generate_key_endpoint = None
-        self._ox_eleven_sign_endpoint = None
-        self._ox_eleven_verify_signature_endpoint = None
-        self._ox_eleven_delete_key_endpoint = None
-        self._ox_eleven_jwks_endpoint = None
+        self._uma_rpt_as_jwt = None
+        self._uma_rpt_lifetime = None
+        self._uma_ticket_lifetime = None
+        self._uma_pct_lifetime = None
+        self._uma_resource_lifetime = None
+        self._uma_add_scopes_automatically = None
+        self._uma_validate_claim_token = None
+        self._uma_grant_access_if_no_policies = None
+        self._uma_restrict_resource_to_associated_client = None
+        self._spontaneous_scope_lifetime = None
         self._openid_sub_attribute = None
         self._response_types_supported = None
         self._response_modes_supported = None
         self._grant_types_supported = None
-        self._dynamic_grant_type_default = None
         self._subject_types_supported = None
         self._default_subject_type = None
         self._user_info_signing_alg_values_supported = None
@@ -442,57 +474,69 @@ class AppConfiguration(object):
         self._dynamic_registration_custom_attributes = None
         self._display_values_supported = None
         self._claim_types_supported = None
+        self._jwks_algorithms_supported = None
         self._service_documentation = None
         self._claims_locales_supported = None
         self._id_token_token_binding_cnf_values_supported = None
         self._ui_locales_supported = None
-        self._persist_id_token_in_ldap = None
-        self._persist_refresh_token_in_ldap = None
         self._claims_parameter_supported = None
         self._request_parameter_supported = None
         self._request_uri_parameter_supported = None
+        self._request_uri_hash_verification_enabled = None
         self._require_request_uri_registration = None
         self._op_policy_uri = None
         self._op_tos_uri = None
         self._authorization_code_lifetime = None
         self._refresh_token_lifetime = None
         self._id_token_lifetime = None
+        self._id_token_filter_claims_based_on_access_token = None
         self._access_token_lifetime = None
-        self._uma_rpt_lifetime = None
-        self._uma_ticket_lifetime = None
-        self._uma_pct_lifetime = None
-        self._uma_resource_lifetime = None
-        self._uma_add_scopes_automatically = None
-        self._uma_validate_claim_token = None
-        self._uma_grant_access_if_no_policies = None
-        self._uma_restrict_resource_to_associated_client = None
-        self._uma_keep_client_during_resource_set_registration = None
-        self._uma_rpt_as_jwt = None
         self._clean_service_interval = None
-        self._clean_service_base_dns = None
         self._clean_service_batch_chunk_size = None
+        self._clean_service_base_dns = None
         self._key_regeneration_enabled = None
         self._key_regeneration_interval = None
         self._default_signature_algorithm = None
         self._ox_open_id_connect_version = None
-        self._jans_id = None
+        self._ox_id = None
         self._dynamic_registration_enabled = None
         self._dynamic_registration_expiration_time = None
         self._dynamic_registration_persist_client_authorizations = None
         self._trusted_client_enabled = None
+        self._skip_authorization_for_open_id_scope_and_pairwise_id = None
         self._dynamic_registration_scopes_param_enabled = None
+        self._dynamic_registration_password_grant_type_enabled = None
+        self._dynamic_registration_allowed_password_grant_scopes = None
         self._dynamic_registration_custom_object_class = None
         self._person_custom_object_class_list = None
+        self._persist_id_token_in_ldap = None
+        self._persist_refresh_token_in_ldap = None
+        self._allow_post_logout_redirect_without_validation = None
+        self._invalidate_session_cookies_after_authorization_flow = None
+        self._return_client_secret_on_read = None
+        self._reject_jwt_with_none_alg = None
+        self._expiration_notificator_enabled = None
+        self._use_nested_jwt_during_encryption = None
+        self._expiration_notificator_map_size_limit = None
+        self._expiration_notificator_interval_in_seconds = None
         self._authentication_filters_enabled = None
         self._client_authentication_filters_enabled = None
+        self._client_reg_default_to_code_flow_with_refresh = None
         self._authentication_filters = None
         self._client_authentication_filters = None
+        self._cors_configuration_filters = None
         self._session_id_unused_lifetime = None
         self._session_id_unauthenticated_unused_lifetime = None
-        self._session_id_lifetime = None
         self._session_id_enabled = None
         self._session_id_persist_on_prompt_none = None
+        self._session_id_request_parameter_enabled = None
+        self._change_session_id_on_authentication = None
+        self._session_id_persist_in_cache = None
+        self._session_id_lifetime = None
+        self._server_session_id_lifetime = None
         self._configuration_update_interval = None
+        self._enable_client_grant_type_update = None
+        self._dynamic_grant_type_default = None
         self._css_location = None
         self._js_location = None
         self._img_location = None
@@ -507,61 +551,54 @@ class AppConfiguration(object):
         self._dn_name = None
         self._key_store_file = None
         self._key_store_secret = None
+        self._key_selection_strategy = None
+        self._ox_eleven_test_mode_token = None
+        self._ox_eleven_generate_key_endpoint = None
+        self._ox_eleven_sign_endpoint = None
+        self._ox_eleven_verify_signature_endpoint = None
+        self._ox_eleven_delete_key_endpoint = None
+        self._introspection_access_token_must_have_uma_protection_scope = None
         self._end_session_with_access_token = None
+        self._cookie_domain = None
+        self._enabled_o_auth_audit_logging = None
+        self._jms_broker_uri_set = None
+        self._jms_user_name = None
+        self._jms_password = None
         self._client_white_list = None
         self._client_black_list = None
         self._legacy_id_token_claims = None
         self._custom_headers_with_authorization_response = None
         self._front_channel_logout_session_supported = None
-        self._use_cache_for_all_implicit_flow_objects = None
-        self._invalidate_session_cookies_after_authorization_flow = None
+        self._logging_level = None
+        self._logging_layout = None
         self._update_user_last_logon_time = None
         self._update_client_access_time = None
-        self._enable_client_grant_type_update = None
-        self._logging_level = None
-        self._cors_configuration_filters = None
         self._log_client_id_on_client_authentication = None
         self._log_client_name_on_client_authentication = None
+        self._disable_jdk_logger = None
         self._authorization_request_custom_allowed_parameters = None
         self._legacy_dynamic_registration_scope_param = None
         self._openid_scope_backward_compatibility = None
-        self._skip_authorization_for_open_id_scope_and_pairwise_id = None
-        self._allow_post_logout_redirect_without_validation = None
-        self._http_logging_enabled = None
-        self._http_logging_exlude_paths = None
-        self._external_logger_configuration = None
         self._disable_u2f_endpoint = None
-        self._disable_jdk_logger = None
-        self._jms_user_name = None
-        self._jms_password = None
-        self._jms_broker_uri_set = None
-        self._ox_eleven_test_mode_token = None
-        self._enabled_o_auth_audit_logging = None
-        self._authentication_protection_configuration = None
-        self._error_handling_method = None
         self._use_local_cache = None
-        self._spontaneous_scope_lifetime = None
-        self._jwks_algorithms_supported = None
-        self._dynamic_registration_password_grant_type_enabled = None
-        self._return_client_secret_on_read = None
-        self._reject_jwt_with_none_alg = None
-        self._expiration_notificator_enabled = None
-        self._expiration_notificator_map_size_limit = None
-        self._expiration_notificator_interval_in_seconds = None
-        self._client_reg_default_to_code_flow_with_refresh = None
-        self._session_id_request_parameter_enabled = None
-        self._change_session_id_on_authentication = None
-        self._server_session_id_lifetime = None
-        self._cookie_domain = None
-        self._logging_layout = None
         self._fapi_compatibility = None
         self._force_id_token_hint_precense = None
         self._force_offline_access_scope_to_enable_refresh_token = None
         self._error_reason_enabled = None
         self._remove_refresh_tokens_for_client_on_logout = None
+        self._skip_refresh_token_during_refreshing = None
+        self._refresh_token_extend_lifetime_on_rotation = None
         self._consent_gathering_script_backward_compatibility = None
         self._introspection_script_backward_compatibility = None
+        self._introspection_response_scopes_backward_compatibility = None
+        self._software_statement_validation_type = None
+        self._software_statement_validation_claim_name = None
+        self._authentication_protection_configuration = None
+        self._error_handling_method = None
         self._keep_authenticator_attributes_on_acr_change = None
+        self._device_authz_request_expires_in = None
+        self._device_authz_token_poll_interval = None
+        self._device_authz_response_type_to_process_authz = None
         self._backchannel_client_id = None
         self._backchannel_redirect_uri = None
         self._backchannel_authentication_endpoint = None
@@ -578,9 +615,12 @@ class AppConfiguration(object):
         self._backchannel_requests_processor_job_chunk_size = None
         self._ciba_grant_life_extra_time_sec = None
         self._ciba_max_expiration_time_allowed_sec = None
+        self._ciba_enabled = None
+        self._discovery_cache_lifetime_in_minutes = None
+        self._http_logging_enabled = None
+        self._http_logging_exlude_paths = None
+        self._external_logger_configuration = None
         self.discriminator = None
-        if session_as_jwt is not None:
-            self.session_as_jwt = session_as_jwt
         if issuer is not None:
             self.issuer = issuer
         if base_endpoint is not None:
@@ -611,22 +651,34 @@ class AppConfiguration(object):
             self.id_generation_endpoint = id_generation_endpoint
         if introspection_endpoint is not None:
             self.introspection_endpoint = introspection_endpoint
-        if introspection_access_token_must_have_uma_protection_scope is not None:
-            self.introspection_access_token_must_have_uma_protection_scope = introspection_access_token_must_have_uma_protection_scope
+        if device_authz_endpoint is not None:
+            self.device_authz_endpoint = device_authz_endpoint
+        if session_as_jwt is not None:
+            self.session_as_jwt = session_as_jwt
+        if sector_identifier_cache_lifetime_in_minutes is not None:
+            self.sector_identifier_cache_lifetime_in_minutes = sector_identifier_cache_lifetime_in_minutes
         if uma_configuration_endpoint is not None:
             self.uma_configuration_endpoint = uma_configuration_endpoint
-        if sector_identifier_endpoint is not None:
-            self.sector_identifier_endpoint = sector_identifier_endpoint
-        if ox_eleven_generate_key_endpoint is not None:
-            self.ox_eleven_generate_key_endpoint = ox_eleven_generate_key_endpoint
-        if ox_eleven_sign_endpoint is not None:
-            self.ox_eleven_sign_endpoint = ox_eleven_sign_endpoint
-        if ox_eleven_verify_signature_endpoint is not None:
-            self.ox_eleven_verify_signature_endpoint = ox_eleven_verify_signature_endpoint
-        if ox_eleven_delete_key_endpoint is not None:
-            self.ox_eleven_delete_key_endpoint = ox_eleven_delete_key_endpoint
-        if ox_eleven_jwks_endpoint is not None:
-            self.ox_eleven_jwks_endpoint = ox_eleven_jwks_endpoint
+        if uma_rpt_as_jwt is not None:
+            self.uma_rpt_as_jwt = uma_rpt_as_jwt
+        if uma_rpt_lifetime is not None:
+            self.uma_rpt_lifetime = uma_rpt_lifetime
+        if uma_ticket_lifetime is not None:
+            self.uma_ticket_lifetime = uma_ticket_lifetime
+        if uma_pct_lifetime is not None:
+            self.uma_pct_lifetime = uma_pct_lifetime
+        if uma_resource_lifetime is not None:
+            self.uma_resource_lifetime = uma_resource_lifetime
+        if uma_add_scopes_automatically is not None:
+            self.uma_add_scopes_automatically = uma_add_scopes_automatically
+        if uma_validate_claim_token is not None:
+            self.uma_validate_claim_token = uma_validate_claim_token
+        if uma_grant_access_if_no_policies is not None:
+            self.uma_grant_access_if_no_policies = uma_grant_access_if_no_policies
+        if uma_restrict_resource_to_associated_client is not None:
+            self.uma_restrict_resource_to_associated_client = uma_restrict_resource_to_associated_client
+        if spontaneous_scope_lifetime is not None:
+            self.spontaneous_scope_lifetime = spontaneous_scope_lifetime
         if openid_sub_attribute is not None:
             self.openid_sub_attribute = openid_sub_attribute
         if response_types_supported is not None:
@@ -635,8 +687,6 @@ class AppConfiguration(object):
             self.response_modes_supported = response_modes_supported
         if grant_types_supported is not None:
             self.grant_types_supported = grant_types_supported
-        if dynamic_grant_type_default is not None:
-            self.dynamic_grant_type_default = dynamic_grant_type_default
         if subject_types_supported is not None:
             self.subject_types_supported = subject_types_supported
         if default_subject_type is not None:
@@ -669,6 +719,8 @@ class AppConfiguration(object):
             self.display_values_supported = display_values_supported
         if claim_types_supported is not None:
             self.claim_types_supported = claim_types_supported
+        if jwks_algorithms_supported is not None:
+            self.jwks_algorithms_supported = jwks_algorithms_supported
         if service_documentation is not None:
             self.service_documentation = service_documentation
         if claims_locales_supported is not None:
@@ -677,16 +729,14 @@ class AppConfiguration(object):
             self.id_token_token_binding_cnf_values_supported = id_token_token_binding_cnf_values_supported
         if ui_locales_supported is not None:
             self.ui_locales_supported = ui_locales_supported
-        if persist_id_token_in_ldap is not None:
-            self.persist_id_token_in_ldap = persist_id_token_in_ldap
-        if persist_refresh_token_in_ldap is not None:
-            self.persist_refresh_token_in_ldap = persist_refresh_token_in_ldap
         if claims_parameter_supported is not None:
             self.claims_parameter_supported = claims_parameter_supported
         if request_parameter_supported is not None:
             self.request_parameter_supported = request_parameter_supported
         if request_uri_parameter_supported is not None:
             self.request_uri_parameter_supported = request_uri_parameter_supported
+        if request_uri_hash_verification_enabled is not None:
+            self.request_uri_hash_verification_enabled = request_uri_hash_verification_enabled
         if require_request_uri_registration is not None:
             self.require_request_uri_registration = require_request_uri_registration
         if op_policy_uri is not None:
@@ -699,34 +749,16 @@ class AppConfiguration(object):
             self.refresh_token_lifetime = refresh_token_lifetime
         if id_token_lifetime is not None:
             self.id_token_lifetime = id_token_lifetime
+        if id_token_filter_claims_based_on_access_token is not None:
+            self.id_token_filter_claims_based_on_access_token = id_token_filter_claims_based_on_access_token
         if access_token_lifetime is not None:
             self.access_token_lifetime = access_token_lifetime
-        if uma_rpt_lifetime is not None:
-            self.uma_rpt_lifetime = uma_rpt_lifetime
-        if uma_ticket_lifetime is not None:
-            self.uma_ticket_lifetime = uma_ticket_lifetime
-        if uma_pct_lifetime is not None:
-            self.uma_pct_lifetime = uma_pct_lifetime
-        if uma_resource_lifetime is not None:
-            self.uma_resource_lifetime = uma_resource_lifetime
-        if uma_add_scopes_automatically is not None:
-            self.uma_add_scopes_automatically = uma_add_scopes_automatically
-        if uma_validate_claim_token is not None:
-            self.uma_validate_claim_token = uma_validate_claim_token
-        if uma_grant_access_if_no_policies is not None:
-            self.uma_grant_access_if_no_policies = uma_grant_access_if_no_policies
-        if uma_restrict_resource_to_associated_client is not None:
-            self.uma_restrict_resource_to_associated_client = uma_restrict_resource_to_associated_client
-        if uma_keep_client_during_resource_set_registration is not None:
-            self.uma_keep_client_during_resource_set_registration = uma_keep_client_during_resource_set_registration
-        if uma_rpt_as_jwt is not None:
-            self.uma_rpt_as_jwt = uma_rpt_as_jwt
         if clean_service_interval is not None:
             self.clean_service_interval = clean_service_interval
-        if clean_service_base_dns is not None:
-            self.clean_service_base_dns = clean_service_base_dns
         if clean_service_batch_chunk_size is not None:
             self.clean_service_batch_chunk_size = clean_service_batch_chunk_size
+        if clean_service_base_dns is not None:
+            self.clean_service_base_dns = clean_service_base_dns
         if key_regeneration_enabled is not None:
             self.key_regeneration_enabled = key_regeneration_enabled
         if key_regeneration_interval is not None:
@@ -735,8 +767,8 @@ class AppConfiguration(object):
             self.default_signature_algorithm = default_signature_algorithm
         if ox_open_id_connect_version is not None:
             self.ox_open_id_connect_version = ox_open_id_connect_version
-        if jans_id is not None:
-            self.jans_id = jans_id
+        if ox_id is not None:
+            self.ox_id = ox_id
         if dynamic_registration_enabled is not None:
             self.dynamic_registration_enabled = dynamic_registration_enabled
         if dynamic_registration_expiration_time is not None:
@@ -745,32 +777,74 @@ class AppConfiguration(object):
             self.dynamic_registration_persist_client_authorizations = dynamic_registration_persist_client_authorizations
         if trusted_client_enabled is not None:
             self.trusted_client_enabled = trusted_client_enabled
+        if skip_authorization_for_open_id_scope_and_pairwise_id is not None:
+            self.skip_authorization_for_open_id_scope_and_pairwise_id = skip_authorization_for_open_id_scope_and_pairwise_id
         if dynamic_registration_scopes_param_enabled is not None:
             self.dynamic_registration_scopes_param_enabled = dynamic_registration_scopes_param_enabled
+        if dynamic_registration_password_grant_type_enabled is not None:
+            self.dynamic_registration_password_grant_type_enabled = dynamic_registration_password_grant_type_enabled
+        if dynamic_registration_allowed_password_grant_scopes is not None:
+            self.dynamic_registration_allowed_password_grant_scopes = dynamic_registration_allowed_password_grant_scopes
         if dynamic_registration_custom_object_class is not None:
             self.dynamic_registration_custom_object_class = dynamic_registration_custom_object_class
         if person_custom_object_class_list is not None:
             self.person_custom_object_class_list = person_custom_object_class_list
+        if persist_id_token_in_ldap is not None:
+            self.persist_id_token_in_ldap = persist_id_token_in_ldap
+        if persist_refresh_token_in_ldap is not None:
+            self.persist_refresh_token_in_ldap = persist_refresh_token_in_ldap
+        if allow_post_logout_redirect_without_validation is not None:
+            self.allow_post_logout_redirect_without_validation = allow_post_logout_redirect_without_validation
+        if invalidate_session_cookies_after_authorization_flow is not None:
+            self.invalidate_session_cookies_after_authorization_flow = invalidate_session_cookies_after_authorization_flow
+        if return_client_secret_on_read is not None:
+            self.return_client_secret_on_read = return_client_secret_on_read
+        if reject_jwt_with_none_alg is not None:
+            self.reject_jwt_with_none_alg = reject_jwt_with_none_alg
+        if expiration_notificator_enabled is not None:
+            self.expiration_notificator_enabled = expiration_notificator_enabled
+        if use_nested_jwt_during_encryption is not None:
+            self.use_nested_jwt_during_encryption = use_nested_jwt_during_encryption
+        if expiration_notificator_map_size_limit is not None:
+            self.expiration_notificator_map_size_limit = expiration_notificator_map_size_limit
+        if expiration_notificator_interval_in_seconds is not None:
+            self.expiration_notificator_interval_in_seconds = expiration_notificator_interval_in_seconds
         if authentication_filters_enabled is not None:
             self.authentication_filters_enabled = authentication_filters_enabled
         if client_authentication_filters_enabled is not None:
             self.client_authentication_filters_enabled = client_authentication_filters_enabled
+        if client_reg_default_to_code_flow_with_refresh is not None:
+            self.client_reg_default_to_code_flow_with_refresh = client_reg_default_to_code_flow_with_refresh
         if authentication_filters is not None:
             self.authentication_filters = authentication_filters
         if client_authentication_filters is not None:
             self.client_authentication_filters = client_authentication_filters
+        if cors_configuration_filters is not None:
+            self.cors_configuration_filters = cors_configuration_filters
         if session_id_unused_lifetime is not None:
             self.session_id_unused_lifetime = session_id_unused_lifetime
         if session_id_unauthenticated_unused_lifetime is not None:
             self.session_id_unauthenticated_unused_lifetime = session_id_unauthenticated_unused_lifetime
-        if session_id_lifetime is not None:
-            self.session_id_lifetime = session_id_lifetime
         if session_id_enabled is not None:
             self.session_id_enabled = session_id_enabled
         if session_id_persist_on_prompt_none is not None:
             self.session_id_persist_on_prompt_none = session_id_persist_on_prompt_none
+        if session_id_request_parameter_enabled is not None:
+            self.session_id_request_parameter_enabled = session_id_request_parameter_enabled
+        if change_session_id_on_authentication is not None:
+            self.change_session_id_on_authentication = change_session_id_on_authentication
+        if session_id_persist_in_cache is not None:
+            self.session_id_persist_in_cache = session_id_persist_in_cache
+        if session_id_lifetime is not None:
+            self.session_id_lifetime = session_id_lifetime
+        if server_session_id_lifetime is not None:
+            self.server_session_id_lifetime = server_session_id_lifetime
         if configuration_update_interval is not None:
             self.configuration_update_interval = configuration_update_interval
+        if enable_client_grant_type_update is not None:
+            self.enable_client_grant_type_update = enable_client_grant_type_update
+        if dynamic_grant_type_default is not None:
+            self.dynamic_grant_type_default = dynamic_grant_type_default
         if css_location is not None:
             self.css_location = css_location
         if js_location is not None:
@@ -799,8 +873,32 @@ class AppConfiguration(object):
             self.key_store_file = key_store_file
         if key_store_secret is not None:
             self.key_store_secret = key_store_secret
+        if key_selection_strategy is not None:
+            self.key_selection_strategy = key_selection_strategy
+        if ox_eleven_test_mode_token is not None:
+            self.ox_eleven_test_mode_token = ox_eleven_test_mode_token
+        if ox_eleven_generate_key_endpoint is not None:
+            self.ox_eleven_generate_key_endpoint = ox_eleven_generate_key_endpoint
+        if ox_eleven_sign_endpoint is not None:
+            self.ox_eleven_sign_endpoint = ox_eleven_sign_endpoint
+        if ox_eleven_verify_signature_endpoint is not None:
+            self.ox_eleven_verify_signature_endpoint = ox_eleven_verify_signature_endpoint
+        if ox_eleven_delete_key_endpoint is not None:
+            self.ox_eleven_delete_key_endpoint = ox_eleven_delete_key_endpoint
+        if introspection_access_token_must_have_uma_protection_scope is not None:
+            self.introspection_access_token_must_have_uma_protection_scope = introspection_access_token_must_have_uma_protection_scope
         if end_session_with_access_token is not None:
             self.end_session_with_access_token = end_session_with_access_token
+        if cookie_domain is not None:
+            self.cookie_domain = cookie_domain
+        if enabled_o_auth_audit_logging is not None:
+            self.enabled_o_auth_audit_logging = enabled_o_auth_audit_logging
+        if jms_broker_uri_set is not None:
+            self.jms_broker_uri_set = jms_broker_uri_set
+        if jms_user_name is not None:
+            self.jms_user_name = jms_user_name
+        if jms_password is not None:
+            self.jms_password = jms_password
         if client_white_list is not None:
             self.client_white_list = client_white_list
         if client_black_list is not None:
@@ -811,88 +909,30 @@ class AppConfiguration(object):
             self.custom_headers_with_authorization_response = custom_headers_with_authorization_response
         if front_channel_logout_session_supported is not None:
             self.front_channel_logout_session_supported = front_channel_logout_session_supported
-        if use_cache_for_all_implicit_flow_objects is not None:
-            self.use_cache_for_all_implicit_flow_objects = use_cache_for_all_implicit_flow_objects
-        if invalidate_session_cookies_after_authorization_flow is not None:
-            self.invalidate_session_cookies_after_authorization_flow = invalidate_session_cookies_after_authorization_flow
+        if logging_level is not None:
+            self.logging_level = logging_level
+        if logging_layout is not None:
+            self.logging_layout = logging_layout
         if update_user_last_logon_time is not None:
             self.update_user_last_logon_time = update_user_last_logon_time
         if update_client_access_time is not None:
             self.update_client_access_time = update_client_access_time
-        if enable_client_grant_type_update is not None:
-            self.enable_client_grant_type_update = enable_client_grant_type_update
-        if logging_level is not None:
-            self.logging_level = logging_level
-        if cors_configuration_filters is not None:
-            self.cors_configuration_filters = cors_configuration_filters
         if log_client_id_on_client_authentication is not None:
             self.log_client_id_on_client_authentication = log_client_id_on_client_authentication
         if log_client_name_on_client_authentication is not None:
             self.log_client_name_on_client_authentication = log_client_name_on_client_authentication
+        if disable_jdk_logger is not None:
+            self.disable_jdk_logger = disable_jdk_logger
         if authorization_request_custom_allowed_parameters is not None:
             self.authorization_request_custom_allowed_parameters = authorization_request_custom_allowed_parameters
         if legacy_dynamic_registration_scope_param is not None:
             self.legacy_dynamic_registration_scope_param = legacy_dynamic_registration_scope_param
         if openid_scope_backward_compatibility is not None:
             self.openid_scope_backward_compatibility = openid_scope_backward_compatibility
-        if skip_authorization_for_open_id_scope_and_pairwise_id is not None:
-            self.skip_authorization_for_open_id_scope_and_pairwise_id = skip_authorization_for_open_id_scope_and_pairwise_id
-        if allow_post_logout_redirect_without_validation is not None:
-            self.allow_post_logout_redirect_without_validation = allow_post_logout_redirect_without_validation
-        if http_logging_enabled is not None:
-            self.http_logging_enabled = http_logging_enabled
-        if http_logging_exlude_paths is not None:
-            self.http_logging_exlude_paths = http_logging_exlude_paths
-        if external_logger_configuration is not None:
-            self.external_logger_configuration = external_logger_configuration
         if disable_u2f_endpoint is not None:
             self.disable_u2f_endpoint = disable_u2f_endpoint
-        if disable_jdk_logger is not None:
-            self.disable_jdk_logger = disable_jdk_logger
-        if jms_user_name is not None:
-            self.jms_user_name = jms_user_name
-        if jms_password is not None:
-            self.jms_password = jms_password
-        if jms_broker_uri_set is not None:
-            self.jms_broker_uri_set = jms_broker_uri_set
-        if ox_eleven_test_mode_token is not None:
-            self.ox_eleven_test_mode_token = ox_eleven_test_mode_token
-        if enabled_o_auth_audit_logging is not None:
-            self.enabled_o_auth_audit_logging = enabled_o_auth_audit_logging
-        if authentication_protection_configuration is not None:
-            self.authentication_protection_configuration = authentication_protection_configuration
-        if error_handling_method is not None:
-            self.error_handling_method = error_handling_method
         if use_local_cache is not None:
             self.use_local_cache = use_local_cache
-        if spontaneous_scope_lifetime is not None:
-            self.spontaneous_scope_lifetime = spontaneous_scope_lifetime
-        if jwks_algorithms_supported is not None:
-            self.jwks_algorithms_supported = jwks_algorithms_supported
-        if dynamic_registration_password_grant_type_enabled is not None:
-            self.dynamic_registration_password_grant_type_enabled = dynamic_registration_password_grant_type_enabled
-        if return_client_secret_on_read is not None:
-            self.return_client_secret_on_read = return_client_secret_on_read
-        if reject_jwt_with_none_alg is not None:
-            self.reject_jwt_with_none_alg = reject_jwt_with_none_alg
-        if expiration_notificator_enabled is not None:
-            self.expiration_notificator_enabled = expiration_notificator_enabled
-        if expiration_notificator_map_size_limit is not None:
-            self.expiration_notificator_map_size_limit = expiration_notificator_map_size_limit
-        if expiration_notificator_interval_in_seconds is not None:
-            self.expiration_notificator_interval_in_seconds = expiration_notificator_interval_in_seconds
-        if client_reg_default_to_code_flow_with_refresh is not None:
-            self.client_reg_default_to_code_flow_with_refresh = client_reg_default_to_code_flow_with_refresh
-        if session_id_request_parameter_enabled is not None:
-            self.session_id_request_parameter_enabled = session_id_request_parameter_enabled
-        if change_session_id_on_authentication is not None:
-            self.change_session_id_on_authentication = change_session_id_on_authentication
-        if server_session_id_lifetime is not None:
-            self.server_session_id_lifetime = server_session_id_lifetime
-        if cookie_domain is not None:
-            self.cookie_domain = cookie_domain
-        if logging_layout is not None:
-            self.logging_layout = logging_layout
         if fapi_compatibility is not None:
             self.fapi_compatibility = fapi_compatibility
         if force_id_token_hint_precense is not None:
@@ -903,12 +943,32 @@ class AppConfiguration(object):
             self.error_reason_enabled = error_reason_enabled
         if remove_refresh_tokens_for_client_on_logout is not None:
             self.remove_refresh_tokens_for_client_on_logout = remove_refresh_tokens_for_client_on_logout
+        if skip_refresh_token_during_refreshing is not None:
+            self.skip_refresh_token_during_refreshing = skip_refresh_token_during_refreshing
+        if refresh_token_extend_lifetime_on_rotation is not None:
+            self.refresh_token_extend_lifetime_on_rotation = refresh_token_extend_lifetime_on_rotation
         if consent_gathering_script_backward_compatibility is not None:
             self.consent_gathering_script_backward_compatibility = consent_gathering_script_backward_compatibility
         if introspection_script_backward_compatibility is not None:
             self.introspection_script_backward_compatibility = introspection_script_backward_compatibility
+        if introspection_response_scopes_backward_compatibility is not None:
+            self.introspection_response_scopes_backward_compatibility = introspection_response_scopes_backward_compatibility
+        if software_statement_validation_type is not None:
+            self.software_statement_validation_type = software_statement_validation_type
+        if software_statement_validation_claim_name is not None:
+            self.software_statement_validation_claim_name = software_statement_validation_claim_name
+        if authentication_protection_configuration is not None:
+            self.authentication_protection_configuration = authentication_protection_configuration
+        if error_handling_method is not None:
+            self.error_handling_method = error_handling_method
         if keep_authenticator_attributes_on_acr_change is not None:
             self.keep_authenticator_attributes_on_acr_change = keep_authenticator_attributes_on_acr_change
+        if device_authz_request_expires_in is not None:
+            self.device_authz_request_expires_in = device_authz_request_expires_in
+        if device_authz_token_poll_interval is not None:
+            self.device_authz_token_poll_interval = device_authz_token_poll_interval
+        if device_authz_response_type_to_process_authz is not None:
+            self.device_authz_response_type_to_process_authz = device_authz_response_type_to_process_authz
         if backchannel_client_id is not None:
             self.backchannel_client_id = backchannel_client_id
         if backchannel_redirect_uri is not None:
@@ -941,29 +1001,16 @@ class AppConfiguration(object):
             self.ciba_grant_life_extra_time_sec = ciba_grant_life_extra_time_sec
         if ciba_max_expiration_time_allowed_sec is not None:
             self.ciba_max_expiration_time_allowed_sec = ciba_max_expiration_time_allowed_sec
-
-    @property
-    def session_as_jwt(self):
-        """Gets the session_as_jwt of this AppConfiguration.  # noqa: E501
-
-        Boolean value true saves session data as a JWT.  # noqa: E501
-
-        :return: The session_as_jwt of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._session_as_jwt
-
-    @session_as_jwt.setter
-    def session_as_jwt(self, session_as_jwt):
-        """Sets the session_as_jwt of this AppConfiguration.
-
-        Boolean value true saves session data as a JWT.  # noqa: E501
-
-        :param session_as_jwt: The session_as_jwt of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._session_as_jwt = session_as_jwt
+        if ciba_enabled is not None:
+            self.ciba_enabled = ciba_enabled
+        if discovery_cache_lifetime_in_minutes is not None:
+            self.discovery_cache_lifetime_in_minutes = discovery_cache_lifetime_in_minutes
+        if http_logging_enabled is not None:
+            self.http_logging_enabled = http_logging_enabled
+        if http_logging_exlude_paths is not None:
+            self.http_logging_exlude_paths = http_logging_exlude_paths
+        if external_logger_configuration is not None:
+            self.external_logger_configuration = external_logger_configuration
 
     @property
     def issuer(self):
@@ -1176,7 +1223,7 @@ class AppConfiguration(object):
     def jwks_uri(self):
         """Gets the jwks_uri of this AppConfiguration.  # noqa: E501
 
-        URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.  # noqa: E501
+        URL of the OP\\'s JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.  # noqa: E501
 
         :return: The jwks_uri of this AppConfiguration.  # noqa: E501
         :rtype: str
@@ -1187,7 +1234,7 @@ class AppConfiguration(object):
     def jwks_uri(self, jwks_uri):
         """Sets the jwks_uri of this AppConfiguration.
 
-        URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.  # noqa: E501
+        URL of the OP\\'s JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.  # noqa: E501
 
         :param jwks_uri: The jwks_uri of this AppConfiguration.  # noqa: E501
         :type: str
@@ -1311,27 +1358,73 @@ class AppConfiguration(object):
         self._introspection_endpoint = introspection_endpoint
 
     @property
-    def introspection_access_token_must_have_uma_protection_scope(self):
-        """Gets the introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+    def device_authz_endpoint(self):
+        """Gets the device_authz_endpoint of this AppConfiguration.  # noqa: E501
 
-        Reject introspection requests if access_token in Authorization header does not have uma_protection scope.  # noqa: E501
+        URL for the Device Authorization.  # noqa: E501
 
-        :return: The introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+        :return: The device_authz_endpoint of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._device_authz_endpoint
+
+    @device_authz_endpoint.setter
+    def device_authz_endpoint(self, device_authz_endpoint):
+        """Sets the device_authz_endpoint of this AppConfiguration.
+
+        URL for the Device Authorization.  # noqa: E501
+
+        :param device_authz_endpoint: The device_authz_endpoint of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._device_authz_endpoint = device_authz_endpoint
+
+    @property
+    def session_as_jwt(self):
+        """Gets the session_as_jwt of this AppConfiguration.  # noqa: E501
+
+        Boolean value true saves session data as a JWT.  # noqa: E501
+
+        :return: The session_as_jwt of this AppConfiguration.  # noqa: E501
         :rtype: bool
         """
-        return self._introspection_access_token_must_have_uma_protection_scope
+        return self._session_as_jwt
 
-    @introspection_access_token_must_have_uma_protection_scope.setter
-    def introspection_access_token_must_have_uma_protection_scope(self, introspection_access_token_must_have_uma_protection_scope):
-        """Sets the introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.
+    @session_as_jwt.setter
+    def session_as_jwt(self, session_as_jwt):
+        """Sets the session_as_jwt of this AppConfiguration.
 
-        Reject introspection requests if access_token in Authorization header does not have uma_protection scope.  # noqa: E501
+        Boolean value true saves session data as a JWT.  # noqa: E501
 
-        :param introspection_access_token_must_have_uma_protection_scope: The introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+        :param session_as_jwt: The session_as_jwt of this AppConfiguration.  # noqa: E501
         :type: bool
         """
 
-        self._introspection_access_token_must_have_uma_protection_scope = introspection_access_token_must_have_uma_protection_scope
+        self._session_as_jwt = session_as_jwt
+
+    @property
+    def sector_identifier_cache_lifetime_in_minutes(self):
+        """Gets the sector_identifier_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+
+        Sector Identifier cache lifetime in minutes.  # noqa: E501
+
+        :return: The sector_identifier_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._sector_identifier_cache_lifetime_in_minutes
+
+    @sector_identifier_cache_lifetime_in_minutes.setter
+    def sector_identifier_cache_lifetime_in_minutes(self, sector_identifier_cache_lifetime_in_minutes):
+        """Sets the sector_identifier_cache_lifetime_in_minutes of this AppConfiguration.
+
+        Sector Identifier cache lifetime in minutes.  # noqa: E501
+
+        :param sector_identifier_cache_lifetime_in_minutes: The sector_identifier_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._sector_identifier_cache_lifetime_in_minutes = sector_identifier_cache_lifetime_in_minutes
 
     @property
     def uma_configuration_endpoint(self):
@@ -1357,142 +1450,234 @@ class AppConfiguration(object):
         self._uma_configuration_endpoint = uma_configuration_endpoint
 
     @property
-    def sector_identifier_endpoint(self):
-        """Gets the sector_identifier_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_rpt_as_jwt(self):
+        """Gets the uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
 
-        URL for the Sector Identifier Endpoint.  # noqa: E501
+        Issue RPT as JWT or as random string.  # noqa: E501
 
-        :return: The sector_identifier_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
+        :rtype: bool
         """
-        return self._sector_identifier_endpoint
+        return self._uma_rpt_as_jwt
 
-    @sector_identifier_endpoint.setter
-    def sector_identifier_endpoint(self, sector_identifier_endpoint):
-        """Sets the sector_identifier_endpoint of this AppConfiguration.
+    @uma_rpt_as_jwt.setter
+    def uma_rpt_as_jwt(self, uma_rpt_as_jwt):
+        """Sets the uma_rpt_as_jwt of this AppConfiguration.
 
-        URL for the Sector Identifier Endpoint.  # noqa: E501
+        Issue RPT as JWT or as random string.  # noqa: E501
 
-        :param sector_identifier_endpoint: The sector_identifier_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_rpt_as_jwt: The uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
+        :type: bool
         """
 
-        self._sector_identifier_endpoint = sector_identifier_endpoint
+        self._uma_rpt_as_jwt = uma_rpt_as_jwt
 
     @property
-    def ox_eleven_generate_key_endpoint(self):
-        """Gets the ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_rpt_lifetime(self):
+        """Gets the uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
 
-        URL for the oxEleven Generate Key Endpoint.  # noqa: E501
+        UMA RPT lifetime.  # noqa: E501
 
-        :return: The ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
         """
-        return self._ox_eleven_generate_key_endpoint
+        return self._uma_rpt_lifetime
 
-    @ox_eleven_generate_key_endpoint.setter
-    def ox_eleven_generate_key_endpoint(self, ox_eleven_generate_key_endpoint):
-        """Sets the ox_eleven_generate_key_endpoint of this AppConfiguration.
+    @uma_rpt_lifetime.setter
+    def uma_rpt_lifetime(self, uma_rpt_lifetime):
+        """Sets the uma_rpt_lifetime of this AppConfiguration.
 
-        URL for the oxEleven Generate Key Endpoint.  # noqa: E501
+        UMA RPT lifetime.  # noqa: E501
 
-        :param ox_eleven_generate_key_endpoint: The ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_rpt_lifetime: The uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
         """
 
-        self._ox_eleven_generate_key_endpoint = ox_eleven_generate_key_endpoint
+        self._uma_rpt_lifetime = uma_rpt_lifetime
 
     @property
-    def ox_eleven_sign_endpoint(self):
-        """Gets the ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_ticket_lifetime(self):
+        """Gets the uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
 
-        URL for the oxEleven Sign Endpoint.  # noqa: E501
+        UMA ticket lifetime.  # noqa: E501
 
-        :return: The ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
         """
-        return self._ox_eleven_sign_endpoint
+        return self._uma_ticket_lifetime
 
-    @ox_eleven_sign_endpoint.setter
-    def ox_eleven_sign_endpoint(self, ox_eleven_sign_endpoint):
-        """Sets the ox_eleven_sign_endpoint of this AppConfiguration.
+    @uma_ticket_lifetime.setter
+    def uma_ticket_lifetime(self, uma_ticket_lifetime):
+        """Sets the uma_ticket_lifetime of this AppConfiguration.
 
-        URL for the oxEleven Sign Endpoint.  # noqa: E501
+        UMA ticket lifetime.  # noqa: E501
 
-        :param ox_eleven_sign_endpoint: The ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_ticket_lifetime: The uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
         """
 
-        self._ox_eleven_sign_endpoint = ox_eleven_sign_endpoint
+        self._uma_ticket_lifetime = uma_ticket_lifetime
 
     @property
-    def ox_eleven_verify_signature_endpoint(self):
-        """Gets the ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_pct_lifetime(self):
+        """Gets the uma_pct_lifetime of this AppConfiguration.  # noqa: E501
 
-        URL for the oxEleven Verify Signature Endpoint.  # noqa: E501
+        UMA PCT lifetime.  # noqa: E501
 
-        :return: The ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_pct_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
         """
-        return self._ox_eleven_verify_signature_endpoint
+        return self._uma_pct_lifetime
 
-    @ox_eleven_verify_signature_endpoint.setter
-    def ox_eleven_verify_signature_endpoint(self, ox_eleven_verify_signature_endpoint):
-        """Sets the ox_eleven_verify_signature_endpoint of this AppConfiguration.
+    @uma_pct_lifetime.setter
+    def uma_pct_lifetime(self, uma_pct_lifetime):
+        """Sets the uma_pct_lifetime of this AppConfiguration.
 
-        URL for the oxEleven Verify Signature Endpoint.  # noqa: E501
+        UMA PCT lifetime.  # noqa: E501
 
-        :param ox_eleven_verify_signature_endpoint: The ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_pct_lifetime: The uma_pct_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
         """
 
-        self._ox_eleven_verify_signature_endpoint = ox_eleven_verify_signature_endpoint
+        self._uma_pct_lifetime = uma_pct_lifetime
 
     @property
-    def ox_eleven_delete_key_endpoint(self):
-        """Gets the ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_resource_lifetime(self):
+        """Gets the uma_resource_lifetime of this AppConfiguration.  # noqa: E501
 
-        URL for the oxEleven Delete Key Endpoint.  # noqa: E501
+        UMA PCT lifetime.  # noqa: E501
 
-        :return: The ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_resource_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
         """
-        return self._ox_eleven_delete_key_endpoint
+        return self._uma_resource_lifetime
 
-    @ox_eleven_delete_key_endpoint.setter
-    def ox_eleven_delete_key_endpoint(self, ox_eleven_delete_key_endpoint):
-        """Sets the ox_eleven_delete_key_endpoint of this AppConfiguration.
+    @uma_resource_lifetime.setter
+    def uma_resource_lifetime(self, uma_resource_lifetime):
+        """Sets the uma_resource_lifetime of this AppConfiguration.
 
-        URL for the oxEleven Delete Key Endpoint.  # noqa: E501
+        UMA PCT lifetime.  # noqa: E501
 
-        :param ox_eleven_delete_key_endpoint: The ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_resource_lifetime: The uma_resource_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
         """
 
-        self._ox_eleven_delete_key_endpoint = ox_eleven_delete_key_endpoint
+        self._uma_resource_lifetime = uma_resource_lifetime
 
     @property
-    def ox_eleven_jwks_endpoint(self):
-        """Gets the ox_eleven_jwks_endpoint of this AppConfiguration.  # noqa: E501
+    def uma_add_scopes_automatically(self):
+        """Gets the uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
 
-        URL for the oxEleven JWKS Endpoint.  # noqa: E501
+        Add UMA scopes automatically if it is not registered yet.  # noqa: E501
 
-        :return: The ox_eleven_jwks_endpoint of this AppConfiguration.  # noqa: E501
-        :rtype: str
+        :return: The uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
+        :rtype: bool
         """
-        return self._ox_eleven_jwks_endpoint
+        return self._uma_add_scopes_automatically
 
-    @ox_eleven_jwks_endpoint.setter
-    def ox_eleven_jwks_endpoint(self, ox_eleven_jwks_endpoint):
-        """Sets the ox_eleven_jwks_endpoint of this AppConfiguration.
+    @uma_add_scopes_automatically.setter
+    def uma_add_scopes_automatically(self, uma_add_scopes_automatically):
+        """Sets the uma_add_scopes_automatically of this AppConfiguration.
 
-        URL for the oxEleven JWKS Endpoint.  # noqa: E501
+        Add UMA scopes automatically if it is not registered yet.  # noqa: E501
 
-        :param ox_eleven_jwks_endpoint: The ox_eleven_jwks_endpoint of this AppConfiguration.  # noqa: E501
-        :type: str
+        :param uma_add_scopes_automatically: The uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
+        :type: bool
         """
 
-        self._ox_eleven_jwks_endpoint = ox_eleven_jwks_endpoint
+        self._uma_add_scopes_automatically = uma_add_scopes_automatically
+
+    @property
+    def uma_validate_claim_token(self):
+        """Gets the uma_validate_claim_token of this AppConfiguration.  # noqa: E501
+
+        Validate claim_token as id_token assuming it is issued by local idp.  # noqa: E501
+
+        :return: The uma_validate_claim_token of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._uma_validate_claim_token
+
+    @uma_validate_claim_token.setter
+    def uma_validate_claim_token(self, uma_validate_claim_token):
+        """Sets the uma_validate_claim_token of this AppConfiguration.
+
+        Validate claim_token as id_token assuming it is issued by local idp.  # noqa: E501
+
+        :param uma_validate_claim_token: The uma_validate_claim_token of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._uma_validate_claim_token = uma_validate_claim_token
+
+    @property
+    def uma_grant_access_if_no_policies(self):
+        """Gets the uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
+
+        Specifies whether to grant access to resources if there are no any policies associated with scopes.  # noqa: E501
+
+        :return: The uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._uma_grant_access_if_no_policies
+
+    @uma_grant_access_if_no_policies.setter
+    def uma_grant_access_if_no_policies(self, uma_grant_access_if_no_policies):
+        """Sets the uma_grant_access_if_no_policies of this AppConfiguration.
+
+        Specifies whether to grant access to resources if there are no any policies associated with scopes.  # noqa: E501
+
+        :param uma_grant_access_if_no_policies: The uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._uma_grant_access_if_no_policies = uma_grant_access_if_no_policies
+
+    @property
+    def uma_restrict_resource_to_associated_client(self):
+        """Gets the uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
+
+        Restrict access to resource by associated client.  # noqa: E501
+
+        :return: The uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._uma_restrict_resource_to_associated_client
+
+    @uma_restrict_resource_to_associated_client.setter
+    def uma_restrict_resource_to_associated_client(self, uma_restrict_resource_to_associated_client):
+        """Sets the uma_restrict_resource_to_associated_client of this AppConfiguration.
+
+        Restrict access to resource by associated client.  # noqa: E501
+
+        :param uma_restrict_resource_to_associated_client: The uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._uma_restrict_resource_to_associated_client = uma_restrict_resource_to_associated_client
+
+    @property
+    def spontaneous_scope_lifetime(self):
+        """Gets the spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
+
+        The lifetime of spontaneous scope in seconds.  # noqa: E501
+
+        :return: The spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._spontaneous_scope_lifetime
+
+    @spontaneous_scope_lifetime.setter
+    def spontaneous_scope_lifetime(self, spontaneous_scope_lifetime):
+        """Sets the spontaneous_scope_lifetime of this AppConfiguration.
+
+        The lifetime of spontaneous scope in seconds.  # noqa: E501
+
+        :param spontaneous_scope_lifetime: The spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._spontaneous_scope_lifetime = spontaneous_scope_lifetime
 
     @property
     def openid_sub_attribute(self):
@@ -1585,29 +1770,6 @@ class AppConfiguration(object):
         """
 
         self._grant_types_supported = grant_types_supported
-
-    @property
-    def dynamic_grant_type_default(self):
-        """Gets the dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
-
-        list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..  # noqa: E501
-
-        :return: The dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
-        :rtype: list[str]
-        """
-        return self._dynamic_grant_type_default
-
-    @dynamic_grant_type_default.setter
-    def dynamic_grant_type_default(self, dynamic_grant_type_default):
-        """Sets the dynamic_grant_type_default of this AppConfiguration.
-
-        list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..  # noqa: E501
-
-        :param dynamic_grant_type_default: The dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._dynamic_grant_type_default = dynamic_grant_type_default
 
     @property
     def subject_types_supported(self):
@@ -1978,6 +2140,29 @@ class AppConfiguration(object):
         self._claim_types_supported = claim_types_supported
 
     @property
+    def jwks_algorithms_supported(self):
+        """Gets the jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
+
+        A list of algorithms that will be used in JWKS endpoint.  # noqa: E501
+
+        :return: The jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._jwks_algorithms_supported
+
+    @jwks_algorithms_supported.setter
+    def jwks_algorithms_supported(self, jwks_algorithms_supported):
+        """Sets the jwks_algorithms_supported of this AppConfiguration.
+
+        A list of algorithms that will be used in JWKS endpoint.  # noqa: E501
+
+        :param jwks_algorithms_supported: The jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._jwks_algorithms_supported = jwks_algorithms_supported
+
+    @property
     def service_documentation(self):
         """Gets the service_documentation of this AppConfiguration.  # noqa: E501
 
@@ -2070,52 +2255,6 @@ class AppConfiguration(object):
         self._ui_locales_supported = ui_locales_supported
 
     @property
-    def persist_id_token_in_ldap(self):
-        """Gets the persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
-
-        Specifies whether to persist id_token into LDAP (otherwise saves into cache).  # noqa: E501
-
-        :return: The persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._persist_id_token_in_ldap
-
-    @persist_id_token_in_ldap.setter
-    def persist_id_token_in_ldap(self, persist_id_token_in_ldap):
-        """Sets the persist_id_token_in_ldap of this AppConfiguration.
-
-        Specifies whether to persist id_token into LDAP (otherwise saves into cache).  # noqa: E501
-
-        :param persist_id_token_in_ldap: The persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._persist_id_token_in_ldap = persist_id_token_in_ldap
-
-    @property
-    def persist_refresh_token_in_ldap(self):
-        """Gets the persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
-
-        Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).  # noqa: E501
-
-        :return: The persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._persist_refresh_token_in_ldap
-
-    @persist_refresh_token_in_ldap.setter
-    def persist_refresh_token_in_ldap(self, persist_refresh_token_in_ldap):
-        """Sets the persist_refresh_token_in_ldap of this AppConfiguration.
-
-        Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).  # noqa: E501
-
-        :param persist_refresh_token_in_ldap: The persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._persist_refresh_token_in_ldap = persist_refresh_token_in_ldap
-
-    @property
     def claims_parameter_supported(self):
         """Gets the claims_parameter_supported of this AppConfiguration.  # noqa: E501
 
@@ -2185,6 +2324,29 @@ class AppConfiguration(object):
         self._request_uri_parameter_supported = request_uri_parameter_supported
 
     @property
+    def request_uri_hash_verification_enabled(self):
+        """Gets the request_uri_hash_verification_enabled of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether the OP supports use of the request_uri hash verification.  # noqa: E501
+
+        :return: The request_uri_hash_verification_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._request_uri_hash_verification_enabled
+
+    @request_uri_hash_verification_enabled.setter
+    def request_uri_hash_verification_enabled(self, request_uri_hash_verification_enabled):
+        """Sets the request_uri_hash_verification_enabled of this AppConfiguration.
+
+        Boolean value specifying whether the OP supports use of the request_uri hash verification.  # noqa: E501
+
+        :param request_uri_hash_verification_enabled: The request_uri_hash_verification_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._request_uri_hash_verification_enabled = request_uri_hash_verification_enabled
+
+    @property
     def require_request_uri_registration(self):
         """Gets the require_request_uri_registration of this AppConfiguration.  # noqa: E501
 
@@ -2211,7 +2373,7 @@ class AppConfiguration(object):
     def op_policy_uri(self):
         """Gets the op_policy_uri of this AppConfiguration.  # noqa: E501
 
-        URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.  # noqa: E501
+        URL that the OpenID Provider provides to the person registering the Client to read about the OP\\'s requirements on how the Relying Party can use the data provided by the OP.  # noqa: E501
 
         :return: The op_policy_uri of this AppConfiguration.  # noqa: E501
         :rtype: str
@@ -2222,7 +2384,7 @@ class AppConfiguration(object):
     def op_policy_uri(self, op_policy_uri):
         """Sets the op_policy_uri of this AppConfiguration.
 
-        URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.  # noqa: E501
+        URL that the OpenID Provider provides to the person registering the Client to read about the OP\\'s requirements on how the Relying Party can use the data provided by the OP.  # noqa: E501
 
         :param op_policy_uri: The op_policy_uri of this AppConfiguration.  # noqa: E501
         :type: str
@@ -2323,6 +2485,29 @@ class AppConfiguration(object):
         self._id_token_lifetime = id_token_lifetime
 
     @property
+    def id_token_filter_claims_based_on_access_token(self):
+        """Gets the id_token_filter_claims_based_on_access_token of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether idToken filters claims based on accessToken.  # noqa: E501
+
+        :return: The id_token_filter_claims_based_on_access_token of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._id_token_filter_claims_based_on_access_token
+
+    @id_token_filter_claims_based_on_access_token.setter
+    def id_token_filter_claims_based_on_access_token(self, id_token_filter_claims_based_on_access_token):
+        """Sets the id_token_filter_claims_based_on_access_token of this AppConfiguration.
+
+        Boolean value specifying whether idToken filters claims based on accessToken.  # noqa: E501
+
+        :param id_token_filter_claims_based_on_access_token: The id_token_filter_claims_based_on_access_token of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._id_token_filter_claims_based_on_access_token = id_token_filter_claims_based_on_access_token
+
+    @property
     def access_token_lifetime(self):
         """Gets the access_token_lifetime of this AppConfiguration.  # noqa: E501
 
@@ -2344,236 +2529,6 @@ class AppConfiguration(object):
         """
 
         self._access_token_lifetime = access_token_lifetime
-
-    @property
-    def uma_rpt_lifetime(self):
-        """Gets the uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
-
-        UMA RPT lifetime.  # noqa: E501
-
-        :return: The uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._uma_rpt_lifetime
-
-    @uma_rpt_lifetime.setter
-    def uma_rpt_lifetime(self, uma_rpt_lifetime):
-        """Sets the uma_rpt_lifetime of this AppConfiguration.
-
-        UMA RPT lifetime.  # noqa: E501
-
-        :param uma_rpt_lifetime: The uma_rpt_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._uma_rpt_lifetime = uma_rpt_lifetime
-
-    @property
-    def uma_ticket_lifetime(self):
-        """Gets the uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
-
-        UMA ticket lifetime.  # noqa: E501
-
-        :return: The uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._uma_ticket_lifetime
-
-    @uma_ticket_lifetime.setter
-    def uma_ticket_lifetime(self, uma_ticket_lifetime):
-        """Sets the uma_ticket_lifetime of this AppConfiguration.
-
-        UMA ticket lifetime.  # noqa: E501
-
-        :param uma_ticket_lifetime: The uma_ticket_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._uma_ticket_lifetime = uma_ticket_lifetime
-
-    @property
-    def uma_pct_lifetime(self):
-        """Gets the uma_pct_lifetime of this AppConfiguration.  # noqa: E501
-
-        UMA PCT lifetime.  # noqa: E501
-
-        :return: The uma_pct_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._uma_pct_lifetime
-
-    @uma_pct_lifetime.setter
-    def uma_pct_lifetime(self, uma_pct_lifetime):
-        """Sets the uma_pct_lifetime of this AppConfiguration.
-
-        UMA PCT lifetime.  # noqa: E501
-
-        :param uma_pct_lifetime: The uma_pct_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._uma_pct_lifetime = uma_pct_lifetime
-
-    @property
-    def uma_resource_lifetime(self):
-        """Gets the uma_resource_lifetime of this AppConfiguration.  # noqa: E501
-
-        UMA PCT lifetime.  # noqa: E501
-
-        :return: The uma_resource_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._uma_resource_lifetime
-
-    @uma_resource_lifetime.setter
-    def uma_resource_lifetime(self, uma_resource_lifetime):
-        """Sets the uma_resource_lifetime of this AppConfiguration.
-
-        UMA PCT lifetime.  # noqa: E501
-
-        :param uma_resource_lifetime: The uma_resource_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._uma_resource_lifetime = uma_resource_lifetime
-
-    @property
-    def uma_add_scopes_automatically(self):
-        """Gets the uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
-
-        Add UMA scopes automatically if it is not registered yet.  # noqa: E501
-
-        :return: The uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_add_scopes_automatically
-
-    @uma_add_scopes_automatically.setter
-    def uma_add_scopes_automatically(self, uma_add_scopes_automatically):
-        """Sets the uma_add_scopes_automatically of this AppConfiguration.
-
-        Add UMA scopes automatically if it is not registered yet.  # noqa: E501
-
-        :param uma_add_scopes_automatically: The uma_add_scopes_automatically of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_add_scopes_automatically = uma_add_scopes_automatically
-
-    @property
-    def uma_validate_claim_token(self):
-        """Gets the uma_validate_claim_token of this AppConfiguration.  # noqa: E501
-
-        Validate claim_token as id_token assuming it is issued by local idp.  # noqa: E501
-
-        :return: The uma_validate_claim_token of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_validate_claim_token
-
-    @uma_validate_claim_token.setter
-    def uma_validate_claim_token(self, uma_validate_claim_token):
-        """Sets the uma_validate_claim_token of this AppConfiguration.
-
-        Validate claim_token as id_token assuming it is issued by local idp.  # noqa: E501
-
-        :param uma_validate_claim_token: The uma_validate_claim_token of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_validate_claim_token = uma_validate_claim_token
-
-    @property
-    def uma_grant_access_if_no_policies(self):
-        """Gets the uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
-
-        Specifies whether to grant access to resources if there are no any policies associated with scopes.  # noqa: E501
-
-        :return: The uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_grant_access_if_no_policies
-
-    @uma_grant_access_if_no_policies.setter
-    def uma_grant_access_if_no_policies(self, uma_grant_access_if_no_policies):
-        """Sets the uma_grant_access_if_no_policies of this AppConfiguration.
-
-        Specifies whether to grant access to resources if there are no any policies associated with scopes.  # noqa: E501
-
-        :param uma_grant_access_if_no_policies: The uma_grant_access_if_no_policies of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_grant_access_if_no_policies = uma_grant_access_if_no_policies
-
-    @property
-    def uma_restrict_resource_to_associated_client(self):
-        """Gets the uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
-
-        Restrict access to resource by associated client.  # noqa: E501
-
-        :return: The uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_restrict_resource_to_associated_client
-
-    @uma_restrict_resource_to_associated_client.setter
-    def uma_restrict_resource_to_associated_client(self, uma_restrict_resource_to_associated_client):
-        """Sets the uma_restrict_resource_to_associated_client of this AppConfiguration.
-
-        Restrict access to resource by associated client.  # noqa: E501
-
-        :param uma_restrict_resource_to_associated_client: The uma_restrict_resource_to_associated_client of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_restrict_resource_to_associated_client = uma_restrict_resource_to_associated_client
-
-    @property
-    def uma_keep_client_during_resource_set_registration(self):
-        """Gets the uma_keep_client_during_resource_set_registration of this AppConfiguration.  # noqa: E501
-
-        Save client information during resource registration.  # noqa: E501
-
-        :return: The uma_keep_client_during_resource_set_registration of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_keep_client_during_resource_set_registration
-
-    @uma_keep_client_during_resource_set_registration.setter
-    def uma_keep_client_during_resource_set_registration(self, uma_keep_client_during_resource_set_registration):
-        """Sets the uma_keep_client_during_resource_set_registration of this AppConfiguration.
-
-        Save client information during resource registration.  # noqa: E501
-
-        :param uma_keep_client_during_resource_set_registration: The uma_keep_client_during_resource_set_registration of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_keep_client_during_resource_set_registration = uma_keep_client_during_resource_set_registration
-
-    @property
-    def uma_rpt_as_jwt(self):
-        """Gets the uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
-
-        Issue RPT as JWT or as random string.  # noqa: E501
-
-        :return: The uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._uma_rpt_as_jwt
-
-    @uma_rpt_as_jwt.setter
-    def uma_rpt_as_jwt(self, uma_rpt_as_jwt):
-        """Sets the uma_rpt_as_jwt of this AppConfiguration.
-
-        Issue RPT as JWT or as random string.  # noqa: E501
-
-        :param uma_rpt_as_jwt: The uma_rpt_as_jwt of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._uma_rpt_as_jwt = uma_rpt_as_jwt
 
     @property
     def clean_service_interval(self):
@@ -2599,29 +2554,6 @@ class AppConfiguration(object):
         self._clean_service_interval = clean_service_interval
 
     @property
-    def clean_service_base_dns(self):
-        """Gets the clean_service_base_dns of this AppConfiguration.  # noqa: E501
-
-        List of additional base dns under which AS will look up for expired entities.  # noqa: E501
-
-        :return: The clean_service_base_dns of this AppConfiguration.  # noqa: E501
-        :rtype: list[str]
-        """
-        return self._clean_service_base_dns
-
-    @clean_service_base_dns.setter
-    def clean_service_base_dns(self, clean_service_base_dns):
-        """Sets the clean_service_base_dns of this AppConfiguration.
-
-        List of additional base dns under which AS will look up for expired entities.  # noqa: E501
-
-        :param clean_service_base_dns: The clean_service_base_dns of this AppConfiguration.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._clean_service_base_dns = clean_service_base_dns
-
-    @property
     def clean_service_batch_chunk_size(self):
         """Gets the clean_service_batch_chunk_size of this AppConfiguration.  # noqa: E501
 
@@ -2643,6 +2575,29 @@ class AppConfiguration(object):
         """
 
         self._clean_service_batch_chunk_size = clean_service_batch_chunk_size
+
+    @property
+    def clean_service_base_dns(self):
+        """Gets the clean_service_base_dns of this AppConfiguration.  # noqa: E501
+
+        List of additional base dns under which AS will look up for expired entities.  # noqa: E501
+
+        :return: The clean_service_base_dns of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._clean_service_base_dns
+
+    @clean_service_base_dns.setter
+    def clean_service_base_dns(self, clean_service_base_dns):
+        """Sets the clean_service_base_dns of this AppConfiguration.
+
+        List of additional base dns under which AS will look up for expired entities.  # noqa: E501
+
+        :param clean_service_base_dns: The clean_service_base_dns of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._clean_service_base_dns = clean_service_base_dns
 
     @property
     def key_regeneration_enabled(self):
@@ -2737,27 +2692,27 @@ class AppConfiguration(object):
         self._ox_open_id_connect_version = ox_open_id_connect_version
 
     @property
-    def jans_id(self):
-        """Gets the jans_id of this AppConfiguration.  # noqa: E501
+    def ox_id(self):
+        """Gets the ox_id of this AppConfiguration.  # noqa: E501
 
         URL for the Inum generator Service.  # noqa: E501
 
-        :return: The jans_id of this AppConfiguration.  # noqa: E501
+        :return: The ox_id of this AppConfiguration.  # noqa: E501
         :rtype: str
         """
-        return self._jans_id
+        return self._ox_id
 
-    @jans_id.setter
-    def jans_id(self, jans_id):
-        """Sets the jans_id of this AppConfiguration.
+    @ox_id.setter
+    def ox_id(self, ox_id):
+        """Sets the ox_id of this AppConfiguration.
 
         URL for the Inum generator Service.  # noqa: E501
 
-        :param jans_id: The jans_id of this AppConfiguration.  # noqa: E501
+        :param ox_id: The ox_id of this AppConfiguration.  # noqa: E501
         :type: str
         """
 
-        self._jans_id = jans_id
+        self._ox_id = ox_id
 
     @property
     def dynamic_registration_enabled(self):
@@ -2852,6 +2807,29 @@ class AppConfiguration(object):
         self._trusted_client_enabled = trusted_client_enabled
 
     @property
+    def skip_authorization_for_open_id_scope_and_pairwise_id(self):
+        """Gets the skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
+
+        If a client has only openid scope and pairwise id, person should not have to authorize.  # noqa: E501
+
+        :return: The skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._skip_authorization_for_open_id_scope_and_pairwise_id
+
+    @skip_authorization_for_open_id_scope_and_pairwise_id.setter
+    def skip_authorization_for_open_id_scope_and_pairwise_id(self, skip_authorization_for_open_id_scope_and_pairwise_id):
+        """Sets the skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.
+
+        If a client has only openid scope and pairwise id, person should not have to authorize.  # noqa: E501
+
+        :param skip_authorization_for_open_id_scope_and_pairwise_id: The skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._skip_authorization_for_open_id_scope_and_pairwise_id = skip_authorization_for_open_id_scope_and_pairwise_id
+
+    @property
     def dynamic_registration_scopes_param_enabled(self):
         """Gets the dynamic_registration_scopes_param_enabled of this AppConfiguration.  # noqa: E501
 
@@ -2873,6 +2851,52 @@ class AppConfiguration(object):
         """
 
         self._dynamic_registration_scopes_param_enabled = dynamic_registration_scopes_param_enabled
+
+    @property
+    def dynamic_registration_password_grant_type_enabled(self):
+        """Gets the dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.  # noqa: E501
+
+        :return: The dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._dynamic_registration_password_grant_type_enabled
+
+    @dynamic_registration_password_grant_type_enabled.setter
+    def dynamic_registration_password_grant_type_enabled(self, dynamic_registration_password_grant_type_enabled):
+        """Sets the dynamic_registration_password_grant_type_enabled of this AppConfiguration.
+
+        Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.  # noqa: E501
+
+        :param dynamic_registration_password_grant_type_enabled: The dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._dynamic_registration_password_grant_type_enabled = dynamic_registration_password_grant_type_enabled
+
+    @property
+    def dynamic_registration_allowed_password_grant_scopes(self):
+        """Gets the dynamic_registration_allowed_password_grant_scopes of this AppConfiguration.  # noqa: E501
+
+        List of grant scopes for dynamic registration.  # noqa: E501
+
+        :return: The dynamic_registration_allowed_password_grant_scopes of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._dynamic_registration_allowed_password_grant_scopes
+
+    @dynamic_registration_allowed_password_grant_scopes.setter
+    def dynamic_registration_allowed_password_grant_scopes(self, dynamic_registration_allowed_password_grant_scopes):
+        """Sets the dynamic_registration_allowed_password_grant_scopes of this AppConfiguration.
+
+        List of grant scopes for dynamic registration.  # noqa: E501
+
+        :param dynamic_registration_allowed_password_grant_scopes: The dynamic_registration_allowed_password_grant_scopes of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._dynamic_registration_allowed_password_grant_scopes = dynamic_registration_allowed_password_grant_scopes
 
     @property
     def dynamic_registration_custom_object_class(self):
@@ -2921,6 +2945,236 @@ class AppConfiguration(object):
         self._person_custom_object_class_list = person_custom_object_class_list
 
     @property
+    def persist_id_token_in_ldap(self):
+        """Gets the persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
+
+        Specifies whether to persist id_token into LDAP (otherwise saves into cache).  # noqa: E501
+
+        :return: The persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._persist_id_token_in_ldap
+
+    @persist_id_token_in_ldap.setter
+    def persist_id_token_in_ldap(self, persist_id_token_in_ldap):
+        """Sets the persist_id_token_in_ldap of this AppConfiguration.
+
+        Specifies whether to persist id_token into LDAP (otherwise saves into cache).  # noqa: E501
+
+        :param persist_id_token_in_ldap: The persist_id_token_in_ldap of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._persist_id_token_in_ldap = persist_id_token_in_ldap
+
+    @property
+    def persist_refresh_token_in_ldap(self):
+        """Gets the persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
+
+        Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).  # noqa: E501
+
+        :return: The persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._persist_refresh_token_in_ldap
+
+    @persist_refresh_token_in_ldap.setter
+    def persist_refresh_token_in_ldap(self, persist_refresh_token_in_ldap):
+        """Sets the persist_refresh_token_in_ldap of this AppConfiguration.
+
+        Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).  # noqa: E501
+
+        :param persist_refresh_token_in_ldap: The persist_refresh_token_in_ldap of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._persist_refresh_token_in_ldap = persist_refresh_token_in_ldap
+
+    @property
+    def allow_post_logout_redirect_without_validation(self):
+        """Gets the allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
+
+        Allows post logout redirect without validation for End Session Endpoint.  # noqa: E501
+
+        :return: The allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._allow_post_logout_redirect_without_validation
+
+    @allow_post_logout_redirect_without_validation.setter
+    def allow_post_logout_redirect_without_validation(self, allow_post_logout_redirect_without_validation):
+        """Sets the allow_post_logout_redirect_without_validation of this AppConfiguration.
+
+        Allows post logout redirect without validation for End Session Endpoint.  # noqa: E501
+
+        :param allow_post_logout_redirect_without_validation: The allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._allow_post_logout_redirect_without_validation = allow_post_logout_redirect_without_validation
+
+    @property
+    def invalidate_session_cookies_after_authorization_flow(self):
+        """Gets the invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
+
+        Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.  # noqa: E501
+
+        :return: The invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._invalidate_session_cookies_after_authorization_flow
+
+    @invalidate_session_cookies_after_authorization_flow.setter
+    def invalidate_session_cookies_after_authorization_flow(self, invalidate_session_cookies_after_authorization_flow):
+        """Sets the invalidate_session_cookies_after_authorization_flow of this AppConfiguration.
+
+        Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.  # noqa: E501
+
+        :param invalidate_session_cookies_after_authorization_flow: The invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._invalidate_session_cookies_after_authorization_flow = invalidate_session_cookies_after_authorization_flow
+
+    @property
+    def return_client_secret_on_read(self):
+        """Gets the return_client_secret_on_read of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.  # noqa: E501
+
+        :return: The return_client_secret_on_read of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._return_client_secret_on_read
+
+    @return_client_secret_on_read.setter
+    def return_client_secret_on_read(self, return_client_secret_on_read):
+        """Sets the return_client_secret_on_read of this AppConfiguration.
+
+        Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.  # noqa: E501
+
+        :param return_client_secret_on_read: The return_client_secret_on_read of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._return_client_secret_on_read = return_client_secret_on_read
+
+    @property
+    def reject_jwt_with_none_alg(self):
+        """Gets the reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether reject JWT requested or validated with algorithm None.  # noqa: E501
+
+        :return: The reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._reject_jwt_with_none_alg
+
+    @reject_jwt_with_none_alg.setter
+    def reject_jwt_with_none_alg(self, reject_jwt_with_none_alg):
+        """Sets the reject_jwt_with_none_alg of this AppConfiguration.
+
+        Boolean value specifying whether reject JWT requested or validated with algorithm None.  # noqa: E501
+
+        :param reject_jwt_with_none_alg: The reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._reject_jwt_with_none_alg = reject_jwt_with_none_alg
+
+    @property
+    def expiration_notificator_enabled(self):
+        """Gets the expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).  # noqa: E501
+
+        :return: The expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._expiration_notificator_enabled
+
+    @expiration_notificator_enabled.setter
+    def expiration_notificator_enabled(self, expiration_notificator_enabled):
+        """Sets the expiration_notificator_enabled of this AppConfiguration.
+
+        Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).  # noqa: E501
+
+        :param expiration_notificator_enabled: The expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._expiration_notificator_enabled = expiration_notificator_enabled
+
+    @property
+    def use_nested_jwt_during_encryption(self):
+        """Gets the use_nested_jwt_during_encryption of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to use nested Jwt during encryption.  # noqa: E501
+
+        :return: The use_nested_jwt_during_encryption of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._use_nested_jwt_during_encryption
+
+    @use_nested_jwt_during_encryption.setter
+    def use_nested_jwt_during_encryption(self, use_nested_jwt_during_encryption):
+        """Sets the use_nested_jwt_during_encryption of this AppConfiguration.
+
+        Boolean value specifying whether to use nested Jwt during encryption.  # noqa: E501
+
+        :param use_nested_jwt_during_encryption: The use_nested_jwt_during_encryption of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._use_nested_jwt_during_encryption = use_nested_jwt_during_encryption
+
+    @property
+    def expiration_notificator_map_size_limit(self):
+        """Gets the expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
+
+        The expiration notificator maximum size limit.  # noqa: E501
+
+        :return: The expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._expiration_notificator_map_size_limit
+
+    @expiration_notificator_map_size_limit.setter
+    def expiration_notificator_map_size_limit(self, expiration_notificator_map_size_limit):
+        """Sets the expiration_notificator_map_size_limit of this AppConfiguration.
+
+        The expiration notificator maximum size limit.  # noqa: E501
+
+        :param expiration_notificator_map_size_limit: The expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._expiration_notificator_map_size_limit = expiration_notificator_map_size_limit
+
+    @property
+    def expiration_notificator_interval_in_seconds(self):
+        """Gets the expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
+
+        The expiration notificator interval in seconds.  # noqa: E501
+
+        :return: The expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._expiration_notificator_interval_in_seconds
+
+    @expiration_notificator_interval_in_seconds.setter
+    def expiration_notificator_interval_in_seconds(self, expiration_notificator_interval_in_seconds):
+        """Sets the expiration_notificator_interval_in_seconds of this AppConfiguration.
+
+        The expiration notificator interval in seconds.  # noqa: E501
+
+        :param expiration_notificator_interval_in_seconds: The expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._expiration_notificator_interval_in_seconds = expiration_notificator_interval_in_seconds
+
+    @property
     def authentication_filters_enabled(self):
         """Gets the authentication_filters_enabled of this AppConfiguration.  # noqa: E501
 
@@ -2967,13 +3221,36 @@ class AppConfiguration(object):
         self._client_authentication_filters_enabled = client_authentication_filters_enabled
 
     @property
+    def client_reg_default_to_code_flow_with_refresh(self):
+        """Gets the client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.  # noqa: E501
+
+        :return: The client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._client_reg_default_to_code_flow_with_refresh
+
+    @client_reg_default_to_code_flow_with_refresh.setter
+    def client_reg_default_to_code_flow_with_refresh(self, client_reg_default_to_code_flow_with_refresh):
+        """Sets the client_reg_default_to_code_flow_with_refresh of this AppConfiguration.
+
+        Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.  # noqa: E501
+
+        :param client_reg_default_to_code_flow_with_refresh: The client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._client_reg_default_to_code_flow_with_refresh = client_reg_default_to_code_flow_with_refresh
+
+    @property
     def authentication_filters(self):
         """Gets the authentication_filters of this AppConfiguration.  # noqa: E501
 
-        User authentication filters.  # noqa: E501
+        List of authentication filters.  # noqa: E501
 
         :return: The authentication_filters of this AppConfiguration.  # noqa: E501
-        :rtype: list[AppConfigurationAuthenticationFilters]
+        :rtype: list[AuthenticationFilters]
         """
         return self._authentication_filters
 
@@ -2981,10 +3258,10 @@ class AppConfiguration(object):
     def authentication_filters(self, authentication_filters):
         """Sets the authentication_filters of this AppConfiguration.
 
-        User authentication filters.  # noqa: E501
+        List of authentication filters.  # noqa: E501
 
         :param authentication_filters: The authentication_filters of this AppConfiguration.  # noqa: E501
-        :type: list[AppConfigurationAuthenticationFilters]
+        :type: list[AuthenticationFilters]
         """
 
         self._authentication_filters = authentication_filters
@@ -2993,10 +3270,10 @@ class AppConfiguration(object):
     def client_authentication_filters(self):
         """Gets the client_authentication_filters of this AppConfiguration.  # noqa: E501
 
-        Client authentication filters.  # noqa: E501
+        List of client authentication filters.  # noqa: E501
 
         :return: The client_authentication_filters of this AppConfiguration.  # noqa: E501
-        :rtype: list[AppConfigurationClientAuthenticationFilters]
+        :rtype: list[AuthenticationFilters]
         """
         return self._client_authentication_filters
 
@@ -3004,13 +3281,36 @@ class AppConfiguration(object):
     def client_authentication_filters(self, client_authentication_filters):
         """Sets the client_authentication_filters of this AppConfiguration.
 
-        Client authentication filters.  # noqa: E501
+        List of client authentication filters.  # noqa: E501
 
         :param client_authentication_filters: The client_authentication_filters of this AppConfiguration.  # noqa: E501
-        :type: list[AppConfigurationClientAuthenticationFilters]
+        :type: list[AuthenticationFilters]
         """
 
         self._client_authentication_filters = client_authentication_filters
+
+    @property
+    def cors_configuration_filters(self):
+        """Gets the cors_configuration_filters of this AppConfiguration.  # noqa: E501
+
+        CORS Configuration filters.  # noqa: E501
+
+        :return: The cors_configuration_filters of this AppConfiguration.  # noqa: E501
+        :rtype: list[CorsConfigurationFilter]
+        """
+        return self._cors_configuration_filters
+
+    @cors_configuration_filters.setter
+    def cors_configuration_filters(self, cors_configuration_filters):
+        """Sets the cors_configuration_filters of this AppConfiguration.
+
+        CORS Configuration filters.  # noqa: E501
+
+        :param cors_configuration_filters: The cors_configuration_filters of this AppConfiguration.  # noqa: E501
+        :type: list[CorsConfigurationFilter]
+        """
+
+        self._cors_configuration_filters = cors_configuration_filters
 
     @property
     def session_id_unused_lifetime(self):
@@ -3059,29 +3359,6 @@ class AppConfiguration(object):
         self._session_id_unauthenticated_unused_lifetime = session_id_unauthenticated_unused_lifetime
 
     @property
-    def session_id_lifetime(self):
-        """Gets the session_id_lifetime of this AppConfiguration.  # noqa: E501
-
-        The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.  # noqa: E501
-
-        :return: The session_id_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._session_id_lifetime
-
-    @session_id_lifetime.setter
-    def session_id_lifetime(self, session_id_lifetime):
-        """Sets the session_id_lifetime of this AppConfiguration.
-
-        The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.  # noqa: E501
-
-        :param session_id_lifetime: The session_id_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._session_id_lifetime = session_id_lifetime
-
-    @property
     def session_id_enabled(self):
         """Gets the session_id_enabled of this AppConfiguration.  # noqa: E501
 
@@ -3128,6 +3405,121 @@ class AppConfiguration(object):
         self._session_id_persist_on_prompt_none = session_id_persist_on_prompt_none
 
     @property
+    def session_id_request_parameter_enabled(self):
+        """Gets the session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
+
+        :return: The session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._session_id_request_parameter_enabled
+
+    @session_id_request_parameter_enabled.setter
+    def session_id_request_parameter_enabled(self, session_id_request_parameter_enabled):
+        """Sets the session_id_request_parameter_enabled of this AppConfiguration.
+
+        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
+
+        :param session_id_request_parameter_enabled: The session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._session_id_request_parameter_enabled = session_id_request_parameter_enabled
+
+    @property
+    def change_session_id_on_authentication(self):
+        """Gets the change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to change session_id on authentication.  # noqa: E501
+
+        :return: The change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._change_session_id_on_authentication
+
+    @change_session_id_on_authentication.setter
+    def change_session_id_on_authentication(self, change_session_id_on_authentication):
+        """Sets the change_session_id_on_authentication of this AppConfiguration.
+
+        Boolean value specifying whether to change session_id on authentication.  # noqa: E501
+
+        :param change_session_id_on_authentication: The change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._change_session_id_on_authentication = change_session_id_on_authentication
+
+    @property
+    def session_id_persist_in_cache(self):
+        """Gets the session_id_persist_in_cache of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to persist session_id in cache.  # noqa: E501
+
+        :return: The session_id_persist_in_cache of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._session_id_persist_in_cache
+
+    @session_id_persist_in_cache.setter
+    def session_id_persist_in_cache(self, session_id_persist_in_cache):
+        """Sets the session_id_persist_in_cache of this AppConfiguration.
+
+        Boolean value specifying whether to persist session_id in cache.  # noqa: E501
+
+        :param session_id_persist_in_cache: The session_id_persist_in_cache of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._session_id_persist_in_cache = session_id_persist_in_cache
+
+    @property
+    def session_id_lifetime(self):
+        """Gets the session_id_lifetime of this AppConfiguration.  # noqa: E501
+
+        The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.  # noqa: E501
+
+        :return: The session_id_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._session_id_lifetime
+
+    @session_id_lifetime.setter
+    def session_id_lifetime(self, session_id_lifetime):
+        """Sets the session_id_lifetime of this AppConfiguration.
+
+        The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.  # noqa: E501
+
+        :param session_id_lifetime: The session_id_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._session_id_lifetime = session_id_lifetime
+
+    @property
+    def server_session_id_lifetime(self):
+        """Gets the server_session_id_lifetime of this AppConfiguration.  # noqa: E501
+
+        The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.  # noqa: E501
+
+        :return: The server_session_id_lifetime of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._server_session_id_lifetime
+
+    @server_session_id_lifetime.setter
+    def server_session_id_lifetime(self, server_session_id_lifetime):
+        """Sets the server_session_id_lifetime of this AppConfiguration.
+
+        The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.  # noqa: E501
+
+        :param server_session_id_lifetime: The server_session_id_lifetime of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._server_session_id_lifetime = server_session_id_lifetime
+
+    @property
     def configuration_update_interval(self):
         """Gets the configuration_update_interval of this AppConfiguration.  # noqa: E501
 
@@ -3149,6 +3541,52 @@ class AppConfiguration(object):
         """
 
         self._configuration_update_interval = configuration_update_interval
+
+    @property
+    def enable_client_grant_type_update(self):
+        """Gets the enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
+
+        Boolean value to specify if client can update Grant Type values.  # noqa: E501
+
+        :return: The enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._enable_client_grant_type_update
+
+    @enable_client_grant_type_update.setter
+    def enable_client_grant_type_update(self, enable_client_grant_type_update):
+        """Sets the enable_client_grant_type_update of this AppConfiguration.
+
+        Boolean value to specify if client can update Grant Type values.  # noqa: E501
+
+        :param enable_client_grant_type_update: The enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._enable_client_grant_type_update = enable_client_grant_type_update
+
+    @property
+    def dynamic_grant_type_default(self):
+        """Gets the dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
+
+        list of the OAuth 2.0 Grant Type values that it\\'s possible to set via client registration API..  # noqa: E501
+
+        :return: The dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._dynamic_grant_type_default
+
+    @dynamic_grant_type_default.setter
+    def dynamic_grant_type_default(self, dynamic_grant_type_default):
+        """Sets the dynamic_grant_type_default of this AppConfiguration.
+
+        list of the OAuth 2.0 Grant Type values that it\\'s possible to set via client registration API..  # noqa: E501
+
+        :param dynamic_grant_type_default: The dynamic_grant_type_default of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._dynamic_grant_type_default = dynamic_grant_type_default
 
     @property
     def css_location(self):
@@ -3400,6 +3838,12 @@ class AppConfiguration(object):
         :param web_keys_storage: The web_keys_storage of this AppConfiguration.  # noqa: E501
         :type: str
         """
+        allowed_values = ["keystore", "pkcs11"]  # noqa: E501
+        if web_keys_storage not in allowed_values:
+            raise ValueError(
+                "Invalid value for `web_keys_storage` ({0}), must be one of {1}"  # noqa: E501
+                .format(web_keys_storage, allowed_values)
+            )
 
         self._web_keys_storage = web_keys_storage
 
@@ -3473,6 +3917,173 @@ class AppConfiguration(object):
         self._key_store_secret = key_store_secret
 
     @property
+    def key_selection_strategy(self):
+        """Gets the key_selection_strategy of this AppConfiguration.  # noqa: E501
+
+        Key Selection Strategy.  # noqa: E501
+
+        :return: The key_selection_strategy of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._key_selection_strategy
+
+    @key_selection_strategy.setter
+    def key_selection_strategy(self, key_selection_strategy):
+        """Sets the key_selection_strategy of this AppConfiguration.
+
+        Key Selection Strategy.  # noqa: E501
+
+        :param key_selection_strategy: The key_selection_strategy of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+        allowed_values = ["OLDER", "NEWER", "FIRST"]  # noqa: E501
+        if key_selection_strategy not in allowed_values:
+            raise ValueError(
+                "Invalid value for `key_selection_strategy` ({0}), must be one of {1}"  # noqa: E501
+                .format(key_selection_strategy, allowed_values)
+            )
+
+        self._key_selection_strategy = key_selection_strategy
+
+    @property
+    def ox_eleven_test_mode_token(self):
+        """Gets the ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
+
+        oxEleven Test Mode Token.  # noqa: E501
+
+        :return: The ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._ox_eleven_test_mode_token
+
+    @ox_eleven_test_mode_token.setter
+    def ox_eleven_test_mode_token(self, ox_eleven_test_mode_token):
+        """Sets the ox_eleven_test_mode_token of this AppConfiguration.
+
+        oxEleven Test Mode Token.  # noqa: E501
+
+        :param ox_eleven_test_mode_token: The ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._ox_eleven_test_mode_token = ox_eleven_test_mode_token
+
+    @property
+    def ox_eleven_generate_key_endpoint(self):
+        """Gets the ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
+
+        URL for the oxEleven Generate Key Endpoint.  # noqa: E501
+
+        :return: The ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._ox_eleven_generate_key_endpoint
+
+    @ox_eleven_generate_key_endpoint.setter
+    def ox_eleven_generate_key_endpoint(self, ox_eleven_generate_key_endpoint):
+        """Sets the ox_eleven_generate_key_endpoint of this AppConfiguration.
+
+        URL for the oxEleven Generate Key Endpoint.  # noqa: E501
+
+        :param ox_eleven_generate_key_endpoint: The ox_eleven_generate_key_endpoint of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._ox_eleven_generate_key_endpoint = ox_eleven_generate_key_endpoint
+
+    @property
+    def ox_eleven_sign_endpoint(self):
+        """Gets the ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
+
+        URL for the oxEleven Sign Endpoint.  # noqa: E501
+
+        :return: The ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._ox_eleven_sign_endpoint
+
+    @ox_eleven_sign_endpoint.setter
+    def ox_eleven_sign_endpoint(self, ox_eleven_sign_endpoint):
+        """Sets the ox_eleven_sign_endpoint of this AppConfiguration.
+
+        URL for the oxEleven Sign Endpoint.  # noqa: E501
+
+        :param ox_eleven_sign_endpoint: The ox_eleven_sign_endpoint of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._ox_eleven_sign_endpoint = ox_eleven_sign_endpoint
+
+    @property
+    def ox_eleven_verify_signature_endpoint(self):
+        """Gets the ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
+
+        URL for the oxEleven Verify Signature Endpoint.  # noqa: E501
+
+        :return: The ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._ox_eleven_verify_signature_endpoint
+
+    @ox_eleven_verify_signature_endpoint.setter
+    def ox_eleven_verify_signature_endpoint(self, ox_eleven_verify_signature_endpoint):
+        """Sets the ox_eleven_verify_signature_endpoint of this AppConfiguration.
+
+        URL for the oxEleven Verify Signature Endpoint.  # noqa: E501
+
+        :param ox_eleven_verify_signature_endpoint: The ox_eleven_verify_signature_endpoint of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._ox_eleven_verify_signature_endpoint = ox_eleven_verify_signature_endpoint
+
+    @property
+    def ox_eleven_delete_key_endpoint(self):
+        """Gets the ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
+
+        URL for the oxEleven Delete Key Endpoint.  # noqa: E501
+
+        :return: The ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._ox_eleven_delete_key_endpoint
+
+    @ox_eleven_delete_key_endpoint.setter
+    def ox_eleven_delete_key_endpoint(self, ox_eleven_delete_key_endpoint):
+        """Sets the ox_eleven_delete_key_endpoint of this AppConfiguration.
+
+        URL for the oxEleven Delete Key Endpoint.  # noqa: E501
+
+        :param ox_eleven_delete_key_endpoint: The ox_eleven_delete_key_endpoint of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._ox_eleven_delete_key_endpoint = ox_eleven_delete_key_endpoint
+
+    @property
+    def introspection_access_token_must_have_uma_protection_scope(self):
+        """Gets the introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+
+        Reject introspection requests if access_token in Authorization header does not have uma_protection scope.  # noqa: E501
+
+        :return: The introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._introspection_access_token_must_have_uma_protection_scope
+
+    @introspection_access_token_must_have_uma_protection_scope.setter
+    def introspection_access_token_must_have_uma_protection_scope(self, introspection_access_token_must_have_uma_protection_scope):
+        """Sets the introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.
+
+        Reject introspection requests if access_token in Authorization header does not have uma_protection scope.  # noqa: E501
+
+        :param introspection_access_token_must_have_uma_protection_scope: The introspection_access_token_must_have_uma_protection_scope of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._introspection_access_token_must_have_uma_protection_scope = introspection_access_token_must_have_uma_protection_scope
+
+    @property
     def end_session_with_access_token(self):
         """Gets the end_session_with_access_token of this AppConfiguration.  # noqa: E501
 
@@ -3494,6 +4105,121 @@ class AppConfiguration(object):
         """
 
         self._end_session_with_access_token = end_session_with_access_token
+
+    @property
+    def cookie_domain(self):
+        """Gets the cookie_domain of this AppConfiguration.  # noqa: E501
+
+        Sets cookie domain for all cookies created by OP.  # noqa: E501
+
+        :return: The cookie_domain of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._cookie_domain
+
+    @cookie_domain.setter
+    def cookie_domain(self, cookie_domain):
+        """Sets the cookie_domain of this AppConfiguration.
+
+        Sets cookie domain for all cookies created by OP.  # noqa: E501
+
+        :param cookie_domain: The cookie_domain of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._cookie_domain = cookie_domain
+
+    @property
+    def enabled_o_auth_audit_logging(self):
+        """Gets the enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
+
+        enabled OAuth Audit Logging.  # noqa: E501
+
+        :return: The enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._enabled_o_auth_audit_logging
+
+    @enabled_o_auth_audit_logging.setter
+    def enabled_o_auth_audit_logging(self, enabled_o_auth_audit_logging):
+        """Sets the enabled_o_auth_audit_logging of this AppConfiguration.
+
+        enabled OAuth Audit Logging.  # noqa: E501
+
+        :param enabled_o_auth_audit_logging: The enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._enabled_o_auth_audit_logging = enabled_o_auth_audit_logging
+
+    @property
+    def jms_broker_uri_set(self):
+        """Gets the jms_broker_uri_set of this AppConfiguration.  # noqa: E501
+
+        JMS Broker URI Set.  # noqa: E501
+
+        :return: The jms_broker_uri_set of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._jms_broker_uri_set
+
+    @jms_broker_uri_set.setter
+    def jms_broker_uri_set(self, jms_broker_uri_set):
+        """Sets the jms_broker_uri_set of this AppConfiguration.
+
+        JMS Broker URI Set.  # noqa: E501
+
+        :param jms_broker_uri_set: The jms_broker_uri_set of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._jms_broker_uri_set = jms_broker_uri_set
+
+    @property
+    def jms_user_name(self):
+        """Gets the jms_user_name of this AppConfiguration.  # noqa: E501
+
+        JMS UserName.  # noqa: E501
+
+        :return: The jms_user_name of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._jms_user_name
+
+    @jms_user_name.setter
+    def jms_user_name(self, jms_user_name):
+        """Sets the jms_user_name of this AppConfiguration.
+
+        JMS UserName.  # noqa: E501
+
+        :param jms_user_name: The jms_user_name of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._jms_user_name = jms_user_name
+
+    @property
+    def jms_password(self):
+        """Gets the jms_password of this AppConfiguration.  # noqa: E501
+
+        JMS Password.  # noqa: E501
+
+        :return: The jms_password of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._jms_password
+
+    @jms_password.setter
+    def jms_password(self, jms_password):
+        """Sets the jms_password of this AppConfiguration.
+
+        JMS Password.  # noqa: E501
+
+        :param jms_password: The jms_password of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._jms_password = jms_password
 
     @property
     def client_white_list(self):
@@ -3611,50 +4337,56 @@ class AppConfiguration(object):
         self._front_channel_logout_session_supported = front_channel_logout_session_supported
 
     @property
-    def use_cache_for_all_implicit_flow_objects(self):
-        """Gets the use_cache_for_all_implicit_flow_objects of this AppConfiguration.  # noqa: E501
+    def logging_level(self):
+        """Gets the logging_level of this AppConfiguration.  # noqa: E501
 
-        Boolean value to specify whether to persist all objects into cache during Implicit Flow.  # noqa: E501
+        Logging level for jans-auth logger.  # noqa: E501
 
-        :return: The use_cache_for_all_implicit_flow_objects of this AppConfiguration.  # noqa: E501
-        :rtype: bool
+        :return: The logging_level of this AppConfiguration.  # noqa: E501
+        :rtype: str
         """
-        return self._use_cache_for_all_implicit_flow_objects
+        return self._logging_level
 
-    @use_cache_for_all_implicit_flow_objects.setter
-    def use_cache_for_all_implicit_flow_objects(self, use_cache_for_all_implicit_flow_objects):
-        """Sets the use_cache_for_all_implicit_flow_objects of this AppConfiguration.
+    @logging_level.setter
+    def logging_level(self, logging_level):
+        """Sets the logging_level of this AppConfiguration.
 
-        Boolean value to specify whether to persist all objects into cache during Implicit Flow.  # noqa: E501
+        Logging level for jans-auth logger.  # noqa: E501
 
-        :param use_cache_for_all_implicit_flow_objects: The use_cache_for_all_implicit_flow_objects of this AppConfiguration.  # noqa: E501
-        :type: bool
+        :param logging_level: The logging_level of this AppConfiguration.  # noqa: E501
+        :type: str
         """
+        allowed_values = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"]  # noqa: E501
+        if logging_level not in allowed_values:
+            raise ValueError(
+                "Invalid value for `logging_level` ({0}), must be one of {1}"  # noqa: E501
+                .format(logging_level, allowed_values)
+            )
 
-        self._use_cache_for_all_implicit_flow_objects = use_cache_for_all_implicit_flow_objects
+        self._logging_level = logging_level
 
     @property
-    def invalidate_session_cookies_after_authorization_flow(self):
-        """Gets the invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
+    def logging_layout(self):
+        """Gets the logging_layout of this AppConfiguration.  # noqa: E501
 
-        Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.  # noqa: E501
+        Logging layout used for Jans Authorization Server loggers. - text - json  # noqa: E501
 
-        :return: The invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
-        :rtype: bool
+        :return: The logging_layout of this AppConfiguration.  # noqa: E501
+        :rtype: str
         """
-        return self._invalidate_session_cookies_after_authorization_flow
+        return self._logging_layout
 
-    @invalidate_session_cookies_after_authorization_flow.setter
-    def invalidate_session_cookies_after_authorization_flow(self, invalidate_session_cookies_after_authorization_flow):
-        """Sets the invalidate_session_cookies_after_authorization_flow of this AppConfiguration.
+    @logging_layout.setter
+    def logging_layout(self, logging_layout):
+        """Sets the logging_layout of this AppConfiguration.
 
-        Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.  # noqa: E501
+        Logging layout used for Jans Authorization Server loggers. - text - json  # noqa: E501
 
-        :param invalidate_session_cookies_after_authorization_flow: The invalidate_session_cookies_after_authorization_flow of this AppConfiguration.  # noqa: E501
-        :type: bool
+        :param logging_layout: The logging_layout of this AppConfiguration.  # noqa: E501
+        :type: str
         """
 
-        self._invalidate_session_cookies_after_authorization_flow = invalidate_session_cookies_after_authorization_flow
+        self._logging_layout = logging_layout
 
     @property
     def update_user_last_logon_time(self):
@@ -3703,81 +4435,6 @@ class AppConfiguration(object):
         self._update_client_access_time = update_client_access_time
 
     @property
-    def enable_client_grant_type_update(self):
-        """Gets the enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
-
-        Boolean value to specify if client can update Grant Type values.  # noqa: E501
-
-        :return: The enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._enable_client_grant_type_update
-
-    @enable_client_grant_type_update.setter
-    def enable_client_grant_type_update(self, enable_client_grant_type_update):
-        """Sets the enable_client_grant_type_update of this AppConfiguration.
-
-        Boolean value to specify if client can update Grant Type values.  # noqa: E501
-
-        :param enable_client_grant_type_update: The enable_client_grant_type_update of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._enable_client_grant_type_update = enable_client_grant_type_update
-
-    @property
-    def logging_level(self):
-        """Gets the logging_level of this AppConfiguration.  # noqa: E501
-
-        Logging level for jans-auth logger.  # noqa: E501
-
-        :return: The logging_level of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._logging_level
-
-    @logging_level.setter
-    def logging_level(self, logging_level):
-        """Sets the logging_level of this AppConfiguration.
-
-        Logging level for jans-auth logger.  # noqa: E501
-
-        :param logging_level: The logging_level of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-        allowed_values = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"]  # noqa: E501
-        if logging_level not in allowed_values:
-            raise ValueError(
-                "Invalid value for `logging_level` ({0}), must be one of {1}"  # noqa: E501
-                .format(logging_level, allowed_values)
-            )
-
-        self._logging_level = logging_level
-
-    @property
-    def cors_configuration_filters(self):
-        """Gets the cors_configuration_filters of this AppConfiguration.  # noqa: E501
-
-        CORS Configuration filters.  # noqa: E501
-
-        :return: The cors_configuration_filters of this AppConfiguration.  # noqa: E501
-        :rtype: list[AppConfigurationCorsConfigurationFilters]
-        """
-        return self._cors_configuration_filters
-
-    @cors_configuration_filters.setter
-    def cors_configuration_filters(self, cors_configuration_filters):
-        """Sets the cors_configuration_filters of this AppConfiguration.
-
-        CORS Configuration filters.  # noqa: E501
-
-        :param cors_configuration_filters: The cors_configuration_filters of this AppConfiguration.  # noqa: E501
-        :type: list[AppConfigurationCorsConfigurationFilters]
-        """
-
-        self._cors_configuration_filters = cors_configuration_filters
-
-    @property
     def log_client_id_on_client_authentication(self):
         """Gets the log_client_id_on_client_authentication of this AppConfiguration.  # noqa: E501
 
@@ -3822,6 +4479,29 @@ class AppConfiguration(object):
         """
 
         self._log_client_name_on_client_authentication = log_client_name_on_client_authentication
+
+    @property
+    def disable_jdk_logger(self):
+        """Gets the disable_jdk_logger of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to enable JDK Loggers.  # noqa: E501
+
+        :return: The disable_jdk_logger of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._disable_jdk_logger
+
+    @disable_jdk_logger.setter
+    def disable_jdk_logger(self, disable_jdk_logger):
+        """Sets the disable_jdk_logger of this AppConfiguration.
+
+        Boolean value specifying whether to enable JDK Loggers.  # noqa: E501
+
+        :param disable_jdk_logger: The disable_jdk_logger of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._disable_jdk_logger = disable_jdk_logger
 
     @property
     def authorization_request_custom_allowed_parameters(self):
@@ -3893,121 +4573,6 @@ class AppConfiguration(object):
         self._openid_scope_backward_compatibility = openid_scope_backward_compatibility
 
     @property
-    def skip_authorization_for_open_id_scope_and_pairwise_id(self):
-        """Gets the skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
-
-        If a client has only openid scope and pairwise id, person should not have to authorize.  # noqa: E501
-
-        :return: The skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._skip_authorization_for_open_id_scope_and_pairwise_id
-
-    @skip_authorization_for_open_id_scope_and_pairwise_id.setter
-    def skip_authorization_for_open_id_scope_and_pairwise_id(self, skip_authorization_for_open_id_scope_and_pairwise_id):
-        """Sets the skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.
-
-        If a client has only openid scope and pairwise id, person should not have to authorize.  # noqa: E501
-
-        :param skip_authorization_for_open_id_scope_and_pairwise_id: The skip_authorization_for_open_id_scope_and_pairwise_id of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._skip_authorization_for_open_id_scope_and_pairwise_id = skip_authorization_for_open_id_scope_and_pairwise_id
-
-    @property
-    def allow_post_logout_redirect_without_validation(self):
-        """Gets the allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
-
-        Allows post logout redirect without validation for End Session Endpoint.  # noqa: E501
-
-        :return: The allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._allow_post_logout_redirect_without_validation
-
-    @allow_post_logout_redirect_without_validation.setter
-    def allow_post_logout_redirect_without_validation(self, allow_post_logout_redirect_without_validation):
-        """Sets the allow_post_logout_redirect_without_validation of this AppConfiguration.
-
-        Allows post logout redirect without validation for End Session Endpoint.  # noqa: E501
-
-        :param allow_post_logout_redirect_without_validation: The allow_post_logout_redirect_without_validation of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._allow_post_logout_redirect_without_validation = allow_post_logout_redirect_without_validation
-
-    @property
-    def http_logging_enabled(self):
-        """Gets the http_logging_enabled of this AppConfiguration.  # noqa: E501
-
-        Enable/Disable request/response logging filter.  # noqa: E501
-
-        :return: The http_logging_enabled of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._http_logging_enabled
-
-    @http_logging_enabled.setter
-    def http_logging_enabled(self, http_logging_enabled):
-        """Sets the http_logging_enabled of this AppConfiguration.
-
-        Enable/Disable request/response logging filter.  # noqa: E501
-
-        :param http_logging_enabled: The http_logging_enabled of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._http_logging_enabled = http_logging_enabled
-
-    @property
-    def http_logging_exlude_paths(self):
-        """Gets the http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
-
-        List of base URI for which request/response logging filter should not record activity.  # noqa: E501
-
-        :return: The http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
-        :rtype: list[str]
-        """
-        return self._http_logging_exlude_paths
-
-    @http_logging_exlude_paths.setter
-    def http_logging_exlude_paths(self, http_logging_exlude_paths):
-        """Sets the http_logging_exlude_paths of this AppConfiguration.
-
-        List of base URI for which request/response logging filter should not record activity.  # noqa: E501
-
-        :param http_logging_exlude_paths: The http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._http_logging_exlude_paths = http_logging_exlude_paths
-
-    @property
-    def external_logger_configuration(self):
-        """Gets the external_logger_configuration of this AppConfiguration.  # noqa: E501
-
-        Path to external log4j2 logging configuration.  # noqa: E501
-
-        :return: The external_logger_configuration of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._external_logger_configuration
-
-    @external_logger_configuration.setter
-    def external_logger_configuration(self, external_logger_configuration):
-        """Sets the external_logger_configuration of this AppConfiguration.
-
-        Path to external log4j2 logging configuration.  # noqa: E501
-
-        :param external_logger_configuration: The external_logger_configuration of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._external_logger_configuration = external_logger_configuration
-
-    @property
     def disable_u2f_endpoint(self):
         """Gets the disable_u2f_endpoint of this AppConfiguration.  # noqa: E501
 
@@ -4031,192 +4596,10 @@ class AppConfiguration(object):
         self._disable_u2f_endpoint = disable_u2f_endpoint
 
     @property
-    def disable_jdk_logger(self):
-        """Gets the disable_jdk_logger of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to enable JDK Loggers.  # noqa: E501
-
-        :return: The disable_jdk_logger of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._disable_jdk_logger
-
-    @disable_jdk_logger.setter
-    def disable_jdk_logger(self, disable_jdk_logger):
-        """Sets the disable_jdk_logger of this AppConfiguration.
-
-        Boolean value specifying whether to enable JDK Loggers.  # noqa: E501
-
-        :param disable_jdk_logger: The disable_jdk_logger of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._disable_jdk_logger = disable_jdk_logger
-
-    @property
-    def jms_user_name(self):
-        """Gets the jms_user_name of this AppConfiguration.  # noqa: E501
-
-        JMS UserName.  # noqa: E501
-
-        :return: The jms_user_name of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._jms_user_name
-
-    @jms_user_name.setter
-    def jms_user_name(self, jms_user_name):
-        """Sets the jms_user_name of this AppConfiguration.
-
-        JMS UserName.  # noqa: E501
-
-        :param jms_user_name: The jms_user_name of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._jms_user_name = jms_user_name
-
-    @property
-    def jms_password(self):
-        """Gets the jms_password of this AppConfiguration.  # noqa: E501
-
-        JMS Password.  # noqa: E501
-
-        :return: The jms_password of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._jms_password
-
-    @jms_password.setter
-    def jms_password(self, jms_password):
-        """Sets the jms_password of this AppConfiguration.
-
-        JMS Password.  # noqa: E501
-
-        :param jms_password: The jms_password of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._jms_password = jms_password
-
-    @property
-    def jms_broker_uri_set(self):
-        """Gets the jms_broker_uri_set of this AppConfiguration.  # noqa: E501
-
-        JMS Broker URI Set.  # noqa: E501
-
-        :return: The jms_broker_uri_set of this AppConfiguration.  # noqa: E501
-        :rtype: list[str]
-        """
-        return self._jms_broker_uri_set
-
-    @jms_broker_uri_set.setter
-    def jms_broker_uri_set(self, jms_broker_uri_set):
-        """Sets the jms_broker_uri_set of this AppConfiguration.
-
-        JMS Broker URI Set.  # noqa: E501
-
-        :param jms_broker_uri_set: The jms_broker_uri_set of this AppConfiguration.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._jms_broker_uri_set = jms_broker_uri_set
-
-    @property
-    def ox_eleven_test_mode_token(self):
-        """Gets the ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
-
-        oxEleven Test Mode Token.  # noqa: E501
-
-        :return: The ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._ox_eleven_test_mode_token
-
-    @ox_eleven_test_mode_token.setter
-    def ox_eleven_test_mode_token(self, ox_eleven_test_mode_token):
-        """Sets the ox_eleven_test_mode_token of this AppConfiguration.
-
-        oxEleven Test Mode Token.  # noqa: E501
-
-        :param ox_eleven_test_mode_token: The ox_eleven_test_mode_token of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._ox_eleven_test_mode_token = ox_eleven_test_mode_token
-
-    @property
-    def enabled_o_auth_audit_logging(self):
-        """Gets the enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
-
-        enabled OAuth Audit Logging.  # noqa: E501
-
-        :return: The enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._enabled_o_auth_audit_logging
-
-    @enabled_o_auth_audit_logging.setter
-    def enabled_o_auth_audit_logging(self, enabled_o_auth_audit_logging):
-        """Sets the enabled_o_auth_audit_logging of this AppConfiguration.
-
-        enabled OAuth Audit Logging.  # noqa: E501
-
-        :param enabled_o_auth_audit_logging: The enabled_o_auth_audit_logging of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._enabled_o_auth_audit_logging = enabled_o_auth_audit_logging
-
-    @property
-    def authentication_protection_configuration(self):
-        """Gets the authentication_protection_configuration of this AppConfiguration.  # noqa: E501
-
-
-        :return: The authentication_protection_configuration of this AppConfiguration.  # noqa: E501
-        :rtype: AppConfigurationAuthenticationProtectionConfiguration
-        """
-        return self._authentication_protection_configuration
-
-    @authentication_protection_configuration.setter
-    def authentication_protection_configuration(self, authentication_protection_configuration):
-        """Sets the authentication_protection_configuration of this AppConfiguration.
-
-
-        :param authentication_protection_configuration: The authentication_protection_configuration of this AppConfiguration.  # noqa: E501
-        :type: AppConfigurationAuthenticationProtectionConfiguration
-        """
-
-        self._authentication_protection_configuration = authentication_protection_configuration
-
-    @property
-    def error_handling_method(self):
-        """Gets the error_handling_method of this AppConfiguration.  # noqa: E501
-
-        A list of possible error handling methods.  # noqa: E501
-
-        :return: The error_handling_method of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._error_handling_method
-
-    @error_handling_method.setter
-    def error_handling_method(self, error_handling_method):
-        """Sets the error_handling_method of this AppConfiguration.
-
-        A list of possible error handling methods.  # noqa: E501
-
-        :param error_handling_method: The error_handling_method of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._error_handling_method = error_handling_method
-
-    @property
     def use_local_cache(self):
         """Gets the use_local_cache of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.  # noqa: E501
+        Boolean value specifying whether to enable local in-memory cache.  # noqa: E501
 
         :return: The use_local_cache of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4227,341 +4610,13 @@ class AppConfiguration(object):
     def use_local_cache(self, use_local_cache):
         """Sets the use_local_cache of this AppConfiguration.
 
-        Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.  # noqa: E501
+        Boolean value specifying whether to enable local in-memory cache.  # noqa: E501
 
         :param use_local_cache: The use_local_cache of this AppConfiguration.  # noqa: E501
         :type: bool
         """
 
         self._use_local_cache = use_local_cache
-
-    @property
-    def spontaneous_scope_lifetime(self):
-        """Gets the spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
-
-        The lifetime of spontaneous scope in seconds.  # noqa: E501
-
-        :return: The spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._spontaneous_scope_lifetime
-
-    @spontaneous_scope_lifetime.setter
-    def spontaneous_scope_lifetime(self, spontaneous_scope_lifetime):
-        """Sets the spontaneous_scope_lifetime of this AppConfiguration.
-
-        The lifetime of spontaneous scope in seconds.  # noqa: E501
-
-        :param spontaneous_scope_lifetime: The spontaneous_scope_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._spontaneous_scope_lifetime = spontaneous_scope_lifetime
-
-    @property
-    def jwks_algorithms_supported(self):
-        """Gets the jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
-
-        A list of algorithms that will be used in JWKS endpoint.  # noqa: E501
-
-        :return: The jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
-        :rtype: list[str]
-        """
-        return self._jwks_algorithms_supported
-
-    @jwks_algorithms_supported.setter
-    def jwks_algorithms_supported(self, jwks_algorithms_supported):
-        """Sets the jwks_algorithms_supported of this AppConfiguration.
-
-        A list of algorithms that will be used in JWKS endpoint.  # noqa: E501
-
-        :param jwks_algorithms_supported: The jwks_algorithms_supported of this AppConfiguration.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._jwks_algorithms_supported = jwks_algorithms_supported
-
-    @property
-    def dynamic_registration_password_grant_type_enabled(self):
-        """Gets the dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.  # noqa: E501
-
-        :return: The dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._dynamic_registration_password_grant_type_enabled
-
-    @dynamic_registration_password_grant_type_enabled.setter
-    def dynamic_registration_password_grant_type_enabled(self, dynamic_registration_password_grant_type_enabled):
-        """Sets the dynamic_registration_password_grant_type_enabled of this AppConfiguration.
-
-        Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.  # noqa: E501
-
-        :param dynamic_registration_password_grant_type_enabled: The dynamic_registration_password_grant_type_enabled of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._dynamic_registration_password_grant_type_enabled = dynamic_registration_password_grant_type_enabled
-
-    @property
-    def return_client_secret_on_read(self):
-        """Gets the return_client_secret_on_read of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.  # noqa: E501
-
-        :return: The return_client_secret_on_read of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._return_client_secret_on_read
-
-    @return_client_secret_on_read.setter
-    def return_client_secret_on_read(self, return_client_secret_on_read):
-        """Sets the return_client_secret_on_read of this AppConfiguration.
-
-        Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.  # noqa: E501
-
-        :param return_client_secret_on_read: The return_client_secret_on_read of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._return_client_secret_on_read = return_client_secret_on_read
-
-    @property
-    def reject_jwt_with_none_alg(self):
-        """Gets the reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true.  # noqa: E501
-
-        :return: The reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._reject_jwt_with_none_alg
-
-    @reject_jwt_with_none_alg.setter
-    def reject_jwt_with_none_alg(self, reject_jwt_with_none_alg):
-        """Sets the reject_jwt_with_none_alg of this AppConfiguration.
-
-        Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true.  # noqa: E501
-
-        :param reject_jwt_with_none_alg: The reject_jwt_with_none_alg of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._reject_jwt_with_none_alg = reject_jwt_with_none_alg
-
-    @property
-    def expiration_notificator_enabled(self):
-        """Gets the expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).  # noqa: E501
-
-        :return: The expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._expiration_notificator_enabled
-
-    @expiration_notificator_enabled.setter
-    def expiration_notificator_enabled(self, expiration_notificator_enabled):
-        """Sets the expiration_notificator_enabled of this AppConfiguration.
-
-        Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).  # noqa: E501
-
-        :param expiration_notificator_enabled: The expiration_notificator_enabled of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._expiration_notificator_enabled = expiration_notificator_enabled
-
-    @property
-    def expiration_notificator_map_size_limit(self):
-        """Gets the expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
-
-        The expiration notificator maximum size limit.  # noqa: E501
-
-        :return: The expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._expiration_notificator_map_size_limit
-
-    @expiration_notificator_map_size_limit.setter
-    def expiration_notificator_map_size_limit(self, expiration_notificator_map_size_limit):
-        """Sets the expiration_notificator_map_size_limit of this AppConfiguration.
-
-        The expiration notificator maximum size limit.  # noqa: E501
-
-        :param expiration_notificator_map_size_limit: The expiration_notificator_map_size_limit of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._expiration_notificator_map_size_limit = expiration_notificator_map_size_limit
-
-    @property
-    def expiration_notificator_interval_in_seconds(self):
-        """Gets the expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
-
-        The expiration notificator interval in seconds.  # noqa: E501
-
-        :return: The expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._expiration_notificator_interval_in_seconds
-
-    @expiration_notificator_interval_in_seconds.setter
-    def expiration_notificator_interval_in_seconds(self, expiration_notificator_interval_in_seconds):
-        """Sets the expiration_notificator_interval_in_seconds of this AppConfiguration.
-
-        The expiration notificator interval in seconds.  # noqa: E501
-
-        :param expiration_notificator_interval_in_seconds: The expiration_notificator_interval_in_seconds of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._expiration_notificator_interval_in_seconds = expiration_notificator_interval_in_seconds
-
-    @property
-    def client_reg_default_to_code_flow_with_refresh(self):
-        """Gets the client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.  # noqa: E501
-
-        :return: The client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._client_reg_default_to_code_flow_with_refresh
-
-    @client_reg_default_to_code_flow_with_refresh.setter
-    def client_reg_default_to_code_flow_with_refresh(self, client_reg_default_to_code_flow_with_refresh):
-        """Sets the client_reg_default_to_code_flow_with_refresh of this AppConfiguration.
-
-        Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.  # noqa: E501
-
-        :param client_reg_default_to_code_flow_with_refresh: The client_reg_default_to_code_flow_with_refresh of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._client_reg_default_to_code_flow_with_refresh = client_reg_default_to_code_flow_with_refresh
-
-    @property
-    def session_id_request_parameter_enabled(self):
-        """Gets the session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
-
-        :return: The session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._session_id_request_parameter_enabled
-
-    @session_id_request_parameter_enabled.setter
-    def session_id_request_parameter_enabled(self, session_id_request_parameter_enabled):
-        """Sets the session_id_request_parameter_enabled of this AppConfiguration.
-
-        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
-
-        :param session_id_request_parameter_enabled: The session_id_request_parameter_enabled of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._session_id_request_parameter_enabled = session_id_request_parameter_enabled
-
-    @property
-    def change_session_id_on_authentication(self):
-        """Gets the change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
-
-        :return: The change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._change_session_id_on_authentication
-
-    @change_session_id_on_authentication.setter
-    def change_session_id_on_authentication(self, change_session_id_on_authentication):
-        """Sets the change_session_id_on_authentication of this AppConfiguration.
-
-        Boolean value specifying whether to enable session_id HTTP request parameter.  # noqa: E501
-
-        :param change_session_id_on_authentication: The change_session_id_on_authentication of this AppConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._change_session_id_on_authentication = change_session_id_on_authentication
-
-    @property
-    def server_session_id_lifetime(self):
-        """Gets the server_session_id_lifetime of this AppConfiguration.  # noqa: E501
-
-        The sessionId lifetime in seconds for sessionId.  # noqa: E501
-
-        :return: The server_session_id_lifetime of this AppConfiguration.  # noqa: E501
-        :rtype: int
-        """
-        return self._server_session_id_lifetime
-
-    @server_session_id_lifetime.setter
-    def server_session_id_lifetime(self, server_session_id_lifetime):
-        """Sets the server_session_id_lifetime of this AppConfiguration.
-
-        The sessionId lifetime in seconds for sessionId.  # noqa: E501
-
-        :param server_session_id_lifetime: The server_session_id_lifetime of this AppConfiguration.  # noqa: E501
-        :type: int
-        """
-
-        self._server_session_id_lifetime = server_session_id_lifetime
-
-    @property
-    def cookie_domain(self):
-        """Gets the cookie_domain of this AppConfiguration.  # noqa: E501
-
-        Sets cookie domain for all cookies created by OP.  # noqa: E501
-
-        :return: The cookie_domain of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._cookie_domain
-
-    @cookie_domain.setter
-    def cookie_domain(self, cookie_domain):
-        """Sets the cookie_domain of this AppConfiguration.
-
-        Sets cookie domain for all cookies created by OP.  # noqa: E501
-
-        :param cookie_domain: The cookie_domain of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-
-        self._cookie_domain = cookie_domain
-
-    @property
-    def logging_layout(self):
-        """Gets the logging_layout of this AppConfiguration.  # noqa: E501
-
-        Logging layout used for Jans Authorization Server loggers.  # noqa: E501
-
-        :return: The logging_layout of this AppConfiguration.  # noqa: E501
-        :rtype: str
-        """
-        return self._logging_layout
-
-    @logging_layout.setter
-    def logging_layout(self, logging_layout):
-        """Sets the logging_layout of this AppConfiguration.
-
-        Logging layout used for Jans Authorization Server loggers.  # noqa: E501
-
-        :param logging_layout: The logging_layout of this AppConfiguration.  # noqa: E501
-        :type: str
-        """
-        allowed_values = ["text", "json"]  # noqa: E501
-        if logging_layout not in allowed_values:
-            raise ValueError(
-                "Invalid value for `logging_layout` ({0}), must be one of {1}"  # noqa: E501
-                .format(logging_layout, allowed_values)
-            )
-
-        self._logging_layout = logging_layout
 
     @property
     def fapi_compatibility(self):
@@ -4590,7 +4645,7 @@ class AppConfiguration(object):
     def force_id_token_hint_precense(self):
         """Gets the force_id_token_hint_precense of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether force id_token_hint parameter presence (false by default).  # noqa: E501
+        Boolean value specifying whether force id_token_hint parameter presence.  # noqa: E501
 
         :return: The force_id_token_hint_precense of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4601,7 +4656,7 @@ class AppConfiguration(object):
     def force_id_token_hint_precense(self, force_id_token_hint_precense):
         """Sets the force_id_token_hint_precense of this AppConfiguration.
 
-        Boolean value specifying whether force id_token_hint parameter presence (false by default).  # noqa: E501
+        Boolean value specifying whether force id_token_hint parameter presence.  # noqa: E501
 
         :param force_id_token_hint_precense: The force_id_token_hint_precense of this AppConfiguration.  # noqa: E501
         :type: bool
@@ -4613,7 +4668,7 @@ class AppConfiguration(object):
     def force_offline_access_scope_to_enable_refresh_token(self):
         """Gets the force_offline_access_scope_to_enable_refresh_token of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true.  # noqa: E501
+        Boolean value specifying whether force offline_access scope to enable refresh_token grant type.  # noqa: E501
 
         :return: The force_offline_access_scope_to_enable_refresh_token of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4624,7 +4679,7 @@ class AppConfiguration(object):
     def force_offline_access_scope_to_enable_refresh_token(self, force_offline_access_scope_to_enable_refresh_token):
         """Sets the force_offline_access_scope_to_enable_refresh_token of this AppConfiguration.
 
-        Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true.  # noqa: E501
+        Boolean value specifying whether force offline_access scope to enable refresh_token grant type.  # noqa: E501
 
         :param force_offline_access_scope_to_enable_refresh_token: The force_offline_access_scope_to_enable_refresh_token of this AppConfiguration.  # noqa: E501
         :type: bool
@@ -4636,7 +4691,7 @@ class AppConfiguration(object):
     def error_reason_enabled(self):
         """Gets the error_reason_enabled of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether to return detailed reason of the error from AS. Default value is false.  # noqa: E501
+        Boolean value specifying whether to return detailed reason of the error from AS..  # noqa: E501
 
         :return: The error_reason_enabled of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4647,7 +4702,7 @@ class AppConfiguration(object):
     def error_reason_enabled(self, error_reason_enabled):
         """Sets the error_reason_enabled of this AppConfiguration.
 
-        Boolean value specifying whether to return detailed reason of the error from AS. Default value is false.  # noqa: E501
+        Boolean value specifying whether to return detailed reason of the error from AS..  # noqa: E501
 
         :param error_reason_enabled: The error_reason_enabled of this AppConfiguration.  # noqa: E501
         :type: bool
@@ -4659,7 +4714,7 @@ class AppConfiguration(object):
     def remove_refresh_tokens_for_client_on_logout(self):
         """Gets the remove_refresh_tokens_for_client_on_logout of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether to remove refresh tokens on logout. Default value is true.  # noqa: E501
+        Boolean value specifying whether to remove refresh tokens on logout.  # noqa: E501
 
         :return: The remove_refresh_tokens_for_client_on_logout of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4670,7 +4725,7 @@ class AppConfiguration(object):
     def remove_refresh_tokens_for_client_on_logout(self, remove_refresh_tokens_for_client_on_logout):
         """Sets the remove_refresh_tokens_for_client_on_logout of this AppConfiguration.
 
-        Boolean value specifying whether to remove refresh tokens on logout. Default value is true.  # noqa: E501
+        Boolean value specifying whether to remove refresh tokens on logout.  # noqa: E501
 
         :param remove_refresh_tokens_for_client_on_logout: The remove_refresh_tokens_for_client_on_logout of this AppConfiguration.  # noqa: E501
         :type: bool
@@ -4679,10 +4734,56 @@ class AppConfiguration(object):
         self._remove_refresh_tokens_for_client_on_logout = remove_refresh_tokens_for_client_on_logout
 
     @property
+    def skip_refresh_token_during_refreshing(self):
+        """Gets the skip_refresh_token_during_refreshing of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to skip refreshing tokens on refreshing.  # noqa: E501
+
+        :return: The skip_refresh_token_during_refreshing of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._skip_refresh_token_during_refreshing
+
+    @skip_refresh_token_during_refreshing.setter
+    def skip_refresh_token_during_refreshing(self, skip_refresh_token_during_refreshing):
+        """Sets the skip_refresh_token_during_refreshing of this AppConfiguration.
+
+        Boolean value specifying whether to skip refreshing tokens on refreshing.  # noqa: E501
+
+        :param skip_refresh_token_during_refreshing: The skip_refresh_token_during_refreshing of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._skip_refresh_token_during_refreshing = skip_refresh_token_during_refreshing
+
+    @property
+    def refresh_token_extend_lifetime_on_rotation(self):
+        """Gets the refresh_token_extend_lifetime_on_rotation of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether to extend refresh tokens on rotation.  # noqa: E501
+
+        :return: The refresh_token_extend_lifetime_on_rotation of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._refresh_token_extend_lifetime_on_rotation
+
+    @refresh_token_extend_lifetime_on_rotation.setter
+    def refresh_token_extend_lifetime_on_rotation(self, refresh_token_extend_lifetime_on_rotation):
+        """Sets the refresh_token_extend_lifetime_on_rotation of this AppConfiguration.
+
+        Boolean value specifying whether to extend refresh tokens on rotation.  # noqa: E501
+
+        :param refresh_token_extend_lifetime_on_rotation: The refresh_token_extend_lifetime_on_rotation of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._refresh_token_extend_lifetime_on_rotation = refresh_token_extend_lifetime_on_rotation
+
+    @property
     def consent_gathering_script_backward_compatibility(self):
         """Gets the consent_gathering_script_backward_compatibility of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration.  # noqa: E501
+        Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.  # noqa: E501
 
         :return: The consent_gathering_script_backward_compatibility of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4693,7 +4794,7 @@ class AppConfiguration(object):
     def consent_gathering_script_backward_compatibility(self, consent_gathering_script_backward_compatibility):
         """Sets the consent_gathering_script_backward_compatibility of this AppConfiguration.
 
-        Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration.  # noqa: E501
+        Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false AS will pick up script based on client configuration.  # noqa: E501
 
         :param consent_gathering_script_backward_compatibility: The consent_gathering_script_backward_compatibility of this AppConfiguration.  # noqa: E501
         :type: bool
@@ -4705,7 +4806,7 @@ class AppConfiguration(object):
     def introspection_script_backward_compatibility(self):
         """Gets the introspection_script_backward_compatibility of this AppConfiguration.  # noqa: E501
 
-        Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false.  # noqa: E501
+        Boolean value specifying whether switch off client\\'s introspection scripts (true value) and run all scripts that exists on server.  # noqa: E501
 
         :return: The introspection_script_backward_compatibility of this AppConfiguration.  # noqa: E501
         :rtype: bool
@@ -4716,13 +4817,138 @@ class AppConfiguration(object):
     def introspection_script_backward_compatibility(self, introspection_script_backward_compatibility):
         """Sets the introspection_script_backward_compatibility of this AppConfiguration.
 
-        Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false.  # noqa: E501
+        Boolean value specifying whether switch off client\\'s introspection scripts (true value) and run all scripts that exists on server.  # noqa: E501
 
         :param introspection_script_backward_compatibility: The introspection_script_backward_compatibility of this AppConfiguration.  # noqa: E501
         :type: bool
         """
 
         self._introspection_script_backward_compatibility = introspection_script_backward_compatibility
+
+    @property
+    def introspection_response_scopes_backward_compatibility(self):
+        """Gets the introspection_response_scopes_backward_compatibility of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying introspection response backward compatibility mode.  # noqa: E501
+
+        :return: The introspection_response_scopes_backward_compatibility of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._introspection_response_scopes_backward_compatibility
+
+    @introspection_response_scopes_backward_compatibility.setter
+    def introspection_response_scopes_backward_compatibility(self, introspection_response_scopes_backward_compatibility):
+        """Sets the introspection_response_scopes_backward_compatibility of this AppConfiguration.
+
+        Boolean value specifying introspection response backward compatibility mode.  # noqa: E501
+
+        :param introspection_response_scopes_backward_compatibility: The introspection_response_scopes_backward_compatibility of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._introspection_response_scopes_backward_compatibility = introspection_response_scopes_backward_compatibility
+
+    @property
+    def software_statement_validation_type(self):
+        """Gets the software_statement_validation_type of this AppConfiguration.  # noqa: E501
+
+        Validation type used for software statement.  # noqa: E501
+
+        :return: The software_statement_validation_type of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._software_statement_validation_type
+
+    @software_statement_validation_type.setter
+    def software_statement_validation_type(self, software_statement_validation_type):
+        """Sets the software_statement_validation_type of this AppConfiguration.
+
+        Validation type used for software statement.  # noqa: E501
+
+        :param software_statement_validation_type: The software_statement_validation_type of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+        allowed_values = ["none", "jwks", "jwks_uri", "script"]  # noqa: E501
+        if software_statement_validation_type not in allowed_values:
+            raise ValueError(
+                "Invalid value for `software_statement_validation_type` ({0}), must be one of {1}"  # noqa: E501
+                .format(software_statement_validation_type, allowed_values)
+            )
+
+        self._software_statement_validation_type = software_statement_validation_type
+
+    @property
+    def software_statement_validation_claim_name(self):
+        """Gets the software_statement_validation_claim_name of this AppConfiguration.  # noqa: E501
+
+        Validation claim name for software statement.  # noqa: E501
+
+        :return: The software_statement_validation_claim_name of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._software_statement_validation_claim_name
+
+    @software_statement_validation_claim_name.setter
+    def software_statement_validation_claim_name(self, software_statement_validation_claim_name):
+        """Sets the software_statement_validation_claim_name of this AppConfiguration.
+
+        Validation claim name for software statement.  # noqa: E501
+
+        :param software_statement_validation_claim_name: The software_statement_validation_claim_name of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._software_statement_validation_claim_name = software_statement_validation_claim_name
+
+    @property
+    def authentication_protection_configuration(self):
+        """Gets the authentication_protection_configuration of this AppConfiguration.  # noqa: E501
+
+
+        :return: The authentication_protection_configuration of this AppConfiguration.  # noqa: E501
+        :rtype: AuthenticationProtectionConfiguration
+        """
+        return self._authentication_protection_configuration
+
+    @authentication_protection_configuration.setter
+    def authentication_protection_configuration(self, authentication_protection_configuration):
+        """Sets the authentication_protection_configuration of this AppConfiguration.
+
+
+        :param authentication_protection_configuration: The authentication_protection_configuration of this AppConfiguration.  # noqa: E501
+        :type: AuthenticationProtectionConfiguration
+        """
+
+        self._authentication_protection_configuration = authentication_protection_configuration
+
+    @property
+    def error_handling_method(self):
+        """Gets the error_handling_method of this AppConfiguration.  # noqa: E501
+
+        A list of possible error handling methods.  # noqa: E501
+
+        :return: The error_handling_method of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._error_handling_method
+
+    @error_handling_method.setter
+    def error_handling_method(self, error_handling_method):
+        """Sets the error_handling_method of this AppConfiguration.
+
+        A list of possible error handling methods.  # noqa: E501
+
+        :param error_handling_method: The error_handling_method of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+        allowed_values = ["internal", "remote"]  # noqa: E501
+        if error_handling_method not in allowed_values:
+            raise ValueError(
+                "Invalid value for `error_handling_method` ({0}), must be one of {1}"  # noqa: E501
+                .format(error_handling_method, allowed_values)
+            )
+
+        self._error_handling_method = error_handling_method
 
     @property
     def keep_authenticator_attributes_on_acr_change(self):
@@ -4746,6 +4972,75 @@ class AppConfiguration(object):
         """
 
         self._keep_authenticator_attributes_on_acr_change = keep_authenticator_attributes_on_acr_change
+
+    @property
+    def device_authz_request_expires_in(self):
+        """Gets the device_authz_request_expires_in of this AppConfiguration.  # noqa: E501
+
+        Expiration time given for device authorization requests.  # noqa: E501
+
+        :return: The device_authz_request_expires_in of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._device_authz_request_expires_in
+
+    @device_authz_request_expires_in.setter
+    def device_authz_request_expires_in(self, device_authz_request_expires_in):
+        """Sets the device_authz_request_expires_in of this AppConfiguration.
+
+        Expiration time given for device authorization requests.  # noqa: E501
+
+        :param device_authz_request_expires_in: The device_authz_request_expires_in of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._device_authz_request_expires_in = device_authz_request_expires_in
+
+    @property
+    def device_authz_token_poll_interval(self):
+        """Gets the device_authz_token_poll_interval of this AppConfiguration.  # noqa: E501
+
+        Default interval returned to the client to process device token requests.  # noqa: E501
+
+        :return: The device_authz_token_poll_interval of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._device_authz_token_poll_interval
+
+    @device_authz_token_poll_interval.setter
+    def device_authz_token_poll_interval(self, device_authz_token_poll_interval):
+        """Sets the device_authz_token_poll_interval of this AppConfiguration.
+
+        Default interval returned to the client to process device token requests.  # noqa: E501
+
+        :param device_authz_token_poll_interval: The device_authz_token_poll_interval of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._device_authz_token_poll_interval = device_authz_token_poll_interval
+
+    @property
+    def device_authz_response_type_to_process_authz(self):
+        """Gets the device_authz_response_type_to_process_authz of this AppConfiguration.  # noqa: E501
+
+        Response type used to process device authz requests.  # noqa: E501
+
+        :return: The device_authz_response_type_to_process_authz of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._device_authz_response_type_to_process_authz
+
+    @device_authz_response_type_to_process_authz.setter
+    def device_authz_response_type_to_process_authz(self, device_authz_response_type_to_process_authz):
+        """Sets the device_authz_response_type_to_process_authz of this AppConfiguration.
+
+        Response type used to process device authz requests.  # noqa: E501
+
+        :param device_authz_response_type_to_process_authz: The device_authz_response_type_to_process_authz of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._device_authz_response_type_to_process_authz = device_authz_response_type_to_process_authz
 
     @property
     def backchannel_client_id(self):
@@ -4859,6 +5154,13 @@ class AppConfiguration(object):
         :param backchannel_token_delivery_modes_supported: The backchannel_token_delivery_modes_supported of this AppConfiguration.  # noqa: E501
         :type: list[str]
         """
+        allowed_values = ["poll", "ping", "push"]  # noqa: E501
+        if not set(backchannel_token_delivery_modes_supported).issubset(set(allowed_values)):
+            raise ValueError(
+                "Invalid values for `backchannel_token_delivery_modes_supported` [{0}], must be a subset of [{1}]"  # noqa: E501
+                .format(", ".join(map(str, set(backchannel_token_delivery_modes_supported) - set(allowed_values))),  # noqa: E501
+                        ", ".join(map(str, allowed_values)))
+            )
 
         self._backchannel_token_delivery_modes_supported = backchannel_token_delivery_modes_supported
 
@@ -4882,6 +5184,13 @@ class AppConfiguration(object):
         :param backchannel_authentication_request_signing_alg_values_supported: The backchannel_authentication_request_signing_alg_values_supported of this AppConfiguration.  # noqa: E501
         :type: list[str]
         """
+        allowed_values = ["RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"]  # noqa: E501
+        if not set(backchannel_authentication_request_signing_alg_values_supported).issubset(set(allowed_values)):
+            raise ValueError(
+                "Invalid values for `backchannel_authentication_request_signing_alg_values_supported` [{0}], must be a subset of [{1}]"  # noqa: E501
+                .format(", ".join(map(str, set(backchannel_authentication_request_signing_alg_values_supported) - set(allowed_values))),  # noqa: E501
+                        ", ".join(map(str, allowed_values)))
+            )
 
         self._backchannel_authentication_request_signing_alg_values_supported = backchannel_authentication_request_signing_alg_values_supported
 
@@ -5006,7 +5315,7 @@ class AppConfiguration(object):
 
 
         :return: The ciba_end_user_notification_config of this AppConfiguration.  # noqa: E501
-        :rtype: AppConfigurationCibaEndUserNotificationConfig
+        :rtype: CIBAEndUserNotificationConfig
         """
         return self._ciba_end_user_notification_config
 
@@ -5016,7 +5325,7 @@ class AppConfiguration(object):
 
 
         :param ciba_end_user_notification_config: The ciba_end_user_notification_config of this AppConfiguration.  # noqa: E501
-        :type: AppConfigurationCibaEndUserNotificationConfig
+        :type: CIBAEndUserNotificationConfig
         """
 
         self._ciba_end_user_notification_config = ciba_end_user_notification_config
@@ -5112,6 +5421,121 @@ class AppConfiguration(object):
         """
 
         self._ciba_max_expiration_time_allowed_sec = ciba_max_expiration_time_allowed_sec
+
+    @property
+    def ciba_enabled(self):
+        """Gets the ciba_enabled of this AppConfiguration.  # noqa: E501
+
+        Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.  # noqa: E501
+
+        :return: The ciba_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._ciba_enabled
+
+    @ciba_enabled.setter
+    def ciba_enabled(self, ciba_enabled):
+        """Sets the ciba_enabled of this AppConfiguration.
+
+        Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.  # noqa: E501
+
+        :param ciba_enabled: The ciba_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._ciba_enabled = ciba_enabled
+
+    @property
+    def discovery_cache_lifetime_in_minutes(self):
+        """Gets the discovery_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+
+        Lifetime of discovery cache.  # noqa: E501
+
+        :return: The discovery_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+        :rtype: int
+        """
+        return self._discovery_cache_lifetime_in_minutes
+
+    @discovery_cache_lifetime_in_minutes.setter
+    def discovery_cache_lifetime_in_minutes(self, discovery_cache_lifetime_in_minutes):
+        """Sets the discovery_cache_lifetime_in_minutes of this AppConfiguration.
+
+        Lifetime of discovery cache.  # noqa: E501
+
+        :param discovery_cache_lifetime_in_minutes: The discovery_cache_lifetime_in_minutes of this AppConfiguration.  # noqa: E501
+        :type: int
+        """
+
+        self._discovery_cache_lifetime_in_minutes = discovery_cache_lifetime_in_minutes
+
+    @property
+    def http_logging_enabled(self):
+        """Gets the http_logging_enabled of this AppConfiguration.  # noqa: E501
+
+        Enable/Disable request/response logging filter.  # noqa: E501
+
+        :return: The http_logging_enabled of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._http_logging_enabled
+
+    @http_logging_enabled.setter
+    def http_logging_enabled(self, http_logging_enabled):
+        """Sets the http_logging_enabled of this AppConfiguration.
+
+        Enable/Disable request/response logging filter.  # noqa: E501
+
+        :param http_logging_enabled: The http_logging_enabled of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._http_logging_enabled = http_logging_enabled
+
+    @property
+    def http_logging_exlude_paths(self):
+        """Gets the http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
+
+        List of base URI for which request/response logging filter should not record activity.  # noqa: E501
+
+        :return: The http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._http_logging_exlude_paths
+
+    @http_logging_exlude_paths.setter
+    def http_logging_exlude_paths(self, http_logging_exlude_paths):
+        """Sets the http_logging_exlude_paths of this AppConfiguration.
+
+        List of base URI for which request/response logging filter should not record activity.  # noqa: E501
+
+        :param http_logging_exlude_paths: The http_logging_exlude_paths of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._http_logging_exlude_paths = http_logging_exlude_paths
+
+    @property
+    def external_logger_configuration(self):
+        """Gets the external_logger_configuration of this AppConfiguration.  # noqa: E501
+
+        Path to external log4j2 logging configuration.  # noqa: E501
+
+        :return: The external_logger_configuration of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._external_logger_configuration
+
+    @external_logger_configuration.setter
+    def external_logger_configuration(self, external_logger_configuration):
+        """Sets the external_logger_configuration of this AppConfiguration.
+
+        Path to external log4j2 logging configuration.  # noqa: E501
+
+        :param external_logger_configuration: The external_logger_configuration of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._external_logger_configuration = external_logger_configuration
 
     def to_dict(self):
         """Returns the model properties as a dict"""
