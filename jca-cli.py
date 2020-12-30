@@ -926,6 +926,19 @@ class JCA_CLI:
             #endpoint = self.get_endpoint(m)
             getattr(self, 'process_' + m.method)(m)
 
+    def parse_command_args(self, args):
+        args_dict = {}
+
+        if args:
+            for arg in args.split(','):
+                neq = arg.find(':')
+                if neq > 1:
+                    arg_name = arg[:neq].strip()
+                    arg_val = arg[neq+1:].strip()
+                    if arg_name and arg_val:
+                        args_dict[arg_name] = arg_val
+
+        return args_dict
 
     def parse_args(self, args, path):
         param_names = []
@@ -933,18 +946,12 @@ class JCA_CLI:
         for param in path['parameters']:
             param_names.append(param['name'])
 
-        args_dict = {}
-        if args:
-            for arg in args.split(','):
-                neq = arg.find(':')
-                if neq > 1:
-                    arg_name = arg[:neq].strip()
-                    arg_val = arg[neq+1:].strip()
-                    if not arg_name in param_names:
-                        sys.stderr.write("valid endpoint args are: {}".format(', '.join(param_names)))
-                        sys.exit()
-                    if arg_name and arg_val:
-                        args_dict[arg_name] = arg_val
+        args_dict = self.parse_command_args(args)
+
+        for arg_name in args_dict:
+            if not arg_name in param_names:
+                sys.stderr.write("valid endpoint args are: {}\ns".format(', '.join(param_names)))
+                sys.exit()
 
         return args_dict
 
@@ -1068,11 +1075,7 @@ class JCA_CLI:
 
     def process_command_patch(self, op, args, data_fn):
 
-        args_dict = {}
-        for a in args.split(','):
-            k,v = a.split(':')
-            args_dict[k.strip()] = v.strip()
-
+        args_dict = self.parse_command_args(args)
 
         with open(data_fn) as f:
             data = json.load(f)
@@ -1110,6 +1113,10 @@ class JCA_CLI:
         sys.stderr.write("Server Response:\n")
         print(json.dumps(unmapped_response, indent=2))
 
+
+
+    def process_command_delete(self, op, args, data_fn):
+        self.process_command_post(op, args, data_fn, method='put')
 
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
 
