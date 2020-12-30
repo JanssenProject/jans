@@ -8,6 +8,7 @@ import urllib3
 import configparser
 import argparse
 import inspect
+import random
 
 import ruamel.yaml
 from pprint import pprint
@@ -46,6 +47,7 @@ parser.add_argument("--info", choices=op_list, help="Help for operation")
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
 parser.add_argument("--endpoint-args", help="Arguments to pass endpoint seperated by comma. For example limit:5,status:INACTIVE")
 parser.add_argument("--schema", help="Get sample json schema")
+#parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
@@ -447,7 +449,8 @@ class JCA_CLI:
         return ''.join(namle_list)+'Api'
 
 
-    def get_tag_from_api_name(self, api_name, method=None):
+    def get_tag_from_api_name(self, api_name, qmethod=None):
+
         for tag in self.cfg_yml['tags']:
             api_class_name = self.get_api_class_name(tag['name'])
             if api_class_name == api_name:
@@ -459,8 +462,8 @@ class JCA_CLI:
 
             for method in self.cfg_yml['paths'][path]:
                 if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
-                    if method:
-                        return self.cfg_yml['paths'][path]
+                    if qmethod and method == qmethod:
+                        return self.cfg_yml['paths'][path][method]
                     paths[method] = self.cfg_yml['paths'][path]
                     
         return paths
@@ -974,17 +977,20 @@ class JCA_CLI:
         if schema:
             print()
             print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema))
-    def process_command_get(self, op, args):
 
-        path = self.get_tag_from_api_name(op, 'get')
-
+    def get_path_api_caller_for_op(self, op, metod):
+        path = self.get_tag_from_api_name(op, metod)
         security = path['security'][0]['jans-auth'][0]
-
         self.get_access_token(security)
         client = getattr(swagger_client, op)
-
         api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
         api_caller = getattr(api_instance, path['operationId'].replace('-','_'))
+        
+        return path, api_caller
+
+    def process_command_get(self, op, args, data_fn):
+
+        path, api_caller = self.get_path_api_caller_for_op(op, 'get')
 
         api_response = None
 
@@ -1013,20 +1019,108 @@ class JCA_CLI:
         print(json.dumps(api_response_unmapped, indent=2))
 
 
+    def populate_model(self, model, data):
+        model_data = {}
+        for key in data:
+            model_field = self.get_model_key_map(model, key)
+            model_data[model_field] = data[key]
+
+        model_obj = model(**model_data)
+        return model_obj
+
+    def process_command_post(self, op, args, data_fn):
+        path, api_caller = self.get_path_api_caller_for_op(op, 'post')
+
+        class DummyEndpoint:
+            pass
+
+        endpoint = DummyEndpoint()
+        endpoint.info = path
+        
+        schema = self.get_scheme_for_endpoint(endpoint)
+        
+        model = getattr(swagger_client.models, schema['__schema_name__'])
+        
+        with open(data_fn) as f:
+            data = json.load(f)
+        
+        body = self.populate_model(model, data)
+
+        try:
+            api_response = api_caller(body=body)
+        except swagger_client.rest.ApiException as e:
+            print(e.reason)
+            print(e.body)
+            sys.exit()
+        
+        unmapped_response = self.unmap_model(api_response)
+        sys.stderr.write("Server Response:\n")
+        print(json.dumps(unmapped_response, indent=2))
+
+
+    def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
+
+        if default:
+            return default
+        if enum:
+            return random.choice(enum)
+        elif example:
+            return example
+
+        if dtype == 'string':
+            if dformat == 'date':
+                val = '20201230113445.990Z'
+            elif dformat == 'url':
+                val = 'https://www.jans.io/sample'
+            else:
+                val = 'string'
+        elif dtype == 'integer':
+            val = random.randint(0,5)
+        elif dtype == 'boolean':
+            val = random.choice([True, False])
+        elif dtype == 'object':
+            val = {}
+
+        return val
+
+
     def get_sample_schema(self, ref):
         schema = self.get_schema_from_reference('#'+args.schema)
-        x = ref.split('/')
+        m = getattr(swagger_client.models, schema['__schema_name__'])
+        sample_data = {}
+
+
+        populate_fields = schema['required']
         
-        m = getattr(swagger_client.models, x[-1])
-        print(m())
+        for field_name in schema['properties']:
+            field = schema['properties'][field_name]
+            if ('enum' in field) or ('items' in field and 'enum' in field['items']):
+                populate_fields.append(field_name)
+
+        for required_field in populate_fields:
+            mapped_required_field = self.get_model_key_map(m, required_field)
+            field = schema['properties'][required_field]
+
+            if 'example' in field:
+                val = field['example']
+            elif 'default' in field:
+                val = field['default']
+            else:
+                if field['type'] == 'array':
+                    val = [self.get_sample_data_for_field(field['items']['type'], field['items'].get('example'), field['items'].get('enum'), field['items'].get('format'), field['items'].get('default'))]
+                else:
+                    val = self.get_sample_data_for_field(field['type'], field.get('example'), field.get('enum'), field.get('format'), field.get('default'))
+
+            sample_data[mapped_required_field] = val
+            
+        unmapped_model = self.unmap_model(m(**sample_data))
         
-        #print(schema)
+        print(json.dumps(unmapped_model, indent=2))
 
 
     def runApp(self):
         clear()
         self.display_menu(self.menu)
-            
 
 cliObject = JCA_CLI(host, client_id, client_secret)
 
@@ -1044,11 +1138,13 @@ else:
 
     if api_name:
         op = api_name + 'Api' 
+
+    if api_name and not args.op_mode:
         cliObject.help_for(op)
     elif args.schema:
         cliObject.get_sample_schema(args.schema)
-    else:
+    elif args.op_mode:
         caller_name = 'process_command_' + args.op_mode
         caller = getattr(cliObject, caller_name)
-        caller(op, args.endpoint_args)
+        caller(op, args.endpoint_args, data_fn=args.data)
 

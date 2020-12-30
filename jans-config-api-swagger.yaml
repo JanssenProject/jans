@@ -3578,7 +3578,6 @@ components:
       required:
         - description
         - displayName
-        - dataType
         - name
         - viewType
       properties:
