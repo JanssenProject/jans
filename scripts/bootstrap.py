@@ -344,12 +344,12 @@ def get_base_ctx(manager):
         'encoded_ox_ldap_pw': manager.secret.get('encoded_ox_ldap_pw'),
         'jetty_base': manager.config.get('jetty_base'),
         'orgName': manager.config.get('orgName'),
-        'oxauth_client_id': manager.config.get('oxauth_client_id'),
-        'oxauthClient_encoded_pw': manager.secret.get('oxauthClient_encoded_pw'),
+        'auth_client_id': manager.config.get('auth_client_id'),
+        'authClient_encoded_pw': manager.secret.get('authClient_encoded_pw'),
         'hostname': manager.config.get('hostname'),
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
-        'oxauth_openid_key_base64': manager.secret.get('oxauth_openid_key_base64'),
+        'auth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
         # 'passport_rs_client_id': manager.config.get('passport_rs_client_id'),
         # 'passport_rs_client_base64_jwks': manager.secret.get('passport_rs_client_base64_jwks'),
         # 'passport_rs_client_cert_alias': manager.config.get('passport_rs_client_cert_alias'),
@@ -405,12 +405,12 @@ def get_base_ctx(manager):
         "pairwiseCalculationKey": manager.secret.get("pairwiseCalculationKey"),
         "pairwiseCalculationSalt": manager.secret.get("pairwiseCalculationSalt"),
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
-        "oxauth_openid_jks_fn": manager.config.get("oxauth_openid_jks_fn"),
-        "oxauth_openid_jks_pass": manager.secret.get("oxauth_openid_jks_pass"),
-        "oxauth_legacyIdTokenClaims": manager.config.get("oxauth_legacyIdTokenClaims"),
+        "auth_openid_jks_fn": manager.config.get("auth_openid_jks_fn"),
+        "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
+        "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "passportSpTLSCert": manager.config.get("passportSpTLSCert"),
         "passportSpTLSKey": manager.config.get("passportSpTLSKey"),
-        "oxauth_openidScopeBackwardCompatibility": manager.config.get("oxauth_openidScopeBackwardCompatibility"),
+        "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
         "fido2ConfigFolder": manager.config.get("fido2ConfigFolder"),
 
         "admin_inum": manager.config.get("admin_inum"),
@@ -484,9 +484,9 @@ def merge_oxtrust_ctx(ctx):
 def merge_auth_ctx(ctx):
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'oxauth_config_base64': 'dynamic-conf.json',
-        'oxauth_static_conf_base64': 'static-conf.json',
-        'oxauth_error_base64': 'errors.json',
+        'auth_config_base64': 'dynamic-conf.json',
+        'auth_static_conf_base64': 'static-conf.json',
+        'auth_error_base64': 'errors.json',
     }
 
     for key, file_ in file_mappings.items():
