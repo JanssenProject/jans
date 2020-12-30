@@ -19,6 +19,7 @@ import string
 import subprocess
 from datetime import datetime
 from datetime import timedelta
+from ipaddress import IPv4Address
 from typing import Any
 from typing import AnyStr
 from typing import Tuple
@@ -289,9 +290,14 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
 
 
 def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
-                         state, city, base_dir="/etc/certs", extra_dn=""):
+                         state, city, base_dir="/etc/certs",
+                         extra_dns=None, extra_ips=None):
+    backend = default_backend()
+
     # generate key
-    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    key = rsa.generate_private_key(
+        public_exponent=65537, key_size=2048, backend=backend,
+    )
 
     # generate cert
     subject = issuer = x509.Name([
@@ -302,7 +308,26 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
         x509.NameAttribute(NameOID.COMMON_NAME, hostname),
         x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
     ])
-    extra_dn = extra_dn or suffix
+
+    # SANs
+    extra_dns = extra_dns or []
+    extra_ips = extra_ips or []
+
+    sans = [
+        x509.DNSName(hostname),  # added to SAN due to issue in Golang
+        x509.DNSName(suffix),
+    ]
+
+    # add Domains to SAN
+    for dn in extra_dns:
+        sans.append(x509.DNSName(dn))
+
+    # add IPs to SAN
+    for ip in extra_ips:
+        sans.append(x509.IPAddress(IPv4Address(ip)))
+
+    # make SANs unique
+    sans = list(set(sans))
 
     now = datetime.utcnow()
 
@@ -322,10 +347,7 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
         x509.BasicConstraints(ca=False, path_length=None),
         critical=False,
     ).add_extension(
-        x509.SubjectAlternativeName([
-            x509.DNSName(hostname),
-            x509.DNSName(extra_dn),
-        ]),
+        x509.SubjectAlternativeName(sans),
         critical=False,
     ).add_extension(
         x509.KeyUsage(
@@ -340,7 +362,7 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
             decipher_only=False,
         ),
         critical=False,
-    ).sign(key, hashes.SHA256())
+    ).sign(key, hashes.SHA256(), backend=backend)
 
     # write cert and key to file
     cert_file = os.path.join(base_dir, f"{suffix}.crt")
