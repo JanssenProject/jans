@@ -10,8 +10,6 @@ logger = logging.getLogger("certmanager")
 
 class WebHandler(BaseHandler):
     def patch(self):
-        passwd = self.manager.secret.get("ssl_cert_pass")
-
         source = self.opts.get("source", "")
 
         if source == "from-files":
@@ -23,7 +21,7 @@ class WebHandler(BaseHandler):
             else:
                 logger.info(f"Using existing {cert_fn} and {key_fn}")
         else:
-            cert_fn, key_fn = self._patch_cert_key("web_https", passwd)
+            cert_fn, key_fn = self._patch_cert_key("web_https")
 
         if not self.dry_run:
             if cert_fn:

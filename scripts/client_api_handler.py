@@ -1,7 +1,6 @@
 import logging.config
 
 from jans.pycloudlib.utils import exec_cmd
-from jans.pycloudlib.utils import generate_ssl_certkey
 
 from base_handler import BaseHandler
 from settings import LOGGING_CONFIG
@@ -12,15 +11,9 @@ logger = logging.getLogger("certmanager")
 
 class ClientApiHandler(BaseHandler):
     def generate_x509(self, suffix, cert_cn):
-        cert_file, key_file = generate_ssl_certkey(
+        cert_file, key_file = self._patch_cert_key(
             suffix,
-            self.manager.config.get("admin_email"),
-            self.manager.config.get("hostname"),
-            self.manager.config.get("orgName"),
-            self.manager.config.get("country_code"),
-            self.manager.config.get("state"),
-            self.manager.config.get("city"),
-            extra_dn=cert_cn,
+            extra_dns=[cert_cn],
         )
         return cert_file, key_file
 
@@ -44,7 +37,6 @@ class ClientApiHandler(BaseHandler):
         cert_cn = self.opts.get(f"{conn_type}-cn", "localhost")
 
         cert_file, key_file = self.generate_x509(suffix, cert_cn)
-        logger.info(f"Generating new {cert_file} and {key_file} file(s)")
         if not self.dry_run:
             self.manager.secret.from_file(
                 f"client_api_{conn_type}_cert", cert_file,

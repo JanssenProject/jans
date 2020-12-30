@@ -5,45 +5,6 @@ from jans.pycloudlib.utils import exec_cmd
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP"
 DEFAULT_ENC_KEYS = DEFAULT_SIG_KEYS
 
-# @TODO: change ``assert`` to another Exception
-
-
-# def generate_ssl_certkey(suffix, passwd, email, hostname, org_name,
-#                          country_code, state, city):
-#     # create key with password
-#     _, err, retcode = exec_cmd(
-#         f"openssl genrsa -des3 -out /etc/certs/{suffix}.key.orig "
-#         f"-passout pass:'{passwd}' 2048"  # noqa: C812
-#     )
-#     assert retcode == 0, \
-#         f"Failed to generate SSL key with password; reason={err.decode()}"
-
-#     # create .key
-#     _, err, retcode = exec_cmd(
-#         f"openssl rsa -in /etc/certs/{suffix}.key.orig -passin pass:'{passwd}' "
-#         f"-out /etc/certs/{suffix}.key"  # noqa: C812
-#     )
-#     assert retcode == 0, f"Failed to generate SSL key; reason={err.decode()}"
-
-#     # create .csr
-#     _, err, retcode = exec_cmd(
-#         f"openssl req -new -key /etc/certs/{suffix}.key "
-#         f"-out /etc/certs/{suffix}.csr "
-#         f"-subj /C='{country_code}'/ST='{state}'/L='{city}'/O='{org_name}'"
-#         f"/CN='{hostname}'/emailAddress='{email}'"  # noqa: C812
-#     )
-#     assert retcode == 0, f"Failed to generate SSL CSR; reason={err.decode()}"
-
-#     # create .crt
-#     _, err, retcode = exec_cmd(
-#         f"openssl x509 -req -days 365 -in /etc/certs/{suffix}.csr "
-#         f"-signkey /etc/certs/{suffix}.key -out /etc/certs/{suffix}.crt"  # noqa: C812
-#     )
-#     assert retcode == 0, f"Failed to generate SSL cert; reason={err.decode()}"
-
-#     # return the paths
-#     return f"/etc/certs/{suffix}.crt", f"/etc/certs/{suffix}.key"
-
 
 def generate_keystore(suffix, hostname, keypasswd):
     # converts key to pkcs12
