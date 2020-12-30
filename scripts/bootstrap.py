@@ -168,7 +168,7 @@ class CtxGenerator:
         self.set_config("city", self.params["city"])
         self.set_config("hostname", self.params["hostname"])
         self.set_config("admin_email", self.params["email"])
-        self.set_config("default_openid_jks_dn_name", "CN=oxAuth CA Certificates")
+        self.set_config("default_openid_jks_dn_name", "CN=Janssen Auth CA Certificates")
         self.set_secret("pairwiseCalculationKey", get_sys_random_chars(random.randint(20, 30)))
         self.set_secret("pairwiseCalculationSalt", get_sys_random_chars(random.randint(20, 30)))
         self.set_config("jetty_base", "/opt/jans/jetty")
@@ -242,26 +242,26 @@ class CtxGenerator:
     def redis_ctx(self):
         self.set_secret("redis_pw", self.params.get("redis_pw", ""))
 
-    def oxauth_ctx(self):
+    def auth_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
-        self.set_config("oxauth_client_id", "1001.{}".format(uuid.uuid4()))
+        self.set_config("auth_client_id", "1001.{}".format(uuid.uuid4()))
         self.set_secret(
-            "oxauthClient_encoded_pw",
+            "authClient_encoded_pw",
             encode_text(get_random_chars(), encoded_salt),
         )
-        oxauth_openid_jks_fn = self.set_config("oxauth_openid_jks_fn", "/etc/certs/oxauth-keys.jks")
-        self.set_secret("oxauth_openid_jks_pass", get_random_chars())
-        oxauth_openid_jwks_fn = self.set_config("oxauth_openid_jwks_fn", "/etc/certs/oxauth-keys.json")
-        self.set_config("oxauth_legacyIdTokenClaims", "false")
-        self.set_config("oxauth_openidScopeBackwardCompatibility", "false")
+        auth_openid_jks_fn = self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
+        self.set_secret("auth_openid_jks_pass", get_random_chars())
+        auth_openid_jwks_fn = self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
+        self.set_config("auth_legacyIdTokenClaims", "false")
+        self.set_config("auth_openidScopeBackwardCompatibility", "false")
 
         # default exp = 2 hours + token lifetime (in hour)
         exp = int(2 + (3600 / 3600))
 
         _, err, retcode = generate_openid_keys_hourly(
-            self.get_secret("oxauth_openid_jks_pass"),
-            self.get_config("oxauth_openid_jks_fn"),
-            oxauth_openid_jwks_fn,
+            self.get_secret("auth_openid_jks_pass"),
+            self.get_config("auth_openid_jks_fn"),
+            auth_openid_jwks_fn,
             self.get_config("default_openid_jks_dn_name"),
             exp=exp,
             sig_keys="RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512",
@@ -271,15 +271,15 @@ class CtxGenerator:
             logger.error(f"Unable to generate auth keys; reason={err}")
             raise click.Abort()
 
-        basedir, fn = os.path.split(oxauth_openid_jwks_fn)
-        self.set_secret("oxauth_openid_key_base64", encode_template(fn, self.ctx, basedir))
+        basedir, fn = os.path.split(auth_openid_jwks_fn)
+        self.set_secret("auth_openid_key_base64", encode_template(fn, self.ctx, basedir))
 
-        # oxAuth keys
-        self.set_config("oxauth_key_rotated_at", int(time.time()))
+        # auth keys
+        self.set_config("auth_key_rotated_at", int(time.time()))
 
-        with open(oxauth_openid_jks_fn, "rb") as fr:
+        with open(auth_openid_jks_fn, "rb") as fr:
             self.set_secret(
-                "oxauth_jks_base64",
+                "auth_jks_base64",
                 encode_text(fr.read(), encoded_salt),
             )
 
@@ -804,7 +804,7 @@ class CtxGenerator:
         self.web_ctx()
         self.ldap_ctx()
         self.redis_ctx()
-        self.oxauth_ctx()
+        self.auth_ctx()
         self.config_api_ctx()
         self.scim_rs_ctx()
         self.scim_rp_ctx()
