@@ -1093,11 +1093,10 @@ class JCA_CLI:
                 item['path'] = '/'+item['path']
 
         path, api_caller = self.get_path_api_caller_for_op(op, 'patch')
-
-
         endpoint = Menu(name=op, path=path['__path__'])
         endpoint_param_dict = self.get_endpiont_url_param(endpoint)
         endpoint_param = endpoint_param_dict.get('name')
+
         if endpoint_param and not endpoint_param in args_dict:
             sys.stderr.write("This operation needs endpoint argument {}\n".format(endpoint_param))
             sys.exit()
@@ -1116,7 +1115,30 @@ class JCA_CLI:
 
 
     def process_command_delete(self, op, args, data_fn):
-        self.process_command_post(op, args, data_fn, method='put')
+        args_dict = self.parse_command_args(args)
+
+        path, api_caller = self.get_path_api_caller_for_op(op, 'delete')
+        endpoint = Menu(name=op, path=path['__path__'])
+        endpoint_param_dict = self.get_endpiont_url_param(endpoint)
+        endpoint_param = endpoint_param_dict.get('name')
+
+        if endpoint_param and not endpoint_param in args_dict:
+            sys.stderr.write("This operation needs endpoint argument {}\n".format(endpoint_param))
+            sys.exit()
+
+        try:
+            api_response = api_caller(args_dict[endpoint_param])
+        except swagger_client.rest.ApiException as e:
+            print(e.reason)
+            print(e.body)
+            sys.exit()
+
+        if api_response:
+            unmapped_response = self.unmap_model(api_response)
+            sys.stderr.write("Server Response:\n")
+            print(json.dumps(unmapped_response, indent=2))
+
+
 
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
 
