@@ -68,7 +68,7 @@ public class LoggingResource {
         conf.getDynamic().setHttpLoggingEnabled(logging.isHttpLoggingEnabled());
 
         configurationService.merge(conf);
-        return Response.ok(ResponseStatus.SUCCESS).build();
+        return Response.ok(logging).build();
     }
 
 }
