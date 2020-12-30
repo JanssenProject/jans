@@ -16,6 +16,7 @@
         "u2fBase": "ou=u2f,o=jans",
         "metric": "ou=statistic,o=metric",
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
-        "ciba": "ou=ciba,o=jans"
+        "ciba": "ou=ciba,o=jans",
+        "stat": "ou=stat,o=jans"
     }
 }
