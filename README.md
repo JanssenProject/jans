@@ -93,15 +93,15 @@ Supported services:
 
     Re-generate:
 
-    - `/etc/certs/oxauth-keys.json`
-    - `/etc/certs/oxauth-keys.jks`
+    - `/etc/certs/auth-keys.json`
+    - `/etc/certs/auth-keys.jks`
 
     Options:
 
     - `interval`: cryto keys expiration time (in hours)
-    - `push-to-container`: whether to _push_ `oxauth-keys.jks` and `oxauth-keys.json` to auth-server containers (default to `true`)
+    - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
     - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
-    - `privkey-push-delay`: delay time in seconds before pushing `oxauth-keys.jks` to oxAuth containers (default to `0`)
+    - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
 
 1.  `ldap`
 
@@ -158,12 +158,12 @@ Supported services:
 
     Delete expired keys (if any) from the following files:
 
-    - `/etc/certs/oxauth-keys.json`
-    - `/etc/certs/oxauth-keys.jks`
+    - `/etc/certs/auth-keys.json`
+    - `/etc/certs/auth-keys.jks`
 
     Options:
 
-    - `push-to-container`: whether to _push_ `oxauth-keys.jks` and `oxauth-keys.json` to oxAuth containers (default to `true`)
+    - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth containers (default to `true`)
 
 ### Examples
 
@@ -191,7 +191,7 @@ Kubernetes CronJob example:
 kind: CronJob
 apiVersion: batch/v1beta1
 metadata:
-  name: oxauth-key-rotation
+  name: auth-key-rotation
 spec:
   schedule: "0 */48 * * *"
   concurrencyPolicy: Forbid
@@ -200,7 +200,7 @@ spec:
       template:
         spec:
           containers:
-            - name: oxauth-key-rotation
+            - name: auth-key-rotation
               image: janssenproject/certmanager:1.0.0_dev
               resources:
                 requests:
@@ -212,6 +212,6 @@ spec:
               envFrom:
                 - configMapRef:
                     name: jans-config-cm
-              args: ["patch", "oxauth", "--opts", "interval:48"]
+              args: ["patch", "auth", "--opts", "interval:48"]
           restartPolicy: Never
 ```

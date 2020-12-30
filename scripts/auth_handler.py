@@ -48,7 +48,7 @@ def keytool_delete_key(jks_fn, alias, password):
     return exec_cmd(cmd)
 
 
-def encode_jks(manager, jks="/etc/certs/oxauth-keys.jks"):
+def encode_jks(manager, jks="/etc/certs/auth-keys.jks"):
     encoded_jks = ""
     with open(jks, "rb") as fd:
         encoded_jks = encode_text(fd.read(), manager.secret.get("encoded_salt"))
@@ -213,18 +213,18 @@ class AuthHandler(BaseHandler):
 
     def get_merged_keys(self, exp_hours):
         # get previous JWKS
-        with open("/etc/certs/oxauth-keys.old.json") as f:
+        with open("/etc/certs/auth-keys.old.json") as f:
             old_jwks = json.loads(f.read()).get("keys", [])
 
         # get previous JKS
-        old_jks_fn = "/etc/certs/oxauth-keys.old.jks"
-        self.manager.secret.to_file("oxauth_jks_base64", old_jks_fn, decode=True, binary_mode=True)
+        old_jks_fn = "/etc/certs/auth-keys.old.jks"
+        self.manager.secret.to_file("auth_jks_base64", old_jks_fn, decode=True, binary_mode=True)
 
         # generate new JWKS and JKS
-        jks_pass = self.manager.secret.get("oxauth_openid_jks_pass")
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
         jks_dn = r"{}".format(self.manager.config.get("default_openid_jks_dn_name"))
-        jks_fn = "/etc/certs/oxauth-keys.jks"
-        jwks_fn = "/etc/certs/oxauth-keys.json"
+        jks_fn = "/etc/certs/auth-keys.jks"
+        jwks_fn = "/etc/certs/auth-keys.json"
         logger.info(f"Generating new {jwks_fn} and {jks_fn}")
         out, err, retcode = generate_openid_keys(jks_pass, jks_fn, jks_dn, exp=exp_hours)
 
@@ -302,7 +302,7 @@ class AuthHandler(BaseHandler):
                            "builtin key rotation feature in jans-auth")
             return
 
-        jks_pass = self.manager.secret.get("oxauth_openid_jks_pass")
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
 
         conf_dynamic.update({
             "keyRegenerationEnabled": False,  # always set to False
@@ -318,7 +318,7 @@ class AuthHandler(BaseHandler):
         except TypeError:
             web_keys = config["jansConfWebKeys"]
 
-        with open("/etc/certs/oxauth-keys.old.json", "w") as f:
+        with open("/etc/certs/auth-keys.old.json", "w") as f:
             f.write(json.dumps(web_keys, indent=2))
 
         exp_hours = int(self.rotation_interval) + int(conf_dynamic["idTokenLifetime"] / 3600)
@@ -388,14 +388,12 @@ class AuthHandler(BaseHandler):
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
                 return
 
-            if int(self.privkey_push_delay) == 0:
-                self.manager.secret.set("oxauth_jks_base64", encode_jks(self.manager))
-
-            self.manager.config.set("oxauth_key_rotated_at", int(time.time()))
-            self.manager.secret.set("oxauth_openid_jks_pass", jks_pass)
+            self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+            self.manager.config.set("auth_key_rotated_at", int(time.time()))
+            self.manager.secret.set("auth_openid_jks_pass", jks_pass)
             # jwks
             self.manager.secret.set(
-                "oxauth_openid_key_base64",
+                "auth_openid_key_base64",
                 generate_base64_contents(json.dumps(keys)),
             )
 
@@ -403,10 +401,10 @@ class AuthHandler(BaseHandler):
             if int(self.privkey_push_delay) > 0:
                 logger.info(f"Waiting for private key push delay ({int(self.privkey_push_delay)} seconds) ...")
                 time.sleep(int(self.privkey_push_delay))
+
                 for container in auth_containers:
                     logger.info(f"creating new {name}:{jks_fn}")
                     self.meta_client.copy_to_container(container, jks_fn)
-                self.manager.secret.set("oxauth_jks_base64", encode_jks(self.manager))
 
                 # key selection is changed
                 if self.privkey_push_strategy != self.key_strategy:
@@ -445,7 +443,7 @@ class AuthHandler(BaseHandler):
                            "builtin key rotation feature in jans-auth")
             return
 
-        jks_pass = self.manager.secret.get("oxauth_openid_jks_pass")
+        jks_pass = self.manager.secret.get("auth_openid_jks_pass")
 
         conf_dynamic.update({
             "keyRegenerationEnabled": False,  # always set to False
@@ -461,8 +459,8 @@ class AuthHandler(BaseHandler):
 
         logger.info("Cleaning up expired keys (if any)")
 
-        jks_fn = "/etc/certs/oxauth-keys.jks"
-        self.manager.secret.to_file("oxauth_jks_base64", jks_fn, decode=True, binary_mode=True)
+        jks_fn = "/etc/certs/auth-keys.jks"
+        self.manager.secret.to_file("auth_jks_base64", jks_fn, decode=True, binary_mode=True)
 
         should_update = False
 
@@ -475,7 +473,7 @@ class AuthHandler(BaseHandler):
             keys.append(jwk)
 
         web_keys["keys"] = keys
-        jwks_fn = "/etc/certs/oxauth-keys.json"
+        jwks_fn = "/etc/certs/auth-keys.json"
         with open(jwks_fn, "w") as f:
             f.write(json.dumps(web_keys, indent=2))
 
@@ -535,12 +533,12 @@ class AuthHandler(BaseHandler):
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
                 return
 
-            self.manager.secret.set("oxauth_jks_base64", encode_jks(self.manager))
-            self.manager.config.set("oxauth_key_rotated_at", int(time.time()))
-            self.manager.secret.set("oxauth_openid_jks_pass", jks_pass)
+            self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+            self.manager.config.set("auth_key_rotated_at", int(time.time()))
+            self.manager.secret.set("auth_openid_jks_pass", jks_pass)
             # jwks
             self.manager.secret.set(
-                "oxauth_openid_key_base64",
+                "auth_openid_key_base64",
                 generate_base64_contents(json.dumps(keys)),
             )
         except (TypeError, ValueError,) as exc:
