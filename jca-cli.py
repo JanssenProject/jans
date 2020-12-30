@@ -464,7 +464,7 @@ class JCA_CLI:
                 if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
                     if qmethod and method == qmethod:
                         return self.cfg_yml['paths'][path][method]
-                    paths[method] = self.cfg_yml['paths'][path]
+                    paths[method] = self.cfg_yml['paths'][path][method]
                     
         return paths
 
@@ -947,7 +947,7 @@ class JCA_CLI:
     def help_for(self, op):
         path = self.get_tag_from_api_name(op)
 
-        schema = None
+        schema_path = None
 
         for method in path:
             if 'tags' in path[method]:
@@ -970,13 +970,15 @@ class JCA_CLI:
                 if 'requestBody' in path[method]:
                     for apptype in path[method]['requestBody'].get('content',{}):
                         if 'schema' in path[method]['requestBody']['content'][apptype]:
-                            schema = path[method]['requestBody']['content'][apptype]['schema']['$ref'][1:]
-                            print(' Schema: {}'.format(schema))
-                            
-                            
-        if schema:
+                            if path[method]['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                schema_path = path[method]['requestBody']['content'][apptype]['schema']['items']['$ref']
+                            else:
+                                schema_path = path[method]['requestBody']['content'][apptype]['schema']['$ref']
+                            print(' Schema: {}'.format(schema_path[1:]))
+
+        if schema_path:
             print()
-            print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema))
+            print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
 
     def get_path_api_caller_for_op(self, op, metod):
         path = self.get_tag_from_api_name(op, metod)
@@ -1062,6 +1064,10 @@ class JCA_CLI:
     def process_command_put(self, op, args, data_fn):
         self.process_command_post(op, args, data_fn, metod='put')
 
+
+    def process_command_path(self, op, args, data_fn):
+        pass
+
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
 
         if default:
@@ -1143,7 +1149,7 @@ else:
     if api_name:
         op = api_name + 'Api' 
 
-    if api_name and not args.op_mode:
+    if api_name and args.info:
         cliObject.help_for(op)
     elif args.schema:
         cliObject.get_sample_schema(args.schema)
