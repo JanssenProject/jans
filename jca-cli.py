@@ -1041,8 +1041,11 @@ class JCA_CLI:
         for key in data:
             model_field = self.get_model_key_map(model, key)
             model_data[model_field] = data[key]
-
-        model_obj = model(**model_data)
+        
+        try:
+            model_obj = model(**model_data)
+        except:
+            self.exit_with_error("Please check consistency of json and default schema")
         return model_obj
 
 
