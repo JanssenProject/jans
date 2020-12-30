@@ -19,6 +19,8 @@ from collections import OrderedDict
 import swagger_client
 
 warning_color = 214
+error_color = 196
+
 clear = lambda: os.system('clear')
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
@@ -951,8 +953,7 @@ class JCA_CLI:
 
         for arg_name in args_dict:
             if not arg_name in param_names:
-                sys.stderr.write("valid endpoint args are: {}\ns".format(', '.join(param_names)))
-                sys.exit()
+                self.exit_with_error("valid endpoint args are: {}".format(', '.join(param_names)))
 
         return args_dict
 
@@ -1044,17 +1045,19 @@ class JCA_CLI:
         model_obj = model(**model_data)
         return model_obj
 
+
+    def exit_with_error(self, error_text):
+        error_text += '\n'
+        sys.stderr.write(self.colored_text(error_text, error_color))
+        sys.exit()
+
     def process_command_post(self, op, args, data_fn, method='post'):
         path, api_caller = self.get_path_api_caller_for_op(op, method)
 
         endpoint = Menu(name=op, info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
-
         model = getattr(swagger_client.models, schema['__schema_name__'])
-        
-        with open(data_fn) as f:
-            data = json.load(f)
-
+        data = self.get_json_from_file(data_fn)
         body = self.populate_model(model, data)
 
         try:
@@ -1069,21 +1072,30 @@ class JCA_CLI:
         print(json.dumps(unmapped_response, indent=2))
 
 
-
     def process_command_put(self, op, args, data_fn):
         self.process_command_post(op, args, data_fn, method='put')
 
 
+    def get_json_from_file(self, data_fn):
+    
+        if not os.path.exists(data_fn):
+            self.exit_with_error("Can't find file {}".format(data_fn))
+        
+        try: 
+            with open(data_fn) as f:
+                data = json.load(f)
+        except:
+            self.exit_with_error("Error parsing json file {}".format(data_fn))
+
+        return data
+
     def process_command_patch(self, op, args, data_fn):
 
         args_dict = self.parse_command_args(args)
-
-        with open(data_fn) as f:
-            data = json.load(f)
+        data = self.get_json_from_file(data_fn)
 
         if not isinstance(data, list):
-            sys.stderr.write("{} must be array of /components/schemas/PatchRequest\n".format(data_fn))
-            sys.exit()
+            self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
         op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
         for item in data:
@@ -1099,8 +1111,7 @@ class JCA_CLI:
         endpoint_param = endpoint_param_dict.get('name')
 
         if endpoint_param and not endpoint_param in args_dict:
-            sys.stderr.write("This operation needs endpoint argument {}\n".format(endpoint_param))
-            sys.exit()
+            self.exit_with_error("This operation needs endpoint argument {}".format(endpoint_param))
 
         try:
             if endpoint_param:
@@ -1127,8 +1138,7 @@ class JCA_CLI:
         endpoint_param = endpoint_param_dict.get('name')
 
         if endpoint_param and not endpoint_param in args_dict:
-            sys.stderr.write("This operation needs endpoint argument {}\n".format(endpoint_param))
-            sys.exit()
+            self.exit_with_error("This operation needs endpoint argument {}".format(endpoint_param))
 
         try:
             api_response = api_caller(args_dict[endpoint_param])
