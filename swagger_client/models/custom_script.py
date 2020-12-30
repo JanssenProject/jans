@@ -36,12 +36,12 @@ class CustomScript(object):
         'script': 'str',
         'script_type': 'str',
         'programming_language': 'str',
-        'module_properties': 'list[CustomScriptModuleProperties]',
-        'configuration_properties': 'list[CustomScriptConfigurationProperties]',
+        'module_properties': 'list[SimpleCustomProperty]',
+        'configuration_properties': 'list[SimpleExtendedCustomProperty]',
         'level': 'int',
         'revision': 'int',
         'enabled': 'bool',
-        'script_error': 'CustomScriptScriptError',
+        'script_error': 'ScriptError',
         'modified': 'bool',
         'internal': 'bool'
     }
@@ -318,7 +318,7 @@ class CustomScript(object):
         Module-level properties applicable to the script.  # noqa: E501
 
         :return: The module_properties of this CustomScript.  # noqa: E501
-        :rtype: list[CustomScriptModuleProperties]
+        :rtype: list[SimpleCustomProperty]
         """
         return self._module_properties
 
@@ -329,7 +329,7 @@ class CustomScript(object):
         Module-level properties applicable to the script.  # noqa: E501
 
         :param module_properties: The module_properties of this CustomScript.  # noqa: E501
-        :type: list[CustomScriptModuleProperties]
+        :type: list[SimpleCustomProperty]
         """
 
         self._module_properties = module_properties
@@ -341,7 +341,7 @@ class CustomScript(object):
         Configuration properties applicable to the script.  # noqa: E501
 
         :return: The configuration_properties of this CustomScript.  # noqa: E501
-        :rtype: list[CustomScriptConfigurationProperties]
+        :rtype: list[SimpleExtendedCustomProperty]
         """
         return self._configuration_properties
 
@@ -352,7 +352,7 @@ class CustomScript(object):
         Configuration properties applicable to the script.  # noqa: E501
 
         :param configuration_properties: The configuration_properties of this CustomScript.  # noqa: E501
-        :type: list[CustomScriptConfigurationProperties]
+        :type: list[SimpleExtendedCustomProperty]
         """
 
         self._configuration_properties = configuration_properties
@@ -432,7 +432,7 @@ class CustomScript(object):
 
 
         :return: The script_error of this CustomScript.  # noqa: E501
-        :rtype: CustomScriptScriptError
+        :rtype: ScriptError
         """
         return self._script_error
 
@@ -442,7 +442,7 @@ class CustomScript(object):
 
 
         :param script_error: The script_error of this CustomScript.  # noqa: E501
-        :type: CustomScriptScriptError
+        :type: ScriptError
         """
 
         self._script_error = script_error

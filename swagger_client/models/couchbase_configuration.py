@@ -67,7 +67,7 @@ class CouchbaseConfiguration(object):
         'certificate_attributes': 'certificateAttributes'
     }
 
-    def __init__(self, config_id=None, user_name=None, user_password=None, servers=None, default_bucket=None, buckets=None, password_encryption_method=None, operation_tracing_enabled=False, mutation_tokens_enabled=False, connect_timeout=None, computation_pool_size=None, use_ssl=None, ssl_trust_store_file=None, ssl_trust_store_pin=None, ssl_trust_store_format=None, binary_attributes=None, certificate_attributes=None):  # noqa: E501
+    def __init__(self, config_id=None, user_name=None, user_password=None, servers=None, default_bucket=None, buckets=None, password_encryption_method=None, operation_tracing_enabled=None, mutation_tokens_enabled=None, connect_timeout=None, computation_pool_size=None, use_ssl=None, ssl_trust_store_file=None, ssl_trust_store_pin=None, ssl_trust_store_format=None, binary_attributes=None, certificate_attributes=None):  # noqa: E501
         """CouchbaseConfiguration - a model defined in Swagger"""  # noqa: E501
         self._config_id = None
         self._user_name = None
@@ -264,6 +264,7 @@ class CouchbaseConfiguration(object):
     def password_encryption_method(self):
         """Gets the password_encryption_method of this CouchbaseConfiguration.  # noqa: E501
 
+        A list of the password encryption algorithms.  # noqa: E501
 
         :return: The password_encryption_method of this CouchbaseConfiguration.  # noqa: E501
         :rtype: str
@@ -274,6 +275,7 @@ class CouchbaseConfiguration(object):
     def password_encryption_method(self, password_encryption_method):
         """Sets the password_encryption_method of this CouchbaseConfiguration.
 
+        A list of the password encryption algorithms.  # noqa: E501
 
         :param password_encryption_method: The password_encryption_method of this CouchbaseConfiguration.  # noqa: E501
         :type: str
@@ -291,6 +293,7 @@ class CouchbaseConfiguration(object):
     def operation_tracing_enabled(self):
         """Gets the operation_tracing_enabled of this CouchbaseConfiguration.  # noqa: E501
 
+        Boolean value True if tracing is enabled on the environment.  # noqa: E501
 
         :return: The operation_tracing_enabled of this CouchbaseConfiguration.  # noqa: E501
         :rtype: bool
@@ -301,6 +304,7 @@ class CouchbaseConfiguration(object):
     def operation_tracing_enabled(self, operation_tracing_enabled):
         """Sets the operation_tracing_enabled of this CouchbaseConfiguration.
 
+        Boolean value True if tracing is enabled on the environment.  # noqa: E501
 
         :param operation_tracing_enabled: The operation_tracing_enabled of this CouchbaseConfiguration.  # noqa: E501
         :type: bool
@@ -335,6 +339,7 @@ class CouchbaseConfiguration(object):
     def connect_timeout(self):
         """Gets the connect_timeout of this CouchbaseConfiguration.  # noqa: E501
 
+        The default timeout for connection timeout.  # noqa: E501
 
         :return: The connect_timeout of this CouchbaseConfiguration.  # noqa: E501
         :rtype: int
@@ -345,6 +350,7 @@ class CouchbaseConfiguration(object):
     def connect_timeout(self, connect_timeout):
         """Sets the connect_timeout of this CouchbaseConfiguration.
 
+        The default timeout for connection timeout.  # noqa: E501
 
         :param connect_timeout: The connect_timeout of this CouchbaseConfiguration.  # noqa: E501
         :type: int
@@ -379,6 +385,7 @@ class CouchbaseConfiguration(object):
     def use_ssl(self):
         """Gets the use_ssl of this CouchbaseConfiguration.  # noqa: E501
 
+        Identifies if SSL should be enabled.  # noqa: E501
 
         :return: The use_ssl of this CouchbaseConfiguration.  # noqa: E501
         :rtype: bool
@@ -389,6 +396,7 @@ class CouchbaseConfiguration(object):
     def use_ssl(self, use_ssl):
         """Sets the use_ssl of this CouchbaseConfiguration.
 
+        Identifies if SSL should be enabled.  # noqa: E501
 
         :param use_ssl: The use_ssl of this CouchbaseConfiguration.  # noqa: E501
         :type: bool

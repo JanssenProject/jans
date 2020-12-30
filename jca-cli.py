@@ -167,7 +167,7 @@ class JCA_CLI:
     def get_yaml(self):
 
         with open(self.swagger_yaml_fn) as f:
-            self.cfg_yml = ruamel.yaml.load(f.read(), ruamel.yaml.RoundTripLoader)
+            self.cfg_yml = ruamel.yaml.load(f.read().replace('\t',''), ruamel.yaml.RoundTripLoader)
 
         return self.cfg_yml
 
@@ -942,7 +942,8 @@ class JCA_CLI:
 
     def parse_args(self, args, path):
         param_names = []
-
+        if not 'parameters' in path:
+            return {}
         for param in path['parameters']:
             param_names.append(param['name'])
 
@@ -1102,7 +1103,10 @@ class JCA_CLI:
             sys.exit()
 
         try:
-            api_response = api_caller(args_dict[endpoint_param], body=data)
+            if endpoint_param:
+                api_response = api_caller(args_dict[endpoint_param], body=data)
+            else:
+                api_response = api_caller(body=data)
         except swagger_client.rest.ApiException as e:
             print(e.reason)
             print(e.body)
