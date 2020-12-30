@@ -124,7 +124,7 @@ class VaultSecret(BaseSecret):
         if self.client.is_authenticated():
             return
 
-        creds = self.client.auth_approle(self.role_id, self.secret_id, use_token=False)
+        creds = self.client.auth.approle.login(self.role_id, self.secret_id, use_token=False)
         self.client.token = creds["auth"]["client_token"]
 
     def get(self, key: str, default: Any = None) -> Any:
