@@ -55,6 +55,16 @@ public class BaseDnConfiguration {
     private String sectorIdentifiers;
     @XmlElement(name = "ciba")
     private String ciba;
+    @XmlElement(name = "stat")
+    private String stat;
+
+    public String getStat() {
+        return stat;
+    }
+
+    public void setStat(String stat) {
+        this.stat = stat;
+    }
 
     public String getAuthorizations() {
         return authorizations;
