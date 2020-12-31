@@ -7,7 +7,6 @@
 package io.jans.configapi.filters;
 
 import io.jans.configapi.auth.AuthorizationService;
-import io.jans.configapi.auth.util.ApiTestMode;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -48,51 +47,32 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
     
+
     @Inject
     AuthorizationService authorizationService;
-    
-    @Inject
-    ApiTestMode apiTestMode;
 
     public void filter(ContainerRequestContext context) {
-
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
-        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString()+" , apiTestMode.isTestMode() = "+apiTestMode.isTestMode());
+        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
         log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , AuthUtil.isTestMode() = "+apiTestMode.isTestMode()+"\n\n\n");
-        
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
+
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
-            if (apiTestMode.isTestMode()) {
-                authorizationHeader = this.testAuthenticationPrep(resourceInfo, context.getMethod(),
-                        request.getRequestURI());
-            }
-            log.info("\n\n\n AuthorizationFilter::filter() - after testAuthenticationPrep() -  authorizationHeader = " + authorizationHeader+" , apiTestMode.isTestMode() = "+apiTestMode.isTestMode()+"\n\n\n");
-            
-            //Api protection validation
             this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
             abortWithUnauthorized(context);
-        }
-        finally {
-            try {
-                if (apiTestMode.isTestMode()) {
-                    //apiTestMode.deleteTestClient(); //TODO: later - ???
-                }
-            } catch (Exception ex) {
-                log.error("====== Test Revoke Token  FAILED ===========================================", ex);
-            }
         }
 
     }
@@ -105,12 +85,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
-    }
-    
-    private String testAuthenticationPrep(ResourceInfo resourceInfo, String method, String path) throws Exception {
-        log.trace("testAuthenticationPrep(), resourceInfo: {}, method: {}, path: {} ", resourceInfo, method, path);
-        String token = AUTHENTICATION_SCHEME + " " + apiTestMode.createTestToken(resourceInfo, method, path);
-        return token;
     }
 
 }

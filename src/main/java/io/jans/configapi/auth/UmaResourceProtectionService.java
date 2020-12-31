@@ -106,11 +106,6 @@ public class UmaResourceProtectionService {
                     }
 
                     ScopeType scopeType = ScopeType.UMA;
-                    /*
-                     * if(ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.
-                     * getApiProtectionType())) { scopeType = ScopeType.OPENID; }
-                     */
-
                     if (scopes == null || scopes.isEmpty()) {
                         log.trace("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope

@@ -13,12 +13,10 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.UmaAuthorizationService;
 import io.jans.configapi.auth.UmaResourceProtectionService;
-import io.jans.configapi.auth.util.ApiTestMode;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -62,8 +60,6 @@ public class ConfigurationFactory {
         } else {
             BASE_DIR = null;
         }
-        
-        APP_EXECUTION_MODE = System.getProperty("app.execution.mode");
     }
 
     private static final String BASE_DIR;
@@ -72,8 +68,6 @@ public class ConfigurationFactory {
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
-    private static final String APP_EXECUTION_MODE;
-    private static Client apiTestClient;
 
     @Inject
     Logger log;
@@ -84,10 +78,7 @@ public class ConfigurationFactory {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
-    
-    @Inject
-    ApiTestMode apiTestMode;
-    
+
     private AppConfiguration appConfiguration;
     private StaticConfiguration staticConf;
     private WebKeysConfiguration jwks;
@@ -101,15 +92,15 @@ public class ConfigurationFactory {
     @Inject
     @ConfigProperty(name = "apiUmaClientId")
     private static String API_CLIENT_ID;
-
-    @Inject
-    @ConfigProperty(name = "apiUmaClientPassword")
-    private static String API_CLIENT_PWD;
-
+    
     @Inject
     @ConfigProperty(name = "apiProtection.type")
     private static String API_PROTECTION_TYPE;
-
+    
+    @Inject
+    @ConfigProperty(name = "apiUmaClientPassword")
+    private static String API_UMA_CLIENT_PASSWORD;
+    
     @Inject
     UmaResourceProtectionService umaResourceProtectionService;
     
@@ -139,22 +130,16 @@ public class ConfigurationFactory {
     public static String getApiProtectionType() {
         return API_PROTECTION_TYPE;
     }
+ 
 
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
-
-    public static String getApiClientPwd() {
-        return API_CLIENT_PWD;
+    
+    public static String getApiClientPassword() {
+        return API_UMA_CLIENT_PASSWORD;
     }
-
-    public static String getAppExecutionMode() {
-        return APP_EXECUTION_MODE;
-    }
-
-    public static Client getApiTestClient() {
-        return apiTestClient;
-    }
+    
     
     public void create() {
         loadBaseConfiguration();
@@ -171,8 +156,6 @@ public class ConfigurationFactory {
         }
 
         createAuthorizationService();
-        
-        this.apiTestClient = createApiTestClient();
         
     }
 
@@ -333,23 +316,4 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-
-    @Produces
-    @ApplicationScoped
-    @Named("apiTestClient")
-    private Client createApiTestClient() {
-        try {
-            log.info(
-                    "=============ConfigurationFactory::createApiTestClient() - ConfigurationFactory.getAppExecutionMode() = "
-                            + ConfigurationFactory.getAppExecutionMode());
-            if (StringHelper.isNotEmptyString(ConfigurationFactory.getAppExecutionMode())) {
-                return this.apiTestMode.init();
-            }
-            return null;
-        } catch (Exception ex) {
-            log.error("Failed to create Test Client", ex);
-            throw new ConfigurationException("Failed to create Test Client", ex);
-        }
-    }
-
 }
