@@ -168,10 +168,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_JAVA_OPTIONS="" \
-    CN_SSL_CERT_FROM_SECRETS=false \
     CN_SYNC_JKS_ENABLED=false \
-    CN_SYNC_JKS_INTERVAL=30 \
-    CN_NAMESPACE=jans
+    CN_SYNC_JKS_INTERVAL=30
 
 # ==========
 # misc stuff

@@ -59,6 +59,5 @@ The following environment variables are supported by the container:
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
 - `CN_JACKRABBIT_ADMIN_PASSWORD_FILE`: Absolute path to file contains password for admin user (default to `/etc/jans/conf/jackrabbit_admin_password`).
-- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `false`). Note that the flag will take effect only if there's no mounted `/etc/certs/jans_https.crt` file.
 - `CN_SYNC_JKS_ENABLED`: Whether to enable JKS sync (default to `false`). Enable this flag if using `gluufederation/key-rotation:4.1.1_02` and below (for key-regeneration).
 - `CN_SYNC_JKS_INTERVAL`: Interval of JKS sync in seconds (if needed); obsolete.
