@@ -52,7 +52,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
 
-        self.install_jca_cli(self)
+        self.install_jca_cli()
 
     def installed(self):
         return os.path.exists(self.config_api_root)
