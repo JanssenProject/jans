@@ -67,9 +67,10 @@ def get_key_from(dn):
 
 
 def get_bucket_mappings():
+    prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
     bucket_mappings = OrderedDict({
         "default": {
-            "bucket": "jans",
+            "bucket": prefix,
             "files": [
                 "base.ldif",
                 "attributes.ldif",
@@ -102,7 +103,7 @@ def get_bucket_mappings():
             "document_key_prefix": [],
         },
         "user": {
-            "bucket": "jans_user",
+            "bucket": f"{prefix}_user",
             "files": [
                 "people.ldif",
                 "groups.ldif",
@@ -111,7 +112,7 @@ def get_bucket_mappings():
             "document_key_prefix": ["groups_", "people_", "authorizations_"],
         },
         "site": {
-            "bucket": "jans_site",
+            "bucket": f"{prefix}_site",
             "files": [
                 "o_site.ldif",
             ],
@@ -119,19 +120,19 @@ def get_bucket_mappings():
             "document_key_prefix": ["site_", "cache-refresh_"],
         },
         "token": {
-            "bucket": "jans_token",
+            "bucket": f"{prefix}_token",
             "files": [],
             "mem_alloc": 300,
             "document_key_prefix": ["tokens_"],
         },
         "cache": {
-            "bucket": "jans_cache",
+            "bucket": f"{prefix}_cache",
             "files": [],
             "mem_alloc": 100,
             "document_key_prefix": ["cache_"],
         },
         "session": {
-            "bucket": "jans_session",
+            "bucket": f"{prefix}_session",
             "files": [],
             "mem_alloc": 200,
             "document_key_prefix": [],
@@ -445,7 +446,9 @@ def merge_extension_ctx(ctx):
 
         for fname in os.listdir(ext_type_dir):
             filepath = os.path.join(ext_type_dir, fname)
-            ext_name = "{}_{}".format(ext_type, os.path.splitext(fname)[0].lower())
+            ext_name = "{}_{}".format(
+                ext_type, os.path.splitext(fname)[0].lower()
+            )
 
             with open(filepath) as fd:
                 ctx[ext_name] = generate_base64_contents(fd.read())
@@ -601,7 +604,8 @@ class CouchbaseBackend(object):
             memsize = 100
 
             logger.info("Creating bucket {0} with type {1} and RAM size {2}".format("jans", bucket_type, memsize))
-            req = self.client.add_bucket("jans", memsize, bucket_type)
+            prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            req = self.client.add_bucket(prefix, memsize, bucket_type)
             if not req.ok:
                 logger.warning("Failed to create bucket {}; reason={}".format("jans", req.text))
 
@@ -624,9 +628,10 @@ class CouchbaseBackend(object):
 
     def create_indexes(self, bucket_mappings):
         buckets = [mapping["bucket"] for _, mapping in bucket_mappings.items()]
+        prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
         with open("/app/static/couchbase/index.json") as f:
-            txt = f.read().replace("!bucket_prefix!", "jans")
+            txt = f.read().replace("!bucket_prefix!", prefix)
             indexes = json.loads(txt)
 
         for bucket in buckets:
@@ -688,9 +693,8 @@ class CouchbaseBackend(object):
                     if not req.ok:
                         # the following code should be ignored
                         # - 4300: index already exists
-                        # - 5000: index already built
                         error = req.json()["errors"][0]
-                        if error["code"] in (4300, 5000):
+                        if error["code"] in (4300,):
                             continue
                         logger.warning("Failed to execute query, reason={}".format(error["msg"]))
 
@@ -738,20 +742,22 @@ class CouchbaseBackend(object):
         def is_initialized():
             persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
             ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
+            bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
-            # only `jans` and `jans_user` buckets that may have initial data;
+            # only default and user buckets buckets that may have initial data;
             # these data also affected by LDAP mapping selection;
-            # by default we will choose the `gluu` bucket
-            bucket, key = "jans", "configuration_oxtrust"
+            bucket, key = bucket_prefix, "configuration_jans-auth"
 
             # if `hybrid` is selected and default mapping is stored in LDAP,
-            # the `jans` bucket won't have data, hence we check the `jans_user` instead
+            # the default bucket won't have data, hence we check the user bucket instead
             if persistence_type == "hybrid" and ldap_mapping == "default":
-                bucket, key = "jans_user", "groups_60B7"
+                bucket, key = f"{bucket_prefix}_user", "groups_60B7"
 
-            query = "SELECT objectClass FROM {0} USE KEYS '{1}'".format(bucket, key)
+            req = self.client.exec_query(
+                f"SELECT objectClass FROM {bucket} USE KEYS $key",
+                key=key,
+            )
 
-            req = self.client.exec_query(query)
             if req.ok:
                 data = req.json()
                 return bool(data["results"])
@@ -936,21 +942,21 @@ class LDAPBackend(object):
         def is_initialized():
             persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
             ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-            namespace = os.environ.get("CN_NAMESPACE", "jans")
 
             # a minimum service stack is having oxTrust, hence check whether entry
             # for oxTrust exists in LDAP
-            default_search = (f"ou=jans-auth,ou=configuration,o={namespace}",
+            default_search = ("ou=jans-auth,ou=configuration,o=jans",
                               "(objectClass=jansAppConf)")
 
             if persistence_type == "hybrid":
                 # `cache` and `token` mapping only have base entries
                 search_mapping = {
                     "default": default_search,
-                    "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=jansGrp)"),
+                    "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
                     "site": ("ou=cache-refresh,o=site", "(ou=people)"),
-                    "cache": (f"o={namespace}", "(ou=cache)"),
-                    "token": (f"ou=tokens,o={namespace}", "(ou=tokens)"),
+                    "cache": ("o=jans", "(ou=cache)"),
+                    "token": ("ou=tokens,o=jans", "(ou=tokens)"),
+                    "session": ("ou=sessions,o=jans", "(ou=sessions)"),
                 }
                 search = search_mapping[ldap_mapping]
             else:

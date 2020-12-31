@@ -107,8 +107,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_RMI_URL="" \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
-    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
-    CN_NAMESPACE=jans
+    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password
 
 # ====
 # misc
