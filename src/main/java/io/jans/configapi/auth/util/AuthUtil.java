@@ -90,7 +90,7 @@ public class AuthUtil {
     }
 
     public String getClientPassword() {
-        return this.configurationFactory.getApiClientPwd();
+        return this.configurationFactory.getApiClientPassword();
     }
 
     public String getTokenUrl() {

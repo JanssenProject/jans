@@ -95,11 +95,7 @@ public class AuthClientFactory {
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .target(revokeTokenUrl);
 
-        
-       // Response response = request
-         //       .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
-        Response response = request.post(Entity.form(multivaluedHashMap));
-        
+        Response response = request.post(Entity.form(multivaluedHashMap));       
         
         if (response.getStatus() == 200) {
             String entity = response.readEntity(String.class);

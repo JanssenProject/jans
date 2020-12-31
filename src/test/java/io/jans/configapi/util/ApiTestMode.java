@@ -1,4 +1,4 @@
-package io.jans.configapi.auth.util;
+package io.jans.configapi.util;
 
 import com.google.common.base.Preconditions;
 
@@ -27,6 +27,7 @@ import io.jans.configapi.auth.UmaResourceProtectionCache;
 import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.auth.service.UmaService;
+import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ClientService;
@@ -36,6 +37,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
 import io.jans.util.security.StringEncrypter.EncryptionException;
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -76,27 +78,15 @@ public class ApiTestMode {
 
     @Inject
     ClientService clientService;
+    
+    private static String testClientId;
+    
+    public String getTestClientId() {
+        return testClientId;
+    }
 
     public Client init() throws Exception {
-
-        if (isTestMode()) {
-            // Create test Client
             return createTestClient();
-        }
-        return null;
-
-    }
-
-    private String getTestClientId() {
-        if (this.configurationFactory.getApiTestClient() != null) {
-            return this.configurationFactory.getApiTestClient().getClientId();
-        }
-        return null;
-    }
-
-    public boolean isTestMode() {
-        return configurationFactory.getAppExecutionMode() != null
-                && "TEST".equalsIgnoreCase(configurationFactory.getAppExecutionMode());
     }
 
     public String getApiProtectionType() {
@@ -153,7 +143,8 @@ public class ApiTestMode {
 
     private Client createTestClient() throws Exception {
         // Create test client
-        String clientPassword = "test1234";
+        //String clientPassword = "test1234";
+        String clientPassword = RandomStringUtils.randomAlphanumeric(8);
         Client client = new Client();
         client.setClientSecret(authUtil.encryptPassword(clientPassword));
         client.setApplicationType(ApplicationType.NATIVE);
@@ -165,15 +156,13 @@ public class ApiTestMode {
         client.setSubjectType(SubjectType.PAIRWISE);
         client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
 
-        String inum = this.clientService.generateInumForNewClient();
+        String inum = clientService.generateInumForNewClient();
         client.setClientId(inum);
-        client.setDn(this.clientService.getDnForClient(inum));
-        this.clientService.addClient(client);
+        client.setDn(clientService.getDnForClient(inum));
+        clientService.addClient(client);
+       
         Client result = clientService.getClientByInum(inum);
-        log.debug("New test client details,  client.getClientId() = " + client.getClientId()
-                + " ,client.getClientName() = " + client.getClientName() + " , client.getDn() = " + client.getDn()
-                + " ,client.getScopes() = " + Arrays.asList(client.getScopes()));
-
+        testClientId = result.getClientId();
         return result;
     }
 
