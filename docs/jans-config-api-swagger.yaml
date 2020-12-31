@@ -986,6 +986,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Memcached cache configuration.
+      description: Partially modifies Memcached cache configuration.
+      operationId: patch-config-cache-memcached
+      tags:
+        - Cache Configuration – Memcached
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemcachedConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/redis:
     get:
       summary: Returns Redis cache configuration.
@@ -1031,6 +1059,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Redis cache configuration.
+      description: Partially modifies Redis cache configuration.
+      operationId: patch-config-cache-redis
+      tags:
+        - Cache Configuration – Redis
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: redisConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/in-memory:
     get:
       summary: Returns in-Memory cache configuration.
@@ -1076,6 +1132,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies In-Memory cache configuration.
+      description: Partially modifies In-Memory cache configuration.
+      operationId: patch-config-cache-in-memory
+      tags:
+        - Cache Configuration – in-Memory
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: inMemoryConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InMemoryConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/native-persistence:
     get:
       summary: Returns native persistence cache configuration.
@@ -1121,6 +1205,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Native Persistence cache configuration.
+      description: Partially modifies Native Persistence cache configuration.
+      operationId: patch-config-cache-native-persistence
+      tags:
+        - Cache Configuration – Native-Persistence
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: nativePersistenceConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NativePersistenceConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/smtp:
     get:
       summary: Returns SMTP server configuration.

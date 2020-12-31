@@ -85,6 +85,7 @@ public class AttributesResource extends BaseResource {
     public Response createAttribute(@Valid GluuAttribute attribute) {
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
         String inum = attributeService.generateInumForNewAttribute();
         attribute.setInum(inum);
         attribute.setDn(attributeService.getDnForAttribute(inum));
@@ -100,6 +101,7 @@ public class AttributesResource extends BaseResource {
         checkResourceNotNull(inum, GLUU_ATTRIBUTE);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
         attribute.setInum(existingAttribute.getInum());

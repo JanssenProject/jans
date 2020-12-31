@@ -1,15 +1,16 @@
-@ignore
+@ignore	
 Feature: Attributes 
 
-@ignore
+@ignore	
 Scenario: Fetch all attributes without bearer token 
 	Given url attributes_url 
 	When method GET 
 	Then status 401 
-	
+
+@ignore	
 Scenario: Fetch all attributes 
 	Given url attributes_url 
-	And  header Authorization = 'Bearer ' + accessToken 
+	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 200 
 	And print response
@@ -69,7 +70,7 @@ Scenario: Fetch the first three inactive attributes
 Scenario: Create new attribute 
 	Given url attributes_url 
 	And header Authorization = 'Bearer ' + accessToken 
-	And request read('classpath:attribute.json') 
+	And request read('attribute.json') 
 	When method POST 
 	Then status 201 
 	Then def result = response 
@@ -107,8 +108,8 @@ Scenario: Get an attribute by inum
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 200 
-	Given url attributes_url + '/' +response[0].inum 
-	And header Authorization = 'Bearer ' + accessToken 
+	Given url attributes_url + '/' +response[0].inum
+	And header Authorization = 'Bearer ' + accessToken
 	When method GET 
 	Then status 200
 	And print response
