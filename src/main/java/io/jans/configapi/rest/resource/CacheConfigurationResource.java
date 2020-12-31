@@ -90,6 +90,21 @@ public class CacheConfigurationResource extends BaseResource {
         });
         return Response.ok(modifiedCache.getRedisConfiguration()).build();
     }
+    
+    @PATCH
+    @Path(ApiConstants.REDIS)
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
+    public Response patchRedisConfiguration(@NotNull String requestString) {
+    	 final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+             try {
+                 return Jackson.applyPatch(requestString, cache);
+             } catch (IOException | JsonPatchException e) {
+                 throw new RuntimeException("Unable to apply patch.", e);
+             }
+         });
+         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
+    }
 
     @GET
     @Path(ApiConstants.IN_MEMORY)
@@ -108,6 +123,21 @@ public class CacheConfigurationResource extends BaseResource {
         });
 
         return Response.ok(modifiedCache.getInMemoryConfiguration()).build();
+    }
+    
+    @PATCH
+    @Path(ApiConstants.IN_MEMORY)
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
+    public Response patchInMemoryConfiguration(@NotNull String requestString) {
+    	 final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+             try {
+                 return Jackson.applyPatch(requestString, cache);
+             } catch (IOException | JsonPatchException e) {
+                 throw new RuntimeException("Unable to apply patch.", e);
+             }
+         });
+         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
     }
 
     @GET
@@ -128,6 +158,21 @@ public class CacheConfigurationResource extends BaseResource {
         return Response.ok(modifiedCache.getNativePersistenceConfiguration()).build();
     }
 
+    @PATCH
+    @Path(ApiConstants.NATIVE_PERSISTENCE)
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
+    public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
+    	 final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+             try {
+                 return Jackson.applyPatch(requestString, cache);
+             } catch (IOException | JsonPatchException e) {
+                 throw new RuntimeException("Unable to apply patch.", e);
+             }
+         });
+         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
+    }
+    
     @GET
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = {ApiAccessConstants.CACHE_READ_ACCESS})
@@ -144,6 +189,21 @@ public class CacheConfigurationResource extends BaseResource {
             return cache;
         });
         return Response.ok(modifiedCache.getMemcachedConfiguration()).build();
+    }
+    
+    @PATCH
+    @Path(ApiConstants.MEMCACHED)
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {ApiAccessConstants.CACHE_WRITE_ACCESS})
+    public Response patchMemcachedConfiguration(@NotNull String requestString) {
+    	 final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+             try {
+                 return Jackson.applyPatch(requestString, cache);
+             } catch (IOException | JsonPatchException e) {
+                 throw new RuntimeException("Unable to apply patch.", e);
+             }
+         });
+         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
 
 }
