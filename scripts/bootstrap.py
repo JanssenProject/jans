@@ -10,8 +10,6 @@ from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import get_server_certificate
-from jans.pycloudlib.utils import as_boolean
 
 manager = get_manager()
 
@@ -83,15 +81,12 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
-    if not os.path.isfile("/etc/certs/jans_https.crt"):
-        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", False)):
-            manager.secret.to_file("ssl_cert", "/etc/certs/jans_https.crt")
-        else:
-            get_server_certificate(manager.config.get("hostname"), 443, "/etc/certs/jans_https.crt")
+    if not os.path.isfile("/etc/certs/web_https.crt"):
+        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
 
     cert_to_truststore(
-        "jans_https",
-        "/etc/certs/jans_https.crt",
+        "web_https",
+        "/etc/certs/web_https.crt",
         "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
         "changeit",
     )

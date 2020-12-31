@@ -131,8 +131,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
-    CN_SSL_CERT_FROM_SECRETS=false \
-    CN_NAMESPACE=jans
+    CN_SSL_CERT_FROM_SECRETS=false
 
 # ==========
 # misc stuff
