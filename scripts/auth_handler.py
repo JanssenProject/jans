@@ -82,14 +82,13 @@ class LdapPersistence(BasePersistence):
     def __init__(self, host, user, password):
         ldap_server = Server(host, port=1636, use_ssl=True)
         self.backend = Connection(ldap_server, user, password)
-        self.namespace = os.environ.get("CN_NAMESPACE", "jans")
 
     def get_auth_config(self):
         # base DN for auth config
         auth_base = ",".join([
             "ou=jans-auth",
             "ou=configuration",
-            f"o={self.namespace}",
+            "o=jans",
         ])
 
         with self.backend as conn:
@@ -132,12 +131,12 @@ class LdapPersistence(BasePersistence):
 class CouchbasePersistence(BasePersistence):
     def __init__(self, host, user, password):
         self.backend = CouchbaseClient(host, user, password)
-        self.namespace = os.environ.get("CN_NAMESPACE", "jans")
 
     def get_auth_config(self):
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         req = self.backend.exec_query(
             "SELECT jansRevision, jansConfDyn, jansConfWebKeys "
-            f"FROM `{self.namespace}` "
+            f"FROM `{bucket}` "
             "USE KEYS 'configuration_jans-auth'",
         )
         if not req.ok:
@@ -154,9 +153,10 @@ class CouchbasePersistence(BasePersistence):
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
         conf_dynamic = json.dumps(conf_dynamic)
         conf_webkeys = json.dumps(conf_webkeys)
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
         req = self.backend.exec_query(
-            f"UPDATE `{self.namespace}` USE KEYS '{id_}' "
+            f"UPDATE `{bucket}` USE KEYS '{id_}' "
             f"SET jansRevision={rev}, jansConfDyn={conf_dynamic}, "
             f"jansConfWebKeys={conf_webkeys} "
             "RETURNING jansRevision"

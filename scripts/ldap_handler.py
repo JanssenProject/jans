@@ -42,7 +42,7 @@ class LdapHandler(BaseHandler):
         passwd = self.manager.secret.get("ldap_truststore_pass")
         hostname = self.manager.config.get("hostname")
 
-        logger.info(f"Generating /etc/certs/{suffix}.pkcs12 file(s)")
+        logger.info(f"Generating /etc/certs/{suffix}.pkcs12 file")
 
         # Convert key to pkcs12
         cmd = " ".join([
