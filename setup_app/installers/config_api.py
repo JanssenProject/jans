@@ -52,8 +52,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
 
-        self.install_jca_cli()
-
     def installed(self):
         return os.path.exists(self.config_api_root)
 
@@ -174,6 +172,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
         self.dbUtils.import_ldif([self.scope_ldif_fn, self.resources_ldif_fn, self.clients_ldif_fn])
+
+        self.install_jca_cli()
 
     def install_jca_cli(self):
         self.logIt("Installing Jans Cli", pbar=self.service_name)
