@@ -62,6 +62,11 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
+    public Boolean statEnabled = true;
+    public int statTimerIntervalInSeconds;
+    public int statWebServiceIntervalLimitInSeconds;
+    public String statNodeId;
+
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -849,6 +854,39 @@ public class AppConfiguration implements Configuration {
 
     public void setUserInfoEncryptionAlgValuesSupported(List<String> userInfoEncryptionAlgValuesSupported) {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
+    }
+
+    public Boolean getStatEnabled() {
+        if (statEnabled == null) statEnabled = true;
+        return statEnabled;
+    }
+
+    public void setStatEnabled(Boolean statEnabled) {
+        this.statEnabled = statEnabled;
+    }
+
+    public int getStatWebServiceIntervalLimitInSeconds() {
+        return statWebServiceIntervalLimitInSeconds;
+    }
+
+    public void setStatWebServiceIntervalLimitInSeconds(int statWebServiceIntervalLimitInSeconds) {
+        this.statWebServiceIntervalLimitInSeconds = statWebServiceIntervalLimitInSeconds;
+    }
+
+    public int getStatTimerIntervalInSeconds() {
+        return statTimerIntervalInSeconds;
+    }
+
+    public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
+        this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
+    }
+
+    public String getStatNodeId() {
+        return statNodeId;
+    }
+
+    public void setStatNodeId(String statNodeId) {
+        this.statNodeId = statNodeId;
     }
 
     public List<String> getUserInfoEncryptionEncValuesSupported() {
