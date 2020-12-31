@@ -17,27 +17,36 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 
+import org.junit.jupiter.api.AfterAll;
+
 @QuarkusTest
 public class KarateTestRunner {
     
     @Inject
     ApiTestMode apiTestMode;
     
-    private Client client;
+    private static Client client;
     
-   // @BeforeAll
-    public void createClient() throws Exception {
-        System.out.println("\n\n KarateTestRunner:::createClient() - Entry ");
-        this.client = apiTestMode.init();
-        System.out.println("\n\n KarateTestRunner:::createClient() - this.client = "+this.client);
+   @BeforeAll
+    public void createTestClient() {
+        System.out.println("\n\n KarateTestRunner:::createTestClient() - Entry ");
+        client = apiTestMode.init();
+        System.out.println("\n\n KarateTestRunner:::createTestClient() - getClientId() = "+client.getClientId());
     }
 
     @Karate.Test
     Karate testFullPath() throws Exception{
         System.out.println("\n\n KarateTestRunner:::testFullPath() - Entry ");
-        createClient();
-        System.out.println("\n\n KarateTestRunner:::testFullPath() - this.client = "+this.client);
+        //createTestClient();
+        System.out.println("\n\n KarateTestRunner:::testFullPath() - client.getClientId() = "+client.getClientId());
         return Karate.run("src/test/resources/feature");
     }
-
+    
+    @AfterAll
+    public void deleteTestClient() {
+        System.out.println("\n\n KarateTestRunner:::deleteTestClient() - Entry - client.getClientId() = "+client.getClientId());
+        apiTestMode.deleteTestClient(client.getClientId());
+        client = null;
+        System.out.println("\n\n KarateTestRunner:::deleteTestClient() - client.getClientId() = " +client.getClientId());
+    }
 }

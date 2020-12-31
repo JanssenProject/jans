@@ -81,11 +81,8 @@ public class ApiTestMode {
     
     private static String testClientId;
     
-    public String getTestClientId() {
-        return testClientId;
-    }
 
-    public Client init() throws Exception {
+    public Client init() {
             return createTestClient();
     }
 
@@ -93,16 +90,16 @@ public class ApiTestMode {
         return this.configurationFactory.getApiProtectionType();
     }
 
-    public String createTestToken(ResourceInfo resourceInfo, String method, String path) throws Exception {
-        log.trace(" Creating Test Token, resourceInfo: {}, method: {}, path: {} ", resourceInfo, method, path);
+    public String createTestToken(String clientId, ResourceInfo resourceInfo, String method, String path) throws Exception {
+        log.trace(" Creating Test Token, clientId: {}, resourceInfo: {}, method: {}, path: {} ", clientId,resourceInfo, method, path);
         Token token = null;
 
         // Get all scopes
         List<String> scopes = this.authUtil.getRequestedScopes(resourceInfo);
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(this.getApiProtectionType())) {
-            token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), this.getTestClientId(), scopes);
+            token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
         } else {
-            token = registerRptTicket(resourceInfo, method, path, scopes);
+            token = registerRptTicket(clientId,resourceInfo, method, path, scopes);
         }
         log.trace("Generated token: {} ", token);
 
@@ -112,13 +109,13 @@ public class ApiTestMode {
         return null;
     }
 
-    private Token registerRptTicket(ResourceInfo resourceInfo, String method, String path, List<String> scopes)
+    private Token registerRptTicket(String clientId, ResourceInfo resourceInfo, String method, String path, List<String> scopes)
             throws Exception {
-        log.trace(" Register Rpt Ticket, resourceInfo: {}, method: {}, path: {}, scopes: {}", resourceInfo, method,
+        log.trace(" Register Rpt Ticket, clientId:{}, resourceInfo: {}, method: {}, path: {}, scopes: {}", clientId, resourceInfo, method,
                 path, scopes);
 
         // Get Pat
-        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), this.getTestClientId(), ScopeType.UMA,
+        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), clientId, ScopeType.UMA,
                 scopes);
         log.trace(" Rpt patToken: {}", patToken);
 
@@ -126,7 +123,7 @@ public class ApiTestMode {
         if (patToken != null && umaResource != null) {
 
             // Register RPT token
-            TokenResponse tokenResponse = this.authUtil.requestRpt(this.getTestClientId(), umaResource.getId(), scopes,
+            TokenResponse tokenResponse = this.authUtil.requestRpt(clientId, umaResource.getId(), scopes,
                     patToken);
             log.debug("tokenResponse = " + tokenResponse + "\n");
 
@@ -141,7 +138,7 @@ public class ApiTestMode {
         return null;
     }
 
-    private Client createTestClient() throws Exception {
+    private Client createTestClient()  {
         // Create test client
         //String clientPassword = "test1234";
         String clientPassword = RandomStringUtils.randomAlphanumeric(8);
@@ -166,9 +163,10 @@ public class ApiTestMode {
         return result;
     }
 
-    public void deleteTestClient() {
-        Client client = this.clientService.getClientByInum(getTestClientId());
-        log.trace("Client to delete " + client.getClientId());
+    public void deleteTestClient(String clientId) {
+        System.out.println("\n\n ApiTestMode:::deleteTestClient() - clientId = "+clientId+"\n\n");
+        Client client = this.clientService.getClientByInum(clientId);
+        System.out.println("Client to delete " + client.getClientId()+"\n\n");
         if (client != null) {
             this.clientService.removeClient(client);
         }
