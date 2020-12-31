@@ -174,11 +174,10 @@ def wait_for_ldap(manager, **kwargs):
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     ldap_server = ldap3.Server(host, 1636, use_ssl=True)
-    namespace = os.environ.get("CN_NAMESPACE", "jans")
 
     # a minimum service stack is having auth-server configuration
     default_search = (
-        f"ou=jans-auth,ou=configuration,o={namespace}",
+        "ou=jans-auth,ou=configuration,o=jans",
         "(objectClass=jansAppConf)",
     )
 
@@ -186,11 +185,11 @@ def wait_for_ldap(manager, **kwargs):
         # `cache` and `token` mapping only have base entries
         search_mapping = {
             "default": default_search,
-            "user": (f"inum=60B7,ou=groups,o={namespace}", "(objectClass=jansGrp)"),
+            "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
             "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
-            "cache": (f"ou=cache,o={namespace}", "(ou=cache)"),
-            "token": (f"ou=tokens,o={namespace}", "(ou=tokens)"),
-            "session": (f"ou=sessions,o={namespace}", "(ou=sessions)"),
+            "cache": ("ou=cache,o=jans", "(ou=cache)"),
+            "token": ("ou=tokens,o=jans", "(ou=tokens)"),
+            "session": ("ou=sessions,o=jans", "(ou=sessions)"),
         }
         search = search_mapping[ldap_mapping]
     else:
@@ -248,7 +247,7 @@ def wait_for_couchbase(manager, **kwargs):
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-    bucket_prefix = os.environ.get("CN_NAMESPACE", "jans")
+    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
     # only default and user buckets buckets that may have initial data;
     # these data also affected by LDAP mapping selection;

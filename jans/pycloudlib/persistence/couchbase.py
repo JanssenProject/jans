@@ -100,7 +100,7 @@ get_encoded_couchbase_superuser_password = partial(get_couchbase_superuser_passw
 
 
 def prefixed_couchbase_mappings():
-    prefix = os.environ.get("CN_NAMESPACE", "jans")
+    prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
     mappings = {
         "default": {"bucket": prefix, "mapping": ""},
         "user": {"bucket": f"{prefix}_user", "mapping": "people, groups, authorizations"},
@@ -209,6 +209,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
+    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
     _couchbase_mappings = get_couchbase_mappings(persistence_type, ldap_mapping)
     couchbase_buckets = []
@@ -224,7 +225,6 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
             f"bucket.{mapping['bucket']}.mapping: {mapping['mapping']}"
         )
 
-    bucket_prefix = os.environ.get("CN_NAMESPACE", "jans")
     if bucket_prefix not in couchbase_buckets:
         couchbase_buckets.insert(0, bucket_prefix)
 

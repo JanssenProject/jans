@@ -45,20 +45,18 @@ def test_render_base_properties(tmpdir):
     from jans.pycloudlib.persistence import render_base_properties
 
     persistence_type = "ldap"
-    namespace = "jans"
     os.environ["CN_PERSISTENCE_TYPE"] = persistence_type
-    os.environ["CN_NAMESPACE"] = namespace
 
     src = tmpdir.join("jans.properties.tmpl")
     src.write("""
 persistence.type=%(persistence_type)s
-fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=%(namespace)s
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
 """.strip())
     dest = tmpdir.join("jans.properties")
 
     expected = f"""
 persistence.type={persistence_type}
-fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o={namespace}
+fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
 """.strip()
 
     render_base_properties(str(src), str(dest))
