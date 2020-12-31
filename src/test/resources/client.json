@@ -49,5 +49,12 @@
     ],
     "rptAsJwt": false,
     "subjectType": "PUBLIC",
-    "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC"
+    "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC",
+     "customAttributes": [
+      {
+        "name": "jansTrustedClnt",
+        "multiValued": false,
+        "value": ["1001.138bcab9-59f3-4d29-87d6-3b2f6617c282"]
+      }
+    ]
 }

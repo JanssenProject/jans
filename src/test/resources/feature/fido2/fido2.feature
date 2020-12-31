@@ -4,17 +4,6 @@ Feature: Verify Fido2 configuration endpoint
 	Background:
   	* def mainUrl = fido2Url
   	
-  	@ignore
-  	@dynamiconf-put-json
-  	Scenario: Update Fido2 configuration
-   Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request read('dynamiconf.json')
-    When method PUT
-    Then status 200
-    And print response
-    And assert response.length != null
-
  	@fido-get
   	Scenario: Retrieve Fido2 configuration
     Given url  mainUrl
@@ -24,6 +13,7 @@ Feature: Verify Fido2 configuration endpoint
     And print response
     And assert response.length != null
 
+    @ignore
     @fido-put
   	Scenario: Update Fido2 configuration
     Given url  mainUrl
@@ -43,7 +33,7 @@ Feature: Verify Fido2 configuration endpoint
     Then status 200
     And print response
            
-
+    @ignore
     @fido-get-error
     Scenario: Retrieve Fido2 configuration without bearer token
     Given url  mainUrl

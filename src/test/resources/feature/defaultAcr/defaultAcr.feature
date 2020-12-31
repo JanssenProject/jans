@@ -40,20 +40,4 @@ Feature: Verify Default ACRS configuration endpoint
     Then status 400
     And print response
     
-    @acrs-error
-    Scenario: Default setOxTrust Authentication Mode configuration cannot be null or blank
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    When method GET
-    Then status 200
-    And print response
-    And assert response.length != null
-    Then def result = response 
-    Then set result.oxtrustAcr = ''
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request result
-    When method PUT
-    Then status 400
-    And print response
-   
+    
