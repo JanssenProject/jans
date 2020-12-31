@@ -18,6 +18,7 @@ from collections import OrderedDict
 
 import swagger_client
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 warning_color = 214
 error_color = 196
 
@@ -63,16 +64,21 @@ if not (host and client_id and client_secret):
     debug_log_file = args.debug_log_file
 
 if not (host and client_id and client_secret):
-    if os.path.exists('config.ini'):
-        config.read('config.ini')
+    config_ini_fn = os.path.join(cur_dir, 'config.ini')
+    if os.path.exists(config_ini_fn):
+        config.read(config_ini_fn)
         host = config['DEFAULT']['jans_host']
         client_id = config['DEFAULT']['jans_client_id']
-        client_secret = config['DEFAULT']['jans_client_secret']
-        debug = config['DEFAULT']['debug']
-        debug_log_file = config['DEFAULT']['debug_log_file']
+        if config['DEFAULT'].get('jans_client_secret'):
+            client_secret = config['DEFAULT']['jans_client_secret']
+        elif config['DEFAULT'].get('jans_client_secret_enc'):
+            client_secret_enc = config['DEFAULT']['jans_client_secret_enc']
+            client_secret = os.popen('/opt/jans/bin/encode.py -D ' + client_secret_enc).read().strip()
+        debug = config['DEFAULT'].get('debug')
+        debug_log_file = config['DEFAULT'].get('debug_log_file')
     else:
         config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net', 'jans_client_id':'your client id', 'jans_client_secret': 'client secret for you client id'}
-        with open('config.ini', 'w') as configfile:
+        with open(config_ini_fn, 'w') as configfile:
             config.write(configfile)
 
         print("Pelase fill config.ini or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run")
@@ -135,7 +141,7 @@ class Menu(object):
             retVal = self.children[self.current_index]
             self.current_index += 1
             return retVal
-            
+
         else:
             raise StopIteration
 
@@ -154,13 +160,13 @@ class JCA_CLI:
 
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
-        
+
         self.swagger_configuration.verify_ssl = False
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
             self.swagger_configuration.logger_file = debug_log_file
 
-        self.swagger_yaml_fn = 'jans-config-api-swagger.yaml'
+        self.swagger_yaml_fn = os.path.join(cur_dir, 'jans-config-api-swagger.yaml')
         self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
