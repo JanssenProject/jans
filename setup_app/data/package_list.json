@@ -1,11 +1,11 @@
 {
   "red 7": {
     "optional": "",
-    "mondatory": "httpd httpd-mod_ssl curl wget tar xz unzip rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2"
+    "mondatory": "httpd httpd-mod_ssl curl wget tar xz unzip rsyslog python3-ldap3 python3-requests python3-ruamel-yaml python3-certifi bzip2"
   },
   "red 8": {
       "optional": "",
-      "mondatory": "httpd mod_ssl curl wget tar xz unzip rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2"},
+      "mondatory": "httpd mod_ssl curl wget tar xz unzip rsyslog python3-ldap3 python3-requests python3-ruamel-yaml python3-certifi bzip2"},
   "debian 10": {
     "optional": "",
     "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2"

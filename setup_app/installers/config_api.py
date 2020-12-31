@@ -4,6 +4,9 @@ import glob
 import json
 import uuid
 import ruamel.yaml
+import zipfile
+import shutil
+import configparser
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -35,12 +38,11 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-cli.zip'), 'https://github.com/JanssenProject/jans-cli/archive/main.zip'.format(Config.oxVersion)),
                 ]
 
     def install(self):
-        self.logIt("Installing", pbar=self.service_name)
-
         self.copyFile(self.source_files[0][0], self.root_dir)
 
         self.copyFile(
@@ -50,6 +52,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
 
+        self.install_jca_cli(self)
 
     def installed(self):
         return os.path.exists(self.config_api_root)
@@ -64,7 +67,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def generate_configuration(self):
-        
+
         uma_rs_protects = self.readFile(self.uma_rs_protect_fn)
         uma_rs_protect = json.loads(uma_rs_protects)
         try:
@@ -168,8 +171,31 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         clients_ldif_fd.close()
 
     def render_import_templates(self):
-
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
-
         self.dbUtils.import_ldif([self.scope_ldif_fn, self.resources_ldif_fn, self.clients_ldif_fn])
+
+    def install_jca_cli(self):
+        self.logIt("Installing Jans Cli", pbar=self.service_name)
+        jans_cli_zip = zipfile.ZipFile(self.source_files[1][0], "r")
+        jans_cli_par_dir = jans_cli_zip.namelist()[0]
+        jans_cli_zip.extractall(Config.jansOptFolder)
+
+        jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
+
+        shutil.move(
+                os.path.join(Config.jansOptFolder, jans_cli_par_dir),
+                jans_cli_install_dir
+                )
+
+        config = configparser.ConfigParser()
+        config['DEFAULT'] = {
+                    'jans_host': Config.hostname,
+                    'jans_client_id': Config.jca_client_id,
+                    'jans_client_secret_enc': Config.jca_client_encoded_pw,
+                    'debug': 'false',
+                    'debug_log_file': os.path.join(jans_cli_install_dir, 'swagger.log')
+                    }
+
+        with open(os.path.join(jans_cli_install_dir, 'config.ini'), 'w') as f:
+            config.write(f)
