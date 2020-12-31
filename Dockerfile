@@ -101,8 +101,7 @@ ENV CN_SECRET_ADAPTER=vault \
 # ===========
 
 ENV CN_WAIT_MAX_TIME=300 \
-    CN_WAIT_SLEEP_DURATION=10 \
-    CN_NAMESPACE=jans
+    CN_WAIT_SLEEP_DURATION=10
 
 # ====
 # misc

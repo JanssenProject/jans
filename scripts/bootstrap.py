@@ -740,10 +740,9 @@ class CtxGenerator:
 
     def radius_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
-        namespace = os.environ.get("CN_NAMESPACE", "jans")
-        self.set_config(f"{namespace}_radius_client_id", '1701.{}'.format(uuid.uuid4()))
+        self.set_config("jans_radius_client_id", '1701.{}'.format(uuid.uuid4()))
         self.set_secret(
-            f"{namespace}_ro_encoded_pw",
+            "jans_ro_encoded_pw",
             encode_text(get_random_chars(), encoded_salt),
         )
 
@@ -776,7 +775,7 @@ class CtxGenerator:
 
         basedir, fn = os.path.split("/etc/certs/jans-radius.keys")
         self.set_secret(
-            f"{namespace}_ro_client_base64_jwks",
+            "jans_ro_client_base64_jwks",
             encode_template(fn, self.ctx, basedir),
         )
 
