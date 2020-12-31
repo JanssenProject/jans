@@ -1,12 +1,13 @@
- @ignore
- Feature: Openid connect clients
+@ignore
+Feature: Openid connect clients
 
-
+@ignore
 Scenario: Fetch all openid connect clients without bearer token
 Given url openidclients_url
 When method GET
 Then status 401
 
+@ignore
 Scenario: Fetch all openid connect clients
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
@@ -22,6 +23,7 @@ And header Authorization = 'Bearer ' + accessToken
 And param limit = 3
 When method GET
 Then status 200
+And print response
 And assert response.length == 3
 
 @ignore
@@ -31,6 +33,7 @@ And header Authorization = 'Bearer ' + accessToken
 And param pattern = 'oxTrust'
 When method GET
 Then status 200
+And print response
 And assert response.length == 1
 
 @ignore
@@ -50,6 +53,7 @@ Given url openidclients_url + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+And print response
 
 @ignore
 @CreateUpdateDelete
