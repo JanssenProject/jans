@@ -1,4 +1,5 @@
- Feature: Verify Auth configuration endpoint
+@ignore
+Feature: Verify Auth configuration endpoint
 
   	Background:
   	* def mainUrl = authConfigurationUrl

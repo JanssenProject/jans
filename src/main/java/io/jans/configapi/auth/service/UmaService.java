@@ -90,7 +90,7 @@ public class UmaService implements Serializable {
                 authorization, resourceId, scopeIds);
         
         if (patToken == null) {
-            log.warn("Token is blank");
+            log.trace("Token is blank"); 
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
             throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
         }

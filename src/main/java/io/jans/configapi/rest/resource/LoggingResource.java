@@ -33,20 +33,7 @@ public class LoggingResource {
     @GET
     @ProtectedApi(scopes = {ApiAccessConstants.LOGGING_READ_ACCESS})
     public Response getLogging() {
-        Logging logging = new Logging();
-        AppConfiguration appConfiguration = configurationService.find();
-        logging.setDisableJdkLogger(appConfiguration.getDisableJdkLogger());
-        logging.setLoggingLevel(appConfiguration.getLoggingLevel());
-        logging.setLoggingLayout(appConfiguration.getLoggingLayout());
-        if (appConfiguration.getEnabledOAuthAuditLogging() == null) {
-            logging.setEnabledOAuthAuditLogging(false);
-        } else {
-            logging.setEnabledOAuthAuditLogging(appConfiguration.getEnabledOAuthAuditLogging());
-        }
-        logging.setHttpLoggingExludePaths(appConfiguration.getHttpLoggingExludePaths());
-        logging.setHttpLoggingEnabled(appConfiguration.getHttpLoggingEnabled());
-        logging.setExternalLoggerConfiguration(appConfiguration.getExternalLoggerConfiguration());
-        return Response.ok(logging).build();
+        return Response.ok(this.getLoggingConfiguration()).build();
     }
 
     @PUT
@@ -58,17 +45,40 @@ public class LoggingResource {
             conf.getDynamic().setLoggingLevel(logging.getLoggingLevel());
         }
         if (!StringUtils.isBlank(logging.getLoggingLayout())) {
-            conf.getDynamic().setLoggingLayout(logging.getLoggingLevel());
+            conf.getDynamic().setLoggingLayout(logging.getLoggingLayout());
         }
+        
+        conf.getDynamic().setHttpLoggingEnabled(logging.isHttpLoggingEnabled());
+        conf.getDynamic().setDisableJdkLogger(logging.isDisableJdkLogger());
+        conf.getDynamic().setEnabledOAuthAuditLogging(logging.isEnabledOAuthAuditLogging());
+        
         if (!StringUtils.isBlank(logging.getExternalLoggerConfiguration())) {
             conf.getDynamic().setExternalLoggerConfiguration(logging.getExternalLoggerConfiguration());
         }
-        conf.getDynamic().setEnabledOAuthAuditLogging(logging.isEnabledOAuthAuditLogging());
-        conf.getDynamic().setDisableJdkLogger(logging.isDisableJdkLogger());
-        conf.getDynamic().setHttpLoggingEnabled(logging.isHttpLoggingEnabled());
-
+        conf.getDynamic().setHttpLoggingExludePaths(logging.getHttpLoggingExludePaths());     
+        
         configurationService.merge(conf);
-        return Response.ok(ResponseStatus.SUCCESS).build();
+        
+        logging = this.getLoggingConfiguration(); 
+        return Response.ok(logging).build();
+    }
+    
+    private Logging getLoggingConfiguration() {
+    	Logging logging = new Logging();
+        AppConfiguration appConfiguration = configurationService.find();
+       
+        logging.setLoggingLevel(appConfiguration.getLoggingLevel());
+        logging.setLoggingLayout(appConfiguration.getLoggingLayout());
+        logging.setHttpLoggingEnabled(appConfiguration.getHttpLoggingEnabled());
+        logging.setDisableJdkLogger(appConfiguration.getDisableJdkLogger());
+        if (appConfiguration.getEnabledOAuthAuditLogging() == null) {
+            logging.setEnabledOAuthAuditLogging(false);
+        } else {
+            logging.setEnabledOAuthAuditLogging(appConfiguration.getEnabledOAuthAuditLogging());
+        }
+        logging.setExternalLoggerConfiguration(appConfiguration.getExternalLoggerConfiguration());
+        logging.setHttpLoggingExludePaths(appConfiguration.getHttpLoggingExludePaths());
+        return logging;
     }
 
 }
