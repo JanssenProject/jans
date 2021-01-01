@@ -37,7 +37,7 @@ class Scope(object):
         'authorization_policies': 'list[str]',
         'default_scope': 'bool',
         'scope_type': 'str',
-        'jans_claim': 'list[str]',
+        'claims': 'list[str]',
         'uma_type': 'bool',
         'uma_authorization_policies': 'list[str]',
         'attributes': 'ScopeAttributes'
@@ -53,13 +53,13 @@ class Scope(object):
         'authorization_policies': 'authorizationPolicies',
         'default_scope': 'defaultScope',
         'scope_type': 'scopeType',
-        'jans_claim': 'jansClaim',
+        'claims': 'claims',
         'uma_type': 'umaType',
         'uma_authorization_policies': 'umaAuthorizationPolicies',
         'attributes': 'attributes'
     }
 
-    def __init__(self, dn=None, id=None, inum=None, display_name=None, description=None, icon_url=None, authorization_policies=None, default_scope=None, scope_type=None, jans_claim=None, uma_type=None, uma_authorization_policies=None, attributes=None):  # noqa: E501
+    def __init__(self, dn=None, id=None, inum=None, display_name=None, description=None, icon_url=None, authorization_policies=None, default_scope=None, scope_type=None, claims=None, uma_type=None, uma_authorization_policies=None, attributes=None):  # noqa: E501
         """Scope - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._id = None
@@ -70,7 +70,7 @@ class Scope(object):
         self._authorization_policies = None
         self._default_scope = None
         self._scope_type = None
-        self._jans_claim = None
+        self._claims = None
         self._uma_type = None
         self._uma_authorization_policies = None
         self._attributes = None
@@ -93,8 +93,8 @@ class Scope(object):
             self.default_scope = default_scope
         if scope_type is not None:
             self.scope_type = scope_type
-        if jans_claim is not None:
-            self.jans_claim = jans_claim
+        if claims is not None:
+            self.claims = claims
         if uma_type is not None:
             self.uma_type = uma_type
         if uma_authorization_policies is not None:
@@ -314,27 +314,27 @@ class Scope(object):
         self._scope_type = scope_type
 
     @property
-    def jans_claim(self):
-        """Gets the jans_claim of this Scope.  # noqa: E501
+    def claims(self):
+        """Gets the claims of this Scope.  # noqa: E501
 
         Claim attributes associated with the scope.  # noqa: E501
 
-        :return: The jans_claim of this Scope.  # noqa: E501
+        :return: The claims of this Scope.  # noqa: E501
         :rtype: list[str]
         """
-        return self._jans_claim
+        return self._claims
 
-    @jans_claim.setter
-    def jans_claim(self, jans_claim):
-        """Sets the jans_claim of this Scope.
+    @claims.setter
+    def claims(self, claims):
+        """Sets the claims of this Scope.
 
         Claim attributes associated with the scope.  # noqa: E501
 
-        :param jans_claim: The jans_claim of this Scope.  # noqa: E501
+        :param claims: The claims of this Scope.  # noqa: E501
         :type: list[str]
         """
 
-        self._jans_claim = jans_claim
+        self._claims = claims
 
     @property
     def uma_type(self):
