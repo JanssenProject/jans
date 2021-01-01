@@ -15,7 +15,7 @@ import random
 import ruamel.yaml
 from pprint import pprint
 from functools import partial
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlencode
 from collections import OrderedDict
 
 import swagger_client
@@ -47,7 +47,8 @@ parser.add_argument("--client-id", help="Jans Config Api Client ID")
 parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
 parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
-parser.add_argument("--operation", choices=op_list, help="Operation to be done")
+parser.add_argument("--operation-id", help="Operation ID to be done")
+parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
 parser.add_argument("--endpoint-args", help="Arguments to pass endpoint seperated by comma. For example limit:5,status:INACTIVE")
@@ -175,10 +176,16 @@ class JCA_CLI:
 
 
     def get_yaml(self):
+        debug_json = 'swagger_yaml.json'
+        if os.path.exists(debug_json):
+            with open(debug_json) as f:
+                return json.load(f, object_pairs_hook=OrderedDict)
 
         with open(self.swagger_yaml_fn) as f:
             self.cfg_yml = ruamel.yaml.load(f.read().replace('\t',''), ruamel.yaml.RoundTripLoader)
-
+            if os.environ.get('dump_yaml'):
+                with open(debug_json, 'w') as w:
+                    json.dump(self.cfg_yml, w, indent=2)
         return self.cfg_yml
 
 
@@ -416,10 +423,16 @@ class JCA_CLI:
         print(self.colored_text(data_json, 10))
 
 
+    def get_url_param(self, url):
+        if url.endswith('}'):
+            pname = re.findall('/\{(.*?)\}$', url)[0]
+            return pname
+
+
     def get_endpiont_url_param(self, endpoint):
         param = {}
-        if endpoint.path.endswith('}'):
-            pname = re.findall('/\{(.*?)\}$', endpoint.path)[0]
+        pname = self.get_url_param(endpoint.path)
+        if pname:
             param = {'name': pname, 'description':pname, 'schema': {'type': 'string'}}
 
         return param
@@ -460,6 +473,19 @@ class JCA_CLI:
         return ''.join(namle_list)+'Api'
 
 
+    def get_path_by_id(self, operation_id):
+        retVal = {}
+        for path in self.cfg_yml['paths']:
+            for method in self.cfg_yml['paths'][path]:
+                if 'operationId' in self.cfg_yml['paths'][path][method] and self.cfg_yml['paths'][path][method]['operationId'] == operation_id:
+                    retVal = self.cfg_yml['paths'][path][method].copy()
+                    retVal['__path__'] = path
+                    retVal['__method__'] = method
+                    retVal['__urlsuffix__'] = self.get_url_param(path)
+
+        return retVal
+
+
     def get_tag_from_api_name(self, api_name, qmethod=None):
 
         for tag in self.cfg_yml['tags']:
@@ -467,7 +493,7 @@ class JCA_CLI:
             if api_class_name == api_name:
                 break
 
-        paths = OrderedDict()
+        paths = []
         
         for path in self.cfg_yml['paths']:
 
@@ -476,9 +502,13 @@ class JCA_CLI:
                 if 'tags' in self.cfg_yml['paths'][path][method] and tag['name'] in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
                     retVal = self.cfg_yml['paths'][path][method].copy()
                     retVal['__path__'] = path
-                    if qmethod and method == qmethod:
-                        return retVal
-                    paths[method] = retVal
+                    retVal['__method__'] = method
+                    retVal['__urlsuffix__'] = self.get_url_param(path)
+                    if qmethod:
+                        if method == qmethod:
+                            paths.append(retVal)
+                    else:
+                        paths.append(retVal)
 
         return paths
 
@@ -614,14 +644,24 @@ class JCA_CLI:
 
 
     def get_scheme_for_endpoint(self, endpoint):
-        for content_type in endpoint.info['requestBody']['content']:
+        schema_ = {}
+        for content_type in endpoint.info.get('requestBody', {}).get('content',{}):
             if 'schema' in endpoint.info['requestBody']['content'][content_type]:
                 schema = endpoint.info['requestBody']['content'][content_type]['schema']
                 break
+        else:
+            return schema_
 
-        if '$ref' in schema:
-            schema_ = schema.copy()
-            schema_ref_ = self.get_schema_from_reference(schema_.pop('$ref'))
+        schema_ = schema.copy()
+
+        if schema_.get('type') == 'array':
+            schma_ref = schema_.get('items', {}).pop('$ref')
+        else:
+            schma_ref = schema_.pop('$ref')
+
+        if schma_ref:
+            
+            schema_ref_ = self.get_schema_from_reference(schma_ref)
             schema_.update(schema_ref_)
 
         return schema_
@@ -966,65 +1006,84 @@ class JCA_CLI:
         return args_dict
 
 
-    def help_for(self, op):
-        path = self.get_tag_from_api_name(op)
+    def help_for(self, op_name):
+        paths = self.get_tag_from_api_name(op_name+'Api')
 
         schema_path = None
 
-        for method in path:
-            if 'tags' in path[method]:
-                print('Method: ', method)
-                print(' Description:', path[method]['description'])
-
-                if 'parameters' in path[method]:
+        for path in paths:
+            if 'tags' in path:
+                print('Operation ID:', path['operationId'])
+                print('  Description:', path['description'])
+                if path.get('__urlsuffix__'):
+                    print('  url-suffix:', path['__urlsuffix__'])
+                if 'parameters' in path:
                     param_names = []
-                    for param in path[method]['parameters']:
+                    for param in path['parameters']:
                         desc = param['description']
                         param_type = param.get('schema', {}).get('type')
                         if param_type:
                             desc += ' [{}]'.format(param_type)
                         param_names.append((param['name'], desc))
                     if param_names:
-                        print(' Parameters:')
+                        print('  Parameters:')
                         for param in param_names:
                             print('  {}: {}'.format(param[0], param[1]))
 
-                if 'requestBody' in path[method]:
-                    for apptype in path[method]['requestBody'].get('content',{}):
-                        if 'schema' in path[method]['requestBody']['content'][apptype]:
-                            if path[method]['requestBody']['content'][apptype]['schema'].get('type') == 'array':
-                                schema_path = path[method]['requestBody']['content'][apptype]['schema']['items']['$ref']
-                                print(' Schema: Array of {}'.format(schema_path[1:]))
+                if 'requestBody' in path:
+                    for apptype in path['requestBody'].get('content',{}):
+                        if 'schema' in path['requestBody']['content'][apptype]:
+                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
+                                print('  Schema: Array of {}'.format(schema_path[1:]))
                             else:
-                                schema_path = path[method]['requestBody']['content'][apptype]['schema']['$ref']
-                                print(' Schema: {}'.format(schema_path[1:]))
+                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                print('  Schema: {}'.format(schema_path[1:]))
 
         if schema_path:
             print()
             print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
 
-    def get_path_api_caller_for_op(self, op, method):
-        path = self.get_tag_from_api_name(op, method)
+
+    def get_json_from_file(self, data_fn):
+    
+        if not os.path.exists(data_fn):
+            self.exit_with_error("Can't find file {}".format(data_fn))
+
+        try: 
+            with open(data_fn) as f:
+                data = json.load(f)
+        except:
+            self.exit_with_error("Error parsing json file {}".format(data_fn))
+
+        return data
+
+
+    def get_path_api_caller_for_path(self, path):
         security = path['security'][0]['jans-auth'][0]
         self.get_access_token(security)
-        client = getattr(swagger_client, op)
+        class_name = self.get_api_class_name(path['tags'][0])
+        client = getattr(swagger_client, class_name)
         api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
         api_caller = getattr(api_instance, path['operationId'].replace('-','_'))
         
-        return path, api_caller
+        return api_caller
 
-    def process_command_get(self, op, args, data_fn):
 
-        path, api_caller = self.get_path_api_caller_for_op(op, 'get')
+    def process_command_get(self, path, suffix_param, endpoint_params, data_fn):
 
+        api_caller = self.get_path_api_caller_for_path(path)
         api_response = None
+        encoded_param = urlencode(endpoint_params)
 
-        args = self.parse_args(args, path)
-
-        sys.stderr.write("Calling with params {}\n".format(str(args)))
+        if encoded_param:
+            sys.stderr.write("Calling with params {}\n".format(encoded_param))
 
         try:
-            api_response = api_caller(**args)
+            if path.get('__urlsuffix__'):
+                api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
+            else:
+                api_response = api_caller(**endpoint_params)
         except swagger_client.rest.ApiException as e:
 
             sys.stderr.write(e.reason)
@@ -1060,12 +1119,13 @@ class JCA_CLI:
     def exit_with_error(self, error_text):
         error_text += '\n'
         sys.stderr.write(self.colored_text(error_text, error_color))
+        print()
         sys.exit()
 
-    def process_command_post(self, op, args, data_fn, method='post'):
-        path, api_caller = self.get_path_api_caller_for_op(op, method)
+    def process_command_post(self, path, suffix_param, endpoint_params, data_fn):
+        api_caller = self.get_path_api_caller_for_path(path)
 
-        endpoint = Menu(name=op, info=path)
+        endpoint = Menu(name='', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
         model = getattr(swagger_client.models, schema['__schema_name__'])
         data = self.get_json_from_file(data_fn)
@@ -1083,32 +1143,19 @@ class JCA_CLI:
         print(json.dumps(unmapped_response, indent=2))
 
 
-    def process_command_put(self, op, args, data_fn):
-        self.process_command_post(op, args, data_fn, method='put')
+    def process_command_put(self, path, suffix_param, endpoint_params, data_fn):
+        self.process_command_post(path, suffix_param, endpoint_params, data_fn)
 
 
-    def get_json_from_file(self, data_fn):
-    
-        if not os.path.exists(data_fn):
-            self.exit_with_error("Can't find file {}".format(data_fn))
-        
-        try: 
-            with open(data_fn) as f:
-                data = json.load(f)
-        except:
-            self.exit_with_error("Error parsing json file {}".format(data_fn))
+    def process_command_patch(self, path, suffix_param, endpoint_params, data_fn):
 
-        return data
-
-    def process_command_patch(self, op, args, data_fn):
-
-        args_dict = self.parse_command_args(args)
         data = self.get_json_from_file(data_fn)
 
         if not isinstance(data, list):
             self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
         op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+
         for item in data:
             if not item['op'] in op_modes:
                 print("op must be one of {}".format(', '.join(op_modes)))
@@ -1116,17 +1163,11 @@ class JCA_CLI:
             if not item['path'].startswith('/'):
                 item['path'] = '/'+item['path']
 
-        path, api_caller = self.get_path_api_caller_for_op(op, 'patch')
-        endpoint = Menu(name=op, path=path['__path__'])
-        endpoint_param_dict = self.get_endpiont_url_param(endpoint)
-        endpoint_param = endpoint_param_dict.get('name')
-
-        if endpoint_param and not endpoint_param in args_dict:
-            self.exit_with_error("This operation needs endpoint argument {}".format(endpoint_param))
+        api_caller = self.get_path_api_caller_for_path(path)
 
         try:
-            if endpoint_param:
-                api_response = api_caller(args_dict[endpoint_param], body=data)
+            if suffix_param:
+                api_response = api_caller(suffix_param[path['__urlsuffix__']], body=data)
             else:
                 api_response = api_caller(body=data)
         except swagger_client.rest.ApiException as e:
@@ -1140,19 +1181,13 @@ class JCA_CLI:
 
 
 
-    def process_command_delete(self, op, args, data_fn):
-        args_dict = self.parse_command_args(args)
+    def process_command_delete(self, path, suffix_param, endpoint_params, data_fn):
 
-        path, api_caller = self.get_path_api_caller_for_op(op, 'delete')
-        endpoint = Menu(name=op, path=path['__path__'])
-        endpoint_param_dict = self.get_endpiont_url_param(endpoint)
-        endpoint_param = endpoint_param_dict.get('name')
-
-        if endpoint_param and not endpoint_param in args_dict:
-            self.exit_with_error("This operation needs endpoint argument {}".format(endpoint_param))
+        api_caller = self.get_path_api_caller_for_path(path)
+        api_response = None
 
         try:
-            api_response = api_caller(args_dict[endpoint_param])
+            api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
         except swagger_client.rest.ApiException as e:
             print(e.reason)
             print(e.body)
@@ -1163,6 +1198,26 @@ class JCA_CLI:
             sys.stderr.write("Server Response:\n")
             print(json.dumps(unmapped_response, indent=2))
 
+    def process_command_by_id(self, operation_id, url_suffix, endpoint_args, data_fn):
+        path = self.get_path_by_id(operation_id)
+
+        if not path:
+            self.exit_with_error("No such Operation ID")
+
+        suffix_param = self.parse_command_args(url_suffix)
+        endpoint_params = self.parse_command_args(endpoint_args)
+
+        if path.get('__urlsuffix__') and not path['__urlsuffix__'] in suffix_param:
+            self.exit_with_error("This operation requires a value for url-suffix {}".format(path['__urlsuffix__']))
+
+        endpoint = Menu('', info=path)
+        schema = self.get_scheme_for_endpoint(endpoint)
+
+        if schema and not data_fn:
+            self.exit_with_error("Please provide schema with --data argument")
+
+        caller_function = getattr(self, 'process_command_' + path['__method__'])
+        caller_function(path, suffix_param, endpoint_params, data_fn)
 
 
     def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
@@ -1230,27 +1285,16 @@ class JCA_CLI:
 
 cliObject = JCA_CLI(host, client_id, client_secret)
 
-if not (args.operation or args.info or args.schema):
+if not (args.operation_id or args.info or args.schema):
     #reset previous color
     print('\033[0m',end='')
     cliObject.runApp()
 else:
-    api_name = None
-
+    print()
     if args.info:
-        api_name = args.info
-    elif args.operation:
-        api_name = args.operation
-
-    if api_name:
-        op = api_name + 'Api' 
-
-    if api_name and args.info:
-        cliObject.help_for(op)
+        cliObject.help_for(args.info)
     elif args.schema:
         cliObject.get_sample_schema(args.schema)
-    elif args.op_mode:
-        caller_name = 'process_command_' + args.op_mode
-        caller = getattr(cliObject, caller_name)
-        caller(op, args.endpoint_args, data_fn=args.data)
-
+    elif args.operation_id:
+        cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+    print()
