@@ -1249,14 +1249,23 @@ class JCA_CLI:
     def get_sample_schema(self, ref):
         schema = self.get_schema_from_reference('#'+args.schema)
         m = getattr(swagger_client.models, schema['__schema_name__'])
+        
+        #print(json.dumps(schema, indent=2))
+        
         sample_data = {}
 
         populate_fields = schema.get('required', [])
-        
+        sub_models = {}
         for field_name in schema['properties']:
             field = schema['properties'][field_name]
             if ('enum' in field) or ('items' in field and 'enum' in field['items']):
                 populate_fields.append(field_name)
+
+            if field['type'] == 'object':
+                if hasattr(swagger_client.models, field['description']):
+                    sub_model = getattr(swagger_client.models, field['description'])
+                    sample_data[field_name] =  sub_model()
+                
 
         for required_field in populate_fields:
             mapped_required_field = self.get_model_key_map(m, required_field)
@@ -1273,9 +1282,9 @@ class JCA_CLI:
                     val = self.get_sample_data_for_field(field['type'], field.get('example'), field.get('enum'), field.get('format'), field.get('default'))
 
             sample_data[mapped_required_field] = val
-            
-        unmapped_model = self.unmap_model(m(**sample_data))
-        
+
+        model = m(**sample_data)
+        unmapped_model = self.unmap_model(model)
         print(json.dumps(unmapped_model, indent=2))
 
 
