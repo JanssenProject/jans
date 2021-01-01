@@ -51,6 +51,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 )
 
         self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
+        self.enable()
 
     def installed(self):
         return os.path.exists(self.config_api_root)

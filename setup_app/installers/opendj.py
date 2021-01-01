@@ -83,6 +83,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.post_install_opendj()
 
+            self.enable()
 
     def extractOpenDJ(self):
 
