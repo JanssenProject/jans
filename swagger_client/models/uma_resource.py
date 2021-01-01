@@ -32,7 +32,7 @@ class UmaResource(object):
         'inum': 'str',
         'id': 'str',
         'name': 'str',
-        'icon_url': 'str',
+        'icon_uri': 'str',
         'scopes': 'list[str]',
         'scope_expression': 'str',
         'clients': 'list[str]',
@@ -51,7 +51,7 @@ class UmaResource(object):
         'inum': 'inum',
         'id': 'id',
         'name': 'name',
-        'icon_url': 'iconUrl',
+        'icon_uri': 'iconUri',
         'scopes': 'scopes',
         'scope_expression': 'scopeExpression',
         'clients': 'clients',
@@ -65,13 +65,13 @@ class UmaResource(object):
         'deletable': 'deletable'
     }
 
-    def __init__(self, dn=None, inum=None, id=None, name=None, icon_url=None, scopes=None, scope_expression=None, clients=None, resources=None, rev=None, creator=None, description=None, type=None, creation_date=None, expiration_date=None, deletable=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, id=None, name=None, icon_uri=None, scopes=None, scope_expression=None, clients=None, resources=None, rev=None, creator=None, description=None, type=None, creation_date=None, expiration_date=None, deletable=None):  # noqa: E501
         """UmaResource - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
         self._id = None
         self._name = None
-        self._icon_url = None
+        self._icon_uri = None
         self._scopes = None
         self._scope_expression = None
         self._clients = None
@@ -92,8 +92,8 @@ class UmaResource(object):
             self.id = id
         if name is not None:
             self.name = name
-        if icon_url is not None:
-            self.icon_url = icon_url
+        if icon_uri is not None:
+            self.icon_uri = icon_uri
         if scopes is not None:
             self.scopes = scopes
         if scope_expression is not None:
@@ -208,27 +208,27 @@ class UmaResource(object):
         self._name = name
 
     @property
-    def icon_url(self):
-        """Gets the icon_url of this UmaResource.  # noqa: E501
+    def icon_uri(self):
+        """Gets the icon_uri of this UmaResource.  # noqa: E501
 
         A URL for a graphic icon representing the resource.  # noqa: E501
 
-        :return: The icon_url of this UmaResource.  # noqa: E501
+        :return: The icon_uri of this UmaResource.  # noqa: E501
         :rtype: str
         """
-        return self._icon_url
+        return self._icon_uri
 
-    @icon_url.setter
-    def icon_url(self, icon_url):
-        """Sets the icon_url of this UmaResource.
+    @icon_uri.setter
+    def icon_uri(self, icon_uri):
+        """Sets the icon_uri of this UmaResource.
 
         A URL for a graphic icon representing the resource.  # noqa: E501
 
-        :param icon_url: The icon_url of this UmaResource.  # noqa: E501
+        :param icon_uri: The icon_uri of this UmaResource.  # noqa: E501
         :type: str
         """
 
-        self._icon_url = icon_url
+        self._icon_uri = icon_uri
 
     @property
     def scopes(self):

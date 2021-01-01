@@ -3952,7 +3952,7 @@ components:
         name:
           description: A human-readable name of the scope.
           type: string
-        iconUrl:
+        iconUri:
           description: A URL for a graphic icon representing the resource.
           type: string
         scopes:
