@@ -2074,7 +2074,7 @@ paths:
         - OAuth - Scopes
       summary: Delete Scope.
       description: Delete Scope.
-      operationId: delete-oauth-scopes-by-id
+      operationId: delete-oauth-scopes-by-inum
       responses:
         '204':
           description: No Content
