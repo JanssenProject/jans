@@ -3455,7 +3455,7 @@ components:
             - uma
             - spontaneous
             - oauth
-        jansClaim:
+        claims:
           description: Claim attributes associated with the scope.
           type: array
           items:
