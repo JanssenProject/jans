@@ -1,3 +1,6 @@
+import os
+import shutil
+
 import pytest
 
 
@@ -158,24 +161,22 @@ def test_get_encoded_couchbase_superuser_password(monkeypatch, tmpdir, gmanager)
     assert get_encoded_couchbase_superuser_password(gmanager) != "secret"
 
 
-# @pytest.mark.skipif(
-#     shutil.which("keytool") is None,
-#     reason="requires keytool executable"
-# )
-# def test_sync_couchbase_truststore(tmpdir, gmanager):
-#     from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+@pytest.mark.skipif(
+    shutil.which("keytool") is None,
+    reason="requires keytool executable"
+)
+def test_sync_couchbase_truststore(monkeypatch, tmpdir, gmanager):
+    from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 
-#     keystore_file = tmpdir.join("couchbase.jks")
-#     cert_file = tmpdir.join("couchbase.crt")
+    keystore_file = tmpdir.join("couchbase.jks")
+    cert_file = tmpdir.join("couchbase.crt")
 
-#     # dummy cert
-#     cert_file.write(DUMMY_COUCHBASE_CERT)
+    # dummy cert
+    cert_file.write(DUMMY_COUCHBASE_CERT)
 
-#     monkeypatch.setenv["CN_COUCHBASE_CERT_FILE"] = str(cert_file)
-#     # gmanager.config.set("couchbaseTrustStoreFn", str(keystore_file))
-#     sync_couchbase_truststore(gmanager)
-#     assert os.path.exists(str(keystore_file))
-#     monkeypatch.setenv.clear()
+    monkeypatch.setenv("CN_COUCHBASE_CERT_FILE", str(cert_file))
+    sync_couchbase_truststore(gmanager, str(keystore_file))
+    assert os.path.exists(str(keystore_file))
 
 
 @pytest.mark.parametrize("timeout, expected", [
