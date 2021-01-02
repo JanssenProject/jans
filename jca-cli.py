@@ -38,7 +38,14 @@ debug_log_file = os.environ.get('jans_debug_log_file')
 class MyApiClient(swagger_client.ApiClient):
     pass
 
+class DummyPool:
+    def close(self):
+        pass
+    def join(self):
+        pass
+
 myapi = MyApiClient()
+myapi.pool = DummyPool()
 
 ##################### arguments #####################
 op_list = []
@@ -1230,76 +1237,78 @@ class JCA_CLI:
         caller_function(path, suffix_param, endpoint_params, data_fn)
 
 
-    def get_sample_data_for_field(self, dtype, example=None, enum=[], dformat=None, default=None):
+    def make_schema_val(self, stype):
+        if stype == 'object':
+            return {}
+        elif stype == 'list':
+            return []
+        elif stype == 'bool':
+            return random.choice((True, False))
+        else:
+            return None
 
-        if default:
-            return default
-        if enum:
-            return random.choice(enum)
-        elif example:
-            return example
+    def get_schema_from_model(self, model, schema):
 
-        if dtype == 'string':
-            if dformat == 'date':
-                val = '20201230113445.990Z'
-            elif dformat == 'url':
-                val = 'https://www.jans.io/sample'
+        for key in model.attribute_map:
+            stype = model.swagger_types[key]
+            mapped_key = model.attribute_map[key]
+            if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
+                schema[mapped_key] = self.make_schema_val(stype)
             else:
-                val = 'string'
-        elif dtype == 'integer':
-            val = random.randint(0,5)
-        elif dtype == 'boolean':
-            val = random.choice([True, False])
-        elif dtype == 'object':
-            val = {}
+                if stype.startswith('list['):
+                    sub_cls = re.match(r'list\[(.*)\]', stype).group(1)
+                    sub_type = 'list'
+                elif stype.startswith('dict('):
+                    sub_cls = re.match(r'dict\(([^,]*), (.*)\)', stype).group(2)
+                    sub_type = 'dict'
+                else:
+                    sub_cls = stype
+                    sub_type = None
 
-        return val
+                if sub_cls in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
+                    schema[mapped_key] = self.make_schema_val(sub_type)
+                else:
+                    sub_dict = {}
+                    sub_model = getattr(swagger_client.models, sub_cls)
+                    sub_schema = self.get_schema_from_model(sub_model, sub_dict)
+                    schema[mapped_key] = sub_dict
+
+
+    def fill_defaults(self, schema, schema_={}):
+
+        for k in schema:
+            if isinstance(schema[k], dict):
+                if '$ref' in schema_['properties'][k]:
+                    sub_schema_ = self.cfg_yml['components']['schemas'][schema_['properties'][k]['$ref'].split('/')[-1]]
+                elif schema_['properties'][k].get('items', {}).get('$ref'):
+                    sub_schema_ = self.cfg_yml['components']['schemas'][schema_['properties'][k]['items']['$ref'].split('/')[-1]]
+                elif 'properties' in schema_['properties'][k]:
+                    sub_schema_ = schema_['properties'][k]
+                self.fill_defaults(schema[k], sub_schema_)
+
+            else:
+                if 'enum' in schema_['properties'][k]:
+                    val = random.choice(schema_['properties'][k]['enum'])
+                    if schema_['properties'][k]['type'] == 'array':
+                        val = [val]
+                    schema[k] = val
+                elif 'default' in schema_['properties'][k]:
+                    schema[k] = schema_['properties'][k]['default']
+                elif 'example' in schema_['properties'][k]:
+                    schema[k] = schema_['properties'][k]['example']
+                elif k in schema_.get('required',[]):
+                    schema[k] = schema_['properties'][k]['type']
+
 
 
     def get_sample_schema(self, ref):
-        schema = self.get_schema_from_reference('#'+args.schema)
-        m = getattr(swagger_client.models, schema['__schema_name__'])
-        sample_data = {}
-        populate_fields = schema.get('required', [])
+        schema_ = self.get_schema_from_reference('#'+args.schema)
+        m = getattr(swagger_client.models, schema_['__schema_name__'])
+        schema = {}
+        self.get_schema_from_model(m, schema)
+        self.fill_defaults(schema, schema_)
 
-        print(json.dumps(schema['properties']['fido2Configuration'], indent=2))
-
-        for field_name in schema['properties']:
-            field = schema['properties'][field_name]
-            if ('enum' in field) or ('items' in field and 'enum' in field['items']):
-                populate_fields.append(field_name)
-
-            if field['type'] == 'object':
-                mapped_field = self.get_model_key_map(m, field_name)
-                sub_model_data = {}
-                if 'properties' in field:
-                    sub_model = self.get_sub_model(field)
-                    if sub_model:
-                        sub_model_data = sub_model()
-
-                sample_data[mapped_field] = sub_model_data
-
-                
-        for required_field in populate_fields:
-            mapped_required_field = self.get_model_key_map(m, required_field)
-            field = schema['properties'][required_field]
-
-            if 'example' in field:
-                val = field['example']
-            elif 'default' in field:
-                val = field['default']
-            else:
-                if field['type'] == 'array':
-                    val = [self.get_sample_data_for_field(field['items']['type'], field['items'].get('example'), field['items'].get('enum'), field['items'].get('format'), field['items'].get('default'))]
-                else:
-                    val = self.get_sample_data_for_field(field['type'], field.get('example'), field.get('enum'), field.get('format'), field.get('default'))
-
-            sample_data[mapped_required_field] = val
-
-        model = m(**sample_data)
-        unmapped_model = self.unmap_model(model)
-        print(json.dumps(unmapped_model, indent=2))
-
+        print(json.dumps(schema, indent=2))
 
     def runApp(self):
         clear()

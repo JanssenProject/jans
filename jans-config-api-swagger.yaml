@@ -4428,7 +4428,7 @@ components:
             bruteForceProtectionEnabled:
               type: boolean
               description: Enable or disable service, This functionality can be enabled dynamically.		  
-			  
+
     CIBAEndUserNotificationConfig:
       type: object
       description: CIBA End User Notification Config.
