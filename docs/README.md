@@ -282,9 +282,9 @@ This means we need schema `/components/schemas/PatchRequest`, be careful it stat
 ```
 
 When you examine this json, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
-__op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-__path__ Path of property to be changed. use path seperator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
-__value__ New value to be assigned for property defined in `path`
+* __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
+* __path__ Path of property to be changed. use path seperator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
+* __value__ New value to be assigned for property defined in `path`
 
 We can edit this json as follows (remember to make it an array):
 
