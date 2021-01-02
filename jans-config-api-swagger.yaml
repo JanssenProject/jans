@@ -4279,7 +4279,7 @@ components:
         fido2Configuration:
           description: Fido2Configuration.
           $ref: '#/components/schemas/Fido2Configuration'
-		
+
     Fido2Configuration:
       type: object
       description: Fido2 configuration properties.
