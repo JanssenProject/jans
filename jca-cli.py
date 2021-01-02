@@ -460,8 +460,11 @@ class JCA_CLI:
         return parameters
 
 
+    def get_name_from_string(self, txt):
+        return re.sub(r'[^0-9a-zA-Z\s]+','', txt)
+
     def get_api_class_name(self, name):
-        namle_list = re.sub(r'[^0-9a-zA-Z\s]+','', name).split()
+        namle_list = self.get_name_from_string(name).split()
         for i, w in enumerate(namle_list[:]):
             if len(w) > 1:
                 w = w[0].upper()+w[1:]
@@ -685,7 +688,8 @@ class JCA_CLI:
                 print("Data for object {}. {}".format(prop, item.get('description','')))
 
                 if getattr(model, prop_).__class__.__name__ == 'type':
-                    model_name = item.get('__schema_name__') or item['description']
+                    model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
+                    model_name = self.get_name_from_string(model_name_str)
                     sub_model_class = getattr(swagger_client.models, model_name)
                     result = self.get_input_for_schema_(item, sub_model_class, spacing=3)
                     setattr(model, prop_, result)
@@ -1103,12 +1107,30 @@ class JCA_CLI:
         print(json.dumps(api_response_unmapped, indent=2))
 
 
-    def populate_model(self, model, data):
+    def get_sub_model(self, field):
+        sub_model_name_str = field.get('title') or field.get('description')
+        sub_model_name = self.get_name_from_string(sub_model_name_str)
+        if hasattr(swagger_client.models, sub_model_name):
+            return getattr(swagger_client.models, sub_model_name)
+
+    def get_populated_model(self, schema, data):
+        model = getattr(swagger_client.models, schema['__schema_name__'])
         model_data = {}
         for key in data:
-            model_field = self.get_model_key_map(model, key)
-            model_data[model_field] = data[key]
-        
+            if key in schema['properties']:
+                if schema['properties'][key]['type'] == 'object' and 'properties' in schema['properties'][key]:
+                    sub_model = self.get_sub_model(schema['properties'][key])
+                    if sub_model:
+                        sub_model_data = {}
+                        for sub_key in data[key]:
+                            sub_model_field = self.get_model_key_map(sub_model, sub_key)
+                            sub_model_data[sub_model_field] = data[key][sub_key]
+                        sbm = sub_model(**sub_model_data)
+                        data[key] = sbm
+
+                model_field = self.get_model_key_map(model, key)
+                model_data[model_field] = data[key]
+
         try:
             model_obj = model(**model_data)
         except:
@@ -1127,9 +1149,8 @@ class JCA_CLI:
 
         endpoint = Menu(name='', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
-        model = getattr(swagger_client.models, schema['__schema_name__'])
         data = self.get_json_from_file(data_fn)
-        body = self.populate_model(model, data)
+        body = self.get_populated_model(schema, data)
 
         try:
             api_response = api_caller(body=body)
@@ -1249,23 +1270,23 @@ class JCA_CLI:
     def get_sample_schema(self, ref):
         schema = self.get_schema_from_reference('#'+args.schema)
         m = getattr(swagger_client.models, schema['__schema_name__'])
-        
-        #print(json.dumps(schema, indent=2))
-        
         sample_data = {}
-
         populate_fields = schema.get('required', [])
-        sub_models = {}
+
         for field_name in schema['properties']:
             field = schema['properties'][field_name]
             if ('enum' in field) or ('items' in field and 'enum' in field['items']):
                 populate_fields.append(field_name)
 
             if field['type'] == 'object':
-                if hasattr(swagger_client.models, field['description']):
-                    sub_model = getattr(swagger_client.models, field['description'])
-                    sample_data[field_name] =  sub_model()
-                
+                if 'properties' in field:
+                    sub_model = self.get_sub_model(field)
+                    if sub_model:
+                        sample_data[field_name] =  sub_model()
+                    else:
+                        sample_data[field_name] = {}
+                else:
+                    sample_data[field_name] = {}
 
         for required_field in populate_fields:
             mapped_required_field = self.get_model_key_map(m, required_field)
