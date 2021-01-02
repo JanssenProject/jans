@@ -34,6 +34,12 @@ client_secret = os.environ.get('jans_client_secret')
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
 
+# dummy api class to reach private ApiClient methods
+class MyApiClient(swagger_client.ApiClient):
+    pass
+
+myapi = MyApiClient()
+
 ##################### arguments #####################
 op_list = []
 
@@ -1113,42 +1119,6 @@ class JCA_CLI:
         if hasattr(swagger_client.models, sub_model_name):
             return getattr(swagger_client.models, sub_model_name)
 
-    def get_populated_model(self, schema, data):
-        model = getattr(swagger_client.models, schema['__schema_name__'])
-        model_data = {}
-        for key in data:
-            if key in schema['properties']:
-                if schema['properties'][key]['type'] == 'object' and 'properties' in schema['properties'][key]:
-                    sub_model = self.get_sub_model(schema['properties'][key])
-                    if sub_model:
-                        sub_model_data = {}
-                        for sub_key in data[key]:
-                            sub_model_field = self.get_model_key_map(sub_model, sub_key)
-                            sub_model_data[sub_model_field] = data[key][sub_key]
-                        sbm = sub_model(**sub_model_data)
-                        data[key] = sbm
-
-                if 'enum' in schema['properties'][key] and data[key]:
-
-                    if schema['properties'][key]['type'] == 'array':
-                        
-                        for item in data[key]:
-                            if not item in schema['properties'][key]['enum']:
-                                self.exit_with_error('Check your json: propery {} must be array of {}'.format(key, ', '.join(schema['properties'][key]['enum'])))
-                    else:
-                        if not data[key] in schema['properties'][key]['enum']:
-                            self.exit_with_error('Check your json: propery {} must be one of {}'.format(key, ', '.join(schema['properties'][key]['enum'])))
-
-                model_field = self.get_model_key_map(model, key)
-                model_data[model_field] = data[key]
-
-        try:
-            model_obj = model(**model_data)
-        except:
-            self.exit_with_error("Please check consistency of json and default schema")
-        return model_obj
-
-
     def exit_with_error(self, error_text):
         error_text += '\n'
         sys.stderr.write(self.colored_text(error_text, error_color))
@@ -1160,8 +1130,16 @@ class JCA_CLI:
 
         endpoint = Menu(name='', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
+        model_name = schema['__schema_name__']
+
+        model = getattr(swagger_client.models, model_name)
+
         data = self.get_json_from_file(data_fn)
-        body = self.get_populated_model(schema, data)
+        
+        try:
+            body = myapi._ApiClient__deserialize_model(data, model)
+        except Exception as e:
+            self.exit_with_error(str(e))
 
         try:
             api_response = api_caller(body=body)
@@ -1284,6 +1262,8 @@ class JCA_CLI:
         sample_data = {}
         populate_fields = schema.get('required', [])
 
+        print(json.dumps(schema['properties']['fido2Configuration'], indent=2))
+
         for field_name in schema['properties']:
             field = schema['properties'][field_name]
             if ('enum' in field) or ('items' in field and 'enum' in field['items']):
@@ -1291,15 +1271,15 @@ class JCA_CLI:
 
             if field['type'] == 'object':
                 mapped_field = self.get_model_key_map(m, field_name)
+                sub_model_data = {}
                 if 'properties' in field:
                     sub_model = self.get_sub_model(field)
                     if sub_model:
-                        sample_data[mapped_field] =  sub_model()
-                    else:
-                        sample_data[mapped_field] = {}
-                else:
-                    sample_data[mapped_field] = {}
+                        sub_model_data = sub_model()
 
+                sample_data[mapped_field] = sub_model_data
+
+                
         for required_field in populate_fields:
             mapped_required_field = self.get_model_key_map(m, required_field)
             field = schema['properties'][required_field]
