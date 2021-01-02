@@ -1128,6 +1128,17 @@ class JCA_CLI:
                         sbm = sub_model(**sub_model_data)
                         data[key] = sbm
 
+                if 'enum' in schema['properties'][key] and data[key]:
+
+                    if schema['properties'][key]['type'] == 'array':
+                        
+                        for item in data[key]:
+                            if not item in schema['properties'][key]['enum']:
+                                self.exit_with_error('Check your json: propery {} must be array of {}'.format(key, ', '.join(schema['properties'][key]['enum'])))
+                    else:
+                        if not data[key] in schema['properties'][key]['enum']:
+                            self.exit_with_error('Check your json: propery {} must be one of {}'.format(key, ', '.join(schema['properties'][key]['enum'])))
+
                 model_field = self.get_model_key_map(model, key)
                 model_data[model_field] = data[key]
 
