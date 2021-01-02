@@ -36,3 +36,246 @@ When it comes to end, it will display modified data and ask if you want to conti
 ![jans-cli Attributes Update - Continue?](img/im-attributes-update-continue.png) 
 
 After you enter `y` it will perform update and display updated data on screen.
+
+## Command Line Argument Mode
+We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get get help, so type:
+```
+/opt/jans/jans-cli/jca-cli.py --help
+```
+
+This will print how to use CL:
+
+```
+usage: jca-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
+                  [--client_secret CLIENT_SECRET] [-debug]
+                  [--debug-log-file DEBUG_LOG_FILE]
+                  [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
+                  [--info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthOpenIDConnectSectorIdentifiers,OAuthScopes,OAuthUMAResources}]
+                  [--op-mode {get,post,put,patch,delete}]
+                  [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA]
+                  [--data DATA]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --host HOST           Hostname of server
+  --client-id CLIENT_ID
+                        Jans Config Api Client ID
+  --client_secret CLIENT_SECRET
+                        Jans Config Api Client ID secret
+  -debug                Run in debug mode
+  --debug-log-file DEBUG_LOG_FILE
+                        Log file name when run in debug mode
+  --operation-id OPERATION_ID
+                        Operation ID to be done
+  --url-suffix URL_SUFFIX
+                        Argument to be added api endpoint url. For example
+                        inum:2B29
+  --info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthOpenIDConnectSectorIdentifiers,OAuthScopes,OAuthUMAResources}
+                        Help for operation
+  --op-mode {get,post,put,patch,delete}
+                        Operation mode to be done
+  --endpoint-args ENDPOINT_ARGS
+                        Arguments to pass endpoint seperated by comma. For
+                        example limit:5,status:INACTIVE
+  --schema SCHEMA       Get sample json schema
+  --data DATA           Path to json data file
+```
+We start with getting infromtation about tasks, the tasks are options of argument `--info`:
+
+Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMemcached, CacheConfigurationNativePersistence, CacheConfigurationRedis, ConfigurationFido2, ConfigurationJWKJSONWebKeyJWK, ConfigurationLogging, ConfigurationProperties, ConfigurationSMTP, CustomScripts, DatabaseCouchbaseConfiguration, DatabaseLDAPConfiguration, DefaultAuthenticationMethod, OAuthOpenIDConnectClients, OAuthOpenIDConnectSectorIdentifiers, OAuthScopes, OAuthUMAResources
+
+Let's get information for task **OAuthScopes**
+
+```
+ /opt/jans/jans-cli/jca-cli.py --info OAuthScopes
+
+Operation ID: get-oauth-scopes
+  Description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+  Parameters:
+  type: Scope type. [string]
+  limit: Search size - max size of the results to return. [integer]
+  pattern: Search pattern. [string]
+Operation ID: post-oauth-scopes
+  Description: Create Scope.
+  Schema: /components/schemas/Scope
+Operation ID: put-oauth-scopes
+  Description: Updates existing Scope.
+  Schema: /components/schemas/Scope
+Operation ID: get-oauth-scopes-by-inum
+  Description: Get Scope by Inum
+  url-suffix: inum
+Operation ID: delete-oauth-scopes-by-id
+  Description: Delete Scope.
+  url-suffix: inum
+Operation ID: patch-oauth-scopes-by-id
+  Description: Update modified attributes of existing Scope by Inum.
+  url-suffix: inum
+  Schema: Array of /components/schemas/PatchRequest
+
+To get sample shema type /opt/jans/jans-cli/jca-cli.py --schema <schma>, for example /opt/jans/jans-cli/jca-cli.py --schema /components/schemas/PatchRequest
+```
+Operations will be done with **Operation ID**. Some operations may take parameters, let's retreive `3` scopes (**limit**) that has `view` in it's description (**pattern**) and **type** `openid`:
+
+```
+ /opt/jans/jans-cli/jca-cli.py --operation-id get-oauth-scopes --endpoint-args limit:3,pattern:view,type:openid
+ ```
+ 
+ It will return:
+ 
+ ```
+ Getting access token for scope https://jans.io/oauth/config/scopes.readonly
+Calling with params limit=3&pattern=view&type=openid
+[
+  {
+    "dn": "inum=43F1,ou=scopes,o=jans",
+    "id": "profile",
+    "inum": "43F1",
+    "displayName": null,
+    "description": "View your basic profile info.",
+    "iconUrl": null,
+    "authorizationPolicies": null,
+    "defaultScope": false,
+    "scopeType": "openid",
+    "claims": [
+      "inum=2B29,ou=attributes,o=jans",
+      "inum=0C85,ou=attributes,o=jans",
+      "inum=B4B0,ou=attributes,o=jans",
+      "inum=A0E8,ou=attributes,o=jans",
+      "inum=5EC6,ou=attributes,o=jans",
+      "inum=B52A,ou=attributes,o=jans",
+      "inum=64A0,ou=attributes,o=jans",
+      "inum=EC3A,ou=attributes,o=jans",
+      "inum=3B47,ou=attributes,o=jans",
+      "inum=3692,ou=attributes,o=jans",
+      "inum=98FC,ou=attributes,o=jans",
+      "inum=A901,ou=attributes,o=jans",
+      "inum=36D9,ou=attributes,o=jans",
+      "inum=BE64,ou=attributes,o=jans",
+      "inum=6493,ou=attributes,o=jans"
+    ],
+    "umaType": false,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    }
+  },
+  {
+    "dn": "inum=C17A,ou=scopes,o=jans",
+    "id": "address",
+    "inum": "C17A",
+    "displayName": null,
+    "description": "View your address.",
+    "iconUrl": null,
+    "authorizationPolicies": null,
+    "defaultScope": false,
+    "scopeType": "openid",
+    "claims": [
+      "inum=27DB,ou=attributes,o=jans",
+      "inum=2A3D,ou=attributes,o=jans",
+      "inum=6609,ou=attributes,o=jans",
+      "inum=6EEB,ou=attributes,o=jans",
+      "inum=BCE8,ou=attributes,o=jans",
+      "inum=D90B,ou=attributes,o=jans",
+      "inum=E6B8,ou=attributes,o=jans",
+      "inum=E999,ou=attributes,o=jans"
+    ],
+    "umaType": false,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    }
+  },
+  {
+    "dn": "inum=764C,ou=scopes,o=jans",
+    "id": "email",
+    "inum": "764C",
+    "displayName": null,
+    "description": "View your email address.",
+    "iconUrl": null,
+    "authorizationPolicies": null,
+    "defaultScope": false,
+    "scopeType": "openid",
+    "claims": [
+      "inum=8F88,ou=attributes,o=jans",
+      "inum=CAE3,ou=attributes,o=jans"
+    ],
+    "umaType": false,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    }
+  }
+]
+```
+
+Let's create a scope, for this we need a sample schema, you can use of the obove result, or can get sample shcema. Remember when we queried info for task **OAuthScopes** it printed:
+
+```
+Operation ID: post-oauth-scopes
+  Description: Create Scope.
+  Schema: /components/schemas/Scope
+```
+Thus, we can get sample schema and use Operation ID `post-oauth-scopes`. Lets get sample schema:
+
+```
+/opt/jans/jans-cli/jca-cli.py --schema /components/schemas/Scope > /tmp/scope.json
+```
+
+Now edit file `tmp/scope.json` with an editor (like **nano**). As as example we just filled the following properties:
+
+```
+"id": "TestScopeID",
+"displayName": "TestScope",
+"description": "Test Scope created by jans-cli",
+```
+
+![jans-cl Edit scope.json](img/cl-oauthscope-json.png) 
+
+It is time to post the data:
+
+```
+ /opt/jans/jans-cli/jca-cli.py --operation-id post-oauth-scopes --data /tmp/scope.json 
+
+Getting access token for scope https://jans.io/oauth/config/scopes.write
+Server Response:
+{
+  "dn": "inum=112116fd-257b-40d8-a2c9-0c23536680ed,ou=scopes,o=jans",
+  "id": "TestScopeID",
+  "inum": "112116fd-257b-40d8-a2c9-0c23536680ed",
+  "displayName": "TestScope",
+  "description": "Test Scope created by jans-cli",
+  "iconUrl": null,
+  "authorizationPolicies": null,
+  "defaultScope": true,
+  "scopeType": "openid",
+  "claims": null,
+  "umaType": false,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": true
+  }
+}
+
+```
+
+It created scope and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for task **OAuthScopes** it printed:
+
+```
+Operation ID: patch-oauth-scopes-by-id
+  Description: Update modified attributes of existing Scope by Inum.
+  url-suffix: inum
+  Schema: Array of /components/schemas/PatchRequest
+ ```
+ 
+This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. Get schema:
+
+
+ 
