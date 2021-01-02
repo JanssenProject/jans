@@ -1278,13 +1278,15 @@ class JCA_CLI:
 
         for k in schema:
             if isinstance(schema[k], dict):
+                sub_schema_ = None
                 if '$ref' in schema_['properties'][k]:
                     sub_schema_ = self.cfg_yml['components']['schemas'][schema_['properties'][k]['$ref'].split('/')[-1]]
                 elif schema_['properties'][k].get('items', {}).get('$ref'):
                     sub_schema_ = self.cfg_yml['components']['schemas'][schema_['properties'][k]['items']['$ref'].split('/')[-1]]
                 elif 'properties' in schema_['properties'][k]:
                     sub_schema_ = schema_['properties'][k]
-                self.fill_defaults(schema[k], sub_schema_)
+                if sub_schema_:
+                    self.fill_defaults(schema[k], sub_schema_)
 
             else:
                 if 'enum' in schema_['properties'][k]:
