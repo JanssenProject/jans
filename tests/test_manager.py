@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 
@@ -19,14 +17,12 @@ class GAdapter(object):
     ("kubernetes", "KubernetesConfig"),
     ("random", "NoneType"),
 ])
-def test_config_manager(adapter, adapter_cls):
+def test_config_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import ConfigManager
 
-    os.environ["CN_CONFIG_ADAPTER"] = adapter
+    monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter)
     manager = ConfigManager()
-
     assert manager.adapter.__class__.__name__ == adapter_cls
-    os.environ.pop("CN_CONFIG_ADAPTER", None)
 
 
 @pytest.mark.parametrize("adapter, adapter_cls", [
@@ -34,14 +30,12 @@ def test_config_manager(adapter, adapter_cls):
     ("kubernetes", "KubernetesSecret"),
     ("random", "NoneType"),
 ])
-def test_secret_manager(adapter, adapter_cls):
+def test_secret_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import SecretManager
 
-    os.environ["CN_SECRET_ADAPTER"] = adapter
+    monkeypatch.setenv("CN_SECRET_ADAPTER", adapter)
     manager = SecretManager()
-
     assert manager.adapter.__class__.__name__ == adapter_cls
-    os.environ.pop("CN_SECRET_ADAPTER", None)
 
 
 def test_config_manager_methods():

@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 
@@ -8,12 +6,11 @@ import pytest
     (0, 1),
     ("not_integer", 60 * 5),
 ])
-def test_get_wait_max_time(value, expected):
+def test_get_wait_max_time(monkeypatch, value, expected):
     from jans.pycloudlib.wait import get_wait_max_time
 
-    os.environ["CN_WAIT_MAX_TIME"] = str(value)
+    monkeypatch.setenv("CN_WAIT_MAX_TIME", str(value))
     assert get_wait_max_time() == expected
-    os.environ.pop("CN_WAIT_MAX_TIME", None)
 
 
 @pytest.mark.parametrize("value, expected", [
@@ -21,12 +18,11 @@ def test_get_wait_max_time(value, expected):
     (0, 1),
     ("not_integer", 10),
 ])
-def test_get_wait_interval(value, expected):
+def test_get_wait_interval(monkeypatch, value, expected):
     from jans.pycloudlib.wait import get_wait_interval
 
-    os.environ["CN_WAIT_SLEEP_DURATION"] = str(value)
+    monkeypatch.setenv("CN_WAIT_SLEEP_DURATION", str(value))
     assert get_wait_interval() == expected
-    os.environ.pop("CN_WAIT_SLEEP_DURATION", None)
 
 
 def test_on_backoff(caplog):
