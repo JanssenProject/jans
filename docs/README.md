@@ -266,7 +266,7 @@ Server Response:
 
 ```
 
-It created scope and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for task **OAuthScopes** it printed:
+It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for task **OAuthScopes** it printed:
 
 ```
 Operation ID: patch-oauth-scopes-by-id
@@ -277,5 +277,45 @@ Operation ID: patch-oauth-scopes-by-id
  
 This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. Get schema:
 
+```
+/opt/jans/jans-cli/jca-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
+```
 
- 
+When you examine this json, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
+__op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
+__path__ Path of property to be changed. use path seperator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
+__value__ New value to be assigned for property defined in `path`
+
+We can edit this json as follows (remember to make it an array):
+
+![jans-cl Edit patch.json](img/cl-oauthscope-patch-json.png)
+
+Let's do the operation:
+
+```
+/opt/jans/jans-cli/jca-cli.py --operation-id patch-oauth-scopes-by-id --url-suffix inum:112116fd-257b-40d8-a2c9-0c23536680ed --data /tmp/patch.json 
+
+Getting access token for scope https://jans.io/oauth/config/scopes.write
+Server Response:
+{
+  "dn": "inum=112116fd-257b-40d8-a2c9-0c23536680ed,ou=scopes,o=jans",
+  "id": "TestScopeID",
+  "inum": "112116fd-257b-40d8-a2c9-0c23536680ed",
+  "displayName": "TestScope",
+  "description": "Test Scope created by jans-cli",
+  "iconUrl": "https://www.jans.io/icon.png",
+  "authorizationPolicies": null,
+  "defaultScope": true,
+  "scopeType": "openid",
+  "claims": null,
+  "umaType": false,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": true
+  }
+}
+```
+
+
