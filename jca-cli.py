@@ -1290,14 +1290,15 @@ class JCA_CLI:
                 populate_fields.append(field_name)
 
             if field['type'] == 'object':
+                mapped_field = self.get_model_key_map(m, field_name)
                 if 'properties' in field:
                     sub_model = self.get_sub_model(field)
                     if sub_model:
-                        sample_data[field_name] =  sub_model()
+                        sample_data[mapped_field] =  sub_model()
                     else:
-                        sample_data[field_name] = {}
+                        sample_data[mapped_field] = {}
                 else:
-                    sample_data[field_name] = {}
+                    sample_data[mapped_field] = {}
 
         for required_field in populate_fields:
             mapped_required_field = self.get_model_key_map(m, required_field)
