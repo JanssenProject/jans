@@ -106,6 +106,25 @@ if argsp.upgrade:
 
 elif argsp.uninstall:
     check_installation()
+    print('\033[31m')
+    print("This process is irreversible.")
+    print("You will lose all data related to Janssen Server.")
+    print('\033[0m')
+    print()
+    while True:
+        print('\033[31m \033[1m')
+        response = input("Are you sure to uninstall Janssen Server? [yes/N] ")
+        print('\033[0m')
+        if response.lower() in ('yes', 'n', 'no'):
+            if not response.lower() == 'yes':
+                sys.exit()
+            else:
+                break
+        else:
+            print("Please type \033[1m yes \033[0m to uninstall")
+
+    print("Uninstalling Jannsen Server...")
+
     print("Stopping OpenDj Server")
     os.system('/opt/opendj/bin/stop-ds')
     for service in jetty_services:
