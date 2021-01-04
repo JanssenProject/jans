@@ -3535,29 +3535,21 @@ components:
       properties:
         dn:
           type: string
-        id:
-          description: The base64url encoded id.
-          type: string
         inum:
           description: Unique id identifying the .
           type: string
         displayName:
           description: A human-readable name of the scope.
           type: string
-        description:
-          description: A human-readable string describing the scope.
+        id:
+          description: The base64url encoded id.
           type: string
         iconUrl:
           description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
           type: string
-        authorizationPolicies:
-          description: Policies associated with all scopes.
-          type: array
-          items:
-            type: string
-        defaultScope:
-          description: Boolean value to specify default scope.
-          type: boolean
+        description:
+          description: A human-readable string describing the scope.
+          type: string
         scopeType:
           description: The scopes type associated with Access Tokens determine what resources will.
           type: string
@@ -3567,14 +3559,24 @@ components:
             - uma
             - spontaneous
             - oauth
-        jansClaim:
+        claims:
           description: Claim attributes associated with the scope.
           type: array
           items:
             type: string
-        umaType:
+        defaultScope:
+          description: Boolean value to specify default scope.
           type: boolean
+        groupClaims:
+          description: Specifies if the scope is group claims.
+          type: boolean
+        dynamicScopeScripts:
+          description: Dynamic Scope Scripts associated with the scope.
+          type: array
+          items:
+            type: string
         umaAuthorizationPolicies:
+          description: Policies associated with scopes.
           type: array
           items:
             type: string
@@ -3590,6 +3592,16 @@ components:
                 type: string
             showInConfigurationEndpoint:
               type: boolean
+        umaType:
+          description: Specifies if the scope is of type UMA.
+          type: boolean
+        deletable:
+          description: Specifies if the scope can be deleted.
+          type: boolean
+        expirationDate:
+          description: Expiry date of the Scope.
+          type: string
+          format: date	
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -4064,7 +4076,7 @@ components:
         name:
           description: A human-readable name of the scope.
           type: string
-        iconUrl:
+        iconUri:
           description: A URL for a graphic icon representing the resource.
           type: string
         scopes:
