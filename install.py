@@ -37,6 +37,7 @@ for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
 
 parser = argparse.ArgumentParser(description="This script downloads Janssen Server components and fires setup")
 parser.add_argument('-u', help="Use downloaded components", action='store_true')
+parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 argsp = parser.parse_args()
 
@@ -71,26 +72,54 @@ if not argsp.u:
     download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
     download('https://github.com/JanssenProject/jans-cli/archive/main.zip', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
-if os.path.exists(setup_dir):
-    shutil.move(setup_dir, setup_dir+'-back.'+time.ctime())
 
-print("Extracting jans-setup package")
+if argsp.upgrade:
 
-setup_zip = zipfile.ZipFile(setup_zip_file, "r")
-setup_par_dir = setup_zip.namelist()[0]
+    if not (os.path.exists('/opt/jans/jetty') and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
+        print("Jans server seems not installed")
+        sys.exit()
 
-for filename in setup_zip.namelist():
-    setup_zip.extract(filename, jans_dir)
+    jetty_home = '/opt/jans/jetty'
+    for service in ('jans-auth', 'jans-fido2', 'jans-scim', 'jans-eleven'):
+        source_fn = os.path.join('/opt/dist/jans', service +'.war')
+        target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
+        if os.path.exists(target_fn):
+            print("Copying", source_fn, "as", target_fn)
+            shutil.move(target_fn, target_fn+'-back.' + time.ctime())
+            shutil.copy(source_fn, target_fn)
+            print("Restarting", service)
+            os.system('systemctl restart ' + service)
 
-shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
+    jans_config_api_fn = '/opt/jans/config-api/jans-config-api-runner.jar'
+    if os.path.exists(jans_config_api_fn):
+        shutil.move(jans_config_api_fn, jans_config_api_fn + '-back.' + time.ctime())
+        source_fn = '/opt/dist/jans/jans-config-api-runner.jar'
+        print("Copying", source_fn, "as", jans_config_api_fn)
+        shutil.copy(source_fn, jans_config_api_fn)
+        print("Restarting jans-config-api")
+        os.system('systemctl restart jans-config-api')
 
-download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/src/main/resources/uma-rs-protect.json'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/uma-rs-protect.json'))
-download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
+else:
+    if os.path.exists(setup_dir):
+        shutil.move(setup_dir, setup_dir + '-back.' + time.ctime())
 
-print("Launcing Janssen Setup")
-setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
+    print("Extracting jans-setup package")
 
-if argsp.args:
-    setup_cmd += ' ' + argsp.args
+    setup_zip = zipfile.ZipFile(setup_zip_file, "r")
+    setup_par_dir = setup_zip.namelist()[0]
 
-os.system(setup_cmd)
+    for filename in setup_zip.namelist():
+        setup_zip.extract(filename, jans_dir)
+
+    shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
+
+    download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/src/main/resources/uma-rs-protect.json'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/uma-rs-protect.json'))
+    download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
+
+    print("Launcing Janssen Setup")
+    setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
+
+    if argsp.args:
+        setup_cmd += ' ' + argsp.args
+
+    os.system(setup_cmd)
