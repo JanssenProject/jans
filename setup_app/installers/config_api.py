@@ -146,7 +146,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             'inum={},ou=clients,o=jans'.format(Config.jca_client_id), {
             'objectClass': ['top', 'jansClnt'],
             'del': ['false'],
-            'displayName': 'Jans Config Api Client',
+            'displayName': ['Jans Config Api Client'],
             'inum': [Config.jca_client_id],
             'jansAccessTknAsJwt': ['false'],
             'jansAccessTknSigAlg': ['RS256'],
