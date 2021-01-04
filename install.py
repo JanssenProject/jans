@@ -38,6 +38,7 @@ for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
 parser = argparse.ArgumentParser(description="This script downloads Janssen Server components and fires setup")
 parser.add_argument('-u', help="Use downloaded components", action='store_true')
 parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
+parser.add_argument('-uninstall', help="Uninstall Jans server and removes all files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 argsp = parser.parse_args()
 
@@ -56,7 +57,7 @@ def download(url, target_fn):
 
 setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
 
-if not argsp.u:
+if not (argsp.u or argsp.uninstall):
     setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
     download(setup_url, setup_zip_file)
 
@@ -72,15 +73,19 @@ if not argsp.u:
     download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
     download('https://github.com/JanssenProject/jans-cli/archive/main.zip', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
+jetty_home = '/opt/jans/jetty'
+jetty_services = ('jans-auth', 'jans-fido2', 'jans-scim', 'jans-eleven')
 
-if argsp.upgrade:
-
-    if not (os.path.exists('/opt/jans/jetty') and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
+def check_installation():
+    if not (os.path.exists(jetty_home) and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
         print("Jans server seems not installed")
         sys.exit()
 
-    jetty_home = '/opt/jans/jetty'
-    for service in ('jans-auth', 'jans-fido2', 'jans-scim', 'jans-eleven'):
+if argsp.upgrade:
+
+    check_installation()
+
+    for service in jetty_services:
         source_fn = os.path.join('/opt/dist/jans', service +'.war')
         target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
         if os.path.exists(target_fn):
@@ -98,6 +103,24 @@ if argsp.upgrade:
         shutil.copy(source_fn, jans_config_api_fn)
         print("Restarting jans-config-api")
         os.system('systemctl restart jans-config-api')
+
+elif argsp.uninstall:
+    check_installation()
+    print("Stopping OpenDj Server")
+    os.system('/opt/opendj/bin/stop-ds')
+    for service in jetty_services:
+        if os.path.exists(os.path.join(jetty_home, service)):
+            default_fn = os.path.join('/etc/default/', service)
+            if os.path.exists(default_fn):
+                print("Removing", default_fn)
+                os.remove(default_fn)
+            print("Stopping", service)
+            os.system('systemctl stop ' + service)
+
+    for p in ('/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/dist', '/opt/jetty*', '/opt/jython*', '/opt/opendj'):
+        cmd = 'rm -r -f ' + p
+        print("Executing", cmd)
+        os.system('rm -r -f ' + p)
 
 else:
     if os.path.exists(setup_dir):
