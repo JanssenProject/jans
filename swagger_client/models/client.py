@@ -93,7 +93,7 @@ class Client(object):
         'backchannel_client_notification_endpoint': 'str',
         'backchannel_authentication_request_signing_alg': 'str',
         'backchannel_user_code_parameter': 'bool',
-        'exp': 'date',
+        'expiration_date': 'datetime',
         'deletable': 'bool',
         'jans_id': 'str'
     }
@@ -164,12 +164,12 @@ class Client(object):
         'backchannel_client_notification_endpoint': 'backchannelClientNotificationEndpoint',
         'backchannel_authentication_request_signing_alg': 'backchannelAuthenticationRequestSigningAlg',
         'backchannel_user_code_parameter': 'backchannelUserCodeParameter',
-        'exp': 'exp',
+        'expiration_date': 'expirationDate',
         'deletable': 'deletable',
         'jans_id': 'jansId'
     }
 
-    def __init__(self, dn=None, inum=None, client_secret=None, front_channel_logout_uri=None, front_channel_logout_session_required=None, registration_access_token=None, client_id_issued_at=None, client_secret_expires_at=None, redirect_uris=None, claim_redirect_uris=None, response_types=None, grant_types=None, application_type=None, contacts=None, client_name=None, id_token_token_binding_cnf=None, logo_uri=None, client_uri=None, policy_uri=None, tos_uri=None, jwks_uri=None, jwks=None, sector_identifier_uri=None, subject_type=None, id_token_signed_response_alg=None, id_token_encrypted_response_alg=None, id_token_encrypted_response_enc=None, user_info_signed_response_alg=None, user_info_encrypted_response_alg=None, user_info_encrypted_response_enc=None, request_object_signing_alg=None, request_object_encryption_alg=None, request_object_encryption_enc=None, token_endpoint_auth_method=None, token_endpoint_auth_signing_alg=None, default_max_age=None, require_auth_time=None, default_acr_values=None, initiate_login_uri=None, post_logout_redirect_uris=None, request_uris=None, scopes=None, claims=None, trusted_client=None, last_access_time=None, last_logon_time=None, persist_client_authorizations=None, include_claims_in_id_token=None, refresh_token_lifetime=None, access_token_lifetime=None, custom_attributes=None, custom_object_classes=None, rpt_as_jwt=None, access_token_as_jwt=None, access_token_signing_alg=None, disabled=None, authorized_origins=None, software_id=None, software_version=None, software_statement=None, attributes=None, backchannel_token_delivery_mode=None, backchannel_client_notification_endpoint=None, backchannel_authentication_request_signing_alg=None, backchannel_user_code_parameter=None, exp=None, deletable=None, jans_id=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, client_secret=None, front_channel_logout_uri=None, front_channel_logout_session_required=None, registration_access_token=None, client_id_issued_at=None, client_secret_expires_at=None, redirect_uris=None, claim_redirect_uris=None, response_types=None, grant_types=None, application_type=None, contacts=None, client_name=None, id_token_token_binding_cnf=None, logo_uri=None, client_uri=None, policy_uri=None, tos_uri=None, jwks_uri=None, jwks=None, sector_identifier_uri=None, subject_type=None, id_token_signed_response_alg=None, id_token_encrypted_response_alg=None, id_token_encrypted_response_enc=None, user_info_signed_response_alg=None, user_info_encrypted_response_alg=None, user_info_encrypted_response_enc=None, request_object_signing_alg=None, request_object_encryption_alg=None, request_object_encryption_enc=None, token_endpoint_auth_method=None, token_endpoint_auth_signing_alg=None, default_max_age=None, require_auth_time=None, default_acr_values=None, initiate_login_uri=None, post_logout_redirect_uris=None, request_uris=None, scopes=None, claims=None, trusted_client=None, last_access_time=None, last_logon_time=None, persist_client_authorizations=None, include_claims_in_id_token=None, refresh_token_lifetime=None, access_token_lifetime=None, custom_attributes=None, custom_object_classes=None, rpt_as_jwt=None, access_token_as_jwt=None, access_token_signing_alg=None, disabled=None, authorized_origins=None, software_id=None, software_version=None, software_statement=None, attributes=None, backchannel_token_delivery_mode=None, backchannel_client_notification_endpoint=None, backchannel_authentication_request_signing_alg=None, backchannel_user_code_parameter=None, expiration_date=None, deletable=None, jans_id=None):  # noqa: E501
         """Client - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
@@ -236,7 +236,7 @@ class Client(object):
         self._backchannel_client_notification_endpoint = None
         self._backchannel_authentication_request_signing_alg = None
         self._backchannel_user_code_parameter = None
-        self._exp = None
+        self._expiration_date = None
         self._deletable = None
         self._jans_id = None
         self.discriminator = None
@@ -366,8 +366,8 @@ class Client(object):
             self.backchannel_authentication_request_signing_alg = backchannel_authentication_request_signing_alg
         if backchannel_user_code_parameter is not None:
             self.backchannel_user_code_parameter = backchannel_user_code_parameter
-        if exp is not None:
-            self.exp = exp
+        if expiration_date is not None:
+            self.expiration_date = expiration_date
         if deletable is not None:
             self.deletable = deletable
         if jans_id is not None:
@@ -1969,27 +1969,27 @@ class Client(object):
         self._backchannel_user_code_parameter = backchannel_user_code_parameter
 
     @property
-    def exp(self):
-        """Gets the exp of this Client.  # noqa: E501
+    def expiration_date(self):
+        """Gets the expiration_date of this Client.  # noqa: E501
 
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.  # noqa: E501
 
-        :return: The exp of this Client.  # noqa: E501
-        :rtype: date
+        :return: The expiration_date of this Client.  # noqa: E501
+        :rtype: datetime
         """
-        return self._exp
+        return self._expiration_date
 
-    @exp.setter
-    def exp(self, exp):
-        """Sets the exp of this Client.
+    @expiration_date.setter
+    def expiration_date(self, expiration_date):
+        """Sets the expiration_date of this Client.
 
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.  # noqa: E501
 
-        :param exp: The exp of this Client.  # noqa: E501
-        :type: date
+        :param expiration_date: The expiration_date of this Client.  # noqa: E501
+        :type: datetime
         """
 
-        self._exp = exp
+        self._expiration_date = expiration_date
 
     @property
     def deletable(self):
