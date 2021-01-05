@@ -6,9 +6,9 @@ Background:
 * def getPath =
 """
 function(path) {
-print(' path = '+path);
+//print(' path = '+path);
 path = path.replace(baseUrl,'');
-print(' final path for token = '+path);
+//print(' final path for token = '+path);
   return path;
 }
 """
@@ -20,8 +20,8 @@ And print pathUrl
 And print methodName
 And param method = methodName
 And param path = getPath(pathUrl)
-And print method
-And print path
+#And print method
+#And print path
 When method GET
 Then status 200
-And print 'token = '+response
+#And print 'token = '+response

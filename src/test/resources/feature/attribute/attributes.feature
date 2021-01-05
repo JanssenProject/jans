@@ -1,15 +1,28 @@
-@ignore	
+
 Feature: Attributes 
 
-@ignore	
+Background:
+* def mainUrl = attributes_url
+* def getToken =
+"""
+function(path,method) {
+//print(' path = '+path+' , method = '+method);
+var result = karate.call('classpath:token.feature',{ pathUrl: path, methodName: method});
+//print(' result.response after call = '+result.response);
+var token = result.response
+  return token;
+}
+"""   
+
 Scenario: Fetch all attributes without bearer token 
-	Given url attributes_url 
+	Given url mainUrl 
 	When method GET 
 	Then status 401 
 
-@ignore	
+
 Scenario: Fetch all attributes 
-	Given url attributes_url 
+	Given url mainUrl 
+	And def accessToken = getToken(mainUrl,'GET')
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 200 
@@ -17,30 +30,33 @@ Scenario: Fetch all attributes
 	And assert response.length != null 
 	And assert response.length >= 10 
 
-@ignore	
+
 Scenario: Fetch the first three attributes 
-	Given url attributes_url 
-	And  header Authorization = 'Bearer ' + accessToken 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'GET')
+	And header Authorization = 'Bearer ' + accessToken 
 	And param limit = 3 
 	When method GET 
 	Then status 200
 	And print response 
 	And assert response.length == 3 
 
-@ignore	
+
 Scenario: Search attributes given a search pattern 
-	Given url attributes_url 
-	And  header Authorization = 'Bearer ' + accessToken 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'GET')
+	And header Authorization = 'Bearer ' + accessToken 
 	And param pattern = 'city' 
 	When method GET 
 	Then status 200
 	And print response 
 	And assert response.length == 1 
 
-@ignore	
+
 Scenario: Fetch the first three active attributes 
-	Given url attributes_url 
-	And  header Authorization = 'Bearer ' + accessToken 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'GET')
+	And header Authorization = 'Bearer ' + accessToken 
 	And param limit = 3 
 	And param status = 'active' 
 	When method GET 
@@ -51,10 +67,11 @@ Scenario: Fetch the first three active attributes
 	And assert response[1].status == 'ACTIVE'
 	And assert response[2].status == 'ACTIVE'	
 
-@ignore	
+
 Scenario: Fetch the first three inactive attributes 
-	Given url attributes_url 
-	And  header Authorization = 'Bearer ' + accessToken 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'GET')
+	And header Authorization = 'Bearer ' + accessToken 
 	And param limit = 3 
 	And param status = 'inactive' 
 	When method GET 
@@ -65,10 +82,11 @@ Scenario: Fetch the first three inactive attributes
 	And assert response[1].status == 'INACTIVE'
 	And assert response[2].status == 'INACTIVE'		
 
-@ignore	
+
 @CreateUpdateDelete 
 Scenario: Create new attribute 
-	Given url attributes_url 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'POST')
 	And header Authorization = 'Bearer ' + accessToken 
 	And request read('attribute.json') 
 	When method POST 
@@ -76,39 +94,45 @@ Scenario: Create new attribute
 	Then def result = response 
 	Then set result.displayName = 'UpdatedQAAddedAttribute' 
 	Then def inum_before = result.inum 
-	Given url attributes_url 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'PUT')
 	And header Authorization = 'Bearer ' + accessToken 
 	And request result 
 	When method PUT 
 	Then status 200 
 	And assert response.displayName == 'UpdatedQAAddedAttribute' 
 	And assert response.inum == inum_before 
-	Given url attributes_url + '/' +response.inum 
+	Given url mainUrl + '/' +response.inum
+	And def accessToken = getToken(mainUrl,'DELETE') 
 	And header Authorization = 'Bearer ' + accessToken 
 	When method DELETE 
 	Then status 204 
 
-@ignore	
+
 Scenario: Delete a non-existion attribute by inum 
-	Given url attributes_url + '/1402.66633-8675-473e-a749' 
+	Given url mainUrl + '/1402.66633-8675-473e-a749'
+	And def accessToken = getToken(mainUrl,'GET') 
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 404 
 	
-@ignore	
+
 Scenario: Get an attribute by inum(unexisting attribute) 
-	Given url attributes_url + '/53553532727272772' 
+	Given url mainUrl + '/53553532727272772'
+	And def accessToken = getToken(mainUrl,'GET') 
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 404 
 
-@ignore	
+
 Scenario: Get an attribute by inum 
-	Given url attributes_url 
+	Given url mainUrl
+	And def accessToken = getToken(mainUrl,'GET')
 	And header Authorization = 'Bearer ' + accessToken 
 	When method GET 
 	Then status 200 
-	Given url attributes_url + '/' +response[0].inum
+	Given url mainUrl + '/' +response[0].inum
+	And def accessToken = getToken(mainUrl,'GET')
 	And header Authorization = 'Bearer ' + accessToken
 	When method GET 
 	Then status 200

@@ -156,7 +156,7 @@ public class AuthUtil {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
                 log.debug(" AuthUtil::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
-                if (path.equals(pathUrl)) {
+                if (pathUrl != null && pathUrl.contains(path)) {
                     // Matching url
                     log.debug(" AuthUtil::getUmaResource() - Matching url, path = " + path + " , pathUrl = " + pathUrl);
 
@@ -166,28 +166,26 @@ public class AuthUtil {
                         log.debug(" AuthUtil::getUmaResource() - Matching umaResource =" + umaResource);
                         break;
                     }
-
+                    
                 }
 
             }
 
         }
+     
         return umaResource;
     }
 
     public List<String> getRequestedScopes(String path) {
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - path = "+path+"\n\n\n");
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - UmaResourceProtectionCache.getAllUmaResources() = "+UmaResourceProtectionCache.getAllUmaResources()+"\n\n\n");
         UmaResource resource = UmaResourceProtectionCache.getUmaResource(path);
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
+        log.trace("getRequestedScopes() - resource = "+resource);
         return resource.getScopes();
     }
     
     public List<String> getRequestedScopes(String method, String path) {
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - method = "+method+" , path = "+path+"\n\n\n");
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - UmaResourceProtectionCache.getAllUmaResources() = "+UmaResourceProtectionCache.getAllUmaResources()+"\n\n\n");
+        log.trace("getRequestedScopes() - method = "+method+" , path = "+path);
         UmaResource resource = this.getUmaResource(method,path);
-        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
         return resource.getScopes();
     }
 
@@ -221,13 +219,12 @@ public class AuthUtil {
 
     public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
             throws Exception {
-        System.out.println("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
+        log.trace("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
                 + "\n");
 
         // Get clientSecret
-        //String clientSecret = this.getClientPassword(clientId);
         String clientSecret = this.getClientDecryptPassword(clientId);
-        System.out.println("RequestAccessToken() - clientSecret = " + clientSecret);
+
         // distinct scopes
         Set<String> scopesSet = new HashSet<String>(scopes);
 
@@ -237,7 +234,7 @@ public class AuthUtil {
                 scope = scope + " " + s;
             }
         }
-        System.out.println("\n\n\n RequestAccessToken() - scope = "+scope);
+        log.trace("\n\n\n RequestAccessToken() - scope = "+scope);
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
