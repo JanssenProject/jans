@@ -4051,9 +4051,9 @@ components:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
         expirationDate:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
           type: string
-          format: date      
+          format: date-time
         deletable:
           description: Specifies whether client is deletable.
           type: boolean          
