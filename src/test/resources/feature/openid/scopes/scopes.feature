@@ -1,38 +1,36 @@
+@ignore
 Feature: Openid connect Scopes
 
-    Background:
-    * def mainUrl = scopes_url
-    * def getPath =
+Background:
+* def mainUrl = scopes_url
+* def getToken =
 """
-function(path) {
-print(' path = '+path);
-path = path.replace(baseUrl,'');
-print(' path after = '+path);
-  return path;
+function(path,method) {
+print(' path = '+path+' , method = '+method);
+var result = karate.call('classpath:token.feature',{ pathUrl: path, methodName: method});
+print(' result.response after call = '+result.response);
+var token = result.response
+  return token;
 }
-"""
-@ignore
+"""   
+
 Scenario: Fetch all openid connect scopes without bearer token
 Given url mainUrl
 When method GET
 Then status 401
 
+
 Scenario: Fetch all scopes
-Given url baseUrl + '/jans-config-api/api/v1/test/token'
-And print url
-And param method = 'GET'
-And param path = getPath(mainUrl)
-When method GET
-Then status 200
-And print response
-And def aToken = response
-And print aToken
 Given url mainUrl
-And header Authorization = 'Bearer ' + aToken
+#And def accessToken = call read('classpath:token.feature') { pathUrl: #(mainUrl), methodName: 'GET' }
+And def accessToken = getToken(mainUrl,'GET')
+And print accessToken
+And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
 And print response
 And assert response.length != null
+
 
 @ignore
 Scenario: Fetch all openid connect scopes
@@ -47,7 +45,7 @@ And assert response.length != null
 @ignore
 Scenario: Fetch the first three openidconnect scopes
 Given url mainUrl
-And  header Authorization = 'Bearer ' + accessToken
+And header Authorization = 'Bearer ' + accessToken
 And param type = 'openid'
 And param limit = 3
 When method GET
