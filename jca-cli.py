@@ -530,9 +530,12 @@ class JCA_CLI:
         return paths
 
     def get_scope_for_endpoint(self, endpoint):
+        scope = []
         for security in endpoint.info['security']:
-            if 'jans-auth' in security:
-                return security['jans-auth'][0]
+            for stype in security:
+                scope += security[stype]
+
+        return ' '.join(scope)
 
 
     def unmap_model(self, model, data_dict=None):
@@ -1081,7 +1084,9 @@ class JCA_CLI:
 
 
     def get_path_api_caller_for_path(self, path):
-        security = path['security'][0]['jans-auth'][0]
+        
+        dummy_enpoint = Menu(name='', info=path)
+        security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         class_name = self.get_api_class_name(path['tags'][0])
         client = getattr(swagger_client, class_name)
