@@ -13,15 +13,21 @@ import inspect
 import random
 import datetime
 import ruamel.yaml
+import importlib
 
 from pprint import pprint
 from functools import partial
 from urllib.parse import urljoin, urlencode
 from collections import OrderedDict
 
-import swagger_client
+
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
+sys.path.append(os.path.join(cur_dir, my_op_mode))
+swagger_client = importlib.import_module(my_op_mode+'.swagger_client')
+swagger_rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
+
 warning_color = 214
 error_color = 196
 
@@ -30,8 +36,8 @@ urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
 host =  os.environ.get('jans_host')
-client_id = os.environ.get('jans_client_id')
-client_secret = os.environ.get('jans_client_secret')
+client_id = os.environ.get(my_op_mode+'_client_id')
+client_secret = os.environ.get(my_op_mode+'_client_secret')
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
 
@@ -51,8 +57,8 @@ myapi.pool = DummyPool()
 ##################### arguments #####################
 op_list = []
 
-for api_name in dir(swagger_client.api):
-    if api_name.endswith and inspect.isclass(getattr(swagger_client.api, api_name)):
+for api_name in dir(swagger_client):
+    if api_name.endswith and inspect.isclass(getattr(swagger_client, api_name)):
         op_list.append(api_name[:-3])
 
 parser = argparse.ArgumentParser()
@@ -85,16 +91,16 @@ if not (host and client_id and client_secret):
     if os.path.exists(config_ini_fn):
         config.read(config_ini_fn)
         host = config['DEFAULT']['jans_host']
-        client_id = config['DEFAULT']['jans_client_id']
-        if config['DEFAULT'].get('jans_client_secret'):
-            client_secret = config['DEFAULT']['jans_client_secret']
-        elif config['DEFAULT'].get('jans_client_secret_enc'):
-            client_secret_enc = config['DEFAULT']['jans_client_secret_enc']
+        client_id = config['DEFAULT'][my_op_mode+'_client_id']
+        if config['DEFAULT'].get(my_op_mode+'_client_secret'):
+            client_secret = config['DEFAULT'][my_op_mode+'_client_secret']
+        elif config['DEFAULT'].get(my_op_mode+'_client_secret_enc'):
+            client_secret_enc = config['DEFAULT'][my_op_mode+'_client_secret_enc']
             client_secret = os.popen('/opt/jans/bin/encode.py -D ' + client_secret_enc).read().strip()
         debug = config['DEFAULT'].get('debug')
         debug_log_file = config['DEFAULT'].get('debug_log_file')
     else:
-        config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net', 'jans_client_id':'your client id', 'jans_client_secret': 'client secret for you client id'}
+        config['DEFAULT'] = {'jans_host': 'jans server hostname,e.g, jans.foo.net', 'jca_client_id':'your jans config api client id', 'jca_client_secret': 'client secret for your jans config api client', 'scim_client_id':'your jans scim client id', 'scim_client_secret': 'client secret for your jans scim client'}
         with open(config_ini_fn, 'w') as configfile:
             config.write(configfile)
 
@@ -183,7 +189,8 @@ class JCA_CLI:
         if self.swagger_configuration.debug:
             self.swagger_configuration.logger_file = debug_log_file
 
-        self.swagger_yaml_fn = os.path.join(cur_dir, 'jans-config-api-swagger.yaml')
+        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
+        
         self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
@@ -214,8 +221,9 @@ class JCA_CLI:
                 for path in self.cfg_yml['paths']:
                     for method in self.cfg_yml['paths'][path]:
                         if 'tags' in self.cfg_yml['paths'][path][method] and m.name in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                            menu_name = self.cfg_yml['paths'][path][method].get('summary') or self.cfg_yml['paths'][path][method].get('description')
                             sm = Menu(
-                                    name=self.cfg_yml['paths'][path][method]['summary'].strip('.'),
+                                    name=menu_name.strip('.'),
                                     method=method,
                                     info=self.cfg_yml['paths'][path][method],
                                     path=path,
@@ -225,8 +233,9 @@ class JCA_CLI:
 
 
     def get_access_token(self, scope):
+        print(self.client_id, self.client_secret)
         sys.stderr.write("Getting access token for scope {}\n".format(scope))
-        rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
+        rest = swagger_rest.RESTClientObject(self.swagger_configuration)
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = urljoin(self.swagger_configuration.host, 'jans-auth/restv1/token')
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -464,8 +473,9 @@ class JCA_CLI:
             endpoint_parameters.insert(0, end_point_param)
 
         for param in endpoint_parameters:
+            text_ = param.get('description') or param.get('summary') or param['name']
             parameters[param['name']] = self.get_input(
-                        text=param['description'].strip('.'), 
+                        text=text_.strip('.'), 
                         itype=param['schema']['type'],
                         default = param['schema'].get('default'),
                         enforce=False
