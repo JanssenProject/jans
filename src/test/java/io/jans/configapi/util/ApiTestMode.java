@@ -103,7 +103,6 @@ public class ApiTestMode {
                 
         Token token = null;
         String clientId = this.getTestClientId();
-        System.out.println("\n\n\n ApiTestMode:::createTestToken() - clientId = "+clientId+"\n\n\n");
         Client client = this.clientService.getClientByInum(clientId);
         System.out.println("\n\n\n ApiTestMode:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
         // Get all scopes
