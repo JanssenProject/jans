@@ -298,7 +298,12 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         installedComponents = []
 
         # Jetty apps
-        for config_var, service in [('installOxAuth', 'jans-auth')]:
+        for config_var, service in [('installOxAuth', 'jans-auth'),
+                                    ('installScimServer', 'jans-scim'),
+                                    ('installFido2', 'jans-fido2'),
+                                    ('installConfigApi', 'jans-config-api'),
+                                    ('installEleven', 'jans-eleven')]:
+
             if Config.get(config_var):
                 installedComponents.append(self.jetty_app_configuration[service])
 
