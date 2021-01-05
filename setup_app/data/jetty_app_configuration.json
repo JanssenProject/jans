@@ -2,7 +2,6 @@
   "jans-auth": {
     "memory": {
       "max_allowed_mb": 2048,
-      "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
       "ratio": 0.2
     },
@@ -12,74 +11,11 @@
     "installed": false,
     "name": "jans-auth"
   },
-  "identity": {
-    "memory": {
-      "max_allowed_mb": 2048,
-      "metaspace_mb": 128,
-      "jvm_heap_ration": 0.7,
-      "ratio": 0.2
-    },
-    "jetty": {
-      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
-    },
-    "installed": false,
-    "name": "identity"
-  },
-  "idp": {
-    "memory": {
-      "max_allowed_mb": 2048,
-      "metaspace_mb": 128,
-      "jvm_heap_ration": 0.7,
-      "ratio": 0.2
-    },
-    "jetty": {
-      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp"
-    },
-    "installed": false,
-    "name": "idp"
-  },
-  "jans-auth-rp": {
-    "memory": {
-      "max_allowed_mb": 384,
-      "metaspace_mb": 64,
-      "jvm_heap_ration": 0.85,
-      "ratio": 0.08
-    },
-    "jetty": {
-      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
-    },
-    "installed": false,
-    "name": "jans-auth-rp"
-  },
-  "passport": {
-    "node": {},
-    "memory": {
-      "max_allowed_mb": 1024,
-      "metaspace_mb": 128,
-      "ratio": 0.08
-    },
-    "installed": false,
-    "name": "passport"
-  },
-  "casa": {
-    "memory": {
-      "max_allowed_mb": 1024,
-      "metaspace_mb": 128,
-      "jvm_heap_ration": 0.7,
-      "ratio": 0.08
-    },
-    "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp"
-    },
-    "installed": false,
-    "name": "casa"
-  },
   "jans-fido2": {
     "memory": {
       "max_allowed_mb": 512,
-      "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.2
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
@@ -90,9 +26,8 @@
   "jans-scim": {
     "memory": {
       "max_allowed_mb": 1024,
-      "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.2
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -103,9 +38,20 @@
   "jans-eleven": {
     "memory": {
       "max_allowed_mb": 1024,
-      "metaspace_mb": 128,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.08
+      "ratio": 0.2
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-eleven"
+  },
+  "jans-config-api": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.2
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
