@@ -89,10 +89,6 @@ public class AuthUtil {
         return this.configurationFactory.getApiClientId();
     }
 
-    public String getClientPassword() {
-        return this.configurationFactory.getApiClientPassword();
-    }
-
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();
     }
@@ -137,9 +133,8 @@ public class AuthUtil {
         return encryptedPassword;
     }
 
-    public UmaResource getUmaResource(ResourceInfo resourceInfo, String method, String path) {
-        log.trace(" AuthUtil::getUmaResource() - resourceInfo = " + resourceInfo
-                + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
+    public UmaResource getUmaResource(String method, String path) {
+        log.trace(" AuthUtil::getUmaResource() method = "
                 + method + " , path = " + path + "\n");
 
         // Verify in cache
@@ -181,7 +176,18 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(String path) {
-        UmaResource resource = resourceProtectionCache.getUmaResource(path);
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - path = "+path+"\n\n\n");
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - UmaResourceProtectionCache.getAllUmaResources() = "+UmaResourceProtectionCache.getAllUmaResources()+"\n\n\n");
+        UmaResource resource = UmaResourceProtectionCache.getUmaResource(path);
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
+        return resource.getScopes();
+    }
+    
+    public List<String> getRequestedScopes(String method, String path) {
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - method = "+method+" , path = "+path+"\n\n\n");
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - UmaResourceProtectionCache.getAllUmaResources() = "+UmaResourceProtectionCache.getAllUmaResources()+"\n\n\n");
+        UmaResource resource = this.getUmaResource(method,path);
+        System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
         return resource.getScopes();
     }
 
@@ -215,13 +221,13 @@ public class AuthUtil {
 
     public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
             throws Exception {
-        log.debug("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
+        System.out.println("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
                 + "\n");
 
         // Get clientSecret
-        String clientSecret = this.getClientPassword(clientId);
-        clientSecret = this.getClientPassword();
-
+        //String clientSecret = this.getClientPassword(clientId);
+        String clientSecret = this.getClientDecryptPassword(clientId);
+        System.out.println("RequestAccessToken() - clientSecret = " + clientSecret);
         // distinct scopes
         Set<String> scopesSet = new HashSet<String>(scopes);
 
@@ -231,10 +237,11 @@ public class AuthUtil {
                 scope = scope + " " + s;
             }
         }
-
+        System.out.println("\n\n\n RequestAccessToken() - scope = "+scope);
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
+            System.out.println(" tokenScope: {} = "+tokenResponse.getScope());
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {
@@ -246,7 +253,7 @@ public class AuthUtil {
 
     public Token requestPat(final String tokenUrl, final String clientId, final ScopeType scopeType,
             final List<String> scopes) throws Exception {
-        return request(tokenUrl, clientId, this.getClientPassword(), scopeType, scopes);
+        return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopeType, scopes);
     }
 
     public Token request(final String tokenUrl, final String clientId, final String clientSecret, ScopeType scopeType,
@@ -305,7 +312,7 @@ public class AuthUtil {
         TokenResponse tokenResponse = null;
         try {
 
-            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId, this.getClientPassword(), scopes,
+            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId, this.getClientDecryptPassword(clientId), scopes,
                     permissionTicket.getTicket(), GrantType.OXAUTH_UMA_TICKET,
                     AuthenticationMethod.CLIENT_SECRET_BASIC);
 

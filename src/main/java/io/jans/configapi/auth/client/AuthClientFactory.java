@@ -113,14 +113,17 @@ public class AuthClientFactory {
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
                    
-        
+        System.out.println("\n\n\n AuthClientFactory:::requestAccessToken() - "
+                +" tokenUrl = "+tokenUrl
+                +", clientId = "+clientId
+                +", clientSecret = "+clientSecret
+                +", scope = "+scope);
         Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope(scope);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        
-        
+                
         final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
         request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
         
@@ -138,9 +141,11 @@ public class AuthClientFactory {
         
        // Response response = request
          //       .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        System.out.println("\n\n\n AuthClientFactory:::requestAccessToken() - multivaluedHashMap = "+multivaluedHashMap);
         Response response = request.post(Entity.form(multivaluedHashMap));
                 
         if (response.getStatus() == 200) {
+            System.out.println("\n\n\n AuthClientFactory:::requestAccessToken() - response.getStatus() 200 ");
             String entity = response.readEntity(String.class);
             
             TokenResponse tokenResponse = new TokenResponse();
@@ -149,6 +154,7 @@ public class AuthClientFactory {
             
             return tokenResponse;
         }
+        System.out.println("\n\n\n AuthClientFactory:::requestAccessToken() - response.getStatus() is not 200 ");
         return null;
 
     }
