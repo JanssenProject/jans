@@ -65,7 +65,7 @@ parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
-parser.add_argument("--endpoint-args", help="Arguments to pass endpoint seperated by comma. For example limit:5,status:INACTIVE")
+parser.add_argument("--endpoint-args", help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
 parser.add_argument("--schema", help="Get sample json schema")
 #parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -293,7 +293,7 @@ class JCA_CLI:
         type_text = ''
         if itype:
             if itype == 'array':
-                type_text = "Type: array of {} seperated by _,".format(sitype)
+                type_text = "Type: array of {} separated by _,".format(sitype)
                 if values:
                     type_text += ' Valid values: {}'.format(', '.join(values))
             elif itype == 'boolean':
@@ -385,7 +385,7 @@ class JCA_CLI:
                         if values:
                             if not selection[i] in values:
                                 data_ok = False
-                                print(' '*spacing, self.colored_text("Please enter array of {} seperated by _,".format(', '.join(values)), warning_color), sep='')
+                                print(' '*spacing, self.colored_text("Please enter array of {} separated by _,".format(', '.join(values)), warning_color), sep='')
                                 break
                     except TypeError as e:
                         print(' '*spacing, e, sep='')
