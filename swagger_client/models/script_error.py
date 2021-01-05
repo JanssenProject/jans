@@ -28,7 +28,7 @@ class ScriptError(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'raised_at': 'date',
+        'raised_at': 'datetime',
         'stack_trace': 'str'
     }
 
@@ -53,7 +53,7 @@ class ScriptError(object):
 
 
         :return: The raised_at of this ScriptError.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._raised_at
 
@@ -63,7 +63,7 @@ class ScriptError(object):
 
 
         :param raised_at: The raised_at of this ScriptError.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._raised_at = raised_at

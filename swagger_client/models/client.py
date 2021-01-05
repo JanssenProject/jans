@@ -34,8 +34,8 @@ class Client(object):
         'front_channel_logout_uri': 'str',
         'front_channel_logout_session_required': 'bool',
         'registration_access_token': 'str',
-        'client_id_issued_at': 'date',
-        'client_secret_expires_at': 'date',
+        'client_id_issued_at': 'datetime',
+        'client_secret_expires_at': 'datetime',
         'redirect_uris': 'list[str]',
         'claim_redirect_uris': 'list[str]',
         'response_types': 'list[str]',
@@ -72,8 +72,8 @@ class Client(object):
         'scopes': 'list[str]',
         'claims': 'list[str]',
         'trusted_client': 'bool',
-        'last_access_time': 'date',
-        'last_logon_time': 'date',
+        'last_access_time': 'datetime',
+        'last_logon_time': 'datetime',
         'persist_client_authorizations': 'bool',
         'include_claims_in_id_token': 'bool',
         'refresh_token_lifetime': 'int',
@@ -509,7 +509,7 @@ class Client(object):
 
 
         :return: The client_id_issued_at of this Client.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._client_id_issued_at
 
@@ -519,7 +519,7 @@ class Client(object):
 
 
         :param client_id_issued_at: The client_id_issued_at of this Client.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._client_id_issued_at = client_id_issued_at
@@ -530,7 +530,7 @@ class Client(object):
 
 
         :return: The client_secret_expires_at of this Client.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._client_secret_expires_at
 
@@ -540,7 +540,7 @@ class Client(object):
 
 
         :param client_secret_expires_at: The client_secret_expires_at of this Client.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._client_secret_expires_at = client_secret_expires_at
@@ -1480,7 +1480,7 @@ class Client(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.  # noqa: E501
 
         :return: The last_access_time of this Client.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._last_access_time
 
@@ -1491,7 +1491,7 @@ class Client(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.  # noqa: E501
 
         :param last_access_time: The last_access_time of this Client.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._last_access_time = last_access_time
@@ -1503,7 +1503,7 @@ class Client(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.  # noqa: E501
 
         :return: The last_logon_time of this Client.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._last_logon_time
 
@@ -1514,7 +1514,7 @@ class Client(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.  # noqa: E501
 
         :param last_logon_time: The last_logon_time of this Client.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._last_logon_time = last_logon_time

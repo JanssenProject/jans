@@ -41,8 +41,8 @@ class UmaResource(object):
         'creator': 'str',
         'description': 'str',
         'type': 'str',
-        'creation_date': 'date',
-        'expiration_date': 'date',
+        'creation_date': 'datetime',
+        'expiration_date': 'datetime',
         'deletable': 'bool'
     }
 
@@ -421,7 +421,7 @@ class UmaResource(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will created.  # noqa: E501
 
         :return: The creation_date of this UmaResource.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._creation_date
 
@@ -432,7 +432,7 @@ class UmaResource(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will created.  # noqa: E501
 
         :param creation_date: The creation_date of this UmaResource.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._creation_date = creation_date
@@ -444,7 +444,7 @@ class UmaResource(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire.  # noqa: E501
 
         :return: The expiration_date of this UmaResource.  # noqa: E501
-        :rtype: date
+        :rtype: datetime
         """
         return self._expiration_date
 
@@ -455,7 +455,7 @@ class UmaResource(object):
         Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire.  # noqa: E501
 
         :param expiration_date: The expiration_date of this UmaResource.  # noqa: E501
-        :type: date
+        :type: datetime
         """
 
         self._expiration_date = expiration_date
