@@ -11,8 +11,9 @@ import configparser
 import argparse
 import inspect
 import random
-
+import datetime
 import ruamel.yaml
+
 from pprint import pprint
 from functools import partial
 from urllib.parse import urljoin, urlencode
@@ -540,6 +541,9 @@ class JCA_CLI:
         for key_ in model.attribute_map:
             
             val = getattr(model, key_)
+            if isinstance(val, datetime.date):
+                val = str(val)
+
             if isinstance(val, list):
                 sub_list = []
                 for entry in val:
@@ -1116,6 +1120,7 @@ class JCA_CLI:
         else:
             data_dict = self.unmap_model(api_response)
             api_response_unmapped = data_dict
+
 
         print(json.dumps(api_response_unmapped, indent=2))
 
