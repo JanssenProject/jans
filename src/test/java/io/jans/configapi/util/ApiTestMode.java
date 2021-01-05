@@ -78,28 +78,42 @@ public class ApiTestMode {
 
     @Inject
     ClientService clientService;
-    
-    private static String testClientId;
-    
+
+    private static String testClientId = "1800.9test";
+
+    public String getTestClientId() {
+        return testClientId;
+    }
 
     public Client init() {
-            return createTestClient();
+        return createTestClient();
     }
 
-    public String getApiProtectionType() {
-        return this.configurationFactory.getApiProtectionType();
+    public static String getApiProtectionType() {
+        return ConfigurationFactory.getApiProtectionType();
     }
 
-    public String createTestToken(String clientId, ResourceInfo resourceInfo, String method, String path) throws Exception {
-        log.trace(" Creating Test Token, clientId: {}, resourceInfo: {}, method: {}, path: {} ", clientId,resourceInfo, method, path);
+    public String createTestToken(String method , String path)
+            throws Exception {
+        System.out.println("\n\n\n *******************  ApiTestMode:::createTestToken() - Entry - method = "+method+" ,path = "+path+" ******************* ");
+        //log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
+        Preconditions.checkNotNull(method, "Method cannot be null !!!");
+        Preconditions.checkNotNull(path, "Path cannot be null !!!");
+        
+                
         Token token = null;
-
+        String clientId = this.getTestClientId();
+        System.out.println("\n\n\n ApiTestMode:::createTestToken() - clientId = "+clientId+"\n\n\n");
+        Client client = this.clientService.getClientByInum(clientId);
+        System.out.println("\n\n\n ApiTestMode:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
         // Get all scopes
-        List<String> scopes = this.authUtil.getRequestedScopes(resourceInfo);
-        if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(this.getApiProtectionType())) {
+        List<String> scopes = this.authUtil.getRequestedScopes(method,path);
+        System.out.println("\n\n\n ApiTestMode:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(getApiProtectionType())) {
             token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
         } else {
-            token = registerRptTicket(clientId,resourceInfo, method, path, scopes);
+            //scopes = this.authUtil.getRequestedScopes(resourceInfo);
+            //token = registerRptTicket(clientId, resourceInfo, method, path, scopes);
         }
         log.trace("Generated token: {} ", token);
 
@@ -109,22 +123,20 @@ public class ApiTestMode {
         return null;
     }
 
-    private Token registerRptTicket(String clientId, ResourceInfo resourceInfo, String method, String path, List<String> scopes)
-            throws Exception {
-        log.trace(" Register Rpt Ticket, clientId:{}, resourceInfo: {}, method: {}, path: {}, scopes: {}", clientId, resourceInfo, method,
-                path, scopes);
+    private Token registerRptTicket(String clientId, ResourceInfo resourceInfo, String method, String path,
+            List<String> scopes) throws Exception {
+        log.trace(" Register Rpt Ticket, clientId:{}, resourceInfo: {}, method: {}, path: {}, scopes: {}", clientId,
+                resourceInfo, method, path, scopes);
 
         // Get Pat
-        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), clientId, ScopeType.UMA,
-                scopes);
+        Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), clientId, ScopeType.UMA, scopes);
         log.trace(" Rpt patToken: {}", patToken);
 
-        UmaResource umaResource = this.authUtil.getUmaResource(resourceInfo, method, path);
+        UmaResource umaResource = this.authUtil.getUmaResource(method, path);
         if (patToken != null && umaResource != null) {
 
             // Register RPT token
-            TokenResponse tokenResponse = this.authUtil.requestRpt(clientId, umaResource.getId(), scopes,
-                    patToken);
+            TokenResponse tokenResponse = this.authUtil.requestRpt(clientId, umaResource.getId(), scopes, patToken);
             log.debug("tokenResponse = " + tokenResponse + "\n");
 
             if (tokenResponse != null) {
@@ -138,35 +150,43 @@ public class ApiTestMode {
         return null;
     }
 
-    private Client createTestClient()  {
+    private Client createTestClient() {
         // Create test client
-        //String clientPassword = "test1234";
-        String clientPassword = RandomStringUtils.randomAlphanumeric(8);
-        Client client = new Client();
-        client.setClientSecret(authUtil.encryptPassword(clientPassword));
-        client.setApplicationType(ApplicationType.NATIVE);
-        client.setClientName("Test_Client_1");
-        client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN,
-                GrantType.CLIENT_CREDENTIALS, GrantType.OXAUTH_UMA_TICKET });
-        client.setScopes(this.getAllScopeArray());
-        client.setResponseTypes(new ResponseType[] { ResponseType.CODE });
-        client.setSubjectType(SubjectType.PAIRWISE);
-        client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-
-        String inum = clientService.generateInumForNewClient();
-        client.setClientId(inum);
-        client.setDn(clientService.getDnForClient(inum));
-        clientService.addClient(client);
-       
-        Client result = clientService.getClientByInum(inum);
-        testClientId = result.getClientId();
-        return result;
+        // String inum = clientService.generateInumForNewClient();
+        String inum = testClientId;
+        Client client = clientService.getClientByInum(inum);
+        System.out.println("\n\n\n\n :::createTestClient() - client_1 = "+client+"\n\n\n");
+        if(client==null) {
+            
+            String clientPassword = RandomStringUtils.randomAlphanumeric(8);
+            client = new Client();
+            client.setClientSecret(authUtil.encryptPassword(clientPassword));
+            client.setApplicationType(ApplicationType.NATIVE);
+            client.setClientName("Test_Client_1");
+            client.setGrantTypes(new GrantType[] { GrantType.AUTHORIZATION_CODE, GrantType.REFRESH_TOKEN,
+                    GrantType.CLIENT_CREDENTIALS, GrantType.OXAUTH_UMA_TICKET });
+            client.setScopes(this.getAllScopeArray());
+            client.setResponseTypes(new ResponseType[] { ResponseType.CODE });
+            client.setSubjectType(SubjectType.PAIRWISE);
+            client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+    
+           
+           
+            client.setClientId(inum);
+            client.setDn(clientService.getDnForClient(inum));
+            clientService.addClient(client);
+        }
+        
+        client = clientService.getClientByInum(inum);
+        System.out.println("\n\n\n\n :::createTestClient() - client_2 = "+client+"\n\n\n");
+        testClientId = client.getClientId();
+        return client;
     }
 
     public void deleteTestClient(String clientId) {
-        System.out.println("\n\n ApiTestMode:::deleteTestClient() - clientId = "+clientId+"\n\n");
-        Client client = this.clientService.getClientByInum(clientId);
-        System.out.println("Client to delete " + client.getClientId()+"\n\n");
+        System.out.println("\n\n ApiTestMode:::deleteTestClient() - clientId = " + clientId + "\n\n");
+        Client client = clientService.getClientByInum(clientId);
+        System.out.println("Client to delete " + client.getClientId() + "\n\n");
         if (client != null) {
             this.clientService.removeClient(client);
         }
