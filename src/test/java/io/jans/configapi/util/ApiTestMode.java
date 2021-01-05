@@ -95,7 +95,7 @@ public class ApiTestMode {
 
     public String createTestToken(String method , String path)
             throws Exception {
-        System.out.println("\n\n\n *******************  ApiTestMode:::createTestToken() - Entry - method = "+method+" ,path = "+path+" ******************* ");
+        log.trace("\n\n\n *******************  ApiTestMode:::createTestToken() - Entry - method = "+method+" ,path = "+path+" ******************* ");
         //log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
         Preconditions.checkNotNull(method, "Method cannot be null !!!");
         Preconditions.checkNotNull(path, "Path cannot be null !!!");
@@ -104,10 +104,10 @@ public class ApiTestMode {
         Token token = null;
         String clientId = this.getTestClientId();
         Client client = this.clientService.getClientByInum(clientId);
-        System.out.println("\n\n\n ApiTestMode:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
+        log.trace("\n\n\n ApiTestMode:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
         // Get all scopes
         List<String> scopes = this.authUtil.getRequestedScopes(method,path);
-        System.out.println("\n\n\n ApiTestMode:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        log.trace("\n\n\n ApiTestMode:::createTestToken() - scopes = "+scopes+"\n\n\n");
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(getApiProtectionType())) {
             token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
         } else {
@@ -150,11 +150,10 @@ public class ApiTestMode {
     }
 
     private Client createTestClient() {
-        // Create test client
-        // String inum = clientService.generateInumForNewClient();
+        
         String inum = testClientId;
         Client client = clientService.getClientByInum(inum);
-        System.out.println("\n\n\n\n :::createTestClient() - client_1 = "+client+"\n\n\n");
+        log.trace("\n\n\n\n :::createTestClient() - client_1 = "+client+"\n\n\n");
         if(client==null) {
             
             String clientPassword = RandomStringUtils.randomAlphanumeric(8);
@@ -177,15 +176,16 @@ public class ApiTestMode {
         }
         
         client = clientService.getClientByInum(inum);
-        System.out.println("\n\n\n\n :::createTestClient() - client_2 = "+client+"\n\n\n");
+        log.trace("\n\n\n\n :::createTestClient() - client_2 = "+client+"\n\n\n");
         testClientId = client.getClientId();
         return client;
     }
 
-    public void deleteTestClient(String clientId) {
-        System.out.println("\n\n ApiTestMode:::deleteTestClient() - clientId = " + clientId + "\n\n");
+    public void deleteTestClient() {
+        String clientId = this.getTestClientId();
+        log.trace("\n\n ApiTestMode:::deleteTestClient() - clientId = " + clientId + "\n\n");
         Client client = clientService.getClientByInum(clientId);
-        System.out.println("Client to delete " + client.getClientId() + "\n\n");
+        log.trace("Client to delete " + client.getClientId() + "\n\n");
         if (client != null) {
             this.clientService.removeClient(client);
         }

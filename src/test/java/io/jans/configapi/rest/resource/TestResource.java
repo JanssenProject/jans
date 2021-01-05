@@ -19,8 +19,8 @@ import javax.validation.Valid;
 import javax.ws.rs.QueryParam;
 
 
-@Path("/test" + "/token")
-public class TestTokenResource extends BaseResource {
+@Path("/test")
+public class TestResource extends BaseResource {
     
     @Inject
     Logger log;
@@ -31,10 +31,12 @@ public class TestTokenResource extends BaseResource {
     
     @GET
     public String createTestToken(@QueryParam("method") String method, @QueryParam("path") String path) throws Exception {
-        System.out.println("\n\n\n ************* TestTokenResource:::createTestToken() - Entry - method = "+method+" ,path = "+path+"************* ");
-        String token = this.apiTestMode.createTestToken(method,path);
-        System.out.println("\n\n\n ************* TestTokenResource:::createTestToken() - token ="+token+"************* ");
-        return token;
-        
+       String token = this.apiTestMode.createTestToken(method,path);
+       return token;        
+    }
+    
+    @DELETE
+    public void deleteTestClient() throws Exception {
+       this.apiTestMode.deleteTestClient();
     }
 }

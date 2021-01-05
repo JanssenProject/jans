@@ -16,7 +16,7 @@ function() {
     var baseUrl = url + (port ? ':' + port : '');
     var config = {
         env: env,
-        test_url: baseUrl + '/jans-config-api/api/v1/test/token',
+        test_url: baseUrl + '/jans-config-api/api/v1/test',
         accessToken: '7672df72-1f81-4430-8716-2780062f8058',
         baseUrl: baseUrl,
         healthUrl: baseUrl + '/health',
