@@ -2,7 +2,7 @@ package io.jans.configapi.rest.resource;
 
 import com.couchbase.client.core.message.ResponseStatus;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.configapi.util.ApiTestMode;
+import io.jans.configapi.util.TestUtil;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.ConfigurationService;
@@ -26,17 +26,17 @@ public class TestResource extends BaseResource {
     Logger log;
 
     @Inject
-    ApiTestMode apiTestMode;
+    TestUtil testUtil;
     
     
     @GET
     public String createTestToken(@QueryParam("method") String method, @QueryParam("path") String path) throws Exception {
-       String token = this.apiTestMode.createTestToken(method,path);
+       String token = this.testUtil.createTestToken(method,path);
        return token;        
     }
     
     @DELETE
     public void deleteTestClient() throws Exception {
-       this.apiTestMode.deleteTestClient();
+       this.testUtil.deleteTestClient();
     }
 }

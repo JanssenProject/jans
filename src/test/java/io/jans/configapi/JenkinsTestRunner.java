@@ -8,10 +8,14 @@ package io.jans.configapi;
 
 import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
+
+import io.jans.as.common.model.registration.Client;
+import io.jans.configapi.util.TestUtil;
 import net.masterthought.cucumber.Configuration;
 import net.masterthought.cucumber.ReportBuilder;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -19,10 +23,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class JenkinsTestRunner {
+    
+    @Inject
+    TestUtil testUtil;
+    
+    @BeforeAll
+    public void createTestClient() {       
+        Client client = testUtil.init();
+    }
 
     @Test
     public void testParallel() {
