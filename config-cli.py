@@ -461,6 +461,10 @@ class JCA_CLI:
         return param
 
 
+    def make_swagger_var(self, varname):
+        word_list = re.sub( r'([A-Z])', r' \1', varname).lower().split()
+        return '_'.join(word_list)
+
     def obtain_parameters(self, endpoint):
         parameters = {}
 
@@ -469,17 +473,19 @@ class JCA_CLI:
             endpoint_parameters = endpoint.info['parameters']
         
         end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param:
+        if end_point_param and not end_point_param in endpoint_parameters:
             endpoint_parameters.insert(0, end_point_param)
 
         for param in endpoint_parameters:
-            text_ = param['name'] or param.get('description') or param.get('summary')
-            parameters[param['name']] = self.get_input(
-                        text=text_.strip('.'), 
-                        itype=param['schema']['type'],
-                        default = param['schema'].get('default'),
-                        enforce=False
-                        )
+            param_name = self.make_swagger_var(param['name'])
+            if not param_name in parameters:
+                text_ = param['name'] or param.get('description') or param.get('summary')
+                parameters[param_name] = self.get_input(
+                            text=text_.strip('.'), 
+                            itype=param['schema']['type'],
+                            default = param['schema'].get('default'),
+                            enforce=False
+                            )
 
         return parameters
 
