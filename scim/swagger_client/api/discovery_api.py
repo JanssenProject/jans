@@ -32,13 +32,13 @@ class DiscoveryApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def resource_types_get(self, **kwargs):  # noqa: E501
-        """resource_types_get  # noqa: E501
+    def get_resources(self, **kwargs):  # noqa: E501
+        """get_resources  # noqa: E501
 
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.resource_types_get(async_req=True)
+        >>> thread = api.get_resources(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -48,18 +48,18 @@ class DiscoveryApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.resource_types_get_with_http_info(**kwargs)  # noqa: E501
+            return self.get_resources_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.resource_types_get_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.get_resources_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def resource_types_get_with_http_info(self, **kwargs):  # noqa: E501
-        """resource_types_get  # noqa: E501
+    def get_resources_with_http_info(self, **kwargs):  # noqa: E501
+        """get_resources  # noqa: E501
 
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.resource_types_get_with_http_info(async_req=True)
+        >>> thread = api.get_resources_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -79,7 +79,7 @@ class DiscoveryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method resource_types_get" % key
+                    " to method get_resources" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -104,7 +104,7 @@ class DiscoveryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/ResourceTypes', 'GET',
+            '/jans-scim/restv1/v2/ResourceTypes', 'GET',
             path_params,
             query_params,
             header_params,
@@ -119,13 +119,13 @@ class DiscoveryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def resource_types_resource_get(self, resource, **kwargs):  # noqa: E501
-        """resource_types_resource_get  # noqa: E501
+    def get_resources_by_resource(self, resource, **kwargs):  # noqa: E501
+        """get_resources_by_resource  # noqa: E501
 
         Describes the endpoint, schemas and extensions supported by a specific kind of resource. It returns a specific portion of the ouput of the more general /Resources endpoint     # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.resource_types_resource_get(resource, async_req=True)
+        >>> thread = api.get_resources_by_resource(resource, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -136,18 +136,18 @@ class DiscoveryApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.resource_types_resource_get_with_http_info(resource, **kwargs)  # noqa: E501
+            return self.get_resources_by_resource_with_http_info(resource, **kwargs)  # noqa: E501
         else:
-            (data) = self.resource_types_resource_get_with_http_info(resource, **kwargs)  # noqa: E501
+            (data) = self.get_resources_by_resource_with_http_info(resource, **kwargs)  # noqa: E501
             return data
 
-    def resource_types_resource_get_with_http_info(self, resource, **kwargs):  # noqa: E501
-        """resource_types_resource_get  # noqa: E501
+    def get_resources_by_resource_with_http_info(self, resource, **kwargs):  # noqa: E501
+        """get_resources_by_resource  # noqa: E501
 
         Describes the endpoint, schemas and extensions supported by a specific kind of resource. It returns a specific portion of the ouput of the more general /Resources endpoint     # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.resource_types_resource_get_with_http_info(resource, async_req=True)
+        >>> thread = api.get_resources_by_resource_with_http_info(resource, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -168,14 +168,14 @@ class DiscoveryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method resource_types_resource_get" % key
+                    " to method get_resources_by_resource" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'resource' is set
         if ('resource' not in params or
                 params['resource'] is None):
-            raise ValueError("Missing the required parameter `resource` when calling `resource_types_resource_get`")  # noqa: E501
+            raise ValueError("Missing the required parameter `resource` when calling `get_resources_by_resource`")  # noqa: E501
 
         collection_formats = {}
 
@@ -199,7 +199,7 @@ class DiscoveryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/ResourceTypes/{resource}', 'GET',
+            '/jans-scim/restv1/v2/ResourceTypes/{resource}', 'GET',
             path_params,
             query_params,
             header_params,
@@ -214,100 +214,13 @@ class DiscoveryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def schemas_get(self, **kwargs):  # noqa: E501
-        """schemas_get  # noqa: E501
-
-        Endpoint used to retrieve information about schemas supported (see section  4 of RFC 7644)   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.schemas_get(async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :return: SchemaListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.schemas_get_with_http_info(**kwargs)  # noqa: E501
-        else:
-            (data) = self.schemas_get_with_http_info(**kwargs)  # noqa: E501
-            return data
-
-    def schemas_get_with_http_info(self, **kwargs):  # noqa: E501
-        """schemas_get  # noqa: E501
-
-        Endpoint used to retrieve information about schemas supported (see section  4 of RFC 7644)   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.schemas_get_with_http_info(async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :return: SchemaListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = []  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method schemas_get" % key
-                )
-            params[key] = val
-        del params['kwargs']
-
-        collection_formats = {}
-
-        path_params = {}
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = []  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Schemas', 'GET',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='SchemaListResponse',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def schemas_uri_get(self, uri, **kwargs):  # noqa: E501
-        """schemas_uri_get  # noqa: E501
+    def get_schema_by_uri(self, uri, **kwargs):  # noqa: E501
+        """get_schema_by_uri  # noqa: E501
 
         Retrieves information about a specific resource  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.schemas_uri_get(uri, async_req=True)
+        >>> thread = api.get_schema_by_uri(uri, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -318,18 +231,18 @@ class DiscoveryApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.schemas_uri_get_with_http_info(uri, **kwargs)  # noqa: E501
+            return self.get_schema_by_uri_with_http_info(uri, **kwargs)  # noqa: E501
         else:
-            (data) = self.schemas_uri_get_with_http_info(uri, **kwargs)  # noqa: E501
+            (data) = self.get_schema_by_uri_with_http_info(uri, **kwargs)  # noqa: E501
             return data
 
-    def schemas_uri_get_with_http_info(self, uri, **kwargs):  # noqa: E501
-        """schemas_uri_get  # noqa: E501
+    def get_schema_by_uri_with_http_info(self, uri, **kwargs):  # noqa: E501
+        """get_schema_by_uri  # noqa: E501
 
         Retrieves information about a specific resource  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.schemas_uri_get_with_http_info(uri, async_req=True)
+        >>> thread = api.get_schema_by_uri_with_http_info(uri, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -350,14 +263,14 @@ class DiscoveryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method schemas_uri_get" % key
+                    " to method get_schema_by_uri" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'uri' is set
         if ('uri' not in params or
                 params['uri'] is None):
-            raise ValueError("Missing the required parameter `uri` when calling `schemas_uri_get`")  # noqa: E501
+            raise ValueError("Missing the required parameter `uri` when calling `get_schema_by_uri`")  # noqa: E501
 
         collection_formats = {}
 
@@ -381,7 +294,7 @@ class DiscoveryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/Schemas/{uri}', 'GET',
+            '/jans-scim/restv1/v2/Schemas/{uri}', 'GET',
             path_params,
             query_params,
             header_params,
@@ -396,38 +309,38 @@ class DiscoveryApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def service_provider_config_get(self, **kwargs):  # noqa: E501
-        """service_provider_config_get  # noqa: E501
+    def get_schemas(self, **kwargs):  # noqa: E501
+        """get_schemas  # noqa: E501
 
-        Describes the SCIM specification features available (see section 5 of RFC 7644)  # noqa: E501
+        Endpoint used to retrieve information about schemas supported (see section  4 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.service_provider_config_get(async_req=True)
+        >>> thread = api.get_schemas(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: ServiceProviderConfigResponse
+        :return: SchemaListResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.service_provider_config_get_with_http_info(**kwargs)  # noqa: E501
+            return self.get_schemas_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.service_provider_config_get_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.get_schemas_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def service_provider_config_get_with_http_info(self, **kwargs):  # noqa: E501
-        """service_provider_config_get  # noqa: E501
+    def get_schemas_with_http_info(self, **kwargs):  # noqa: E501
+        """get_schemas  # noqa: E501
 
-        Describes the SCIM specification features available (see section 5 of RFC 7644)  # noqa: E501
+        Endpoint used to retrieve information about schemas supported (see section  4 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.service_provider_config_get_with_http_info(async_req=True)
+        >>> thread = api.get_schemas_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: ServiceProviderConfigResponse
+        :return: SchemaListResponse
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -443,7 +356,7 @@ class DiscoveryApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method service_provider_config_get" % key
+                    " to method get_schemas" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -468,7 +381,94 @@ class DiscoveryApi(object):
         auth_settings = []  # noqa: E501
 
         return self.api_client.call_api(
-            '/ServiceProviderConfig', 'GET',
+            '/jans-scim/restv1/v2/Schemas', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='SchemaListResponse',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_service_provider_config(self, **kwargs):  # noqa: E501
+        """get_service_provider_config  # noqa: E501
+
+        Describes the SCIM specification features available (see section 5 of RFC 7644)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_service_provider_config(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: ServiceProviderConfigResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_service_provider_config_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.get_service_provider_config_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def get_service_provider_config_with_http_info(self, **kwargs):  # noqa: E501
+        """get_service_provider_config  # noqa: E501
+
+        Describes the SCIM specification features available (see section 5 of RFC 7644)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_service_provider_config_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: ServiceProviderConfigResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = []  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_service_provider_config" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/ServiceProviderConfig', 'GET',
             path_params,
             query_params,
             header_params,

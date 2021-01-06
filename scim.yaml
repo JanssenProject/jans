@@ -5,20 +5,29 @@ info:
     Gluu SCIM 2.0 server API. Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality
     (create, update, retrieve and delete) for identity management resources such as users, groups, and fido devices.
   license:
-    name: Apache 2
-    url: https://github.com/GluuFederation/scim/blob/master/LICENSE
+    name: License
+    url: 'https://github.com/JanssenProject/blob/master/LICENSE'
   version: 4.2.2
 servers:
-- url: https://c1.gluu.org/jans-scim/restv1/scim/v2/
+- url: https://jans.io/
 tags:
-- name: user
+- name: User
   description: Endpoints for management of the User resource
-- name: group
+- name: Group
   description: Endpoints for management of the Group resource
-- name: discovery
+- name: Discovery
   description: Endpoints to facilitate discovery of SCIM service provider features
+- name: Fido Devices
+  description: Endpoints to manage fido devices
+- name: Fido2 Devices
+  description: Endpoints to manage fido2 devices
+- name: Search
+  description: Search (from system root) for one or more resource
+- name: Bulk
+  description: Send several resource operations in a single request
+
 paths:
-  /Groups:
+  /jans-scim/restv1/v2/Groups:
     get:
       tags:
       - group
@@ -92,6 +101,7 @@ paths:
       - group
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
+      operationId: post-group
       security:
         - testmode: []
       parameters:
@@ -154,11 +164,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: group
-  /Groups/{id}:
+  /jans-scim/restv1/v2/Groups/{id}:
     get:
       tags:
       - group
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
+      operationId: get-group-by-id
       security:
         - testmode: []
       parameters:
@@ -212,6 +223,7 @@ paths:
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
+      operationId: put-group-by-id
       security:
         - testmode: []
       parameters:
@@ -294,6 +306,7 @@ paths:
       tags:
       - group
       description: Deletes a group resource (see section 3.6 of RFC 7644)
+      operationId: delete-group-by-id
       security:
         - testmode: []
       parameters:
@@ -331,6 +344,7 @@ paths:
       description: "Updates one or more attributes of a Group resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
+      operationId: patch-group-by-id
       security:
         - testmode: []
       parameters:
@@ -391,11 +405,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /Groups/.search:
+  /jans-scim/restv1/v2/Groups/.search:
     post:
       tags:
       - group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
+      operationId: query-groups
       security:
         - testmode: []
       requestBody:
@@ -439,9 +454,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /FidoDevices:
+  /jans-scim/restv1/v2/FidoDevices:
     get:
       description: Query Fido resources
+      operationId: get-fido-devices
       security:
         - testmode: []
       parameters:
@@ -520,9 +536,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/{id}:
+  /jans-scim/restv1/v2/FidoDevices/{id}:
     get:
       description: Retrieves a U2F/Super Gluu device by Id
+      operationId: get-fido-device-by-id
       security:
         - testmode: []
       parameters:
@@ -574,6 +591,7 @@ paths:
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
+      operationId: put-fido-device-by-id
       security:
         - testmode: []
       parameters:
@@ -644,6 +662,7 @@ paths:
       x-codegen-request-body-name: fidoDeviceResource
     delete:
       description: Deletes a Fido resource
+      operationId: delete-fido-device-by-id
       security:
         - testmode: []
       parameters:
@@ -675,9 +694,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/.search:
+  /jans-scim/restv1/v2/FidoDevices/.search:
     post:
       description: Query Fido resources
+      operationId: query-fido-resources
       security:
         - testmode: []
       parameters:
@@ -737,9 +757,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /Fido2Devices:
+  /jans-scim/restv1/v2/Fido2Devices:
     get:
       description: Query Fido 2 resources
+      operationId: query-fido2-resources
       security:
         - testmode: []
       parameters:
@@ -818,9 +839,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Fido2Devices/{id}:
+  /jans-scim/restv1/v2/Fido2Devices/{id}:
     get:
       description: Retrieves a Fido 2 device by Id
+      operationId: get-fido2-device-by-id
       security:
         - testmode: []
       parameters:
@@ -872,6 +894,7 @@ paths:
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
+      operationId: put-fido2-device-by-id
       security:
         - testmode: []
       parameters:
@@ -942,6 +965,7 @@ paths:
       x-codegen-request-body-name: fidoDeviceResource
     delete:
       description: Deletes a Fido 2 resource
+      operationId: delete-fido2-device-by-id
       security:
         - testmode: []
       parameters:
@@ -973,9 +997,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Fido2Devices/.search:
+  /jans-scim/restv1/v2/Fido2Devices/.search:
     post:
       description: Query Fido 2 resources
+      operationId: query-fido2-devices
       security:
         - testmode: []
       parameters:
@@ -1038,7 +1063,7 @@ paths:
   /jans-scim/restv1/v2/Users:
     get:
       tags:
-      - user
+      - User
       description: Query User resources (see section 3.4.2 of RFC 7644)
       operationId: get-users
       security:
@@ -1106,9 +1131,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-      - user
+      - User
       description: Allows creating a User resource via POST (see section 3.3 of RFC
         7644)
+      operationId: post-user
       security:
         - testmode: []
       parameters:
@@ -1171,11 +1197,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: user
-  /Users/{id}:
+  /jans-scim/restv1/v2/Users/{id}:
     get:
       tags:
-      - user
+      - User
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+      operationId: get-user-by-id
       security:
         - testmode: []
       parameters:
@@ -1224,11 +1251,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - user
+      - User
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
+      operationId: put-user-by-id
       security:
         - testmode: []
       parameters:
@@ -1309,8 +1337,9 @@ paths:
       x-codegen-request-body-name: user
     delete:
       tags:
-      - user
+      - User
       description: Deletes a user resource
+      operationId: delete-user-by-id
       security:
         - testmode: []
       parameters:
@@ -1344,10 +1373,11 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - user
+      - User
       description: "Updates one or more attributes of a User resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
+      operationId: patch-user-by-id
       security:
         - testmode: []
       parameters:
@@ -1408,11 +1438,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /Users/.search:
+  /jans-scim/restv1/v2/Users/.search:
     post:
       tags:
-      - user
+      - User
       description: Query User resources (see section 3.4.2 of RFC 7644)
+      operationId: query-user
       security:
         - testmode: []
       requestBody:
@@ -1456,10 +1487,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /.search:
+  /jans-scim/restv1/v2/.search:
     post:
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
+      operationId: query-resource
       security:
         - testmode: []
       requestBody:
@@ -1503,10 +1535,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /Bulk:
+  /jans-scim/restv1/v2/Bulk:
     post:
       description: Send several resource operations in a single request (see section
         3.7 of RFC 7644)
+      operationId: post-bulk
       security:
         - testmode: []
       requestBody:
@@ -1541,12 +1574,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /ServiceProviderConfig:
+  /jans-scim/restv1/v2/ServiceProviderConfig:
     get:
       tags:
       - discovery
       description: Describes the SCIM specification features available (see section
         5 of RFC 7644)
+      operationId: get-service-provider-config
       responses:
         200:
           description: Successful operation
@@ -1566,12 +1600,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /ResourceTypes:
+  /jans-scim/restv1/v2/ResourceTypes:
     get:
       tags:
       - discovery
       description: |
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
+      operationId: get-resources
       responses:
         200:
           description: Successful operation
@@ -1591,13 +1626,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /ResourceTypes/{resource}:
+  /jans-scim/restv1/v2/ResourceTypes/{resource}:
     get:
       tags:
       - discovery
       description: "Describes the endpoint, schemas and extensions supported by a\
         \ specific kind of resource.\nIt returns a specific portion of the ouput of\
         \ the more general /Resources endpoint  \n"
+      operationId: get-resources-by-resource
       parameters:
       - name: resource
         in: path
@@ -1628,12 +1664,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Schemas:
+  /jans-scim/restv1/v2/Schemas:
     get:
       tags:
       - discovery
       description: "Endpoint used to retrieve information about schemas supported\
         \ (see section \n4 of RFC 7644)\n"
+      operationId: get-schemas
       responses:
         200:
           description: Successful operation
@@ -1653,11 +1690,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Schemas/{uri}:
+  /jans-scim/restv1/v2/Schemas/{uri}:
     get:
       tags:
       - discovery
       description: Retrieves information about a specific resource
+      operationId: get-schema-by-uri
       parameters:
       - name: uri
         in: path

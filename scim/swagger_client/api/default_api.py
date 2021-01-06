@@ -32,13 +32,528 @@ class DefaultApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def bulk_post(self, body, **kwargs):  # noqa: E501
-        """bulk_post  # noqa: E501
+    def delete_fido2_device_by_id(self, id, **kwargs):  # noqa: E501
+        """delete_fido2_device_by_id  # noqa: E501
+
+        Deletes a Fido 2 resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_fido2_device_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_fido2_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_fido2_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def delete_fido2_device_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """delete_fido2_device_by_id  # noqa: E501
+
+        Deletes a Fido 2 resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_fido2_device_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_fido2_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `delete_fido2_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Fido2Devices/{id}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def delete_fido_device_by_id(self, id, **kwargs):  # noqa: E501
+        """delete_fido_device_by_id  # noqa: E501
+
+        Deletes a Fido resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_fido_device_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_fido_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_fido_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def delete_fido_device_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """delete_fido_device_by_id  # noqa: E501
+
+        Deletes a Fido resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_fido_device_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_fido_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `delete_fido_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/FidoDevices/{id}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_fido2_device_by_id(self, id, **kwargs):  # noqa: E501
+        """get_fido2_device_by_id  # noqa: E501
+
+        Retrieves a Fido 2 device by Id  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido2_device_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: Fido2DeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_fido2_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_fido2_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def get_fido2_device_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """get_fido2_device_by_id  # noqa: E501
+
+        Retrieves a Fido 2 device by Id  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido2_device_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: Fido2DeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_fido2_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `get_fido2_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Fido2Devices/{id}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='Fido2DeviceResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_fido_device_by_id(self, id, **kwargs):  # noqa: E501
+        """get_fido_device_by_id  # noqa: E501
+
+        Retrieves a U2F/Super Gluu device by Id  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido_device_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: FidoDeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_fido_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_fido_device_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def get_fido_device_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """get_fido_device_by_id  # noqa: E501
+
+        Retrieves a U2F/Super Gluu device by Id  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido_device_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: FidoDeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_fido_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `get_fido_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/FidoDevices/{id}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='FidoDeviceResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_fido_devices(self, **kwargs):  # noqa: E501
+        """get_fido_devices  # noqa: E501
+
+        Query Fido resources  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido_devices(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :param str user_id: Used to restrict the search to fido resources owned by a specific user
+        :param str filter: See section 3.4.2.2 of RFC 7644
+        :param int start_index:
+        :param int count:
+        :param str sort_by:
+        :param str sort_oder:
+        :return: FidoListResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_fido_devices_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.get_fido_devices_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def get_fido_devices_with_http_info(self, **kwargs):  # noqa: E501
+        """get_fido_devices  # noqa: E501
+
+        Query Fido resources  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_fido_devices_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :param str user_id: Used to restrict the search to fido resources owned by a specific user
+        :param str filter: See section 3.4.2.2 of RFC 7644
+        :param int start_index:
+        :param int count:
+        :param str sort_by:
+        :param str sort_oder:
+        :return: FidoListResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['attributes', 'excluded_attributes', 'user_id', 'filter', 'start_index', 'count', 'sort_by', 'sort_oder']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_fido_devices" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+        if 'user_id' in params:
+            query_params.append(('userId', params['user_id']))  # noqa: E501
+        if 'filter' in params:
+            query_params.append(('filter', params['filter']))  # noqa: E501
+        if 'start_index' in params:
+            query_params.append(('startIndex', params['start_index']))  # noqa: E501
+        if 'count' in params:
+            query_params.append(('count', params['count']))  # noqa: E501
+        if 'sort_by' in params:
+            query_params.append(('sortBy', params['sort_by']))  # noqa: E501
+        if 'sort_oder' in params:
+            query_params.append(('sortOder', params['sort_oder']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/FidoDevices', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='FidoListResponse',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def post_bulk(self, body, **kwargs):  # noqa: E501
+        """post_bulk  # noqa: E501
 
         Send several resource operations in a single request (see section 3.7 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.bulk_post(body, async_req=True)
+        >>> thread = api.post_bulk(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -49,18 +564,18 @@ class DefaultApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.bulk_post_with_http_info(body, **kwargs)  # noqa: E501
+            return self.post_bulk_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.bulk_post_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.post_bulk_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def bulk_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """bulk_post  # noqa: E501
+    def post_bulk_with_http_info(self, body, **kwargs):  # noqa: E501
+        """post_bulk  # noqa: E501
 
         Send several resource operations in a single request (see section 3.7 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.bulk_post_with_http_info(body, async_req=True)
+        >>> thread = api.post_bulk_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -81,14 +596,14 @@ class DefaultApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method bulk_post" % key
+                    " to method post_bulk" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `bulk_post`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `post_bulk`")  # noqa: E501
 
         collection_formats = {}
 
@@ -116,7 +631,7 @@ class DefaultApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/Bulk', 'POST',
+            '/jans-scim/restv1/v2/Bulk', 'POST',
             path_params,
             query_params,
             header_params,
@@ -131,13 +646,346 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def fido2_devices_get(self, **kwargs):  # noqa: E501
-        """fido2_devices_get  # noqa: E501
+    def put_fido2_device_by_id(self, body, id, **kwargs):  # noqa: E501
+        """put_fido2_device_by_id  # noqa: E501
+
+        Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_fido2_device_by_id(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param Fido2DeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: Fido2DeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.put_fido2_device_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.put_fido2_device_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+            return data
+
+    def put_fido2_device_by_id_with_http_info(self, body, id, **kwargs):  # noqa: E501
+        """put_fido2_device_by_id  # noqa: E501
+
+        Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_fido2_device_by_id_with_http_info(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param Fido2DeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: Fido2DeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method put_fido2_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `put_fido2_device_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `put_fido2_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Fido2Devices/{id}', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='Fido2DeviceResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def put_fido_device_by_id(self, body, id, **kwargs):  # noqa: E501
+        """put_fido_device_by_id  # noqa: E501
+
+        Updates a Fido resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_fido_device_by_id(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param FidoDeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: FidoDeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.put_fido_device_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.put_fido_device_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+            return data
+
+    def put_fido_device_by_id_with_http_info(self, body, id, **kwargs):  # noqa: E501
+        """put_fido_device_by_id  # noqa: E501
+
+        Updates a Fido resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.put_fido_device_by_id_with_http_info(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param FidoDeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: FidoDeviceResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method put_fido_device_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `put_fido_device_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `put_fido_device_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/FidoDevices/{id}', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='FidoDeviceResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def query_fido2_devices(self, body, **kwargs):  # noqa: E501
+        """query_fido2_devices  # noqa: E501
 
         Query Fido 2 resources  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_get(async_req=True)
+        >>> thread = api.query_fido2_devices(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param SearchRequest body: Payload that represents the search criteria (required)
+        :param str user_id: Used to restrict the search to fido 2 resources owned by a specific user
+        :return: Fido2ListResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.query_fido2_devices_with_http_info(body, **kwargs)  # noqa: E501
+        else:
+            (data) = self.query_fido2_devices_with_http_info(body, **kwargs)  # noqa: E501
+            return data
+
+    def query_fido2_devices_with_http_info(self, body, **kwargs):  # noqa: E501
+        """query_fido2_devices  # noqa: E501
+
+        Query Fido 2 resources  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.query_fido2_devices_with_http_info(body, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param SearchRequest body: Payload that represents the search criteria (required)
+        :param str user_id: Used to restrict the search to fido 2 resources owned by a specific user
+        :return: Fido2ListResponse
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body', 'user_id']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method query_fido2_devices" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `query_fido2_devices`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'user_id' in params:
+            query_params.append(('userId', params['user_id']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Fido2Devices/.search', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='Fido2ListResponse',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def query_fido2_resources(self, **kwargs):  # noqa: E501
+        """query_fido2_resources  # noqa: E501
+
+        Query Fido 2 resources  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.query_fido2_resources(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -155,18 +1003,18 @@ class DefaultApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.fido2_devices_get_with_http_info(**kwargs)  # noqa: E501
+            return self.query_fido2_resources_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.fido2_devices_get_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.query_fido2_resources_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def fido2_devices_get_with_http_info(self, **kwargs):  # noqa: E501
-        """fido2_devices_get  # noqa: E501
+    def query_fido2_resources_with_http_info(self, **kwargs):  # noqa: E501
+        """query_fido2_resources  # noqa: E501
 
         Query Fido 2 resources  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_get_with_http_info(async_req=True)
+        >>> thread = api.query_fido2_resources_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -194,7 +1042,7 @@ class DefaultApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method fido2_devices_get" % key
+                    " to method query_fido2_resources" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -235,7 +1083,7 @@ class DefaultApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/Fido2Devices', 'GET',
+            '/jans-scim/restv1/v2/Fido2Devices', 'GET',
             path_params,
             query_params,
             header_params,
@@ -250,861 +1098,13 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def fido2_devices_id_delete(self, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_delete  # noqa: E501
-
-        Deletes a Fido 2 resource  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_delete(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido2_devices_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido2_devices_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-            return data
-
-    def fido2_devices_id_delete_with_http_info(self, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_delete  # noqa: E501
-
-        Deletes a Fido 2 resource  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_delete_with_http_info(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido2_devices_id_delete" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido2_devices_id_delete`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Fido2Devices/{id}', 'DELETE',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type=None,  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido2_devices_id_get(self, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_get  # noqa: E501
-
-        Retrieves a Fido 2 device by Id  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_get(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: Fido2DeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido2_devices_id_get_with_http_info(id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido2_devices_id_get_with_http_info(id, **kwargs)  # noqa: E501
-            return data
-
-    def fido2_devices_id_get_with_http_info(self, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_get  # noqa: E501
-
-        Retrieves a Fido 2 device by Id  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_get_with_http_info(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: Fido2DeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido2_devices_id_get" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido2_devices_id_get`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Fido2Devices/{id}', 'GET',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='Fido2DeviceResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido2_devices_id_put(self, body, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_put  # noqa: E501
-
-        Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_put(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param Fido2DeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: Fido2DeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido2_devices_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido2_devices_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-            return data
-
-    def fido2_devices_id_put_with_http_info(self, body, id, **kwargs):  # noqa: E501
-        """fido2_devices_id_put  # noqa: E501
-
-        Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_id_put_with_http_info(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param Fido2DeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: Fido2DeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido2_devices_id_put" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `fido2_devices_id_put`")  # noqa: E501
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido2_devices_id_put`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Fido2Devices/{id}', 'PUT',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='Fido2DeviceResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido2_devices_search_post(self, body, **kwargs):  # noqa: E501
-        """fido2_devices_search_post  # noqa: E501
-
-        Query Fido 2 resources  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_search_post(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param SearchRequest body: Payload that represents the search criteria (required)
-        :param str user_id: Used to restrict the search to fido 2 resources owned by a specific user
-        :return: Fido2ListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido2_devices_search_post_with_http_info(body, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido2_devices_search_post_with_http_info(body, **kwargs)  # noqa: E501
-            return data
-
-    def fido2_devices_search_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """fido2_devices_search_post  # noqa: E501
-
-        Query Fido 2 resources  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido2_devices_search_post_with_http_info(body, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param SearchRequest body: Payload that represents the search criteria (required)
-        :param str user_id: Used to restrict the search to fido 2 resources owned by a specific user
-        :return: Fido2ListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body', 'user_id']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido2_devices_search_post" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `fido2_devices_search_post`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-
-        query_params = []
-        if 'user_id' in params:
-            query_params.append(('userId', params['user_id']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Fido2Devices/.search', 'POST',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='Fido2ListResponse',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido_devices_get(self, **kwargs):  # noqa: E501
-        """fido_devices_get  # noqa: E501
+    def query_fido_resources(self, body, **kwargs):  # noqa: E501
+        """query_fido_resources  # noqa: E501
 
         Query Fido resources  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_get(async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :param str user_id: Used to restrict the search to fido resources owned by a specific user
-        :param str filter: See section 3.4.2.2 of RFC 7644
-        :param int start_index:
-        :param int count:
-        :param str sort_by:
-        :param str sort_oder:
-        :return: FidoListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido_devices_get_with_http_info(**kwargs)  # noqa: E501
-        else:
-            (data) = self.fido_devices_get_with_http_info(**kwargs)  # noqa: E501
-            return data
-
-    def fido_devices_get_with_http_info(self, **kwargs):  # noqa: E501
-        """fido_devices_get  # noqa: E501
-
-        Query Fido resources  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_get_with_http_info(async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :param str user_id: Used to restrict the search to fido resources owned by a specific user
-        :param str filter: See section 3.4.2.2 of RFC 7644
-        :param int start_index:
-        :param int count:
-        :param str sort_by:
-        :param str sort_oder:
-        :return: FidoListResponse
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['attributes', 'excluded_attributes', 'user_id', 'filter', 'start_index', 'count', 'sort_by', 'sort_oder']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido_devices_get" % key
-                )
-            params[key] = val
-        del params['kwargs']
-
-        collection_formats = {}
-
-        path_params = {}
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-        if 'user_id' in params:
-            query_params.append(('userId', params['user_id']))  # noqa: E501
-        if 'filter' in params:
-            query_params.append(('filter', params['filter']))  # noqa: E501
-        if 'start_index' in params:
-            query_params.append(('startIndex', params['start_index']))  # noqa: E501
-        if 'count' in params:
-            query_params.append(('count', params['count']))  # noqa: E501
-        if 'sort_by' in params:
-            query_params.append(('sortBy', params['sort_by']))  # noqa: E501
-        if 'sort_oder' in params:
-            query_params.append(('sortOder', params['sort_oder']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/FidoDevices', 'GET',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='FidoListResponse',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido_devices_id_delete(self, id, **kwargs):  # noqa: E501
-        """fido_devices_id_delete  # noqa: E501
-
-        Deletes a Fido resource  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_delete(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido_devices_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido_devices_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-            return data
-
-    def fido_devices_id_delete_with_http_info(self, id, **kwargs):  # noqa: E501
-        """fido_devices_id_delete  # noqa: E501
-
-        Deletes a Fido resource  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_delete_with_http_info(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido_devices_id_delete" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido_devices_id_delete`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/FidoDevices/{id}', 'DELETE',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type=None,  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido_devices_id_get(self, id, **kwargs):  # noqa: E501
-        """fido_devices_id_get  # noqa: E501
-
-        Retrieves a U2F/Super Gluu device by Id  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_get(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: FidoDeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido_devices_id_get_with_http_info(id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido_devices_id_get_with_http_info(id, **kwargs)  # noqa: E501
-            return data
-
-    def fido_devices_id_get_with_http_info(self, id, **kwargs):  # noqa: E501
-        """fido_devices_id_get  # noqa: E501
-
-        Retrieves a U2F/Super Gluu device by Id  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_get_with_http_info(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: FidoDeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido_devices_id_get" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido_devices_id_get`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/FidoDevices/{id}', 'GET',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='FidoDeviceResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido_devices_id_put(self, body, id, **kwargs):  # noqa: E501
-        """fido_devices_id_put  # noqa: E501
-
-        Updates a Fido resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_put(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param FidoDeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: FidoDeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.fido_devices_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.fido_devices_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-            return data
-
-    def fido_devices_id_put_with_http_info(self, body, id, **kwargs):  # noqa: E501
-        """fido_devices_id_put  # noqa: E501
-
-        Updates a Fido resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_id_put_with_http_info(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param FidoDeviceResource body: Payload with the data to replace in the existing device identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: FidoDeviceResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method fido_devices_id_put" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `fido_devices_id_put`")  # noqa: E501
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `fido_devices_id_put`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/FidoDevices/{id}', 'PUT',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='FidoDeviceResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def fido_devices_search_post(self, body, **kwargs):  # noqa: E501
-        """fido_devices_search_post  # noqa: E501
-
-        Query Fido resources  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_search_post(body, async_req=True)
+        >>> thread = api.query_fido_resources(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -1116,18 +1116,18 @@ class DefaultApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.fido_devices_search_post_with_http_info(body, **kwargs)  # noqa: E501
+            return self.query_fido_resources_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.fido_devices_search_post_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.query_fido_resources_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def fido_devices_search_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """fido_devices_search_post  # noqa: E501
+    def query_fido_resources_with_http_info(self, body, **kwargs):  # noqa: E501
+        """query_fido_resources  # noqa: E501
 
         Query Fido resources  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.fido_devices_search_post_with_http_info(body, async_req=True)
+        >>> thread = api.query_fido_resources_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -1149,14 +1149,14 @@ class DefaultApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method fido_devices_search_post" % key
+                    " to method query_fido_resources" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `fido_devices_search_post`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `query_fido_resources`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1186,7 +1186,7 @@ class DefaultApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/FidoDevices/.search', 'POST',
+            '/jans-scim/restv1/v2/FidoDevices/.search', 'POST',
             path_params,
             query_params,
             header_params,
@@ -1201,13 +1201,13 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def search_post(self, body, **kwargs):  # noqa: E501
-        """search_post  # noqa: E501
+    def query_resource(self, body, **kwargs):  # noqa: E501
+        """query_resource  # noqa: E501
 
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_post(body, async_req=True)
+        >>> thread = api.query_resource(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -1218,18 +1218,18 @@ class DefaultApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.search_post_with_http_info(body, **kwargs)  # noqa: E501
+            return self.query_resource_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.search_post_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.query_resource_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def search_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """search_post  # noqa: E501
+    def query_resource_with_http_info(self, body, **kwargs):  # noqa: E501
+        """query_resource  # noqa: E501
 
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_post_with_http_info(body, async_req=True)
+        >>> thread = api.query_resource_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -1250,14 +1250,14 @@ class DefaultApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method search_post" % key
+                    " to method query_resource" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `search_post`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `query_resource`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1285,7 +1285,7 @@ class DefaultApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/.search', 'POST',
+            '/jans-scim/restv1/v2/.search', 'POST',
             path_params,
             query_params,
             header_params,

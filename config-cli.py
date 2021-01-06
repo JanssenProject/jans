@@ -473,7 +473,7 @@ class JCA_CLI:
             endpoint_parameters.insert(0, end_point_param)
 
         for param in endpoint_parameters:
-            text_ = param.get('description') or param.get('summary') or param['name']
+            text_ = param['name'] or param.get('description') or param.get('summary')
             parameters[param['name']] = self.get_input(
                         text=text_.strip('.'), 
                         itype=param['schema']['type'],
@@ -652,10 +652,22 @@ class JCA_CLI:
     def get_schema_from_reference(self, ref):
         schema_path_list = ref.strip('/#').split('/')
         schema = self.cfg_yml[schema_path_list[0]]
+ 
         schema_ = schema.copy()
 
         for p in schema_path_list[1:]:
             schema_ = schema_[p]
+
+        if 'allOf' in schema_:
+            all_schema = OrderedDict()
+            
+            all_schema['properties'] = OrderedDict()
+            for sch in schema_['allOf']:
+                if 'properties' in sch:
+                    all_schema['properties'].update(sch['properties'])
+
+            schema_ = all_schema
+
 
         for key_ in schema_['properties']:
             if '$ref' in schema_['properties'][key_]:
@@ -735,13 +747,17 @@ class JCA_CLI:
                 model_name = item['__schema_name__']
                 sub_model_class = getattr(swagger_client.models, model_name)
                 sub_model_list = []
-                
-                sub_model_list_title_text = item.get('description') or item.get('title') or item.get('__schema_name__')
-                
-                sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'])
+                sub_model_list_help_text = ''
+                sub_model_list_title_text = item.get('title')
+                if sub_model_list_title_text:
+                    sub_model_list_help_text = item.get('description')
+                else:
+                    sub_model_list_title_text = item.get('description')
+
+                sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'], help_text=sub_model_list_help_text)
                 if sub_model_list_selection == 'y':
                     while True:
-                        sub_model_list_data = self.get_input_for_schema_(item, sub_model_class)
+                        sub_model_list_data = self.get_input_for_schema_(item, sub_model_class, spacing=spacing+3)
                         sub_model_list.append(sub_model_list_data)
                         sub_model_list_selection = self.get_input(text="Add another {}?".format(sub_model_list_title_text), values=['y','n'])
                         if sub_model_list_selection == 'n':
