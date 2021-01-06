@@ -17,7 +17,8 @@ function() {
 
     var config = {
         env: env,
-        accessToken: 'c8dd2445-4734-4119-8dd1-4dbe91976202',
+        test_url: baseUrl + '/jans-config-api/api/v1/test',
+        accessToken: '7672df72-1f81-4430-8716-2780062f8058',
         baseUrl: baseUrl,
         healthUrl: baseUrl + '/health',
         fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
@@ -33,12 +34,14 @@ function() {
         openidsectors_url: baseUrl + '/jans-config-api/api/v1/openid/sectoridentifiers',
         umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
         attributes_url: baseUrl + '/jans-config-api/api/v1/attributes',
-        smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp',
+        smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp', 
         logging_url: baseUrl + '/jans-config-api/api/v1/logging',
     };
 
     karate.configure('connectTimeout', 30000);
     karate.configure('readTimeout', 60000);
     
+    var result = karate.callSingle('classpath:testClient.feature', config);
+    print(' result = '+result);
     return config;
 }

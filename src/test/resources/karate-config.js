@@ -14,6 +14,8 @@ function() {
     var url = props.get('karate.test.url');
     var port = props.get('karate.test.port');
     var baseUrl = url + (port ? ':' + port : '');
+   
+   
     var config = {
         env: env,
         test_url: baseUrl + '/jans-config-api/api/v1/test',
@@ -40,5 +42,7 @@ function() {
     karate.configure('connectTimeout', 30000);
     karate.configure('readTimeout', 60000);
     
+    var result = karate.callSingle('classpath:testClient.feature', config);
+    print(' result = '+result);
     return config;
 }
