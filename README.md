@@ -68,7 +68,7 @@ The response will contain an ID and a secret. Keep those for later use.
 Using the client credentials get an access token from `jans_auth` token endpoint, eg.
 
 ```
-curl -u '<client_id>:<client_secret>' -k -d grant_type=client_credentials https://buster.gluu.info/jans-auth/restv1/token
+curl -u '<client_id>:<client_secret>' -k -d grant_type=client_credentials https://jans-host-name/jans-auth/restv1/token
 ```
 (replace with proper values in the placeholders).
 
@@ -77,7 +77,7 @@ curl -u '<client_id>:<client_secret>' -k -d grant_type=client_credentials https:
 With the previously obtained access token, issue a call to an endpoint. The following makes a query to the users endpoint for users whose display name contains the word "admin":
 
 ```
-curl -i -k -G -H 'Authorization: Bearer <access_token>' -d count=10 --data-urlencode 'filter=displayName co "admin"' https://jans-auth-host/jans-scim/restv1/v2/Users
+curl -i -k -G -H 'Authorization: Bearer <access_token>' -d count=10 --data-urlencode 'filter=displayName co "admin"' https://jans-host-name/jans-scim/restv1/v2/Users
 ```
 
 The ouput should show valid SCIM (JSON) output. Account the access token is short lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.
