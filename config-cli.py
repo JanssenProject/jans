@@ -465,7 +465,7 @@ class JCA_CLI:
         word_list = re.sub( r'([A-Z])', r' \1', varname).lower().split()
         return '_'.join(word_list)
 
-    def obtain_parameters(self, endpoint):
+    def obtain_parameters(self, endpoint, single=False):
         parameters = {}
 
         endpoint_parameters = []
@@ -476,15 +476,19 @@ class JCA_CLI:
         if end_point_param and not end_point_param in endpoint_parameters:
             endpoint_parameters.insert(0, end_point_param)
 
-        for param in endpoint_parameters:
+        n = 1 if single else len(endpoint_parameters)
+
+        for param in endpoint_parameters[0:n]:
             param_name = self.make_swagger_var(param['name'])
             if not param_name in parameters:
                 text_ = param['name'] or param.get('description') or param.get('summary')
+                enforce = True if end_point_param and end_point_param['name'] == param['name'] else False
+                    
                 parameters[param_name] = self.get_input(
                             text=text_.strip('.'), 
                             itype=param['schema']['type'],
                             default = param['schema'].get('default'),
-                            enforce=False
+                            enforce=enforce
                             )
 
         return parameters
@@ -596,7 +600,7 @@ class JCA_CLI:
 
         self.print_underlined(title)
 
-        parameters = self.obtain_parameters(endpoint)
+        parameters = self.obtain_parameters(endpoint, single=return_value)
         
         for param in parameters.copy():
             if not parameters[param]:
