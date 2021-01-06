@@ -6,28 +6,28 @@
 ## Menu-driven Interactive Mode
 We will refer _Menu-driven Interactive Mode_ as **IM**. To run IM just simply execute jans-cli as follows:
 ```
-/opt/jans/jans-cli/jca-cli.py
+/opt/jans/jans-cli/config-cli.py
 ```
 You will see main menu as
 
 ![jans-cli Main Menu](img/im-main.png)
 
-Using IM is ver simple and intuitive. Just make selection and answer questions. For example to get all attributes chose 1, you will get the following options:
+Using IM is very simple and intuitive. Just make selection and answer questions. For example to get all attributes chose 1, you will get the following options:
 
 ![jans-cli Attributes Menu](img/im-attributes-main.png)
 
-Then chose 1, you will be asked Search size,  Search pattern and Status of the attribute. For simpleicity leave deafults in our case:
+Then chose 1, you will be asked Search size,  Search pattern and Status of the attribute. For simplicity leave defaults in our case:
 
 ![jans-cli Attributes Get All](img/im-attributes-get-all.png)
 
-Once press Enter, it will retreive 50 attrbiutes and prints to screen in green color:
+Once press Enter, it will retrieve 50 attributes and prints to screen in green color:
 
 ![jans-cli Attributes Get All Response](img/im-attributes-get-all-response.png)
 
-You can save result to file by chosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an reconised command, it will display valid commands.
+You can save result to file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
 
-To update an attrbiue, choose 3 (on Attribute screen). It will ask `inum` of attrbiute you are going to update. I want to change desctiption for attribute having inum **BCA8**. 
-It will retreive current data and will ask for modifation of each properties, just leave defaults if you don't want to change that property.
+To update an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. I want to change description for attribute having inum **BCA8**. 
+It will retrieve current data and will ask for modification of each properties, just leave defaults if you don't want to change that property.
 
 ![jans-cli Attributes Update](img/im-attributes-update.png)
 
@@ -38,15 +38,15 @@ When it comes to end, it will display modified data and ask if you want to conti
 After you enter `y` it will perform update and display updated data on screen.
 
 ## Command Line Argument Mode
-We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get get help, so type:
+We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
 ```
-/opt/jans/jans-cli/jca-cli.py --help
+/opt/jans/jans-cli/config-cli.py --help
 ```
 
 This will print how to use CL:
 
 ```
-usage: jca-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
+usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
                   [--client_secret CLIENT_SECRET] [-debug]
                   [--debug-log-file DEBUG_LOG_FILE]
                   [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
@@ -75,19 +75,19 @@ optional arguments:
   --op-mode {get,post,put,patch,delete}
                         Operation mode to be done
   --endpoint-args ENDPOINT_ARGS
-                        Arguments to pass endpoint seperated by comma. For
+                        Arguments to pass endpoint separated by comma. For
                         example limit:5,status:INACTIVE
   --schema SCHEMA       Get sample json schema
   --data DATA           Path to json data file
 ```
-We start with getting infromtation about tasks, the tasks are options of argument `--info`:
+We start with getting information about tasks, the tasks are options of argument `--info`:
 
 Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMemcached, CacheConfigurationNativePersistence, CacheConfigurationRedis, ConfigurationFido2, ConfigurationJWKJSONWebKeyJWK, ConfigurationLogging, ConfigurationProperties, ConfigurationSMTP, CustomScripts, DatabaseCouchbaseConfiguration, DatabaseLDAPConfiguration, DefaultAuthenticationMethod, OAuthOpenIDConnectClients, OAuthOpenIDConnectSectorIdentifiers, OAuthScopes, OAuthUMAResources
 
-Let's get information for task **OAuthScopes**
+Let's get information for a task **OAuthScopes**
 
 ```
- /opt/jans/jans-cli/jca-cli.py --info OAuthScopes
+ /opt/jans/jans-cli/config-cli.py --info OAuthScopes
 
 Operation ID: get-oauth-scopes
   Description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
@@ -112,12 +112,12 @@ Operation ID: patch-oauth-scopes-by-id
   url-suffix: inum
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample shema type /opt/jans/jans-cli/jca-cli.py --schema <schma>, for example /opt/jans/jans-cli/jca-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
-Operations will be done with **Operation ID**. Some operations may take parameters, let's retreive `3` scopes (**limit**) that has `view` in it's description (**pattern**) and **type** `openid`:
+Operations will be done with **Operation ID**. Some operations may take parameters, let's retrieve `3` scopes (**limit**) that has `view` in it's description (**pattern**) and **type** `openid`:
 
 ```
- /opt/jans/jans-cli/jca-cli.py --operation-id get-oauth-scopes --endpoint-args limit:3,pattern:view,type:openid
+ /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes --endpoint-args limit:3,pattern:view,type:openid
  ```
  
  It will return:
@@ -214,7 +214,7 @@ Calling with params limit=3&pattern=view&type=openid
 ]
 ```
 
-Let's create a scope, for this we need a sample schema, you can use of the obove result, or can get sample shcema. Remember when we queried info for task **OAuthScopes** it printed:
+Let's create a scope, for this we need a sample schema, you can use of the above result, or can get sample schema. Remember when we queried info for a task **OAuthScopes** it printed:
 
 ```
 Operation ID: post-oauth-scopes
@@ -224,10 +224,10 @@ Operation ID: post-oauth-scopes
 Thus, we can get sample schema and use Operation ID `post-oauth-scopes`. Lets get sample schema:
 
 ```
-/opt/jans/jans-cli/jca-cli.py --schema /components/schemas/Scope > /tmp/scope.json
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Scope > /tmp/scope.json
 ```
 
-Now edit file `tmp/scope.json` with an editor (like **nano**). As as example we just filled the following properties:
+Now edit file `tmp/scope.json` with an editor (like **nano**). As an example we just filled the following properties:
 
 ```
 "id": "TestScopeID",
@@ -240,7 +240,7 @@ Now edit file `tmp/scope.json` with an editor (like **nano**). As as example we 
 It is time to post the data:
 
 ```
- /opt/jans/jans-cli/jca-cli.py --operation-id post-oauth-scopes --data /tmp/scope.json 
+ /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes --data /tmp/scope.json 
 
 Getting access token for scope https://jans.io/oauth/config/scopes.write
 Server Response:
@@ -266,7 +266,7 @@ Server Response:
 
 ```
 
-It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for task **OAuthScopes** it printed:
+It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for the task **OAuthScopes** it printed:
 
 ```
 Operation ID: patch-oauth-scopes-by-id
@@ -278,12 +278,12 @@ Operation ID: patch-oauth-scopes-by-id
 This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. Get schema:
 
 ```
-/opt/jans/jans-cli/jca-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
 ```
 
 When you examine this json, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
 * __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path seperator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
+* __path__ Path of property to be changed. use path separator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
 * __value__ New value to be assigned for property defined in `path`
 
 We can edit this json as follows (remember to make it an array):
@@ -293,7 +293,7 @@ We can edit this json as follows (remember to make it an array):
 Let's do the operation:
 
 ```
-/opt/jans/jans-cli/jca-cli.py --operation-id patch-oauth-scopes-by-id --url-suffix inum:112116fd-257b-40d8-a2c9-0c23536680ed --data /tmp/patch.json 
+/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-scopes-by-id --url-suffix inum:112116fd-257b-40d8-a2c9-0c23536680ed --data /tmp/patch.json 
 
 Getting access token for scope https://jans.io/oauth/config/scopes.write
 Server Response:
