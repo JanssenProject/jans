@@ -1096,7 +1096,7 @@ class JCA_CLI:
     def get_path_api_caller_for_path(self, path):
         
         dummy_enpoint = Menu(name='', info=path)
-        security = self.get_scope_for_endpoint(endpoint)
+        security = self.get_scope_for_endpoint(dummy_enpoint)
         self.get_access_token(security)
         class_name = self.get_api_class_name(path['tags'][0])
         client = getattr(swagger_client, class_name)
