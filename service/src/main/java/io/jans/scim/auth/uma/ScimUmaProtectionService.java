@@ -31,7 +31,7 @@ import io.jans.scim.service.OpenIdService;
  */
 @ApplicationScoped
 @Named("scimUmaProtectionService")
-@BindingUrls({"/scim"})
+@BindingUrls({"/"})
 public class ScimUmaProtectionService extends BaseUmaProtectionService implements Serializable {
 
 	private static final long serialVersionUID = -5447131971095468865L;
