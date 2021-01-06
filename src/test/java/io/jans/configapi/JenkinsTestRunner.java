@@ -17,6 +17,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import javax.inject.Inject;
 /**
  * @author Yuriy Zabrovarnyy
  */
+@TestInstance(Lifecycle.PER_CLASS)
 public class JenkinsTestRunner {
     
     @Inject
