@@ -154,8 +154,6 @@ public class UmaService implements Serializable {
         // Determine RPT token to status
         RptIntrospectionResponse rptStatusResponse = null;
         try {
-            // rptStatusResponse =
-            // this.getUmaRptIntrospectionService().requestRptStatus(authorization,rptToken,"");
             rptStatusResponse = UmaClient.getRptStatus(this.umaMetadata, authorization, rptToken);
             log.trace(" rptStatusResponse: {}" + rptStatusResponse);
         } catch (Exception ex) {

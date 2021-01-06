@@ -111,8 +111,7 @@ public class TestUtil {
         if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(getApiProtectionType())) {
             token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
         } else {
-            //scopes = this.authUtil.getRequestedScopes(resourceInfo);
-            //token = registerRptTicket(clientId, resourceInfo, method, path, scopes);
+            token = registerRptTicket(clientId, method, path, scopes);
         }
         log.trace("Generated token: {} ", token);
 
@@ -122,10 +121,10 @@ public class TestUtil {
         return null;
     }
 
-    private Token registerRptTicket(String clientId, ResourceInfo resourceInfo, String method, String path,
+    private Token registerRptTicket(String clientId, String method, String path,
             List<String> scopes) throws Exception {
-        log.trace(" Register Rpt Ticket, clientId:{}, resourceInfo: {}, method: {}, path: {}, scopes: {}", clientId,
-                resourceInfo, method, path, scopes);
+        log.trace(" Register Rpt Ticket, clientId:{}, method: {}, path: {}, scopes: {}", clientId,
+                 method, path, scopes);
 
         // Get Pat
         Token patToken = this.authUtil.requestPat(this.authUtil.getTokenUrl(), clientId, ScopeType.UMA, scopes);
