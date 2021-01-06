@@ -21,7 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import io.jans.exception.ConfigurationException;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.config.oxtrust.Configuration;
 import io.jans.orm.PersistenceEntryManager;
@@ -67,9 +66,6 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
-
-	@Inject
-	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -272,8 +268,6 @@ public class ConfigurationFactory {
 				// Destroy old configuration
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
-
-					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
@@ -291,11 +285,6 @@ public class ConfigurationFactory {
 	public void destroy(Class<? extends Configuration> clazz) {
 		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
 		configurationInstance.destroy(confInstance.get());
-	}
-
-	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
-		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
-		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
