@@ -26,7 +26,7 @@ public class TestResource extends BaseResource {
     @POST
     public void createTestClient() throws Exception {
         Client client = testUtil.init();
-        System.out.println(" ********************* clientid = "+client.getClientId()+" ********************* ");
+        log.info(" ********************* clientid = "+client.getClientId()+" ********************* ");
     }
 
     @DELETE
