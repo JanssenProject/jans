@@ -34,9 +34,9 @@
 			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
 		<repository>
-			<id>gluu</id>
-			<name>Gluu repository</name>
-			<url>https://ox.gluu.org/maven</url>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
 		</repository>
 	</repositories>
 
