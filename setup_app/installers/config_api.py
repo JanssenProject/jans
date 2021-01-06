@@ -4,7 +4,7 @@ import glob
 import json
 import uuid
 import ruamel.yaml
-import zipfile
+import tarfile
 import shutil
 import configparser
 
@@ -39,7 +39,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'jans-cli.zip'), 'https://github.com/JanssenProject/jans-cli/archive/main.zip'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://github.com/JanssenProject/jans-cli/archive/main.zip'.format(Config.oxVersion)),
                 ]
 
     def install(self):
@@ -179,16 +179,14 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def install_jca_cli(self):
         self.logIt("Installing Jans Cli", pbar=self.service_name)
-        jans_cli_zip = zipfile.ZipFile(self.source_files[1][0], "r")
-        jans_cli_par_dir = jans_cli_zip.namelist()[0]
-        jans_cli_zip.extractall(Config.jansOptFolder)
-
         jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
-
-        shutil.move(
-                os.path.join(Config.jansOptFolder, jans_cli_par_dir),
-                jans_cli_install_dir
-                )
+        
+        #extract jans-cli tgz archieve
+        cli_tar = tarfile.open(self.source_files[1][0])
+        par_dir = cli_tar.firstmember.name
+        cli_tar.extractall(Config.jansOptFolder)
+        shutil.move(os.path.join(Config.jansOptFolder, par_dir), jans_cli_install_dir)
+        cli_tar.close()
 
         config = configparser.ConfigParser()
         config['DEFAULT'] = {
