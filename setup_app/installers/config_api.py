@@ -193,8 +193,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         config = configparser.ConfigParser()
         config['DEFAULT'] = {
                     'jans_host': Config.hostname,
-                    'jans_client_id': Config.jca_client_id,
-                    'jans_client_secret_enc': Config.jca_client_encoded_pw,
+                    'jca_client_id': Config.jca_client_id,
+                    'jca_client_secret_enc': Config.jca_client_encoded_pw,
                     'debug': 'false',
                     'debug_log_file': os.path.join(jans_cli_install_dir, 'swagger.log')
                     }
