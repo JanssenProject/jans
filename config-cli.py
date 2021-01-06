@@ -26,6 +26,7 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
 swagger_client = importlib.import_module(my_op_mode+'.swagger_client')
+swagger_client.models = importlib.import_module(my_op_mode+'.swagger_client.models')
 swagger_rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
 
 warning_color = 214
@@ -233,7 +234,6 @@ class JCA_CLI:
 
 
     def get_access_token(self, scope):
-        print(self.client_id, self.client_secret)
         sys.stderr.write("Getting access token for scope {}\n".format(scope))
         rest = swagger_rest.RESTClientObject(self.swagger_configuration)
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
