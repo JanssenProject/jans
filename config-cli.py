@@ -461,7 +461,11 @@ class JCA_CLI:
         return param
 
 
-    def obtain_parameters(self, endpoint):
+    def make_swagger_var(self, varname):
+        word_list = re.sub( r'([A-Z])', r' \1', varname).lower().split()
+        return '_'.join(word_list)
+
+    def obtain_parameters(self, endpoint, single=False):
         parameters = {}
 
         endpoint_parameters = []
@@ -469,17 +473,23 @@ class JCA_CLI:
             endpoint_parameters = endpoint.info['parameters']
         
         end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param:
+        if end_point_param and not end_point_param in endpoint_parameters:
             endpoint_parameters.insert(0, end_point_param)
 
-        for param in endpoint_parameters:
-            text_ = param['name'] or param.get('description') or param.get('summary')
-            parameters[param['name']] = self.get_input(
-                        text=text_.strip('.'), 
-                        itype=param['schema']['type'],
-                        default = param['schema'].get('default'),
-                        enforce=False
-                        )
+        n = 1 if single else len(endpoint_parameters)
+
+        for param in endpoint_parameters[0:n]:
+            param_name = self.make_swagger_var(param['name'])
+            if not param_name in parameters:
+                text_ = param['name'] or param.get('description') or param.get('summary')
+                enforce = True if end_point_param and end_point_param['name'] == param['name'] else False
+                    
+                parameters[param_name] = self.get_input(
+                            text=text_.strip('.'), 
+                            itype=param['schema']['type'],
+                            default = param['schema'].get('default'),
+                            enforce=enforce
+                            )
 
         return parameters
 
@@ -590,7 +600,7 @@ class JCA_CLI:
 
         self.print_underlined(title)
 
-        parameters = self.obtain_parameters(endpoint)
+        parameters = self.obtain_parameters(endpoint, single=return_value)
         
         for param in parameters.copy():
             if not parameters[param]:
@@ -952,7 +962,7 @@ class JCA_CLI:
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
-        
+
         cur_model = None
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
@@ -966,8 +976,14 @@ class JCA_CLI:
         if not cur_model:            
             schema = self.get_scheme_for_endpoint(endpoint)
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
-        
+
+        end_point_param = self.get_endpiont_url_param(endpoint)
+
         if cur_model:
+            end_point_param_val = None
+            if end_point_param:
+                end_point_param_val = getattr(cur_model, end_point_param['name'])
+
             self.get_input_for_schema_(schema, cur_model)
         
             print("Obtained Data:")
@@ -982,7 +998,11 @@ class JCA_CLI:
                 print("Please wait while posting data ...\n")                
 
                 try:
-                    api_response = api_caller(body=cur_model)
+                    if end_point_param_val:
+                        args_ = {'body': cur_model, end_point_param['name']:end_point_param_val}
+                        api_response = api_caller(**args_)
+                    else:
+                        api_response = api_caller(body=cur_model)
                 except swagger_client.rest.ApiException as e:
                     api_response = None
                     print('\u001b[38;5;196m')
