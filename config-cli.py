@@ -962,7 +962,7 @@ class JCA_CLI:
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
-        
+
         cur_model = None
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
@@ -976,8 +976,14 @@ class JCA_CLI:
         if not cur_model:            
             schema = self.get_scheme_for_endpoint(endpoint)
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
-        
+
+        end_point_param = self.get_endpiont_url_param(endpoint)
+
         if cur_model:
+            end_point_param_val = None
+            if end_point_param:
+                end_point_param_val = getattr(cur_model, end_point_param['name'])
+
             self.get_input_for_schema_(schema, cur_model)
         
             print("Obtained Data:")
@@ -992,7 +998,11 @@ class JCA_CLI:
                 print("Please wait while posting data ...\n")                
 
                 try:
-                    api_response = api_caller(body=cur_model)
+                    if end_point_param_val:
+                        args_ = {'body': cur_model, end_point_param['name']:end_point_param_val}
+                        api_response = api_caller(**args_)
+                    else:
+                        api_response = api_caller(body=cur_model)
                 except swagger_client.rest.ApiException as e:
                     api_response = None
                     print('\u001b[38;5;196m')
