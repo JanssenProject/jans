@@ -9,7 +9,7 @@ package io.jans.configapi;
 import com.intuit.karate.junit5.Karate;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.configapi.util.ApiTestMode;
+import io.jans.configapi.util.TestUtil;
 import io.quarkus.test.junit.QuarkusTest;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,11 +25,11 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 public class KarateTestRunner {
     
     @Inject
-    ApiTestMode apiTestMode;
+    TestUtil testUtil;
     
     @BeforeAll
     public void createTestClient() {       
-        Client client = apiTestMode.init();
+        Client client = testUtil.init();
     }
 
     @Karate.Test
