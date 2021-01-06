@@ -200,4 +200,4 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         with open(os.path.join(jans_cli_install_dir, 'config.ini'), 'w') as f:
             config.write(f)
 
-        self.run([paths.cmd_chmod, '+x', os.path.join(jans_cli_install_dir, 'jca-cli.py')])
+        self.run([paths.cmd_chmod, '+x', os.path.join(jans_cli_install_dir, 'config-cli.py')])
