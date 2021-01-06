@@ -32,6 +32,204 @@ class UserApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def delete_user_by_id(self, id, **kwargs):  # noqa: E501
+        """delete_user_by_id  # noqa: E501
+
+        Deletes a user resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_user_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_user_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_user_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def delete_user_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """delete_user_by_id  # noqa: E501
+
+        Deletes a user resource  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_user_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: Identifier of the resource to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_user_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `delete_user_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Users/{id}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_user_by_id(self, id, **kwargs):  # noqa: E501
+        """get_user_by_id  # noqa: E501
+
+        Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_user_by_id(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: UserResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_user_by_id_with_http_info(id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_user_by_id_with_http_info(id, **kwargs)  # noqa: E501
+            return data
+
+    def get_user_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
+        """get_user_by_id  # noqa: E501
+
+        Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_user_by_id_with_http_info(id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: UserResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_user_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `get_user_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Users/{id}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='UserResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def get_users(self, **kwargs):  # noqa: E501
         """get_users  # noqa: E501
 
@@ -147,13 +345,128 @@ class UserApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def jans_scim_restv1_v2_users_post(self, body, **kwargs):  # noqa: E501
-        """jans_scim_restv1_v2_users_post  # noqa: E501
+    def patch_user_by_id(self, body, id, **kwargs):  # noqa: E501
+        """patch_user_by_id  # noqa: E501
+
+        Updates one or more attributes of a User resource using a sequence of additions, removals, and  replacements operations. See section 3.5.2 of RFC 7644   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.patch_user_by_id(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PatchRequest body: Payload describing the patch operations to apply upon the resource identified by param id (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: UserResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.patch_user_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+        else:
+            (data) = self.patch_user_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
+            return data
+
+    def patch_user_by_id_with_http_info(self, body, id, **kwargs):  # noqa: E501
+        """patch_user_by_id  # noqa: E501
+
+        Updates one or more attributes of a User resource using a sequence of additions, removals, and  replacements operations. See section 3.5.2 of RFC 7644   # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.patch_user_by_id_with_http_info(body, id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param PatchRequest body: Payload describing the patch operations to apply upon the resource identified by param id (required)
+        :param str id: (required)
+        :param str attributes: See section 3.9 of RFC 7644
+        :param str excluded_attributes: See section 3.9 of RFC 7644
+        :return: UserResource
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method patch_user_by_id" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'body' is set
+        if ('body' not in params or
+                params['body'] is None):
+            raise ValueError("Missing the required parameter `body` when calling `patch_user_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `patch_user_by_id`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
+
+        query_params = []
+        if 'attributes' in params:
+            query_params.append(('attributes', params['attributes']))  # noqa: E501
+        if 'excluded_attributes' in params:
+            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'body' in params:
+            body_params = params['body']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/scim+json', 'application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['testmode']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/jans-scim/restv1/v2/Users/{id}', 'PATCH',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='UserResource',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def post_user(self, body, **kwargs):  # noqa: E501
+        """post_user  # noqa: E501
 
         Allows creating a User resource via POST (see section 3.3 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.jans_scim_restv1_v2_users_post(body, async_req=True)
+        >>> thread = api.post_user(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -166,18 +479,18 @@ class UserApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.jans_scim_restv1_v2_users_post_with_http_info(body, **kwargs)  # noqa: E501
+            return self.post_user_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.jans_scim_restv1_v2_users_post_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.post_user_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def jans_scim_restv1_v2_users_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """jans_scim_restv1_v2_users_post  # noqa: E501
+    def post_user_with_http_info(self, body, **kwargs):  # noqa: E501
+        """post_user  # noqa: E501
 
         Allows creating a User resource via POST (see section 3.3 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.jans_scim_restv1_v2_users_post_with_http_info(body, async_req=True)
+        >>> thread = api.post_user_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -200,14 +513,14 @@ class UserApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method jans_scim_restv1_v2_users_post" % key
+                    " to method post_user" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `jans_scim_restv1_v2_users_post`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `post_user`")  # noqa: E501
 
         collection_formats = {}
 
@@ -254,111 +567,17 @@ class UserApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def users_id_delete(self, id, **kwargs):  # noqa: E501
-        """users_id_delete  # noqa: E501
+    def put_user_by_id(self, body, id, **kwargs):  # noqa: E501
+        """put_user_by_id  # noqa: E501
 
-        Deletes a user resource  # noqa: E501
+        Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_delete(id, async_req=True)
+        >>> thread = api.put_user_by_id(body, id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.users_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.users_id_delete_with_http_info(id, **kwargs)  # noqa: E501
-            return data
-
-    def users_id_delete_with_http_info(self, id, **kwargs):  # noqa: E501
-        """users_id_delete  # noqa: E501
-
-        Deletes a user resource  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_delete_with_http_info(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param str id: Identifier of the resource to delete (required)
-        :return: None
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method users_id_delete" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `users_id_delete`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Users/{id}', 'DELETE',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type=None,  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def users_id_get(self, id, **kwargs):  # noqa: E501
-        """users_id_get  # noqa: E501
-
-        Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)  # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_get(id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
+        :param UserResource body: Payload with the data to replace in the existing user identified by the id param (required)
         :param str id: (required)
         :param str attributes: See section 3.9 of RFC 7644
         :param str excluded_attributes: See section 3.9 of RFC 7644
@@ -368,126 +587,22 @@ class UserApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.users_id_get_with_http_info(id, **kwargs)  # noqa: E501
+            return self.put_user_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
         else:
-            (data) = self.users_id_get_with_http_info(id, **kwargs)  # noqa: E501
+            (data) = self.put_user_by_id_with_http_info(body, id, **kwargs)  # noqa: E501
             return data
 
-    def users_id_get_with_http_info(self, id, **kwargs):  # noqa: E501
-        """users_id_get  # noqa: E501
+    def put_user_by_id_with_http_info(self, body, id, **kwargs):  # noqa: E501
+        """put_user_by_id  # noqa: E501
 
-        Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)  # noqa: E501
+        Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_get_with_http_info(id, async_req=True)
+        >>> thread = api.put_user_by_id_with_http_info(body, id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: UserResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method users_id_get" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `users_id_get`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Users/{id}', 'GET',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='UserResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def users_id_patch(self, body, id, **kwargs):  # noqa: E501
-        """users_id_patch  # noqa: E501
-
-        Updates one or more attributes of a User resource using a sequence of additions, removals, and  replacements operations. See section 3.5.2 of RFC 7644   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_patch(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PatchRequest body: Payload describing the patch operations to apply upon the resource identified by param id (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: UserResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.users_id_patch_with_http_info(body, id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.users_id_patch_with_http_info(body, id, **kwargs)  # noqa: E501
-            return data
-
-    def users_id_patch_with_http_info(self, body, id, **kwargs):  # noqa: E501
-        """users_id_patch  # noqa: E501
-
-        Updates one or more attributes of a User resource using a sequence of additions, removals, and  replacements operations. See section 3.5.2 of RFC 7644   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_patch_with_http_info(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param PatchRequest body: Payload describing the patch operations to apply upon the resource identified by param id (required)
+        :param UserResource body: Payload with the data to replace in the existing user identified by the id param (required)
         :param str id: (required)
         :param str attributes: See section 3.9 of RFC 7644
         :param str excluded_attributes: See section 3.9 of RFC 7644
@@ -507,18 +622,18 @@ class UserApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method users_id_patch" % key
+                    " to method put_user_by_id" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `users_id_patch`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `put_user_by_id`")  # noqa: E501
         # verify the required parameter 'id' is set
         if ('id' not in params or
                 params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `users_id_patch`")  # noqa: E501
+            raise ValueError("Missing the required parameter `id` when calling `put_user_by_id`")  # noqa: E501
 
         collection_formats = {}
 
@@ -552,7 +667,7 @@ class UserApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/Users/{id}', 'PATCH',
+            '/jans-scim/restv1/v2/Users/{id}', 'PUT',
             path_params,
             query_params,
             header_params,
@@ -567,128 +682,13 @@ class UserApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def users_id_put(self, body, id, **kwargs):  # noqa: E501
-        """users_id_put  # noqa: E501
-
-        Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_put(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param UserResource body: Payload with the data to replace in the existing user identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: UserResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.users_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-        else:
-            (data) = self.users_id_put_with_http_info(body, id, **kwargs)  # noqa: E501
-            return data
-
-    def users_id_put_with_http_info(self, body, id, **kwargs):  # noqa: E501
-        """users_id_put  # noqa: E501
-
-        Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes  not passed in the payload will be left intact.   # noqa: E501
-        This method makes a synchronous HTTP request by default. To make an
-        asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_id_put_with_http_info(body, id, async_req=True)
-        >>> result = thread.get()
-
-        :param async_req bool
-        :param UserResource body: Payload with the data to replace in the existing user identified by the id param (required)
-        :param str id: (required)
-        :param str attributes: See section 3.9 of RFC 7644
-        :param str excluded_attributes: See section 3.9 of RFC 7644
-        :return: UserResource
-                 If the method is called asynchronously,
-                 returns the request thread.
-        """
-
-        all_params = ['body', 'id', 'attributes', 'excluded_attributes']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
-
-        params = locals()
-        for key, val in six.iteritems(params['kwargs']):
-            if key not in all_params:
-                raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method users_id_put" % key
-                )
-            params[key] = val
-        del params['kwargs']
-        # verify the required parameter 'body' is set
-        if ('body' not in params or
-                params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `users_id_put`")  # noqa: E501
-        # verify the required parameter 'id' is set
-        if ('id' not in params or
-                params['id'] is None):
-            raise ValueError("Missing the required parameter `id` when calling `users_id_put`")  # noqa: E501
-
-        collection_formats = {}
-
-        path_params = {}
-        if 'id' in params:
-            path_params['id'] = params['id']  # noqa: E501
-
-        query_params = []
-        if 'attributes' in params:
-            query_params.append(('attributes', params['attributes']))  # noqa: E501
-        if 'excluded_attributes' in params:
-            query_params.append(('excludedAttributes', params['excluded_attributes']))  # noqa: E501
-
-        header_params = {}
-
-        form_params = []
-        local_var_files = {}
-
-        body_params = None
-        if 'body' in params:
-            body_params = params['body']
-        # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/scim+json', 'application/json'])  # noqa: E501
-
-        # Authentication setting
-        auth_settings = ['testmode']  # noqa: E501
-
-        return self.api_client.call_api(
-            '/Users/{id}', 'PUT',
-            path_params,
-            query_params,
-            header_params,
-            body=body_params,
-            post_params=form_params,
-            files=local_var_files,
-            response_type='UserResource',  # noqa: E501
-            auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
-
-    def users_search_post(self, body, **kwargs):  # noqa: E501
-        """users_search_post  # noqa: E501
+    def query_user(self, body, **kwargs):  # noqa: E501
+        """query_user  # noqa: E501
 
         Query User resources (see section 3.4.2 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_search_post(body, async_req=True)
+        >>> thread = api.query_user(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -699,18 +699,18 @@ class UserApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.users_search_post_with_http_info(body, **kwargs)  # noqa: E501
+            return self.query_user_with_http_info(body, **kwargs)  # noqa: E501
         else:
-            (data) = self.users_search_post_with_http_info(body, **kwargs)  # noqa: E501
+            (data) = self.query_user_with_http_info(body, **kwargs)  # noqa: E501
             return data
 
-    def users_search_post_with_http_info(self, body, **kwargs):  # noqa: E501
-        """users_search_post  # noqa: E501
+    def query_user_with_http_info(self, body, **kwargs):  # noqa: E501
+        """query_user  # noqa: E501
 
         Query User resources (see section 3.4.2 of RFC 7644)  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.users_search_post_with_http_info(body, async_req=True)
+        >>> thread = api.query_user_with_http_info(body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -731,14 +731,14 @@ class UserApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method users_search_post" % key
+                    " to method query_user" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'body' is set
         if ('body' not in params or
                 params['body'] is None):
-            raise ValueError("Missing the required parameter `body` when calling `users_search_post`")  # noqa: E501
+            raise ValueError("Missing the required parameter `body` when calling `query_user`")  # noqa: E501
 
         collection_formats = {}
 
@@ -766,7 +766,7 @@ class UserApi(object):
         auth_settings = ['testmode']  # noqa: E501
 
         return self.api_client.call_api(
-            '/Users/.search', 'POST',
+            '/jans-scim/restv1/v2/Users/.search', 'POST',
             path_params,
             query_params,
             header_params,
