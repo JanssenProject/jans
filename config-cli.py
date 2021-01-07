@@ -14,6 +14,7 @@ import random
 import datetime
 import ruamel.yaml
 import importlib
+import code
 
 from pprint import pprint
 from functools import partial
@@ -196,6 +197,12 @@ class JCA_CLI:
         self.make_menu()
         self.current_menu = self.menu
 
+
+    def drop_to_shell(self, mylocals):
+        locals_ = locals()
+        locals_.update(mylocals)
+        code.interact(local=locals_)
+        sys.exit()
 
     def get_yaml(self):
         debug_json = 'swagger_yaml.json'
@@ -728,7 +735,10 @@ class JCA_CLI:
                 return attribute
 
 
-    def get_input_for_schema_(self, schema, model, spacing=0):
+    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False):
+
+
+        #self.drop_to_shell(locals())
 
         data = {}
         for prop in schema['properties']:
@@ -739,19 +749,23 @@ class JCA_CLI:
                 print()
                 print("Data for object {}. {}".format(prop, item.get('description','')))
 
-                if getattr(model, prop_).__class__.__name__ == 'type':
-                    model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
-                    model_name = self.get_name_from_string(model_name_str)
+                model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
+                model_name = self.get_name_from_string(model_name_str)
+
+                if initialised and getattr(model, prop_):
+                    sub_model = getattr(model, prop_)
+                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                elif isinstance(model, type) and hasattr(swagger_client.models, model_name):
                     sub_model_class = getattr(swagger_client.models, model_name)
-                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3)
+                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3, initialised=initialised)
                     setattr(model, prop_, result)
                 elif hasattr(swagger_client.models, model.swagger_types[prop_]):
                     sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
-                    result = self.get_input_for_schema_(item, sub_model, spacing=3)
+                    result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
                     setattr(model, prop_, result)
                 else:
-                    sub_model = getattr(model, prop_)
-                    self.get_input_for_schema_(item, sub_model, spacing=3)
+                    self.print_colored_output("Fix me: can't find model", error_color)
+
 
             elif item['type'] == 'array' and '__schema_name__' in item:
                 model_name = item['__schema_name__']
@@ -962,11 +976,12 @@ class JCA_CLI:
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
-
+        initialised = False
         cur_model = None
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
+                initialised = True
 
         if not cur_model:
             for m in endpoint.parent:
@@ -984,7 +999,7 @@ class JCA_CLI:
             if end_point_param:
                 end_point_param_val = getattr(cur_model, end_point_param['name'])
 
-            self.get_input_for_schema_(schema, cur_model)
+            self.get_input_for_schema_(schema, cur_model, initialised=initialised)
         
             print("Obtained Data:")
             print()
@@ -1043,7 +1058,6 @@ class JCA_CLI:
             self.display_menu(menu.get_child(int(selection) -1))
         else:
             m = menu.get_child(int(selection) -1)
-            #endpoint = self.get_endpoint(m)
             getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
@@ -1302,6 +1316,17 @@ class JCA_CLI:
             return random.choice((True, False))
         else:
             return None
+
+
+    def is_native_type(self, model, prop):
+        stype = getattr(model, prop)
+        if stype.startswith('list['):
+            stype = re.match(r'list\[(.*)\]', stype).group(1)
+        elif stype.startswith('dict('):
+            stype = re.match(r'dict\(([^,]*), (.*)\)', stype).group(2)
+
+        if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
+            return True
 
     def get_schema_from_model(self, model, schema):
 
