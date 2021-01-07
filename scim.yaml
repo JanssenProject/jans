@@ -1740,6 +1740,7 @@ components:
           items:
             type: string
             example: urn:ietf:params:scim:api:messages:2.0:SearchRequest
+          default: ["urn:ietf:params:scim:api:messages:2.0:SearchRequest"]
         attributes:
           type: array
           items:
@@ -1756,6 +1757,7 @@ components:
           type: string
         startIndex:
           type: integer
+          default: 1
         count:
           type: integer
       description: See section 3.4.3 of RFC 7644
