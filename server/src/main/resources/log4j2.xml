@@ -99,7 +99,10 @@
 		<Logger name="io.jans.as.server.service.custom" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_SCIM_SCRIPT_LOG_FILE" />
 		</Logger>
-
+		
+		<logger name="io.jans.service.external" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="JANS_SCIM_SCRIPT_LOG_FILE" />
+		</logger>
 
         <Root level="ERROR">
             <AppenderRef ref="Console" />
