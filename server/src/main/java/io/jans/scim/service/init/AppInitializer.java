@@ -6,7 +6,7 @@
 
 package io.jans.scim.service.init;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -85,7 +85,7 @@ public class AppInitializer {
         configurationFactory.initTimer();
         loggerService.initTimer();
         //externalScimService.init();
-        customScriptManager.initTimer(Collections.singletonList(CustomScriptType.SCIM));
+        customScriptManager.initTimer(Arrays.asList(CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION));
         logger.info("Initialized!");
 
     }
