@@ -197,12 +197,11 @@ This will install docker, microk8s, helm and Janssen with the default settings t
 | `global.fido2.enabled`                             | Enable Fido2                                                                                                                     | `false`                             |
 | `global.scim.enabled`                              | Enable SCIM                                                                                                                      | `false`                             |
 | `global.config.enabled`                            | Enable Config                                                                                                                    | `true`                              |
-| `global.config-api.enabled`                        | Enable Config API                                                                                                                   | `true`                              |        
+| `global.config-api.enabled`                        | Enable Config API                                                                                                                | `true`                              |        
 | `global.persistence.enabled`                       | Enable Persistence                                                                                                               | `true`                              |
 | `global.opendj.enabled`                            | Enable Opendj                                                                                                                    | `true`                              |
-| `global.client-api.enabled`                        | Enable client-api                                                                                                                       | `false`                             |
-| `global.nginx-ingress.enabled`                     | Enable Ingress nginx                                                                                                             | `true`                              |
-| `global.auth-key-rotation.enabled`                 | Enable Auth server Key Rotation                                                                                                       | `false`                             |
+| `global.client-api.enabled`                        | Enable client-api                                                                                                                | `false`                             |
+| `global.auth-key-rotation.enabled`                 | Enable Auth server Key Rotation                                                                                                  | `false`                             |
 
 #### config   
 
@@ -251,11 +250,21 @@ This will install docker, microk8s, helm and Janssen with the default settings t
 
 | Parameter                                          | Description                                                                                                                      | Default                             |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |     
-| `nginx-ingress.ingress.enabled`                    | Enable ingress                                                                                                                   | `true`                              |
-| `nginx-ingress.ingress.path`                       | Main path in ingress                                                                                                             | `/`                                 |
-| `nginx-ingress.ingress.hosts`                      | Host holding FQDN for janssen                                                                                                       | `[demoexample.jans.io]`            |
-| `nginx-ingress.ingress.tls[0].secretName`          | Secret name of TLS certificate. This shouldn't be changed.                                                                       | `tls-certificate`                   |
-| `nginx-ingress.ingress.tls[0].hosts`               | Host holding FQDN for janssen                                                                                                       | `demoexample.jans.io`              |
+| `nginx-ingress.ingress.openidConfigEnabled`         | Enable openid-configuration Ingress                                                                                             | `true`                              |
+| `nginx-ingress.ingress.uma2ConfigEnabled`           | Enable uma2-configuration Ingress                                                                                               | `true`                              |
+| `nginx-ingress.ingress.webfingerEnabled`            | Enable webfinger Ingress                                                                                                        | `true`                              |
+| `nginx-ingress.ingress.webdiscoveryEnabled`         | Enable simple-web-discovery Ingress                                                                                             | `true`                              |
+| `nginx-ingress.ingress.scimConfigEnabled`           | Enable SCIM-configuration Ingress                                                                                               | `true`                              |
+| `nginx-ingress.ingress.scimEnabled`                 | Enable SCIM Ingress                                                                                                             | `true`                              |
+| `nginx-ingress.ingress.configApiEnabled`            | Enable ConfigAPI Ingress                                                                                                        | `true`                              |
+| `nginx-ingress.ingress.u2fConfigEnabled`            | Enable U2F (fido-configuration) Ingress                                                                                         | `true`                              |
+| `nginx-ingress.ingress.fido2ConfigEnabled`          | Enable Fido2 configuration Ingress                                                                                              | `true`                              |
+| `nginx-ingress.ingress.authServerEnabled`           | Enable Auth Server Ingress                                                                                                      | `true`                              |
+| `nginx-ingress.ingress.additionalAnnotations`       | Additional annotations that can be added to ingress objects                                                                     | `{}`                                |
+| `nginx-ingress.ingress.path`                        | Main path in ingress                                                                                                            | `/`                                 |
+| `nginx-ingress.ingress.hosts`                       | Host holding FQDN for janssen                                                                                                   | `[demoexample.jans.io]`             |
+| `nginx-ingress.ingress.tls[0].secretName`           | Secret name of TLS certificate. This shouldn't be changed.                                                                      | `tls-certificate`                   |
+| `nginx-ingress.ingress.tls[0].hosts`                | Host holding FQDN for janssen                                                                                                   | `demoexample.jans.io`               |
 
 #### opendj
 
