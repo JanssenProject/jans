@@ -1,11 +1,11 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v1
-appVersion: "1.0.0_a2"
+appVersion: "1.0.0-a3"
 home: https://jans.io
 maintainers:
 - name: Janssen
 email: support@jans.io
 description: Helm chart for SCIM
 name: scim
-version: 1.0.0_a2
+version: 1.0.0-a3
