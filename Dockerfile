@@ -111,7 +111,7 @@ LABEL name="configuration-manager" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="a1" \
+    release="a3" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 
