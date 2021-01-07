@@ -298,7 +298,7 @@ spec:
             pathType: Prefix
             backend:
               serviceName: config-api
-              servicePort: 9444
+              servicePort: 8074
   {{- end }}
 {{- end }}
 
