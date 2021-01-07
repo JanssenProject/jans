@@ -85,7 +85,7 @@ config:
     ldapServiceName: opendj
   image:
     repository: janssenproject/configuration-manager
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
   resources:
     limits:
       cpu: 300m
@@ -145,7 +145,7 @@ opendj:
 persistence:
   image:
     repository: janssenproject/persistence-loader
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -160,7 +160,7 @@ auth-server:
   replicas: 1
   image:
     repository: janssenproject/auth-server
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -175,7 +175,7 @@ fido2:
   replicas: 1
   image:
     repository: janssenproject/fido2
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -189,7 +189,7 @@ scim:
     scimServiceName: scim
   image:
     repository: janssenproject/scim
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -204,7 +204,7 @@ client-api:
   replicas: 1
   image:
     repository: janssenproject/client-api
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -219,7 +219,7 @@ config-api:
   replicas: 1
   image:
     repository: janssenproject/config-api
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
@@ -232,7 +232,7 @@ auth-server-key-rotation:
   keysLife: 48
   image:
     repository: janssenproject/certmanager
-    tag: 1.0.0_a2
+    tag: 1.0.0_a3
     pullPolicy: Always
   resources:
     limits:
