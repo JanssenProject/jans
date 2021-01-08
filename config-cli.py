@@ -913,8 +913,17 @@ class JCA_CLI:
 
 
     def process_patch(self, endpoint):
-        schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
 
+        if 'PatchOperation' in self.cfg_yml['components']['schemas']:
+            schema = self.cfg_yml['components']['schemas']['PatchOperation'].copy()
+            model = getattr(swagger_client.models, 'PatchOperation')
+            for item in schema['properties']:
+                if not 'type' in schema['properties'][item]:
+                    schema['properties'][item]['type'] = 'string'
+        else:
+            schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            model = getattr(swagger_client.models, 'PatchRequest')
+            
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
         if 'name' in url_param:
@@ -923,26 +932,20 @@ class JCA_CLI:
         body = []
 
         while True:
-            data = {}
-            for param in ('op', 'path', 'value'):
-                itype = schema[param]['type']
-                if itype=='object':
-                    itype = 'string'
-                val_ = self.get_input(text=schema[param]['description'].strip('.'), values=schema[param].get('enum',[]), itype=itype)
-                data[param] = val_
-                if param == 'path' and data['op'] == 'remove':
-                    break
-            if not data['path'].startswith('/'):
-                data['path'] = '/' + data['path']
-            
-            model = swagger_client.PatchRequest(**data)
-            body.append(model)
+            data = self.get_input_for_schema_(schema, model)
+            if not data.path.startswith('/'):
+                data.path = '/'+data.path
+            body.append(data)
             selection = self.get_input(text='Patch another param?', values=['y', 'n'])
             if selection == 'n':
                 break
 
-        api_input_unmapped = self.unmap_model(model)
-        self.print_colored_output(api_input_unmapped)
+
+        unmapped_body = []
+        for item in body:
+            unmapped_body.append(self.unmap_model(item))
+
+        self.print_colored_output(unmapped_body)
             
         selection = self.get_input(values=['y', 'n'], text='Coninue?')
 
@@ -952,9 +955,14 @@ class JCA_CLI:
             
             print("Please wait patching...\n")
 
+
+            if my_op_mode == 'scim':
+                body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
+
             try:
                 if url_param_val:
-                    api_response = api_caller(url_param_val, body=body)
+                    payload = {url_param['name']:url_param_val, 'body':body}
+                    api_response = api_caller(**payload)
                 else:
                     api_response = api_caller(body=body)
             except swagger_client.rest.ApiException as e:

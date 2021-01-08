@@ -30,7 +30,7 @@ paths:
   /jans-scim/restv1/v2/Groups:
     get:
       tags:
-      - group
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       operationId: get-groups
       security:
@@ -167,7 +167,7 @@ paths:
   /jans-scim/restv1/v2/Groups/{id}:
     get:
       tags:
-      - group
+      - Group
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
       operationId: get-group-by-id
       security:
@@ -408,7 +408,7 @@ paths:
   /jans-scim/restv1/v2/Groups/.search:
     post:
       tags:
-      - group
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       operationId: query-groups
       security:
@@ -1401,9 +1401,6 @@ paths:
           identified by param id
         content:
           application/scim+json:
-            schema:
-              $ref: '#/components/schemas/PatchRequest'
-          application/json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
         required: true

@@ -439,7 +439,7 @@ class UserApi(object):
 
         # HTTP header `Content-Type`
         header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/scim+json', 'application/json'])  # noqa: E501
+            ['application/scim+json'])  # noqa: E501
 
         # Authentication setting
         auth_settings = ['testmode']  # noqa: E501
