@@ -777,7 +777,15 @@ class JCA_CLI:
                 else:
                     sub_model_list_title_text = item.get('description')
 
+                cur_model_data = getattr(model, prop_)
+                if cur_model_data:
+                    for cur_data in cur_model_data:
+                        print("\nUpdate {}".format(sub_model_list_title_text))
+                        cur_model_data = self.get_input_for_schema_(item, cur_data, spacing=spacing+3)
+
                 sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'], help_text=sub_model_list_help_text)
+                
+                
                 if sub_model_list_selection == 'y':
                     while True:
                         sub_model_list_data = self.get_input_for_schema_(item, sub_model_class, spacing=spacing+3)
