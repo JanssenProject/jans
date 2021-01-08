@@ -7,7 +7,7 @@ export JAVA_HOME=/opt/jre
 export PATH=$JAVA_HOME/bin:$PATH
 
 service_name=`basename $0`
-config_api_command="java -jar -Djans.base=/etc/jans /opt/jans/config-api/jans-config-api-runner.jar"
+config_api_command="java -jar -Djans.base=/etc/jans /opt/jans/jans-config-api/jans-config-api-runner.jar"
 
 # Check the application status
 #
@@ -65,7 +65,7 @@ start() {
 	echo -n "Starting $service_name: "
 	
 	# Redirects default and error output to a log file
-	cd /opt/jans/config-api/
+	cd /opt/jans/jans-config-api/
 	`$config_api_command` > /dev/null 2>&1 &
 	echo "OK"
 }
