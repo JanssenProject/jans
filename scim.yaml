@@ -98,7 +98,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-      - group
+      - Group
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
       operationId: post-group
@@ -218,7 +218,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - group
+      - Group
       description: "Updates a Group resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
@@ -304,7 +304,7 @@ paths:
       x-codegen-request-body-name: group
     delete:
       tags:
-      - group
+      - Group
       description: Deletes a group resource (see section 3.6 of RFC 7644)
       operationId: delete-group-by-id
       security:
@@ -340,7 +340,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - group
+      - Group
       description: "Updates one or more attributes of a Group resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
