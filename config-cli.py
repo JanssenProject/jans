@@ -558,7 +558,7 @@ class JCA_CLI:
 
     def get_scope_for_endpoint(self, endpoint):
         scope = []
-        for security in endpoint.info['security']:
+        for security in endpoint.info.get('security', []):
             for stype in security:
                 scope += security[stype]
 
@@ -736,7 +736,6 @@ class JCA_CLI:
 
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False):
 
-
         #self.drop_to_shell(locals())
 
         data = {}
@@ -766,8 +765,6 @@ class JCA_CLI:
                     sub_model = getattr(model, prop_)
                     self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
                     #print(self.colored_text("Fix me: can't find model", error_color))
-
-
 
             elif item['type'] == 'array' and '__schema_name__' in item:
                 model_name = item['__schema_name__']
