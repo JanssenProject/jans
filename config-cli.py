@@ -782,6 +782,7 @@ class JCA_CLI:
                     for cur_data in cur_model_data:
                         print("\nUpdate {}".format(sub_model_list_title_text))
                         cur_model_data = self.get_input_for_schema_(item, cur_data, spacing=spacing+3)
+                        sub_model_list.append(cur_model_data)
 
                 sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'], help_text=sub_model_list_help_text)
                 
@@ -793,6 +794,7 @@ class JCA_CLI:
                         sub_model_list_selection = self.get_input(text="Add another {}?".format(sub_model_list_title_text), values=['y','n'])
                         if sub_model_list_selection == 'n':
                             break
+                
                 data[prop_] = sub_model_list
 
             else:
