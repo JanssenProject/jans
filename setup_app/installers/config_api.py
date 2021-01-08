@@ -26,7 +26,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.install_var = 'installConfigApi'
         self.register_progess()
 
-        self.root_dir = os.path.join(Config.jansOptFolder, 'config-api')
+        self.root_dir = os.path.join(Config.jansOptFolder, 'jans-config-api')
         self.conf_dir = os.path.join(self.root_dir, 'config')
         self.log_dir = os.path.join(self.root_dir, 'logs')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
