@@ -15,10 +15,10 @@
 from __future__ import absolute_import
 
 # import apis into sdk package
+from swagger_client.api.group_api import GroupApi
 from swagger_client.api.user_api import UserApi
 from swagger_client.api.default_api import DefaultApi
 from swagger_client.api.discovery_api import DiscoveryApi
-from swagger_client.api.group_api import GroupApi
 # import ApiClient
 from swagger_client.api_client import ApiClient
 from swagger_client.configuration import Configuration

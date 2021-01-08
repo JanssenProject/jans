@@ -685,7 +685,6 @@ class JCA_CLI:
 
             schema_ = all_schema
 
-
         for key_ in schema_['properties']:
             if '$ref' in schema_['properties'][key_]:
                 schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
@@ -694,7 +693,7 @@ class JCA_CLI:
                 ref_schema = self.get_schema_from_reference(ref_path)
                 schema_['properties'][key_]['properties'] = ref_schema['properties']
                 schema_['properties'][key_]['title'] = ref_schema['title']
-                schema_['properties'][key_]['description'] = ref_schema['description']
+                schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
                 
         if not 'title' in schema_:
@@ -764,7 +763,10 @@ class JCA_CLI:
                     result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
                     setattr(model, prop_, result)
                 else:
-                    self.print_colored_output("Fix me: can't find model", error_color)
+                    sub_model = getattr(model, prop_)
+                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                    #print(self.colored_text("Fix me: can't find model", error_color))
+
 
 
             elif item['type'] == 'array' and '__schema_name__' in item:
