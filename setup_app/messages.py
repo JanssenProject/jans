@@ -8,7 +8,7 @@ class msg:
     InstallStepsForm_label = "Installing Janssen Server"
     DisplaySummaryForm_label = "Janssen Server Installation Summary"
     version_label = 'Janssen CE'
-    decription = "Use setup.py to configure your Janssen Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup."
+    decription = "Use setup.py to configure your Janssen Server and to add initial data required for jans-auth to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup."
 
     os_type_label = "Detected OS"
     init_type_label = "Detected init"
@@ -107,7 +107,11 @@ class msg:
                    "Hostname: hostname of this server. Detected hostname will be provided.\n"
                    "Organization Name: ......")
 
-    installation_completed = "Janssen Server installation successful!"
+    installation_completed = ("Janssen Server installation successful!\n"
+                                "CLI avalibale to manage Jannsen Server:\n""
+                                "/opt/jans/jans-cli/config-cli.py\n"
+                                "/opt/jans/jans-cli/scim-cli.py"
+                                )
     post_installation = "Please exit from container and restart Janssen Server."
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
