@@ -14,6 +14,7 @@ import random
 import datetime
 import ruamel.yaml
 import importlib
+import code
 
 from pprint import pprint
 from functools import partial
@@ -196,6 +197,12 @@ class JCA_CLI:
         self.make_menu()
         self.current_menu = self.menu
 
+
+    def drop_to_shell(self, mylocals):
+        locals_ = locals()
+        locals_.update(mylocals)
+        code.interact(local=locals_)
+        sys.exit()
 
     def get_yaml(self):
         debug_json = 'swagger_yaml.json'
@@ -551,7 +558,7 @@ class JCA_CLI:
 
     def get_scope_for_endpoint(self, endpoint):
         scope = []
-        for security in endpoint.info['security']:
+        for security in endpoint.info.get('security', []):
             for stype in security:
                 scope += security[stype]
 
@@ -678,7 +685,6 @@ class JCA_CLI:
 
             schema_ = all_schema
 
-
         for key_ in schema_['properties']:
             if '$ref' in schema_['properties'][key_]:
                 schema_['properties'][key_] = self.get_schema_from_reference(schema_['properties'][key_]['$ref'])
@@ -687,7 +693,7 @@ class JCA_CLI:
                 ref_schema = self.get_schema_from_reference(ref_path)
                 schema_['properties'][key_]['properties'] = ref_schema['properties']
                 schema_['properties'][key_]['title'] = ref_schema['title']
-                schema_['properties'][key_]['description'] = ref_schema['description']
+                schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
                 
         if not 'title' in schema_:
@@ -728,7 +734,9 @@ class JCA_CLI:
                 return attribute
 
 
-    def get_input_for_schema_(self, schema, model, spacing=0):
+    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False):
+
+        #self.drop_to_shell(locals())
 
         data = {}
         for prop in schema['properties']:
@@ -739,19 +747,24 @@ class JCA_CLI:
                 print()
                 print("Data for object {}. {}".format(prop, item.get('description','')))
 
-                if getattr(model, prop_).__class__.__name__ == 'type':
-                    model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
-                    model_name = self.get_name_from_string(model_name_str)
+                model_name_str = item.get('__schema_name__') or item.get('title') or item.get('description')
+                model_name = self.get_name_from_string(model_name_str)
+
+                if initialised and getattr(model, prop_):
+                    sub_model = getattr(model, prop_)
+                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                elif isinstance(model, type) and hasattr(swagger_client.models, model_name):
                     sub_model_class = getattr(swagger_client.models, model_name)
-                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3)
+                    result = self.get_input_for_schema_(item, sub_model_class, spacing=3, initialised=initialised)
                     setattr(model, prop_, result)
                 elif hasattr(swagger_client.models, model.swagger_types[prop_]):
                     sub_model = getattr(swagger_client.models, model.swagger_types[prop_])
-                    result = self.get_input_for_schema_(item, sub_model, spacing=3)
+                    result = self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
                     setattr(model, prop_, result)
                 else:
                     sub_model = getattr(model, prop_)
-                    self.get_input_for_schema_(item, sub_model, spacing=3)
+                    self.get_input_for_schema_(item, sub_model, spacing=3, initialised=initialised)
+                    #print(self.colored_text("Fix me: can't find model", error_color))
 
             elif item['type'] == 'array' and '__schema_name__' in item:
                 model_name = item['__schema_name__']
@@ -764,7 +777,16 @@ class JCA_CLI:
                 else:
                     sub_model_list_title_text = item.get('description')
 
+                cur_model_data = getattr(model, prop_)
+                if cur_model_data:
+                    for cur_data in cur_model_data:
+                        print("\nUpdate {}".format(sub_model_list_title_text))
+                        cur_model_data = self.get_input_for_schema_(item, cur_data, spacing=spacing+3)
+                        sub_model_list.append(cur_model_data)
+
                 sub_model_list_selection = self.get_input(text="Add {}?".format(sub_model_list_title_text), values=['y','n'], help_text=sub_model_list_help_text)
+                
+                
                 if sub_model_list_selection == 'y':
                     while True:
                         sub_model_list_data = self.get_input_for_schema_(item, sub_model_class, spacing=spacing+3)
@@ -772,6 +794,7 @@ class JCA_CLI:
                         sub_model_list_selection = self.get_input(text="Add another {}?".format(sub_model_list_title_text), values=['y','n'])
                         if sub_model_list_selection == 'n':
                             break
+                
                 data[prop_] = sub_model_list
 
             else:
@@ -899,8 +922,17 @@ class JCA_CLI:
 
 
     def process_patch(self, endpoint):
-        schema = self.cfg_yml['components']['schemas']['PatchRequest']['properties']
 
+        if 'PatchOperation' in self.cfg_yml['components']['schemas']:
+            schema = self.cfg_yml['components']['schemas']['PatchOperation'].copy()
+            model = getattr(swagger_client.models, 'PatchOperation')
+            for item in schema['properties']:
+                if not 'type' in schema['properties'][item]:
+                    schema['properties'][item]['type'] = 'string'
+        else:
+            schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            model = getattr(swagger_client.models, 'PatchRequest')
+            
         url_param_val = None
         url_param = self.get_endpiont_url_param(endpoint)
         if 'name' in url_param:
@@ -909,26 +941,20 @@ class JCA_CLI:
         body = []
 
         while True:
-            data = {}
-            for param in ('op', 'path', 'value'):
-                itype = schema[param]['type']
-                if itype=='object':
-                    itype = 'string'
-                val_ = self.get_input(text=schema[param]['description'].strip('.'), values=schema[param].get('enum',[]), itype=itype)
-                data[param] = val_
-                if param == 'path' and data['op'] == 'remove':
-                    break
-            if not data['path'].startswith('/'):
-                data['path'] = '/' + data['path']
-            
-            model = swagger_client.PatchRequest(**data)
-            body.append(model)
+            data = self.get_input_for_schema_(schema, model)
+            if not data.path.startswith('/'):
+                data.path = '/'+data.path
+            body.append(data)
             selection = self.get_input(text='Patch another param?', values=['y', 'n'])
             if selection == 'n':
                 break
 
-        api_input_unmapped = self.unmap_model(model)
-        self.print_colored_output(api_input_unmapped)
+
+        unmapped_body = []
+        for item in body:
+            unmapped_body.append(self.unmap_model(item))
+
+        self.print_colored_output(unmapped_body)
             
         selection = self.get_input(values=['y', 'n'], text='Coninue?')
 
@@ -938,9 +964,14 @@ class JCA_CLI:
             
             print("Please wait patching...\n")
 
+
+            if my_op_mode == 'scim':
+                body = {'schemas': ['urn:ietf:params:scim:api:messages:2.0:PatchOp'], 'Operations': body}
+
             try:
                 if url_param_val:
-                    api_response = api_caller(url_param_val, body=body)
+                    payload = {url_param['name']:url_param_val, 'body':body}
+                    api_response = api_caller(**payload)
                 else:
                     api_response = api_caller(body=body)
             except swagger_client.rest.ApiException as e:
@@ -962,11 +993,12 @@ class JCA_CLI:
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
-
+        initialised = False
         cur_model = None
         for m in endpoint.parent:
             if m.method=='get' and m.path.endswith('}'):
                 cur_model = self.process_get(m, return_value=True)
+                initialised = True
 
         if not cur_model:
             for m in endpoint.parent:
@@ -984,7 +1016,7 @@ class JCA_CLI:
             if end_point_param:
                 end_point_param_val = getattr(cur_model, end_point_param['name'])
 
-            self.get_input_for_schema_(schema, cur_model)
+            self.get_input_for_schema_(schema, cur_model, initialised=initialised)
         
             print("Obtained Data:")
             print()
@@ -1022,6 +1054,7 @@ class JCA_CLI:
 
     def display_menu(self, menu):
         clear()
+        print(self.colored_text("*** WARNING! This software is experimental ***", warning_color))
         self.current_menu = menu
 
         self.print_underlined(menu.name)
@@ -1043,7 +1076,6 @@ class JCA_CLI:
             self.display_menu(menu.get_child(int(selection) -1))
         else:
             m = menu.get_child(int(selection) -1)
-            #endpoint = self.get_endpoint(m)
             getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
@@ -1302,6 +1334,17 @@ class JCA_CLI:
             return random.choice((True, False))
         else:
             return None
+
+
+    def is_native_type(self, model, prop):
+        stype = getattr(model, prop)
+        if stype.startswith('list['):
+            stype = re.match(r'list\[(.*)\]', stype).group(1)
+        elif stype.startswith('dict('):
+            stype = re.match(r'dict\(([^,]*), (.*)\)', stype).group(2)
+
+        if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
+            return True
 
     def get_schema_from_model(self, model, schema):
 

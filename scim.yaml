@@ -23,14 +23,14 @@ tags:
   description: Endpoints to manage fido2 devices
 - name: Search
   description: Search (from system root) for one or more resource
-- name: Bulk
-  description: Send several resource operations in a single request
+#- name: Bulk
+#  description: Send several resource operations in a single request
 
 paths:
   /jans-scim/restv1/v2/Groups:
     get:
       tags:
-      - group
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       operationId: get-groups
       security:
@@ -98,7 +98,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-      - group
+      - Group
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
       operationId: post-group
@@ -167,7 +167,7 @@ paths:
   /jans-scim/restv1/v2/Groups/{id}:
     get:
       tags:
-      - group
+      - Group
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
       operationId: get-group-by-id
       security:
@@ -218,7 +218,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - group
+      - Group
       description: "Updates a Group resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
@@ -304,7 +304,7 @@ paths:
       x-codegen-request-body-name: group
     delete:
       tags:
-      - group
+      - Group
       description: Deletes a group resource (see section 3.6 of RFC 7644)
       operationId: delete-group-by-id
       security:
@@ -340,7 +340,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - group
+      - Group
       description: "Updates one or more attributes of a Group resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
@@ -408,7 +408,7 @@ paths:
   /jans-scim/restv1/v2/Groups/.search:
     post:
       tags:
-      - group
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       operationId: query-groups
       security:
@@ -456,6 +456,8 @@ paths:
       x-codegen-request-body-name: searchRequest
   /jans-scim/restv1/v2/FidoDevices:
     get:
+      tags:
+        - Fido Devices
       description: Query Fido resources
       operationId: get-fido-devices
       security:
@@ -538,6 +540,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /jans-scim/restv1/v2/FidoDevices/{id}:
     get:
+      tags:
+        - Fido Devices
       description: Retrieves a U2F/Super Gluu device by Id
       operationId: get-fido-device-by-id
       security:
@@ -587,6 +591,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - Fido Devices
       description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
@@ -661,6 +667,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: fidoDeviceResource
     delete:
+      tags:
+        - Fido Devices
       description: Deletes a Fido resource
       operationId: delete-fido-device-by-id
       security:
@@ -696,6 +704,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /jans-scim/restv1/v2/FidoDevices/.search:
     post:
+      tags:
+        - Fido Devices
       description: Query Fido resources
       operationId: query-fido-resources
       security:
@@ -759,6 +769,8 @@ paths:
       x-codegen-request-body-name: searchRequest
   /jans-scim/restv1/v2/Fido2Devices:
     get:
+      tags:
+        - Fido2 Devices
       description: Query Fido 2 resources
       operationId: query-fido2-resources
       security:
@@ -841,6 +853,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /jans-scim/restv1/v2/Fido2Devices/{id}:
     get:
+      tags:
+        - Fido2 Devices
       description: Retrieves a Fido 2 device by Id
       operationId: get-fido2-device-by-id
       security:
@@ -890,6 +904,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - Fido2 Devices
       description: "Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
@@ -964,6 +980,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: fidoDeviceResource
     delete:
+      tags:
+        - Fido2 Devices
       description: Deletes a Fido 2 resource
       operationId: delete-fido2-device-by-id
       security:
@@ -999,6 +1017,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /jans-scim/restv1/v2/Fido2Devices/.search:
     post:
+      tags:
+        - Fido2 Devices
       description: Query Fido 2 resources
       operationId: query-fido2-devices
       security:
@@ -1403,9 +1423,6 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchRequest'
         required: true
       responses:
         200:
@@ -1489,6 +1506,8 @@ paths:
       x-codegen-request-body-name: searchRequest
   /jans-scim/restv1/v2/.search:
     post:
+      tags:
+        - Search
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
       operationId: query-resource
@@ -1537,6 +1556,8 @@ paths:
       x-codegen-request-body-name: searchRequest
   /jans-scim/restv1/v2/Bulk:
     post:
+      tags:
+        - Bulk
       description: Send several resource operations in a single request (see section
         3.7 of RFC 7644)
       operationId: post-bulk
@@ -1577,7 +1598,7 @@ paths:
   /jans-scim/restv1/v2/ServiceProviderConfig:
     get:
       tags:
-      - discovery
+      - Discovery
       description: Describes the SCIM specification features available (see section
         5 of RFC 7644)
       operationId: get-service-provider-config
@@ -1603,7 +1624,7 @@ paths:
   /jans-scim/restv1/v2/ResourceTypes:
     get:
       tags:
-      - discovery
+      - Discovery
       description: |
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
       operationId: get-resources
@@ -1629,7 +1650,7 @@ paths:
   /jans-scim/restv1/v2/ResourceTypes/{resource}:
     get:
       tags:
-      - discovery
+      - Discovery
       description: "Describes the endpoint, schemas and extensions supported by a\
         \ specific kind of resource.\nIt returns a specific portion of the ouput of\
         \ the more general /Resources endpoint  \n"
@@ -1667,7 +1688,7 @@ paths:
   /jans-scim/restv1/v2/Schemas:
     get:
       tags:
-      - discovery
+      - Discovery
       description: "Endpoint used to retrieve information about schemas supported\
         \ (see section \n4 of RFC 7644)\n"
       operationId: get-schemas
@@ -1693,7 +1714,7 @@ paths:
   /jans-scim/restv1/v2/Schemas/{uri}:
     get:
       tags:
-      - discovery
+      - Discovery
       description: Retrieves information about a specific resource
       operationId: get-schema-by-uri
       parameters:
@@ -1740,6 +1761,7 @@ components:
           items:
             type: string
             example: urn:ietf:params:scim:api:messages:2.0:SearchRequest
+          default: ["urn:ietf:params:scim:api:messages:2.0:SearchRequest"]
         attributes:
           type: array
           items:
@@ -1756,6 +1778,7 @@ components:
           type: string
         startIndex:
           type: integer
+          default: 1
         count:
           type: integer
       description: See section 3.4.3 of RFC 7644
