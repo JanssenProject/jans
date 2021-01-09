@@ -49,7 +49,7 @@ class SearchRequest(object):
         'count': 'count'
     }
 
-    def __init__(self, schemas=None, attributes=None, excluded_attributes=None, filter=None, sort_by=None, sort_order=None, start_index=None, count=None):  # noqa: E501
+    def __init__(self, schemas=None, attributes=None, excluded_attributes=None, filter=None, sort_by=None, sort_order=None, start_index=1, count=None):  # noqa: E501
         """SearchRequest - a model defined in Swagger"""  # noqa: E501
         self._schemas = None
         self._attributes = None
