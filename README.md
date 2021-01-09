@@ -1,9 +1,6 @@
 # _Janssen Command Line Interface_
 `jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
 
-# _Overview_
-
-
 # _Quick Start_
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during installation 
