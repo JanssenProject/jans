@@ -1054,6 +1054,7 @@ class JCA_CLI:
 
     def display_menu(self, menu):
         clear()
+        print(self.colored_text("*** WARNING! This software is experimental ***", warning_color))
         self.current_menu = menu
 
         self.print_underlined(menu.name)
