@@ -1609,18 +1609,13 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ServiceProviderConfigResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceProviderConfigResponse'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
   /jans-scim/restv1/v2/ResourceTypes:
     get:
       tags:
@@ -1635,18 +1630,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceTypeListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceTypeListResponse'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
   /jans-scim/restv1/v2/ResourceTypes/{resource}:
     get:
       tags:
@@ -1673,18 +1664,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceType'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceType'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
   /jans-scim/restv1/v2/Schemas:
     get:
       tags:
@@ -1699,18 +1686,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SchemaListResponse'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
   /jans-scim/restv1/v2/Schemas/{uri}:
     get:
       tags:
@@ -1737,18 +1720,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SchemaResource'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     AnyValue:
