@@ -3426,6 +3426,7 @@ components:
             - BINARY
             - CERTIFICATE
             - DATE
+            - JSON
         status:
           type: string
           description: Attrubute status
