@@ -752,6 +752,7 @@ paths:
       summary: Updates a custom script.
       description: Updates a custom script.
       operationId: put-config-scripts
+      x-getdata: get-config-scripts-by-inum
       tags:
         - Custom Scripts
       requestBody:

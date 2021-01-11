@@ -778,7 +778,8 @@ class JCA_CLI:
                     sub_model_list_title_text = item.get('description')
 
                 cur_model_data = getattr(model, prop_)
-                if cur_model_data:
+
+                if cur_model_data and initialised:
                     for cur_data in cur_model_data:
                         print("\nUpdate {}".format(sub_model_list_title_text))
                         cur_model_data = self.get_input_for_schema_(item, cur_data, spacing=spacing+3)
@@ -995,10 +996,20 @@ class JCA_CLI:
         schema = self.get_scheme_for_endpoint(endpoint)
         initialised = False
         cur_model = None
-        for m in endpoint.parent:
-            if m.method=='get' and m.path.endswith('}'):
-                cur_model = self.process_get(m, return_value=True)
-                initialised = True
+        
+        if 'x-getdata' in endpoint.info:
+            for m in endpoint.parent:
+                if m.info['operationId'] == endpoint.info['x-getdata']:
+                    cur_model = self.process_get(m, return_value=True)
+                    initialised = True
+                    break
+                    
+        else:
+            for m in endpoint.parent:
+                if m.method=='get' and m.path.endswith('}'):
+                    cur_model = self.process_get(m, return_value=True)
+                    initialised = True
+                    break
 
         if not cur_model:
             for m in endpoint.parent:
@@ -1372,6 +1383,12 @@ class JCA_CLI:
                     sub_schema = self.get_schema_from_model(sub_model, sub_dict)
                     schema[mapped_key] = sub_dict
 
+
+    def get_swagger_model_attr(self, model, attr):
+        stype = model.swagger_types[attr]
+        if stype in swagger_client.ApiClient.NATIVE_TYPES_MAPPING:
+            return getattr(model, attr)
+        
 
     def fill_defaults(self, schema, schema_={}):
 
