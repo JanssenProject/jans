@@ -1,9 +1,7 @@
-# _jans-cli_
-`jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes 
-easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
+# _Janssen Command Line Interface_
+`jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
 
-
-# Quick Start
+# _Quick Start_
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during installation 
 of [Janssen Server](https://github.com/JanssenProject/home).
@@ -12,9 +10,9 @@ of [Janssen Server](https://github.com/JanssenProject/home).
 
 After successfully installed Janssen Server, run the following command:
 
-```/opt/jans/jans-cli/config-cli.py```
+```python3 /opt/jans/jans-cli/config-cli.py```
 
-You will get a menu as below:
+You will get a menu as below image:
 
 ![main-menu.png](docs/img/im-main.png)
 

@@ -1,7 +1,7 @@
 # Using jans-cli
 `jans-cli` is automatically installed if you choose to install **jans-config-api** during installation of Janssen Server. `jans-cli` has two modes of operation
 1. Menu-driven Interactive Mode
-1. Command Line Argument Mode
+2. Command Line Argument Mode
 
 ## Menu-driven Interactive Mode
 We will refer _Menu-driven Interactive Mode_ as **IM**. To run IM just simply execute jans-cli as follows:
@@ -12,11 +12,21 @@ You will see main menu as
 
 ![jans-cli Main Menu](img/im-main.png)
 
-Using IM is very simple and intuitive. Just make selection and answer questions. For example to get all attributes chose 1, you will get the following options:
+Using IM is very simple and intuitive. Just make selection and answer questions. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning. 
+
+### Attribute
+
+Using **Janssen CLI**, You can perform some quick operation in _Attribute_. Such as:
+- `view/find` list of Attributes in details.
+- `add` new attributes.
+- `update` an existing attribute
+- `delete` an attribute using it's `inum`, etc.
+
+For example to get all attributes choose 1 from the Menu, you will get the following options:
 
 ![jans-cli Attributes Menu](img/im-attributes-main.png)
 
-Then chose 1, you will be asked Search size,  Search pattern and Status of the attribute. For simplicity leave defaults in our case:
+To `View/Find` attributes choose 1, you will be asked `Search size`,  `Search pattern` and `Status of the attribute`. For simplicity leave defaults in our case:
 
 ![jans-cli Attributes Get All](img/im-attributes-get-all.png)
 
@@ -24,9 +34,13 @@ Once press Enter, it will retrieve 50 attributes and prints to screen in green c
 
 ![jans-cli Attributes Get All Response](img/im-attributes-get-all-response.png)
 
-You can save result to file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
+You can save result as a file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
 
-To update an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. I want to change description for attribute having inum **BCA8**. 
+To `Add` a new attribute, choose 2 (on Attribute screen). Then enter value for each type of attribute items, after then it will ask to `continue?` enter `y` to continue. If everything are filled in the right way, it will create a new attribute on the list. 
+
+![add attribute](img/add-attrb.png) 
+
+To `update` an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. For example; I want to change description for attribute having inum **BCA8**. 
 It will retrieve current data and will ask for modification of each properties, just leave defaults if you don't want to change that property.
 
 ![jans-cli Attributes Update](img/im-attributes-update.png)
@@ -36,6 +50,538 @@ When it comes to end, it will display modified data and ask if you want to conti
 ![jans-cli Attributes Update - Continue?](img/im-attributes-update-continue.png) 
 
 After you enter `y` it will perform update and display updated data on screen.
+
+
+To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` value that you want to delete. Here I chose that I already created in the above: `"inum=a0d1c46e-6184-44c1-a299-29acb3ee8ff7"` It will ask for confirmation, enter `y` to confirm.
+
+![delete attribute](img/delete-attrb.png)
+
+### Authentication Method
+Sometimes It's getting hard to change **Default Authentication Method** from web browser if you can't login using web interface. Here Janssen CLI is going to help you a lot. 
+
+![default-auth](img/default-auth.png)
+
+- `View` Default Authentication Method.
+- `Update` Default Authentication Method.
+
+Select option 2 from the Main Menu to chose Authentication Method. You can see such option as listed above.
+
+To `View` default authentication method select 1 from Authentication Menu, It will show you current default authentication method of janssen server.
+
+![current-default-auth](img/cur-default-auth.png)
+
+
+To `update` default authentication method select 2, then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
+
+![update-auth](img/up-default-auth.png)
+
+
+### Cache Configuration
+In the following Main Menu, Options `3, 4, 5, 6 & 7` are for **Cache Configuration**. 
+- Cache Configuration
+- Cache Configuration – Memcached
+- Cache Configuration – Redis
+- Cache Configuration – in-Memory
+- Cache Configuration – Native-Persistence
+
+Select option 3 to enter in _Cache Configuration_ menu. If you want to view cache configuration then choose option 1
+from Cache Configuration Menu. It will return cache configuration in details as below:
+```
+{
+  "cacheProviderType": "NATIVE_PERSISTENCE",
+  "memcachedConfiguration": {
+    "servers": "localhost:11211",
+    "maxOperationQueueLength": 100000,
+    "bufferSize": 32768,
+    "defaultPutExpiration": 60,
+    "connectionFactoryType": "DEFAULT"
+  },
+  "redisConfiguration": {
+    "redisProviderType": "STANDALONE",
+    "servers": "localhost:6379",
+    "password": null,
+    "defaultPutExpiration": 60,
+    "sentinelMasterGroupName": null,
+    "useSSL": false,
+    "sslTrustStoreFilePath": null,
+    "maxIdleConnections": 10,
+    "maxTotalConnections": 500,
+    "connectionTimeout": 3000,
+    "soTimeout": 3000,
+    "maxRetryAttempts": 5
+  },
+  "inMemoryConfiguration": {
+    "defaultPutExpiration": 60
+  },
+  "nativePersistenceConfiguration": {
+    "defaultPutExpiration": 60,
+    "defaultCleanupBatchSize": 10000,
+    "deleteExpiredOnGetRequest": false
+  }
+}
+```
+
+To update configuration for each type of cache provider, you can simply choose option `4, 5, 6 or 7` according to Cache Provider Type.
+
+### Jans Authorization Server
+From the Main Menu choose option 8 to `get/modify` Jans authorization server configuration properties.
+
+Select 1 to get all the details about Jans authorization server configuration. It will show all the properties as below:
+```
+{
+  "issuer": "https://testjans.gluu.com",
+  "baseEndpoint": "https://testjans.gluu.com/jans-auth/restv1",
+  "authorizationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/authorize",
+  "tokenEndpoint": "https://testjans.gluu.com/jans-auth/restv1/token",
+  "tokenRevocationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/revoke",
+  "userInfoEndpoint": "https://testjans.gluu.com/jans-auth/restv1/userinfo",
+  "clientInfoEndpoint": "https://testjans.gluu.com/jans-auth/restv1/clientinfo",
+  "checkSessionIFrame": "https://testjans.gluu.com/jans-auth/opiframe.htm",
+  "endSessionEndpoint": "https://testjans.gluu.com/jans-auth/restv1/end_session",
+  "jwksUri": "https://testjans.gluu.com/jans-auth/restv1/jwks",
+  "registrationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/register",
+  "openIdDiscoveryEndpoint": "https://testjans.gluu.com/.well-known/webfinger",
+  "openIdConfigurationEndpoint": "https://testjans.gluu.com/.well-known/openid-configuration",
+  "idGenerationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/id",
+  "introspectionEndpoint": "https://testjans.gluu.com/jans-auth/restv1/introspection",
+  "deviceAuthzEndpoint": "https://testjans.gluu.com/jans-auth/restv1/device_authorization",
+  "sessionAsJwt": false,
+  "sectorIdentifierCacheLifetimeInMinutes": 1440,
+  "umaConfigurationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/uma2-configuration",
+  "umaRptAsJwt": false,
+  "umaRptLifetime": 3600,
+  "umaTicketLifetime": 3600,
+  "umaPctLifetime": 2592000,
+  "umaResourceLifetime": 2592000,
+  "umaAddScopesAutomatically": true,
+  "umaValidateClaimToken": false,
+  "umaGrantAccessIfNoPolicies": false,
+  "umaRestrictResourceToAssociatedClient": false,
+  "spontaneousScopeLifetime": 86400,
+  "openidSubAttribute": "inum",
+  "responseTypesSupported": [
+    "['token', 'code']",
+    "['id_token']",
+    "['token']",
+    "['id_token', 'code']",
+    "['id_token', 'token', 'code']",
+    "['code']",
+    "['id_token', 'token']"
+  ],
+  "responseModesSupported": [
+    "query",
+    "form_post",
+    "fragment"
+  ],
+  "grantTypesSupported": [
+    "password",
+    "client_credentials",
+    "refresh_token",
+    "urn:ietf:params:oauth:grant-type:uma-ticket",
+    "urn:ietf:params:oauth:grant-type:device_code",
+    "implicit",
+    "authorization_code"
+  ],
+  "subjectTypesSupported": [
+    "public",
+    "pairwise"
+  ],
+  "defaultSubjectType": [
+    "p",
+    "a",
+    "i",
+    "r",
+    "w",
+    "i",
+    "s",
+    "e"
+  ],
+  "userInfoSigningAlgValuesSupported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "userInfoEncryptionAlgValuesSupported": [
+    "RSA1_5",
+    "RSA-OAEP",
+    "A128KW",
+    "A256KW"
+  ],
+  "userInfoEncryptionEncValuesSupported": [
+    "A128CBC+HS256",
+    "A256CBC+HS512",
+    "A128GCM",
+    "A256GCM"
+  ],
+  "idTokenSigningAlgValuesSupported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "idTokenEncryptionAlgValuesSupported": [
+    "RSA1_5",
+    "RSA-OAEP",
+    "A128KW",
+    "A256KW"
+  ],
+  "idTokenEncryptionEncValuesSupported": [
+    "A128CBC+HS256",
+    "A256CBC+HS512",
+    "A128GCM",
+    "A256GCM"
+  ],
+  "requestObjectSigningAlgValuesSupported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "requestObjectEncryptionAlgValuesSupported": [
+    "RSA1_5",
+    "RSA-OAEP",
+    "A128KW",
+    "A256KW"
+  ],
+  "requestObjectEncryptionEncValuesSupported": [
+    "A128CBC+HS256",
+    "A256CBC+HS512",
+    "A128GCM",
+    "A256GCM"
+  ],
+  "tokenEndpointAuthMethodsSupported": [
+    "client_secret_basic",
+    "client_secret_post",
+    "client_secret_jwt",
+    "private_key_jwt",
+    "tls_client_auth",
+    "self_signed_tls_client_auth"
+  ],
+  "tokenEndpointAuthSigningAlgValuesSupported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512"
+  ],
+  "dynamicRegistrationCustomAttributes": null,
+  "displayValuesSupported": [
+    "page",
+    "popup"
+  ],
+  "claimTypesSupported": [
+    "normal"
+  ],
+  "jwksAlgorithmsSupported": [
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "RSA1_5",
+    "RSA-OAEP"
+  ],
+  "serviceDocumentation": [
+    "h",
+    "t",
+    "t",
+    "p",
+    ":",
+    "/",
+    "/",
+    "j",
+    "a",
+    "n",
+    "s",
+    ".",
+    "o",
+    "r",
+    "g",
+    "/",
+    "d",
+    "o",
+    "c",
+    "s"
+  ],
+  "claimsLocalesSupported": [
+    "en"
+  ],
+  "idTokenTokenBindingCnfValuesSupported": [
+    "tbh"
+  ],
+  "uiLocalesSupported": [
+    "en",
+    "bg",
+    "de",
+    "es",
+    "fr",
+    "it",
+    "ru",
+    "tr"
+  ],
+  "claimsParameterSupported": false,
+  "requestParameterSupported": true,
+  "requestUriParameterSupported": true,
+  "requestUriHashVerificationEnabled": false,
+  "requireRequestUriRegistration": false,
+  "opPolicyUri": "http://www.jans.io/doku.php?id=jans:policy",
+  "opTosUri": "http://www.jans.io/doku.php?id=jans:tos",
+  "authorizationCodeLifetime": 60,
+  "refreshTokenLifetime": 14400,
+  "idTokenLifetime": 3600,
+  "idTokenFilterClaimsBasedOnAccessToken": false,
+  "accessTokenLifetime": 300,
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "cleanServiceBaseDns": null,
+  "keyRegenerationEnabled": true,
+  "keyRegenerationInterval": 48,
+  "defaultSignatureAlgorithm": [
+    "R",
+    "S",
+    "2",
+    "5",
+    "6"
+  ],
+  "oxOpenIdConnectVersion": "openidconnect-1.0",
+  "oxId": "https://testjans.gluu.com/oxid/service/jans/inum",
+  "dynamicRegistrationEnabled": true,
+  "dynamicRegistrationExpirationTime": -1,
+  "dynamicRegistrationPersistClientAuthorizations": true,
+  "trustedClientEnabled": true,
+  "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
+  "dynamicRegistrationScopesParamEnabled": true,
+  "dynamicRegistrationPasswordGrantTypeEnabled": false,
+  "dynamicRegistrationAllowedPasswordGrantScopes": null,
+  "dynamicRegistrationCustomObjectClass": null,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "persistIdTokenInLdap": false,
+  "persistRefreshTokenInLdap": true,
+  "allowPostLogoutRedirectWithoutValidation": false,
+  "invalidateSessionCookiesAfterAuthorizationFlow": false,
+  "returnClientSecretOnRead": true,
+  "rejectJwtWithNoneAlg": true,
+  "expirationNotificatorEnabled": false,
+  "useNestedJwtDuringEncryption": true,
+  "expirationNotificatorMapSizeLimit": 100000,
+  "expirationNotificatorIntervalInSeconds": 600,
+  "authenticationFiltersEnabled": false,
+  "clientAuthenticationFiltersEnabled": false,
+  "clientRegDefaultToCodeFlowWithRefresh": true,
+  "authenticationFilters": [
+    {
+      "filter": "(&(mail=*{0}*)(inum={1}))",
+      "bind": false,
+      "bind-password-attribute": null,
+      "base-dn": null
+    },
+    {
+      "filter": "uid={0}",
+      "bind": true,
+      "bind-password-attribute": null,
+      "base-dn": null
+    }
+  ],
+  "clientAuthenticationFilters": [
+    {
+      "filter": "myCustomAttr1={0}",
+      "bind": null,
+      "bind-password-attribute": null,
+      "base-dn": null
+    }
+  ],
+  "corsConfigurationFilters": [
+    {
+      "filterName": "CorsFilter",
+      "corsEnabled": true,
+      "corsAllowedOrigins": "*",
+      "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
+      "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+      "corsExposedHeaders": null,
+      "corsSupportCredentials": true,
+      "corsLoggingEnabled": false,
+      "corsPreflightMaxAge": 1800,
+      "corsRequestDecorate": true
+    }
+  ],
+  "sessionIdUnusedLifetime": 86400,
+  "sessionIdUnauthenticatedUnusedLifetime": 120,
+  "sessionIdEnabled": true,
+  "sessionIdPersistOnPromptNone": true,
+  "sessionIdRequestParameterEnabled": false,
+  "changeSessionIdOnAuthentication": true,
+  "sessionIdPersistInCache": false,
+  "sessionIdLifetime": 86400,
+  "serverSessionIdLifetime": 86400,
+  "configurationUpdateInterval": 3600,
+  "enableClientGrantTypeUpdate": true,
+  "dynamicGrantTypeDefault": [
+    "client_credentials",
+    "refresh_token",
+    "urn:ietf:params:oauth:grant-type:uma-ticket",
+    "urn:ietf:params:oauth:grant-type:device_code",
+    "implicit",
+    "authorization_code"
+  ],
+  "cssLocation": null,
+  "jsLocation": null,
+  "imgLocation": null,
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": false,
+  "pairwiseIdType": [
+    "a",
+    "l",
+    "g",
+    "o",
+    "r",
+    "i",
+    "t",
+    "h",
+    "m",
+    "i",
+    "c"
+  ],
+  "pairwiseCalculationKey": "sckNNuFhwz3r2fC4xLLlBeVybFw",
+  "pairwiseCalculationSalt": "USZej6vS3pI7RzFIl3AT",
+  "shareSubjectIdBetweenClientsWithSameSectorId": true,
+  "webKeysStorage": "keystore",
+  "dnName": "CN=Jans Auth CA Certificates",
+  "keyStoreFile": "/etc/certs/jans-auth-keys.jks",
+  "keyStoreSecret": "0EIsfpb6tURD",
+  "keySelectionStrategy": "OLDER",
+  "oxElevenTestModeToken": null,
+  "oxElevenGenerateKeyEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/generateKey",
+  "oxElevenSignEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/sign",
+  "oxElevenVerifySignatureEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/verifySignature",
+  "oxElevenDeleteKeyEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/deleteKey",
+  "introspectionAccessTokenMustHaveUmaProtectionScope": false,
+  "endSessionWithAccessToken": false,
+  "cookieDomain": null,
+  "enabledOAuthAuditLogging": null,
+  "jmsBrokerURISet": null,
+  "jmsUserName": null,
+  "jmsPassword": null,
+  "clientWhiteList": [
+    "*"
+  ],
+  "clientBlackList": [
+    "*.attacker.com/*"
+  ],
+  "legacyIdTokenClaims": false,
+  "customHeadersWithAuthorizationResponse": true,
+  "frontChannelLogoutSessionSupported": true,
+  "loggingLevel": "INFO",
+  "loggingLayout": "text",
+  "updateUserLastLogonTime": false,
+  "updateClientAccessTime": false,
+  "logClientIdOnClientAuthentication": true,
+  "logClientNameOnClientAuthentication": false,
+  "disableJdkLogger": true,
+  "authorizationRequestCustomAllowedParameters": [
+    "customParam2",
+    "customParam3",
+    "customParam1"
+  ],
+  "legacyDynamicRegistrationScopeParam": false,
+  "openidScopeBackwardCompatibility": false,
+  "disableU2fEndpoint": false,
+  "useLocalCache": true,
+  "fapiCompatibility": false,
+  "forceIdTokenHintPrecense": false,
+  "forceOfflineAccessScopeToEnableRefreshToken": true,
+  "errorReasonEnabled": false,
+  "removeRefreshTokensForClientOnLogout": true,
+  "skipRefreshTokenDuringRefreshing": false,
+  "refreshTokenExtendLifetimeOnRotation": false,
+  "consentGatheringScriptBackwardCompatibility": false,
+  "introspectionScriptBackwardCompatibility": false,
+  "introspectionResponseScopesBackwardCompatibility": false,
+  "softwareStatementValidationType": "script",
+  "softwareStatementValidationClaimName": null,
+  "authenticationProtectionConfiguration": {
+    "attemptExpiration": 15,
+    "maximumAllowedAttemptsWithoutDelay": 4,
+    "delayTime": 2,
+    "bruteForceProtectionEnabled": false
+  },
+  "errorHandlingMethod": "internal",
+  "keepAuthenticatorAttributesOnAcrChange": false,
+  "deviceAuthzRequestExpiresIn": 1800,
+  "deviceAuthzTokenPollInterval": 5,
+  "deviceAuthzResponseTypeToProcessAuthz": "code",
+  "backchannelClientId": null,
+  "backchannelRedirectUri": "https://testjans.gluu.com/jans-auth/ciba/home.htm",
+  "backchannelAuthenticationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/bc-authorize",
+  "backchannelDeviceRegistrationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/bc-deviceRegistration",
+  "backchannelTokenDeliveryModesSupported": [
+    "poll",
+    "ping",
+    "push"
+  ],
+  "backchannelAuthenticationRequestSigningAlgValuesSupported": null,
+  "backchannelUserCodeParameterSupported": false,
+  "backchannelBindingMessagePattern": "^[a-zA-Z0-9]{4,8}$",
+  "backchannelAuthenticationResponseExpiresIn": 3600,
+  "backchannelAuthenticationResponseInterval": 2,
+  "backchannelLoginHintClaims": [
+    "inum",
+    "uid",
+    "mail"
+  ],
+  "cibaEndUserNotificationConfig": {
+    "apiKey": null,
+    "authDomain": null,
+    "databaseURL": null,
+    "projectId": null,
+    "storageBucket": null,
+    "messagingSenderId": null,
+    "appId": null,
+    "notificationUrl": null,
+    "notificationKey": null,
+    "publicVapidKey": null
+  },
+  "backchannelRequestsProcessorJobIntervalSec": 5,
+  "backchannelRequestsProcessorJobChunkSize": 100,
+  "cibaGrantLifeExtraTimeSec": 180,
+  "cibaMaxExpirationTimeAllowedSec": 1800,
+  "cibaEnabled": false,
+  "discoveryCacheLifetimeInMinutes": 60,
+  "httpLoggingEnabled": false,
+  "httpLoggingExludePaths": null,
+  "externalLoggerConfiguration": null
+}
+```
+
 
 ## Command Line Argument Mode
 We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
