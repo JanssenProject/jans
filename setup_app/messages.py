@@ -108,7 +108,7 @@ class msg:
                    "Organization Name: ......")
 
     installation_completed = ("Janssen Server installation successful!\n"
-                                "CLI avalibale to manage Jannsen Server:\n"
+                                "CLI available to manage Jannsen Server:\n"
                                 "/opt/jans/jans-cli/config-cli.py\n"
                                 "/opt/jans/jans-cli/scim-cli.py"
                                 )
