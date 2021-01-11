@@ -229,6 +229,9 @@ class SetupUtils(Crypto64):
         if os.path.isfile(inFile):
             with open(inFile, 'rb') as f:
                 cur_content = f.read()
+        else:
+            cur_content = ''
+
         self.backupFile(inFile, destFolder, cur_content=cur_content)
         self.logIt("Copying file {} to {}".format(inFile, destFolder))
         try:
