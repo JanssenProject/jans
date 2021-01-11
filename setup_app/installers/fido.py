@@ -72,5 +72,12 @@ class FidoInstaller(JettyInstaller):
             os.path.join(self.fido2ConfigFolder, 'mds/cert')
             )
 
+        #copy fido2 server metadata
+        self.copyTree(
+            os.path.join(Config.install_dir, 'static/auth/fido2/server_metadata'),
+            os.path.join(self.fido2ConfigFolder, 'server_metadata')
+            )
+
+
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
