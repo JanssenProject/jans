@@ -1552,16 +1552,10 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ServiceProviderConfigResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceProviderConfigResponse'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /ResourceTypes:
@@ -1577,16 +1571,10 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceTypeListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceTypeListResponse'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /ResourceTypes/{resource}:
@@ -1614,16 +1602,10 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceType'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResourceType'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /Schemas:
@@ -1639,16 +1621,10 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SchemaListResponse'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /Schemas/{uri}:
@@ -1676,16 +1652,10 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SchemaResource'
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
