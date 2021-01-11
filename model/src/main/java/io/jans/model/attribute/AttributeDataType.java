@@ -22,7 +22,7 @@ import io.jans.orm.annotation.AttributeEnum;
 public enum AttributeDataType implements AttributeEnum {
 
     STRING("string", "Text"), NUMERIC("numeric", "Numeric"), BOOLEAN("boolean", "Boolean"), BINARY("binary", "Binary"), CERTIFICATE("certificate",
-            "Certificate"), DATE("generalizedTime", "Date");
+            "Certificate"), DATE("generalizedTime", "Date"), JSON("json", "Json");
 
     private String value;
     private String displayName;
