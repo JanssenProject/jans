@@ -26,3 +26,18 @@ jansRequireAuthTime: false
 jansTknEndpointAuthMethod: private_key_jwt
 objectClass: jansClnt
 objectClass: top
+
+# SCIM Test Client
+dn: inum=%(scim_test_client_id)s,ou=clients,o=jans
+objectClass: top
+objectClass: jansClnt
+inum: %(scim_test_client_id)s
+displayName: SCIM Test Mode Client
+jansGrantTyp: client_credentials
+jansTknEndpointAuthMethod: client_secret_basic
+jansLogoutSessRequired: false
+jansRequireAuthTime: false
+jansRespTyp: token
+jansScope: inum=F0C4,ou=scopes,o=jans
+jansScope: inum=C4F5,ou=scopes,o=jans
+jansClntSecret: %(encoded_scim_test_client_secret)s
