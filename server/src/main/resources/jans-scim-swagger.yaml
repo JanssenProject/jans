@@ -1197,6 +1197,8 @@ paths:
       tags:
         - discovery
       description: Describes the SCIM specification features available (see section 5 of RFC 7644)
+      produces:
+        - application/scim+json
 
       responses:
         200:
@@ -1214,6 +1216,8 @@ paths:
         - discovery
       description: |
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
+      produces:
+        - application/scim+json
 
       responses:
         200:
@@ -1231,7 +1235,9 @@ paths:
         - discovery
       description: |
         Describes the endpoint, schemas and extensions supported by a specific kind of resource.
-        It returns a specific portion of the ouput of the more general /Resources endpoint  
+        It returns a specific portion of the ouput of the more general /Resources endpoint
+      produces:
+        - application/scim+json
       
       parameters:
         -
@@ -1262,6 +1268,8 @@ paths:
       description: |
         Endpoint used to retrieve information about schemas supported (see section 
         4 of RFC 7644)
+      produces:
+        - application/scim+json
       
       responses:
         200:
@@ -1277,7 +1285,9 @@ paths:
     get:
       tags:
         - discovery
-      description: Retrieves information about a specific resource  
+      description: Retrieves information about a specific resource
+      produces:
+        - application/scim+json 
       
       parameters:
         -
