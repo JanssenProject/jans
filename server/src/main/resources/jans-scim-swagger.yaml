@@ -1594,20 +1594,21 @@ definitions:
     description: See section 3.5.2 of RFC 7644
     type: object
     required:
-      - operation
+      - op
     properties:
-      operation:
+      op:
         type: string
+        description: The kind of operation to perform
         enum:
           - add
           - remove
           - replace
       path:
         type: string
-        description: Required when type is remove, optional otherwise
+        description: Required when op is remove, optional otherwise
       value:
         type: object
-        description: Only required when type is add or replace
+        description: Only required when op is add or replace
   PatchRequest:
     type: object
     required:
