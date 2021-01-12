@@ -30,6 +30,7 @@ import io.jans.as.server.service.MetricService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
+import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
@@ -80,6 +81,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
 	@Inject
 	private MetricService metricService;
+
+    @Inject
+    private StatService statService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -182,6 +186,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(asToken(accessToken));
             }
 
+            statService.reportAccessToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_ACCESS_TOKEN_COUNT);
 
             return accessToken;
@@ -247,6 +252,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(asToken(refreshToken));
             }
 
+            statService.reportRefreshToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
             return refreshToken;
@@ -265,6 +271,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
+                statService.reportRefreshToken(getGrantType());
                 metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
                 return refreshToken;
             }
@@ -296,6 +303,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             setAcrValues(acrValues);
             setSessionDn(sessionDn);
 
+            statService.reportIdToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT);
 
             return idToken;
