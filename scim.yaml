@@ -1431,18 +1431,12 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
         400:
           description: |
             One or more operations supplied in the request are specified incorrectly, there were attempts to
             modify immutable attributes, or the resulting resource cannot pass intrinsic validations
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
@@ -2022,7 +2016,7 @@ components:
       - operation
       type: object
       properties:
-        operation:
+        op:
           type: string
           enum:
           - add

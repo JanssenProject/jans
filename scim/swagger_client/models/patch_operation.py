@@ -28,57 +28,56 @@ class PatchOperation(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'operation': 'str',
+        'op': 'str',
         'path': 'str',
         'value': 'AnyValue'
     }
 
     attribute_map = {
-        'operation': 'operation',
+        'op': 'op',
         'path': 'path',
         'value': 'value'
     }
 
-    def __init__(self, operation=None, path=None, value=None):  # noqa: E501
+    def __init__(self, op=None, path=None, value=None):  # noqa: E501
         """PatchOperation - a model defined in Swagger"""  # noqa: E501
-        self._operation = None
+        self._op = None
         self._path = None
         self._value = None
         self.discriminator = None
-        self.operation = operation
+        if op is not None:
+            self.op = op
         if path is not None:
             self.path = path
         if value is not None:
             self.value = value
 
     @property
-    def operation(self):
-        """Gets the operation of this PatchOperation.  # noqa: E501
+    def op(self):
+        """Gets the op of this PatchOperation.  # noqa: E501
 
 
-        :return: The operation of this PatchOperation.  # noqa: E501
+        :return: The op of this PatchOperation.  # noqa: E501
         :rtype: str
         """
-        return self._operation
+        return self._op
 
-    @operation.setter
-    def operation(self, operation):
-        """Sets the operation of this PatchOperation.
+    @op.setter
+    def op(self, op):
+        """Sets the op of this PatchOperation.
 
 
-        :param operation: The operation of this PatchOperation.  # noqa: E501
+        :param op: The op of this PatchOperation.  # noqa: E501
         :type: str
         """
-        if operation is None:
-            raise ValueError("Invalid value for `operation`, must not be `None`")  # noqa: E501
         allowed_values = ["add", "remove", "replace"]  # noqa: E501
-        if operation not in allowed_values:
+        if op not in allowed_values:
             raise ValueError(
-                "Invalid value for `operation` ({0}), must be one of {1}"  # noqa: E501
-                .format(operation, allowed_values)
+                "Invalid value for `op` ({0}), must be one of {1}"  # noqa: E501
+                .format(op, allowed_values)
             )
 
-        self._operation = operation
+        self._op = op
 
     @property
     def path(self):
