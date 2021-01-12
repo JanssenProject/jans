@@ -1174,7 +1174,7 @@ jansAttrEditTyp: admin
 jansAttrEditTyp: user
 jansAttrName: jansIMAPData
 jansAttrOrigin: jansPerson
-jansAttrTyp: imapdata
+jansAttrTyp: json
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
 jansClaimName: imap_data
