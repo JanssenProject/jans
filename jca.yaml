@@ -2176,14 +2176,14 @@ components:
           description: boolean value indicating if script enabled.
         scriptError:
           type: object
-          description: Possible errors assosiated with the script.
+          description: Possible errors associated with the script.
           $ref: '#/components/schemas/ScriptError'
         modified:
           type: boolean
           description: boolean value indicating if the script is modified.
         internal:
           type: boolean
-          description: boolean value indicating if the script is interanl.
+          description: boolean value indicating if the script is internal.
     LdapConfiguration:
       type: object
       properties:
@@ -3966,12 +3966,12 @@ components:
           description: Resource scope expression.
           type: string
         clients:
-          description: List of client assosiated with the resource.
+          description: List of client associated with the resource.
           type: array
           items:
             type: string
         resources:
-          description: List of assosiated resource.
+          description: List of associated resource.
           type: array
           items:
             type: string
@@ -4354,7 +4354,7 @@ components:
           type: boolean
     ScriptError:
       type: object
-      description: Possible errors assosiated with the script.
+      description: Possible errors associated with the script.
       properties:
         raisedAt:
           type: string
