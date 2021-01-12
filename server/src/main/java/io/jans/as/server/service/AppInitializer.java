@@ -21,6 +21,7 @@ import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
+import io.jans.as.server.service.stat.StatTimer;
 import io.jans.as.server.service.status.ldap.LdapStatusTimer;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -33,6 +34,7 @@ import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -49,7 +51,6 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
@@ -147,7 +148,10 @@ public class AppInitializer {
 	@Inject
 	private KeyGeneratorTimer keyGeneratorTimer;
 
-	@Inject
+    @Inject
+    private StatTimer statTimer;
+
+    @Inject
     private ExpirationNotificatorTimer expirationNotificatorTimer;
 
 	@Inject
@@ -222,6 +226,7 @@ public class AppInitializer {
 		cleanerTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
+        statTimer.initTimer();
 		expirationNotificatorTimer.initTimer();
 		initTimer();
 		initCibaRequestsProcessor();
