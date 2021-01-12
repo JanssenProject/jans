@@ -1947,21 +1947,22 @@ components:
               $ref: '#/components/schemas/SchemaResource'
     PatchOperation:
       required:
-      - operation
+      - op
       type: object
       properties:
         operation:
           type: string
+          description: The kind of operation to perform
           enum:
           - add
           - remove
           - replace
         path:
           type: string
-          description: Required when type is remove, optional otherwise
+          description: Required when op is remove, optional otherwise
         value:
           $ref: '#/components/schemas/AnyValue'
-          description: Only required when type is add or replace
+          description: Only required when op is add or replace
       description: See section 3.5.2 of RFC 7644
     PatchRequest:
       required:
