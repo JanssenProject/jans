@@ -1950,7 +1950,7 @@ components:
       - op
       type: object
       properties:
-        operation:
+        op:
           type: string
           description: The kind of operation to perform
           enum:
