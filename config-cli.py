@@ -867,7 +867,7 @@ class JCA_CLI:
         model_unmapped = self.unmap_model(model)
         self.print_colored_output(model_unmapped)
 
-        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
+        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
 
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
@@ -943,7 +943,7 @@ class JCA_CLI:
 
         while True:
             data = self.get_input_for_schema_(schema, model)
-            if not data.path.startswith('/'):
+            if my_op_mode != 'scim' and not data.path.startswith('/'):
                 data.path = '/'+data.path
             body.append(data)
             selection = self.get_input(text='Patch another param?', values=['y', 'n'])
@@ -957,7 +957,7 @@ class JCA_CLI:
 
         self.print_colored_output(unmapped_body)
             
-        selection = self.get_input(values=['y', 'n'], text='Coninue?')
+        selection = self.get_input(values=['y', 'n'], text='Continue?')
 
         if selection == 'y':
 
@@ -1003,7 +1003,7 @@ class JCA_CLI:
                     cur_model = self.process_get(m, return_value=True)
                     initialised = True
                     break
-                    
+
         else:
             for m in endpoint.parent:
                 if m.method=='get' and m.path.endswith('}'):
