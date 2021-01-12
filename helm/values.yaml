@@ -26,6 +26,8 @@ global:
     enabled: true
   scim:
     enabled: true
+    # Bootstraps a client id (scim_test_client_id)  and secret (scim_test_client_secret).
+    testMode: false
   config:
     enabled: true
   config-api:
