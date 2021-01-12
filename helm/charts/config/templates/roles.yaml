@@ -3,7 +3,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "config.name" . }}-cn-role
+  name: {{ .Release.Namespace }}-cn-role
   namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups: [""] # "" refers to the core API group
