@@ -8,7 +8,7 @@ We will refer _Menu-driven Interactive Mode_ as **IM**. To run IM just simply ex
 ```
 /opt/jans/jans-cli/config-cli.py
 ```
-You will see main menu as
+You will see the main menu as below:
 
 ![jans-cli Main Menu](img/im-main.png)
 
@@ -86,7 +86,7 @@ In the following Main Menu, Options `3, 4, 5, 6 & 7` are for **Cache Configurati
 
 Select option 3 to enter in _Cache Configuration_ menu. If you want to view cache configuration then choose option 1
 from Cache Configuration Menu. It will return cache configuration in details as below:
-```
+```json5
 {
   "cacheProviderType": "NATIVE_PERSISTENCE",
   "memcachedConfiguration": {
@@ -125,9 +125,16 @@ To update configuration for each type of cache provider, you can simply choose o
 
 ### Jans Authorization Server
 From the Main Menu choose option 8 to `get/modify` Jans authorization server configuration properties.
+```text
+Configuration – Properties
+--------------------------
+1 Gets all Jans authorization server configuration properties
+2 Partially modifies Jans authorization server Application configuration properties
+
+```
 
 Select 1 to get all the details about Jans authorization server configuration. It will show all the properties as below:
-```
+```json5
 {
   "issuer": "https://testjans.gluu.com",
   "baseEndpoint": "https://testjans.gluu.com/jans-auth/restv1",
@@ -581,7 +588,313 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "externalLoggerConfiguration": null
 }
 ```
+By selecting 2nd option, you can modify partially some of its properties. 
 
+### Janssen FIDO2
+Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as 
+the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have the 
+option to also install the FIDO2 component.
+
+Using Janssen CLI, you can `view/update` details of the FIDO2 configuration.
+From the main menu select option 9, It will give two option to choose:
+
+```text
+Configuration – Fido2
+---------------------
+1 Gets Jans Authorization Server Fido2 configuration properties
+2 Updates Fido2 configuration properties
+```
+If you chose the first option, you will get some details of fido2 configuration properties:
+```json5
+{
+  "issuer": "https://testjans.gluu.com",
+  "baseEndpoint": "https://testjans.gluu.com/fido2/restv1",
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": true,
+  "disableJdkLogger": true,
+  "loggingLevel": "INFO",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": "",
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": true,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
+    "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
+    "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
+    "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
+    "requestedParties": [
+      {
+        "name": "https://testjans.gluu.com",
+        "domains": [
+          "testjans.gluu.com"
+        ]
+      }
+    ],
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 180,
+    "authenticationHistoryExpiration": 1296000,
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ]
+  }
+}
+```
+If you want to update fido2 configuration, you can choose 2nd option. It will ask to fill each property, skip for default values. 
+For example, if you want to change logginglevel `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
+
+### SMTP Server Configuration
+Janssen CLI also supports SMTP configuration. You can do following things as stated below:
+- `View/Get`
+- `Add/Delete`
+- `Update`
+- `Test`
+
+Simply select option 10 from Main Menu it will show some options as below:
+```text
+Configuration – SMTP
+--------------------
+1 Returns SMTP server configuration
+2 Adds SMTP server configuration
+3 Updates SMTP server configuration
+4 Deletes SMTP server configuration
+5 Test SMTP server configuration
+```
+Just go with the option and perform operation.
+
+### Janssen Logging Configuration
+Using Janssen CLI, you can easily update logging configuration. Just go with the option 11
+from Main Menu, It will display two options as sated below.
+```text
+Configuration – Logging
+-----------------------
+1 Returns Jans Authorization Server logging settings
+2 Updates Jans Authorization Server logging settings
+```
+
+First option returns current logging configuration.
+```json
+Returns Jans Authorization Server logging settings
+--------------------------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/logging.readonly
+
+{
+  "loggingLevel": "INFO",
+  "loggingLayout": "text",
+  "httpLoggingEnabled": false,
+  "disableJdkLogger": true,
+  "enabledOAuthAuditLogging": false,
+  "externalLoggerConfiguration": null,
+  "httpLoggingExludePaths": null
+}
+```
+To update current logging configuration select option 2. For example, I have updated `logginglevel INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
+```json
+Returns Jans Authorization Server logging settings
+--------------------------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/logging.readonly
+
+«Logging level for Jans Authorization Server logger. Type: string»
+loggingLevel [INFO]: DEBUG
+
+«Logging layout used for Jans Authorization Server loggers. Type: string»
+loggingLayout [text]: 
+
+«To enable http request/response logging. Type: boolean»
+httpLoggingEnabled [false]: 
+
+«To enable/disable Jdk logging. Type: boolean»
+disableJdkLogger [true]: 
+
+«To enable/disable OAuth audit logging. Type: boolean»
+enabledOAuthAuditLogging [false]: true
+Please enter a(n) boolean value: _true, _false
+enabledOAuthAuditLogging [false]: _true
+
+«Path to external log4j2 configuration file. Type: string»
+externalLoggerConfiguration: 
+
+«List of paths to exclude from logger. Type: array of string separated by _,»
+Example: /auth/img, /auth/stylesheet
+httpLoggingExludePaths: 
+Obtained Data:
+
+{
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "httpLoggingEnabled": false,
+  "disableJdkLogger": true,
+  "enabledOAuthAuditLogging": true,
+  "externalLoggerConfiguration": null,
+  "httpLoggingExludePaths": null
+}
+
+Continue? y
+Getting access token for scope https://jans.io/oauth/config/logging.write
+Please wait while posting data ...
+
+{
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "httpLoggingEnabled": false,
+  "disableJdkLogger": true,
+  "enabledOAuthAuditLogging": true,
+  "externalLoggerConfiguration": null,
+  "httpLoggingExludePaths": null
+}
+
+```
+
+### JSON Web Key 
+This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public 
+keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
+From the Main Menu, Select option 12, It returns some options as stated below:
+
+```text
+Configuration – JWK - JSON Web Key (JWK)
+----------------------------------------
+1 Gets list of JSON Web Key (JWK) used by server
+2 Puts/replaces JWKS
+3 Patch JWKS
+```
+You can `view` list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
+
+### Custom Scripts
+Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way 
+that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such operation 
+as listed below:
+
+```text
+Custom Scripts
+--------------
+1 Gets a list of custom scripts
+2 Adds a new custom script
+3 Updates a custom script
+4 Gets list of scripts by type
+5 Gets a script by Inum
+6 Deletes a custom script
+```
+To Add a new script, choose option 2 and fill each property:
+
+`dn, inum, display name, valid script`
+```
+ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP]
+
+Programming Language: [PYTHON, JAVASCRIPT]
+```
+
+### LDAP Configuration 
+
+Using Janssen CLI, Following list of actions can be performed in LDAP.
+```text
+Database - LDAP configuration
+-----------------------------
+1 Gets list of existing LDAP configurations
+2 Adds a new LDAP configuration
+3 Updates LDAP configuration
+4 Gets an LDAP configuration by name
+5 Deletes an LDAP configuration
+6 Partially modify an LDAP configuration
+7 Tests an LDAP configuration
+```
+To get list of existing LDAP configurations, select option 1 and press enter: you will get as following result.
+
+```text
+Gets list of existing LDAP configurations
+-----------------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/database/ldap.readonly
+
+[
+  {
+    "configId": "auth_ldap_server",
+    "bindDN": "cn=directory manager",
+    "bindPassword": "gD63aUTvvS4=",
+    "servers": [
+      "localhost:1636"
+    ],
+    "maxConnections": 1000,
+    "useSSL": true,
+    "baseDNs": [
+      "ou=people,o=jans"
+    ],
+    "primaryKey": "uid",
+    "localPrimaryKey": "uid",
+    "useAnonymousBind": false,
+    "enabled": false,
+    "version": 0,
+    "level": 0
+  }
+]
+```
+
+To add a new LDAP configuration, choose option 2 and add the following properties:
+```json5
+{
+  "configId":
+  "bindDN": 
+  "bindPassword":
+  "servers": [],
+  "maxConnections": 2,
+  "useSSL": false,
+  "baseDNs": [],
+  "primaryKey":
+  "localPrimaryKey":
+  "useAnonymousBind": false,
+  "enabled": false,
+  "version": null,
+  "level": null
+}
+```
+Then enter `y` to confirm.
+
+To update an existing LDAP configuration, select option 3 and enter ldap configuration name. 
+the given name is matched with the existing configurations then It will ask to enter value for each property.
+
+
+
+### Couchbase Configuration
+
+From the main menu, select option 15 to enter into Couchbase configuration menu. You will get the following menu like LDAP configuration.
+
+```text
+Database - Couchbase configuration
+----------------------------------
+1 Gets list of existing Couchbase configurations
+2 Adds a new Couchbase configuration
+3 Updates Couchbase configuration
+4 Gets a Couchbase configurations by name
+5 Partially modify an Couchbase configuration
+6 Deletes a Couchbase configurations by name
+7 Tests a Couchbase configuration
+```
+
+### OpenID Connect - Clients
+
+OpenID Connect Interactive Mode supports following list of actions:
+
+```text
+OAuth - OpenID Connect - Clients
+--------------------------------
+1 Gets list of OpenID Connect clients
+2 Create new OpenId connect client
+3 Update OpenId Connect client
+4 Get OpenId Connect Client by Inum
+5 Delete OpenId Connect client
+6 Update modified properties of OpenId Connect client by Inum
+```
+Using Janssen CLI, Administrator can easily `create/update/delete` openid Connect without any interrupt.
 
 ## Command Line Argument Mode
 We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
