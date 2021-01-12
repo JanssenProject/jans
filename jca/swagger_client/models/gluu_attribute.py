@@ -329,7 +329,7 @@ class GluuAttribute(object):
         """
         if data_type is None:
             raise ValueError("Invalid value for `data_type`, must not be `None`")  # noqa: E501
-        allowed_values = ["STRING", "NUMERIC", "BOOLEAN", "BINARY", "CERTIFICATE", "DATE"]  # noqa: E501
+        allowed_values = ["STRING", "NUMERIC", "BOOLEAN", "BINARY", "CERTIFICATE", "DATE", "JSON"]  # noqa: E501
         if data_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `data_type` ({0}), must be one of {1}"  # noqa: E501
