@@ -61,6 +61,8 @@ data:
   CN_REDIS_SSL_TRUSTSTORE: {{ .Values.configmap.cnRedisSslTruststore | quote }}
   CN_REDIS_SENTINEL_GROUP: {{ .Values.configmap.cnRedisSentinelGroup | quote }}
   {{- end }}
+  CN_SCIM_ENABLED: {{ .Values.global.scim.enabled | quote }}
+  CN_SCIM_TEST_MODE: {{ .Values.global.scim.testMode | quote }}
 
 ---
 
