@@ -21,8 +21,6 @@ from functools import partial
 from urllib.parse import urljoin, urlencode
 from collections import OrderedDict
 
-
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
@@ -336,7 +334,7 @@ class JCA_CLI:
         
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += ' [{}]'.format(self.colored_text(default_text, 11))
+            text += self.colored_text('  ['+default_text+']', 11)
             if itype=='integer':
                 default=int(default)
 
@@ -347,7 +345,7 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            selection = input(' '*spacing + self.colored_text(text, 15)+' ')
+            selection = input(' '*spacing + self.colored_text(text, 20)+' ')
             selection = selection.strip()
 
             if itype == 'boolean' and not selection:
