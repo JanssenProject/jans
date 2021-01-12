@@ -867,7 +867,7 @@ class JCA_CLI:
         model_unmapped = self.unmap_model(model)
         self.print_colored_output(model_unmapped)
 
-        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Coninue?')
+        selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
 
         if selection == 'y':
             api_caller = self.get_api_caller(endpoint)
@@ -957,7 +957,7 @@ class JCA_CLI:
 
         self.print_colored_output(unmapped_body)
             
-        selection = self.get_input(values=['y', 'n'], text='Coninue?')
+        selection = self.get_input(values=['y', 'n'], text='Continue?')
 
         if selection == 'y':
 
