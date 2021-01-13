@@ -1404,7 +1404,7 @@ Server Response:
 
 
 ### OAuthScopes
-Let's get information for a task **OAuthScopes**cd
+Let's get information for a task **OAuthScopes**
 
 
 ```
