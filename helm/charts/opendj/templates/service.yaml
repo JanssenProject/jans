@@ -15,8 +15,15 @@ spec:
       name: {{ $key }}
       targetPort: {{ $value.targetPort }}
       protocol: {{ $value.protocol}}
+      {{- if $value.nodePort }}
+      nodePort: {{ $value.nodePort }}
+      {{- end }}
     {{- end }}
+  {{- if .Values.multiCluster.enabled }}
+  type: NodePort
+  {{- else }}
   clusterIP: None
+  {{- end }}
   selector:
     app: {{ include "opendj.name" . }}
 {{- end }}

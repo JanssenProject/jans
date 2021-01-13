@@ -138,6 +138,12 @@ nginx-ingress:
       - demoexample.jans.io
 
 opendj:
+  # multiCluster LDAP is an alpha feature
+  multiCluster:
+    enabled: false
+    serfAdvertiseAddr: "firstldap.jans.io:30946"
+    serfKey: Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk=
+    serfPeers: ["firstldap.jans.io:30946", "secondldap.jans.io:31946"]
   service:
     ldapServiceName: opendj
   replicas: 1
@@ -154,6 +160,37 @@ opendj:
     requests:
       cpu: 1500m
       memory: 2000Mi
+  ports:
+    tcp-ldaps:
+      port: 1636
+      targetPort: 1636
+      protocol: TCP
+      nodePort: ""
+    tcp-ldap:
+      port: 1389
+      targetPort: 1389
+      protocol: TCP
+      nodePort: ""
+    tcp-repl:
+      port: 8989
+      targetPort: 8989
+      protocol: TCP
+      nodePort: ""
+    tcp-admin:
+      port: 4444
+      targetPort: 4444
+      protocol: TCP
+      nodePort: ""
+    tcp-serf:
+      port: 7946
+      targetPort: 7946
+      protocol: TCP
+      nodePort: ""
+    udp-serf:
+      port: 7946
+      targetPort: 7946
+      protocol: UDP
+      nodePort: ""
 persistence:
   image:
     repository: janssenproject/persistence-loader

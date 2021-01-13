@@ -11,9 +11,9 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ include "opendj.name" . }} 
+      app: {{ include "opendj.name" . }}
   serviceName: {{ include "opendj.name" . }}
-  replicas: {{ .Values.replicas }} 
+  replicas: {{ .Values.replicas }}
   template:
     metadata:
       labels:
@@ -23,6 +23,15 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
+      volumes:
+      {{- if .Values.multiCluster.enabled }}
+        - name: serfkey
+          secret:
+            secretName: {{ .Release.Name }}-serf-key
+        - name: serfpeers
+          configMap:
+            name: {{ .Release.Name }}-serf-peers
+      {{- end }}
       containers:
       - name: {{ include "opendj.fullname" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -37,6 +46,17 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
+        {{- if .Values.multiCluster.enabled }}
+        env:
+          - name: CN_SERF_ADVERTISE_ADDR
+            value: {{ .Values.multiCluster.serfAdvertiseAddr | quote }}
+          - name: CN_LDAP_ADVERTISE_ADMIN_PORT
+            value: {{ index .Values "ports" "tcp-admin" "nodePort" | quote }}
+          - name: CN_LDAP_ADVERTISE_LDAPS_PORT
+            value: {{ index .Values "ports" "tcp-ldaps" "nodePort" | quote }}
+          - name: CN_LDAP_ADVERTISE_REPLICATION_PORT
+            value: {{ index .Values "ports" "tcp-repl" "nodePort" | quote }}
+        {{- end }}
         ports:
         {{- range $key, $value := .Values.ports }}
           - containerPort: {{ $value.targetPort }}
@@ -47,6 +67,14 @@ spec:
           - mountPath: {{$values.mountPath}}
             name: {{$values.name}}
             subPath: {{$key}}
+        {{- end }}
+        {{- if .Values.multiCluster.enabled }}
+          - mountPath: "/etc/cn/conf/serf-key"
+            name: serfkey
+            subPath: serf-key
+          - mountPath: "/etc/jans/conf/serf-peers-static.json"
+            name: serfpeers
+            subPath: serf-peers-static.json
         {{- end }}
         livenessProbe:
           exec:
