@@ -30,7 +30,7 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
-        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
         command:
           - /bin/sh
           - -c
@@ -38,7 +38,7 @@ spec:
               /usr/bin/python3 /scripts/updatelbip.py &
               /app/scripts/entrypoint.sh
         {{- end}}
-        {{- if or (eq .Values.global.provisioner "microk8s.io/hostpath" ) (eq .Values.global.provisioner "k8s.io/minikube-hostpath") }}
+        {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
         resources: {}
         {{- else if .Values.global.cloud.testEnviroment }}
         resources: {}
@@ -52,7 +52,7 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
-        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+        {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
           - name: {{ include "scim.fullname" .}}-updatelbip
             mountPath: "/scripts"
         {{- end }}
@@ -93,7 +93,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-cb-crt 
       {{- end }}
-      {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+      {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
         - name: {{ include "scim.fullname" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip

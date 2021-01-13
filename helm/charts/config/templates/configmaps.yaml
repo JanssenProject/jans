@@ -21,7 +21,7 @@ data:
   CN_AUTH_SERVER_BACKEND: {{ .Values.configmap.cnAuthServerBackend | quote }}
   CN_CLIENT_API_SERVER_URL: {{ .Values.configmap.cnClientApiServerUrl | quote }}
   CN_CLIENT_API_BIND_IP_ADDRESSES: {{ .Values.configmap.cnClientApiBindIpAddresses | quote }}
-  {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.provisioner "openebs.io/local")) }}
+  {{- if and (eq .Values.global.isDomainRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}

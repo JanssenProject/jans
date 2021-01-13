@@ -11,7 +11,7 @@ metadata:
     storage: opendj
   annotations:
     storageclass.beta.kubernetes.io/is-default-class: "false"
-    {{- if eq .Values.global.provisioner "openebs.io/local" }}
+    {{- if eq .Values.global.storageClass.provisioner "openebs.io/local" }}
     openebs.io/cas-type: local
     cas.openebs.io/config: |
       - name: StorageType
@@ -19,27 +19,31 @@ metadata:
       - name: BasePath
         value: /var/local-hostpath
     {{- end }}
-provisioner: {{ .Values.global.provisioner }}
+provisioner: {{ .Values.global.storageClass.provisioner }}
+{{- if and ( ne .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) ( ne .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") ( ne .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") ( ne .Values.global.storageClass.provisioner "kubernetes.io/gce-pd") ( ne .Values.global.storageClass.provisioner "dobs.csi.digitalocean.com") ( ne .Values.global.storageClass.provisioner "openebs.io/local") ( ne .Values.global.storageClass.provisioner "kubernetes.io/azure-disk") }}
 parameters:
-  {{- if eq .Values.global.provisioner "kubernetes.io/aws-ebs" }}
+{{ toYaml .Values.global.storageClass.parameters | indent 4 }}
+{{- else }}
+parameters:
+  {{- if eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs" }}
   type: gp2
-  fsType: {{ .Values.global.fsType }}
-  {{- else if eq .Values.global.provisioner "kubernetes.io/gce-pd" }}
+  fsType: ext4
+  {{- else if eq .Values.global.storageClass.provisioner "kubernetes.io/gce-pd" }}
   type: {{ .Values.global.gcePdStorageType }}
-  {{- else if eq .Values.global.provisioner "kubernetes.io/azure-disk" }}
+  {{- else if eq .Values.global.storageClass.provisioner "kubernetes.io/azure-disk" }}
   storageAccountType: {{ .Values.global.azureStorageAccountType }}
   kind: {{ .Values.global.azureStorageKind }}
-  {{- else if eq .Values.global.provisioner "dobs.csi.digitalocean.com" }}
-  {{- else if eq .Values.global.provisioner "openebs.io/local" }}
+  {{- else if eq .Values.global.storageClass.provisioner "dobs.csi.digitalocean.com" }}
+  {{- else if eq .Values.global.storageClass.provisioner "openebs.io/local" }}
   {{- else }}
-  pool: {{ .Values.global.pool }}
-  fsType: {{ .Values.global.fsType }}
+  pool: default
+  fsType: ext4
   {{- end }}
-allowVolumeExpansion: true
-volumeBindingMode: WaitForFirstConsumer
-reclaimPolicy: {{ .Values.global.reclaimPolicy }}
-mountOptions:
-  - debug
-
+{{- end }}
+allowVolumeExpansion: {{ .Values.global.storageClass.allowVolumeExpansion }}
+volumeBindingMode: {{ .Values.global.storageClass.volumeBindingMode }}
+reclaimPolicy: {{ .Values.global.storageClass.reclaimPolicy }}
+mountOptions: {{ .Values.global.storageClass.mountOptions | toJson }}
+allowedTopologies: {{ .Values.global.storageClass.allowedTopologies | toJson }}
 {{- end }}
 {{- end }}

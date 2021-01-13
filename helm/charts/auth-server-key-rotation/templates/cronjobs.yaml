@@ -35,7 +35,7 @@ spec:
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
-              {{- if or (eq .Values.global.provisioner "microk8s.io/hostpath" ) (eq .Values.global.provisioner "k8s.io/minikube-hostpath") }}
+              {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
               resources: {}
               {{- else if .Values.global.cloud.testEnviroment }}
               resources: {}
