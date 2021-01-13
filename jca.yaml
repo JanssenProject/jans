@@ -2122,7 +2122,7 @@ components:
           description: Details describing the script.
         script:
           type: string
-          description: Actual script.
+          description: 'Actual script or the path to a script file by inputting _file /path/of/file, e.g., _file /opt/jans/customscript/interceptionscript.py.'
         scriptType:
           type: string
           description: Type of script.
