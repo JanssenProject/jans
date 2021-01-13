@@ -347,6 +347,14 @@ class JCA_CLI:
         while True:
             selection = input(' '*spacing + self.colored_text(text, 20)+' ')
             selection = selection.strip()
+            if selection.startswith('_file '):
+                fname = selection.split()[1]
+                if os.path.isfile(fname):
+                    with open(fname) as f:
+                        selection = f.read().strip()
+                else:
+                    print(self.colored_text("File {} does not exist".format(fname), warning_color))
+                    continue
 
             if itype == 'boolean' and not selection:
                 return False
