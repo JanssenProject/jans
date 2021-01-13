@@ -9,13 +9,23 @@ global:
     testEnviroment: false
   upgrade:
     enabled: false
-  provisioner: microk8s.io/hostpath
-  pool: default
-  fsType: ext4
+  storageClass:
+    provisioner: microk8s.io/hostpath
+    # Provide custom parameters if the provisioner is not from the following : microk8s.io/hostpath, k8s.io/minikube-hostpath, kubernetes.io/aws-ebs, kubernetes.io/gce-pd, dobs.csi.digitalocean.com, openebs.io/local, kubernetes.io/azure-disk
+    parameters:
+      type:
+      fsType:
+      storageAccountType:
+      kind:
+      pool:
+    reclaimPolicy: Retain
+    allowVolumeExpansion: true
+    mountOptions: [debug]
+    volumeBindingMode: WaitForFirstConsumer
+    allowedTopologies:
   gcePdStorageType: pd-standard
   azureStorageAccountType: Standard_LRS
   azureStorageKind: Managed
-  reclaimPolicy: Retain
   lbIp: ""
   domain: demoexample.jans.io
   isDomainRegistered: "false"
