@@ -437,6 +437,11 @@ paths:
           in: query
           description: See section 3.9 of RFC 7644
           type: string
+        - 
+          name: userId
+          in: query
+          description: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP
+          type: string
         -
           name: id
           in: path
@@ -661,6 +666,11 @@ paths:
           name: excludedAttributes
           in: query
           description: See section 3.9 of RFC 7644
+          type: string
+        - 
+          name: userId
+          in: query
+          description: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP
           type: string
         -
           name: id
