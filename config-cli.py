@@ -26,6 +26,8 @@ my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
 swagger_client = importlib.import_module(my_op_mode+'.swagger_client')
 swagger_client.models = importlib.import_module(my_op_mode+'.swagger_client.models')
+swagger_client.api = importlib.import_module(my_op_mode+'.swagger_client.api')
+
 swagger_rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
 
 warning_color = 214
@@ -57,8 +59,8 @@ myapi.pool = DummyPool()
 ##################### arguments #####################
 op_list = []
 
-for api_name in dir(swagger_client):
-    if api_name.endswith and inspect.isclass(getattr(swagger_client, api_name)):
+for api_name in dir(swagger_client.api):
+    if api_name.endswith('Api') and inspect.isclass(getattr(swagger_client.api, api_name)):
         op_list.append(api_name[:-3])
 
 parser = argparse.ArgumentParser()
