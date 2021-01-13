@@ -112,10 +112,9 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
             Fido2DeviceResource fidoResource=new Fido2DeviceResource();
 
             GluuFido2Device device=fidoDeviceService.getFido2DeviceById(userId, id);
-            if (device==null)
-                throw new SCIMException("Resource " + id + " not found");
+            //device cannot be null (see Fido2DeviceWebServiceDecorator)
 
-            transferAttributesToFido2Resource(device, fidoResource, endpointUrl, userId);
+            transferAttributesToFido2Resource(device, fidoResource, endpointUrl, getUserInumFromDN(device.getDn()));
 
             String json=resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
             response=Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();

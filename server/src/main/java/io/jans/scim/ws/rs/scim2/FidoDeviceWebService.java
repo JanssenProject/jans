@@ -115,10 +115,9 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
             FidoDeviceResource fidoResource=new FidoDeviceResource();
 
             GluuCustomFidoDevice device=fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
-            if (device==null)
-                throw new SCIMException("Resource " + id + " not found");
+            //device cannot be null (see FidoDeviceWebServiceDecorator)
 
-            transferAttributesToFidoResource(device, fidoResource, endpointUrl, userId);
+            transferAttributesToFidoResource(device, fidoResource, endpointUrl, getUserInumFromDN(device.getDn()));
 
             String json=resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
             response=Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();
