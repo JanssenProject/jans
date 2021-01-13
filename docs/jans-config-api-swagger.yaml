@@ -2141,16 +2141,16 @@ components:
             https://jans.io/oauth/config/scripts.write: Manage scripts related information
             https://jans.io/oauth/config/cache.readonly: View cache related information
             https://jans.io/oauth/config/cache.write: Manage cache related information
-            https://jans.io/oauth/config/smtp.readonly: View SMTP related information	
+            https://jans.io/oauth/config/smtp.readonly: View SMTP related information
             https://jans.io/oauth/config/smtp.write: Manage SMTP related information
-            https://jans.io/oauth/config/logging.readonly: View logging related information	
+            https://jans.io/oauth/config/logging.readonly: View logging related information
             https://jans.io/oauth/config/logging.write: Manage logging related information
-            https://jans.io/oauth/config/jwks.readonly: View JWKS related information	
-            https://jans.io/oauth/config/jwks.write: Manage JWKS related information	
+            https://jans.io/oauth/config/jwks.readonly: View JWKS related information
+            https://jans.io/oauth/config/jwks.write: Manage JWKS related information
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
-            https://jans.io/oauth/config/openid/clients.write: Manage clients related information	
+            https://jans.io/oauth/config/openid/clients.write: Manage clients related information
             https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information		
+            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: Manage scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
@@ -2210,7 +2210,15 @@ components:
           type: string
     CustomScript:
       type: object
-      description: Script 
+      description: Script
+      required:
+        - name
+        - script
+        - scriptType
+        - programmingLanguage
+        - moduleProperties
+        - configurationProperties
+        - level
       properties:
         dn:
           type: string
@@ -2222,10 +2230,10 @@ components:
           pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
           minLength: 1
           maxLength: 60
-          description: 'Name should contain only letters, digits and underscores.'
+          description: 'Custom script name. Should contain only letters, digits and underscores.'
         aliases:
           type: array
-          description: List of possible alias for the script.
+          description: List of possible aliases for the custom script.
           items:
             type: string
         description:
@@ -2282,9 +2290,11 @@ components:
           type: integer
           format: int64
           description: Update revision number of the script.
+          default: 0
         enabled:
           type: boolean
           description: boolean value indicating if script enabled.
+          default: false
         scriptError:
           type: object
           description: Possible errors assosiated with the script.
@@ -2292,11 +2302,21 @@ components:
         modified:
           type: boolean
           description: boolean value indicating if the script is modified.
+          default: false
         internal:
           type: boolean
-          description: boolean value indicating if the script is interanl.
+          description: boolean value indicating if the script is internal. 
+          default: false
     LdapConfiguration:
       type: object
+      required:
+        - configId
+        - bindDN
+        - bindPassword
+        - servers
+        - useSSL
+        - baseDNs
+        - primaryKey
       properties:
         configId:
           type: string
@@ -2339,9 +2359,11 @@ components:
         useAnonymousBind:
           type: boolean
           description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+          default: false
         enabled:
           type: boolean
           description: Boolean value used to indicate if the LDAP Server is enabled. Do not use this unless the server administrator has entered all the required values.
+          default: false
         version:
           type: integer
           description: LDAP server version.
@@ -2350,6 +2372,17 @@ components:
           description: A string that indicates the level. 
     CouchbaseConfiguration:
       type: object
+      required:
+        - configId
+        - userName
+        - userPassword
+        - servers
+        - defaultBucket
+        - buckets
+        - passwordEncryptionMethod
+        - sslTrustStoreFile
+        - sslTrustStorePin
+        - sslTrustStoreFormat
       properties:
         configId:
           type: string
@@ -2397,6 +2430,7 @@ components:
         operationTracingEnabled:
           type: boolean
           description: Boolean value True if tracing is enabled on the environment.
+          default: false
         mutationTokensEnabled:
           type: boolean
           description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
@@ -2411,6 +2445,7 @@ components:
         useSSL:
           type: boolean
           description: Identifies if SSL should be enabled.
+          default: true
         sslTrustStoreFile:
           type: string
           description: The path to the trust store file to use. It contains the trusted certificates.
@@ -2433,6 +2468,12 @@ components:
     JsonWebKey:
       type: object
       description: JsonWebKey
+      required:
+        - kid
+        - kty
+        - use
+        - alg
+        - exp
       properties:
         kid:
           type: string
@@ -2541,7 +2582,7 @@ components:
           example: 'https://server.example.com/restv1/device_authorization'
         sessionAsJwt:
           type: boolean
-          description: Boolean value true saves session data as a JWT.		  
+          description: Boolean value true saves session data as a JWT.
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           description:  Sector Identifier cache lifetime in minutes.
@@ -3533,6 +3574,10 @@ components:
       title: Scope
       description: Auth Scope.
       type: object
+      required:
+        - displayName
+        - scopeType
+        - expirationDate
       properties:
         dn:
           type: string
@@ -3596,13 +3641,15 @@ components:
         umaType:
           description: Specifies if the scope is of type UMA.
           type: boolean
+          default: false
         deletable:
           description: Specifies if the scope can be deleted.
           type: boolean
+          default: false
         expirationDate:
           description: Expiry date of the Scope.
           type: string
-          format: date	
+          format: date
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -3677,10 +3724,12 @@ components:
       description: Client.
       type: object
       required:
-        - clientName
-        - grantTypes
-        - tokenEndpointAuthMethod
         - applicationType
+        - clientName
+        - subjectType
+        - logout
+        - frontChannelLogoutSessionRequired
+        - includeClaimsInIdToken
       properties:
         dn:
           type: string
@@ -3701,7 +3750,7 @@ components:
           format: date
         clientSecretExpiresAt:
           type: string
-          format: date	
+          format: date
         redirectUris:
           description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
           type: array
@@ -3948,7 +3997,8 @@ components:
             description: String containing a space-separated list of claims that can be requested individually.        
         trustedClient:
           description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
-          type: boolean        
+          type: boolean
+          default: false
         lastAccessTime:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.'
           type: string
@@ -3963,6 +4013,7 @@ components:
         includeClaimsInIdToken:
           description: 'If true then claims are included in token id, default value is false.'
           type: boolean
+          default: false
         refreshTokenLifetime:
           description: Specifies the Client-specific refresh token expiration.
           type: integer
@@ -4005,7 +4056,8 @@ components:
             - PS512
         disabled:
           description: Specifies whether client is disabled.
-          type: boolean        
+          type: boolean
+          default: false
         authorizedOrigins:
           description: Specifies authorized JavaScript origins.
           type: array
@@ -4057,14 +4109,21 @@ components:
           format: date-time
         deletable:
           description: Specifies whether client is deletable.
-          type: boolean          
+          type: boolean
+          default: false
         jansId:
           description: Attribute Scope Id.
           type: string
+
     UmaResource:
       title: UMAResource object
       description: UMAResource
       type: object
+      required:
+        - dn
+        - inum
+        - id
+        - type
       properties:
         dn:
           type: string
@@ -4120,10 +4179,13 @@ components:
           format: date      
         deletable:
           description: Specifies whether client is deletable.
-          type: boolean 
+          type: boolean
+          default: false
     SectorIdentifier:
       type: object
       description: Sector Identifier Details.
+      required:
+        - id
       properties:
         id:
           description: XRI i-number. Sector Identifier to uniquely identify the sector.
@@ -4404,7 +4466,7 @@ components:
         fido2Configuration:
           description: Fido2Configuration.
           $ref: '#/components/schemas/Fido2Configuration'
-		
+    
     Fido2Configuration:
       type: object
       description: Fido2 configuration properties.
@@ -4552,8 +4614,8 @@ components:
               description: Delay time in seconds after reaching maximumAllowedAttemptsWithoutDelay limit.
             bruteForceProtectionEnabled:
               type: boolean
-              description: Enable or disable service, This functionality can be enabled dynamically.		  
-			  
+              description: Enable or disable service, This functionality can be enabled dynamically.
+
     CIBAEndUserNotificationConfig:
       type: object
       description: CIBA End User Notification Config.
@@ -4588,4 +4650,3 @@ components:
         publicVapidKey:
           type: string
           description: Public Vapid Key
-			  
