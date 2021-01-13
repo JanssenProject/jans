@@ -14,7 +14,10 @@ function() {
     var url = props.get('karate.test.url');
     var port = props.get('karate.test.port');
     var baseUrl = url + (port ? ':' + port : '');
-
+      karate.log('karate_jenkins env :', env);
+   karate.log('karate_jenkins url :', url);
+   karate.log('karate_jenkins port :', port);
+   karate.log('karate_jenkins baseUrl :', baseUrl);
     var config = {
         env: env,
         test_url: baseUrl + '/jans-config-api/api/v1/test',
