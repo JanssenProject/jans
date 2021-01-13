@@ -42,8 +42,9 @@ public class StatTimer {
     private AtomicBoolean isActive;
     private long lastFinishedTime;
 
+    @Asynchronous
     public void initTimer() {
-        log.debug("Initializing Stat Service Timer");
+        log.info("Initializing Stat Service Timer");
 
         final boolean initialized = statService.init();
         if (!initialized) {
@@ -55,7 +56,7 @@ public class StatTimer {
         timerEvent.fire(new TimerEvent(new TimerSchedule(TIMER_TICK_INTERVAL_IN_SECONDS, TIMER_TICK_INTERVAL_IN_SECONDS), new StatEvent(), Scheduled.Literal.INSTANCE));
 
         this.lastFinishedTime = System.currentTimeMillis();
-        log.debug("Initialized Stat Service Timer");
+        log.info("Initialized Stat Service Timer");
     }
 
     @Asynchronous
