@@ -121,9 +121,6 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/GroupResource'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GroupResource'
         required: true
       responses:
         201:
