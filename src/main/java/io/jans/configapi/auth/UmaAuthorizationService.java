@@ -10,23 +10,19 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.auth.service.PatService;
 import io.jans.configapi.auth.service.UmaService;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 @Named("umaAuthorizationService")
@@ -45,13 +41,10 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     public void processAuthorization(String rpt, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.debug(" UmaAuthorizationService::validateAuthorization() - rpt = "
-                + rpt + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName()
-                + " , method = " + method + " , path = " + path + "\n");
+        log.trace("UMA  Authorization parameters , rpt:{}, resourceInfo:{}, method: {}, path: {} ", rpt, resourceInfo, method, path);
 
         UmaResource umaResource = getUmaResource(resourceInfo, method, path);
-        log.debug(" UmaAuthorizationService::validateAuthorization() - umaResource = " + umaResource);
-
+       
         if (umaResource.getScopes() == null || umaResource.getScopes().isEmpty())
             return; // nothing to validate. Resource is not protected.
 
@@ -69,13 +62,10 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
     }
 
     private UmaResource getUmaResource(ResourceInfo resourceInfo, String method, String path) {
-        log.debug(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
+        log.trace(" UmaAuthorizationService::getUmaResource() - resourceInfo = " + resourceInfo
                 + " , resourceInfo.getClass().getName() = " + resourceInfo.getClass().getName() + " , method = "
                 + method + " , path = " + path + "\n");
-        log.debug(
-                " UmaAuthorizationService::getUmaResource() - umaResourceProtectionCache.getAllUmaResources() = "
-                        + UmaResourceProtectionCache.getAllUmaResources());
-
+    
         // Verify in cache
         Map<String, UmaResource> resources = UmaResourceProtectionCache.getAllUmaResources();
 
@@ -83,7 +73,6 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
         Set<String> keys = resources.keySet();
         List<String> filteredPaths = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
 
-        log.debug(" UmaAuthorizationService::getUmaResource() - filteredPaths = " + filteredPaths);
         if (filteredPaths == null || filteredPaths.isEmpty()) {
             throw new WebApplicationException("No matching resource found .",
                     Response.status(Response.Status.UNAUTHORIZED).build());
