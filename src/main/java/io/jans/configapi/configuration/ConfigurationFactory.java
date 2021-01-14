@@ -127,7 +127,7 @@ public class ConfigurationFactory {
         return APP_PROPERTIES_FILE;
     }
 
-    public static String getConfigAppPropertiesFile() {
+    public static String getApiProtectionType() {
         return API_PROTECTION_TYPE;
     }
  
@@ -290,17 +290,25 @@ public class ConfigurationFactory {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info("=============  createAuthorizationService() - ConfigurationFactory.getConfigAppPropertiesFile() = "+ConfigurationFactory.getConfigAppPropertiesFile());
-        if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
+        log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
+                + ConfigurationFactory.getApiProtectionType());
+        if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
-            if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getConfigAppPropertiesFile())) {
-                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "+umaResourceProtectionService);
+
+            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); // Verify
+                                                                                                       // Resources
+                                                                                                       // available
+
+            if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
+                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "
+                        + umaResourceProtectionService);
                 return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
             } else {
-                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "+umaResourceProtectionService);
-                umaResourceProtectionService.verifyUmaResources(); //Verify UmaResources available 
+                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "
+                        + umaResourceProtectionService);
+
                 return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
             }
         } catch (Exception ex) {

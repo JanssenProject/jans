@@ -6,19 +6,14 @@
 
 package io.jans.configapi.auth;
 
-import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.auth.util.AuthUtil;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class AuthorizationService implements Serializable {
 
@@ -28,7 +23,7 @@ public abstract class AuthorizationService implements Serializable {
     Logger log;
     
     @Inject
-    UmaResourceProtectionCache resourceProtectionCache;
+    AuthUtil authUtil;
 
     public abstract void processAuthorization(String token, ResourceInfo resourceInfo, String method,
             String path) throws Exception;
@@ -38,34 +33,15 @@ public abstract class AuthorizationService implements Serializable {
     }
 
     public List<String> getRequestedScopes(String path) {
-        UmaResource resource = resourceProtectionCache.getUmaResource(path);
-        log.debug(" resource = "+resource);
-        return resource.getScopes(); 
+        return authUtil.getRequestedScopes(path); 
     }
     
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        Class<?> resourceClass = resourceInfo.getResourceClass();
-        ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
-        List<String> scopes = new ArrayList<String>();
-        if (typeAnnotation == null) {
-            addMethodScopes(resourceInfo, scopes);
-        } else {
-            scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            addMethodScopes(resourceInfo, scopes);
-        }
-        return scopes;
+        return authUtil.getRequestedScopes(resourceInfo);
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        return authScopes.containsAll(resourceScopes);
-    }
-
-    private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
-        Method resourceMethod = resourceInfo.getResourceMethod();
-        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
-        if (methodAnnotation != null) {
-            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
-        }
-    }
+        return authUtil.validateScope(authScopes, resourceScopes);
+    }   
 
 }

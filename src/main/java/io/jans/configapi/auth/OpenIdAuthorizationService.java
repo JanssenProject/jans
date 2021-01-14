@@ -34,7 +34,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public void processAuthorization(String token, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-
+        log.trace("oAuth  Authorization parameters , token:{}, resourceInfo:{}, method: {}, path: {} ", token, resourceInfo, method, path);
         if (StringUtils.isBlank(token)) {
             log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
@@ -42,14 +42,13 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim());
-        System.out.println("\n\n OpenIdAuthorizationService::processAuthorization() - introspectionResponse = " + introspectionResponse + "\n\n");
-
+       
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
             log.error("Token is Invalid.");
             throw new WebApplicationException("Token is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
-        System.out.println("\n\n OpenIdAuthorizationService::processAuthorization() - introspectionResponse.getScope() = " + introspectionResponse.getScope() + "\n\n");
+        
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
             log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
                     + introspectionResponse.getScope());
