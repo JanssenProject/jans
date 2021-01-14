@@ -1,18 +1,19 @@
 package io.jans.configapi.auth.service;
 
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.configapi.auth.client.UmaClient;
+import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class PatService {
     ConfigurationFactory configurationFactory;
 
     @Inject
-    private EncryptionService encryptionService;
+    private AuthUtil authUtil;
 
     @Inject
     UmaMetadata umaMetadata;
@@ -90,25 +91,9 @@ public class PatService {
         }
 
         try {
+            String clientId = authUtil.getClientId();
+            this.umaPat = authUtil.requestPat(this.umaMetadata.getTokenEndpoint(), clientId, ScopeType.UMA, null);
 
-            String clientId = this.configurationFactory.getApiClientId();
-            String clientPassword = this.configurationFactory.getApiClientPassword();
-            
-            if (StringHelper.isEmpty(clientId) || StringHelper.isEmpty(clientPassword)) {
-                log.error("Internal clientId or password is empty!!!");
-                throw new Exception("Internal clientId or password is empty!!!");
-            }
-
-            if (clientPassword != null) {
-                try {
-                    clientPassword = encryptionService.decrypt(clientPassword);
-                } catch (EncryptionException ex) {
-                    log.error("Failed to decrypt UmaClientKeyStorePassword password", ex);
-                }
-            }
-
-            this.umaPat = UmaClient.requestPat(umaMetadata.getTokenEndpoint(),clientId, clientPassword, null);
-     
             if (this.umaPat == null) {
                 this.umaPatAccessTokenExpiration = 0l;
             } else {
@@ -141,19 +126,4 @@ public class PatService {
                 || (validatePatTokenExpiration <= now));
     }
 
-    protected String getClientKeyStorePassword() {
-        return configurationService.find().getKeyStoreSecret();
-    }
-
-    protected String getClientKeyStoreFile() {
-        return configurationService.find().getKeyStoreFile();
-    }
-
-    private String getClientId() {
-        return configurationFactory.getApiClientId();
-    }
-
-    private String getClientKeyId() {
-        return null; // TBD
-    }
 }

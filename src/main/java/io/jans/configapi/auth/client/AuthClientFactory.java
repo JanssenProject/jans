@@ -7,7 +7,11 @@
 package io.jans.configapi.auth.client;
 
 
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.IntrospectionService;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
@@ -19,8 +23,13 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
+import java.util.List;
 import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 public class AuthClientFactory {
@@ -48,6 +57,7 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
+        
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                 .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
@@ -59,6 +69,165 @@ public class AuthClientFactory {
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
 
         return proxy.introspectToken(header, token);
+
+    }
+    
+    public static TokenResponse revokeToken(final String revokeTokenUrl, final String clientId, final String clientSecret, final String token) {
+        
+        Builder request = ResteasyClientBuilder.newClient().target(revokeTokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+                
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
+        multivaluedHashMap.add(token, "token");
+        multivaluedHashMap.add(clientId, "clientId");
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(revokeTokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(revokeTokenUrl);
+
+        Response response = request.post(Entity.form(multivaluedHashMap));       
+        
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            
+            return tokenResponse;
+        }
+        return null;
+
+    }
+    
+    public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
+            final String clientSecret, final String scope) {
+
+        Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+                
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(tokenUrl);
+        Response response = request.post(Entity.form(multivaluedHashMap));
+                
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            
+            return tokenResponse;
+        }
+
+        return null;
+
+    }
+    
+    public static TokenResponse patRequest(final String tokenUrl, final String clientId,
+            final String clientSecret, final String scope) {
+        
+        Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(tokenUrl);
+
+        
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            
+            return tokenResponse;
+        }
+        return null;
+
+    }
+    
+    public static TokenResponse requestRpt(final String tokenUrl, final String clientId,
+            final String clientSecret, final List<String> scopes, final String ticket,
+            GrantType grantType, AuthenticationMethod authMethod) {
+      
+        String scope = null;
+        if (scopes != null && scopes.size() > 0) {
+            for (String s : scopes) {
+                scope = scope + " " + s;
+            }
+        }
+                
+        Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();       
+        TokenRequest tokenRequest = new TokenRequest(grantType);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthenticationMethod(authMethod);
+        
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(tokenRequest.getParameters());
+        multivaluedHashMap.add("ticket",ticket);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
+                .register(engine);
+        restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+        restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(tokenUrl);
+        Response response = request.post(Entity.form(multivaluedHashMap));
+        
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setEntity(entity);
+            tokenResponse.injectDataFromJson(entity);
+            return tokenResponse;
+        }
+        return null;
 
     }
 

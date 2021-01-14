@@ -1,7 +1,6 @@
 package io.jans.configapi.auth;
 
 import com.google.common.base.Preconditions;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.persistence.UmaResource;
@@ -17,8 +16,6 @@ import io.jans.configapi.util.Jackson;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +34,7 @@ public class UmaResourceProtectionService {
 
     @Inject
     Logger log;
-    
+
     @Inject
     EncryptionService encryptionService;
 
@@ -49,7 +46,7 @@ public class UmaResourceProtectionService {
 
     @Inject
     UmaResourceService umaResourceService;
-    
+
     @Inject
     ClientService clientService;
 
@@ -63,29 +60,25 @@ public class UmaResourceProtectionService {
         return rsResourceList;
     }
 
-    public void verifyUmaResources() throws Exception {
-
+    public void verifyResources(String apiProtectionType) throws Exception {
+        log.debug(
+                "\n UmaResourceProtectionService::verifyResources() - apiProtectionType = " + apiProtectionType + "\n");
         // Load the uma resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = loader.getResourceAsStream(PROTECTION_CONFIGURATION_FILE_NAME);
 
         RsResourceList resourceList = Jackson.createJsonMapper().readValue(inputStream, RsResourceList.class);
-        log.debug(
-                " \n\n UmaResourceProtectionService::verifyUmaResources() - resourceList = " + resourceList + "\n\n");
         this.rsResourceList = resourceList.getResources();
-
-        log.debug(" \n\n UmaResourceProtectionService::verifyUmaResources() - rsResourceList = "
-                + rsResourceList + "\n\n");
+        log.trace("verifyResources() - rsResourceList{} ", rsResourceList);
 
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
-        createScopeIfNeeded();
-
+        createScopeIfNeeded(apiProtectionType);
         createResourceIfNeeded();
-      
+
     }
 
-    private void createScopeIfNeeded() { 
+    private void createScopeIfNeeded(String apiProtectionType) {
         List<String> rsScopes = null;
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
@@ -94,7 +87,7 @@ public class UmaResourceProtectionService {
 
                     // Check in cache
                     if (UmaResourceProtectionCache.getScope(scopeName) != null) {
-                        log.debug("Scope - '" + scopeName + "' exists in cache.");
+                        log.trace("Scope - '" + scopeName + "' exists in cache.");
                         break;
                     }
 
@@ -112,8 +105,9 @@ public class UmaResourceProtectionService {
                         }
                     }
 
+                    ScopeType scopeType = ScopeType.UMA;
                     if (scopes == null || scopes.isEmpty()) {
-                        log.debug("Scope - '" + scopeName + "' does not exist, hence creating it.");
+                        log.trace("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope
                         scope = new Scope();
                         String inum = UUID.randomUUID().toString();
@@ -121,17 +115,16 @@ public class UmaResourceProtectionService {
                         scope.setDisplayName(scopeName);
                         scope.setInum(inum);
                         scope.setDn(scopeService.getDnForScope(inum));
-                        scope.setScopeType(ScopeType.UMA);
+                        scope.setScopeType(scopeType);
                         scopeService.addScope(scope);
-                    }
-                    else {
-                        //Update resource
-                        log.debug("Scope - '" + scopeName + "' already exists, hence updating it.");
-                       
+                    } else {
+                        // Update resource
+                        log.trace("Scope - '" + scopeName + "' already exists, hence updating it.");
+
                         scope.setId(scopeName);
                         scope.setDisplayName(scopeName);
                         scope.setDn(scopeService.getDnForScope(scope.getInum()));
-                        scope.setScopeType(ScopeType.UMA);
+                        scope.setScopeType(scopeType);
                         scopeService.updateScope(scope);
                     }
 
@@ -143,31 +136,25 @@ public class UmaResourceProtectionService {
     }
 
     public void createResourceIfNeeded() {
-        log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = "
-                + rsResourceList + "\n\n");
+        log.debug("UmaResourceProtectionService::createResourceIfNeeded() - rsResourceList = " + rsResourceList + "\n");
 
         Map<String, UmaResource> allResources = UmaResourceProtectionCache.getAllUmaResources();
 
         for (RsResource rsResource : rsResourceList) {
 
             for (Condition condition : rsResource.getConditions()) {
-                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath(); 
-                
-                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - umaResourceName = "
-                        + umaResourceName + "\n\n");
+                String umaResourceName = condition.getHttpMethods() + ":::" + rsResource.getPath();
+
                 // Check in cache
                 if (UmaResourceProtectionCache.getUmaResource(umaResourceName) != null) {
-                    log.debug("UmaResource - '" + umaResourceName + "' exists in cache.");
+                    log.trace("UmaResource - '" + umaResourceName + "' exists in cache.");
                     break;
                 }
 
                 // Check in DB
                 List<UmaResource> umaResources = umaResourceService.findResourcesByName(umaResourceName, 2);
-                log.debug(" \n\n UmaResourceProtectionService::createResourceIfNeeded() - findResources() -> umaResources = "
-                        + umaResources + "\n\n");
-                
-                UmaResource umaResource = null;
 
+                UmaResource umaResource = null;
                 if (umaResources != null && !umaResources.isEmpty()) {
                     // Fetch existing resources to store in cache
                     umaResource = umaResources.get(0);
@@ -180,26 +167,25 @@ public class UmaResourceProtectionService {
 
                 // Create Resource
                 if (umaResources == null || umaResources.isEmpty()) {
-                    log.debug("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
+                    log.trace("UmaResource - '" + umaResources + "' does not exist, hence creating it.");
                     umaResource = new UmaResource();
                     String id = UUID.randomUUID().toString();
                     umaResource.setId(id);
                     umaResource.setDn(umaResourceService.getDnForResource(id));
                     umaResource.setName(umaResourceName);
-                    umaResource.setScopes(condition.getScopes()); 
+                    umaResource.setScopes(condition.getScopes());
                     umaResource.setCreationDate(getCreationDate(rsResource));
-                    umaResource.setDescription("Config API Resource - "+umaResourceName);
-                    
-                   umaResourceService.addResource(umaResource);
-                }
-                else {
-                    //Update resource
-                    log.debug("UmaResource - '" + umaResources + "' already exists, hence updating it.");
-                    //umaResource.setDn(umaResource.getId());
+                    umaResource.setDescription("Config API Resource - " + umaResourceName);
+
+                    umaResourceService.addResource(umaResource);
+                } else {
+                    // Update resource
+                    log.trace("UmaResource - '" + umaResources + "' already exists, hence updating it.");
+                    // umaResource.setDn(umaResource.getId());
                     umaResource.setName(umaResourceName);
                     umaResource.setScopes(condition.getScopes());
-                   
-                   umaResourceService.updateResource(umaResource);
+
+                    umaResourceService.updateResource(umaResource);
                 }
 
                 // Add to cache
@@ -207,7 +193,7 @@ public class UmaResourceProtectionService {
             }
         }
     }
-    
+
     private Date getCreationDate(RsResource rsResource) {
         final Calendar calendar = Calendar.getInstance();
         Date iat = calendar.getTime();
@@ -218,7 +204,5 @@ public class UmaResourceProtectionService {
 
         return iat;
     }
-   
-    
-    
+
 }
