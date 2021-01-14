@@ -871,6 +871,12 @@ class JCA_CLI:
         
         model_class = getattr(swagger_client.models, schema['__schema_name__'])
         
+        if my_op_mode == 'scim':
+            if endpoint.path == '/jans-scim/restv1/v2/Groups':
+                schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:Group']
+            elif endpoint.path == '/jans-scim/restv1/v2/Users':
+                schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
+
         model = self.get_input_for_schema_(schema, model_class)
 
         print("Obtained Data:\n")
