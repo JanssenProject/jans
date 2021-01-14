@@ -112,9 +112,9 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                                     'description': [scopes_def.get(scope, display_name)],
                                     'displayName': [display_name],
                                     'inum': [inum],
-                                    'jansDefScope': ['true'],
+                                    'jansDefScope': ['false'],
                                     'jansId': [scope],
-                                    'jansScopeTyp': ['uma'],
+                                    'jansScopeTyp': ['openid'],
                                 })
 
                         jansUmaScopes.append(scopes[scope]['dn'])
