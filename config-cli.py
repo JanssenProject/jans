@@ -688,8 +688,11 @@ class JCA_CLI:
             
             all_schema['properties'] = OrderedDict()
             for sch in schema_['allOf']:
-                if 'properties' in sch:
-                    all_schema['properties'].update(sch['properties'])
+                if '$ref' in sch:
+                    all_schema.update(self.get_schema_from_reference(sch['$ref']))
+                elif 'properties' in sch:
+                    for sprop in sch['properties']:
+                        all_schema['properties'][sprop] = sch['properties'][sprop]
 
             schema_ = all_schema
 
@@ -842,10 +845,9 @@ class JCA_CLI:
             return modelObject
         else:
             for key_ in data:
-                if data[key_]:
-                    setattr(model, key_, data[key_])
-            
-            
+                #if data[key_]:
+                setattr(model, key_, data[key_])
+
             return model
 
 
@@ -1002,6 +1004,7 @@ class JCA_CLI:
     def process_put(self, endpoint):
 
         schema = self.get_scheme_for_endpoint(endpoint)
+
         initialised = False
         cur_model = None
         
@@ -1025,7 +1028,6 @@ class JCA_CLI:
                     cur_model = self.process_get(m, return_value=True)
 
         if not cur_model:            
-            schema = self.get_scheme_for_endpoint(endpoint)
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
 
         end_point_param = self.get_endpiont_url_param(endpoint)
