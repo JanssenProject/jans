@@ -2332,7 +2332,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
-      - type: object
         properties:
           userId:
             type: string

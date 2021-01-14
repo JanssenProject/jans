@@ -3585,7 +3585,7 @@ components:
           items:
             type: string
           example:
-            - 'https://client.example.org/cb'	        
+            - 'https://client.example.org/cb'
         claimRedirectUris:
           description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
           type: array
