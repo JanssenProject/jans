@@ -24,7 +24,7 @@ paths:
       - group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.read]
       parameters:
       - name: attributes
         in: query
@@ -92,7 +92,7 @@ paths:
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
@@ -159,7 +159,7 @@ paths:
       - group
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.read]
       parameters:
       - name: attributes
         in: query
@@ -212,7 +212,7 @@ paths:
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
@@ -294,7 +294,7 @@ paths:
       - group
       description: Deletes a group resource (see section 3.6 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: id
         in: path
@@ -331,7 +331,7 @@ paths:
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
@@ -396,7 +396,7 @@ paths:
       - group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/groups.read]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -442,7 +442,7 @@ paths:
     get:
       description: Query Fido resources
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: attributes
         in: query
@@ -523,7 +523,7 @@ paths:
     get:
       description: Retrieves a U2F/Super Gluu device by Id
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: attributes
         in: query
@@ -579,7 +579,7 @@ paths:
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido.write]
       parameters:
       - name: attributes
         in: query
@@ -649,7 +649,7 @@ paths:
     delete:
       description: Deletes a Fido resource
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido.write]
       parameters:
       - name: id
         in: path
@@ -683,7 +683,7 @@ paths:
     post:
       description: Query Fido resources
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: userId
         in: query
@@ -745,7 +745,7 @@ paths:
     get:
       description: Query Fido 2 resources
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: attributes
         in: query
@@ -826,7 +826,7 @@ paths:
     get:
       description: Retrieves a Fido 2 device by Id
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: attributes
         in: query
@@ -882,7 +882,7 @@ paths:
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido2.write]
       parameters:
       - name: attributes
         in: query
@@ -952,7 +952,7 @@ paths:
     delete:
       description: Deletes a Fido 2 resource
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido2.write]
       parameters:
       - name: id
         in: path
@@ -986,7 +986,7 @@ paths:
     post:
       description: Query Fido 2 resources
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: userId
         in: query
@@ -1050,7 +1050,7 @@ paths:
       - user
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
@@ -1118,7 +1118,7 @@ paths:
       description: Allows creating a User resource via POST (see section 3.3 of RFC
         7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -1185,7 +1185,7 @@ paths:
       - user
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
@@ -1238,7 +1238,7 @@ paths:
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -1320,7 +1320,7 @@ paths:
       - user
       description: Deletes a user resource
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: id
         in: path
@@ -1357,7 +1357,7 @@ paths:
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -1422,7 +1422,7 @@ paths:
       - user
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/users.read]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -1469,7 +1469,7 @@ paths:
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/all-resources.search]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -1516,7 +1516,7 @@ paths:
       description: Send several resource operations in a single request (see section
         3.7 of RFC 7644)
       security:
-        - testmode: []
+        - testmode: [https://jans.io/scim/bulk]
       requestBody:
         description: Payload describing the operations to perform
         content:
@@ -2395,5 +2395,15 @@ components:
         modes may be available, please check SCIM docs
       flows:
         clientCredentials:
-          tokenUrl: 'https://jenkins-ldap.jans.io/oxauth/restv1/token'
-          scopes: {}
+          tokenUrl: 'https://jenkins-ldap.jans.io/jans-auth/restv1/token'
+          scopes:
+            https://jans.io/scim/users.read: Query user resources
+            https://jans.io/scim/users.write: Modify user resources
+            https://jans.io/scim/groups.read: Query group resources
+            https://jans.io/scim/groups.write: Modify group resources
+            https://jans.io/scim/fido.read: Query fido resources
+            https://jans.io/scim/fido.write: Modify fido resources
+            https://jans.io/scim/fido2.read: Query fido 2 resources
+            https://jans.io/scim/fido2.write: Modify fido 2 resources
+            https://jans.io/scim/all-resources.search: Access the root .search endpoint 
+            https://jans.io/scim/bulk: Send requests to the bulk endpoint
