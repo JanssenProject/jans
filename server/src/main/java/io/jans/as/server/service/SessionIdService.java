@@ -38,6 +38,7 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.as.server.service.external.session.SessionEventType;
+import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -128,6 +129,9 @@ public class SessionIdService {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private StatService statService;
 
     private String buildDn(String sessionId) {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -502,6 +506,11 @@ public class SessionIdService {
         sessionId.setUserDn(p_userDn);
         sessionId.setAuthenticationTime(new Date());
         sessionId.setState(SessionIdState.AUTHENTICATED);
+
+        final User user = getUser(sessionId);
+        if (user != null) {
+            statService.reportActiveUser(user.getUserId());
+        }
 
         final boolean persisted;
         if (appConfiguration.getChangeSessionIdOnAuthentication() && httpResponse != null) {
