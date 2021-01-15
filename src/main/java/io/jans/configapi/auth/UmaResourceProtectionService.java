@@ -9,9 +9,11 @@ import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.RsResourceList;
 
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.ClientService;
 import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.service.UmaResourceService;
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.Jackson;
 import org.slf4j.Logger;
 
@@ -79,6 +81,7 @@ public class UmaResourceProtectionService {
     }
 
     private void createScopeIfNeeded(String apiProtectionType) {
+        System.out.println("\n ********* UmaResourceProtectionService:::createScopeIfNeeded() - apiProtectionType = "+apiProtectionType+"\n ***********");
         List<String> rsScopes = null;
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
@@ -105,7 +108,10 @@ public class UmaResourceProtectionService {
                         }
                     }
 
-                    ScopeType scopeType = ScopeType.UMA;
+                    ScopeType scopeType = ScopeType.OAUTH;
+                    if (ApiConstants.PROTECTION_TYPE_UMA.equals(ConfigurationFactory.getApiProtectionType())) {
+                    	scopeType = ScopeType.UMA;
+                    }
                     if (scopes == null || scopes.isEmpty()) {
                         log.trace("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope
