@@ -15,15 +15,3 @@ jansUmaPolicyScrDn: inum=2DAF-F9A5,ou=scripts,o=jans
 objectClass: jansScope
 objectClass: top
 
-dn: jansId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=jans
-displayName: SCIM Resource
-jansAssociatedClnt: inum=%(scim_rs_client_id)s,ou=clients,o=jans
-jansFaviconImage: http://www.jans.io/img/scim_logo.png
-jansId: %(scim_resource_oxid)s
-jansResource: https://%(hostname)s/restv1/scim/v2
-jansRevision: 1
-jansUmaScope: inum=8CAD-B06D,ou=scopes,o=jans
-objectClass: jansUmaResource
-objectClass: top
-owner: inum=%(admin_inum)s,ou=people,o=jans
-
