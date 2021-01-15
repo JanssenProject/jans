@@ -124,19 +124,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 if not resource['path'].startswith('/'):
                     resource['path'] = '/' + resource['path']
 
-                ldif_resources_writer.unparse(
-                    'jansId={},ou=resources,ou=uma,o=jans'.format(rid), {
-                    'displayName': ['Jans Cofig Api Uma Resource {}'.format(resource['path'])],
-                    'jansAssociatedClnt': ['inum={},ou=clients,o=jans'.format(Config.jca_client_id)],
-                    'jansFaviconImage': ['http://www.jans.io/img/scim_logo.png'],
-                    'jansId': [rid],
-                    'jansResource': ['https://{}{}'.format(Config.hostname, resource['path'])],
-                    'jansUmaScope': jansUmaScopes,
-                    'jansRevision': ['1'],
-                    'objectClass': ['top', 'jansUmaResource'],
-                    'owner': ['inum={},ou=people,o=json'.format(Config.admin_inum)]
-                    })
-
         scope_ldif_fd.close()
         resources_ldif_fd.close()
 
