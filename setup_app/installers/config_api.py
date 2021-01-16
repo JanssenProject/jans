@@ -39,7 +39,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://github.com/JanssenProject/jans-cli/archive/main.zip'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
                 ]
 
     def install(self):
@@ -54,7 +54,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.enable()
 
     def installed(self):
-        return os.path.exists(self.config_api_root)
+        return os.path.exists(self.root_dir)
 
 
     def create_folders(self):
