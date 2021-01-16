@@ -540,6 +540,19 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installEleven')
 
 
+    def promptForConfigApi(self):
+        if Config.installed_instance and Config.installConfigApi:
+            return
+
+        promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
+                            self.getDefaultOption(Config.installConfigApi)
+                            )[0].lower()
+
+        Config.installConfigApi = True if promptForConfigApi == 'y' else False
+
+        if Config.installed_instance and Config.installConfigApi:
+            Config.addPostSetupService.append('installConfigApi')
+
     def promptForProperties(self):
 
         if Config.noPrompt:
@@ -621,7 +634,6 @@ class PropertiesUtils(SetupUtils):
 
                 ldapPass = (Config.ldapPass if Config.ldapPass else Config.admin_password) or self.getPW(6)
 
-
                 while True:
                     ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
                     if len(ldapPass) > 3:
@@ -644,7 +656,6 @@ class PropertiesUtils(SetupUtils):
                 Config.ldapPass = ldapPass
                 Config.ldap_hostname = ldapHost
 
-
             while True:
                 adminPass = self.getPrompt("Enter Password for Admin User", Config.ldapPass)
                 if len(adminPass) > 3:
@@ -653,7 +664,6 @@ class PropertiesUtils(SetupUtils):
                     print("Admin password should be at least four characters in length.")
 
             Config.admin_password = adminPass
-
 
             if Config.cb_install == InstallTypes.REMOTE:
                 self.prompt_remote_couchbase()
@@ -713,12 +723,6 @@ class PropertiesUtils(SetupUtils):
                                                 )[0].lower()
             Config.installOxAuth = True if promptForOxAuth == 'y' else False
 
-            promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
-                                            self.getDefaultOption(Config.installConfigApi)
-                                                )[0].lower()
-
-            Config.installConfigApi = True if promptForConfigApi == 'y' else False
-
             couchbase_mappings_ = self.getMappingType('couchbase')
             buckets_ = [ 'jans_{}'.format(b) for b in couchbase_mappings_ ]
 
@@ -738,6 +742,7 @@ class PropertiesUtils(SetupUtils):
                                     ))
                     sys.exit(False)
 
+        self.promptForConfigApi()
         self.promptForScimServer()
         self.promptForFido2Server()
         self.promptForEleven()
