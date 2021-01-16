@@ -207,7 +207,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installScimServer = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
-        Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'config-api'))
+        Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):
