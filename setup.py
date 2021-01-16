@@ -308,6 +308,13 @@ def do_installation():
 if proceed:
     do_installation()
     print('\n', static.colors.OKGREEN)
+    if Config.installConfigApi or Config.installScimServer:
+        msg.installation_completed += "CLI available to manage Jannsen Server:\n"
+        if Config.installConfigApi:
+            msg.installation_completed += "/opt/jans/jans-cli/config-cli.py\n"
+        if Config.installScimServer:
+            msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
+
     msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
     print(msg_text)
     print('\n', static.colors.ENDC)
