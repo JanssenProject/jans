@@ -36,7 +36,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.resources_ldif_fn = os.path.join(self.output_folder, 'resources.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
-
+        self.load_ldif_files = [self.scope_ldif_fn]
+        
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
@@ -95,12 +96,16 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         scopes = {}
         jansUmaScopes_all = []
 
+        load_resources = False
+
         for resource in uma_rs_protect['resources']:
 
             jansUmaScopes = []
 
             for condition in resource['conditions']:
                 for scope in condition['scopes']:
+                    if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
+                        continue
                     if not scope in scopes:
                         inum = 'CACA-' + os.urandom(2).hex().upper()
                         scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
@@ -119,48 +124,56 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
                         jansUmaScopes.append(scopes[scope]['dn'])
                         jansUmaScopes_all.append(scopes[scope]['dn'])
-
-                rid = '1800.' + str(uuid.uuid4())
-                if not resource['path'].startswith('/'):
-                    resource['path'] = '/' + resource['path']
+                        
+                        load_resources = True
 
         scope_ldif_fd.close()
         resources_ldif_fd.close()
 
-        clients_ldif_fd = open(self.clients_ldif_fn, 'wb')
-        ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
-        ldif_clients_writer.unparse(
-            'inum={},ou=clients,o=jans'.format(Config.jca_client_id), {
-            'objectClass': ['top', 'jansClnt'],
-            'del': ['false'],
-            'displayName': ['Jans Config Api Client'],
-            'inum': [Config.jca_client_id],
-            'jansAccessTknAsJwt': ['false'],
-            'jansAccessTknSigAlg': ['RS256'],
-            'jansAppTyp': ['web'],
-            'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
-            'jansClntSecret': [Config.jca_client_encoded_pw],
-            'jansDisabled': ['false'],
-            'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
-            'jansIdTknSignedRespAlg': ['RS256'],
-            'jansInclClaimsInIdTkn': ['false'],
-            'jansLogoutSessRequired': ['false'],
-            'jansPersistClntAuthzs': ['true'],
-            'jansRequireAuthTime': ['false'],
-            'jansRespTyp': ['code'],
-            'jansRptAsJwt': ['false'],
-            'jansScope': jansUmaScopes_all,
-            'jansSubjectTyp': ['pairwise'],
-            'jansTknEndpointAuthMethod': ['client_secret_basic'],
-            'jansTrustedClnt': ['false'],
-            })
+        if load_resources:
+            self.load_ldif_files.append(self.resources_ldif_fn)
 
-        clients_ldif_fd.close()
+        createClient = True
+        config_api_dn = 'inum={},ou=clients,o=jans'.format(Config.jca_client_id)
+        if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(inum={})'.format(Config.jca_client_id)):
+            createClient = False
+
+        if createClient:
+            clients_ldif_fd = open(self.clients_ldif_fn, 'wb')
+            ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
+            ldif_clients_writer.unparse(
+                config_api_dn, {
+                'objectClass': ['top', 'jansClnt'],
+                'del': ['false'],
+                'displayName': ['Jans Config Api Client'],
+                'inum': [Config.jca_client_id],
+                'jansAccessTknAsJwt': ['false'],
+                'jansAccessTknSigAlg': ['RS256'],
+                'jansAppTyp': ['web'],
+                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
+                'jansClntSecret': [Config.jca_client_encoded_pw],
+                'jansDisabled': ['false'],
+                'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
+                'jansIdTknSignedRespAlg': ['RS256'],
+                'jansInclClaimsInIdTkn': ['false'],
+                'jansLogoutSessRequired': ['false'],
+                'jansPersistClntAuthzs': ['true'],
+                'jansRequireAuthTime': ['false'],
+                'jansRespTyp': ['code'],
+                'jansRptAsJwt': ['false'],
+                'jansScope': jansUmaScopes_all,
+                'jansSubjectTyp': ['pairwise'],
+                'jansTknEndpointAuthMethod': ['client_secret_basic'],
+                'jansTrustedClnt': ['false'],
+                })
+
+            clients_ldif_fd.close()
+            self.load_ldif_files.append(self.clients_ldif_fn)
 
     def render_import_templates(self):
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
-        self.dbUtils.import_ldif([self.scope_ldif_fn, self.resources_ldif_fn, self.clients_ldif_fn])
+        self.dbUtils.import_ldif(self.load_ldif_files)
 
         self.install_jca_cli()
 
