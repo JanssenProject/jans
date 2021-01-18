@@ -360,10 +360,7 @@ public class SessionIdService {
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
 
-        final User user = getUser(sessionId);
-        if (user != null) {
-            statService.reportActiveUser(user.getUserId());
-        }
+        reportActiveUser(sessionId);
 
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
@@ -379,6 +376,17 @@ public class SessionIdService {
         }
 
         return sessionId;
+    }
+
+    private void reportActiveUser(SessionId sessionId) {
+        try {
+            final User user = getUser(sessionId);
+            if (user != null) {
+                statService.reportActiveUser(user.getUserId());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public SessionId generateUnauthenticatedSessionId(String userDn) {
