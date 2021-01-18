@@ -4,6 +4,7 @@ import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
@@ -149,7 +150,7 @@ public class StatService {
             return;
         }
 
-        String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
+        String dn = configurationFactory.getBaseConfiguration().getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
         Conf conf = entryManager.find(Conf.class, dn);
 
         if (StringUtils.isNotBlank(conf.getDynamic().getStatNodeId())) {
