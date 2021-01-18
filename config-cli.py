@@ -229,7 +229,7 @@ class JCA_CLI:
     def make_menu(self):
 
         menu = Menu('Main Menu')
-        
+
         for tag in self.cfg_yml['tags']:
             if tag['name'] != 'developers':
                 m = Menu(name=tag['name'])
@@ -237,6 +237,8 @@ class JCA_CLI:
                 for path in self.cfg_yml['paths']:
                     for method in self.cfg_yml['paths'][path]:
                         if 'tags' in self.cfg_yml['paths'][path][method] and m.name in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
+                            if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
+                                continue
                             menu_name = self.cfg_yml['paths'][path][method].get('summary') or self.cfg_yml['paths'][path][method].get('description')
                             sm = Menu(
                                     name=menu_name.strip('.'),
@@ -1087,7 +1089,7 @@ class JCA_CLI:
             for attr_name in cur_model.attribute_map:
                 if attr_name != 'dn':
                     attr_name_list.append(cur_model.attribute_map[attr_name])
-            
+
             attr_name_list.sort()
             item_numbers = []
             def print_fileds():
