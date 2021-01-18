@@ -48,7 +48,7 @@ All files related to SetupApp are saved under this directory and subdirectories.
   variables are defined as class variables, so the can be accesible without any construction. You need to call `init()` static
   method with argument installaltion directory. Since we don't create varbiles related to services/applications unless they are
   installed, you can query a variable with static method `get()` by providing variable name and default value if you need. 
-  For example if you code `Config.get('scimTestMode', False)`, this will return value of variable `scimTestMode` if defined, 
+  For example if you code `Config.get('installJans', False)`, this will return value of variable `installJans` if defined, 
   otherwise  returns `False`. This is the third file you need to import if you are going to write another application and sould
   be constructed by `init()`. You won't need initialize this class.
   

@@ -146,9 +146,6 @@ def get_setup_options():
     if argsp.no_httpd:
         setupOptions['installHTTPD'] = False
 
-    if argsp.enable_scim_test_mode:
-        setupOptions['scimTestMode'] = 'true'
-    
     setupOptions['downloadWars'] = argsp.w
     setupOptions['loadTestData']  = argsp.t
     setupOptions['loadTestDataExit'] = argsp.x
