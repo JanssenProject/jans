@@ -38,6 +38,8 @@ swagger_rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
 
 warning_color = 214
 error_color = 196
+success_color = 10
+bold_color = 15
 
 clear = lambda: os.system('clear')
 urllib3.disable_warnings()
@@ -464,13 +466,13 @@ class JCA_CLI:
 
     def print_colored_output(self, data):
         data_json = json.dumps(data, indent=2)
-        print(self.colored_text(data_json, 10))
+        print(self.colored_text(data_json, success_color))
 
 
     def pretty_print(self, data):
         pp = pprint.PrettyPrinter(indent=2)
         pp_string = pp.pformat(data)
-        print(self.colored_text(pp_string, 10))
+        print(self.colored_text(pp_string, success_color))
 
     def get_url_param(self, url):
         if url.endswith('}'):
@@ -780,13 +782,16 @@ class JCA_CLI:
                 return attribute
 
 
-    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False):
+    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None):
 
         #self.drop_to_shell(locals())
 
         data = {}
         for prop in schema['properties']:
+            
             item = schema['properties'][prop]
+            if getitem and item != getitem:
+                continue
             prop_ = self.get_model_key_map(model, prop)
 
             if item['type'] == 'object' and 'properties' in item:
@@ -841,7 +846,7 @@ class JCA_CLI:
                         sub_model_list_selection = self.get_input(text="Add another {}?".format(sub_model_list_title_text), values=['y','n'])
                         if sub_model_list_selection == 'n':
                             break
-                
+
                 data[prop_] = sub_model_list
 
             else:
@@ -938,7 +943,7 @@ class JCA_CLI:
                     api_response_unmapped = self.unmap_model(api_response)
                     self.print_colored_output(api_response_unmapped)
                 except:
-                    print(self.colored_text(str(api_response), 10))
+                    print(self.colored_text(str(api_response), success_color))
 
         selection = self.get_input(values=['q', 'b'])
         if selection in ('b', 'n'):
@@ -965,7 +970,7 @@ class JCA_CLI:
                 print('\u001b[0m')
 
             if api_response is None:
-                print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), 10))
+                print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), success_color))
 
 
         selection = self.get_input(['b', 'q'])
@@ -1078,40 +1083,68 @@ class JCA_CLI:
             if end_point_param:
                 end_point_param_val = getattr(cur_model, end_point_param['name'])
 
-            self.get_input_for_schema_(schema, cur_model, initialised=initialised)
-        
-            print("Obtained Data:")
-            print()
-            model_unmapped = self.unmap_model(cur_model)
-            self.print_colored_output(model_unmapped)
-
-            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+            attr_name_list = []
+            for attr_name in cur_model.attribute_map:
+                if attr_name != 'dn':
+                    attr_name_list.append(cur_model.attribute_map[attr_name])
             
-            if selection == 'y':
-                api_caller = self.get_api_caller(endpoint)
-                print("Please wait while posting data ...\n")                
+            attr_name_list.sort()
+            item_numbers = []
+            def print_fileds():
+                print("Fields:")
+                for i, attr_name in enumerate(attr_name_list):
+                    print(str(i+1).rjust(2), attr_name)
+                    item_numbers.append(str(i+1))
 
-                try:
-                    if end_point_param_val:
-                        args_ = {'body': cur_model, end_point_param['name']:end_point_param_val}
-                        api_response = api_caller(**args_)
-                    else:
-                        api_response = api_caller(body=cur_model)
-                except swagger_client.rest.ApiException as e:
-                    api_response = None
-                    print('\u001b[38;5;196m')
-                    print(e.reason)
-                    print(e.body)
-                    print('\u001b[0m')
-                
-                if api_response:
-                    api_response_unmapped = self.unmap_model(api_response)
-                    self.print_colored_output(api_response_unmapped)
+            print_fileds()
+            cahnged_items = []
+            selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
+            help_text = 'q: quit, v: view, s: save, l: list fields #: update filed'
 
+            while True:
+                selection = self.get_input(values=selection_list, help_text=help_text)
+                if selection == 'v':
+                    self.pretty_print(self.unmap_model(cur_model))
+                elif selection == 'l':
+                    print_fileds()
+                elif selection in item_numbers:
+                    item = attr_name_list[int(selection)-1]
+                    schema_item = schema['properties'][item]
+                    self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
+                    cahnged_items.append(item)
 
-        selection = self.get_input(['b'])
-        if selection == 'b':
-            self.display_menu(endpoint.parent)
+                if selection == 'b':
+                    self.display_menu(endpoint.parent)
+                    break
+                elif selection == 's':
+                    print('Changes:')
+                    for ci in cahnged_items:
+                        model_key = self.get_model_key_map(cur_model, ci)
+                        str_val = str( getattr(cur_model, model_key))
+                        print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
+
+                    selection = self.get_input(values=['y', 'n'], text='Continue?')
+                    if selection == 'y':
+                        print("Please wait while posting data ...\n")                
+                        api_caller = self.get_api_caller(endpoint)
+                        try:
+                            if end_point_param_val:
+                                args_ = {'body': cur_model, end_point_param['name']:end_point_param_val}
+                                api_response = api_caller(**args_)
+                            else:
+                                api_response = api_caller(body=cur_model)
+                        except swagger_client.rest.ApiException as e:
+                            api_response = None
+                            print('\u001b[38;5;196m')
+                            print(e.reason)
+                            print(e.body)
+                            print('\u001b[0m')
+                        
+                        if api_response:
+                            api_response_unmapped = self.unmap_model(api_response)
+                            self.print_colored_output(api_response_unmapped)
+                    
+            self.get_input_for_schema_(schema, cur_model, initialised=initialised)
 
 
     def display_menu(self, menu):
