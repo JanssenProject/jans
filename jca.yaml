@@ -820,6 +820,7 @@ paths:
       summary: Gets list of scripts by type.
       description: Gets list of scripts by type.
       operationId: get-config-scripts-by-type
+      x-cli-ignore: true
       tags:
         - Custom Scripts
       responses:
@@ -850,6 +851,7 @@ paths:
       summary: Gets a script by Inum.
       description: Gets a script by Inum.
       operationId: get-config-scripts-by-inum
+      x-cli-ignore: true
       tags:
         - Custom Scripts
       responses:
