@@ -16,12 +16,18 @@ import ruamel.yaml
 import importlib
 import code
 
-from pprint import pprint
+import pprint
 from functools import partial
 from urllib.parse import urljoin, urlencode
 from collections import OrderedDict
 
+from lib.tabulate.tabulate import tabulate
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+tabulate_endpoints = {
+        'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
+        }
+
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
 swagger_client = importlib.import_module(my_op_mode+'.swagger_client')
@@ -461,6 +467,11 @@ class JCA_CLI:
         print(self.colored_text(data_json, 10))
 
 
+    def pretty_print(self, data):
+        pp = pprint.PrettyPrinter(indent=2)
+        pp_string = pp.pformat(data)
+        print(self.colored_text(pp_string, 10))
+
     def get_url_param(self, url):
         if url.endswith('}'):
             pname = re.findall('/\{(.*?)\}$', url)[0]
@@ -607,6 +618,19 @@ class JCA_CLI:
             if model.attribute_map[key_] == key:
                 return key_
 
+
+    def tabular_data(self, data, ome):
+        tab_data = []
+        headers = tabulate_endpoints[ome]
+        for i, entry in enumerate(data):
+            row_ = [i]
+            for header in headers:
+                row_.append(entry[header])
+            tab_data.append(row_)
+
+        print(tabulate(tab_data, headers, tablefmt="grid"))
+
+
     def process_get(self, endpoint, return_value=False):
         clear()
         title = endpoint.name
@@ -643,7 +667,8 @@ class JCA_CLI:
             return api_response
 
         selections = ['q', 'b']
-
+        item_counters = []
+        tabulated = False
         if api_response:
             selections.append('w')
             api_response_unmapped = []
@@ -655,9 +680,16 @@ class JCA_CLI:
                 data_dict = self.unmap_model(api_response)
                 api_response_unmapped = data_dict
 
-            print()
-            self.print_colored_output(api_response_unmapped)
+            op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
 
+            if op_mode_endpoint in tabulate_endpoints:
+                self.tabular_data(api_response_unmapped, op_mode_endpoint)
+                item_counters = [str(i+1) for i in range(len(api_response_unmapped))]
+                tabulated = True
+            else:
+                self.print_colored_output(api_response_unmapped)
+
+        selections += item_counters
         while True:
             selection = self.get_input(selections)
             if selection == 'b':
@@ -672,6 +704,9 @@ class JCA_CLI:
                 except Exception as e:
                     print("An error ocurred while saving data")
                     print(e)
+            elif selection in item_counters:
+                self.pretty_print(api_response_unmapped[int(selection) -1])
+
 
 
     def get_schema_from_reference(self, ref):
