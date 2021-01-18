@@ -1239,7 +1239,7 @@ class JCA_CLI:
 
         if schema_path:
             print()
-            print("To get sample shema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
+            print("To get sample schema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
 
 
     def get_json_from_file(self, data_fn):
