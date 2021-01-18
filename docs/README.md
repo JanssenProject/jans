@@ -22,7 +22,7 @@ Using **Janssen CLI**, You can perform some quick operation in _Attribute_. Such
 - `update` an existing attribute
 - `delete` an attribute using it's `inum`, etc.
 
-For example to get all attributes choose 1 from the Menu, you will get the following options:
+For example to get all attributes choose 1 from the Main Menu, you will get the following options:
 
 ![jans-cli Attributes Menu](img/im-attributes-main.png)
 
@@ -36,30 +36,114 @@ Once press Enter, it will retrieve 50 attributes and prints to screen in green c
 
 You can save result as a file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
 
-To `Add` a new attribute, choose 2 (on Attribute screen). Then enter value for each type of attribute items, after then it will ask to `continue?` enter `y` to continue. If everything are filled in the right way, it will create a new attribute on the list. 
+To `Add` a new attribute, choose 2 (on Attribute screen). Then enter value for each type of attribute items, after then it will ask to `continue?` enter `y` to continue. If everything are filled in the right way, it will create a new attribute on the list.
+You can go with to add a new attribute quickly:
+```text
+Obtained Data:
+{
+  "dn": "ou=attributes,o=jans",
+  "inum": null,
+  "selected": false,
+  "name": "testAttrb",
+  "displayName": "test Attribute",
+  "description": "testing attribute addition",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": null,
+  "editType": [
+    "ADMIN",
+    "USER"
+  ],
+  "viewType": [
+    "ADMIN",
+    "USER"
+  ],
+  "usageType": null,
+  "claimName": null,
+  "seeAlso": null,
+  "saml1Uri": null,
+  "saml2Uri": null,
+  "urn": null,
+  "scimCustomAttr": false,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": {
+    "regexp": null,
+    "minLength": null,
+    "maxLength": null
+  },
+  "tooltip": null
+}
+```
 
-![add attribute](img/add-attrb.png) 
+![add attribute](img/im-add-attrb.png) 
 
 To `update` an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. For example; I want to change description for attribute having inum **BCA8**. 
-It will retrieve current data and will ask for modification of each properties, just leave defaults if you don't want to change that property.
-
-![jans-cli Attributes Update](img/im-attributes-update.png)
+It will retrieve current data and will ask for modification of each property, just leave defaults if you don't want to change that property.
 
 When it comes to end, it will display modified data and ask if you want to continue (this data just before it sends to server)
 
-![jans-cli Attributes Update - Continue?](img/im-attributes-update-continue.png) 
+```text
+Obtained Data:
+
+{
+  "dn": "inum=BCA8,ou=attributes,o=jans",
+  "inum": "BCA8",
+  "selected": false,
+  "name": "transientId",
+  "displayName": "TransientId",
+  "description": "TransientId",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": "jansPerson",
+  "editType": [
+    "USER",
+    "ADMIN"
+  ],
+  "viewType": [
+    "USER",
+    "ADMIN"
+  ],
+  "usageType": null,
+  "claimName": null,
+  "seeAlso": null,
+  "saml1Uri": "urn:mace:dir:attribute-def:transientId",
+  "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.312",
+  "urn": "mace:shibboleth:1.0:nameIdentifier",
+  "scimCustomAttr": false,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": {
+    "regexp": null,
+    "minLength": null,
+    "maxLength": null
+  },
+  "tooltip": null
+}
+```
+![jans-cli Attributes Update](img/im-attributes-update.png)
 
 After you enter `y` it will perform `update` and display updated data on screen.
 
 
-To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` value that you want to delete. Here I chose that I already created in the above: `"inum=a0d1c46e-6184-44c1-a299-29acb3ee8ff7"` It will ask for confirmation, enter `y` to confirm.
+To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` value that you want to delete. Here I chose that I already created in the above: `"inum=0adfeb80-cb57-4f7b-a3a0-944082e4c199"` It will ask for confirmation, enter `y` to confirm.
 
-![delete attribute](img/delete-attrb.png)
+![delete attribute](img/im-delete-attrb.png)
 
 ### Authentication Method
 Sometimes It's getting hard to change **Default Authentication Method** from web browser if you can't login using web interface. Here Janssen CLI is going to help you a lot. 
 
-![default-auth](img/default-auth.png)
+![default-auth](img/im-default-auth.png)
 
 - `View` Default Authentication Method.
 - `Update` Default Authentication Method.
@@ -68,12 +152,12 @@ Select option 2 from the Main Menu to chose Authentication Method. You can see s
 
 To `View` default authentication method select 1 from Authentication Menu, It will show you current default authentication method of janssen server.
 
-![current-default-auth](img/cur-default-auth.png)
+![current-default-auth](img/im-cur-default-auth.png)
 
 
 To `update` default authentication method select 2, then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
 
-![update-auth](img/up-default-auth.png)
+![update-auth](img/im-update-default-auth.png)
 
 
 ### Cache Configuration
@@ -1733,7 +1817,7 @@ Modify it to update attribute `name`, `display name`, `view type`:
 nano /tmp/attribute.json
 ```
 
-![post-attribute.png](img/post-attribute.png)
+![post-attribute.png](img/cl-post-attribute.png)
 
 Now, let's add this attribute using `post-attributes`:
 ```commandline
