@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -90,7 +84,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
     @RefAdjusted
     @ApiOperation(value = "Create user", notes = "https://tools.ietf.org/html/rfc7644#section-3.3", response = UserResource.class)
     public Response createUser(
@@ -117,7 +111,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.read"})
     @RefAdjusted
     @ApiOperation(value = "Find user by id", notes = "Returns a user by id as path param (https://tools.ietf.org/html/rfc7644#section-3.4.1)",
             response = UserResource.class)
@@ -159,7 +153,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
     @RefAdjusted
     @ApiOperation(value = "Update user", notes = "Update user (https://tools.ietf.org/html/rfc7644#section-3.5.1)", response = UserResource.class)
     public Response updateUser(
@@ -191,7 +185,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
     @ApiOperation(value = "Delete User", notes = "Delete User (https://tools.ietf.org/html/rfc7644#section-3.6)")
     public Response deleteUser(@PathParam("id") String id){
 
@@ -213,7 +207,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.read"})
     @RefAdjusted
     @ApiOperation(value = "Search users", notes = "Returns a list of users (https://tools.ietf.org/html/rfc7644#section-3.4.2.2)", response = ListResponse.class)
     public Response searchUsers(
@@ -252,7 +246,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.read"})
     @RefAdjusted
     @ApiOperation(value = "Search users POST /.search", notes = "Returns a list of users (https://tools.ietf.org/html/rfc7644#section-3.4.3)", response = ListResponse.class)
     public Response searchUsersPost(@ApiParam(value = "SearchRequest", required = true) SearchRequest searchRequest){
@@ -279,7 +273,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
     @RefAdjusted
     @ApiOperation(value = "PATCH operation", notes = "https://tools.ietf.org/html/rfc7644#section-3.5.2", response = UserResource.class)
     public Response patchUser(

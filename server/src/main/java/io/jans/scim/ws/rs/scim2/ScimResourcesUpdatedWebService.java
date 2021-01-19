@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
 //import io.jans.scim.ldap.service.IGroupService;
@@ -73,7 +67,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.read"})
     public Response usersChangedAfter(@QueryParam("timeStamp") String isoDate,
                                       @QueryParam("start") int start,
                                       @QueryParam("pageSize") int itemsPerPage) {
