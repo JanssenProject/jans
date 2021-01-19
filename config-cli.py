@@ -21,8 +21,11 @@ from functools import partial
 from urllib.parse import urljoin, urlencode
 from collections import OrderedDict
 
-from lib.tabulate.tabulate import tabulate
 cur_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(cur_dir)
+
+from pylib.tabulate.tabulate import tabulate
+
 
 tabulate_endpoints = {
         'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
