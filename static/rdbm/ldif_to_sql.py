@@ -36,7 +36,7 @@ for schema_fn in ('jans_schema.json', 'custom_schema.json'):
     schema = json.load(schema_io)
     jans_attributes += schema['attributeTypes']
 
-output_dir = '/tmp/output'
+output_dir = '/opt/jans/jans-setup/output'
 
 sql_data = open('jans_data.sql', 'w')
 
