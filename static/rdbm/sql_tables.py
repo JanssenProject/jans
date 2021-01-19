@@ -7,7 +7,7 @@ ldap_sql_data_type_mapping = {
     '1.3.6.1.4.1.1466.115.121.1.24': 'DATETIME',
     '1.3.6.1.4.1.1466.115.121.1.27': 'INT',
     '1.3.6.1.4.1.1466.115.121.1.11': 'VARCHAR(2)', #country code
-    '1.3.6.1.4.1.1466.115.121.1.26': 'TEXT', #IA5 String
+    '1.3.6.1.4.1.1466.115.121.1.26': 'VARCHAR(48)', #IA5 String
     '1.3.6.1.4.1.1466.115.121.1.40': 'BINARY', #octed string
     '1.3.6.1.4.1.1466.115.121.1.8': 'BLOB',
     '1.3.6.1.4.1.1466.115.121.1.50': 'VARCHAR(20)', #phone number
@@ -16,6 +16,12 @@ ldap_sql_data_type_mapping = {
     '1.3.6.1.4.1.1466.115.121.1.41': 'VARCHAR(128)', #Postal Address,
     'JSON': 'JSON'
     }
+
+opendj_data_types = {
+    'description': 'TINYTEXT'
+}
+
+
 
 with open('opendj_attributes_syntax.json') as f:
     opendj_attributes_syntax = json.load(f)
@@ -47,9 +53,16 @@ if __name__ == "__main__":
             sql_tbl_cols = []
 
             for attrname in obj['may']:
-                attr_syntax = get_attr_syntax(attrname, jans_schema['attributeTypes'])
+                for ja in jans_schema['attributeTypes']:
+                    if attrname in ja['names']:
+                        if ja.get('sql_data_type'):
+                            data_type = ja['sql_data_type']
+                            break
+                else:
+                    attr_syntax = get_attr_syntax(attrname, jans_schema['attributeTypes'])
+                    data_type = ldap_sql_data_type_mapping[attr_syntax]
 
-                sql_tbl_cols.append('`{}` {}'.format(attrname, ldap_sql_data_type_mapping[attr_syntax]))
+                sql_tbl_cols.append('`{}` {}'.format(attrname, data_type))
                 
             sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`))'.format(sql_tbl_name.lower(), ', '.join(sql_tbl_cols))
             w.write(sql_cmd+';\n')
