@@ -5,25 +5,24 @@ import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
-
-import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 @Named
-public class UmaResourceProtectionCache {
+public class ConfigApiProtectionCache {
 
     public static final int CACHE_LIFETIME = 60;
 
     private static final Cache<String, Scope> scopeCache = CacheBuilder.newBuilder()
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
 
-    private static final Cache<String, UmaResource> umaResourceCache = CacheBuilder.newBuilder()
+    private static final Cache<String, List<Scope>> resourceCache = CacheBuilder.newBuilder()
             .expireAfterWrite(CACHE_LIFETIME, TimeUnit.MINUTES).build();
 
     // Scope
@@ -49,27 +48,26 @@ public class UmaResourceProtectionCache {
         return Maps.newHashMap(scopeCache.asMap());
     }
 
-    // UmaResource
-    public static void removeAllUmaResources() {
-        umaResourceCache.invalidateAll();
+    // Resource
+    public static void removeAllResources() {
+        resourceCache.invalidateAll();
     }
 
-    public static UmaResource getUmaResource(String umaResourceName) {
-        Preconditions.checkNotNull(umaResourceName);
-        Preconditions.checkState(!Strings.isNullOrEmpty(umaResourceName));
-        return umaResourceCache.getIfPresent(umaResourceName);
+    public static List<Scope> getResource(String resourceName) {
+        Preconditions.checkNotNull(resourceName);
+        Preconditions.checkState(!Strings.isNullOrEmpty(resourceName));
+        return resourceCache.getIfPresent(resourceName);
 
     }
 
-    public static void putUmaResource(String umaResourceName, UmaResource umaResource) {
-        Preconditions.checkNotNull(umaResource);
-        if (umaResourceCache.getIfPresent(umaResourceName) == null) {
-            umaResourceCache.put(umaResourceName, umaResource);
-        }
+    public static void putResource(String resourceName, List<Scope> scopeList) {
+        Preconditions.checkNotNull(resourceName);       
+        resourceCache.put(resourceName, scopeList);
+        
     }
 
-    public static Map<String, UmaResource> getAllUmaResources() {
-        return Maps.newHashMap(umaResourceCache.asMap());
+    public static Map<String, List<Scope>> getAllResources() {
+        return Maps.newHashMap(resourceCache.asMap());
     }
 
 }
