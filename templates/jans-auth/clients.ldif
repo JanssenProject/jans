@@ -22,6 +22,7 @@ jansScope: inum=764C,ou=scopes,o=jans
 jansSubjectTyp: public
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: true
-objectClass: jansClnt
 objectClass: top
+objectClass: jansClnt
+
 
