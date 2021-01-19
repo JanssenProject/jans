@@ -15,6 +15,7 @@ import hashlib
 from pathlib import Path
 from urllib.parse import urlparse
 from collections import OrderedDict
+from string import Template
 
 from setup_app import paths
 from setup_app.config import Config
@@ -398,7 +399,7 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
 
-    def renderTemplateInOut(self, filePath, templateFolder, outputFolder, me=''):
+    def renderTemplateInOut(self, filePath, templateFolder, outputFolder, me='', pystring=False):
         fn = os.path.basename(filePath)
         in_fp = os.path.join(templateFolder, fn) 
         self.logIt("Rendering template %s" % in_fp)
@@ -413,8 +414,12 @@ class SetupUtils(Crypto64):
             if isinstance(format_dict[k], bool):
                 format_dict[k] = str(format_dict[k]).lower()
 
-        rendered_text = self.fomatWithDict(template_text, format_dict)
+        if pystring:
+            rendered_text = Template(template_text).substitute(format_dict)
+        else:
+            rendered_text = self.fomatWithDict(template_text, format_dict)
         out_fp = os.path.join(outputFolder, fn)
+
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
