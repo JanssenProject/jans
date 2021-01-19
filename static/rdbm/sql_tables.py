@@ -17,8 +17,20 @@ ldap_sql_data_type_mapping = {
     'JSON': 'JSON'
     }
 
-opendj_data_types = {
-    'description': 'TINYTEXT'
+sql_data_types = {
+    'description': 'TEXT', # some attribute descriptions are too long, change to TINYTEXT after shortening them
+    'jansAttrs': 'JSON',
+    'jansDbAuth': 'TEXT',
+    'jansScr': 'TEXT',
+    'jansConfApp': 'TEXT',
+    'jansCacheConf': 'TEXT',
+    'jansDocStoreConf': 'TEXT',
+    'jansConfDyn': 'JSON',
+    'jansConfErrors': 'TEXT',
+    'jansConfStatic': 'TEXT',
+    'jansConfWebKeys': 'TEXT',
+    'userPassword': 'VARCHAR(48)',
+    
 }
 
 
@@ -53,17 +65,20 @@ if __name__ == "__main__":
             sql_tbl_cols = []
 
             for attrname in obj['may']:
-                for ja in jans_schema['attributeTypes']:
-                    if attrname in ja['names']:
-                        if ja.get('sql_data_type'):
-                            data_type = ja['sql_data_type']
-                            break
+                if attrname in sql_data_types:
+                    data_type = sql_data_types[attrname]
                 else:
-                    attr_syntax = get_attr_syntax(attrname, jans_schema['attributeTypes'])
-                    data_type = ldap_sql_data_type_mapping[attr_syntax]
+                    for ja in jans_schema['attributeTypes']:
+                        if attrname in ja['names']:
+                            if ja.get('sql_data_type'):
+                                data_type = ja['sql_data_type']
+                                break
+                    else:
+                        attr_syntax = get_attr_syntax(attrname, jans_schema['attributeTypes'])
+                        data_type = ldap_sql_data_type_mapping[attr_syntax]
 
                 sql_tbl_cols.append('`{}` {}'.format(attrname, data_type))
                 
-            sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`))'.format(sql_tbl_name.lower(), ', '.join(sql_tbl_cols))
+            sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`))'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
             w.write(sql_cmd+';\n')
     w.close()
