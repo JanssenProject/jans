@@ -27,7 +27,6 @@ class myLdifParser(LDIFParser):
                 self.entries.append((dn, entry))
 
 
-
 schema_path = cur_path.parent.parent.joinpath('schema')
 
 jans_attributes = []
@@ -51,6 +50,11 @@ for ldif_path in Path(output_dir).glob('**/*.ldif'):
         rdn_name = dn_parsed[0][0]
         doc_id = dn_parsed[0][1]
         objectClass = entry.get('objectClass') or entry.get('objectclass')
+        if 'top' in objectClass:
+            objectClass.remove('top')
+        if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
+            continue
+
         objectClass = objectClass[-1]
         entry.pop(rdn_name)
         if 'objectClass' in entry:
@@ -58,14 +62,14 @@ for ldif_path in Path(output_dir).glob('**/*.ldif'):
         elif 'objectclass' in entry:
             entry.pop('objectclass')
 
-        table_name = objectClass.lower()
+        table_name = objectClass
 
         cols = ['`doc_id`', '`objectClass`', '`dn`']
         vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
         for lkey in entry:
             cols.append('`{}`'.format(lkey))
             data_type = ldap_sql_data_type_mapping[get_attr_syntax(lkey, jans_attributes)]
-            
+
             if data_type in ('SMALLINT', 'INT'):
                 if entry[lkey][0].lower() in ('1', 'on', 'true', 'yes'):
                     vals.append('1')
@@ -74,6 +78,9 @@ for ldif_path in Path(output_dir).glob('**/*.ldif'):
             elif data_type == 'DATETIME':
                 vals.append(entry[lkey])
             elif data_type == 'JSON':
+                if lkey in ('jansConfProperty', 'jansModuleProperty'):
+                    for i, k in enumerate(entry[lkey][:]):
+                        entry[lkey][i] = json.loads(k)
                 vals.append("'{}'".format(json.dumps(entry[lkey])))
             else:
                 vals.append(json.dumps(entry[lkey][0]))
