@@ -555,7 +555,7 @@ class PropertiesUtils(SetupUtils):
 
     def promptForProperties(self):
 
-        if Config.noPrompt:
+        if Config.noPrompt or '-x' in sys.argv:
             return
 
 

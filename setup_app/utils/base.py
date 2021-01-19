@@ -97,7 +97,7 @@ current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 10
 
 def check_resources():
 
-    if '--shell' in sys.argv:
+    if '--shell' in sys.argv or '-x' in sys.argv:
         return
 
     if current_file_max < static.file_max:
