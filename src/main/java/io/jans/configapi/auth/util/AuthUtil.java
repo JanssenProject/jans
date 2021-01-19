@@ -20,7 +20,7 @@ import io.jans.ca.rs.protect.Condition;
 import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.RsResourceList;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.auth.UmaResourceProtectionCache;
+import io.jans.configapi.auth.ConfigApiProtectionCache;
 import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.auth.service.UmaService;
@@ -77,9 +77,6 @@ public class AuthUtil {
     ScopeService scopeService;
 
     @Inject
-    UmaResourceProtectionCache resourceProtectionCache;
-
-    @Inject
     UmaService umaService;
 
     @Inject
@@ -133,12 +130,12 @@ public class AuthUtil {
         return encryptedPassword;
     }
 
-    public UmaResource getUmaResource(String method, String path) {
-        log.trace(" AuthUtil::getUmaResource() method = "
+    public List<Scope> getResourceScopeList(String method, String path) {
+        log.trace(" AuthUtil::getResourceScopeList() method = "
                 + method + " , path = " + path + "\n");
 
         // Verify in cache
-        Map<String, UmaResource> resources = UmaResourceProtectionCache.getAllUmaResources();
+        Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
 
         // Filter paths based on resource name
         Set<String> keys = resources.keySet();
@@ -149,21 +146,21 @@ public class AuthUtil {
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        UmaResource umaResource = null;
+        List<Scope> scopeList = null;
         for (String key : filteredPaths) {
             String[] result = key.split(":::");
             if (result != null && result.length > 1) {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
-                log.debug(" AuthUtil::getUmaResource() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+                log.debug(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
                 if (pathUrl != null && pathUrl.contains(path)) {
                     // Matching url
-                    log.debug(" AuthUtil::getUmaResource() - Matching url, path = " + path + " , pathUrl = " + pathUrl);
+                    log.debug(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = " + pathUrl);
 
                     // Verify Method
                     if (httpmethod.contains(method)) {
-                        umaResource = UmaResourceProtectionCache.getUmaResource(key);
-                        log.debug(" AuthUtil::getUmaResource() - Matching umaResource =" + umaResource);
+                    	scopeList = ConfigApiProtectionCache.getResource(key);
+                        log.debug(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
                         break;
                     }
                     
@@ -173,20 +170,34 @@ public class AuthUtil {
 
         }
      
-        return umaResource;
+        return scopeList;
     }
 
     public List<String> getRequestedScopes(String path) {
-        UmaResource resource = UmaResourceProtectionCache.getUmaResource(path);
-        log.trace("getRequestedScopes() - resource = "+resource);
-        return resource.getScopes();
+        List<Scope> scopeList = ConfigApiProtectionCache.getResource(path);
+        log.trace("getRequestedScopes() - scopeList = "+scopeList);
+        List<String> scopeStrList = new ArrayList();
+        if (scopeList != null && scopeList.size() > 0) {
+            for (Scope s : scopeList) {
+            	scopeStrList.add(s.getId());
+            }
+        }
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        return scopeStrList;
     }
     
     public List<String> getRequestedScopes(String method, String path) {
         log.trace("getRequestedScopes() - method = "+method+" , path = "+path);
-        UmaResource resource = this.getUmaResource(method,path);
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - resource = "+resource+"\n\n\n");
-        return resource.getScopes();
+        List<Scope> scopeList = this.getResourceScopeList(method,path);
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = "+scopeList+"\n\n\n");
+        List<String> scopeStrList = new ArrayList();
+        if (scopeList != null && scopeList.size() > 0) {
+            for (Scope s : scopeList) {
+            	scopeStrList.add(s.getId());
+            }
+        }
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        return scopeStrList;
     }
 
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
@@ -352,11 +363,11 @@ public class AuthUtil {
         List<String> scopes = new ArrayList<String>();
 
         // Verify in cache
-        Map<String, Scope> scopeMap = UmaResourceProtectionCache.getAllScopes();
+        Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
         Set<String> keys = scopeMap.keySet();
 
         for (String id : keys) {
-            Scope scope = UmaResourceProtectionCache.getScope(id);
+            Scope scope = ConfigApiProtectionCache.getScope(id);
             scopes.add(scope.getInum());
         }
         return scopes;
