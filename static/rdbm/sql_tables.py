@@ -19,13 +19,13 @@ ldap_sql_data_type_mapping = {
 
 sql_data_types = {
     'description': 'TEXT', # some attribute descriptions are too long, change to TINYTEXT after shortening them
-    'jansAttrs': 'JSON',
+    'jansAttrs': 'TEXT',
     'jansDbAuth': 'TEXT',
     'jansScr': 'TEXT',
     'jansConfApp': 'TEXT',
     'jansCacheConf': 'TEXT',
     'jansDocStoreConf': 'TEXT',
-    'jansConfDyn': 'JSON',
+    'jansConfDyn': 'TEXT',
     'jansConfErrors': 'TEXT',
     'jansConfStatic': 'TEXT',
     'jansConfWebKeys': 'TEXT',
