@@ -25,7 +25,7 @@ def render_app_properties(manager):
     with open("/app/templates/application.properties.tmpl") as f:
         txt = safe_render(f.read(), ctx)
 
-    with open("/opt/jans/config-api/config/application.properties", "w") as f:
+    with open("/opt/jans/jans-config-api/config/application.properties", "w") as f:
         f.write(txt)
 
 

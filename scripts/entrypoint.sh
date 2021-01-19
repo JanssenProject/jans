@@ -9,7 +9,7 @@ if [ ! -f /deploy/touched  ]; then
     touch /deploy/touched
 fi
 
-cd /opt/jans/config-api
+cd /opt/jans/jans-config-api
 exec java \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
@@ -17,4 +17,4 @@ exec java \
     -Djans.base=/etc/jans \
     -Dquarkus.profile=prod \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jans/config-api/jans-config-api-runner.jar
+    -jar /opt/jans/jans-config-api/jans-config-api-runner.jar

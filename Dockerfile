@@ -18,11 +18,11 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-01-15 15:29'
+ENV CN_BUILD_DATE='2021-01-19 14:54'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
 
-RUN mkdir -p /opt/jans/config-api \
-    && wget -q ${CN_SOURCE_URL} -O /opt/jans/config-api/jans-config-api-runner.jar
+RUN mkdir -p /opt/jans/jans-config-api \
+    && wget -q ${CN_SOURCE_URL} -O /opt/jans/jans-config-api/jans-config-api-runner.jar
 
 EXPOSE 8074
 EXPOSE 9444
@@ -124,20 +124,14 @@ LABEL name="Config API" \
     summary="Janssen Config API" \
     description=""
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/jans/config-api/logs /opt/jans/config-api/config
+RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/jans/jans-config-api/logs /opt/jans/jans-config-api/config
 RUN touch /etc/hosts.back
-# config_api.log jans-config-api-access.log
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
-
-# && chown -R 1000:1000 config_api.log \
-# && chown -R 1000:1000 jans-config-api-access.log \
-# && chgrp -R 0 jans-config-api-access.log && chmod -R g=u jans-config-api-access.log \
-# && chgrp -R 0 config_api.log && chmod -R g=u config_api.log \
 
  # adjust ownership
 RUN chown -R 1000:1000 /etc/jans \
