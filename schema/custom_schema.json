@@ -11,7 +11,12 @@
         "departmentNumber",
         "employeeType",
         "cn",
+        "sn",
         "st",
+        "uid",
+        "givenName",
+        "middleName",
+        "nickname",
         "manager",
         "street",
         "postOfficeBox",
@@ -19,11 +24,18 @@
         "preferredDeliveryMethod",
         "roomNumber",
         "secretary",
+        "userPassword",
         "homePostalAddress",
         "l",
         "postalCode",
         "description",
-        "title"
+        "title",
+        "jansStatus",
+        "memberOf",
+        "displayName",
+        "mail",
+        "emailVerified"
+        
       ],
       "names": [
         "jansCustomPerson"
