@@ -31,10 +31,9 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.log_dir = os.path.join(self.root_dir, 'logs')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.application_properties_tmp = os.path.join(self.templates_folder, 'application.properties')
-        self.uma_rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/uma-rs-protect.json')
+        self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
         self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
-        self.resources_ldif_fn = os.path.join(self.output_folder, 'resources.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.load_ldif_files = [self.scope_ldif_fn]
         
@@ -68,8 +67,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def generate_configuration(self):
 
-        uma_rs_protects = self.readFile(self.uma_rs_protect_fn)
-        uma_rs_protect = json.loads(uma_rs_protects)
+        uma_rs_protect = self.loadJson(self.rs_protect_fn)
+
         try:
             config_api_swagger_yaml_fn = os.path.join(Config.install_dir, 'setup_app/data/jans-config-api-swagger.yaml')
             yml_str = self.readFile(config_api_swagger_yaml_fn)
@@ -79,10 +78,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         except:
             scopes_def = {}
 
-        uma_rs_protects = self.readFile(self.uma_rs_protect_fn)
-        uma_rs_protect = json.loads(uma_rs_protects)
-
-        self.check_clients([('jca_client_id', '1801.')])
+        self.check_clients([('jca_client_id', '1800.')])
 
         if not Config.get('jca_client_pw'):
             Config.jca_client_pw = self.getPW()
@@ -90,9 +86,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         scopes = ''
         scope_ldif_fd = open(self.scope_ldif_fn, 'wb')
-        resources_ldif_fd = open(self.resources_ldif_fn, 'wb')
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
-        ldif_resources_writer = LDIFWriter(resources_ldif_fd, cols=1000)
         scopes = {}
         jansUmaScopes_all = []
 
@@ -107,7 +101,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                     if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
                         continue
                     if not scope in scopes:
-                        inum = 'CACA-' + os.urandom(2).hex().upper()
+                        inum = '1801.' + os.urandom(3).hex().upper()
                         scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
                         scopes[scope] = {'dn': scope_dn}
                         display_name = 'Config API scope {}'.format(scope)
@@ -124,14 +118,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
                         jansUmaScopes.append(scopes[scope]['dn'])
                         jansUmaScopes_all.append(scopes[scope]['dn'])
-                        
-                        load_resources = True
 
         scope_ldif_fd.close()
-        resources_ldif_fd.close()
-
-        if load_resources:
-            self.load_ldif_files.append(self.resources_ldif_fn)
 
         createClient = True
         config_api_dn = 'inum={},ou=clients,o=jans'.format(Config.jca_client_id)

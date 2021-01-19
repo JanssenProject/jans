@@ -14,6 +14,7 @@ import hashlib
 
 from pathlib import Path
 from urllib.parse import urlparse
+from collections import OrderedDict
 
 from setup_app import paths
 from setup_app.config import Config
@@ -179,6 +180,11 @@ class SetupUtils(Crypto64):
             self.logIt("Error writing %s" % inFilePathText, True)
 
         return inFilePathText
+
+    def loadJson(self, fn):
+        json_content = self.readFile(fn)
+        json_data =json.loads(json_content, object_pairs_hook=OrderedDict)
+        return json_data
 
     def insertLinesInFile(self, inFilePath, index, text):        
             inFilePathLines = None                    
