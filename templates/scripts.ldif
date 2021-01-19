@@ -30,8 +30,8 @@ jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(dynamic_scope_dynamic_permission)s
 jansScrTyp: dynamic_scope
-objectClass: jansCustomScr
 objectClass: top
+objectClass: jansCustomScr
 jansEnabled: true
 jansProgLng: python
 
@@ -104,8 +104,8 @@ jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_yubicloudexternalauthenticator)s
 jansScrTyp: person_authentication
-objectClass: jansCustomScr
 objectClass: top
+objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
@@ -537,8 +537,8 @@ jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(persistence_extension_samplescript)s
 jansScrTyp: persistence_extension
-objectClass: jansCustomScr
 objectClass: top
+objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
@@ -550,8 +550,8 @@ jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(idp_samplescript)s
 jansScrTyp: idp
-objectClass: jansCustomScr
 objectClass: top
+objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
