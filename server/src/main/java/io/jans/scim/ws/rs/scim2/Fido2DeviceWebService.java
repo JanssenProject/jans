@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -87,7 +81,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.write"})
     @ApiOperation(value = "Create device", response = Fido2DeviceResource.class)
     public Response createDevice() {
         log.debug("Executing web service method. createDevice");
@@ -98,7 +92,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.read"})
     @RefAdjusted
     @ApiOperation(value = "Find device by id", notes = "Returns a device by id as path param", response = Fido2DeviceResource.class)
     public Response getF2DeviceById(@PathParam("id") String id,
@@ -136,7 +130,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.write"})
     @RefAdjusted
     @ApiOperation(value = "Update device", response = Fido2DeviceResource.class)
     public Response updateF2Device(
@@ -189,7 +183,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.write"})
     @ApiOperation(value = "Delete device")
     public Response deleteF2Device(@PathParam("id") String id) {
 
@@ -217,7 +211,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.read"})
     @RefAdjusted
     @ApiOperation(value = "Search devices", notes = "Returns a list of devices", response = ListResponse.class)
     public Response searchF2Devices(
@@ -256,7 +250,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/fido2.read"})
     @RefAdjusted
     @ApiOperation(value = "Search devices POST /.search", notes = "Returns a list of fido devices", response = ListResponse.class)
     public Response searchF2DevicesPost(SearchRequest searchRequest, @QueryParam("userId") String userId) {

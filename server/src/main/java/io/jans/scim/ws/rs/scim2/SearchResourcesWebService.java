@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -77,7 +71,7 @@ public class SearchResourcesWebService extends BaseScimWebService {
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/all-resources.search"})
     @RefAdjusted
     @ApiOperation(value = "General search POST /.search", notes = "Returns a list of resources (https://tools.ietf.org/html/rfc7644#section-3.4.3)", response = ListResponse.class)
     public Response search(@ApiParam(value = "SearchRequest", required = true) SearchRequest searchRequest) {
