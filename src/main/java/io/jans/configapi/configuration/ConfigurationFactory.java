@@ -15,8 +15,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
-import io.jans.configapi.auth.UmaAuthorizationService;
-import io.jans.configapi.auth.UmaResourceProtectionService;
+import io.jans.configapi.auth.ConfigApiResourceProtectionService;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -88,21 +87,20 @@ public class ConfigurationFactory {
     private String cryptoConfigurationSalt;
     private String saltFilePath;
     
+    @Inject
+    @ConfigProperty(name = "api.protection.type")
+    private static String API_PROTECTION_TYPE;
 
     @Inject
-    @ConfigProperty(name = "apiUmaClientId")
+    @ConfigProperty(name = "api.client.id")
     private static String API_CLIENT_ID;
     
     @Inject
-    @ConfigProperty(name = "apiProtection.type")
-    private static String API_PROTECTION_TYPE;
+    @ConfigProperty(name = "api.client.password")
+    private static String API_CLIENT_PASSWORD;
     
     @Inject
-    @ConfigProperty(name = "apiUmaClientPassword")
-    private static String API_UMA_CLIENT_PASSWORD;
-    
-    @Inject
-    UmaResourceProtectionService umaResourceProtectionService;
+    ConfigApiResourceProtectionService configApiResourceProtectionService;
     
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
@@ -137,9 +135,8 @@ public class ConfigurationFactory {
     }
     
     public static String getApiClientPassword() {
-        return API_UMA_CLIENT_PASSWORD;
-    }
-    
+        return API_CLIENT_PASSWORD;
+    }    
     
     public void create() {
         loadBaseConfiguration();
@@ -296,21 +293,9 @@ public class ConfigurationFactory {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
-
-            umaResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); // Verify
-                                                                                                       // Resources
-                                                                                                       // available
-
-            if (ApiConstants.PROTECTION_TYPE_OAUTH2.equals(ConfigurationFactory.getApiProtectionType())) {
-                log.info("=============  createAuthorizationService() - OpenIdAuthorizationService = "
-                        + umaResourceProtectionService);
-                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-            } else {
-                log.info("=============  createAuthorizationService() - UmaAuthorizationService = "
-                        + umaResourceProtectionService);
-
-                return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
-            }
+        	// Verify resources available
+            configApiResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); 
+            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
