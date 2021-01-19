@@ -97,6 +97,9 @@ current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 10
 
 def check_resources():
 
+    if '--shell' in sys.argv:
+        return
+
     if current_file_max < static.file_max:
         print(("{0}Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "

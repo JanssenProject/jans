@@ -158,8 +158,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             clients_ldif_fd.close()
             self.load_ldif_files.append(self.clients_ldif_fn)
 
-    def render_import_templates(self):
-        self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder)
+    def render_import_templates(self):        
+        self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
         self.dbUtils.import_ldif(self.load_ldif_files)
 
