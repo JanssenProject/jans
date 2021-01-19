@@ -78,7 +78,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         except:
             scopes_def = {}
 
-        self.check_clients([('jca_client_id', '1800.')])
+        self.check_clients([('jca_client_id', '1801.')])
 
         if not Config.get('jca_client_pw'):
             Config.jca_client_pw = self.getPW()
@@ -101,7 +101,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                     if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
                         continue
                     if not scope in scopes:
-                        inum = '1801.' + os.urandom(3).hex().upper()
+                        inum = '1800.' + os.urandom(3).hex().upper()
                         scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
                         scopes[scope] = {'dn': scope_dn}
                         display_name = 'Config API scope {}'.format(scope)
