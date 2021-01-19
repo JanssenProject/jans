@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim2.client;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -67,10 +61,11 @@ public class BaseTest {
         // Override test parameters
         context.getSuite().getXmlSuite().setParameters(parameters);
 
-        if (client==null) {
+        if (client == null) {
             setupClient(context.getSuite().getXmlSuite().getParameters());
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         }
+        
     }
 
     @AfterSuite
@@ -81,24 +76,24 @@ public class BaseTest {
     private void setupClient(Map<String, String> params) throws Exception{
 
         logger.info("Initializing client...");
-        boolean testMode=Boolean.parseBoolean(System.getProperty("testmode"));
+        String tokenEndpointAuthnMethod = params.get("tokenEndpointAuthnMethod");
+        String domainURL = params.get("domainURL");
+        String OIDCMetadataUrl = params.get("OIDCMetadataUrl");
+        String clientId = params.get("clientId");
 
-        /*
-         To get a simpler client (not one that supports all possible operations as in this case), you can use as class
-         parameter any other interface from gluu.scim2.client.rest or org.gluu.oxtrust.ws.rs.scim2 packages. Find an
-         example at test method gluu.scim2.client.SampleTest#smallerClient
-         */
-        if (testMode)
-            client=ScimClientFactory.getTestClient(ClientSideService.class, params.get("domainURL"), params.get("OIDCMetadataUrl"));
-            //client=ScimClientFactory.getTestClient(ClientSideService.class, params.get("domainURL"), params.get("OIDCMetadataUrl"), "clientId", "clientSecret");
-        else
-            client=ScimClientFactory.getClient(
-                    ClientSideService.class,
-                    params.get("domainURL"),
-                    params.get("umaAatClientId"),
-                    params.get("umaAatClientJksPath"),
-                    params.get("umaAatClientJksPassword"),
-                    params.get("umaAatClientKeyId"));
+        if (tokenEndpointAuthnMethod.equals("client_secret_basic")) {
+        	client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, params.get("clientSecret"));
+
+        } else if (tokenEndpointAuthnMethod.equals("client_secret_post")) {
+        	client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, params.get("clientSecret"), true);
+
+        } else if (tokenEndpointAuthnMethod.equals("private_key_jwt")) {
+        	client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, 
+        		Paths.get(params.get("keyStorePath")), params.get("keyStorePath"), params.get("keyId"));
+        } else {
+           throw new Exception("Unsupported method for token endpoint authentication: " + tokenEndpointAuthnMethod);
+        }
+
     }
 
     private String decodeFileValue(String value){
@@ -112,12 +107,10 @@ public class BaseTest {
                 decoded = bfr.lines().reduce("", (partial, next) -> partial + NEW_LINE + next);
                 if (decoded.length()==0)
                     logger.warn("Key '{}' is empty", value);
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 logger.error(e.getMessage(), e);
                 decoded=null;
             }
-            //No need to close bfr: try-with-resources statements does it
         }
         return decoded;
 
