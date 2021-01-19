@@ -1,5 +1,6 @@
 dn: inum=%(jca_client_id)s,ou=clients,o=jans
 del: false
+displayName: Jans Config Api Client
 inum: %(jca_client_id)s
 jansAccessTknAsJwt: false
 jansAccessTknSigAlg: RS256
@@ -52,4 +53,3 @@ jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
 objectClass: top
 objectClass: jansClnt
-
