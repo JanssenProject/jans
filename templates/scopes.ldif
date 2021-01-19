@@ -85,8 +85,8 @@ jansClaim: inum=29DA,ou=attributes,o=jans
 jansDefScope: false
 jansId: clientinfo
 jansScopeTyp: openid
-objectClass: jansScope
 objectClass: top
+objectClass: jansScope
 
 dn: inum=10B2,ou=scopes,o=jans
 description: View your local username in the Janssen Server.
@@ -107,8 +107,8 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: true
 jansId: uma_protection
 jansScopeTyp: openid
-objectClass: jansScope
 objectClass: top
+objectClass: jansScope
 
 dn: inum=6D90,ou=scopes,o=jans
 description: oxd scope which is required to call oxd API
@@ -118,8 +118,8 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: true
 jansId: oxd
 jansScopeTyp: openid
-objectClass: jansScope
 objectClass: top
+objectClass: jansScope
 
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
@@ -129,8 +129,8 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansDefScope: false
 jansId: revoke_session
 jansScopeTyp: openid
-objectClass: jansScope
 objectClass: top
+objectClass: jansScope
 
 dn: inum=8A01,ou=scopes,o=jans
 description: View your mobile phone number.
@@ -151,8 +151,8 @@ jansDefScope: true
 jansId: permission
 jansScopeTyp: dynamic
 jansScrDn: inum=CB5B-3211,ou=scripts,o=jans
-objectClass: jansScope
 objectClass: top
+objectClass: jansScope
 
 dn: inum=C4F6,ou=scopes,o=jans
 description: This scope value requests that an OAuth 2.0 Refresh Token be issued.
