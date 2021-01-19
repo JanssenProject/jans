@@ -28,7 +28,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         pass
 
     def collect(self):
-        print("Please wait while collectiong properties...")
+        print("Please wait while collecting properties...")
         self.logIt("Previously installed instance. Collecting properties")
         salt_fn = os.path.join(Config.configFolder,'salt')
         if os.path.exists(salt_fn):
