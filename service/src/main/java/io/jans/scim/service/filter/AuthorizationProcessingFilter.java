@@ -31,8 +31,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 
-import io.jans.scim.auth.uma.BaseUmaProtectionService;
-import io.jans.scim.auth.uma.BindingUrls;
+import io.jans.scim.auth.ProtectionService;
+import io.jans.scim.auth.BindingUrls;
 
 /**
  * A RestEasy filter to centralize protection of APIs with UMA based on path
@@ -42,7 +42,7 @@ import io.jans.scim.auth.uma.BindingUrls;
  */
 // To protect methods with this filter just add the @ProtectedApi annotation to
 // them and ensure there is a proper subclass
-// of {@link BaseUmaProtectionService} that can handle specific protection logic
+// of {@link ProtectionService} that can handle specific protection logic
 // for your particular case
 @Provider
 @ProtectedApi
@@ -60,12 +60,12 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	private ResourceInfo resourceInfo;
 
 	@Inject
-	private Instance<BaseUmaProtectionService> protectionServiceInstance;
+	private Instance<ProtectionService> protectionServiceInstance;
 	
 	@Inject
 	private BeanManager beanManager;
 
-	private Map<String, Class<BaseUmaProtectionService>> protectionMapping;
+	private Map<String, Class<ProtectionService>> protectionMapping;
 
 	/**
 	 * This method performs the protection check of service invocations: it provokes
@@ -82,7 +82,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 		String path = requestContext.getUriInfo().getPath();
 		log.debug("REST call to '{}' intercepted", path);
-		BaseUmaProtectionService protectionService = null;
+		ProtectionService protectionService = null;
 		for (String prefix : protectionMapping.keySet()) {
 			if (path.startsWith(prefix)) {
 				protectionService = protectionServiceInstance.select(protectionMapping.get(prefix)).get();
@@ -90,16 +90,16 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 			}
 		}
 		if (protectionService == null) {
-			log.warn(
-					"No concrete UMA protection mechanism is associated to this path (resource will be accessed anonymously)");
-
+			log.warn("No concrete protection mechanism is associated to this path " +
+				"(resource will be accessed anonymously)");
 		} else {
 			log.debug("Path is protected, proceeding with authorization processing...");
 			Response authorizationResponse = protectionService.processAuthorization(httpHeaders, resourceInfo);
-			if (authorizationResponse == null)
+			if (authorizationResponse == null) {
 				log.debug("Authorization passed"); // If authorization passed, proceed with actual processing of request
-			else
+			} else {
 				requestContext.abortWith(authorizationResponse);
+			}
 		}
 
 	}
@@ -111,8 +111,8 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	private void init() {
-		protectionMapping = new HashMap<String, Class<BaseUmaProtectionService>>();
-		Set<Bean<?>> beans = beanManager.getBeans(BaseUmaProtectionService.class, Any.Literal.INSTANCE);
+		protectionMapping = new HashMap<String, Class<ProtectionService>>();
+		Set<Bean<?>> beans = beanManager.getBeans(ProtectionService.class, Any.Literal.INSTANCE);
 		
 		for (Bean bean : beans) {
 			Class beanClass = bean.getBeanClass();
