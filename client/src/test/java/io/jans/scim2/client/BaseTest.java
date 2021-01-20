@@ -89,7 +89,7 @@ public class BaseTest {
 
         } else if (tokenEndpointAuthnMethod.equals("private_key_jwt")) {
         	client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, 
-        		Paths.get(params.get("keyStorePath")), params.get("keyStorePath"), params.get("keyId"));
+        		Paths.get(params.get("keyStorePath")), params.get("keyStorePassword"), params.get("keyId"));
         } else {
            throw new Exception("Unsupported method for token endpoint authentication: " + tokenEndpointAuthnMethod);
         }
