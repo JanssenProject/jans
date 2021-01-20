@@ -120,7 +120,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         # Other clients
         client_var_id_list = [
                     ('oxauth_client_id', '1001.'),
-                    ('jca_client_id', '1801.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'})
+                    ('jca_client_id', '1801.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'}),
+                    ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ]
         self.check_clients(client_var_id_list)
 
