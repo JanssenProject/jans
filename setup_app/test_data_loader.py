@@ -3,6 +3,7 @@ import sys
 import glob
 import time
 import json
+import socket
 import ldap3
 import urllib.request
 import base64
@@ -63,6 +64,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
 
     def load_test_data(self):
+        self.logIt("Checking Internet conncetion")
+        socket.setdefaulttimeout(3)
+        try:
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 443))
+        except:
+            self.logIt("Failed to connect 8.8.8.8:443.", True)
+            print("Test data loader needs internet connection. Giving up ...")
+            return
 
         if not self.scimInstaller.installed():
             self.logIt("Scim was not installed. Installing")
