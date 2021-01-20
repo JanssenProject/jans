@@ -35,13 +35,13 @@ import io.jans.scim.auth.ProtectionService;
 import io.jans.scim.auth.BindingUrls;
 
 /**
- * A RestEasy filter to centralize protection of APIs with UMA based on path
+ * A RestEasy filter to centralize protection of APIs based on path
  * pattern. Created by jgomer on 2017-11-25.
  * 
  * @author Yuriy Movchan Date: 02/14/2017
  */
-// To protect methods with this filter just add the @ProtectedApi annotation to
-// them and ensure there is a proper subclass
+// Note for developers: to protect methods with this filter just add the 
+// @ProtectedApi annotation to them and ensure there is a proper subclass
 // of {@link ProtectionService} that can handle specific protection logic
 // for your particular case
 @Provider

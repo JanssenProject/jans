@@ -9,28 +9,37 @@ import io.jans.scim2.client.ScimClient;
 import io.jans.scim2.client.rest.ClientSideService;
 
 /**
- * A factory class to obtain "client" objects that allow interaction with the SCIM service.
+ * A factory class to obtain objects that allow direct interaction with the SCIM API. Usage
+ * examples can be found at https://github.com/JanssenProject/jans-scim/tree/master/README.md
+ * <p>Common parameters of methods here include:
+ * <ul>
+ * <li><code><b>domain</b></code>: The root URL of the SCIM service. Usually in the form <code>https://your.server.com/jans-scim/restv1</code>
+ * <li><code><b>OIDCMetadataUrl</b></code>: URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
+ * <li><code><b>clientId</b></code>: ID of an already registered OAuth2 client
+ * <li><code><b>interfaceClass</b></code>: The Class to which the object returned will belong to. Normally it will be an interface in
+ * package {@link io.jans.scim2.client.rest io.jans.scim2.client.rest} or {@link io.jans.scim.ws.rs.scim2 io.jans.scim.ws.rs.scim2}
+ * </ul>
  */
 public class ScimClientFactory {
 
     private static Class<ClientSideService> defaultInterface;
+    
+    private ScimClientFactory() {}
 
     static {
         SecurityProviderUtility.installBCProvider();
         defaultInterface = ClientSideService.class;
     }
     
-    /**
-     * Constructs an object that allows direct interaction with the SCIM API. Usage examples of this type of client  
-     * can be found at https://github.com/JanssenProject/jans-scim/tree/master/README.md
-     * @param interfaceClass The Class to which the object returned will belong to. Normally it will be an interface in
-     *                       package {@link io.jans.scim2.client.rest gluu.scim2.client.rest} or 
-     *                       {@link io.jans.scim.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}
-     * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/jans-scim/restv1}
-     * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
-     * @param clientId ID of an already registered OIDC client
-     * @param clientSecret Secret of the corresponding client (see clientId parameter)
-     * @param <T> The type the object returned will belong to.
+    /** 
+     * @param interfaceClass See class description
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description
+     * @param clientSecret Secret of the OAuth2 client
+     * @param secretPostAuthnMethod Whether the client uses client_secret_post or client_secret_basic
+     *                              to authenticate against the token endpoint
+     * @param <T> The type the object returned will belong to
      * @return An object that allows to invoke service methods
      * @throws Exception In case of initialization problem
      */
@@ -42,7 +51,21 @@ public class ScimClientFactory {
         return typedProxy(interfaceClass, handler);
         
     }
-    
+
+    /**
+     * @param interfaceClass See class description
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description. It is assumed the client uses private_key_jwt mechanism to
+     *                 authenticate against the token endpoint
+     * @param keyStorePath A path to a keystore whose keys may be employed to generate a client_assertion  
+     * @param keyStorePassword Password associated to the keystore
+     * @param keyId Identifier of one of the keys. Its corresponding private key will be extracted to generate the
+     *              assertion. If null is passed, the first key of the keystore will be used  
+     * @param <T> The type the object returned will belong to
+     * @return An object that allows to invoke service methods
+     * @throws Exception In case of initialization problem
+     */
     public static <T> T getClient(Class <T> interfaceClass, String domain, String OIDCMetadataUrl, 
     	String clientId, Path keyStorePath, String keyStorePassword, String keyId) throws Exception {
     
@@ -53,15 +76,14 @@ public class ScimClientFactory {
     }
 
     /**
-     * Constructs an object that allows direct interaction with the SCIM API. Usage examples of this type of client 
-     * can be found at https://github.com/JanssenProject/jans-scim/tree/master/README.md
-     * <p>The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
-     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. Also has some support to
-     * call service provider configuration endpoints (see section 4 of RFC 7644)</p>
-     * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/jans-scim/restv1}
-     * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
-     * @param clientId ID of an already registered OIDC client
-     * @param clientSecret Secret of the corresponding client (see clientId parameter)
+     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
+     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
+     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description. It is assumed the client uses client_secret_basic mechanism to
+     *                 authenticate against the token endpoint
+     * @param clientSecret Secret of the OAuth2 client
      * @return An object that allows to invoke service methods
      * @throws Exception In case of initialization problem
      */
@@ -70,16 +92,57 @@ public class ScimClientFactory {
         return getClient(domain, OIDCMetadataUrl, clientId, clientSecret, false);
     }
 
+    /**
+     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
+     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
+     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description
+     * @param clientSecret Secret of the OAuth2 client
+     * @param secretPostAuthnMethod Whether the client uses client_secret_post or client_secret_basic
+     *                              to authenticate against the token endpoint
+     * @return An object that allows to invoke service methods
+     * @throws Exception In case of initialization problem
+     */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
     	String clientId, String clientSecret, boolean secretPostAuthnMethod) throws Exception {
         return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, clientSecret, secretPostAuthnMethod);
     }
-
+    
+    /**
+     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
+     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
+     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description. It is assumed the client uses private_key_jwt mechanism to
+     *                 authenticate against the token endpoint
+     * @param keyStorePath A path to a keystore whose first key may be employed to generate a client_assertion  
+     * @param keyStorePassword Password associated to the keystore 
+     * @return An object that allows to invoke service methods
+     * @throws Exception In case of initialization problem
+     */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
     	String clientId, Path keyStorePath, String keyStorePassword) throws Exception {
         return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath, keyStorePassword, null);
     }
 
+    /**
+     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
+     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
+     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * @param domain See class description
+     * @param OIDCMetadataUrl See class description
+     * @param clientId See class description. It is assumed the client uses private_key_jwt mechanism to
+     *                 authenticate against the token endpoint
+     * @param keyStorePath A path to a keystore whose keys may be employed to generate a client_assertion  
+     * @param keyStorePassword Password associated to the keystore
+     * @param keyId Identifier of one of the keys. Its corresponding private key will be extracted to generate the
+     *              assertion. If null is passed, the first key of the keystore will be used
+     * @return An object that allows to invoke service methods
+     * @throws Exception In case of initialization problem
+     */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
     	String clientId, Path keyStorePath, String keyStorePassword, String keyId) throws Exception {
         return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath, keyStorePassword, keyId);
