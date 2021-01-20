@@ -32,15 +32,17 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |https://jans.io/scim/all-resources.search|Access the root .search endpoint| 
 |https://jans.io/scim/bulk|Send requests to the bulk endpoint|
 
-In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
+In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all of the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
 To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers. 
 
 ### Example of usage
 
-In the following example we leverage the OAuth SCIM Client to get a token and issue a call to an endpoint. Log into your Janssen machine and use the commands provided:
+In the following example we leverage the OAuth SCIM Client to get a token and issue a call to an endpoint. 
 
 ### Get client credentials
+
+Log into your Janssen machine and use the commands provided:
 
 - Get the client id: Run `cat /opt/jans/jans-cli/config.ini | grep 'scim_client_id'`
 - Get the encrypted client secret: Run `cat /opt/jans/jans-cli/config.ini | grep 'scim_client_secret_enc'`
@@ -48,20 +50,23 @@ In the following example we leverage the OAuth SCIM Client to get a token and is
 
 ### Get a token
 
-Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. For instance: 
+Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. For instance (line breaks added for readability): 
 
 ```
-curl -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' https://your-jans-server/jans-auth/restv1/token
+curl -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d 
+scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' 
+https://your-jans-server/jans-auth/restv1/token
 ```
 
-Grab the "access_token" from the response.
+Grab the "access_token" from the response. Ideally this and the commands that followed should be issued from a machine other than your Jans server. 
 
 ### Issue a request to the service
 
-Using the token, call your SCIM operation(s):
+Using the token, call your SCIM operations (line breaks added for readability):
 
 ```
-curl -i -k -G -H 'Authorization: Bearer ACCESS_TOKEN' -d count=2 --data-urlencode 'filter=displayName co "Admin"' https://buster.gluu.info/jans-scim/restv1/v2/Users
+curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' 
+https://your-jans-server/jans-scim/restv1/v2/Users
 ```
 
 The ouput should show valid SCIM (JSON) output. Account the access token is short lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.
@@ -72,6 +77,89 @@ The Jans-SCIM API is documented using [Open API](https://www.openapis.org) versi
 
 ### Java client
 
-There is a Java-based [client](https://github.com/JanssenProject/jans-scim/tree/master/client) ready to use. This client facilitates service consumption and abstracts out the complexities of access. It supports OAuth clients that use client_secret_basic, client_secret_post and private_key_jwt methods to authenticate to the token endpoint. Some example follow:
+There is a Java-based [client](https://github.com/JanssenProject/jans-scim/tree/master/client) ready to use. This client facilitates service consumption and abstracts out the complexities of access. It supports OAuth clients that use `client_secret_basic`, `client_secret_post` and `private_key_jwt` methods to authenticate to the token endpoint. To register a client, you can use the [jans-cli](https://github.com/JanssenProject/jans-cli) tool.
 
+Usage examples follow:
 
+#### Prereqs
+
+- Import the SSL certificate of your server to the `cacerts` keystore of your local Java installation. An utility called [Key Store Explorer](https://keystore-explorer.org/) makes this task super easy. By default Janssen uses a self-signed certificate that you can find at `/opt/jans/etc/certs/httpd.crt`.
+
+- Maven build tool
+
+#### Add dependency
+
+Add the artifact `jans-scim-client` to your project, eg:
+
+```
+<properties>
+	<scim.client.version>1.0.0-SNAPSHOT</scim.client.version>
+</properties>
+...
+<repositories>
+  <repository>
+    <id>Jans</id>
+    <name>Janssen repository</name>
+    <url>https://maven.jans.io/maven</url>
+  </repository>
+</repositories>
+...
+<dependency>
+  <groupId>io.jans</groupId>
+  <artifactId>jans-scim-client</artifactId>
+  <version>${scim.client.version}</version>
+</dependency>
+```
+
+#### Get an instance of SCIM service client:
+
+```
+import io.jans.scim2.client.factory.ScimClientFactory;
+import io.jans.scim2.client.rest.ClientSideService;
+
+...
+
+ClientSideService client = ScimClientFactory.getClient(
+      "https://your-jans-server/jans-scim/restv1"   // The base path of the service 
+    , "https://your-jans-server/.well-known/openid-configuration"   // The metadata url of the authorization server 
+    , "6a931fba-a55a-42ac-9154-5e44a7dfda77"    // The OAuth client ID
+    , "FBI_CIA_KGB_MI6"    // The client secret
+    );
+```
+
+In the code above, it is assumed the client referenced uses `client_secret_basic`. Here you can use the already bundled client, otherwise see [Where to go from here](#where-to-go-from-here).
+
+#### Perform an operation
+
+```
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.gluu.oxtrust.model.scim2.BaseScimResource;
+import org.gluu.oxtrust.model.scim2.ListResponse;
+import org.gluu.oxtrust.model.scim2.user.UserResource;
+
+import javax.ws.rs.core.Response;
+import java.util.List;
+
+...
+
+Logger logger = LogManager.getLogger(getClass());
+String filter = "userName eq \"admin\"";
+
+Response response = client.searchUsers(filter, 1, 1, null, null, null, null);
+List<BaseScimResource> resources = response.readEntity(ListResponse.class).getResources();
+
+logger.info("Length of results list is: {}", resources.size());
+UserResource admin = (UserResource) resources.get(0);
+logger.info("First user in the list is: {}", admin.getDisplayName());
+
+client.close();
+```
+
+This code performs a search using a filter based on username. It is recommended to call `close` whenever you know there will not be any other request associated to the client object obtained.
+
+#### Where to go from here? 
+
+The `client` instance resembles quite close the SCIM specification, so it is generally easy to map the operations described in the standard versus the Java methods available. It can be useful to have some javadocs at hand though, specifically those from `model` and `client` folders of this repository. You may clone this repo and run `mvn javadoc:javadoc` inside the two directories mentioned.
+
+Note that `ScimClientFactory` provides several methods that allow you to use OAuth clients which employ mechanisms other than the default (`client_secret_basic`) to request tokens. Also, you can make `client` belong to more restrictive interfaces limiting the operations available in yoour code.
