@@ -83,7 +83,7 @@ Usage examples follow:
 
 #### Prereqs
 
-- Import the SSL certificate of your Jans server to the `cacerts` keystore of your local Java installation. An utility called [KeyStore Explorer](https://keystore-explorer.org/) makes this task super easy. By default Janssen uses a self-signed certificate that can be found at `/opt/jans/etc/certs/httpd.crt`.
+- Import the SSL certificate of your Jans server to the `cacerts` keystore of your local Java installation. A utility called [KeyStore Explorer](https://keystore-explorer.org/) makes this task super easy. By default Janssen uses a self-signed certificate that can be found at `/etc/certs/httpd.crt`.
 
 - Maven build tool installed
 
