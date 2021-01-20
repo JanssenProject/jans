@@ -14,14 +14,18 @@ function() {
     var url = props.get('karate.test.url');
     var port = props.get('karate.test.port');
     var baseUrl = url + (port ? ':' + port : '');
-   karate.log('karate env :', env);
-   karate.log('karate url :', url);
-   karate.log('karate port :', port);
-   karate.log('karate baseUrl :', baseUrl);
+    var access_token = java.lang.System.getProperty('access.token');
+
+    karate.log('karate env :', env);
+    karate.log('karate url :', url);
+    karate.log('karate port :', port);
+    karate.log('karate baseUrl :', baseUrl);
+    karate.log('access_token :', access_token);
+    
     var config = {
         env: env,
         test_url: baseUrl + '/jans-config-api/api/v1/test',
-        accessToken: '7672df72-1f81-4430-8716-2780062f8058',
+        accessToken: access_token,
         baseUrl: baseUrl,
         healthUrl: baseUrl + '/health',
         fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
@@ -42,9 +46,6 @@ function() {
     };
 
     karate.configure('connectTimeout', 30000);
-    karate.configure('readTimeout', 60000);
-    
-    var result = karate.callSingle('classpath:testClient.feature', config);
-    print(' result = '+result);
+    karate.configure('readTimeout', 60000);    
     return config;
 }

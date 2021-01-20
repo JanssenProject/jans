@@ -3,19 +3,10 @@ Feature: Verify Cache configuration endpoint
 
   	Background:
   	* def mainUrl = cacheUrl
-* def getToken =
-"""
-function(path,method) {
-var result = karate.call('classpath:token.feature',{ pathUrl: path, methodName: method});
-var token = result.response
-return token;
-}
-"""  
   
  	@cache-get
   	Scenario: Retrieve Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
@@ -25,16 +16,14 @@ return token;
     @cache-patch
 	Scenario: Patch cacheProviderType configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
     And print response.cacheProviderType
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/cacheProviderType\", \"value\":\""+response.cacheProviderType+"\" } ]"
@@ -46,16 +35,14 @@ return token;
     @cache-patch
 	Scenario: Patch nativePersistenceConfiguration configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
     And print response.nativePersistenceConfiguration
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/nativePersistenceConfiguration\", \"value\":"+response.nativePersistenceConfiguration+" } ]"
@@ -67,16 +54,14 @@ return token;
     @cache-patch
 	Scenario: Patch inMemoryConfiguration configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
     And print response.inMemoryConfiguration
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/inMemoryConfiguration\", \"value\":"+response.inMemoryConfiguration+" } ]"
@@ -88,16 +73,14 @@ return token;
     @cache-patch
 	Scenario: Patch redisConfiguration configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
     And print response.redisConfiguration
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/redisConfiguration\", \"value\":"+response.redisConfiguration+" } ]"
@@ -109,16 +92,14 @@ return token;
     @cache-patch
 	Scenario: Patch memcachedConfiguration configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
     And print response.redisConfiguration
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/memcachedConfiguration\", \"value\":"+response.memcachedConfiguration+" } ]"
@@ -130,7 +111,6 @@ return token;
     @cache-get-redis
   	Scenario: Retrieve Redis Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'redis'
     When method GET
@@ -141,7 +121,6 @@ return token;
     @cache-put-redis
   	Scenario: Update Redis Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'redis'
     When method GET
@@ -149,7 +128,6 @@ return token;
     Then print response
     Then def first_response = response 
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'PUT')
     And header Authorization = 'Bearer ' + accessToken
     And path 'redis'
     And request first_response 
@@ -161,16 +139,14 @@ return token;
     @cache-patch-redis
 	Scenario: Patch redis configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     And path 'redis'
     When method GET
     Then status 200
     And print response
     And assert response.length != null
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/redisConfiguration/defaultPutExpiration\", \"value\":812 } ]"
@@ -183,7 +159,6 @@ return token;
     @cache-get-in-memory
   	Scenario: Retrieve in-memory Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'in-memory'
     When method GET
@@ -194,7 +169,6 @@ return token;
     @cache-put-in-memory
   	Scenario: Update in-memory Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'in-memory'
     When method GET
@@ -202,7 +176,6 @@ return token;
     Then print response
     Then def first_response = response 
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'PUT')
     And header Authorization = 'Bearer ' + accessToken
     And path 'in-memory'
     And request first_response 
@@ -214,16 +187,14 @@ return token;
     @cache-patch-in-memory
 	Scenario: Patch in-memory configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     And path 'in-memory'
     When method GET
     Then status 200
     And print response
     And assert response.length != null
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/inMemoryConfiguration/defaultPutExpiration\", \"value\":812 } ]"
@@ -236,7 +207,6 @@ return token;
     @cache-get-native-persistence
   	Scenario: Retrieve native-persistence Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'native-persistence'
     When method GET
@@ -247,7 +217,6 @@ return token;
     @cache-put-native-persistence
   	Scenario: Update native-persistence Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'native-persistence'
     When method GET
@@ -255,7 +224,6 @@ return token;
     Then print response
     Then def first_response = response 
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'PUT')
     And header Authorization = 'Bearer ' + accessToken
     And path 'native-persistence'
     And request first_response 
@@ -267,16 +235,14 @@ return token;
     @cache-patch-native-persistence
 	Scenario: Patch native-persistence configuration
 	Given url  mainUrl
-	And def accessToken = getToken(mainUrl,'GET')
-    And header Authorization = 'Bearer ' + accessToken
+	And header Authorization = 'Bearer ' + accessToken
     And path 'native-persistence'
     When method GET
     Then status 200
     And print response
     And assert response.length != null
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/nativePersistenceConfiguration/defaultPutExpiration\", \"value\":812 } ]"
@@ -289,7 +255,6 @@ return token;
 	@cache-get-memcached
   	Scenario: Retrieve memcached Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'memcached'
     When method GET
@@ -300,7 +265,6 @@ return token;
     @cache-put-memcached
   	Scenario: Update memcached Cache configuration
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')
     And header Authorization = 'Bearer ' + accessToken
     And path 'memcached'
     When method GET
@@ -308,7 +272,6 @@ return token;
     Then print response
     Then def first_response = response 
     Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'PUT')
     And header Authorization = 'Bearer ' + accessToken
     And path 'memcached'
     And request first_response 
@@ -321,7 +284,6 @@ return token;
     @cache-patch-memcached
 	Scenario: Patch memcached configuration
 	Given url  mainUrl
-    And def accessToken = getToken(mainUrl,'GET')	
     And header Authorization = 'Bearer ' + accessToken
     And path 'memcached'
     When method GET
@@ -329,8 +291,7 @@ return token;
     And print response
     And assert response.length != null
   	Given url  mainUrl
-  	And def accessToken = getToken(mainUrl,'PATCH')
-    And header Authorization = 'Bearer ' + accessToken
+  	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/memcachedConfiguration/defaultPutExpiration\", \"value\":812 } ]"
