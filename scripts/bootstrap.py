@@ -92,19 +92,19 @@ def main():
         "changeit",
     )
 
-    manager.secret.to_file("scim_rs_jks_base64", "/etc/certs/scim-rs.jks",
-                           decode=True, binary_mode=True)
-    with open(manager.config.get("scim_rs_client_jwks_fn"), "w") as f:
-        f.write(
-            base64.b64decode(manager.secret.get("scim_rs_client_base64_jwks")).decode()
-        )
+    # manager.secret.to_file("scim_rs_jks_base64", "/etc/certs/scim-rs.jks",
+    #                        decode=True, binary_mode=True)
+    # with open(manager.config.get("scim_rs_client_jwks_fn"), "w") as f:
+    #     f.write(
+    #         base64.b64decode(manager.secret.get("scim_rs_client_base64_jwks")).decode()
+    #     )
 
-    manager.secret.to_file("scim_rp_jks_base64", "/etc/certs/scim-rp.jks",
-                           decode=True, binary_mode=True)
-    with open(manager.config.get("scim_rp_client_jwks_fn"), "w") as f:
-        f.write(
-            base64.b64decode(manager.secret.get("scim_rp_client_base64_jwks")).decode()
-        )
+    # manager.secret.to_file("scim_rp_jks_base64", "/etc/certs/scim-rp.jks",
+    #                        decode=True, binary_mode=True)
+    # with open(manager.config.get("scim_rp_client_jwks_fn"), "w") as f:
+    #     f.write(
+    #         base64.b64decode(manager.secret.get("scim_rp_client_base64_jwks")).decode()
+    #     )
 
     modify_jetty_xml()
     modify_webdefault_xml()
