@@ -4,9 +4,6 @@ import glob
 import json
 import uuid
 import ruamel.yaml
-import tarfile
-import shutil
-import configparser
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -38,8 +35,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.load_ldif_files = [self.scope_ldif_fn]
         
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion))
                 ]
 
     def install(self):
@@ -163,29 +159,3 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
         self.dbUtils.import_ldif(self.load_ldif_files)
 
-        self.install_jca_cli()
-
-    def install_jca_cli(self):
-        self.logIt("Installing Jans Cli", pbar=self.service_name)
-        jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
-        
-        #extract jans-cli tgz archieve
-        cli_tar = tarfile.open(self.source_files[1][0])
-        par_dir = cli_tar.firstmember.name
-        cli_tar.extractall(Config.jansOptFolder)
-        shutil.move(os.path.join(Config.jansOptFolder, par_dir), jans_cli_install_dir)
-        cli_tar.close()
-
-        config = configparser.ConfigParser()
-        config['DEFAULT'] = {
-                    'jans_host': Config.hostname,
-                    'jca_client_id': Config.jca_client_id,
-                    'jca_client_secret_enc': Config.jca_client_encoded_pw,
-                    'debug': 'false',
-                    'debug_log_file': os.path.join(jans_cli_install_dir, 'swagger.log')
-                    }
-
-        with open(os.path.join(jans_cli_install_dir, 'config.ini'), 'w') as f:
-            config.write(f)
-
-        self.run([paths.cmd_chmod, '+x', os.path.join(jans_cli_install_dir, 'config-cli.py')])
