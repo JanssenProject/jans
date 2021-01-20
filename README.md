@@ -15,75 +15,63 @@ documents: [RFC 7642](https://tools.ietf.org/html/rfc7642), [RFC 7643](https://t
 
 ## About endpoints protection
 
-In Jans-SCIM you can protect your endpoints with UMA (a profile of [OAuth 2.0](http://tools.ietf.org/html/rfc6749)); this is a safe and standardized approach for controlling access to web resources. Alternatively, you can temporarily enable the test mode where the process to obtain an access token is straightforward so it is easier to start interacting with your service, as well as learning about SCIM.
+In Jans-SCIM endpoints are protected with bearer OAuth 2.0 tokens; this is a safe, standardized approach for controlling access to resources.
 
+Depending on the scopes associated to a token, you will be granted (or denied) access to perform certain operations. The following lists the available scopes:
 
-### Test mode
+|Scope|Actions allowed|
+|-|-|
+|https://jans.io/scim/users.read|Query user resources|
+|https://jans.io/scim/users.write|Modify user resources|
+|https://jans.io/scim/groups.read|Query group resources|
+|https://jans.io/scim/groups.write|Modify group resources|
+|https://jans.io/scim/fido.read|Query fido resources|
+|https://jans.io/scim/fido.write|Modify fido resources|
+|https://jans.io/scim/fido2.read|Query fido 2 resources|
+|https://jans.io/scim/fido2.write|Modify fido 2 resources|
+|https://jans.io/scim/all-resources.search|Access the root .search endpoint| 
+|https://jans.io/scim/bulk|Send requests to the bulk endpoint|
 
-#### Prereqs
+In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
-Activating test mode requires a small edition in the underlying LDAP. To ease the process install a GUI LDAP client in your development machine. Several options recommended:
+To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers. 
 
-- [Apache DS](http://directory.apache.org/studio) (requires Java runtime)
-- [JXExplorer](http://www.jxplorer.org/) (requires Java runtime)
-- [LDAP administrator](https://www.ldapadministrator.com) (windows only)
+### Example of usage
 
-Once installed, establish a temporary tunnel to your LDAP, for instance:
+In the following example we leverage the OAuth SCIM Client to get a token and issue a call to an endpoint. Log into your Janssen machine and use the commands provided:
 
-```
-ssh -L 1636:localhost:1636 root@jans-host
-```
+### Get client credentials
 
-This requires SSH server and client libraries available in both your janssen host and development machine respectively.
+- Get the client id: Run `cat /opt/jans/jans-cli/config.ini | grep 'scim_client_id'`
+- Get the encrypted client secret: Run `cat /opt/jans/jans-cli/config.ini | grep 'scim_client_secret_enc'`
+- Decrypt the secret: Run `/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE`
 
-#### Connect to LDAP
+### Get a token
 
-Establish a connection using the following:
-
-- Port: 1636
-- Encryption method: SSL
-- Authentication method: simple
-- Base DN: `o=jans`
-- Bind DN: `cn=directory manager`
-- Bind password: As provided in Janssen installation
-
-#### Set scimTestMode
-
-Navigate in the LDAP tree to `ou=jans-scim,ou=configuration,o=jans` and edit attribute `jansConfDyn` (this is JSON content): locate `scimTestMode` property and set it to `true`. Save the change
-
-Restart `jans-scim`, eg. `systemctl restart jans-scim`.
-
-#### Register an OpenID client
-
-Create a client from which you can obtain access tokens, eg:
+Request a token with the scopes necessary to perform the intended operations. Use a white space to separate scopes. For instance: 
 
 ```
-curl -k -i -H 'Content-Type: application/json' -d '{"application_type": "native", "token_endpoint_auth_method": "client_secret_basic", "client_name": "SCIM test client", "scope": "openid", "grant_types": ["client_credentials"], "response_types": ["token"], "redirect_uris":["https://dummy.com"] }' https://jans-host-name/jans-auth/restv1/register
+curl -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' https://your-jans-server/jans-auth/restv1/token
 ```
 
-The response will contain an ID and a secret. Keep those for later use.
+Grab the "access_token" from the response.
 
-#### Get a token
+### Issue a request to the service
 
-Using the client credentials get an access token from `jans_auth` token endpoint, eg.
-
-```
-curl -u '<client_id>:<client_secret>' -k -d grant_type=client_credentials https://jans-host-name/jans-auth/restv1/token
-```
-(replace with proper values in the placeholders).
-
-#### Make a call to a SCIM endpoint
-
-With the previously obtained access token, issue a call to an endpoint. The following makes a query to the users endpoint for users whose display name contains the word "admin":
+Using the token, call your SCIM operation(s):
 
 ```
-curl -i -k -G -H 'Authorization: Bearer <access_token>' -d count=10 --data-urlencode 'filter=displayName co "Admin"' https://jans-host-name/jans-scim/restv1/v2/Users
+curl -i -k -G -H 'Authorization: Bearer ACCESS_TOKEN' -d count=2 --data-urlencode 'filter=displayName co "Admin"' https://buster.gluu.info/jans-scim/restv1/v2/Users
 ```
 
 The ouput should show valid SCIM (JSON) output. Account the access token is short lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.
 
 ## API consumption
 
-A Java-based [client](https://github.com/JanssenProject/jans-scim/tree/master/client) is provided. This client facilitates service consumption and abstracts out the complexities of access. 
-
 The Jans-SCIM API is documented using [Open API](https://www.openapis.org) version 3.0 as well as the swagger 2.0 specification. Find the yaml documents [here](https://github.com/JanssenProject/jans-scim/tree/master/server/src/main/resources). You can quickly generate client stubs in a variety of languages and frameworks with [Swagger code generator](https://swagger.io/tools/swagger-codegen).
+
+### Java client
+
+There is a Java-based [client](https://github.com/JanssenProject/jans-scim/tree/master/client) ready to use. This client facilitates service consumption and abstracts out the complexities of access. It supports OAuth clients that use client_secret_basic, client_secret_post and private_key_jwt methods to authenticate to the token endpoint. Some example follow:
+
+
