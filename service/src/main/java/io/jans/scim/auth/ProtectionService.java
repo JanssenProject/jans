@@ -1,11 +1,12 @@
 package io.jans.scim.auth;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.container.ResourceInfo;
@@ -25,24 +26,15 @@ public abstract class ProtectionService implements Serializable {
 	}
 
 	protected List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-		Class<?> resourceClass = resourceInfo.getResourceClass();
-		ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
-		List<String> scopes = new ArrayList<String>();
-		if (typeAnnotation == null) {
-			addMethodScopes(resourceInfo, scopes);
-		} else {
-			scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-			addMethodScopes(resourceInfo, scopes);
-		}
+		List<String> scopes = new ArrayList<>();
+		scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceClass()));
+		scopes.addAll(getScopesFromAnnotation(resourceInfo.getResourceMethod()));
 		return scopes;
 	}
 
-	private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
-		Method resourceMethod = resourceInfo.getResourceMethod();
-		ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
-		if (methodAnnotation != null) {
-			scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
-		}
+	private List<String> getScopesFromAnnotation(AnnotatedElement elem) {		
+		return Optional.ofNullable(elem.getAnnotation(ProtectedApi.class)).map(ProtectedApi::scopes)
+		    .map(Arrays::asList).orElse(Collections.emptyList());
 	}	
 
 }
