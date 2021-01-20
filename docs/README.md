@@ -3063,7 +3063,7 @@ Getting access token for scope https://jans.io/oauth/config/uma/resources.readon
   "deletable": true
 }
 ```
-replace id with accurate one.
+replace the id with accurate one.
 
 - **patch-oauth-uma-resources-by-id**
 
@@ -3086,7 +3086,7 @@ Let's get the sample schema:
   "value": {}
 }
 ```
-Let's want to update as `deletable:false` to a uma resource whose id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da. 
+Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`. 
 So we are going to perform an operation `replace` where `path` is `deletable` with `value: false`.
 
 let's update the json as below:
@@ -3138,4 +3138,124 @@ Server Response:
 }
 ```
 As you see that `deletable` updated to `false`.
+
+### Janssen Fido2 Configuration
+
+Using Janssen CLI, You can `get/update` Fido2 properties.
+To get the information of Janssen Fido2 CLI, run the following command:
+
+```
+/opt/jans/jans-cli/config-cli.py --info ConfigurationFido2
+
+Operation ID: get-properties-fido2
+  Description: Gets Jans Authorization Server Fido2 configuration properties.
+Operation ID: put-properties-fido2
+  Description: Updates Fido2 configuration properties.
+  Schema: /components/schemas/JansFido2DynConfiguration
+
+To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration
+```
+
+- **__get-properties-fido2__**
+
+To get the properties of Janssen Fido2 Configuration, run below command:
+`/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
+
+It will return the result as below:
+
+```text
+Getting access token for scope https://jans.io/oauth/config/fido2.readonly
+{
+  "issuer": "https://testjans.gluu.com",
+  "baseEndpoint": "https://testjans.gluu.com/fido2/restv1",
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": false,
+  "disableJdkLogger": false,
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": false,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": null,
+    "mdsCertsFolder": null,
+    "mdsTocsFolder": null,
+    "serverMetadataFolder": null,
+    "requestedParties": [
+      {
+        "name": null,
+        "domains": []
+      }
+    ],
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": null,
+    "authenticationHistoryExpiration": null,
+    "requestedCredentialTypes": []
+  }
+}
+```
+
+- **__put-properties-fido2__**
+
+To perform this operation, let's check the schema first.
+
+```text
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration > /tmp/fido2-schema.json
+```
+
+This command will create fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
+
+![janssen fido2 configuration](img/cl-fido2-update.png)
+
+Now let's do the operation:
+
+```text
+/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 --data /tmp/fido2-schema.json
+
+Getting access token for scope https://jans.io/oauth/config/fido2.write
+Server Response:
+{
+  "issuer": "https://server.example.com/",
+  "baseEndpoint": "https://server.example.com/fido2/restv1",
+  "cleanServiceInterval": null,
+  "cleanServiceBatchChunkSize": null,
+  "useLocalCache": false,
+  "disableJdkLogger": false,
+  "loggingLevel": "INFO",
+  "loggingLayout": null,
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": null,
+  "metricReporterKeepDataDays": null,
+  "metricReporterEnabled": true,
+  "personCustomObjectClassList": [],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": null,
+    "mdsCertsFolder": null,
+    "mdsTocsFolder": null,
+    "serverMetadataFolder": null,
+    "requestedParties": [
+      {
+        "name": null,
+        "domains": null
+      },
+      {
+        "name": null,
+        "domains": null
+      }
+    ],
+    "userAutoEnrollment": true,
+    "unfinishedRequestExpiration": null,
+    "authenticationHistoryExpiration": null,
+    "requestedCredentialTypes": []
+  }
+}
+```
+
+You may find that I have updated to `logginglabel:INFO` from `NULL`.
 
