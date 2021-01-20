@@ -48,9 +48,11 @@ jansScope: inum=1800.C0B661,ou=scopes,o=jans
 jansScope: inum=1800.7FD3C9,ou=scopes,o=jans
 jansScope: inum=1800.BDCE9B,ou=scopes,o=jans
 jansScope: inum=1800.33641E,ou=scopes,o=jans
+jansScope: inum=F0C4,ou=scopes,o=jans
+jansScope: inum=764C,ou=scopes,o=jans
+jansScope: inum=10B2,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
 objectClass: top
 objectClass: jansClnt
-

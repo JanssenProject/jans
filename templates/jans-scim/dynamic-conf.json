@@ -1,40 +1,16 @@
 {
     "baseDN":"o=jans",
-
     "applicationUrl":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-scim/restv1",
-
     "personCustomObjectClass":"jansCustomPerson",
-
     "oxAuthIssuer":"https://%(hostname)s",
-    "umaIssuer":"https://%(hostname)s",
-
-    "scimTestMode": %(scimTestMode)s,
-    "scimUmaClientId":"%(scim_rs_client_id)s",
-    "scimUmaClientKeyId":"",
-    "scimUmaResourceId":"%(scim_resource_oxid)s",
-    "scimUmaScope":"https://%(hostname)s/jans-auth/restv1/uma/scopes/scim_access",
-    "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
-    "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
-
-    "rptConnectionPoolUseConnectionPooling":true,
-    "rptConnectionPoolMaxTotal":200,
-    "rptConnectionPoolDefaultMaxPerRoute":20,
-    "rptConnectionPoolValidateAfterInactivity":10,
-    "rptConnectionPoolCustomKeepAliveTimeout":5,
-
-    "ScimProperties": {
-        "maxCount": 200
-    },
-
-   "useLocalCache":true,
-
-   "disableJdkLogger":true,
-   "loggingLevel":"INFO",
-   "loggingLayout":"text",
-   "externalLoggerConfiguration":"",
-
-   "metricReporterInterval":300,
-   "metricReporterKeepDataDays":15,
-   "metricReporterEnabled":true
+    "maxCount": 200,
+    "useLocalCache":true,
+    "disableJdkLogger":true,
+    "loggingLevel":"INFO",
+    "loggingLayout":"text",
+    "externalLoggerConfiguration":"",
+    "metricReporterInterval":300,
+    "metricReporterKeepDataDays":15,
+    "metricReporterEnabled":true
 }
