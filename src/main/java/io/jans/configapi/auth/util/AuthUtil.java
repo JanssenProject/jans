@@ -1,6 +1,5 @@
 package io.jans.configapi.auth.util;
 
-import com.google.common.base.Preconditions;
 
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
@@ -8,50 +7,35 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeType;
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.UmaScopeType;
-import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
-import io.jans.ca.rs.protect.Condition;
-import io.jans.ca.rs.protect.RsResource;
-import io.jans.ca.rs.protect.RsResourceList;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.auth.ConfigApiProtectionCache;
 import io.jans.configapi.auth.client.AuthClientFactory;
-import io.jans.configapi.auth.client.UmaClient;
 import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.configapi.service.ClientService;
 import io.jans.configapi.service.ScopeService;
-import io.jans.configapi.service.UmaResourceService;
-import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.Jackson;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
-import java.io.InputStream;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -172,6 +156,18 @@ public class AuthUtil {
      
         return scopeList;
     }
+    
+    public List<String> getAllResourceScopes() {
+       Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+        log.trace("getAllResourceScopes() - scopeMap = "+scopeMap);
+        List<String> scopeStrList = null;
+        if (scopeMap != null && !scopeMap.isEmpty()) {        	
+        	Set<String> scopeSet = scopeMap.keySet();
+        	scopeStrList = new ArrayList<String>(scopeSet);
+        }
+        log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        return scopeStrList;
+    }
 
     public List<String> getRequestedScopes(String path) {
         List<Scope> scopeList = ConfigApiProtectionCache.getResource(path);
@@ -246,9 +242,12 @@ public class AuthUtil {
             }
         }
         log.trace("\n\n\n RequestAccessToken() - scope = "+scope);
+        
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
+            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getScope() = "+tokenResponse.getScope());
+            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getAccessToken() = "+tokenResponse.getAccessToken());
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {

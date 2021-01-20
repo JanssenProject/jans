@@ -77,6 +77,29 @@ public class TestUtil {
         return null;
     }
     
+    public String createTestToken()
+            throws Exception {
+        log.trace("\n\n\n *******************  TestUtil:::createTestToken() - Entry  ******************* ");
+        //log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
+               
+        Token token = null;
+        String clientId = this.getTestClientId();
+        Client client = this.clientService.getClientByInum(clientId);
+        log.trace("\n\n\n TestUtil:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
+        
+        // Get all scopes
+        List<String> scopes = this.authUtil.getAllResourceScopes();
+        log.trace("\n\n\n TestUtil:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
+        
+        log.trace("Generated token: {} ", token);
+
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        return null;
+    }
+    
     private Client createTestClient() {
         
         String inum = testClientId;

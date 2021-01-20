@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Uma Scopes
 
 Scenario: Fetch all uma scopes without bearer token
@@ -8,12 +8,14 @@ Then status 401
 
 Scenario: Fetch all uma scopes
 Given url scopes_url
+And print accessToken
 And  header Authorization = 'Bearer ' + accessToken
 And param type = 'uma'
 When method GET
 Then status 200
 And print response
 And assert response.length != null
+
 
 Scenario: Fetch the first three uma scopes
 Given url scopes_url
@@ -23,7 +25,8 @@ And param limit = 3
 When method GET
 Then status 200
 And print response
-And assert response.length == 3
+And assert response.length <= 3
+
 
 Scenario: Search uma scopes given a search pattern
 Given url scopes_url
@@ -34,6 +37,7 @@ When method GET
 Then status 200
 And print response
 And assert response.length == 1
+
 
 @CreateUpdateDelete
 Scenario: Create new Uma Scope
@@ -57,6 +61,7 @@ And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
 
+
 Scenario: Delete a non-existion uma scope by inum
 Given url scopes_url + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
@@ -72,6 +77,7 @@ And param type = 'uma'
 When method GET
 Then status 404
 And print response
+
 
 Scenario: Get an uma scope by inum
 Given url scopes_url
