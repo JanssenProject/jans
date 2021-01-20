@@ -72,7 +72,6 @@ class ScimInstaller(JettyInstaller):
                                 'description': [config_scopes[scope]],
                                 'displayName': [display_name],
                                 'inum': [inum],
-                                'jansDefScope': ['false'],
                                 'jansId': [scope],
                                 'jansScopeTyp': ['oauth'],
                                 })
@@ -92,7 +91,6 @@ class ScimInstaller(JettyInstaller):
         client_scopes_writer.unparse(
                 scim_client_dn, {
                 'objectClass': ['top', 'jansClnt'],
-                'del': ['false'],
                 'displayName': ['SCIM client'],
                 'jansAccessTknSigAlg': ['RS256'],
                 'jansAppTyp': ['native'],
