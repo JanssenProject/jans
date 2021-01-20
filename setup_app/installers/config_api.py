@@ -33,7 +33,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.load_ldif_files = [self.scope_ldif_fn]
-        
+
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion))
                 ]
@@ -149,6 +149,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 'jansSubjectTyp': ['pairwise'],
                 'jansTknEndpointAuthMethod': ['client_secret_basic'],
                 'jansTrustedClnt': ['false'],
+                'jansRedirectURI': ['https://{}/admin-ui'.format(Config.hostname), 'http//:localhost:4100']
                 })
 
             clients_ldif_fd.close()
