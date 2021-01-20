@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Uma Resource
 
 Scenario: Fetch all uma resources without bearer token
@@ -8,19 +8,24 @@ Then status 401
 
 Scenario: Fetch all uma resources
 Given url umaresources_url
+And print accessToken
 And  header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
 And print response
 And assert response.length != null
 
+
 Scenario: Fetch the first two uma resources
 Given url umaresources_url
+And print accessToken
 And  header Authorization = 'Bearer ' + accessToken
 And param limit = 2
 When method GET
 Then status 200
+Then print response
 And assert response.length == 2
+
 
 Scenario: Search uma resources given a search pattern
 Given url umaresources_url
@@ -53,17 +58,20 @@ And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
 
+
 Scenario: Delete a non-existion uma resource by id
 Given url umaresources_url + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
 
+
 Scenario: Get an uma resource by id(unexisting resource)
 Given url umaresources_url + '/53553532727272772'
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
+
 
 Scenario: Get an uma resource by id
 Given url umaresources_url
