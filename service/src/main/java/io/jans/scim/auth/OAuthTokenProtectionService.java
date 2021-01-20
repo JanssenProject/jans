@@ -71,13 +71,12 @@ public class OAuthTokenProtectionService extends ProtectionService implements Se
 				    //see section 3.12 RFC 7644
                     authorizationResponse = getErrorResponse(Status.FORBIDDEN, msg);
                 }
-			} else{
+			} else {
 				log.info("Request is missing authorization header");
 				//see section 3.12 RFC 7644
 				authorizationResponse = getErrorResponse(Status.UNAUTHORIZED, "No authorization header found");
 			}    
-        }
-        catch (Exception e){
+        } catch (Exception e){
             log.error(e.getMessage(), e);
             authorizationResponse = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
