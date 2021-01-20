@@ -158,7 +158,7 @@ client.close();
 
 This code performs a search using a filter based on username. It is recommended to call `close` once you know there will not be any other request associated to the client object obtained.
 
-#### Where to go from here? 
+#### Where to go next? 
 
 The `client` instance resembles quite close the SCIM specification, so it is generally easy to map the operations described in the standard versus the Java methods available. It can be useful to have some javadocs at hand though, specifically those from `model` and `client` folders of this repository. You may clone this repo and run `mvn javadoc:javadoc` inside the two directories mentioned.
 
