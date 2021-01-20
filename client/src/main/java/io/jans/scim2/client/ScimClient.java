@@ -88,7 +88,7 @@ public class ScimClient<T> extends AbstractScimClient<T> {
 			// Get first key
 			List<String> aliases = cryptoProvider.getKeys();
 			if (aliases.size() > 0) {
-				this.keyId = aliases.get(0);
+				keyId = aliases.get(0);
 			} else {
                 throw new ScimInitializationException("No keys found in keystore");
 			}
@@ -96,6 +96,7 @@ public class ScimClient<T> extends AbstractScimClient<T> {
 		clientId = id;
 		tokenEndpoint = getTokenEndpoint(OIDCMetadataUrl);
         tokenEndpointAuthnMethod = AuthenticationMethod.PRIVATE_KEY_JWT;
+        this.keyId = keyId;
 		updateTokens();
         
     }
