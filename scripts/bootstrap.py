@@ -780,8 +780,13 @@ class CtxGenerator:
         )
 
     def scim_client_ctx(self):
-        self.set_config("scim_test_client_id", "0008-{}".format(uuid.uuid4()))
-        self.set_secret("scim_test_client_secret", get_random_chars(24))
+        client_id = f"1201.{uuid.uuid4()}"
+        self.set_config("scim_client_id", client_id)
+
+        client_pw = get_random_chars()
+        self.set_secret("scim_client_pw", client_pw)
+        client_encoded_pw = encode_text(client_pw, self.get_secret("encoded_salt"))
+        self.set_secret("scim_client_encoded_pw", client_encoded_pw)
 
     def couchbase_ctx(self):
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
@@ -799,8 +804,8 @@ class CtxGenerator:
         self.redis_ctx()
         self.auth_ctx()
         self.config_api_ctx()
-        self.scim_rs_ctx()
-        self.scim_rp_ctx()
+        # self.scim_rs_ctx()
+        # self.scim_rp_ctx()
         # self.passport_rs_ctx()
         # self.passport_rp_ctx()
         # self.passport_sp_ctx()
