@@ -55,6 +55,8 @@ from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.eleven import ElevenInstaller
+from setup_app.installers.jans_cli import JansCliInstaller
+
 
 #from setup_app.installers.oxd import OxdInstaller
 
@@ -148,13 +150,14 @@ configApiInstaller = ConfigApiInstaller()
 fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
 elevenInstaller = ElevenInstaller()
+jansCliInstaller = JansCliInstaller()
 #oxdInstaller = OxdInstaller()
 
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
                         jansAuthInstaller, scimInstaller, fidoInstaller,
-                        elevenInstaller,
+                        elevenInstaller, jansCliInstaller
                         #oxdInstaller
                         ):
 
@@ -180,6 +183,9 @@ if argsp.x:
     testDataLoader.deleteLdapPw()
     print("Test data loaded. Exiting ...")
     sys.exit()
+
+
+Config.installJansCli = Config.installConfigApi or Config.installScimServer
 
 if argsp.shell:
     code.interact(local=locals())
@@ -272,7 +278,11 @@ def do_installation():
 
         if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(elevenInstaller.install_var)):
             elevenInstaller.start_installation()
-            
+        
+        if Config.installJansCli:
+            jansCliInstaller.start_installation()
+            jansCliInstaller.configure()
+
         #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
         #    oxdInstaller.start_installation()
 
