@@ -48,13 +48,13 @@ def renew_license():
         print("Can't connect to ldap server")
         return
 
-    scr_dn = 'inum=92F0-BF9E,ou=scripts,o=gluu'
+    scr_dn = 'inum=92F0-BF9E,ou=scripts,o=jans'
 
     ldap_conn.search(
                 search_base=scr_dn, 
                 search_scope=ldap3.BASE, 
                 search_filter='(objectClass=*)', 
-                attributes=['oxConfigurationProperty']
+                attributes=['jansConfProperty']
                 )
 
     result = ldap_conn.response
@@ -63,7 +63,7 @@ def renew_license():
         print("Can't find Super Gluu script with dn {} in ldap".format(scr_dn))
         return
         
-    for oxprop_s in result[0]['attributes']['oxConfigurationProperty']:
+    for oxprop_s in result[0]['attributes']['jansConfProperty']:
          oxprop = json.loads(oxprop_s)
          if oxprop['value1'] == 'license_file':
              license_fn = oxprop['value2']
