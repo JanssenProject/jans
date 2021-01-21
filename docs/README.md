@@ -135,6 +135,61 @@ Obtained Data:
 
 After you enter `y` it will perform `update` and display updated data on screen.
 
+If you want to update specific property of an attribute then you can go with partial updates from Attribute Menu.
+To update partially, you will be asked to enter `inum`, `op`, `path` and `value`.
+- **__inum__** identity of an attribute where operation to be done.
+- **__op__** means operation to be done: [`replace`, `move`, `add`, `remove`, `copy`, `test`]
+- **__path__** chose path where operation will be performed: for example `attributeValidation/minLength`
+- **__value__** value that you want update. It can be integer, boolean or string.
+
+![partially update attribute](img/im-partial-attrb-update.png)
+
+Finally, it will display the updated result.
+
+```text
+Getting access token for scope https://jans.io/oauth/config/attributes.write
+Please wait patching...
+
+{
+  "dn": "inum=BCA8,ou=attributes,o=jans",
+  "inum": "BCA8",
+  "selected": true,
+  "name": "transientId",
+  "displayName": "TransientId",
+  "description": "TransientId",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": "jansPerson",
+  "editType": [
+    "USER",
+    "ADMIN"
+  ],
+  "viewType": [
+    "USER",
+    "ADMIN"
+  ],
+  "usageType": null,
+  "claimName": null,
+  "seeAlso": null,
+  "saml1Uri": "urn:mace:dir:attribute-def:transientId",
+  "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.312",
+  "urn": "mace:shibboleth:1.0:nameIdentifier",
+  "scimCustomAttr": false,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": {
+    "regexp": null,
+    "minLength": null,
+    "maxLength": null
+  },
+  "tooltip": null
+}
+```
 
 To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` value that you want to delete. Here I chose that I already created in the above: `"inum=0adfeb80-cb57-4f7b-a3a0-944082e4c199"` It will ask for confirmation, enter `y` to confirm.
 
@@ -590,6 +645,7 @@ Please wait while posting data ...
 
 
 ### Jans Authorization Server
+
 From the Main Menu choose option 8 to `get/modify` Jans authorization server configuration properties.
 ```text
 Configuration – Properties
@@ -1053,10 +1109,14 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "externalLoggerConfiguration": null
 }
 ```
-By selecting 2nd option, you can modify partially some of its properties. 
+By selecting 2nd option, you can modify its properties partially. 
+
+![update jans authorization server](img/im-update-jans-auth.png)
+
+At the end it will show the updated result.
 
 ### Janssen FIDO2
-Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as 
+Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username / password as 
 the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have the 
 option to also install the FIDO2 component.
 
@@ -1112,7 +1172,52 @@ If you chose the first option, you will get some details of fido2 configuration 
 }
 ```
 If you want to update fido2 configuration, you can choose 2nd option. It will ask to fill each property, skip for default values. 
-For example, if you want to change logginglevel `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
+For example, if you want to change **_logginglevel_** `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
+
+![update fido2 configuration](img/im-update-fido2.png)
+
+- **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
+
+```text
+Continue? y
+Getting access token for scope https://jans.io/oauth/config/fido2.write
+Please wait while posting data ...
+
+{
+  "issuer": "https://testjans.gluu.com",
+  "baseEndpoint": "https://testjans.gluu.com/fido2/restv1",
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": false,
+  "disableJdkLogger": false,
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": false,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": null,
+    "mdsCertsFolder": null,
+    "mdsTocsFolder": null,
+    "serverMetadataFolder": null,
+    "requestedParties": [
+      {
+        "name": null,
+        "domains": []
+      }
+    ],
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": null,
+    "authenticationHistoryExpiration": null,
+    "requestedCredentialTypes": []
+  }
+}
+```
 
 ### SMTP Server Configuration
 Janssen CLI also supports SMTP configuration. You can do following things as stated below:
@@ -1133,9 +1238,85 @@ Configuration – SMTP
 ```
 Just go with the option and perform operation.
 
+- **__view / find__** : select option 1, it will return as below:
+
+```text
+Returns SMTP server configuration
+---------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/smtp.readonly
+
+{
+  "host": null,
+  "port": 0,
+  "requiresSsl": null,
+  "serverTrust": null,
+  "fromName": null,
+  "fromEmailAddress": null,
+  "requiresAuthentication": null,
+  "userName": null,
+  "password": null
+}
+```
+- **__Add SMTP Server__**
+To add a smtp server, chose option 2 from SMTP Configuration Menu:
+  
+```text
+Selection: 2
+
+«Hostname of the SMTP server. Type: string»
+host: 
+
+«Port number of the SMTP server. Type: integer»
+port: 
+
+«Boolean value with default value false. If true, SSL will be enabled. Type: boolean»
+requiresSsl  [false]: 
+
+«Boolean value with default value false. Type: boolean»
+serverTrust  [false]: 
+
+«Name of the sender. Type: string»
+fromName: 
+
+«Email Address of the Sender. Type: string»
+fromEmailAddress: 
+
+«Boolean value with default value false. It true it will enable sender authentication. Type: boolean»
+requiresAuthentication  [false]: 
+
+«Username of the SMTP. Type: string»
+userName: 
+
+«Password for the SMTP. Type: string»
+password: 
+Obtained Data:
+
+{
+  "host": null,
+  "port": null,
+  "requiresSsl": false,
+  "serverTrust": false,
+  "fromName": null,
+  "fromEmailAddress": null,
+  "requiresAuthentication": false,
+  "userName": null,
+  "password": null
+}
+
+Continue? 
+```
+
+Fill each property with the correct information.
+- **Test SMTP Server**
+
+If server is running, and all the information you have entered are correct. You can test SMTP server from the following option 5, it will respond, if server configured properly.
+
 ### Janssen Logging Configuration
-Using Janssen CLI, you can easily update logging configuration. Just go with the option 11
-from Main Menu, It will display two options as sated below.
+
+Using Janssen CLI, you can easily update logging configuration. Just go with the option 11 from Main Menu, It will display two options as sated below.
+
 ```text
 Configuration – Logging
 -----------------------
@@ -1233,6 +1414,292 @@ Configuration – JWK - JSON Web Key (JWK)
 3 Patch JWKS
 ```
 You can `view` list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
+
+- **__`Get list of JSON Web Key`__**
+
+Select option 1 from JSON Web Key Menu and it will return a list of key with details information as below:
+  
+```text
+Gets list of JSON Web Key (JWK) used by server
+Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+---------------------------------------------------------------------------------------------------------------------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/jwks.readonly
+
+{
+  "keys": [
+    {
+      "kid": "a1d120af-d4c1-45aa-8cff-034e00f13d2b_sig_rs256",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAKefzbtkilZu5nn6G1WHSbJZu/PIdKpR9U5QA58DXN6GMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzODU5WhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxmm58zzhORBJkyxcjyfFUrRO06V4PwDZT/ObroQOQDuN8KbOzqkGdZX6BkZiFPNHuWdnUp0/2Fxf2LM1z5nhyCG4Wy92rUqHL6ispNtPfWOe3mWwQlFJk/Z/87gqJZ00ss3vnSk+05j4AsgvnPoKZJtgJPAEjZ8+bBSNExpqWdHBFcqJJsLhyjE5o7hQFQplMevQLyVvrzxsY8YwZuoTZA+bUo7//vsrHUe/PyZP0+0FHRbFzwo+ArxrdFcFlEhTqjKijo7pyh8gmZkgvXG8D1Zi1Fmstnf9yiF36ZBlN+RSr+JHxPAvwU2O/aMmFhvZNJ9aOzP0dienSZo72xSiRwIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAGB6JFBWpIAux87xE1GL1iY+LrcxC7T6ITRb+mwhtsA0bOTx9CISNLhuFUIcOBrB+2LQD7asVvbo7I2zJ9enIR0QJbO4Z3niSCVULWeBhPACh5a+HgkpZ7mlFLJyD1hpw+pEfobasvoJLzvyuVpL/EXCgMYoi0qmrkwZfYXoajjZAhsT6Y5mTBd25xYGcatglQZutaVOgneQxZb2vjAH4h3H14EHdKPh3viXbpyXe6MP+DqX1kIqFHX3rYbhvLXdALHkRsqlcoHMW7jQuQyyfXNbwddg6H/IR0VV5yliOsoHP8BxHS9vIGHroGpZarpCwkxgsRKL+Uib1+wBN1GLu6o="
+      ],
+      "n": "xmm58zzhORBJkyxcjyfFUrRO06V4PwDZT_ObroQOQDuN8KbOzqkGdZX6BkZiFPNHuWdnUp0_2Fxf2LM1z5nhyCG4Wy92rUqHL6ispNtPfWOe3mWwQlFJk_Z_87gqJZ00ss3vnSk-05j4AsgvnPoKZJtgJPAEjZ8-bBSNExpqWdHBFcqJJsLhyjE5o7hQFQplMevQLyVvrzxsY8YwZuoTZA-bUo7__vsrHUe_PyZP0-0FHRbFzwo-ArxrdFcFlEhTqjKijo7pyh8gmZkgvXG8D1Zi1Fmstnf9yiF36ZBlN-RSr-JHxPAvwU2O_aMmFhvZNJ9aOzP0dienSZo72xSiRw",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "5841b726-4a62-4a91-9b14-2c4e774b8187_sig_rs384",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS384",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAK29kWeoIZxzuN9D5Bi+TJOSkxSMyK+9O6sFHH9UG6KTMA0GCSqGSIb3DQEBDAUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAwWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtegG/5p4hXBV8BhPE7bUYgCXYnwFY9J9yVNjMI306qnN1sRrTvqH88SCLg2/sY2gWI+Y8lmqXYsLbsmCoCXMUAHU6ujqrwWZsiubucyb6wmE2yWdkSgIcT1jpepnfvm4oyKnhZVqn6hOuDx+/vBNk/RJfPibBrhJp/+uiZFc86at3JIgqXB5RqV9ryXGSXpL7tj5cST2HFU+2WzoutHRze7T3XLcA0bIiiQUfHzssxElfSbrUZRY36mpoaqm2WDMEhBEwu2B1L2Jwx76LIn7dWszwaIHkqLMy7PSl3Hit0MdO7SD5bqHnMHHmSjj+9XmYBg5oErfOKJOWAevLlksgQIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQEMBQADggEBACSX/4j+sd5TGsM1e3ISJHxjDlWhvsurPQhadaDu49NdCP/9hrwo7Th48q8Q8o99DnDBOIV0AE7VORYC4xRWHXlGJV84YAQRhHi1rL8L5YWheNeR0/ibanLhaTMb4Ecw8CRJWplslKmt78bn/J1xl4cWilDTVeB+LAYrpmDJNXSx/3QHtIc2PoIKn3dE8cHhHvQ+zHmd52TxGdBR08+TqZDcwZT9XvjrOwyUkk5LIXp8Di9oqPtcDM2vqrgZna40cZAtXHzY1x6PKlwRoMSEZ+olYjjy2OlqsotORc+fbQIkLkUUnhyHTAiobZT1N55LjYkhwjXV+Ps1Qm0Q2px9uMs="
+      ],
+      "n": "tegG_5p4hXBV8BhPE7bUYgCXYnwFY9J9yVNjMI306qnN1sRrTvqH88SCLg2_sY2gWI-Y8lmqXYsLbsmCoCXMUAHU6ujqrwWZsiubucyb6wmE2yWdkSgIcT1jpepnfvm4oyKnhZVqn6hOuDx-_vBNk_RJfPibBrhJp_-uiZFc86at3JIgqXB5RqV9ryXGSXpL7tj5cST2HFU-2WzoutHRze7T3XLcA0bIiiQUfHzssxElfSbrUZRY36mpoaqm2WDMEhBEwu2B1L2Jwx76LIn7dWszwaIHkqLMy7PSl3Hit0MdO7SD5bqHnMHHmSjj-9XmYBg5oErfOKJOWAevLlksgQ",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "71d17b7d-045b-4095-ad00-5025fa6829ec_sig_rs512",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS512",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDCTCCAfGgAwIBAgIgBcLFz+d7BzpRRt6y8Q7tx+JHp/Mz+W7wYrJ79B879AwwDQYJKoZIhvcNAQENBQAwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yMTAxMTUyMjM5MDBaFw0yMTAxMTcyMjM5MDlaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC5fSJXTly7NcBc0hUWE4+n0n9qS0dshbO4iHWEGrIcE3sWAYlz1Y1UItlS3LdkIkP92yV7d2c1Y9DEpVaanH21yIoHDjUkNtgYOUv6QMVzOb0o3P6NDZQBUTW1dXIc6XF2gfM3HVd7blcq1yqrENQKpZcqAFd6acyPvuIJq9o8w7MfEJHrpOlBWYeMarXGgzIdNd4S+1jGBpbsbROm3jUFVftjunL0sub1+tViBEk+cspleaOtA2r5oc8pC5BbkIQ4CreocOHtIBSQOXhp4iS30xiEemKcM0Me9n5A9DzzB2EHfo48qR0zjsKdV2XRVGYehwxwQTXJcmFLWJb1phQDAgMBAAGjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADANBgkqhkiG9w0BAQ0FAAOCAQEAnqYSP4iuwe2fZjPw3yYBk9ZR64qeQvihJZKwgQFwJ5yOo+bu8gErDisVmMUVxeR/g6RTuBBbJGwECtz2Fcpj7euapPoGGxkHEnZMAwkro0UPWztSi798tIhZoeRrZI0A9Lhk885qI2ZSE9hcD5oaDU1uRcnBFwbsoZovmLnwm+9hNJyb6WNpLO3fOnIQGAIx1P6CGShKCK/U4Q3kXrhCg5H7ceSVbHWPwMrKmBSp4dytSXimo8VCFe2a2sInKWcGC1nhBHD0vUlrmJrPo31xYkoSDFkBIszGXLrSUAj5rFFY+qurWv2izECkdMHtv8TqRC9+wFLppFgbbr/R8EZP8A=="
+      ],
+      "n": "uX0iV05cuzXAXNIVFhOPp9J_aktHbIWzuIh1hBqyHBN7FgGJc9WNVCLZUty3ZCJD_dsle3dnNWPQxKVWmpx9tciKBw41JDbYGDlL-kDFczm9KNz-jQ2UAVE1tXVyHOlxdoHzNx1Xe25XKtcqqxDUCqWXKgBXemnMj77iCavaPMOzHxCR66TpQVmHjGq1xoMyHTXeEvtYxgaW7G0Tpt41BVX7Y7py9LLm9frVYgRJPnLKZXmjrQNq-aHPKQuQW5CEOAq3qHDh7SAUkDl4aeIkt9MYhHpinDNDHvZ-QPQ88wdhB36OPKkdM47CnVdl0VRmHocMcEE1yXJhS1iW9aYUAw",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "941699d5-7abf-4d7b-a34d-680778dbf202_sig_es256",
+      "kty": "EC",
+      "use": "sig",
+      "alg": "ES256",
+      "crv": "P-256",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIBfjCCASSgAwIBAgIhAJEw743rfFLOZzVxJ5Y0/syaX3M2pgKQRHSiikfcKlu+MAoGCCqGSM49BAMCMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAwWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEjIQfizmxui3ZMItmyfI+PAXt/lu5DAVx9U7XNLWlJV1SslGyJO5EpQgw3KaMbT8Z7CXUEM15YBX7Q3ipRwmaYaMnMCUwIwYDVR0lBBwwGgYIKwYBBQUHAwEGCCsGAQUFBwMCBgRVHSUAMAoGCCqGSM49BAMCA0gAMEUCICFR1HkIWNaKvmnC3K2yKzqT3mV04li35Y3wSa2jNE0jAiEAgPSZmkjWhAybbeFVhwYw2tRoUr33aKxH75kIy8MdYGE="
+      ],
+      "n": null,
+      "e": null,
+      "x": "AIyEH4s5sbot2TCLZsnyPjwF7f5buQwFcfVO1zS1pSVd",
+      "y": "UrJRsiTuRKUIMNymjG0_Gewl1BDNeWAV-0N4qUcJmmE"
+    },
+    {
+      "kid": "1e422bb9-09d8-429b-965b-85ec88e29059_sig_es384",
+      "kty": "EC",
+      "use": "sig",
+      "alg": "ES384",
+      "crv": "P-384",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIBuzCCAUGgAwIBAgIhAKhVZ9S8jBZxo7bFKUTGPlxAmXE7+NRa15UhkwD3DjrRMAoGCCqGSM49BAMDMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAwWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEsVnnhnMVqJlgdJL1nAMdkY3TYsfe7+jCvG8/HV9fFcLWGYj8LGRFPqjr0tuwAW0Y96przj2GvNOyA90nddd8X5KHiln8x9OZ0ZhCAjlH8KJfn3SqaXfDF+N6A/LAN7uBoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwCgYIKoZIzj0EAwMDaAAwZQIwXO/CxFQRYyEucM2ELFG/duih44ghTzxhzOP+3RbJQHLLT0Z34iZlRPePVzXC52AaAjEAiM6wI9pOMxl8rdNdHEuCiL1SETlHs6K3mr6An6iWm63E0jL6szZX1zOZtVk/y386"
+      ],
+      "n": null,
+      "e": null,
+      "x": "ALFZ54ZzFaiZYHSS9ZwDHZGN02LH3u_owrxvPx1fXxXC1hmI_CxkRT6o69LbsAFtGA",
+      "y": "APeqa849hrzTsgPdJ3XXfF-Sh4pZ_MfTmdGYQgI5R_CiX590qml3wxfjegPywDe7gQ"
+    },
+    {
+      "kid": "52f64d60-b50b-4b07-95b2-582f87a2cb37_sig_es512",
+      "kty": "EC",
+      "use": "sig",
+      "alg": "ES512",
+      "crv": "P-521",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIICBTCCAWagAwIBAgIgEtgLr/raWVlRStF9d1djdZucnWYKKhRiZAH0KiElSnwwCgYIKoZIzj0EAwQwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yMTAxMTUyMjM5MDBaFw0yMTAxMTcyMjM5MDlaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABACvjTXQc/bAWetmIpkGg4z8b/81zz3y4ycZjiKHb9BOQfq4503ZfJ4KBj22UzaUPzjWV1se9UVv6QL+IIAkHVJbzQCP3vMaURBUUvplobpQ2791d0LFC98T6qfzGlMgBcTTMRF5QsEuFyc3PkbNpUIFLJUaLCRauNIExRuxOWjp2Zu9KaMnMCUwIwYDVR0lBBwwGgYIKwYBBQUHAwEGCCsGAQUFBwMCBgRVHSUAMAoGCCqGSM49BAMEA4GMADCBiAJCAZmADtCphAEt7UO7rfCC1fNVwHJiUz7msGCFP7pLZObijl/z/uy0dIV+YV5TcwE//aMzXj5QGfJ4tkdibp+iskNhAkIBPO7ZoCVHKiRvyxAa3RTXZHK8Sv0UixFmeS2nICyUVBLKgz36qsLkA6uXxLxuvXUhabJwJsyrAKjyp/i0X897KE0="
+      ],
+      "n": null,
+      "e": null,
+      "x": "AK-NNdBz9sBZ62YimQaDjPxv_zXPPfLjJxmOIodv0E5B-rjnTdl8ngoGPbZTNpQ_ONZXWx71RW_pAv4ggCQdUlvN",
+      "y": "AI_e8xpREFRS-mWhulDbv3V3QsUL3xPqp_MaUyAFxNMxEXlCwS4XJzc-Rs2lQgUslRosJFq40gTFG7E5aOnZm70p"
+    },
+    {
+      "kid": "13394d6c-e7cc-4699-8b96-6423984b94d7_sig_ps256",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "PS256",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDcTCCAiWgAwIBAgIgMp9yALa/gAL+jgCC/gs20Zlyx+WMmmIewokfcGn3xgYwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKIDAgEgMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAxWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkcvMiWwaCFNJYpq0Ioev9nlrt40XNASE5NjuhZHGg4MHlBOAaMOsnmLqkEGhdWybbAaXkOoeoPFVBkMkuo+BpmugNBJjiGtlGbOkguRQ7+P3Ifjq45EcaBoEEr9h7MfbkYHpGSxQS1JnmylT7ORfbAaqsh3LbS+82Q/eP4/AF4WjoJeTPdkGXrqaGmqrHKtNLTN/U8/hFO52nnnbjljGbsPnTGU5279r0L1+VN5hUEstAyNlDcy5MVDesswq4AK3U7vRxDmguAiW1sw0Xzv9jR6xecdwJM0Q54i7Lwjk7IlFxWm7akE78Q9frlWaQLA8kR16yYnxoI4O+cum618c8wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKIDAgEgA4IBAQAZtk2ljb/Z/gT0uzdYRUYNR6JuZXOpajoMALSSjmPSWF9IVMgQZ5dmZWg6PYmJJ/mBKSGw6ju6nbHXeVE8gPlcTZ3YOdaRS7hX9zDAF7VtiAblbDRNSt3F61euMl3HBNMcfUXhBlYt+RJwaN/x1WQ1YvOaB3xt7rihJHYhTaK+WZAQl1ptdXN7m9IXCHMWEqO4A3+m3a9z3bNoSd7W221He+G0OUcNhMXyLxSJp2D6RO80AIAOCahhSy3DQ33Uk6PPiQu3AZlKk9Ppi6e17B+yUU9PVt9U2GgqAFa8ll2AjT3lG/kyQZLSmM0WU44rcsncsCdWWXGTmChxD4DUCV0u"
+      ],
+      "n": "kcvMiWwaCFNJYpq0Ioev9nlrt40XNASE5NjuhZHGg4MHlBOAaMOsnmLqkEGhdWybbAaXkOoeoPFVBkMkuo-BpmugNBJjiGtlGbOkguRQ7-P3Ifjq45EcaBoEEr9h7MfbkYHpGSxQS1JnmylT7ORfbAaqsh3LbS-82Q_eP4_AF4WjoJeTPdkGXrqaGmqrHKtNLTN_U8_hFO52nnnbjljGbsPnTGU5279r0L1-VN5hUEstAyNlDcy5MVDesswq4AK3U7vRxDmguAiW1sw0Xzv9jR6xecdwJM0Q54i7Lwjk7IlFxWm7akE78Q9frlWaQLA8kR16yYnxoI4O-cum618c8w",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "66294948-40f2-48df-8ff6-d342d56f8102_sig_ps384",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "PS384",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDcTCCAiWgAwIBAgIgOpAUrzN/UPGm9uLadWCgpQIaDb7wp6I44MAYu3pAsuAwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgIFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgIFAKIDAgEwMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAxWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy9KnfzsvwhO23Pef6TfyIOkAqnDGNwrzzeBYuqiql3/Zu9uhtbDD9Q1/XClqOvbi+ouUXJHZ9Rsxpvald1z9+8XAZYIpQ0Rrqr11KBeNEwyrn/fK/lfgOaVuVSG1oe7o5zVZXMlYUiRk+koVkrm2Jj9NG7FDBW28pChps3Wk05KBsopgndKjIna3WYgT2zr0KHDwPe4EbQSL2NyS87TF77jD6yW24jqEMuAa/FvvFIDiEP60JQG9aNO19w0yMkmj8c8+cQtwO/E5huRg83bfGHMPMSaDgxoXoDCt+UKIpkVC+SgE1+SBZLMuLpsj+wTBXhz0MJm6LYFLJxalz9+eawIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgIFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgIFAKIDAgEwA4IBAQBGhHD5FKSqJ4GJYPEi48AhUlrmc4xBsKr7FXNGzYpXkgzwlhP0XkifGguT4W/4JD9ra4GdPjVweC6XM525Uu1NDKvBDMLUYaQj5rDmXe0hHSL8cJ60yKOipbbyOXycvHot3Kebqy7rECCKDjEbejaHnYYjdVNFehz7CvweAB0cn34QKAPfBjfqDHW8d2B46Ow7jhGL18ep01j9WeEeLW5K0nbdgRRLKA2T7RV6jXrsnI5w7eOxfn1WXj7PGmFeyLZQaEUtK7pX+cU10wBVk3Jtt/9HaQTxE9aVETpddwWLjakAzoS0gXRqlQLh1786zIBcHGKlpkYKbTEXIBokBgdN"
+      ],
+      "n": "y9KnfzsvwhO23Pef6TfyIOkAqnDGNwrzzeBYuqiql3_Zu9uhtbDD9Q1_XClqOvbi-ouUXJHZ9Rsxpvald1z9-8XAZYIpQ0Rrqr11KBeNEwyrn_fK_lfgOaVuVSG1oe7o5zVZXMlYUiRk-koVkrm2Jj9NG7FDBW28pChps3Wk05KBsopgndKjIna3WYgT2zr0KHDwPe4EbQSL2NyS87TF77jD6yW24jqEMuAa_FvvFIDiEP60JQG9aNO19w0yMkmj8c8-cQtwO_E5huRg83bfGHMPMSaDgxoXoDCt-UKIpkVC-SgE1-SBZLMuLpsj-wTBXhz0MJm6LYFLJxalz9-eaw",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "c9239f5e-9168-43dc-a931-e3fe26ffec51_sig_ps512",
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "PS512",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDcjCCAiagAwIBAgIhALyTZpvJJ7wbNwXRjx4qAOkF8+PE0CAKLiNmluz8qBsSMEEGCSqGSIb3DQEBCjA0oA8wDQYJYIZIAWUDBAIDBQChHDAaBgkqhkiG9w0BAQgwDQYJYIZIAWUDBAIDBQCiAwIBQDAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMB4XDTIxMDExNTIyMzkwMVoXDTIxMDExNzIyMzkwOVowJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOV/yvZh9YgWhjWUX/uhFSxXscTiidKrmxRoHJprK3daNgNj04jkWC53aZYt4TvYI/gTOUwmt+j8IzVmxpDZeKi7BiEb5C0iv1iDndEDZfVScLBQnXMPvaObtnFc5FXPe/8rMsRdtPigIcZW7lB987+jlgi62lojFSQKR3C+q7P6jQ0LSy/v9bCwE/X+dVfgQ0iiigFQfLISb/o49jyMZ8tiW+skHCpfE5WrlYq4dilfZIExcF5fgNKXb9DaGRT/GUtF7at+tDD186UiToWcez2V1i5hh97WGVq43CUA4PWfXHidJN4Orzn8rP/tx7CAsl3fVFImKStIKtuhzm0ig4sCAwEAAaMnMCUwIwYDVR0lBBwwGgYIKwYBBQUHAwEGCCsGAQUFBwMCBgRVHSUAMEEGCSqGSIb3DQEBCjA0oA8wDQYJYIZIAWUDBAIDBQChHDAaBgkqhkiG9w0BAQgwDQYJYIZIAWUDBAIDBQCiAwIBQAOCAQEAzm9YrqtVIUwnXZ2Uhl9J7FCC73nF8OC31/SQMBzfxsyo6Hx9ksxuBfvvmnCb761luVgeFOELlttfsV9uj4T3TuNzZ8uOCrxCgFOeG1CTJ3V4tl5XDSo3cLeYwIlj8hpeHKwCc6Ecjh4BLfQvzIGQWTVFLfiA1SHUsidnLFNUSogD7OXBDHq+GzErcQafCqeozRF1JfrUEt9NHdGk4+w859qz7jAP3hjkBtCMYWFhMUnR55PHBUfZ0sLIH10nDG+eeRCaVDJLbrUb6lLMPQH7sWDU7f3EYa2lk3Z25M1p7Oah6R5VaKcO/AQ4bEk9ptQWd6HLyYLMVtk4dRNbr7IX+Q=="
+      ],
+      "n": "5X_K9mH1iBaGNZRf-6EVLFexxOKJ0qubFGgcmmsrd1o2A2PTiORYLndpli3hO9gj-BM5TCa36PwjNWbGkNl4qLsGIRvkLSK_WIOd0QNl9VJwsFCdcw-9o5u2cVzkVc97_ysyxF20-KAhxlbuUH3zv6OWCLraWiMVJApHcL6rs_qNDQtLL-_1sLAT9f51V-BDSKKKAVB8shJv-jj2PIxny2Jb6yQcKl8TlauVirh2KV9kgTFwXl-A0pdv0NoZFP8ZS0Xtq360MPXzpSJOhZx7PZXWLmGH3tYZWrjcJQDg9Z9ceJ0k3g6vOfys_-3HsICyXd9UUiYpK0gq26HObSKDiw",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "90d4965b-868d-4290-91a6-8c5d49459f88_enc_rsa1_5",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA1_5",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAIksD5qI5INemoZFFfxQ+DT6CwQT/3vPF+hSmWtKOqUpMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAyWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApB+uqGCDL32xtRSrdADTTakbLKx3DelyBLIfTbEsTv2u0GjRawv/AocnWiwHd3N6b/SkmXXnOpvsFSlFNTbZJho49kjdcdZ7zmXE7LkcXsa3Z1F1bHweXddqqWuxVUXt80so5eAQseOW33KPGMbORHhIkt4IRDC0bAcEKUgk5ibGA9wuolcsA4tZ9/zuKhZpQzXy+3Z2ezfX+veRLXB7N7bh3JZeaJMKEaMriOE73iTHk6xr4qcEK2wdVJhQjxCHoEm0++66ATivSGcJqAexoS6hoR/LibpSMP5+Tw5QHHvLFc1b0CDa0yhFzPMpB+CYJJnDOpPdLz1i2/oAOeh1RQIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAHbVma4EZAsw7ltfqlwpJK6lGPCNdPInzYlrWof4vay4oCkKXrhE4AvAayxlszoom+Ap1RKf+8oUzVN0Ilz1IF0OvKle+PL1S92kb90uM6NxlQ/fRSveAg7At/J+N9Xu2OJ1v0xUkDvmCTmX6bnnfSafWWSU0Z/na2w84owRD29dRsFn2Ge5EmuhIjNzDYfZCMhfVQQvJh1olvHXr59+ustbJGM8pmeZ0Uh15IidzpTR3kiXbcOVbHuJCJ8vjjLiUq2MzNFXWRxTDinw920yVCxLT1GhMy0lq2IHsZFGMwrsDT50aUv9+7/dz4RQlpLuVs+p2q8ERGCfxPLxaO8MG38="
+      ],
+      "n": "pB-uqGCDL32xtRSrdADTTakbLKx3DelyBLIfTbEsTv2u0GjRawv_AocnWiwHd3N6b_SkmXXnOpvsFSlFNTbZJho49kjdcdZ7zmXE7LkcXsa3Z1F1bHweXddqqWuxVUXt80so5eAQseOW33KPGMbORHhIkt4IRDC0bAcEKUgk5ibGA9wuolcsA4tZ9_zuKhZpQzXy-3Z2ezfX-veRLXB7N7bh3JZeaJMKEaMriOE73iTHk6xr4qcEK2wdVJhQjxCHoEm0--66ATivSGcJqAexoS6hoR_LibpSMP5-Tw5QHHvLFc1b0CDa0yhFzPMpB-CYJJnDOpPdLz1i2_oAOeh1RQ",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    },
+    {
+      "kid": "e6e8ccc4-708b-4a83-bbd2-7a9e0181734f_enc_rsa-oaep",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA-OAEP",
+      "crv": "",
+      "exp": 1610923149000,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAIfkfNwuxlcdhdiAKvWrX+LbYKvZwRC9aEn9tOqCZLunMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwMTE1MjIzOTAyWhcNMjEwMTE3MjIzOTA5WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw6p2QLwHKwPA+W9oTjTAkYn1iRQVXdPsNIu18Lao11Fbp0krMKSsnVcBIuO8zjsERf8b/awTN9zJQpKO3LqHHcGIjZJdAfH42CPgyUMjn6laF8iO0S+kI8RCocRLoPP2PVbqPjYD6kvK0mlSSLu+t9bU7mgEsYF5y8r05hX1ROdLUTFuHMa2g4cuD0HEEJMzewK1TzPikNiThsQv0yzwkwGZrBldWeB1E8BGWha2jwVom/Noo6vimtN8Le1XeYq5PvRVaS4AtLup4K0SaVetL0mAiCWKUTudWNDCRWB/Z4lJCJGOCCfk6bPp0TsjOcDjGkPzP05G9FFWndOpQ49UcwIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAJ6zGYZqI4rwBJri7v3XSLvKrUgU19xLq6aik6h3DMylzHFEydnMdgyYU23GWP/rcvM1K4whhiopUcoj/FHQ0uaQV67zb6/NvCbIxiGjQs08ZcYnMtZ0zwm9hj7YeafsVQVI3qo1VdJfPWYHEW4IUfaqIlWdsj/CW1HeKWOrw0+WC1JYwD5Ka13bwYtC3jgt8yHwn3XoOhbINzFsVdRA5pfJKCvZN5IteHhpkmeOkvOlRFaPrqlGM2rukCzo2aBakC8F8SwaQje6prm2wSRJp/qjJKxKO8fMklcBT/FMD2zdYeHb4+YFRo8/CzjRNPEmMSI4LHdFkmjGDrLQYjrxOsY="
+      ],
+      "n": "w6p2QLwHKwPA-W9oTjTAkYn1iRQVXdPsNIu18Lao11Fbp0krMKSsnVcBIuO8zjsERf8b_awTN9zJQpKO3LqHHcGIjZJdAfH42CPgyUMjn6laF8iO0S-kI8RCocRLoPP2PVbqPjYD6kvK0mlSSLu-t9bU7mgEsYF5y8r05hX1ROdLUTFuHMa2g4cuD0HEEJMzewK1TzPikNiThsQv0yzwkwGZrBldWeB1E8BGWha2jwVom_Noo6vimtN8Le1XeYq5PvRVaS4AtLup4K0SaVetL0mAiCWKUTudWNDCRWB_Z4lJCJGOCCfk6bPp0TsjOcDjGkPzP05G9FFWndOpQ49Ucw",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    }
+  ]
+}
+```
+
+- **`puts/replace - JWK`**
+
+You can add a new JWK or replace an old JWK with new value through this Interactive Mode option.
+When it will ask `Add JwonWebKey?` just press `y` to confirm. Fill each property with a value, keep empty to skip.
+
+- **__kid__**: Unique Key Identifier [String].
+- **__kty__**: Cryptographic algorithm name used with the key [String].
+- **__use__**: Key usage, [enc, sig,..]
+- **__alg__**: The cryptographic algorithm name that is going to be used.
+- **__exp__**: time validation
+
+```text
+Gets list of JSON Web Key (JWK) used by server
+Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+---------------------------------------------------------------------------------------------------------------------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/jwks.readonly
+
+«JsonWebKey. »
+Add JsonWebKey? y
+
+   «The unique identifier for the key. Type: string»
+   kid: aabb
+
+   «The family of cryptographic algorithms used with the key. Type: string»
+   kty: RSA
+
+   «How the key was meant to be used; sig represents the signature. Type: string»
+   use: enc
+
+   «The specific cryptographic algorithm used with the key. Type: string»
+   alg: RSA-OAEP
+
+   «The crv member identifies the cryptographic curve used with the key. Values defined by this specification are P-256, P-384 and P-521. Additional crv values MAY be used, provided they are understood by implementations using that Elliptic Curve key. The crv value is case sensitive. Type: string»
+   crv: 
+
+   «Contains the token expiration timestamp. Type: integer»
+   exp: 
+
+   «The x.509 certificate chain. The first entry in the array is the certificate to use for token verification; the other certificates can be used to verify this first certificate. Type: array of string separated by _,»
+   x5c: 
+
+   «The modulus for the RSA public key. Type: string»
+   n: 
+
+   «The exponent for the RSA public key. Type: string»
+   e: 
+
+   «The x member contains the x coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation. Type: string»
+   x: 
+
+   «The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation. Type: string»
+   y: 
+
+Add another JsonWebKey? n
+Obtained Data:
+
+{
+  "keys": [
+    {
+      "kid": "aabb",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA-OAEP",
+      "crv": null,
+      "exp": null,
+      "x5c": [],
+      "n": null,
+      "e": null,
+      "x": null,
+      "y": null
+    }
+  ]
+}
+
+Continue? y
+Getting access token for scope https://jans.io/oauth/config/jwks.write
+Please wait while posting data ...
+
+{
+  "keys": [
+    {
+      "kid": "aabb",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA-OAEP",
+      "crv": "",
+      "exp": null,
+      "x5c": null,
+      "n": null,
+      "e": null,
+      "x": null,
+      "y": null
+    }
+  ]
+}
+```
+
+- **`Patch JWK`**
+
+Just chose this option and fill the value for `op`, `path`, and `value` to patch JSON Web Key.
 
 ### Custom Scripts
 Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way 
@@ -2596,7 +3063,7 @@ Getting access token for scope https://jans.io/oauth/config/uma/resources.readon
   "deletable": true
 }
 ```
-replace id with accurate one.
+replace the id with accurate one.
 
 - **patch-oauth-uma-resources-by-id**
 
@@ -2619,7 +3086,7 @@ Let's get the sample schema:
   "value": {}
 }
 ```
-Let's want to update as `deletable:false` to a uma resource whose id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da. 
+Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`. 
 So we are going to perform an operation `replace` where `path` is `deletable` with `value: false`.
 
 let's update the json as below:
@@ -2671,4 +3138,124 @@ Server Response:
 }
 ```
 As you see that `deletable` updated to `false`.
+
+### Janssen Fido2 Configuration
+
+Using Janssen CLI, You can `get/update` Fido2 properties.
+To get the information of Janssen Fido2 CLI, run the following command:
+
+```
+/opt/jans/jans-cli/config-cli.py --info ConfigurationFido2
+
+Operation ID: get-properties-fido2
+  Description: Gets Jans Authorization Server Fido2 configuration properties.
+Operation ID: put-properties-fido2
+  Description: Updates Fido2 configuration properties.
+  Schema: /components/schemas/JansFido2DynConfiguration
+
+To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration
+```
+
+- **__get-properties-fido2__**
+
+To get the properties of Janssen Fido2 Configuration, run below command:
+`/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
+
+It will return the result as below:
+
+```text
+Getting access token for scope https://jans.io/oauth/config/fido2.readonly
+{
+  "issuer": "https://testjans.gluu.com",
+  "baseEndpoint": "https://testjans.gluu.com/fido2/restv1",
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": false,
+  "disableJdkLogger": false,
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": false,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": null,
+    "mdsCertsFolder": null,
+    "mdsTocsFolder": null,
+    "serverMetadataFolder": null,
+    "requestedParties": [
+      {
+        "name": null,
+        "domains": []
+      }
+    ],
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": null,
+    "authenticationHistoryExpiration": null,
+    "requestedCredentialTypes": []
+  }
+}
+```
+
+- **__put-properties-fido2__**
+
+To perform this operation, let's check the schema first.
+
+```text
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration > /tmp/fido2-schema.json
+```
+
+This command will create fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
+
+![janssen fido2 configuration](img/cl-fido2-update.png)
+
+Now let's do the operation:
+
+```text
+/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 --data /tmp/fido2-schema.json
+
+Getting access token for scope https://jans.io/oauth/config/fido2.write
+Server Response:
+{
+  "issuer": "https://server.example.com/",
+  "baseEndpoint": "https://server.example.com/fido2/restv1",
+  "cleanServiceInterval": null,
+  "cleanServiceBatchChunkSize": null,
+  "useLocalCache": false,
+  "disableJdkLogger": false,
+  "loggingLevel": "INFO",
+  "loggingLayout": null,
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": null,
+  "metricReporterKeepDataDays": null,
+  "metricReporterEnabled": true,
+  "personCustomObjectClassList": [],
+  "fido2Configuration": {
+    "authenticatorCertsFolder": null,
+    "mdsCertsFolder": null,
+    "mdsTocsFolder": null,
+    "serverMetadataFolder": null,
+    "requestedParties": [
+      {
+        "name": null,
+        "domains": null
+      },
+      {
+        "name": null,
+        "domains": null
+      }
+    ],
+    "userAutoEnrollment": true,
+    "unfinishedRequestExpiration": null,
+    "authenticationHistoryExpiration": null,
+    "requestedCredentialTypes": []
+  }
+}
+```
+
+You may find that I have updated to `logginglabel:INFO` from `NULL`.
 
