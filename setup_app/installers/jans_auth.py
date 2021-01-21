@@ -117,7 +117,7 @@ class JansAuthInstaller(JettyInstaller):
                 os.path.join(Config.jansOptPythonFolder, 'libs' )
             )
         
-        for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_jans_creds.json',
+        for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',
                         'vericloud_jans_creds.json', 'cert_creds.json', 'otp_configuration.json'):
             
             src_fn = os.path.join(Config.install_dir, 'static/auth/conf', conf_fn)
