@@ -9,9 +9,9 @@ import shutil
 
 def renew_license():
 
-    ldap_properties_fn = '/etc/gluu/conf/gluu-ldap.properties'
-    salt_fn = '/etc/gluu/conf/salt'
-    encode_fn = '/opt/gluu/bin/encode.py'
+    ldap_properties_fn = '/etc/jans/conf/jans-ldap.properties'
+    salt_fn = '/etc/jans/conf/salt'
+    encode_fn = '/opt/jans/bin/encode.py'
     
     for fn in (ldap_properties_fn, salt_fn, encode_fn):
         if not os.path.exists(fn):
