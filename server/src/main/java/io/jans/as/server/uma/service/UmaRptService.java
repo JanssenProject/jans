@@ -9,6 +9,7 @@ package io.jans.as.server.uma.service;
 import com.google.common.base.Preconditions;
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -21,6 +22,7 @@ import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.external.ExternalUmaRptClaimsService;
 import io.jans.as.server.service.external.context.ExternalUmaRptClaimsContext;
+import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.authorization.UmaRPT;
 import io.jans.as.server.util.ServerUtil;
@@ -82,6 +84,9 @@ public class UmaRptService {
 
     @Inject
     private ExternalUmaRptClaimsService externalUmaRptClaimsService;
+
+    @Inject
+    private StatService statService;
 
     private boolean containsBranch = false;
 
@@ -212,6 +217,7 @@ public class UmaRptService {
             UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
             rpt.setPermissions(getPermissionDns(permissions));
             persist(rpt);
+            statService.reportUmaToken(GrantType.OXAUTH_UMA_TICKET);
             return rpt;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
