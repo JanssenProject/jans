@@ -144,7 +144,7 @@ paths:
             application/json:
               schema:
                 title: Gluu Attributes
-                description: List of all attribute.
+                description: List of all attributes.
                 type: array
                 items:
                   $ref: '#/components/schemas/GluuAttribute'
@@ -3297,7 +3297,7 @@ components:
           type: string
         selected:
           type: boolean
-          description: Boolean value to indicate if the atrribute is selected.
+          description: Boolean value to indicate if the attribute is selected.
         name:
           type: string
           description: Name of the attribute.
@@ -3320,7 +3320,7 @@ components:
             - JSON
         status:
           type: string
-          description: Attrubute status
+          description: Attribute status
           enum:
             - ACTIVE
             - INACTIVE
@@ -3391,7 +3391,7 @@ components:
           properties:
             regexp:
               type: string
-              description: Reguar expression to be used to validate the dataType.
+              description: Regular expression to be used to validate the dataType.
             minLength:
               type: integer
             maxLength:
@@ -3640,7 +3640,7 @@ components:
           description: URL of the home page of the Client. The value of this field must point to a valid Web page.
           type: string
         policyUri:
-          description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+          description: URL that the Relying Party Client provides to the End-User to read about how the profile data will be used.
           type: string
         tosUri:
           description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
@@ -4289,7 +4289,7 @@ components:
       description: Fido2 configuration properties.
       properties:
         authenticatorCertsFolder:
-          description: Authenticators certificates fodler.
+          description: Authenticators certificates folder.
           type: string
         mdsCertsFolder:
           description: MDS TOC root certificates folder.
