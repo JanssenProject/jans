@@ -132,7 +132,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Validate license
             try:
                 self.license_content = LicenseValidator.validate(license["public_key"], license["public_password"], license["license_password"], license["license"],
-                                          Product.SUPER_JANS, Date())
+                                          Product.SUPER_GLUU, Date())
                 self.valid_license = self.license_content.isValid()
             except:
                 print "Super-Janssen. Initialization. Failed to validate license. Exception: ", sys.exc_info()[1]
