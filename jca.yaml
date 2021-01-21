@@ -35,8 +35,8 @@ tags:
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
-      summary: Gets all Jans authorization server configuration properties.
-      description: Gets all Jans authorization server configuration properties.
+      summary: Get all Jans authorization server configuration properties.
+      description: Get all Jans authorization server configuration properties.
       operationId: get-properties
       security:
         - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
@@ -56,8 +56,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partially modifies Jans authorization server Application configuration properties.
-      description: Partially modifies Jans authorization server AppConfiguration properties.
+      summary: Partially modify Jans authorization server Application configuration properties.
+      description: Partially modify Jans authorization server AppConfiguration properties.
       operationId: patch-properties
       security:
         - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.write]
@@ -87,8 +87,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/fido2/config:
     get:
-      summary: Gets Jans Authorization Server Fido2 configuration properties.
-      description: Gets Jans Authorization Server Fido2 configuration properties.
+      summary: Get Jans Authorization Server Fido2 configuration properties.
+      description: Get Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
         - Configuration – Fido2
@@ -132,8 +132,8 @@ paths:
     parameters: []
   /jans-config-api/api/v1/attributes:
     get:
-      summary: Gets a list of Gluu attributes.
-      description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
+      summary: Get a list of Gluu attributes.
+      description: 'Get all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
       operationId: get-attributes
       tags:
         - Attribute
@@ -234,8 +234,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Gets an attribute based on inum.
-      description: Gets an attribute based on inum.
+      summary: Get an attribute based on inum.
+      description: Get an attribute based on inum.
       operationId: get-attributes-by-inum
       tags:
         - Attribute
@@ -253,8 +253,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/attributes.readonly]
     delete:
-      summary: Deletes an attribute based on inum.
-      description: Deletes an attribute based on inum.
+      summary: Delete an attribute based on inum.
+      description: Delete an attribute based on inum.
       operationId: delete-attributes-by-inum
       tags:
         - Attribute
@@ -301,8 +301,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/acrs:
     get:      
-      summary: Gets default authentication method.
-      description: Gets default authentication method.
+      summary: Get default authentication method.
+      description: Get default authentication method.
       operationId: get-acrs
       tags:
         - Default Authentication Method
@@ -346,8 +346,8 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap:
     get:
-      summary: Gets list of existing LDAP configurations.
-      description: Gets list of existing LDAP configurations. 
+      summary: Get list of existing LDAP configurations.
+      description: Get list of existing LDAP configurations. 
       operationId: get-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -430,8 +430,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Gets an LDAP configuration by name.
-      description: Gets an LDAP configuration by name.
+      summary: Get an LDAP configuration by name.
+      description: Get an LDAP configuration by name.
       operationId: get-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -451,8 +451,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
     delete:
-      summary: Deletes an LDAP configuration.
-      description: Deletes an LDAP configuration.
+      summary: Delete an LDAP configuration.
+      description: Delete an LDAP configuration.
       operationId: delete-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -527,8 +527,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
   /jans-config-api/api/v1/config/database/couchbase:
     get:
-      summary: Gets list of existing Couchbase configurations.
-      description: Gets list of existing Couchbase configurations. 
+      summary: Get list of existing Couchbase configurations.
+      description: Get list of existing Couchbase configurations. 
       operationId: get-config-database-couchbase
       tags:
         - Database - Couchbase configuration
@@ -610,8 +610,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Gets a Couchbase configurations by name.
-      description: Gets a Couchbase configurations by name.
+      summary: Get a Couchbase configurations by name.
+      description: Get a Couchbase configurations by name.
       operationId: get-config-database-couchbase-by-name
       tags:
         - Database - Couchbase configuration
@@ -661,8 +661,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
     delete:
-      summary: Deletes a Couchbase configurations by name.
-      description: Deletes a Couchbase configurations by name.
+      summary: Delete a Couchbase configurations by name.
+      description: Delete a Couchbase configurations by name.
       operationId: delete-config-database-couchbase-by-name
       tags:
         - Database - Couchbase configuration
@@ -705,8 +705,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.readonly]
   /jans-config-api/api/v1/config/scripts:
     get:
-      summary: Gets a list of custom scripts.
-      description: Gets a list of custom scripts.
+      summary: Get a list of custom scripts.
+      description: Get a list of custom scripts.
       operationId: get-config-scripts
       tags:
         - Custom Scripts
@@ -817,8 +817,8 @@ paths:
         name: limit
         description: Search size - max size of the results to return.
     get:
-      summary: Gets list of scripts by type.
-      description: Gets list of scripts by type.
+      summary: Get list of scripts by type.
+      description: Get list of scripts by type.
       operationId: get-config-scripts-by-type
       x-cli-ignore: true
       tags:
@@ -848,8 +848,8 @@ paths:
         required: true
         description: Script identifier.
     get:
-      summary: Gets a script by Inum.
-      description: Gets a script by Inum.
+      summary: Get a script by Inum.
+      description: Get a script by Inum.
       operationId: get-config-scripts-by-inum
       x-cli-ignore: true
       tags:
@@ -878,8 +878,8 @@ paths:
         required: true
         description: Script identifier.
     delete:
-      summary: Deletes a custom script.
-      description: Deletes a custom script.
+      summary: Delete a custom script.
+      description: Delete a custom script.
       operationId: delete-config-scripts-by-inum
       tags:
         - Custom Scripts
@@ -915,8 +915,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     patch:
-      summary: Partially modifies cache configuration.
-      description: Partially modifies cache configuration.
+      summary: Partially modify cache configuration.
+      description: Partially modify cache configuration.
       operationId: patch-config-cache
       tags:
         - Cache Configuration
@@ -1195,8 +1195,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/smtp.write]
     delete:
-      summary: Deletes SMTP server configuration.
-      description: Deletes SMTP server configuration.
+      summary: Delete SMTP server configuration.
+      description: Delete SMTP server configuration.
       operationId: delete-config-smtp
       tags:
         - Configuration – SMTP
@@ -1295,8 +1295,8 @@ paths:
     get:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
-      summary: Gets list of JSON Web Key (JWK) used by server.
-      description: 'Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
+      summary: Get list of JSON Web Key (JWK) used by server.
+      description: 'Get list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
       operationId: get-config-jwks
       responses:
         '200':
@@ -1368,7 +1368,7 @@ paths:
       tags:
         - OAuth - OpenID Connect - Clients
       summary: Gets list of OpenID Connect clients
-      description: Gets list of OpenID Connect clients
+      description: Get list of OpenID Connect clients
       operationId: get-oauth-openid-clients
       responses:
         '200':
@@ -1532,8 +1532,8 @@ paths:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
-      summary: Gets list of OpenID Connect Sectors.
-      description: Gets list of OpenID Connect Sectors.
+      summary: Get list of OpenID Connect Sectors.
+      description: Get list of OpenID Connect Sectors.
       operationId: get-oauth-openid-sectors
       responses:
         '200':
@@ -1681,8 +1681,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Gets list of UMA resources.
-      description: Gets list of UMA resources.
+      summary: Get list of UMA resources.
+      description: Get list of UMA resources.
       operationId: get-oauth-uma-resources
       responses:
         '200':
@@ -1774,8 +1774,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Gets an UMA resource by ID.
-      description: Gets an UMA resource by ID.  
+      summary: Get an UMA resource by ID.
+      description: Get an UMA resource by ID.  
       operationId: get-oauth-uma-resources-by-id
       responses:
         '200':
@@ -1796,8 +1796,8 @@ paths:
     delete:
       tags:
         - OAuth - UMA Resources
-      summary: Deletes an UMA resource.
-      description: Deletes an UMA resource.
+      summary: Delete an UMA resource.
+      description: Delete an UMA resource.
       operationId: delete-oauth-uma-resources-by-id
       responses:
         '204':
@@ -1845,8 +1845,8 @@ paths:
     get:
       tags:
         - OAuth - Scopes
-      summary: Gets list of Scopes.
-      description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+      summary: Get list of Scopes.
+      description: Get list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
       operationId: get-oauth-scopes
       responses:
         '200':
