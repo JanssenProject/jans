@@ -69,7 +69,6 @@ public abstract class AbstractScimClient<T> implements InvocationHandler, Serial
             getIntegerProperty("httpclient.multithreaded.validateafterinactivity").ifPresent(cm::setValidateAfterInactivity);
 
             logger.debug("Using multithreaded support with maxTotalConnections={} and maxPerRoutConnections={}", cm.getMaxTotal(), cm.getDefaultMaxPerRoute());
-            logger.warn("Ensure your oxTrust 'rptConnectionPoolUseConnectionPooling' property is set to true");
 
             CloseableHttpClient httpClient = HttpClients.custom()
 					.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
