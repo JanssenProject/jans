@@ -6,13 +6,5 @@ objectClass: top
 objectClass: jansAppConf
 ou: scim
 
-dn: inum=8CAD-B06D,ou=scopes,o=jans
-displayName: SCIM Access
-inum: 8CAD-B06D
-jansId: https://%(hostname)s/jans-auth/restv1/uma/scopes/scim_access
-jansScopeTyp: uma
-jansUmaPolicyScrDn: inum=2DAF-F9A5,ou=scripts,o=jans
-objectClass: top
-objectClass: jansScope
 
 
