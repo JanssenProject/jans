@@ -91,7 +91,7 @@
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
 
-        <!-- Gluu -->
+        <!-- Jans -->
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-client</artifactId>

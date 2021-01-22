@@ -31,13 +31,13 @@ import java.util.Properties;
  */
 public class BaseTest {
 
-    private static final String FILE_PREFIX="file:";
-    private static final Charset DEFAULT_CHARSET=Charset.forName("UTF-8");
-    private static final String NEW_LINE=System.getProperty("line.separator");
+    private static final String FILE_PREFIX = "file:";
+    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    private static final String NEW_LINE = System.getProperty("line.separator");
 
-    protected static ClientSideService client=null;
+    protected static ClientSideService client = null;
     protected Logger logger = LogManager.getLogger(getClass());
-    protected ObjectMapper mapper=new ObjectMapper();
+    protected ObjectMapper mapper = new ObjectMapper();
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
@@ -73,7 +73,7 @@ public class BaseTest {
         client.close();
     }
 
-    private void setupClient(Map<String, String> params) throws Exception{
+    private void setupClient(Map<String, String> params) throws Exception {
 
         logger.info("Initializing client...");
         String tokenEndpointAuthnMethod = params.get("tokenEndpointAuthnMethod");
@@ -105,18 +105,18 @@ public class BaseTest {
             try (BufferedReader bfr = Files.newBufferedReader(Paths.get(value), DEFAULT_CHARSET)) {     //create reader
                 //appends every line after another
                 decoded = bfr.lines().reduce("", (partial, next) -> partial + NEW_LINE + next);
-                if (decoded.length()==0)
+                if (decoded.length() == 0)
                     logger.warn("Key '{}' is empty", value);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-                decoded=null;
+                decoded = null;
             }
         }
         return decoded;
 
     }
 
-    public UserResource getDeepCloneUsr(UserResource bean) throws Exception{
+    public UserResource getDeepCloneUsr(UserResource bean) throws Exception {
         return mapper.readValue(mapper.writeValueAsString(bean), UserResource.class);
     }
 
