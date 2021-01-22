@@ -89,7 +89,8 @@ public class OAuthTokenProtectionService extends ProtectionService implements Se
 
         try {
         	String introspectionEndpoint = openIdService.getOpenIdConfiguration().getIntrospectionEndpoint();
-            introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint);
+            introspectionService = ClientFactory.instance().createIntrospectionService(
+            	introspectionEndpoint, ClientFactory.instance().createEngine());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
