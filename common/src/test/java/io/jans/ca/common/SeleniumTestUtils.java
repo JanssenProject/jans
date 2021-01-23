@@ -138,7 +138,7 @@ public class SeleniumTestUtils {
             authorizationRequest.setResponseTypes(responseTypes.stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList()));
             authorizationRequest.setState(state);
 
-            return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +authorizationRequest.getQueryString(), Util.UTF8_STRING_ENCODING);
+            return URLDecoder.decode(opHost + "/jans-auth/restv1/authorize?" +authorizationRequest.getQueryString(), Util.UTF8_STRING_ENCODING);
 
             /*return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +
                     "response_type=code+id_token+token" +
