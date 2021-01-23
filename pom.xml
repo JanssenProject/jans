@@ -40,8 +40,8 @@
     <repositories>
         <repository>
             <id>gluu</id>
-            <name>Gluu repository</name>
-            <url>http://ox.gluu.org/maven</url>
+            <name>Jans repository</name>
+            <url>https://maven.jans.io/maven</url>
         </repository>
         <repository>
             <id>central</id>
