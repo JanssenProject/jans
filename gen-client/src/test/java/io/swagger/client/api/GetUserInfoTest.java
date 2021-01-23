@@ -43,7 +43,7 @@ public class GetUserInfoTest {
     }
 
     @Parameters({"opHost", "redirectUrls"})
-    @Test
+    @Test(enabled = false)
     public void testWithInvalidToken(String opHost, String redirectUrls) throws Exception {
         final DevelopersApi client = api();
 
