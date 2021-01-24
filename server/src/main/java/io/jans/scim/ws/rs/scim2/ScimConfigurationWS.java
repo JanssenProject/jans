@@ -1,12 +1,5 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -37,7 +30,7 @@ import io.jans.service.JsonService;
  */
 @ApplicationScoped
 @Path("/scim-configuration")
-@Api(value = "/.well-known/scim-configuration", description = "The SCIM server endpoint that provides configuration data. ")
+@Api(value = "/.well-known/scim-configuration", description = "The SCIM server endpoint that provides configuration data.")
 public class ScimConfigurationWS {
 
     @Inject
@@ -82,7 +75,7 @@ public class ScimConfigurationWS {
         try {
             final ScimConfiguration c2 = new ScimConfiguration();
             c2.setVersion("2.0");
-            c2.setAuthorizationSupported(Arrays.asList("uma", "oauth2"));
+            c2.setAuthorizationSupported(Collections.singletonList("oauth2"));
             c2.setUserEndpoint(userService.getEndpointUrl());
             c2.setGroupEndpoint(groupService.getEndpointUrl());
             c2.setFidoDevicesEndpoint(fidoService.getEndpointUrl());
@@ -97,8 +90,7 @@ public class ScimConfigurationWS {
             log.info("SCIM configuration: {}", entity);
 
             return Response.ok(entity).build();
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
             log.error(e.getMessage(), e);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Failed to generate SCIM configuration").build());
