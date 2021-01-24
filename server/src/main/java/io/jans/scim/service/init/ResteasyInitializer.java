@@ -13,6 +13,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import io.jans.scim.service.filter.AuthorizationProcessingFilter;
+import io.jans.scim.service.filter.EnabledServiceFilter;
 import io.jans.scim.service.scim2.interceptor.ServiceMetadataFilter;
 import io.jans.scim.ws.rs.scim2.*;
 
@@ -34,8 +35,9 @@ public class ResteasyInitializer extends Application {
 		classes.add(Fido2DeviceWebService.class);
 
 		// Providers
+		classes.add(EnabledServiceFilter.class);
 		classes.add(AuthorizationProcessingFilter.class);
-		classes.add( ServiceMetadataFilter.class);		
+		classes.add(ServiceMetadataFilter.class);		
 
 		return classes;
 	}
