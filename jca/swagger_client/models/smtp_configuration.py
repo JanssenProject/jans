@@ -31,7 +31,7 @@ class SmtpConfiguration(object):
         'host': 'str',
         'port': 'int',
         'requires_ssl': 'bool',
-        'server_trust': 'bool',
+        'trust_host': 'bool',
         'from_name': 'str',
         'from_email_address': 'str',
         'requires_authentication': 'bool',
@@ -42,21 +42,21 @@ class SmtpConfiguration(object):
     attribute_map = {
         'host': 'host',
         'port': 'port',
-        'requires_ssl': 'requiresSsl',
-        'server_trust': 'serverTrust',
-        'from_name': 'fromName',
-        'from_email_address': 'fromEmailAddress',
-        'requires_authentication': 'requiresAuthentication',
-        'user_name': 'userName',
+        'requires_ssl': 'requires-ssl',
+        'trust_host': 'trust-host',
+        'from_name': 'from-name',
+        'from_email_address': 'from-email-address',
+        'requires_authentication': 'requires-authentication',
+        'user_name': 'user-name',
         'password': 'password'
     }
 
-    def __init__(self, host=None, port=None, requires_ssl=None, server_trust=None, from_name=None, from_email_address=None, requires_authentication=None, user_name=None, password=None):  # noqa: E501
+    def __init__(self, host=None, port=None, requires_ssl=None, trust_host=None, from_name=None, from_email_address=None, requires_authentication=None, user_name=None, password=None):  # noqa: E501
         """SmtpConfiguration - a model defined in Swagger"""  # noqa: E501
         self._host = None
         self._port = None
         self._requires_ssl = None
-        self._server_trust = None
+        self._trust_host = None
         self._from_name = None
         self._from_email_address = None
         self._requires_authentication = None
@@ -69,8 +69,8 @@ class SmtpConfiguration(object):
             self.port = port
         if requires_ssl is not None:
             self.requires_ssl = requires_ssl
-        if server_trust is not None:
-            self.server_trust = server_trust
+        if trust_host is not None:
+            self.trust_host = trust_host
         if from_name is not None:
             self.from_name = from_name
         if from_email_address is not None:
@@ -152,27 +152,27 @@ class SmtpConfiguration(object):
         self._requires_ssl = requires_ssl
 
     @property
-    def server_trust(self):
-        """Gets the server_trust of this SmtpConfiguration.  # noqa: E501
+    def trust_host(self):
+        """Gets the trust_host of this SmtpConfiguration.  # noqa: E501
 
         Boolean value with default value false.  # noqa: E501
 
-        :return: The server_trust of this SmtpConfiguration.  # noqa: E501
+        :return: The trust_host of this SmtpConfiguration.  # noqa: E501
         :rtype: bool
         """
-        return self._server_trust
+        return self._trust_host
 
-    @server_trust.setter
-    def server_trust(self, server_trust):
-        """Sets the server_trust of this SmtpConfiguration.
+    @trust_host.setter
+    def trust_host(self, trust_host):
+        """Sets the trust_host of this SmtpConfiguration.
 
         Boolean value with default value false.  # noqa: E501
 
-        :param server_trust: The server_trust of this SmtpConfiguration.  # noqa: E501
+        :param trust_host: The trust_host of this SmtpConfiguration.  # noqa: E501
         :type: bool
         """
 
-        self._server_trust = server_trust
+        self._trust_host = trust_host
 
     @property
     def from_name(self):

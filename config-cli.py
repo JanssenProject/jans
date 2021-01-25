@@ -623,8 +623,9 @@ class JCA_CLI:
 
 
     def get_model_key_map(self, model, key):
+        key_underscore = key.replace('-', '_')
         for key_ in model.attribute_map:
-            if model.attribute_map[key_] == key:
+            if model.attribute_map[key_] == key or model.attribute_map[key_] == key_underscore:
                 return key_
 
 
@@ -799,8 +800,8 @@ class JCA_CLI:
             item = schema['properties'][prop]
             if getitem and item != getitem:
                 continue
+            
             prop_ = self.get_model_key_map(model, prop)
-
             if item['type'] == 'object' and 'properties' in item:
                 print()
                 print("Data for object {}. {}".format(prop, item.get('description','')))
@@ -1091,8 +1092,6 @@ class JCA_CLI:
         if not cur_model:            
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
 
-
-
         end_point_param = self.get_endpiont_url_param(get_endpoint)
 
         if cur_model:
@@ -1114,7 +1113,7 @@ class JCA_CLI:
                     item_numbers.append(str(i+1))
 
             print_fileds()
-            cahnged_items = []
+            changed_items = []
             selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
             help_text = 'q: quit, v: view, s: save, l: list fields #: update filed'
 
@@ -1126,16 +1125,17 @@ class JCA_CLI:
                     print_fileds()
                 elif selection in item_numbers:
                     item = attr_name_list[int(selection)-1]
+                    item_unmapped = self.get_model_key_map(cur_model, item)
                     schema_item = schema['properties'][item]
                     self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
-                    cahnged_items.append(item)
+                    changed_items.append(item)
 
                 if selection == 'b':
                     self.display_menu(endpoint.parent)
                     break
                 elif selection == 's':
                     print('Changes:')
-                    for ci in cahnged_items:
+                    for ci in changed_items:
                         model_key = self.get_model_key_map(cur_model, ci)
                         str_val = str( getattr(cur_model, model_key))
                         print(self.colored_text(ci, bold_color) + ':', self.colored_text(str_val, success_color))
