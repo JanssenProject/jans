@@ -1200,8 +1200,8 @@ jansMultivaluedAttr: true
 jansSAML1URI: urn:mace:dir:attribute-def:role
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
 jansStatus: active
-objectClass: jansAttr
 objectClass: top
+objectClass: jansAttr
 urn: urn:jans:dir:attribute-def:role
 
 dn: inum=CACA,ou=attributes,o=jans
