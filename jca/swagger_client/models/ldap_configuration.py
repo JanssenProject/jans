@@ -59,7 +59,7 @@ class LdapConfiguration(object):
         'level': 'level'
     }
 
-    def __init__(self, config_id=None, bind_dn=None, bind_password=None, servers=None, max_connections=2, use_ssl=None, base_d_ns=None, primary_key=None, local_primary_key=None, use_anonymous_bind=None, enabled=None, version=None, level=None):  # noqa: E501
+    def __init__(self, config_id=None, bind_dn=None, bind_password=None, servers=None, max_connections=2, use_ssl=None, base_d_ns=None, primary_key=None, local_primary_key=None, use_anonymous_bind=False, enabled=False, version=None, level=None):  # noqa: E501
         """LdapConfiguration - a model defined in Swagger"""  # noqa: E501
         self._config_id = None
         self._bind_dn = None
@@ -75,22 +75,15 @@ class LdapConfiguration(object):
         self._version = None
         self._level = None
         self.discriminator = None
-        if config_id is not None:
-            self.config_id = config_id
-        if bind_dn is not None:
-            self.bind_dn = bind_dn
-        if bind_password is not None:
-            self.bind_password = bind_password
-        if servers is not None:
-            self.servers = servers
+        self.config_id = config_id
+        self.bind_dn = bind_dn
+        self.bind_password = bind_password
+        self.servers = servers
         if max_connections is not None:
             self.max_connections = max_connections
-        if use_ssl is not None:
-            self.use_ssl = use_ssl
-        if base_d_ns is not None:
-            self.base_d_ns = base_d_ns
-        if primary_key is not None:
-            self.primary_key = primary_key
+        self.use_ssl = use_ssl
+        self.base_d_ns = base_d_ns
+        self.primary_key = primary_key
         if local_primary_key is not None:
             self.local_primary_key = local_primary_key
         if use_anonymous_bind is not None:
@@ -122,6 +115,8 @@ class LdapConfiguration(object):
         :param config_id: The config_id of this LdapConfiguration.  # noqa: E501
         :type: str
         """
+        if config_id is None:
+            raise ValueError("Invalid value for `config_id`, must not be `None`")  # noqa: E501
 
         self._config_id = config_id
 
@@ -145,6 +140,8 @@ class LdapConfiguration(object):
         :param bind_dn: The bind_dn of this LdapConfiguration.  # noqa: E501
         :type: str
         """
+        if bind_dn is None:
+            raise ValueError("Invalid value for `bind_dn`, must not be `None`")  # noqa: E501
 
         self._bind_dn = bind_dn
 
@@ -168,6 +165,8 @@ class LdapConfiguration(object):
         :param bind_password: The bind_password of this LdapConfiguration.  # noqa: E501
         :type: str
         """
+        if bind_password is None:
+            raise ValueError("Invalid value for `bind_password`, must not be `None`")  # noqa: E501
 
         self._bind_password = bind_password
 
@@ -191,6 +190,8 @@ class LdapConfiguration(object):
         :param servers: The servers of this LdapConfiguration.  # noqa: E501
         :type: list[str]
         """
+        if servers is None:
+            raise ValueError("Invalid value for `servers`, must not be `None`")  # noqa: E501
 
         self._servers = servers
 
@@ -237,6 +238,8 @@ class LdapConfiguration(object):
         :param use_ssl: The use_ssl of this LdapConfiguration.  # noqa: E501
         :type: bool
         """
+        if use_ssl is None:
+            raise ValueError("Invalid value for `use_ssl`, must not be `None`")  # noqa: E501
 
         self._use_ssl = use_ssl
 
@@ -260,6 +263,8 @@ class LdapConfiguration(object):
         :param base_d_ns: The base_d_ns of this LdapConfiguration.  # noqa: E501
         :type: list[str]
         """
+        if base_d_ns is None:
+            raise ValueError("Invalid value for `base_d_ns`, must not be `None`")  # noqa: E501
 
         self._base_d_ns = base_d_ns
 
@@ -283,6 +288,8 @@ class LdapConfiguration(object):
         :param primary_key: The primary_key of this LdapConfiguration.  # noqa: E501
         :type: str
         """
+        if primary_key is None:
+            raise ValueError("Invalid value for `primary_key`, must not be `None`")  # noqa: E501
 
         self._primary_key = primary_key
 

@@ -127,14 +127,15 @@ else:
 
 class Menu(object):
 
-    def __init__(self, name, method='', info='', path=''):
+    def __init__(self, name, method='', info={}, path=''):
         self.name = name
         self.method = method
         self.info = info
         self.path = path
         self.children = []
         self.parent = None
-    
+        self.ignore = False
+
     def __iter__(self):
         self.current_index = 0
         return self
@@ -240,8 +241,8 @@ class JCA_CLI:
                 for path in self.cfg_yml['paths']:
                     for method in self.cfg_yml['paths'][path]:
                         if 'tags' in self.cfg_yml['paths'][path][method] and m.name in self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in self.cfg_yml['paths'][path][method]:
-                            if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
-                                continue
+                            #if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
+                            #    continue
                             menu_name = self.cfg_yml['paths'][path][method].get('summary') or self.cfg_yml['paths'][path][method].get('description')
                             sm = Menu(
                                     name=menu_name.strip('.'),
@@ -250,6 +251,7 @@ class JCA_CLI:
                                     path=path,
                                     )
                             m.add_child(sm)
+
         self.menu = menu
 
 
@@ -1058,12 +1060,18 @@ class JCA_CLI:
 
         initialised = False
         cur_model = None
-        
-        if 'x-getdata' in endpoint.info:
+
+        if 'x-cli-getdata' in endpoint.info:
+            print("YESSS", endpoint.info['x-cli-getdata'])
             for m in endpoint.parent:
-                if m.info['operationId'] == endpoint.info['x-getdata']:
+                print("Checking", m, m.info['operationId'])
+                if m.info['operationId'] == endpoint.info['x-cli-getdata']:
+                   
+                    
                     cur_model = self.process_get(m, return_value=True)
                     initialised = True
+                    get_endpoint = m
+                    print("GET ENDPOINT", get_endpoint)
                     break
 
         else:
@@ -1071,17 +1079,21 @@ class JCA_CLI:
                 if m.method=='get' and m.path.endswith('}'):
                     cur_model = self.process_get(m, return_value=True)
                     initialised = True
+                    get_endpoint = m
                     break
 
         if not cur_model:
             for m in endpoint.parent:
                 if m.method=='get' and not m.path.endswith('}'):
                     cur_model = self.process_get(m, return_value=True)
+                    get_endpoint = m
 
         if not cur_model:            
             cur_model = getattr(swagger_client.models, schema['__schema_name__'])
 
-        end_point_param = self.get_endpiont_url_param(endpoint)
+
+
+        end_point_param = self.get_endpiont_url_param(get_endpoint)
 
         if cur_model:
             end_point_param_val = None
@@ -1162,6 +1174,8 @@ class JCA_CLI:
         selection_values = ['q', 'b']
 
         for i, item in enumerate(menu):
+            if item.info.get('x-cli-ignore'):
+                continue
             print(i+1, item)
             selection_values.append(str(i+1))
         

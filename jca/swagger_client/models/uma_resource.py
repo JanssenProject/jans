@@ -65,7 +65,7 @@ class UmaResource(object):
         'deletable': 'deletable'
     }
 
-    def __init__(self, dn=None, inum=None, id=None, name=None, icon_uri=None, scopes=None, scope_expression=None, clients=None, resources=None, rev=None, creator=None, description=None, type=None, creation_date=None, expiration_date=None, deletable=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, id=None, name=None, icon_uri=None, scopes=None, scope_expression=None, clients=None, resources=None, rev=None, creator=None, description=None, type=None, creation_date=None, expiration_date=None, deletable=False):  # noqa: E501
         """UmaResource - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
@@ -84,12 +84,9 @@ class UmaResource(object):
         self._expiration_date = None
         self._deletable = None
         self.discriminator = None
-        if dn is not None:
-            self.dn = dn
-        if inum is not None:
-            self.inum = inum
-        if id is not None:
-            self.id = id
+        self.dn = dn
+        self.inum = inum
+        self.id = id
         if name is not None:
             self.name = name
         if icon_uri is not None:
@@ -108,8 +105,7 @@ class UmaResource(object):
             self.creator = creator
         if description is not None:
             self.description = description
-        if type is not None:
-            self.type = type
+        self.type = type
         if creation_date is not None:
             self.creation_date = creation_date
         if expiration_date is not None:
@@ -135,6 +131,8 @@ class UmaResource(object):
         :param dn: The dn of this UmaResource.  # noqa: E501
         :type: str
         """
+        if dn is None:
+            raise ValueError("Invalid value for `dn`, must not be `None`")  # noqa: E501
 
         self._dn = dn
 
@@ -158,6 +156,8 @@ class UmaResource(object):
         :param inum: The inum of this UmaResource.  # noqa: E501
         :type: str
         """
+        if inum is None:
+            raise ValueError("Invalid value for `inum`, must not be `None`")  # noqa: E501
 
         self._inum = inum
 
@@ -181,6 +181,8 @@ class UmaResource(object):
         :param id: The id of this UmaResource.  # noqa: E501
         :type: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
@@ -411,6 +413,8 @@ class UmaResource(object):
         :param type: The type of this UmaResource.  # noqa: E501
         :type: str
         """
+        if type is None:
+            raise ValueError("Invalid value for `type`, must not be `None`")  # noqa: E501
 
         self._type = type
 

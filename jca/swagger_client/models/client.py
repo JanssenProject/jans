@@ -169,7 +169,7 @@ class Client(object):
         'jans_id': 'jansId'
     }
 
-    def __init__(self, dn=None, inum=None, client_secret=None, front_channel_logout_uri=None, front_channel_logout_session_required=None, registration_access_token=None, client_id_issued_at=None, client_secret_expires_at=None, redirect_uris=None, claim_redirect_uris=None, response_types=None, grant_types=None, application_type=None, contacts=None, client_name=None, id_token_token_binding_cnf=None, logo_uri=None, client_uri=None, policy_uri=None, tos_uri=None, jwks_uri=None, jwks=None, sector_identifier_uri=None, subject_type=None, id_token_signed_response_alg=None, id_token_encrypted_response_alg=None, id_token_encrypted_response_enc=None, user_info_signed_response_alg=None, user_info_encrypted_response_alg=None, user_info_encrypted_response_enc=None, request_object_signing_alg=None, request_object_encryption_alg=None, request_object_encryption_enc=None, token_endpoint_auth_method=None, token_endpoint_auth_signing_alg=None, default_max_age=None, require_auth_time=None, default_acr_values=None, initiate_login_uri=None, post_logout_redirect_uris=None, request_uris=None, scopes=None, claims=None, trusted_client=None, last_access_time=None, last_logon_time=None, persist_client_authorizations=None, include_claims_in_id_token=None, refresh_token_lifetime=None, access_token_lifetime=None, custom_attributes=None, custom_object_classes=None, rpt_as_jwt=None, access_token_as_jwt=None, access_token_signing_alg=None, disabled=None, authorized_origins=None, software_id=None, software_version=None, software_statement=None, attributes=None, backchannel_token_delivery_mode=None, backchannel_client_notification_endpoint=None, backchannel_authentication_request_signing_alg=None, backchannel_user_code_parameter=None, expiration_date=None, deletable=None, jans_id=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, client_secret=None, front_channel_logout_uri=None, front_channel_logout_session_required=None, registration_access_token=None, client_id_issued_at=None, client_secret_expires_at=None, redirect_uris=None, claim_redirect_uris=None, response_types=None, grant_types=None, application_type=None, contacts=None, client_name=None, id_token_token_binding_cnf=None, logo_uri=None, client_uri=None, policy_uri=None, tos_uri=None, jwks_uri=None, jwks=None, sector_identifier_uri=None, subject_type=None, id_token_signed_response_alg=None, id_token_encrypted_response_alg=None, id_token_encrypted_response_enc=None, user_info_signed_response_alg=None, user_info_encrypted_response_alg=None, user_info_encrypted_response_enc=None, request_object_signing_alg=None, request_object_encryption_alg=None, request_object_encryption_enc=None, token_endpoint_auth_method=None, token_endpoint_auth_signing_alg=None, default_max_age=None, require_auth_time=None, default_acr_values=None, initiate_login_uri=None, post_logout_redirect_uris=None, request_uris=None, scopes=None, claims=None, trusted_client=False, last_access_time=None, last_logon_time=None, persist_client_authorizations=None, include_claims_in_id_token=False, refresh_token_lifetime=None, access_token_lifetime=None, custom_attributes=None, custom_object_classes=None, rpt_as_jwt=None, access_token_as_jwt=None, access_token_signing_alg=None, disabled=False, authorized_origins=None, software_id=None, software_version=None, software_statement=None, attributes=None, backchannel_token_delivery_mode=None, backchannel_client_notification_endpoint=None, backchannel_authentication_request_signing_alg=None, backchannel_user_code_parameter=None, expiration_date=None, deletable=False, jans_id=None):  # noqa: E501
         """Client - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
@@ -248,8 +248,7 @@ class Client(object):
             self.client_secret = client_secret
         if front_channel_logout_uri is not None:
             self.front_channel_logout_uri = front_channel_logout_uri
-        if front_channel_logout_session_required is not None:
-            self.front_channel_logout_session_required = front_channel_logout_session_required
+        self.front_channel_logout_session_required = front_channel_logout_session_required
         if registration_access_token is not None:
             self.registration_access_token = registration_access_token
         if client_id_issued_at is not None:
@@ -262,7 +261,8 @@ class Client(object):
             self.claim_redirect_uris = claim_redirect_uris
         if response_types is not None:
             self.response_types = response_types
-        self.grant_types = grant_types
+        if grant_types is not None:
+            self.grant_types = grant_types
         self.application_type = application_type
         if contacts is not None:
             self.contacts = contacts
@@ -283,8 +283,7 @@ class Client(object):
             self.jwks = jwks
         if sector_identifier_uri is not None:
             self.sector_identifier_uri = sector_identifier_uri
-        if subject_type is not None:
-            self.subject_type = subject_type
+        self.subject_type = subject_type
         if id_token_signed_response_alg is not None:
             self.id_token_signed_response_alg = id_token_signed_response_alg
         if id_token_encrypted_response_alg is not None:
@@ -303,7 +302,8 @@ class Client(object):
             self.request_object_encryption_alg = request_object_encryption_alg
         if request_object_encryption_enc is not None:
             self.request_object_encryption_enc = request_object_encryption_enc
-        self.token_endpoint_auth_method = token_endpoint_auth_method
+        if token_endpoint_auth_method is not None:
+            self.token_endpoint_auth_method = token_endpoint_auth_method
         if token_endpoint_auth_signing_alg is not None:
             self.token_endpoint_auth_signing_alg = token_endpoint_auth_signing_alg
         if default_max_age is not None:
@@ -330,8 +330,7 @@ class Client(object):
             self.last_logon_time = last_logon_time
         if persist_client_authorizations is not None:
             self.persist_client_authorizations = persist_client_authorizations
-        if include_claims_in_id_token is not None:
-            self.include_claims_in_id_token = include_claims_in_id_token
+        self.include_claims_in_id_token = include_claims_in_id_token
         if refresh_token_lifetime is not None:
             self.refresh_token_lifetime = refresh_token_lifetime
         if access_token_lifetime is not None:
@@ -479,6 +478,8 @@ class Client(object):
         :param front_channel_logout_session_required: The front_channel_logout_session_required of this Client.  # noqa: E501
         :type: bool
         """
+        if front_channel_logout_session_required is None:
+            raise ValueError("Invalid value for `front_channel_logout_session_required`, must not be `None`")  # noqa: E501
 
         self._front_channel_logout_session_required = front_channel_logout_session_required
 
@@ -641,8 +642,6 @@ class Client(object):
         :param grant_types: The grant_types of this Client.  # noqa: E501
         :type: list[str]
         """
-        if grant_types is None:
-            raise ValueError("Invalid value for `grant_types`, must not be `None`")  # noqa: E501
         allowed_values = ["authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code"]  # noqa: E501
         if not set(grant_types).issubset(set(allowed_values)):
             raise ValueError(
@@ -936,6 +935,8 @@ class Client(object):
         :param subject_type: The subject_type of this Client.  # noqa: E501
         :type: str
         """
+        if subject_type is None:
+            raise ValueError("Invalid value for `subject_type`, must not be `None`")  # noqa: E501
         allowed_values = ["pairwise", "public"]  # noqa: E501
         if subject_type not in allowed_values:
             raise ValueError(
@@ -1226,8 +1227,6 @@ class Client(object):
         :param token_endpoint_auth_method: The token_endpoint_auth_method of this Client.  # noqa: E501
         :type: str
         """
-        if token_endpoint_auth_method is None:
-            raise ValueError("Invalid value for `token_endpoint_auth_method`, must not be `None`")  # noqa: E501
         allowed_values = ["client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"]  # noqa: E501
         if token_endpoint_auth_method not in allowed_values:
             raise ValueError(
@@ -1562,6 +1561,8 @@ class Client(object):
         :param include_claims_in_id_token: The include_claims_in_id_token of this Client.  # noqa: E501
         :type: bool
         """
+        if include_claims_in_id_token is None:
+            raise ValueError("Invalid value for `include_claims_in_id_token`, must not be `None`")  # noqa: E501
 
         self._include_claims_in_id_token = include_claims_in_id_token
 

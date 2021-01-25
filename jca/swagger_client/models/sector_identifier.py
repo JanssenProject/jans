@@ -48,8 +48,7 @@ class SectorIdentifier(object):
         self._redirect_uris = None
         self._client_ids = None
         self.discriminator = None
-        if id is not None:
-            self.id = id
+        self.id = id
         if description is not None:
             self.description = description
         if redirect_uris is not None:
@@ -77,6 +76,8 @@ class SectorIdentifier(object):
         :param id: The id of this SectorIdentifier.  # noqa: E501
         :type: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
