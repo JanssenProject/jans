@@ -3,7 +3,6 @@ objectClass: top
 objectClass: jansGrp
 inum: 60B7
 jansStatus: active
-displayName: Jannsen Manager Group
+displayName: Janssen Manager Group
 description: This group is for administrative purpose, with full acces to users
 member: inum=%(admin_inum)s,ou=people,o=jans
-
