@@ -67,7 +67,7 @@ class CouchbaseConfiguration(object):
         'certificate_attributes': 'certificateAttributes'
     }
 
-    def __init__(self, config_id=None, user_name=None, user_password=None, servers=None, default_bucket=None, buckets=None, password_encryption_method=None, operation_tracing_enabled=None, mutation_tokens_enabled=None, connect_timeout=None, computation_pool_size=None, use_ssl=None, ssl_trust_store_file=None, ssl_trust_store_pin=None, ssl_trust_store_format=None, binary_attributes=None, certificate_attributes=None):  # noqa: E501
+    def __init__(self, config_id=None, user_name=None, user_password=None, servers=None, default_bucket=None, buckets=None, password_encryption_method=None, operation_tracing_enabled=False, mutation_tokens_enabled=None, connect_timeout=None, computation_pool_size=None, use_ssl=True, ssl_trust_store_file=None, ssl_trust_store_pin=None, ssl_trust_store_format=None, binary_attributes=None, certificate_attributes=None):  # noqa: E501
         """CouchbaseConfiguration - a model defined in Swagger"""  # noqa: E501
         self._config_id = None
         self._user_name = None
@@ -87,20 +87,13 @@ class CouchbaseConfiguration(object):
         self._binary_attributes = None
         self._certificate_attributes = None
         self.discriminator = None
-        if config_id is not None:
-            self.config_id = config_id
-        if user_name is not None:
-            self.user_name = user_name
-        if user_password is not None:
-            self.user_password = user_password
-        if servers is not None:
-            self.servers = servers
-        if default_bucket is not None:
-            self.default_bucket = default_bucket
-        if buckets is not None:
-            self.buckets = buckets
-        if password_encryption_method is not None:
-            self.password_encryption_method = password_encryption_method
+        self.config_id = config_id
+        self.user_name = user_name
+        self.user_password = user_password
+        self.servers = servers
+        self.default_bucket = default_bucket
+        self.buckets = buckets
+        self.password_encryption_method = password_encryption_method
         if operation_tracing_enabled is not None:
             self.operation_tracing_enabled = operation_tracing_enabled
         if mutation_tokens_enabled is not None:
@@ -111,12 +104,9 @@ class CouchbaseConfiguration(object):
             self.computation_pool_size = computation_pool_size
         if use_ssl is not None:
             self.use_ssl = use_ssl
-        if ssl_trust_store_file is not None:
-            self.ssl_trust_store_file = ssl_trust_store_file
-        if ssl_trust_store_pin is not None:
-            self.ssl_trust_store_pin = ssl_trust_store_pin
-        if ssl_trust_store_format is not None:
-            self.ssl_trust_store_format = ssl_trust_store_format
+        self.ssl_trust_store_file = ssl_trust_store_file
+        self.ssl_trust_store_pin = ssl_trust_store_pin
+        self.ssl_trust_store_format = ssl_trust_store_format
         if binary_attributes is not None:
             self.binary_attributes = binary_attributes
         if certificate_attributes is not None:
@@ -142,6 +132,8 @@ class CouchbaseConfiguration(object):
         :param config_id: The config_id of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if config_id is None:
+            raise ValueError("Invalid value for `config_id`, must not be `None`")  # noqa: E501
 
         self._config_id = config_id
 
@@ -165,6 +157,8 @@ class CouchbaseConfiguration(object):
         :param user_name: The user_name of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if user_name is None:
+            raise ValueError("Invalid value for `user_name`, must not be `None`")  # noqa: E501
 
         self._user_name = user_name
 
@@ -188,6 +182,8 @@ class CouchbaseConfiguration(object):
         :param user_password: The user_password of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if user_password is None:
+            raise ValueError("Invalid value for `user_password`, must not be `None`")  # noqa: E501
 
         self._user_password = user_password
 
@@ -211,6 +207,8 @@ class CouchbaseConfiguration(object):
         :param servers: The servers of this CouchbaseConfiguration.  # noqa: E501
         :type: list[str]
         """
+        if servers is None:
+            raise ValueError("Invalid value for `servers`, must not be `None`")  # noqa: E501
 
         self._servers = servers
 
@@ -234,6 +232,8 @@ class CouchbaseConfiguration(object):
         :param default_bucket: The default_bucket of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if default_bucket is None:
+            raise ValueError("Invalid value for `default_bucket`, must not be `None`")  # noqa: E501
 
         self._default_bucket = default_bucket
 
@@ -257,6 +257,8 @@ class CouchbaseConfiguration(object):
         :param buckets: The buckets of this CouchbaseConfiguration.  # noqa: E501
         :type: list[str]
         """
+        if buckets is None:
+            raise ValueError("Invalid value for `buckets`, must not be `None`")  # noqa: E501
 
         self._buckets = buckets
 
@@ -280,6 +282,8 @@ class CouchbaseConfiguration(object):
         :param password_encryption_method: The password_encryption_method of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if password_encryption_method is None:
+            raise ValueError("Invalid value for `password_encryption_method`, must not be `None`")  # noqa: E501
         allowed_values = ["SHA", "SSHA", "SHA-256", "SSHA-256", "SHA-384", "SSHA-384", "SHA-512", "SSHA-512", "MD5", "SMD5", "CRYPT", "CRYPT-MD5", "CRYPT-SHA-256", "CRYPT-SHA-512", "CRYPT-BCRYPT", "CRYPT-BCRYPT", "PKCS5S2"]  # noqa: E501
         if password_encryption_method not in allowed_values:
             raise ValueError(
@@ -424,6 +428,8 @@ class CouchbaseConfiguration(object):
         :param ssl_trust_store_file: The ssl_trust_store_file of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if ssl_trust_store_file is None:
+            raise ValueError("Invalid value for `ssl_trust_store_file`, must not be `None`")  # noqa: E501
 
         self._ssl_trust_store_file = ssl_trust_store_file
 
@@ -447,6 +453,8 @@ class CouchbaseConfiguration(object):
         :param ssl_trust_store_pin: The ssl_trust_store_pin of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if ssl_trust_store_pin is None:
+            raise ValueError("Invalid value for `ssl_trust_store_pin`, must not be `None`")  # noqa: E501
 
         self._ssl_trust_store_pin = ssl_trust_store_pin
 
@@ -470,6 +478,8 @@ class CouchbaseConfiguration(object):
         :param ssl_trust_store_format: The ssl_trust_store_format of this CouchbaseConfiguration.  # noqa: E501
         :type: str
         """
+        if ssl_trust_store_format is None:
+            raise ValueError("Invalid value for `ssl_trust_store_format`, must not be `None`")  # noqa: E501
 
         self._ssl_trust_store_format = ssl_trust_store_format
 

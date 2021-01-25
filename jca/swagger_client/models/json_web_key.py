@@ -69,18 +69,13 @@ class JsonWebKey(object):
         self._x = None
         self._y = None
         self.discriminator = None
-        if kid is not None:
-            self.kid = kid
-        if kty is not None:
-            self.kty = kty
-        if use is not None:
-            self.use = use
-        if alg is not None:
-            self.alg = alg
+        self.kid = kid
+        self.kty = kty
+        self.use = use
+        self.alg = alg
         if crv is not None:
             self.crv = crv
-        if exp is not None:
-            self.exp = exp
+        self.exp = exp
         if x5c is not None:
             self.x5c = x5c
         if n is not None:
@@ -112,6 +107,8 @@ class JsonWebKey(object):
         :param kid: The kid of this JsonWebKey.  # noqa: E501
         :type: str
         """
+        if kid is None:
+            raise ValueError("Invalid value for `kid`, must not be `None`")  # noqa: E501
 
         self._kid = kid
 
@@ -135,6 +132,8 @@ class JsonWebKey(object):
         :param kty: The kty of this JsonWebKey.  # noqa: E501
         :type: str
         """
+        if kty is None:
+            raise ValueError("Invalid value for `kty`, must not be `None`")  # noqa: E501
 
         self._kty = kty
 
@@ -158,6 +157,8 @@ class JsonWebKey(object):
         :param use: The use of this JsonWebKey.  # noqa: E501
         :type: str
         """
+        if use is None:
+            raise ValueError("Invalid value for `use`, must not be `None`")  # noqa: E501
 
         self._use = use
 
@@ -181,6 +182,8 @@ class JsonWebKey(object):
         :param alg: The alg of this JsonWebKey.  # noqa: E501
         :type: str
         """
+        if alg is None:
+            raise ValueError("Invalid value for `alg`, must not be `None`")  # noqa: E501
 
         self._alg = alg
 
@@ -227,6 +230,8 @@ class JsonWebKey(object):
         :param exp: The exp of this JsonWebKey.  # noqa: E501
         :type: int
         """
+        if exp is None:
+            raise ValueError("Invalid value for `exp`, must not be `None`")  # noqa: E501
 
         self._exp = exp
 

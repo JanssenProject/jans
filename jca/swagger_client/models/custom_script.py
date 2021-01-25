@@ -65,7 +65,7 @@ class CustomScript(object):
         'internal': 'internal'
     }
 
-    def __init__(self, dn=None, inum=None, name=None, aliases=None, description=None, script=None, script_type=None, programming_language=None, module_properties=None, configuration_properties=None, level=None, revision=None, enabled=None, script_error=None, modified=None, internal=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, name=None, aliases=None, description=None, script=None, script_type=None, programming_language=None, module_properties=None, configuration_properties=None, level=None, revision=0, enabled=False, script_error=None, modified=False, internal=False):  # noqa: E501
         """CustomScript - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
@@ -88,24 +88,17 @@ class CustomScript(object):
             self.dn = dn
         if inum is not None:
             self.inum = inum
-        if name is not None:
-            self.name = name
+        self.name = name
         if aliases is not None:
             self.aliases = aliases
         if description is not None:
             self.description = description
-        if script is not None:
-            self.script = script
-        if script_type is not None:
-            self.script_type = script_type
-        if programming_language is not None:
-            self.programming_language = programming_language
-        if module_properties is not None:
-            self.module_properties = module_properties
-        if configuration_properties is not None:
-            self.configuration_properties = configuration_properties
-        if level is not None:
-            self.level = level
+        self.script = script
+        self.script_type = script_type
+        self.programming_language = programming_language
+        self.module_properties = module_properties
+        self.configuration_properties = configuration_properties
+        self.level = level
         if revision is not None:
             self.revision = revision
         if enabled is not None:
@@ -165,7 +158,7 @@ class CustomScript(object):
     def name(self):
         """Gets the name of this CustomScript.  # noqa: E501
 
-        Name should contain only letters, digits and underscores.  # noqa: E501
+        Custom script name. Should contain only letters, digits and underscores.  # noqa: E501
 
         :return: The name of this CustomScript.  # noqa: E501
         :rtype: str
@@ -176,11 +169,13 @@ class CustomScript(object):
     def name(self, name):
         """Sets the name of this CustomScript.
 
-        Name should contain only letters, digits and underscores.  # noqa: E501
+        Custom script name. Should contain only letters, digits and underscores.  # noqa: E501
 
         :param name: The name of this CustomScript.  # noqa: E501
         :type: str
         """
+        if name is None:
+            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
 
@@ -188,7 +183,7 @@ class CustomScript(object):
     def aliases(self):
         """Gets the aliases of this CustomScript.  # noqa: E501
 
-        List of possible alias for the script.  # noqa: E501
+        List of possible aliases for the custom script.  # noqa: E501
 
         :return: The aliases of this CustomScript.  # noqa: E501
         :rtype: list[str]
@@ -199,7 +194,7 @@ class CustomScript(object):
     def aliases(self, aliases):
         """Sets the aliases of this CustomScript.
 
-        List of possible alias for the script.  # noqa: E501
+        List of possible aliases for the custom script.  # noqa: E501
 
         :param aliases: The aliases of this CustomScript.  # noqa: E501
         :type: list[str]
@@ -250,6 +245,8 @@ class CustomScript(object):
         :param script: The script of this CustomScript.  # noqa: E501
         :type: str
         """
+        if script is None:
+            raise ValueError("Invalid value for `script`, must not be `None`")  # noqa: E501
 
         self._script = script
 
@@ -273,6 +270,8 @@ class CustomScript(object):
         :param script_type: The script_type of this CustomScript.  # noqa: E501
         :type: str
         """
+        if script_type is None:
+            raise ValueError("Invalid value for `script_type`, must not be `None`")  # noqa: E501
         allowed_values = ["PERSON_AUTHENTICATION", "INTROSPECTION", "RESOURCE_OWNER_PASSWORD_CREDENTIALS", "APPLICATION_SESSION", "CACHE_REFRESH", "UPDATE_USER", "USER_REGISTRATION", "CLIENT_REGISTRATION", "ID_GENERATOR", "UMA_RPT_POLICY", "UMA_RPT_CLAIMS", "UMA_CLAIMS_GATHERING", "CONSENT_GATHERING", "DYNAMIC_SCOPE", "SPONTANEOUS_SCOPE", "END_SESSION", "POST_AUTHN", "SCIM", "CIBA_END_USER_NOTIFICATION", "PERSISTENCE_EXTENSION", "IDP"]  # noqa: E501
         if script_type not in allowed_values:
             raise ValueError(
@@ -302,6 +301,8 @@ class CustomScript(object):
         :param programming_language: The programming_language of this CustomScript.  # noqa: E501
         :type: str
         """
+        if programming_language is None:
+            raise ValueError("Invalid value for `programming_language`, must not be `None`")  # noqa: E501
         allowed_values = ["PYTHON", "JAVASCRIPT"]  # noqa: E501
         if programming_language not in allowed_values:
             raise ValueError(
@@ -331,6 +332,8 @@ class CustomScript(object):
         :param module_properties: The module_properties of this CustomScript.  # noqa: E501
         :type: list[SimpleCustomProperty]
         """
+        if module_properties is None:
+            raise ValueError("Invalid value for `module_properties`, must not be `None`")  # noqa: E501
 
         self._module_properties = module_properties
 
@@ -354,6 +357,8 @@ class CustomScript(object):
         :param configuration_properties: The configuration_properties of this CustomScript.  # noqa: E501
         :type: list[SimpleExtendedCustomProperty]
         """
+        if configuration_properties is None:
+            raise ValueError("Invalid value for `configuration_properties`, must not be `None`")  # noqa: E501
 
         self._configuration_properties = configuration_properties
 
@@ -377,6 +382,8 @@ class CustomScript(object):
         :param level: The level of this CustomScript.  # noqa: E501
         :type: int
         """
+        if level is None:
+            raise ValueError("Invalid value for `level`, must not be `None`")  # noqa: E501
 
         self._level = level
 
@@ -474,7 +481,7 @@ class CustomScript(object):
     def internal(self):
         """Gets the internal of this CustomScript.  # noqa: E501
 
-        boolean value indicating if the script is interanl.  # noqa: E501
+        boolean value indicating if the script is internal.  # noqa: E501
 
         :return: The internal of this CustomScript.  # noqa: E501
         :rtype: bool
@@ -485,7 +492,7 @@ class CustomScript(object):
     def internal(self, internal):
         """Sets the internal of this CustomScript.
 
-        boolean value indicating if the script is interanl.  # noqa: E501
+        boolean value indicating if the script is internal.  # noqa: E501
 
         :param internal: The internal of this CustomScript.  # noqa: E501
         :type: bool

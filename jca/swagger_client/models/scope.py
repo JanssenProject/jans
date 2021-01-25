@@ -29,78 +29,90 @@ class Scope(object):
     """
     swagger_types = {
         'dn': 'str',
-        'id': 'str',
         'inum': 'str',
         'display_name': 'str',
-        'description': 'str',
+        'id': 'str',
         'icon_url': 'str',
-        'authorization_policies': 'list[str]',
-        'default_scope': 'bool',
+        'description': 'str',
         'scope_type': 'str',
         'claims': 'list[str]',
-        'uma_type': 'bool',
+        'default_scope': 'bool',
+        'group_claims': 'bool',
+        'dynamic_scope_scripts': 'list[str]',
         'uma_authorization_policies': 'list[str]',
-        'attributes': 'ScopeAttributes'
+        'attributes': 'ScopeAttributes',
+        'uma_type': 'bool',
+        'deletable': 'bool',
+        'expiration_date': 'date'
     }
 
     attribute_map = {
         'dn': 'dn',
-        'id': 'id',
         'inum': 'inum',
         'display_name': 'displayName',
-        'description': 'description',
+        'id': 'id',
         'icon_url': 'iconUrl',
-        'authorization_policies': 'authorizationPolicies',
-        'default_scope': 'defaultScope',
+        'description': 'description',
         'scope_type': 'scopeType',
         'claims': 'claims',
-        'uma_type': 'umaType',
+        'default_scope': 'defaultScope',
+        'group_claims': 'groupClaims',
+        'dynamic_scope_scripts': 'dynamicScopeScripts',
         'uma_authorization_policies': 'umaAuthorizationPolicies',
-        'attributes': 'attributes'
+        'attributes': 'attributes',
+        'uma_type': 'umaType',
+        'deletable': 'deletable',
+        'expiration_date': 'expirationDate'
     }
 
-    def __init__(self, dn=None, id=None, inum=None, display_name=None, description=None, icon_url=None, authorization_policies=None, default_scope=None, scope_type=None, claims=None, uma_type=None, uma_authorization_policies=None, attributes=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, display_name=None, id=None, icon_url=None, description=None, scope_type=None, claims=None, default_scope=None, group_claims=None, dynamic_scope_scripts=None, uma_authorization_policies=None, attributes=None, uma_type=False, deletable=False, expiration_date=None):  # noqa: E501
         """Scope - a model defined in Swagger"""  # noqa: E501
         self._dn = None
-        self._id = None
         self._inum = None
         self._display_name = None
-        self._description = None
+        self._id = None
         self._icon_url = None
-        self._authorization_policies = None
-        self._default_scope = None
+        self._description = None
         self._scope_type = None
         self._claims = None
-        self._uma_type = None
+        self._default_scope = None
+        self._group_claims = None
+        self._dynamic_scope_scripts = None
         self._uma_authorization_policies = None
         self._attributes = None
+        self._uma_type = None
+        self._deletable = None
+        self._expiration_date = None
         self.discriminator = None
         if dn is not None:
             self.dn = dn
-        if id is not None:
-            self.id = id
         if inum is not None:
             self.inum = inum
-        if display_name is not None:
-            self.display_name = display_name
-        if description is not None:
-            self.description = description
+        self.display_name = display_name
+        if id is not None:
+            self.id = id
         if icon_url is not None:
             self.icon_url = icon_url
-        if authorization_policies is not None:
-            self.authorization_policies = authorization_policies
-        if default_scope is not None:
-            self.default_scope = default_scope
-        if scope_type is not None:
-            self.scope_type = scope_type
+        if description is not None:
+            self.description = description
+        self.scope_type = scope_type
         if claims is not None:
             self.claims = claims
-        if uma_type is not None:
-            self.uma_type = uma_type
+        if default_scope is not None:
+            self.default_scope = default_scope
+        if group_claims is not None:
+            self.group_claims = group_claims
+        if dynamic_scope_scripts is not None:
+            self.dynamic_scope_scripts = dynamic_scope_scripts
         if uma_authorization_policies is not None:
             self.uma_authorization_policies = uma_authorization_policies
         if attributes is not None:
             self.attributes = attributes
+        if uma_type is not None:
+            self.uma_type = uma_type
+        if deletable is not None:
+            self.deletable = deletable
+        self.expiration_date = expiration_date
 
     @property
     def dn(self):
@@ -122,29 +134,6 @@ class Scope(object):
         """
 
         self._dn = dn
-
-    @property
-    def id(self):
-        """Gets the id of this Scope.  # noqa: E501
-
-        The base64url encoded id.  # noqa: E501
-
-        :return: The id of this Scope.  # noqa: E501
-        :rtype: str
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id):
-        """Sets the id of this Scope.
-
-        The base64url encoded id.  # noqa: E501
-
-        :param id: The id of this Scope.  # noqa: E501
-        :type: str
-        """
-
-        self._id = id
 
     @property
     def inum(self):
@@ -189,31 +178,33 @@ class Scope(object):
         :param display_name: The display_name of this Scope.  # noqa: E501
         :type: str
         """
+        if display_name is None:
+            raise ValueError("Invalid value for `display_name`, must not be `None`")  # noqa: E501
 
         self._display_name = display_name
 
     @property
-    def description(self):
-        """Gets the description of this Scope.  # noqa: E501
+    def id(self):
+        """Gets the id of this Scope.  # noqa: E501
 
-        A human-readable string describing the scope.  # noqa: E501
+        The base64url encoded id.  # noqa: E501
 
-        :return: The description of this Scope.  # noqa: E501
+        :return: The id of this Scope.  # noqa: E501
         :rtype: str
         """
-        return self._description
+        return self._id
 
-    @description.setter
-    def description(self, description):
-        """Sets the description of this Scope.
+    @id.setter
+    def id(self, id):
+        """Sets the id of this Scope.
 
-        A human-readable string describing the scope.  # noqa: E501
+        The base64url encoded id.  # noqa: E501
 
-        :param description: The description of this Scope.  # noqa: E501
+        :param id: The id of this Scope.  # noqa: E501
         :type: str
         """
 
-        self._description = description
+        self._id = id
 
     @property
     def icon_url(self):
@@ -239,50 +230,27 @@ class Scope(object):
         self._icon_url = icon_url
 
     @property
-    def authorization_policies(self):
-        """Gets the authorization_policies of this Scope.  # noqa: E501
+    def description(self):
+        """Gets the description of this Scope.  # noqa: E501
 
-        Policies associated with all scopes.  # noqa: E501
+        A human-readable string describing the scope.  # noqa: E501
 
-        :return: The authorization_policies of this Scope.  # noqa: E501
-        :rtype: list[str]
+        :return: The description of this Scope.  # noqa: E501
+        :rtype: str
         """
-        return self._authorization_policies
+        return self._description
 
-    @authorization_policies.setter
-    def authorization_policies(self, authorization_policies):
-        """Sets the authorization_policies of this Scope.
+    @description.setter
+    def description(self, description):
+        """Sets the description of this Scope.
 
-        Policies associated with all scopes.  # noqa: E501
+        A human-readable string describing the scope.  # noqa: E501
 
-        :param authorization_policies: The authorization_policies of this Scope.  # noqa: E501
-        :type: list[str]
-        """
-
-        self._authorization_policies = authorization_policies
-
-    @property
-    def default_scope(self):
-        """Gets the default_scope of this Scope.  # noqa: E501
-
-        Boolean value to specify default scope.  # noqa: E501
-
-        :return: The default_scope of this Scope.  # noqa: E501
-        :rtype: bool
-        """
-        return self._default_scope
-
-    @default_scope.setter
-    def default_scope(self, default_scope):
-        """Sets the default_scope of this Scope.
-
-        Boolean value to specify default scope.  # noqa: E501
-
-        :param default_scope: The default_scope of this Scope.  # noqa: E501
-        :type: bool
+        :param description: The description of this Scope.  # noqa: E501
+        :type: str
         """
 
-        self._default_scope = default_scope
+        self._description = description
 
     @property
     def scope_type(self):
@@ -304,6 +272,8 @@ class Scope(object):
         :param scope_type: The scope_type of this Scope.  # noqa: E501
         :type: str
         """
+        if scope_type is None:
+            raise ValueError("Invalid value for `scope_type`, must not be `None`")  # noqa: E501
         allowed_values = ["openid", "dynamic", "uma", "spontaneous", "oauth"]  # noqa: E501
         if scope_type not in allowed_values:
             raise ValueError(
@@ -337,30 +307,79 @@ class Scope(object):
         self._claims = claims
 
     @property
-    def uma_type(self):
-        """Gets the uma_type of this Scope.  # noqa: E501
+    def default_scope(self):
+        """Gets the default_scope of this Scope.  # noqa: E501
 
+        Boolean value to specify default scope.  # noqa: E501
 
-        :return: The uma_type of this Scope.  # noqa: E501
+        :return: The default_scope of this Scope.  # noqa: E501
         :rtype: bool
         """
-        return self._uma_type
+        return self._default_scope
 
-    @uma_type.setter
-    def uma_type(self, uma_type):
-        """Sets the uma_type of this Scope.
+    @default_scope.setter
+    def default_scope(self, default_scope):
+        """Sets the default_scope of this Scope.
 
+        Boolean value to specify default scope.  # noqa: E501
 
-        :param uma_type: The uma_type of this Scope.  # noqa: E501
+        :param default_scope: The default_scope of this Scope.  # noqa: E501
         :type: bool
         """
 
-        self._uma_type = uma_type
+        self._default_scope = default_scope
+
+    @property
+    def group_claims(self):
+        """Gets the group_claims of this Scope.  # noqa: E501
+
+        Specifies if the scope is group claims.  # noqa: E501
+
+        :return: The group_claims of this Scope.  # noqa: E501
+        :rtype: bool
+        """
+        return self._group_claims
+
+    @group_claims.setter
+    def group_claims(self, group_claims):
+        """Sets the group_claims of this Scope.
+
+        Specifies if the scope is group claims.  # noqa: E501
+
+        :param group_claims: The group_claims of this Scope.  # noqa: E501
+        :type: bool
+        """
+
+        self._group_claims = group_claims
+
+    @property
+    def dynamic_scope_scripts(self):
+        """Gets the dynamic_scope_scripts of this Scope.  # noqa: E501
+
+        Dynamic Scope Scripts associated with the scope.  # noqa: E501
+
+        :return: The dynamic_scope_scripts of this Scope.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._dynamic_scope_scripts
+
+    @dynamic_scope_scripts.setter
+    def dynamic_scope_scripts(self, dynamic_scope_scripts):
+        """Sets the dynamic_scope_scripts of this Scope.
+
+        Dynamic Scope Scripts associated with the scope.  # noqa: E501
+
+        :param dynamic_scope_scripts: The dynamic_scope_scripts of this Scope.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._dynamic_scope_scripts = dynamic_scope_scripts
 
     @property
     def uma_authorization_policies(self):
         """Gets the uma_authorization_policies of this Scope.  # noqa: E501
 
+        Policies associated with scopes.  # noqa: E501
 
         :return: The uma_authorization_policies of this Scope.  # noqa: E501
         :rtype: list[str]
@@ -371,6 +390,7 @@ class Scope(object):
     def uma_authorization_policies(self, uma_authorization_policies):
         """Sets the uma_authorization_policies of this Scope.
 
+        Policies associated with scopes.  # noqa: E501
 
         :param uma_authorization_policies: The uma_authorization_policies of this Scope.  # noqa: E501
         :type: list[str]
@@ -398,6 +418,77 @@ class Scope(object):
         """
 
         self._attributes = attributes
+
+    @property
+    def uma_type(self):
+        """Gets the uma_type of this Scope.  # noqa: E501
+
+        Specifies if the scope is of type UMA.  # noqa: E501
+
+        :return: The uma_type of this Scope.  # noqa: E501
+        :rtype: bool
+        """
+        return self._uma_type
+
+    @uma_type.setter
+    def uma_type(self, uma_type):
+        """Sets the uma_type of this Scope.
+
+        Specifies if the scope is of type UMA.  # noqa: E501
+
+        :param uma_type: The uma_type of this Scope.  # noqa: E501
+        :type: bool
+        """
+
+        self._uma_type = uma_type
+
+    @property
+    def deletable(self):
+        """Gets the deletable of this Scope.  # noqa: E501
+
+        Specifies if the scope can be deleted.  # noqa: E501
+
+        :return: The deletable of this Scope.  # noqa: E501
+        :rtype: bool
+        """
+        return self._deletable
+
+    @deletable.setter
+    def deletable(self, deletable):
+        """Sets the deletable of this Scope.
+
+        Specifies if the scope can be deleted.  # noqa: E501
+
+        :param deletable: The deletable of this Scope.  # noqa: E501
+        :type: bool
+        """
+
+        self._deletable = deletable
+
+    @property
+    def expiration_date(self):
+        """Gets the expiration_date of this Scope.  # noqa: E501
+
+        Expiry date of the Scope.  # noqa: E501
+
+        :return: The expiration_date of this Scope.  # noqa: E501
+        :rtype: date
+        """
+        return self._expiration_date
+
+    @expiration_date.setter
+    def expiration_date(self, expiration_date):
+        """Sets the expiration_date of this Scope.
+
+        Expiry date of the Scope.  # noqa: E501
+
+        :param expiration_date: The expiration_date of this Scope.  # noqa: E501
+        :type: date
+        """
+        if expiration_date is None:
+            raise ValueError("Invalid value for `expiration_date`, must not be `None`")  # noqa: E501
+
+        self._expiration_date = expiration_date
 
     def to_dict(self):
         """Returns the model properties as a dict"""

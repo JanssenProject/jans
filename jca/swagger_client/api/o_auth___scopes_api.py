@@ -32,13 +32,13 @@ class OAuthScopesApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def delete_oauth_scopes_by_id(self, inum, **kwargs):  # noqa: E501
+    def delete_oauth_scopes_by_inum(self, inum, **kwargs):  # noqa: E501
         """Delete Scope.  # noqa: E501
 
         Delete Scope.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_oauth_scopes_by_id(inum, async_req=True)
+        >>> thread = api.delete_oauth_scopes_by_inum(inum, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -49,18 +49,18 @@ class OAuthScopesApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.delete_oauth_scopes_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            return self.delete_oauth_scopes_by_inum_with_http_info(inum, **kwargs)  # noqa: E501
         else:
-            (data) = self.delete_oauth_scopes_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            (data) = self.delete_oauth_scopes_by_inum_with_http_info(inum, **kwargs)  # noqa: E501
             return data
 
-    def delete_oauth_scopes_by_id_with_http_info(self, inum, **kwargs):  # noqa: E501
+    def delete_oauth_scopes_by_inum_with_http_info(self, inum, **kwargs):  # noqa: E501
         """Delete Scope.  # noqa: E501
 
         Delete Scope.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_oauth_scopes_by_id_with_http_info(inum, async_req=True)
+        >>> thread = api.delete_oauth_scopes_by_inum_with_http_info(inum, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
@@ -81,14 +81,14 @@ class OAuthScopesApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method delete_oauth_scopes_by_id" % key
+                    " to method delete_oauth_scopes_by_inum" % key
                 )
             params[key] = val
         del params['kwargs']
         # verify the required parameter 'inum' is set
         if ('inum' not in params or
                 params['inum'] is None):
-            raise ValueError("Missing the required parameter `inum` when calling `delete_oauth_scopes_by_id`")  # noqa: E501
+            raise ValueError("Missing the required parameter `inum` when calling `delete_oauth_scopes_by_inum`")  # noqa: E501
 
         collection_formats = {}
 

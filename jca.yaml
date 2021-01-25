@@ -35,8 +35,8 @@ tags:
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
-      summary: Get all Jans authorization server configuration properties.
-      description: Get all Jans authorization server configuration properties.
+      summary: Gets all Jans authorization server configuration properties.
+      description: Gets all Jans authorization server configuration properties.
       operationId: get-properties
       security:
         - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
@@ -56,8 +56,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partially modify Jans authorization server Application configuration properties.
-      description: Partially modify Jans authorization server AppConfiguration properties.
+      summary: Partially modifies Jans authorization server Application configuration properties.
+      description: Partially modifies Jans authorization server AppConfiguration properties.
       operationId: patch-properties
       security:
         - jans-auth: [https://jans.io/oauth/jans-auth-server/config/properties.write]
@@ -87,8 +87,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/fido2/config:
     get:
-      summary: Get Jans Authorization Server Fido2 configuration properties.
-      description: Get Jans Authorization Server Fido2 configuration properties.
+      summary: Gets Jans Authorization Server Fido2 configuration properties.
+      description: Gets Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
         - Configuration – Fido2
@@ -132,8 +132,8 @@ paths:
     parameters: []
   /jans-config-api/api/v1/attributes:
     get:
-      summary: Get a list of Gluu attributes.
-      description: 'Get all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
+      summary: Gets a list of Gluu attributes.
+      description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
       operationId: get-attributes
       tags:
         - Attribute
@@ -144,7 +144,7 @@ paths:
             application/json:
               schema:
                 title: Gluu Attributes
-                description: List of all attributes.
+                description: List of all attribute.
                 type: array
                 items:
                   $ref: '#/components/schemas/GluuAttribute'
@@ -234,8 +234,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Get an attribute based on inum.
-      description: Get an attribute based on inum.
+      summary: Gets an attribute based on inum.
+      description: Gets an attribute based on inum.
       operationId: get-attributes-by-inum
       tags:
         - Attribute
@@ -253,8 +253,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/attributes.readonly]
     delete:
-      summary: Delete an attribute based on inum.
-      description: Delete an attribute based on inum.
+      summary: Deletes an attribute based on inum.
+      description: Deletes an attribute based on inum.
       operationId: delete-attributes-by-inum
       tags:
         - Attribute
@@ -301,8 +301,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/acrs:
     get:      
-      summary: Get default authentication method.
-      description: Get default authentication method.
+      summary: Gets default authentication method.
+      description: Gets default authentication method.
       operationId: get-acrs
       tags:
         - Default Authentication Method
@@ -346,8 +346,8 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap:
     get:
-      summary: Get list of existing LDAP configurations.
-      description: Get list of existing LDAP configurations. 
+      summary: Gets list of existing LDAP configurations.
+      description: Gets list of existing LDAP configurations. 
       operationId: get-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -430,8 +430,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Get an LDAP configuration by name.
-      description: Get an LDAP configuration by name.
+      summary: Gets an LDAP configuration by name.
+      description: Gets an LDAP configuration by name.
       operationId: get-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -451,8 +451,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
     delete:
-      summary: Delete an LDAP configuration.
-      description: Delete an LDAP configuration.
+      summary: Deletes an LDAP configuration.
+      description: Deletes an LDAP configuration.
       operationId: delete-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -527,8 +527,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.readonly]
   /jans-config-api/api/v1/config/database/couchbase:
     get:
-      summary: Get list of existing Couchbase configurations.
-      description: Get list of existing Couchbase configurations. 
+      summary: Gets list of existing Couchbase configurations.
+      description: Gets list of existing Couchbase configurations. 
       operationId: get-config-database-couchbase
       tags:
         - Database - Couchbase configuration
@@ -610,8 +610,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Get a Couchbase configurations by name.
-      description: Get a Couchbase configurations by name.
+      summary: Gets a Couchbase configurations by name.
+      description: Gets a Couchbase configurations by name.
       operationId: get-config-database-couchbase-by-name
       tags:
         - Database - Couchbase configuration
@@ -661,8 +661,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
     delete:
-      summary: Delete a Couchbase configurations by name.
-      description: Delete a Couchbase configurations by name.
+      summary: Deletes a Couchbase configurations by name.
+      description: Deletes a Couchbase configurations by name.
       operationId: delete-config-database-couchbase-by-name
       tags:
         - Database - Couchbase configuration
@@ -705,8 +705,8 @@ paths:
         - jans-auth: [https://jans.io/oauth/config/database/couchbase.readonly]
   /jans-config-api/api/v1/config/scripts:
     get:
-      summary: Get a list of custom scripts.
-      description: Get a list of custom scripts.
+      summary: Gets a list of custom scripts.
+      description: Gets a list of custom scripts.
       operationId: get-config-scripts
       tags:
         - Custom Scripts
@@ -752,7 +752,7 @@ paths:
       summary: Updates a custom script.
       description: Updates a custom script.
       operationId: put-config-scripts
-      x-getdata: get-config-scripts-by-inum
+      x-cli-getdata: get-config-scripts-by-inum
       tags:
         - Custom Scripts
       requestBody:
@@ -817,8 +817,8 @@ paths:
         name: limit
         description: Search size - max size of the results to return.
     get:
-      summary: Get list of scripts by type.
-      description: Get list of scripts by type.
+      summary: Gets list of scripts by type.
+      description: Gets list of scripts by type.
       operationId: get-config-scripts-by-type
       x-cli-ignore: true
       tags:
@@ -848,8 +848,8 @@ paths:
         required: true
         description: Script identifier.
     get:
-      summary: Get a script by Inum.
-      description: Get a script by Inum.
+      summary: Gets a script by Inum.
+      description: Gets a script by Inum.
       operationId: get-config-scripts-by-inum
       x-cli-ignore: true
       tags:
@@ -878,8 +878,8 @@ paths:
         required: true
         description: Script identifier.
     delete:
-      summary: Delete a custom script.
-      description: Delete a custom script.
+      summary: Deletes a custom script.
+      description: Deletes a custom script.
       operationId: delete-config-scripts-by-inum
       tags:
         - Custom Scripts
@@ -915,8 +915,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.readonly]
     patch:
-      summary: Partially modify cache configuration.
-      description: Partially modify cache configuration.
+      summary: Partially modifies cache configuration.
+      description: Partially modifies cache configuration.
       operationId: patch-config-cache
       tags:
         - Cache Configuration
@@ -989,6 +989,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Memcached cache configuration.
+      description: Partially modifies Memcached cache configuration.
+      operationId: patch-config-cache-memcached
+      tags:
+        - Cache Configuration – Memcached
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemcachedConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/redis:
     get:
       summary: Returns Redis cache configuration.
@@ -1034,6 +1062,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Redis cache configuration.
+      description: Partially modifies Redis cache configuration.
+      operationId: patch-config-cache-redis
+      tags:
+        - Cache Configuration – Redis
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: redisConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/in-memory:
     get:
       summary: Returns in-Memory cache configuration.
@@ -1079,6 +1135,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies In-Memory cache configuration.
+      description: Partially modifies In-Memory cache configuration.
+      operationId: patch-config-cache-in-memory
+      tags:
+        - Cache Configuration – in-Memory
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: inMemoryConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InMemoryConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/cache/native-persistence:
     get:
       summary: Returns native persistence cache configuration.
@@ -1124,6 +1208,34 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/cache.write]
     parameters: []
+    patch:
+      summary: Partially modifies Native Persistence cache configuration.
+      description: Partially modifies Native Persistence cache configuration.
+      operationId: patch-config-cache-native-persistence
+      tags:
+        - Cache Configuration – Native-Persistence
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: nativePersistenceConfiguration/defaultPutExpiration, value: 80 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NativePersistenceConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - jans-auth: [https://jans.io/oauth/config/cache.write]
   /jans-config-api/api/v1/config/smtp:
     get:
       summary: Returns SMTP server configuration.
@@ -1195,8 +1307,8 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/smtp.write]
     delete:
-      summary: Delete SMTP server configuration.
-      description: Delete SMTP server configuration.
+      summary: Deletes SMTP server configuration.
+      description: Deletes SMTP server configuration.
       operationId: delete-config-smtp
       tags:
         - Configuration – SMTP
@@ -1295,8 +1407,8 @@ paths:
     get:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
-      summary: Get list of JSON Web Key (JWK) used by server.
-      description: 'Get list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
+      summary: Gets list of JSON Web Key (JWK) used by server.
+      description: 'Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
       operationId: get-config-jwks
       responses:
         '200':
@@ -1368,7 +1480,7 @@ paths:
       tags:
         - OAuth - OpenID Connect - Clients
       summary: Gets list of OpenID Connect clients
-      description: Get list of OpenID Connect clients
+      description: Gets list of OpenID Connect clients
       operationId: get-oauth-openid-clients
       responses:
         '200':
@@ -1532,8 +1644,8 @@ paths:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
-      summary: Get list of OpenID Connect Sectors.
-      description: Get list of OpenID Connect Sectors.
+      summary: Gets list of OpenID Connect Sectors.
+      description: Gets list of OpenID Connect Sectors.
       operationId: get-oauth-openid-sectors
       responses:
         '200':
@@ -1681,8 +1793,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Get list of UMA resources.
-      description: Get list of UMA resources.
+      summary: Gets list of UMA resources.
+      description: Gets list of UMA resources.
       operationId: get-oauth-uma-resources
       responses:
         '200':
@@ -1774,8 +1886,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Get an UMA resource by ID.
-      description: Get an UMA resource by ID.  
+      summary: Gets an UMA resource by ID.
+      description: Gets an UMA resource by ID.  
       operationId: get-oauth-uma-resources-by-id
       responses:
         '200':
@@ -1796,8 +1908,8 @@ paths:
     delete:
       tags:
         - OAuth - UMA Resources
-      summary: Delete an UMA resource.
-      description: Delete an UMA resource.
+      summary: Deletes an UMA resource.
+      description: Deletes an UMA resource.
       operationId: delete-oauth-uma-resources-by-id
       responses:
         '204':
@@ -1845,8 +1957,8 @@ paths:
     get:
       tags:
         - OAuth - Scopes
-      summary: Get list of Scopes.
-      description: Get list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+      summary: Gets list of Scopes.
+      description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
       operationId: get-oauth-scopes
       responses:
         '200':
@@ -1965,7 +2077,7 @@ paths:
         - OAuth - Scopes
       summary: Delete Scope.
       description: Delete Scope.
-      operationId: delete-oauth-scopes-by-id
+      operationId: delete-oauth-scopes-by-inum
       responses:
         '204':
           description: No Content
@@ -2032,16 +2144,16 @@ components:
             https://jans.io/oauth/config/scripts.write: Manage scripts related information
             https://jans.io/oauth/config/cache.readonly: View cache related information
             https://jans.io/oauth/config/cache.write: Manage cache related information
-            https://jans.io/oauth/config/smtp.readonly: View SMTP related information	
+            https://jans.io/oauth/config/smtp.readonly: View SMTP related information
             https://jans.io/oauth/config/smtp.write: Manage SMTP related information
-            https://jans.io/oauth/config/logging.readonly: View logging related information	
+            https://jans.io/oauth/config/logging.readonly: View logging related information
             https://jans.io/oauth/config/logging.write: Manage logging related information
-            https://jans.io/oauth/config/jwks.readonly: View JWKS related information	
-            https://jans.io/oauth/config/jwks.write: Manage JWKS related information	
+            https://jans.io/oauth/config/jwks.readonly: View JWKS related information
+            https://jans.io/oauth/config/jwks.write: Manage JWKS related information
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
-            https://jans.io/oauth/config/openid/clients.write: Manage clients related information	
+            https://jans.io/oauth/config/openid/clients.write: Manage clients related information
             https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information		
+            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: Manage scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
@@ -2101,7 +2213,15 @@ components:
           type: string
     CustomScript:
       type: object
-      description: Script 
+      description: Script
+      required:
+        - name
+        - script
+        - scriptType
+        - programmingLanguage
+        - moduleProperties
+        - configurationProperties
+        - level
       properties:
         dn:
           type: string
@@ -2113,10 +2233,10 @@ components:
           pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
           minLength: 1
           maxLength: 60
-          description: 'Name should contain only letters, digits and underscores.'
+          description: 'Custom script name. Should contain only letters, digits and underscores.'
         aliases:
           type: array
-          description: List of possible alias for the script.
+          description: List of possible aliases for the custom script.
           items:
             type: string
         description:
@@ -2124,7 +2244,7 @@ components:
           description: Details describing the script.
         script:
           type: string
-          description: 'Actual script or the path to a script file by inputting _file /path/of/file, e.g., _file /opt/jans/customscript/interceptionscript.py.'
+          description: Actual script.
         scriptType:
           type: string
           description: Type of script.
@@ -2173,21 +2293,33 @@ components:
           type: integer
           format: int64
           description: Update revision number of the script.
+          default: 0
         enabled:
           type: boolean
           description: boolean value indicating if script enabled.
+          default: false
         scriptError:
           type: object
-          description: Possible errors associated with the script.
+          description: Possible errors assosiated with the script.
           $ref: '#/components/schemas/ScriptError'
         modified:
           type: boolean
           description: boolean value indicating if the script is modified.
+          default: false
         internal:
           type: boolean
-          description: boolean value indicating if the script is internal.
+          description: boolean value indicating if the script is internal. 
+          default: false
     LdapConfiguration:
       type: object
+      required:
+        - configId
+        - bindDN
+        - bindPassword
+        - servers
+        - useSSL
+        - baseDNs
+        - primaryKey
       properties:
         configId:
           type: string
@@ -2230,9 +2362,11 @@ components:
         useAnonymousBind:
           type: boolean
           description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+          default: false
         enabled:
           type: boolean
           description: Boolean value used to indicate if the LDAP Server is enabled. Do not use this unless the server administrator has entered all the required values.
+          default: false
         version:
           type: integer
           description: LDAP server version.
@@ -2241,6 +2375,17 @@ components:
           description: A string that indicates the level. 
     CouchbaseConfiguration:
       type: object
+      required:
+        - configId
+        - userName
+        - userPassword
+        - servers
+        - defaultBucket
+        - buckets
+        - passwordEncryptionMethod
+        - sslTrustStoreFile
+        - sslTrustStorePin
+        - sslTrustStoreFormat
       properties:
         configId:
           type: string
@@ -2288,6 +2433,7 @@ components:
         operationTracingEnabled:
           type: boolean
           description: Boolean value True if tracing is enabled on the environment.
+          default: false
         mutationTokensEnabled:
           type: boolean
           description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
@@ -2302,6 +2448,7 @@ components:
         useSSL:
           type: boolean
           description: Identifies if SSL should be enabled.
+          default: true
         sslTrustStoreFile:
           type: string
           description: The path to the trust store file to use. It contains the trusted certificates.
@@ -2324,6 +2471,12 @@ components:
     JsonWebKey:
       type: object
       description: JsonWebKey
+      required:
+        - kid
+        - kty
+        - use
+        - alg
+        - exp
       properties:
         kid:
           type: string
@@ -2432,7 +2585,7 @@ components:
           example: 'https://server.example.com/restv1/device_authorization'
         sessionAsJwt:
           type: boolean
-          description: Boolean value true saves session data as a JWT.		  
+          description: Boolean value true saves session data as a JWT.
         sectorIdentifierCacheLifetimeInMinutes:
           type: integer
           description:  Sector Identifier cache lifetime in minutes.
@@ -3297,7 +3450,7 @@ components:
           type: string
         selected:
           type: boolean
-          description: Boolean value to indicate if the attribute is selected.
+          description: Boolean value to indicate if the atrribute is selected.
         name:
           type: string
           description: Name of the attribute.
@@ -3320,7 +3473,7 @@ components:
             - JSON
         status:
           type: string
-          description: Attribute status
+          description: Attrubute status
           enum:
             - ACTIVE
             - INACTIVE
@@ -3391,7 +3544,7 @@ components:
           properties:
             regexp:
               type: string
-              description: Regular expression to be used to validate the dataType.
+              description: Reguar expression to be used to validate the dataType.
             minLength:
               type: integer
             maxLength:
@@ -3424,11 +3577,12 @@ components:
       title: Scope
       description: Auth Scope.
       type: object
+      required:
+        - displayName
+        - scopeType
+        - expirationDate
       properties:
         dn:
-          type: string
-        id:
-          description: The base64url encoded id.
           type: string
         inum:
           description: Unique id identifying the .
@@ -3436,20 +3590,15 @@ components:
         displayName:
           description: A human-readable name of the scope.
           type: string
-        description:
-          description: A human-readable string describing the scope.
+        id:
+          description: The base64url encoded id.
           type: string
         iconUrl:
           description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
           type: string
-        authorizationPolicies:
-          description: Policies associated with all scopes.
-          type: array
-          items:
-            type: string
-        defaultScope:
-          description: Boolean value to specify default scope.
-          type: boolean
+        description:
+          description: A human-readable string describing the scope.
+          type: string
         scopeType:
           description: The scopes type associated with Access Tokens determine what resources will.
           type: string
@@ -3464,9 +3613,19 @@ components:
           type: array
           items:
             type: string
-        umaType:
+        defaultScope:
+          description: Boolean value to specify default scope.
           type: boolean
+        groupClaims:
+          description: Specifies if the scope is group claims.
+          type: boolean
+        dynamicScopeScripts:
+          description: Dynamic Scope Scripts associated with the scope.
+          type: array
+          items:
+            type: string
         umaAuthorizationPolicies:
+          description: Policies associated with scopes.
           type: array
           items:
             type: string
@@ -3482,6 +3641,18 @@ components:
                 type: string
             showInConfigurationEndpoint:
               type: boolean
+        umaType:
+          description: Specifies if the scope is of type UMA.
+          type: boolean
+          default: false
+        deletable:
+          description: Specifies if the scope can be deleted.
+          type: boolean
+          default: false
+        expirationDate:
+          description: Expiry date of the Scope.
+          type: string
+          format: date
     CustomAttribute:
       title: CustomAttribute
       description: Attribute.
@@ -3556,10 +3727,12 @@ components:
       description: Client.
       type: object
       required:
-        - clientName
-        - grantTypes
-        - tokenEndpointAuthMethod
         - applicationType
+        - clientName
+        - subjectType
+        - logout
+        - frontChannelLogoutSessionRequired
+        - includeClaimsInIdToken
       properties:
         dn:
           type: string
@@ -3587,7 +3760,7 @@ components:
           items:
             type: string
           example:
-            - 'https://client.example.org/cb'
+            - 'https://client.example.org/cb'	        
         claimRedirectUris:
           description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
           type: array
@@ -3640,7 +3813,7 @@ components:
           description: URL of the home page of the Client. The value of this field must point to a valid Web page.
           type: string
         policyUri:
-          description: URL that the Relying Party Client provides to the End-User to read about how the profile data will be used.
+          description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
           type: string
         tosUri:
           description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
@@ -3827,7 +4000,8 @@ components:
             description: String containing a space-separated list of claims that can be requested individually.        
         trustedClient:
           description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
-          type: boolean        
+          type: boolean
+          default: false
         lastAccessTime:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.'
           type: string
@@ -3842,6 +4016,7 @@ components:
         includeClaimsInIdToken:
           description: 'If true then claims are included in token id, default value is false.'
           type: boolean
+          default: false
         refreshTokenLifetime:
           description: Specifies the Client-specific refresh token expiration.
           type: integer
@@ -3884,7 +4059,8 @@ components:
             - PS512
         disabled:
           description: Specifies whether client is disabled.
-          type: boolean        
+          type: boolean
+          default: false
         authorizedOrigins:
           description: Specifies authorized JavaScript origins.
           type: array
@@ -3931,19 +4107,26 @@ components:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
         expirationDate:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
           type: string
           format: date-time
         deletable:
           description: Specifies whether client is deletable.
-          type: boolean          
+          type: boolean
+          default: false
         jansId:
           description: Attribute Scope Id.
           type: string
+
     UmaResource:
       title: UMAResource object
       description: UMAResource
       type: object
+      required:
+        - dn
+        - inum
+        - id
+        - type
       properties:
         dn:
           type: string
@@ -3968,12 +4151,12 @@ components:
           description: Resource scope expression.
           type: string
         clients:
-          description: List of client associated with the resource.
+          description: List of client assosiated with the resource.
           type: array
           items:
             type: string
         resources:
-          description: List of associated resource.
+          description: List of assosiated resource.
           type: array
           items:
             type: string
@@ -3999,10 +4182,13 @@ components:
           format: date-time
         deletable:
           description: Specifies whether client is deletable.
-          type: boolean 
+          type: boolean
+          default: false
     SectorIdentifier:
       type: object
       description: Sector Identifier Details.
+      required:
+        - id
       properties:
         id:
           description: XRI i-number. Sector Identifier to uniquely identify the sector.
@@ -4283,13 +4469,13 @@ components:
         fido2Configuration:
           description: Fido2Configuration.
           $ref: '#/components/schemas/Fido2Configuration'
-
+    
     Fido2Configuration:
       type: object
       description: Fido2 configuration properties.
       properties:
         authenticatorCertsFolder:
-          description: Authenticators certificates folder.
+          description: Authenticators certificates fodler.
           type: string
         mdsCertsFolder:
           description: MDS TOC root certificates folder.
@@ -4356,7 +4542,7 @@ components:
           type: boolean
     ScriptError:
       type: object
-      description: Possible errors associated with the script.
+      description: Possible errors assosiated with the script.
       properties:
         raisedAt:
           type: string
@@ -4431,7 +4617,7 @@ components:
               description: Delay time in seconds after reaching maximumAllowedAttemptsWithoutDelay limit.
             bruteForceProtectionEnabled:
               type: boolean
-              description: Enable or disable service, This functionality can be enabled dynamically.		  
+              description: Enable or disable service, This functionality can be enabled dynamically.
 
     CIBAEndUserNotificationConfig:
       type: object
@@ -4467,4 +4653,3 @@ components:
         publicVapidKey:
           type: string
           description: Public Vapid Key
-			  
