@@ -752,6 +752,7 @@ paths:
       summary: Updates a custom script.
       description: Updates a custom script.
       operationId: put-config-scripts
+      x-cli-getdata: get-config-scripts-by-inum
       tags:
         - Custom Scripts
       requestBody:
@@ -819,6 +820,7 @@ paths:
       summary: Gets list of scripts by type.
       description: Gets list of scripts by type.
       operationId: get-config-scripts-by-type
+      x-cli-ignore: true
       tags:
         - Custom Scripts
       responses:
@@ -849,6 +851,7 @@ paths:
       summary: Gets a script by Inum.
       description: Gets a script by Inum.
       operationId: get-config-scripts-by-inum
+      x-cli-ignore: true
       tags:
         - Custom Scripts
       responses:
@@ -3747,10 +3750,10 @@ components:
           type: string
         clientIdIssuedAt:
           type: string
-          format: date
+          format: date-time
         clientSecretExpiresAt:
           type: string
-          format: date
+          format: date-time
         redirectUris:
           description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
           type: array
@@ -4002,11 +4005,11 @@ components:
         lastAccessTime:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.'
           type: string
-          format: date
+          format: date-time
         lastLogonTime:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.'
           type: string
-          format: date        
+          format: date-time        
         persistClientAuthorizations:
           description: Specifies if the client authorization details are to be persisted. Default value is true.
           type: boolean
@@ -4172,11 +4175,11 @@ components:
         creationDate:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will created.'
           type: string
-          format: date  
+          format: date-time
         expirationDate:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire.'
           type: string
-          format: date      
+          format: date-time
         deletable:
           description: Specifies whether client is deletable.
           type: boolean
@@ -4543,7 +4546,7 @@ components:
       properties:
         raisedAt:
           type: string
-          format: date
+          format: date-time
         stackTrace:
           type: string
     AuthenticationFilters:
