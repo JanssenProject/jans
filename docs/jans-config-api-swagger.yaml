@@ -2216,11 +2216,11 @@ components:
       description: Script
       required:
         - name
+        - description
         - script
         - scriptType
         - programmingLanguage
         - moduleProperties
-        - configurationProperties
         - level
       properties:
         dn:
