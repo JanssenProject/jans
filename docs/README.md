@@ -12,7 +12,7 @@ You will see the main menu as below:
 
 ![jans-cli Main Menu](img/im-main.png)
 
-Using IM is very simple and intuitive. Just make selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning. 
+Using IM is very simple and intuitive. Just make selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning.
 
 ### Attribute
 
@@ -3310,7 +3310,8 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 Jans Authorization server have two operations `id` to `get/modify` its properties.
 
--**__get-properties__**
+- **__get-properties__**
+
 It returns all the information of Jans Authorization server.
 
 ```text
