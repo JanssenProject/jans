@@ -516,14 +516,16 @@ class JCA_CLI:
         for param in endpoint_parameters[0:n]:
             param_name = self.make_swagger_var(param['name'])
             if not param_name in parameters:
-                text_ = param['name'] or param.get('description') or param.get('summary')
+                text_ = param['name']
+                help_text = param.get('description') or param.get('summary')
                 enforce = True if end_point_param and end_point_param['name'] == param['name'] else False
                     
                 parameters[param_name] = self.get_input(
                             text=text_.strip('.'), 
                             itype=param['schema']['type'],
                             default = param['schema'].get('default'),
-                            enforce=enforce
+                            enforce=enforce,
+                            help_text=help_text
                             )
 
         return parameters
