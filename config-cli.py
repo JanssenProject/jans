@@ -800,7 +800,7 @@ class JCA_CLI:
         for prop in schema['properties']:
             
             item = schema['properties'][prop]
-            if getitem and item != getitem:
+            if getitem and item != getitem or prop in ('dn', 'inum'):
                 continue
             
             prop_ = self.get_model_key_map(model, prop)
