@@ -36,8 +36,7 @@ sys.path.append(os.path.join(cur_dir, my_op_mode))
 swagger_client = importlib.import_module(my_op_mode+'.swagger_client')
 swagger_client.models = importlib.import_module(my_op_mode+'.swagger_client.models')
 swagger_client.api = importlib.import_module(my_op_mode+'.swagger_client.api')
-
-swagger_rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
+swagger_client.rest = importlib.import_module(my_op_mode+'.swagger_client.rest')
 
 warning_color = 214
 error_color = 196
@@ -257,7 +256,7 @@ class JCA_CLI:
 
     def get_access_token(self, scope):
         sys.stderr.write("Getting access token for scope {}\n".format(scope))
-        rest = swagger_rest.RESTClientObject(self.swagger_configuration)
+        rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = urljoin(self.swagger_configuration.host, 'jans-auth/restv1/token')
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -282,6 +281,14 @@ class JCA_CLI:
             print("Error while getting access token")
             sys.stderr.write(response.data)
             sys.stderr.write('\n')
+
+    def print_exception(self, e):
+        print('\u001b[38;5;196m')
+        if hasattr(e, 'reason'):
+            print(e.reason)
+        if hasattr(e, 'body'):
+            print(e.body)
+        print('\u001b[0m')
 
 
     def colored_text(self, text, color=255):
@@ -669,11 +676,8 @@ class JCA_CLI:
 
         try:
             api_response = api_caller(**parameters)
-        except swagger_client.rest.ApiException as e:
-            print('\u001b[38;5;196m')
-            print(e.reason)
-            print(e.body)
-            print('\u001b[0m')
+        except Exception as e:
+            self.print_exception(e)
 
         if return_value:
             return api_response
@@ -715,7 +719,7 @@ class JCA_CLI:
                         print("Output was written to", fn)
                 except Exception as e:
                     print("An error ocurred while saving data")
-                    print(e)
+                    self.print_exception(e)
             elif selection in item_counters:
                 self.pretty_print(api_response_unmapped[int(selection) -1])
 
@@ -941,13 +945,10 @@ class JCA_CLI:
 
             try:
                 api_response = api_caller(body=model)
-            except swagger_client.rest.ApiException as e:
+            except Exception as e:
                 api_response = None
-                print('\u001b[38;5;196m')
-                print(e.reason)
-                print(e.body)
-                print('\u001b[0m')
-            
+                self.print_exception(e)
+
             if api_response:
                 try:
                     api_response_unmapped = self.unmap_model(api_response)
@@ -973,11 +974,8 @@ class JCA_CLI:
 
             try:
                 api_response = api_caller(url_param_val)
-            except swagger_client.rest.ApiException as e:
-                print('\u001b[38;5;196m')
-                print(e.reason)
-                print(e.body)
-                print('\u001b[0m')
+            except Exception as e:
+                self.print_exception(e)
 
             if api_response is None:
                 print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), success_color))
@@ -1041,12 +1039,9 @@ class JCA_CLI:
                     api_response = api_caller(**payload)
                 else:
                     api_response = api_caller(body=body)
-            except swagger_client.rest.ApiException as e:
+            except Exception as e:
                 api_response = None
-                print('\u001b[38;5;196m')
-                print(e.reason)
-                print(e.body)
-                print('\u001b[0m')
+                self.print_exception(e)
 
             if api_response:
                 api_response_unmapped = self.unmap_model(api_response)
@@ -1152,13 +1147,10 @@ class JCA_CLI:
                                 api_response = api_caller(**args_)
                             else:
                                 api_response = api_caller(body=cur_model)
-                        except swagger_client.rest.ApiException as e:
+                        except Exception as e:
                             api_response = None
-                            print('\u001b[38;5;196m')
-                            print(e.reason)
-                            print(e.body)
-                            print('\u001b[0m')
-                        
+                            self.print_exception(e)
+
                         if api_response:
                             api_response_unmapped = self.unmap_model(api_response)
                             self.print_colored_output(api_response_unmapped)
@@ -1304,11 +1296,12 @@ class JCA_CLI:
                 api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
             else:
                 api_response = api_caller(**endpoint_params)
-        except swagger_client.rest.ApiException as e:
-
-            sys.stderr.write(e.reason)
-            sys.stderr.write(e.body)
-            sys.stderr.write('\n')
+        except Exception as e:
+            if hasattr(e, 'reason'):
+                sys.stderr.write(e.reason)
+            if hasattr(e, 'body'):
+                sys.stderr.write(e.body)
+                sys.stderr.write('\n')
             sys.exit()
 
         api_response_unmapped = []
@@ -1354,9 +1347,8 @@ class JCA_CLI:
 
         try:
             api_response = api_caller(body=body)
-        except swagger_client.rest.ApiException as e:
-            print(e.reason)
-            print(e.body)
+        except Exception as e:
+            self.print_exception(e)
             sys.exit()
         
         unmapped_response = self.unmap_model(api_response)
@@ -1391,9 +1383,8 @@ class JCA_CLI:
                 api_response = api_caller(suffix_param[path['__urlsuffix__']], body=data)
             else:
                 api_response = api_caller(body=data)
-        except swagger_client.rest.ApiException as e:
-            print(e.reason)
-            print(e.body)
+        except Exception as e:
+            self.print_exception(e)
             sys.exit()
 
         unmapped_response = self.unmap_model(api_response)
@@ -1409,9 +1400,8 @@ class JCA_CLI:
 
         try:
             api_response = api_caller(suffix_param[path['__urlsuffix__']], **endpoint_params)
-        except swagger_client.rest.ApiException as e:
-            print(e.reason)
-            print(e.body)
+        except Exception as e:
+            self.print_exception(e)
             sys.exit()
 
         if api_response:
