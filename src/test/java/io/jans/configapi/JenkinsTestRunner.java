@@ -33,16 +33,7 @@ public class JenkinsTestRunner {
 
     @Test
     public void testParallel() throws Exception {
-    	//Client client = testUtil.init();
-        //String token = this.testUtil.createTestToken();
-       // System.setProperty("access.token", token);
-        LOG.error(" ********************* JenkinsTestRunner:::testFullPath() -  ********************* ");
-		System.out.println( "JenkinsTestRunner ::::testParallel() - Before Calling testUtil \n");
-		testUtil();
-		System.out.println( "JenkinsTestRunner ::::testParallel() - After Calling testUtil \n");
-        LOG.error(" ********************* JenkinsTestRunner:::testFullPath() - after ********************* ");
-
-        System.setProperty("karate.env", "jenkins");
+    	System.setProperty("karate.env", "jenkins");
         Results results = Runner.path("src/test/resources/feature").tags("~@ignore").parallel(5);
         generateReport(results.getReportDir());
         Assertions.assertEquals(0, results.getFailCount(), results.getErrorMessages());
@@ -57,24 +48,4 @@ public class JenkinsTestRunner {
         reportBuilder.generateReports();
     }
     
-    private void testUtil() {
-    	try {
-    		String clientId = Util.getApiClientId();
-    		System.out.println( "JenkinsTestRunner ::::testUtil() - clientId ="+clientId+"\n");
-    		
-    		String clientPwd = Util.getApiClientPassword();
-    		System.out.println( "JenkinsTestRunner ::::testUtil() - clientPwd ="+clientPwd+"\n");
-    		
-    		Client testClient = Util.createTestClient();
-    		System.out.println( "JenkinsTestRunner ::::testUtil() - testClient.getClientId() ="+testClient.getClientId()+"\n");
-    		
-    		String token = Util.createTestToken();
-    		System.out.println( "JenkinsTestRunner ::::testUtil() - token ="+token
-    				+"\n");
-    		
-    	}catch(Exception ex) {
-    		ex.printStackTrace();
-    		System.out.println( "JenkinsTestRunner ::::testUtil() - ex.getMessage() ="+ex.getMessage()+"\n");
-    	}
-    }
 }
