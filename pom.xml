@@ -239,6 +239,13 @@
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${quarkus-plugin.version}</version>
+                <configuration>
+    <source>src</source>
+    <compilerArgs>
+      <arg>--enable-preview</arg>
+    </compilerArgs>
+    <jvmArgs>--enable-preview</jvmArgs>
+  </configuration>
                 <executions>
                     <execution>
                         <goals>
