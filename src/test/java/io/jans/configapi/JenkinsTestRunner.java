@@ -27,13 +27,11 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class JenkinsTestRunner {  	
-	
-	private static final Logger LOG = LoggerFactory.getLogger(JenkinsTestRunner.class);
+public class JenkinsTestRunner {
 
     @Test
-    public void testParallel() throws Exception {
-    	System.setProperty("karate.env", "jenkins");
+    public void testParallel() {
+        System.setProperty("karate.env", "jenkins");
         Results results = Runner.path("src/test/resources/feature").tags("~@ignore").parallel(5);
         generateReport(results.getReportDir());
         Assertions.assertEquals(0, results.getFailCount(), results.getErrorMessages());
@@ -47,5 +45,4 @@ public class JenkinsTestRunner {
         ReportBuilder reportBuilder = new ReportBuilder(jsonPaths, config);
         reportBuilder.generateReports();
     }
-    
 }
