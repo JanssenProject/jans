@@ -52,14 +52,14 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS})
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) throws Exception {
         final List<Client> clients;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             clients = clientService.searchClients(pattern, limit);
         } else {
             clients = clientService.getAllClients(limit);
         }
-        return Response.ok(clients).build();
+        return Response.ok(getClients(clients)).build();
     }
 
     @GET
@@ -84,6 +84,9 @@ public class ClientsResource extends BaseResource {
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
+        if (result.getClientSecret() != null) {
+        	result.setClientSecret(encryptionService.encrypt(result.getClientSecret()));
+        }
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -131,5 +134,16 @@ public class ClientsResource extends BaseResource {
         clientService.removeClient(client);
         return Response.noContent().build();
     }
+    
+	private List<Client> getClients(List<Client> clients) throws Exception {
+		if (clients!=null && !clients.isEmpty()) {
+			for (Client client : clients)
+				if (client.getClientSecret() != null) {
+					client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+				}
+		}
+		return clients;
+	}
+
 
 }
