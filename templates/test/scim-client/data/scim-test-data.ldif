@@ -10,6 +10,7 @@ jansAttrTyp: string
 jansMultivaluedAttr: false
 jansSAML1URI: urn:jans:dir:attribute-def:scimCustomFirst
 jansSAML2URI: urn:oid:scimCustomFirst
+jansAttrViewTyp: admin
 jansScimCustomAttr: true
 jansStatus: active
 objectClass: top
@@ -27,6 +28,7 @@ jansAttrTyp: generalizedTime
 jansMultivaluedAttr: true
 jansSAML1URI: urn:jans:dir:attribute-def:scimCustomSecond
 jansSAML2URI: urn:oid:scimCustomSecond
+jansAttrViewTyp: admin
 jansScimCustomAttr: true
 jansStatus: active
 objectClass: top
@@ -44,6 +46,7 @@ jansAttrTyp: numeric
 jansMultivaluedAttr: false
 jansSAML1URI: urn:jans:dir:attribute-def:scimCustomThird
 jansSAML2URI: urn:oid:scimCustomThird
+jansAttrViewTyp: admin
 jansScimCustomAttr: true
 jansStatus: active
 objectClass: top
