@@ -283,11 +283,14 @@ class JCA_CLI:
             sys.stderr.write('\n')
 
     def print_exception(self, e):
+        print(self.colored_text("Error retreiving data", warning_color))
         print('\u001b[38;5;196m')
         if hasattr(e, 'reason'):
             print(e.reason)
         if hasattr(e, 'body'):
             print(e.body)
+        if hasattr(e, 'args'):
+            print(', '.join(e.args))
         print('\u001b[0m')
 
 
