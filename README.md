@@ -26,7 +26,7 @@ You will get a menu as below image:
 ![main-menu.png](docs/img/im-main.png)
 
 From the following list you can choose any option by selecting its number. For example, let's say number 2,
-to get **Default Authentication Method**. 
+to get **Default Authentication Method**.
 
 That returns another two options as below:
 
@@ -36,5 +36,4 @@ Now selecting 1 and it returns our desired result as below image:
 
 ![default-authentication-method.png](docs/img/im-cur-default-auth.png)
 
-So, It was a quick start to view how this _jans-cli_ Interactive Mode really works. Please, follow this [link](docs) 
-to read _jans-cli_ docs for better understanding of Janssen Command Line.
+So, It was a quick start to view how this _jans-cli_ Interactive Mode really works. Please, follow this [link](docs) to read _jans-cli_ docs for better understanding of Janssen Command Line.
