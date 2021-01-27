@@ -1,4 +1,4 @@
-
+@ignore
 Feature: Uma Scopes
 
 Scenario: Fetch all uma scopes without bearer token

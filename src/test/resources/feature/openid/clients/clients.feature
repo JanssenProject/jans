@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Openid connect clients
 
 @ignore
@@ -7,7 +7,6 @@ Given url openidclients_url
 When method GET
 Then status 401
 
-@ignore
 Scenario: Fetch all openid connect clients
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
@@ -60,7 +59,7 @@ And print response
 Scenario: Create new OpenId Connect Client
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
-And request read('classpath:client.json')
+And request read('client.json')
 When method POST
 Then status 201
 Then def result = response
