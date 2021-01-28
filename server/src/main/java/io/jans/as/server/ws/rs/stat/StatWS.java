@@ -9,6 +9,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
 import net.agkn.hll.HLL;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -65,6 +67,54 @@ public class StatWS {
 
     public Response stat(String month) {
         return null;
+    }
+
+    private StatResponseItem buildItem(String month) {
+        try {
+            String monthlyDn = String.format("ou=%s,%s", month, statService.getBaseDn());
+
+            final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
+            if (entries == null || entries.isEmpty()) {
+                log.trace("Can't find stat entries for month: " + monthlyDn);
+                return null;
+            }
+
+            final StatResponseItem responseItem = new StatResponseItem();
+            responseItem.setMonthlyActiveUsers(userCardinality(entries));
+
+            unionTokenMapIntoResponseItem(entries, responseItem);
+
+            return responseItem;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private void unionTokenMapIntoResponseItem(List<StatEntry> entries, StatResponseItem responseItem) {
+        for (StatEntry entry : entries) {
+            for (Map.Entry<String, Map<String, Long>> en : entry.getStat().getTokenCountPerGrantType().entrySet()) {
+                if (en.getValue() == null) {
+                    continue;
+                }
+
+                final Map<String, Long> tokenMap = responseItem.getTokenCountPerGrantType().get(en.getKey());
+                if (tokenMap == null) {
+                    responseItem.getTokenCountPerGrantType().put(en.getKey(), en.getValue());
+                    continue;
+                }
+
+                for (Map.Entry<String, Long> tokenEntry : en.getValue().entrySet()) {
+                    final Long counter = tokenMap.get(tokenEntry.getKey());
+                    if (counter == null) {
+                        tokenMap.put(tokenEntry.getKey(), tokenEntry.getValue());
+                        continue;
+                    }
+
+                    tokenMap.put(tokenEntry.getKey(), counter + tokenEntry.getValue());
+                }
+            }
+        }
     }
 
     private long userCardinality(List<StatEntry> entries) {
