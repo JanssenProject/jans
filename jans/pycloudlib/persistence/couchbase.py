@@ -240,7 +240,9 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "default_bucket": bucket_prefix,
                 "couchbase_mappings": "\n".join(couchbase_mappings),
                 "encryption_method": "SSHA-256",
-                "ssl_enabled": "true",
+                "ssl_enabled": str(as_boolean(
+                    os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)
+                )).lower(),
                 "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn"),
                 "encoded_couchbaseTrustStorePass": encode_text(
                     CN_COUCHBASE_TRUSTSTORE_PASSWORD,
