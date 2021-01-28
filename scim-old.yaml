@@ -2,72 +2,69 @@ openapi: 3.0.1
 info:
   title: SCIM API
   description: |
-    Janssen SCIM 2.0 server API. Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality
+    Gluu SCIM 2.0 server API. Developers can think of SCIM as a REST API with endpoints exposing CRUD functionality
     (create, update, retrieve and delete) for identity management resources such as users, groups, and fido devices.
   license:
-    name: Janssen License
-    url: https://github.com/JanssenProject/blob/master/LICENSE
-  version: 5.0.0
+    name: License
+    url: 'https://github.com/JanssenProject/blob/master/LICENSE'
+  version: 4.2.2
 servers:
-- url: https://jenkins-ldap.jans.io/scim/restv1/v2
+- url: https://jans.io/
 tags:
-- name: user
+- name: User
   description: Endpoints for management of the User resource
-- name: group
+- name: Group
   description: Endpoints for management of the Group resource
-- name: discovery
+- name: Discovery
   description: Endpoints to facilitate discovery of SCIM service provider features
-- name: fido devices
+- name: Fido Devices
   description: Endpoints to manage fido devices
-- name: fido2 devices
+- name: Fido2 Devices
   description: Endpoints to manage fido2 devices
-- name: search
+- name: Search
   description: Search (from system root) for one or more resource
+#- name: Bulk
+#  description: Send several resource operations in a single request
 
 paths:
-  /Groups:
+  /jans-scim/restv1/v2/Groups:
     get:
       tags:
-      - group
-      operationId: get-groups
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
+      operationId: get-groups
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - testmode: [https://jans.io/scim/groups.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: filter
         in: query
-        description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
+        description: See section 3.4.2.2 of RFC 7644
         schema:
           type: string
-        example: displayName co "Audit"
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
         schema:
           type: integer
       - name: count
         in: query
-        description: Specifies the desired maximum number of query results per page
         schema:
           type: integer
       - name: sortBy
         in: query
-        description: The attribute whose value will be used to order the returned responses
         schema:
           type: string
-      - name: sortOrder
+      - name: sortOder
         in: query
-        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -101,30 +98,27 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-      - group
-      operationId: create-group
+      - Group
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
+      operationId: post-group
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       requestBody:
         description: Payload that represents the Group to create
         content:
           application/scim+json:
-            schema:
-              $ref: '#/components/schemas/GroupResource'
-          application/json:
             schema:
               $ref: '#/components/schemas/GroupResource'
         required: true
@@ -167,23 +161,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: group
-  /Groups/{id}:
+  /jans-scim/restv1/v2/Groups/{id}:
     get:
       tags:
-      - group
-      operationId: get-group-by-id
+      - Group
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
+      operationId: get-group-by-id
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - testmode: [https://jans.io/scim/groups.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -221,23 +215,23 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - group
-      operationId: update-group-by-id
+      - Group
       description: "Updates a Group resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
+      operationId: put-group-by-id
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -307,11 +301,11 @@ paths:
       x-codegen-request-body-name: group
     delete:
       tags:
-      - group
-      operationId: delete-group-by-id
+      - Group
       description: Deletes a group resource (see section 3.6 of RFC 7644)
+      operationId: delete-group-by-id
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: id
         in: path
@@ -343,22 +337,22 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - group
-      operationId: patch-group-by-id
+      - Group
       description: "Updates one or more attributes of a Group resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
+      operationId: patch-group-by-id
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - testmode: [https://jans.io/scim/groups.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -408,14 +402,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /Groups/.search:
+  /jans-scim/restv1/v2/Groups/.search:
     post:
       tags:
-      - group
-      operationId: search-group
+      - Group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
+      operationId: query-groups
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - testmode: [https://jans.io/scim/groups.read]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -457,23 +451,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /FidoDevices:
+  /jans-scim/restv1/v2/FidoDevices:
     get:
       tags:
-        - fido devices
-      operationId: get-fido-devices
+        - Fido Devices
       description: Query Fido resources
+      operationId: get-fido-devices
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: userId
@@ -484,28 +478,23 @@ paths:
           type: string
       - name: filter
         in: query
-        description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
-        example: status eq "compromised"
+        description: See section 3.4.2.2 of RFC 7644
         schema:
           type: string
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
         schema:
           type: integer
       - name: count
         in: query
-        description: Specifies the desired maximum number of query results per page
         schema:
           type: integer
       - name: sortBy
         in: query
-        description: The attribute whose value will be used to order the returned responses
         schema:
           type: string
-      - name: sortOrder
+      - name: sortOder
         in: query
-        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -546,28 +535,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/{id}:
+  /jans-scim/restv1/v2/FidoDevices/{id}:
     get:
       tags:
-        - fido devices
-      operationId: get-fido-device-by-id
+        - Fido Devices
       description: Retrieves a U2F/Super Gluu device by Id
+      operationId: get-fido-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: userId
-        in: query
-        description: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -605,23 +589,23 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-        - fido devices
-      operationId: update-fido-device-by-id
+        - Fido Devices
       description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
+      operationId: put-fido-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido.write]
+        - testmode: [https://jans.io/scim/fido.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -681,11 +665,11 @@ paths:
       x-codegen-request-body-name: fidoDeviceResource
     delete:
       tags:
-        - fido devices
-      operationId: delete-fido-device-by-id
+        - Fido Devices
       description: Deletes a Fido resource
+      operationId: delete-fido-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido.write]
+        - testmode: [https://jans.io/scim/fido.write]
       parameters:
       - name: id
         in: path
@@ -715,14 +699,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /FidoDevices/.search:
+  /jans-scim/restv1/v2/FidoDevices/.search:
     post:
       tags:
-        - fido devices
-      operationId: search-fido-device
+        - Fido Devices
       description: Query Fido resources
+      operationId: query-fido-resources
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - testmode: [https://jans.io/scim/fido.read]
       parameters:
       - name: userId
         in: query
@@ -780,23 +764,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /Fido2Devices:
+  /jans-scim/restv1/v2/Fido2Devices:
     get:
       tags:
-        - fido2 devices
-      operationId: get-fido2-devices
+        - Fido2 Devices
       description: Query Fido 2 resources
+      operationId: query-fido2-resources
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read]
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: userId
@@ -807,28 +791,23 @@ paths:
           type: string
       - name: filter
         in: query
-        description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
-        example: userId sw "123-abcde-qwerty"
+        description: See section 3.4.2.2 of RFC 7644
         schema:
           type: string
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
         schema:
           type: integer
       - name: count
         in: query
-        description: Specifies the desired maximum number of query results per page
         schema:
           type: integer
       - name: sortBy
         in: query
-        description: The attribute whose value will be used to order the returned responses
         schema:
           type: string
-      - name: sortOrder
+      - name: sortOder
         in: query
-        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -869,28 +848,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Fido2Devices/{id}:
+  /jans-scim/restv1/v2/Fido2Devices/{id}:
     get:
       tags:
-        - fido2 devices
-      operationId: get-fido2-device-by-id
+        - Fido2 Devices
       description: Retrieves a Fido 2 device by Id
+      operationId: get-fido2-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read]
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: userId
-        in: query
-        description: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -928,23 +902,23 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-        - fido2 devices
-      operationId: update-fido2-device-by-id
+        - Fido2 Devices
       description: "Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
         \ will be left intact.\n"
+      operationId: put-fido2-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido2.write]
+        - testmode: [https://jans.io/scim/fido2.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -1004,11 +978,11 @@ paths:
       x-codegen-request-body-name: fidoDeviceResource
     delete:
       tags:
-        - fido2 devices
-      operationId: delete-fido2-device-by-id
+        - Fido2 Devices
       description: Deletes a Fido 2 resource
+      operationId: delete-fido2-device-by-id
       security:
-        - scim_auth: [https://jans.io/scim/fido2.write]
+        - testmode: [https://jans.io/scim/fido2.write]
       parameters:
       - name: id
         in: path
@@ -1038,14 +1012,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Fido2Devices/.search:
+  /jans-scim/restv1/v2/Fido2Devices/.search:
     post:
       tags:
-        - fido2 devices
-      operationId: search-fido2-device
+        - Fido2 Devices
       description: Query Fido 2 resources
+      operationId: query-fido2-devices
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read]
+        - testmode: [https://jans.io/scim/fido2.read]
       parameters:
       - name: userId
         in: query
@@ -1103,49 +1077,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /Users:
+  /jans-scim/restv1/v2/Users:
     get:
       tags:
-      - user
-      operationId: get-users
+      - User
       description: Query User resources (see section 3.4.2 of RFC 7644)
+      operationId: get-users
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - testmode: [https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: filter
         in: query
-        description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
-        example: userName eq "jhon" and meta.lastModified gt "2011-05-13T04:42:34Z"
+        description: See section 3.4.2.2 of RFC 7644
         schema:
           type: string
       - name: startIndex
         in: query
-        description: The 1-based index of the first query result
         schema:
           type: integer
       - name: count
         in: query
-        description: Specifies the desired maximum number of query results per page
         schema:
           type: integer
       - name: sortBy
         in: query
-        description: The attribute whose value will be used to order the returned responses
         schema:
           type: string
-      - name: sortOrder
+      - name: sortOder
         in: query
-        description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -1179,21 +1148,21 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
-      - user
-      operationId: create-user
+      - User
       description: Allows creating a User resource via POST (see section 3.3 of RFC
         7644)
+      operationId: post-user
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       requestBody:
@@ -1245,23 +1214,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: user
-  /Users/{id}:
+  /jans-scim/restv1/v2/Users/{id}:
     get:
       tags:
-      - user
-      operationId: get-user-by-id
+      - User
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+      operationId: get-user-by-id
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - testmode: [https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -1299,23 +1268,23 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - user
-      operationId: update-user-by-id
+      - User
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
+      operationId: put-user-by-id
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -1385,11 +1354,11 @@ paths:
       x-codegen-request-body-name: user
     delete:
       tags:
-      - user
-      operationId: delete-user-by-id
+      - User
       description: Deletes a user resource
+      operationId: delete-user-by-id
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: id
         in: path
@@ -1421,22 +1390,22 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - user
-      operationId: patch-user-by-id
+      - User
       description: "Updates one or more attributes of a User resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
+      operationId: patch-user-by-id
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - testmode: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
-        description: A comma-separated list of attribute names to return in the response
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: excludedAttributes
         in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        description: See section 3.9 of RFC 7644
         schema:
           type: string
       - name: id
@@ -1451,9 +1420,6 @@ paths:
           application/scim+json:
             schema:
               $ref: '#/components/schemas/PatchRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchRequest'
         required: true
       responses:
         200:
@@ -1462,18 +1428,12 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
         400:
           description: |
             One or more operations supplied in the request are specified incorrectly, there were attempts to
             modify immutable attributes, or the resulting resource cannot pass intrinsic validations
           content:
             application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         500:
@@ -1486,14 +1446,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /Users/.search:
+  /jans-scim/restv1/v2/Users/.search:
     post:
       tags:
-      - user
-      operationId: search-user
+      - User
       description: Query User resources (see section 3.4.2 of RFC 7644)
+      operationId: query-user
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - testmode: [https://jans.io/scim/users.read]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -1535,15 +1495,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /.search:
+  /jans-scim/restv1/v2/.search:
     post:
+      tags:
+        - Search
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
-      tags:
-        - search
-      operationId: search-resource
+      operationId: query-resource
       security:
-        - scim_auth: [https://jans.io/scim/all-resources.search]
+        - testmode: [https://jans.io/scim/all-resources.search]
       requestBody:
         description: Payload that represents the search criteria
         content:
@@ -1585,12 +1545,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: searchRequest
-  /Bulk:
+  /jans-scim/restv1/v2/Bulk:
     post:
+      tags:
+        - Bulk
       description: Send several resource operations in a single request (see section
         3.7 of RFC 7644)
+      operationId: post-bulk
       security:
-        - scim_auth: [https://jans.io/scim/bulk]
+        - testmode: [https://jans.io/scim/bulk]
       requestBody:
         description: Payload describing the operations to perform
         content:
@@ -1623,13 +1586,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: request
-  /ServiceProviderConfig:
+  /jans-scim/restv1/v2/ServiceProviderConfig:
     get:
       tags:
-      - discovery
-      operationId: get-service-provider-config
+      - Discovery
       description: Describes the SCIM specification features available (see section
         5 of RFC 7644)
+      operationId: get-service-provider-config
       responses:
         200:
           description: Successful operation
@@ -1643,13 +1606,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /ResourceTypes:
+
+  /jans-scim/restv1/v2/ResourceTypes:
     get:
       tags:
-      - discovery
-      operationId: get-resource-types
+      - Discovery
       description: |
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
+      operationId: get-resources
       responses:
         200:
           description: Successful operation
@@ -1657,20 +1621,22 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceTypeListResponse'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /ResourceTypes/{resource}:
+
+  /jans-scim/restv1/v2/ResourceTypes/{resource}:
     get:
       tags:
-      - discovery
-      operationId: get-resource-type-by-id
+      - Discovery
       description: "Describes the endpoint, schemas and extensions supported by a\
         \ specific kind of resource.\nIt returns a specific portion of the ouput of\
         \ the more general /Resources endpoint  \n"
+      operationId: get-resources-by-resource
       parameters:
       - name: resource
         in: path
@@ -1689,19 +1655,21 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ResourceType'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Schemas:
+
+  /jans-scim/restv1/v2/Schemas:
     get:
       tags:
-      - discovery
-      operationId: get-schemas
+      - Discovery
       description: "Endpoint used to retrieve information about schemas supported\
         \ (see section \n4 of RFC 7644)\n"
+      operationId: get-schemas
       responses:
         200:
           description: Successful operation
@@ -1709,18 +1677,20 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaListResponse'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /Schemas/{uri}:
+
+  /jans-scim/restv1/v2/Schemas/{uri}:
     get:
       tags:
-      - discovery
-      operationId: get-schema-by-uri
+      - Discovery
       description: Retrieves information about a specific resource
+      operationId: get-schema-by-uri
       parameters:
       - name: uri
         in: path
@@ -1741,12 +1711,14 @@ paths:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/SchemaResource'
+
         500:
           description: There was an unexpected failure executing the operation
           content:
             application/scim+json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     AnyValue:
@@ -1759,32 +1731,26 @@ components:
           items:
             type: string
             example: urn:ietf:params:scim:api:messages:2.0:SearchRequest
+          default: ["urn:ietf:params:scim:api:messages:2.0:SearchRequest"]
         attributes:
           type: array
-          description: A list of attribute names to return in the response
           items:
             type: string
         excludedAttributes:
           type: array
-          description: When specified, the response will contain a default set of attributes minus those listed here
           items:
             type: string
         filter:
           type: string
-          description: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644
-          example: userName eq "jhon" and meta.lastModified gt "2011-05-13T04:42:34Z"
         sortBy:
           type: string
-          description: The attribute whose value will be used to order the returned responses
         sortOrder:
           type: string
-          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
         startIndex:
           type: integer
-          description: The 1-based index of the first query result
+          default: 1
         count:
           type: integer
-          description: Specifies the desired maximum number of query results per page
       description: See section 3.4.3 of RFC 7644
     ErrorResponse:
       required:
@@ -1798,13 +1764,10 @@ components:
             example: urn:ietf:params:scim:api:messages:2.0:Error
         status:
           type: string
-          description: HTTP status code as string
         scimType:
           type: string
-          description: A detail error keyword. See table 9 of RFC 7644
         detail:
           type: string
-          description: A detailed human-readable message of the error
       description: See section 3.12 of RFC 7644
     ServiceProviderConfigResponse:
       type: object
@@ -1979,15 +1942,12 @@ components:
             example: urn:ietf:params:scim:api:messages:2.0:ListResponse
         totalResults:
           type: integer
-          description: Total number of results returned by the search. The value may be larger than the number of resources returned due to pagination
         startIndex:
           type: integer
-          description: The 1-based index of the first result in the current set of search results
         itemsPerPage:
           type: integer
-          description: The number of resources returned in a results page
     GroupListResponse:
-      description: Results for groups search. See section 3.4.2.4 of RFC 7644
+      description: See section 3.4.2.4 of RFC 7644
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
@@ -1998,7 +1958,6 @@ components:
             items:
               $ref: '#/components/schemas/GroupResource'
     FidoListResponse:
-      description: Results for fido devices search
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
@@ -2009,7 +1968,6 @@ components:
             items:
               $ref: '#/components/schemas/FidoDeviceResource'
     Fido2ListResponse:
-      description: Results for fido 2 devices search
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
@@ -2020,7 +1978,7 @@ components:
             items:
               $ref: '#/components/schemas/Fido2DeviceResource'
     UserListResponse:
-      description: Results for users search. See section 3.4.2.4 of RFC 7644
+      description: See section 3.4.2.4 of RFC 7644
       allOf:
       - $ref: '#/components/schemas/BasicListResponse'
       - type: object
@@ -2052,25 +2010,23 @@ components:
               $ref: '#/components/schemas/SchemaResource'
     PatchOperation:
       required:
-      - op
+      - operation
       type: object
       properties:
         op:
           type: string
-          description: The kind of operation to perform
           enum:
           - add
           - remove
           - replace
         path:
           type: string
-          description: Required when op is remove, optional otherwise
+          description: Required when type is remove, optional otherwise
         value:
           $ref: '#/components/schemas/AnyValue'
-          description: Only required when op is add or replace
+          description: Only required when type is add or replace
       description: See section 3.5.2 of RFC 7644
     PatchRequest:
-      description: Stores one or more patch operations
       required:
       - Operations
       type: object
@@ -2096,7 +2052,6 @@ components:
             Used to bind the id generated for a created resource (via POST) to a named variable for later reuse
         path:
           type: string
-          description: Path of the endpoint the operation uses relative to the server root, eg. /Users
         data:
           type: object
           properties: {}
@@ -2112,7 +2067,6 @@ components:
       description: See section 3.7 of RFC 7644
     BulkData:
       type: object
-      description: Used to encapsulate one or more succesive SCIM operations in a single request
       properties:
         schemas:
           type: array
@@ -2130,7 +2084,6 @@ components:
         properties:
           failOnErrors:
             type: integer
-            description: The number of errors that can be accepted before the Bulk request is terminated and a response is returned
     Meta:
       type: object
       properties:
@@ -2142,23 +2095,18 @@ components:
           type: string
         location:
           type: string
-      description: Descriptive information about a resource. See section 3.1 of RFC 7643
+      description: See section 3.1 of RFC 7643
     Member:
       type: object
-      description: Represents a member of a Group resource
       properties:
         $ref:
           type: string
-          description: URI of the SCIM resource
         type:
           type: string
-          description: The type of member. Only "User" is allowed
         display:
           type: string
-          description: A human readable name, primarily used for display purposes
         value:
           type: string
-          description: Identifier (ID) of the resource
     Name:
       type: object
       properties:
@@ -2170,13 +2118,10 @@ components:
           type: string
         honorificPrefix:
           type: string
-          description: A "title" like "Ms.", "Mrs."
         honorificSuffix:
           type: string
-          description: Name suffix, like "Junior", "The great", "III"
         formatted:
           type: string
-          description: Full name, including all middle names, titles, and suffixes as appropriate
       description: See section 4.1.1 of RFC 7643
     Email:
       type: object
@@ -2191,7 +2136,6 @@ components:
           example: work
         primary:
           type: boolean
-          description: Denotes if this is the preferred e-mail among others, if any
       description: See section 4.1.2 of RFC 7643
     PhoneNumber:
       type: object
@@ -2206,7 +2150,6 @@ components:
           example: fax
         primary:
           type: boolean
-          description: Denotes if this is the preferred phone number among others, if any 
       description: See section 4.1.2 of RFC 7643
     InstantMessagingAddress:
       type: object
@@ -2220,7 +2163,6 @@ components:
           example: gtalk
         primary:
           type: boolean
-          description: Denotes if this is the preferred messaging addressed among others, if any
       description: See section 4.1.2 of RFC 7643
     Photo:
       type: object
@@ -2235,54 +2177,43 @@ components:
           example: thumbnail
         primary:
           type: boolean
-          description: Denotes if this is the preferred photo among others, if any
-      description: Points to a resource location representing the user's image. See section 4.1.2 of RFC 7643
+      description: See section 4.1.2 of RFC 7643
     Address:
       type: object
       properties:
         formatted:
           type: string
-          description: Full mailing address, formatted for display or use with a mailing label
         streetAddress:
           type: string
           example: 56 Acacia Avenue
         locality:
           type: string
-          description: City or locality of the address
         region:
           type: string
-          description: State or region of the address
         postalCode:
           type: string
-          description: Zip code
         country:
           type: string
-          description: Country expressed in ISO 3166-1 "alpha-2" code format
-          example: UK
         type:
           type: string
           example: home
         primary:
           type: boolean
-          description: Denotes if this is the preferred address among others, if any
-      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643
+      description: See section 4.1.2 of RFC 7643
     Group:
       type: object
       properties:
         value:
           type: string
-          description: Group identifier
           example: 180ee84f0671b1
         $ref:
           type: string
-          description: URI associated to the group
           example: https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1
         display:
           type: string
           example: Cult managers
         type:
           type: string
-          description: Describes how the group membership was derived
           example: direct
       description: See section 4.1.2 of RFC 7643
     Entitlement:
@@ -2297,8 +2228,7 @@ components:
           type: string
         primary:
           type: boolean
-          description: Denotes if this is the preferred entitlement among others, if any
-      description: Entitlements represent things a user has, like rights. See section 4.1.2 of RFC 7643
+      description: See section 4.1.2 of RFC 7643
     Role:
       type: object
       properties:
@@ -2311,7 +2241,6 @@ components:
           type: string
         primary:
           type: boolean
-          description: Denotes if this is the preferred role among others, if any
       description: See section 4.1.2 of RFC 7643
     X509Certificate:
       type: object
@@ -2325,23 +2254,21 @@ components:
           type: string
         primary:
           type: boolean
-          description: Denotes if this is the preferred certificate among others, if any
-      description: A certificate associated with the user. See section 4.1.2 of RFC 7643
+      description: See section 4.1.2 of RFC 7643
     BaseResource:
       type: object
       properties:
         schemas:
           type: array
-          description: URIs that are used to indicate the namespaces of the SCIM schemas that define the attributes present in the current structure
           items:
             type: string
         id:
           type: string
-          description: A unique identifier for a SCIM resource. See section 3.1 of RFC 7643
+          description: See section 3.1 of RFC 7643
         meta:
           $ref: '#/components/schemas/Meta'
     GroupResource:
-      description: Represents a group resource. See section 4.2 of RFC 7643
+      description: See section 4.2 of RFC 7643
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
@@ -2349,7 +2276,6 @@ components:
         properties:
           displayName:
             type: string
-            description: Group name suitable for display to end-users
           members:
             type: array
             items:
@@ -2396,14 +2322,12 @@ components:
             - compromised
           displayName:
             type: string
-            description: Device name suitable for display to end-users
           description:
             type: string
     Fido2DeviceResource:
       description: Represents a Fido 2 device enrollment
       allOf:
       - $ref: '#/components/schemas/BaseResource'
-      - type: object
       - type: object
         properties:
           userId:
@@ -2423,9 +2347,8 @@ components:
             - pending
           displayName:
             type: string
-            description: Device name suitable for display to end-users
     UserResource:
-      description: Represents a user resource. See section 4.1 of RFC 7643
+      description: See section 4.1 of RFC 7643
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
@@ -2433,39 +2356,27 @@ components:
         properties:
           externalId:
             type: string
-            description: Identifier of the resource useful from the perspective of the provisioning client. See section 3.1 of RFC 7643
+            description: See section 3.1 of RFC 7643
           userName:
             type: string
-            description: Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users)
           name:
             $ref: '#/components/schemas/Name'
           displayName:
             type: string
-            description: Name of the user suitable for display to end-users
           nickName:
             type: string
-            description: Casual way to address the user in real life
           profileUrl:
             type: string
-            description: URI pointing to a location representing the User's online profile
           title:
             type: string
-            example: Vice President
           userType:
             type: string
-            description: Used to identify the relationship between the organization and the user
-            example: Contractor
           preferredLanguage:
             type: string
-            description: Preferred language as used in the Accept-Language HTTP header
-            example: en
           locale:
             type: string
-            description: Used for purposes of localizing items such as currency and dates
-            example: en-US
           timezone:
             type: string
-            example: America/Los_Angeles
           active:
             type: boolean
           password:
@@ -2527,20 +2438,13 @@ components:
             items:
               $ref: '#/components/schemas/GenericResource'
   securitySchemes:
-    scim_auth:
+    testmode:
       type: oauth2
-      description: Endpoints protected by a bearer token passed in the Authorization header.
+      description: |
+        Endpoints protected by a bearer token passed in the Authorization header. 
+        It is assumed your jans-scim is configured to operate in test mode. Other protection
+        modes may be available, please check SCIM docs
       flows:
         clientCredentials:
-          tokenUrl: 'https://jenkins-ldap.jans.io/jans-auth/restv1/token'
-          scopes:
-            https://jans.io/scim/users.read: Query user resources
-            https://jans.io/scim/users.write: Modify user resources
-            https://jans.io/scim/groups.read: Query group resources
-            https://jans.io/scim/groups.write: Modify group resources
-            https://jans.io/scim/fido.read: Query fido resources
-            https://jans.io/scim/fido.write: Modify fido resources
-            https://jans.io/scim/fido2.read: Query fido 2 resources
-            https://jans.io/scim/fido2.write: Modify fido 2 resources
-            https://jans.io/scim/all-resources.search: Access the root .search endpoint 
-            https://jans.io/scim/bulk: Send requests to the bulk endpoint
+          tokenUrl: 'https://your.gluu.server.com/oxauth/restv1/token'
+          scopes: {}
