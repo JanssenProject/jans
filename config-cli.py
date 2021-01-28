@@ -1174,12 +1174,17 @@ class JCA_CLI:
 
         selection_values = ['q', 'b']
 
+        menu_numbering = {}
+
+        c = 0
         for i, item in enumerate(menu):
             if item.info.get('x-cli-ignore'):
                 continue
-            print(i+1, item)
-            selection_values.append(str(i+1))
-        
+            print(c+1, item)
+            selection_values.append(str(c+1))
+            menu_numbering[c+1] = i
+            c += 1
+
         selection = self.get_input(selection_values)
 
         if selection == 'b' and not menu.parent:
@@ -1187,10 +1192,10 @@ class JCA_CLI:
             sys.exit()
         elif selection == 'b':
             self.display_menu(menu.parent)
-        elif menu.get_child(int(selection) -1).children:
-            self.display_menu(menu.get_child(int(selection) -1))
+        elif int(selection) in menu_numbering and  menu.get_child(menu_numbering[int(selection)]).children:
+            self.display_menu(menu.get_child(menu_numbering[int(selection)]))
         else:
-            m = menu.get_child(int(selection) -1)
+            m = menu.get_child(menu_numbering[int(selection)])
             getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
