@@ -18,6 +18,8 @@ dn: inum=XXXX.AAAA-2222,ou=people,o=jans
 birthdate: 20140210000000Z
 displayName: Test Aaaa 2222
 jansAddres: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
+jansPhotos: {"value":"http://some.gif/AAAA-2222_thumb.gif","display":"AAAA-2222 thumbnail","type":"thumbnail","primary":false}
+jansPhotos: {"value":"http://some.gif/AAAA-2222.gif","display":"AAAA-2222","type":"photo","primary":true}
 jansExtId: 12000
 givenName: Aaaa 2222
 inum: XXXX.AAAA-2222
