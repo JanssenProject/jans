@@ -97,7 +97,8 @@ class CustomScript(object):
         self.script_type = script_type
         self.programming_language = programming_language
         self.module_properties = module_properties
-        self.configuration_properties = configuration_properties
+        if configuration_properties is not None:
+            self.configuration_properties = configuration_properties
         self.level = level
         if revision is not None:
             self.revision = revision
@@ -357,8 +358,6 @@ class CustomScript(object):
         :param configuration_properties: The configuration_properties of this CustomScript.  # noqa: E501
         :type: list[SimpleExtendedCustomProperty]
         """
-        if configuration_properties is None:
-            raise ValueError("Invalid value for `configuration_properties`, must not be `None`")  # noqa: E501
 
         self._configuration_properties = configuration_properties
 
