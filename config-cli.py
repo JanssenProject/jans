@@ -18,7 +18,7 @@ import code
 
 import pprint
 from functools import partial
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urlencode
 from collections import OrderedDict
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -196,7 +196,9 @@ class JCA_CLI:
 
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
-
+        if my_op_mode == 'scim':
+            self.swagger_configuration.host += '/jans-scim/restv1/v2'
+ 
         self.swagger_configuration.verify_ssl = False
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
@@ -243,12 +245,14 @@ class JCA_CLI:
                             #if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
                             #    continue
                             menu_name = self.cfg_yml['paths'][path][method].get('summary') or self.cfg_yml['paths'][path][method].get('description')
+
                             sm = Menu(
                                     name=menu_name.strip('.'),
                                     method=method,
                                     info=self.cfg_yml['paths'][path][method],
                                     path=path,
                                     )
+                            
                             m.add_child(sm)
 
         self.menu = menu
@@ -258,7 +262,7 @@ class JCA_CLI:
         sys.stderr.write("Getting access token for scope {}\n".format(scope))
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
-        url = urljoin(self.swagger_configuration.host, 'jans-auth/restv1/token')
+        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
         response = rest.POST(
