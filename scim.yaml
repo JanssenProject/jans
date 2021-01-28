@@ -12,18 +12,17 @@ servers:
 - url: https://jenkins-ldap.jans.io/scim/restv1/v2
 tags:
 - name: user
-  description: Endpoints for management of the User resource
+  description: Endpoints for management of User resources
 - name: group
-  description: Endpoints for management of the Group resource
+  description: Endpoints for management of Group resources
+- name: fido devices
+  description: Endpoints for management of Fido devices
+- name: fido2 devices
+  description: Endpoints for management of Fido2 devices
+- name: global search
+  description: Search from service root
 - name: discovery
   description: Endpoints to facilitate discovery of SCIM service provider features
-- name: fido devices
-  description: Endpoints to manage fido devices
-- name: fido2 devices
-  description: Endpoints to manage fido2 devices
-- name: search
-  description: Search (from system root) for one or more resource
-
 paths:
   /Groups:
     get:
@@ -1540,8 +1539,8 @@ paths:
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
       tags:
-        - search
-      operationId: search-resource
+        - global search
+      operationId: search-resources
       security:
         - scim_auth: [https://jans.io/scim/all-resources.search]
       requestBody:
