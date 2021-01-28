@@ -2220,7 +2220,7 @@ components:
         - scriptType
         - programmingLanguage
         - moduleProperties
-        - configurationProperties
+        #- configurationProperties
         - level
       properties:
         dn:
