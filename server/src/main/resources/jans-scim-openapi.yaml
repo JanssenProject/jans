@@ -12,9 +12,15 @@ servers:
 - url: https://jenkins-ldap.jans.io/scim/restv1/v2
 tags:
 - name: user
-  description: Endpoints for management of the User resource
+  description: Endpoints for management of User resources
 - name: group
-  description: Endpoints for management of the Group resource
+  description: Endpoints for management of Group resources
+- name: fido devices
+  description: Endpoints for management of Fido devices
+- name: fido2 devices
+  description: Endpoints for management of Fido2 devices
+- name: global search
+  description: Search from service root
 - name: discovery
   description: Endpoints to facilitate discovery of SCIM service provider features
 paths:
@@ -22,6 +28,7 @@ paths:
     get:
       tags:
       - group
+      operationId: get-groups
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/groups.read]
@@ -94,6 +101,7 @@ paths:
     post:
       tags:
       - group
+      operationId: create-group
       description: Allows creating a Group resource via POST (see section 3.3 of RFC
         7644)
       security:
@@ -162,6 +170,7 @@ paths:
     get:
       tags:
       - group
+      operationId: get-group-by-id
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/groups.read]
@@ -212,6 +221,7 @@ paths:
     put:
       tags:
       - group
+      operationId: update-group-by-id
       description: "Updates a Group resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
@@ -297,6 +307,7 @@ paths:
     delete:
       tags:
       - group
+      operationId: delete-group-by-id
       description: Deletes a group resource (see section 3.6 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/groups.write]
@@ -332,6 +343,7 @@ paths:
     patch:
       tags:
       - group
+      operationId: patch-group-by-id
       description: "Updates one or more attributes of a Group resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
@@ -399,6 +411,7 @@ paths:
     post:
       tags:
       - group
+      operationId: search-group
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/groups.read]
@@ -445,6 +458,9 @@ paths:
       x-codegen-request-body-name: searchRequest
   /FidoDevices:
     get:
+      tags:
+        - fido devices
+      operationId: get-fido-devices
       description: Query Fido resources
       security:
         - scim_auth: [https://jans.io/scim/fido.read]
@@ -531,6 +547,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /FidoDevices/{id}:
     get:
+      tags:
+        - fido devices
+      operationId: get-fido-device-by-id
       description: Retrieves a U2F/Super Gluu device by Id
       security:
         - scim_auth: [https://jans.io/scim/fido.read]
@@ -584,6 +603,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - fido devices
+      operationId: update-fido-device-by-id
       description: "Updates a Fido resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
@@ -657,6 +679,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: fidoDeviceResource
     delete:
+      tags:
+        - fido devices
+      operationId: delete-fido-device-by-id
       description: Deletes a Fido resource
       security:
         - scim_auth: [https://jans.io/scim/fido.write]
@@ -691,6 +716,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /FidoDevices/.search:
     post:
+      tags:
+        - fido devices
+      operationId: search-fido-device
       description: Query Fido resources
       security:
         - scim_auth: [https://jans.io/scim/fido.read]
@@ -753,6 +781,9 @@ paths:
       x-codegen-request-body-name: searchRequest
   /Fido2Devices:
     get:
+      tags:
+        - fido2 devices
+      operationId: get-fido2-devices
       description: Query Fido 2 resources
       security:
         - scim_auth: [https://jans.io/scim/fido2.read]
@@ -839,6 +870,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /Fido2Devices/{id}:
     get:
+      tags:
+        - fido2 devices
+      operationId: get-fido2-device-by-id
       description: Retrieves a Fido 2 device by Id
       security:
         - scim_auth: [https://jans.io/scim/fido2.read]
@@ -892,6 +926,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
+      tags:
+        - fido2 devices
+      operationId: update-fido2-device-by-id
       description: "Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58;\
         \ every\nattribute value found in the payload sent will replace the one in\
         \ the existing resource representation. Attributes \nnot passed in the payload\
@@ -965,6 +1002,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: fidoDeviceResource
     delete:
+      tags:
+        - fido2 devices
+      operationId: delete-fido2-device-by-id
       description: Deletes a Fido 2 resource
       security:
         - scim_auth: [https://jans.io/scim/fido2.write]
@@ -999,6 +1039,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /Fido2Devices/.search:
     post:
+      tags:
+        - fido2 devices
+      operationId: search-fido2-device
       description: Query Fido 2 resources
       security:
         - scim_auth: [https://jans.io/scim/fido2.read]
@@ -1063,6 +1106,7 @@ paths:
     get:
       tags:
       - user
+      operationId: get-users
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/users.read]
@@ -1135,6 +1179,7 @@ paths:
     post:
       tags:
       - user
+      operationId: create-user
       description: Allows creating a User resource via POST (see section 3.3 of RFC
         7644)
       security:
@@ -1203,6 +1248,7 @@ paths:
     get:
       tags:
       - user
+      operationId: get-user-by-id
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/users.read]
@@ -1253,6 +1299,7 @@ paths:
     put:
       tags:
       - user
+      operationId: update-user-by-id
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
@@ -1338,6 +1385,7 @@ paths:
     delete:
       tags:
       - user
+      operationId: delete-user-by-id
       description: Deletes a user resource
       security:
         - scim_auth: [https://jans.io/scim/users.write]
@@ -1373,6 +1421,7 @@ paths:
     patch:
       tags:
       - user
+      operationId: patch-user-by-id
       description: "Updates one or more attributes of a User resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
@@ -1440,6 +1489,7 @@ paths:
     post:
       tags:
       - user
+      operationId: search-user
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
         - scim_auth: [https://jans.io/scim/users.read]
@@ -1488,6 +1538,9 @@ paths:
     post:
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
+      tags:
+        - global search
+      operationId: search-resources
       security:
         - scim_auth: [https://jans.io/scim/all-resources.search]
       requestBody:
@@ -1573,6 +1626,7 @@ paths:
     get:
       tags:
       - discovery
+      operationId: get-service-provider-config
       description: Describes the SCIM specification features available (see section
         5 of RFC 7644)
       responses:
@@ -1592,6 +1646,7 @@ paths:
     get:
       tags:
       - discovery
+      operationId: get-resource-types
       description: |
         This endpoint is used to discover the types of resources available (see section 4 of RFC 7644)
       responses:
@@ -1611,6 +1666,7 @@ paths:
     get:
       tags:
       - discovery
+      operationId: get-resource-type-by-id
       description: "Describes the endpoint, schemas and extensions supported by a\
         \ specific kind of resource.\nIt returns a specific portion of the ouput of\
         \ the more general /Resources endpoint  \n"
@@ -1642,6 +1698,7 @@ paths:
     get:
       tags:
       - discovery
+      operationId: get-schemas
       description: "Endpoint used to retrieve information about schemas supported\
         \ (see section \n4 of RFC 7644)\n"
       responses:
@@ -1661,6 +1718,7 @@ paths:
     get:
       tags:
       - discovery
+      operationId: get-schema-by-uri
       description: Retrieves information about a specific resource
       parameters:
       - name: uri
