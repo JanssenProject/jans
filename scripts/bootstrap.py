@@ -663,81 +663,6 @@ class CtxGenerator:
                 encode_text(f.read(), encoded_salt),
             )
 
-    def oxtrust_api_rs_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        api_rs_client_jks_fn = self.set_config("api_rs_client_jks_fn", "/etc/certs/api-rs.jks")
-        api_rs_client_jwks_fn = self.set_config("api_rs_client_jwks_fn", "/etc/certs/api-rs-keys.json")
-        api_rs_client_jks_pass = self.set_secret("api_rs_client_jks_pass", get_random_chars())
-        self.set_secret(
-            "api_rs_client_jks_pass_encoded",
-            encode_text(api_rs_client_jks_pass, encoded_salt),
-        )
-
-        out, err, retcode = generate_openid_keys(
-            api_rs_client_jks_pass,
-            api_rs_client_jks_fn,
-            api_rs_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate oxTrust API RS keys; reason={err}")
-            raise click.Abort()
-
-        api_rs_client_cert_alg = self.set_config("api_rs_client_cert_alg", "RS512")
-
-        cert_alias = ""
-        for key in json.loads(out)["keys"]:
-            if key["alg"] == api_rs_client_cert_alg:
-                cert_alias = key["kid"]
-                break
-        self.set_config("api_rs_client_cert_alias", cert_alias)
-
-        basedir, fn = os.path.split(api_rs_client_jwks_fn)
-        self.set_secret("api_rs_client_base64_jwks", encode_template(fn, self.ctx, basedir))
-
-        self.set_config("oxtrust_resource_server_client_id", '1401.{}'.format(uuid.uuid4()))
-        self.set_config("oxtrust_resource_id", '1403.{}'.format(uuid.uuid4()))
-
-        with open(api_rs_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "api_rs_jks_base64",
-                encode_text(fr.read(), encoded_salt),
-            )
-
-    def oxtrust_api_rp_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        api_rp_client_jks_fn = self.set_config("api_rp_client_jks_fn", "/etc/certs/api-rp.jks")
-        api_rp_client_jwks_fn = self.set_config("api_rp_client_jwks_fn", "/etc/certs/api-rp-keys.json")
-        api_rp_client_jks_pass = self.set_secret("api_rp_client_jks_pass", get_random_chars())
-        self.set_secret(
-            "api_rp_client_jks_pass_encoded",
-            encode_text(api_rp_client_jks_pass, encoded_salt),
-        )
-        _, err, retcode = generate_openid_keys(
-            api_rp_client_jks_pass,
-            api_rp_client_jks_fn,
-            api_rp_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate oxTrust API RP keys; reason={err}")
-            raise click.Abort()
-
-        basedir, fn = os.path.split(api_rp_client_jwks_fn)
-        self.set_secret("api_rp_client_base64_jwks", encode_template(fn, self.ctx, basedir))
-
-        self.set_config("oxtrust_requesting_party_client_id", '1402.{}'.format(uuid.uuid4()))
-
-        with open(api_rp_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "api_rp_jks_base64",
-                encode_text(fr.read(), encoded_salt),
-            )
-
-    def oxtrust_api_client_ctx(self):
-        self.set_config("api_test_client_id", "0008-{}".format(uuid.uuid4()))
-        self.set_secret("api_test_client_secret", get_random_chars(24))
-
     def radius_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
         self.set_config("jans_radius_client_id", '1701.{}'.format(uuid.uuid4()))
@@ -810,9 +735,6 @@ class CtxGenerator:
         # self.passport_rp_ctx()
         # self.passport_sp_ctx()
         # self.oxshibboleth_ctx()
-        # self.oxtrust_api_rs_ctx()
-        # self.oxtrust_api_rp_ctx()
-        # self.oxtrust_api_client_ctx()
         # self.radius_ctx()
         self.scim_client_ctx()
         self.couchbase_ctx()
