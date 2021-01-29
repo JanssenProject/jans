@@ -12,10 +12,8 @@ from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import get_server_certificate
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
-from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_ssl_certkey
 
 
@@ -24,10 +22,7 @@ manager = get_manager()
 
 def get_web_cert():
     if not os.path.isfile("/etc/certs/web_https.crt"):
-        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", False)):
-            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
-        else:
-            get_server_certificate(manager.config.get("hostname"), 443, "/etc/certs/web_https.crt")
+        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
