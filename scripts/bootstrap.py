@@ -43,8 +43,6 @@ CN_PERSISTENCE_TYPE = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
 CN_PERSISTENCE_LDAP_MAPPING = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 CN_LDAP_URL = os.environ.get("CN_LDAP_URL", "localhost:1636")
 
-CN_OXTRUST_API_ENABLED = os.environ.get("CN_OXTRUST_API_ENABLED", False)
-CN_OXTRUST_API_TEST_MODE = os.environ.get("CN_OXTRUST_API_TEST_MODE", False)
 CN_PASSPORT_ENABLED = os.environ.get("CN_PASSPORT_ENABLED", False)
 CN_RADIUS_ENABLED = os.environ.get("CN_RADIUS_ENABLED", False)
 CN_CASA_ENABLED = os.environ.get("CN_CASA_ENABLED", False)
@@ -86,13 +84,11 @@ def get_bucket_mappings():
                 "jans-config-api/scopes.ldif",
                 "jans-config-api/clients.ldif",
                 # "oxidp.ldif",
-                # "oxtrust_api.ldif",
                 # "passport.ldif",
                 # "oxpassport-config.ldif",
                 # "jans_radius_base.ldif",
                 # "jans_radius_server.ldif",
                 # "clients.ldif",
-                # "oxtrust_api_clients.ldif",
                 "o_metric.ldif",
                 # "jans_radius_clients.ldif",
                 # "passport_clients.ldif",
@@ -415,13 +411,6 @@ def get_base_ctx(manager):
         "fido2ConfigFolder": manager.config.get("fido2ConfigFolder"),
 
         "admin_inum": manager.config.get("admin_inum"),
-        "enable_oxtrust_api_access_policy": str(as_boolean(CN_OXTRUST_API_ENABLED)).lower(),
-        "oxtrust_api_test_mode": str(as_boolean(CN_OXTRUST_API_TEST_MODE)).lower(),
-        "api_test_client_id": manager.config.get("api_test_client_id"),
-        # "encoded_api_test_client_secret": encode_text(
-        #     manager.secret.get("api_test_client_secret"),
-        #     manager.secret.get("encoded_salt"),
-        # ).decode(),
         "enable_scim_access_policy": str(as_boolean(CN_SCIM_ENABLED) or as_boolean(CN_PASSPORT_ENABLED)).lower(),
         # "scimTestMode": str(as_boolean(CN_SCIM_TEST_MODE)).lower(),
         # "scim_test_client_id": manager.config.get("scim_test_client_id"),
@@ -870,13 +859,11 @@ class LDAPBackend(object):
                 "jans-config-api/scopes.ldif",
                 "jans-config-api/clients.ldif",
                 # "oxidp.ldif",
-                # "oxtrust_api.ldif",
                 # "passport.ldif",
                 # "oxpassport-config.ldif",
                 # "gluu_radius_base.ldif",
                 # "gluu_radius_server.ldif",
                 # "clients.ldif",
-                # "oxtrust_api_clients.ldif",
                 "o_metric.ldif",
                 # "gluu_radius_clients.ldif",
                 # "passport_clients.ldif",

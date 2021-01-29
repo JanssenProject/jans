@@ -131,7 +131,7 @@
     "clientBlackList": ["*.attacker.com/*"],
 
     "scimTestMode": %(scimTestMode)s,
-    "oxTrustApiTestMode": %(oxtrust_api_test_mode)s,
+    "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200
     },
