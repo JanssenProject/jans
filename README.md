@@ -50,6 +50,8 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_CONN_TIMEOUT`: Connect timeout used when a bucket is opened (default to `10000` milliseconds).
 - `CN_COUCHBASE_CONN_MAX_WAIT`: Maximum time to wait before retrying connection (default to `20000` milliseconds).
 - `CN_COUCHBASE_SCAN_CONSISTENCY`: Default scan consistency; one of `not_bounded`, `request_plus`, or `statement_plus` (default to `not_bounded`).
+- `CN_COUCHBASE_BUCKET_PREFIX`: Prefix for Couchbase buckets (default to `jans`).
+- `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_CLIENT_API_APPLICATION_CERT_CN`: CommonName used in application certificate subject
 - `CN_CLIENT_API_ADMIN_CERT_CN`: CommonName used in admin certificate subject
 - `CN_CLIENT_API_BIND_IP_ADDRESSES`: A comma-separated host/IP address that are allowed to access client-api (default to `*`).
