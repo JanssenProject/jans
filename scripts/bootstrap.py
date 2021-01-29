@@ -291,78 +291,6 @@ class CtxGenerator:
         client_encoded_pw = encode_text(client_pw, self.get_secret("encoded_salt"))
         self.set_secret("jca_client_encoded_pw", client_encoded_pw)
 
-    def scim_rs_ctx(self):
-        self.set_config("scim_rs_client_id", "1201.{}".format(uuid.uuid4()))
-        scim_rs_client_jks_fn = self.set_config("scim_rs_client_jks_fn", "/etc/certs/scim-rs.jks")
-        scim_rs_client_jwks_fn = self.set_config("scim_rs_client_jwks_fn", "/etc/certs/scim-rs-keys.json")
-        scim_rs_client_jks_pass = self.set_secret("scim_rs_client_jks_pass", get_random_chars())
-        encoded_salt = self.get_secret("encoded_salt")
-
-        self.set_secret(
-            "scim_rs_client_jks_pass_encoded",
-            encode_text(scim_rs_client_jks_pass, encoded_salt),
-        )
-
-        out, err, retcode = generate_openid_keys(
-            scim_rs_client_jks_pass,
-            scim_rs_client_jks_fn,
-            scim_rs_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate SCIM RS keys; reason={err}")
-            raise click.Abort()
-
-        scim_rs_client_cert_alg = self.set_config("scim_rs_client_cert_alg", "RS512")
-
-        cert_alias = ""
-        for key in json.loads(out)["keys"]:
-            if key["alg"] == scim_rs_client_cert_alg:
-                cert_alias = key["kid"]
-                break
-
-        self.set_config("scim_rs_client_cert_alias", cert_alias)
-
-        basedir, fn = os.path.split(scim_rs_client_jwks_fn)
-        self.set_secret("scim_rs_client_base64_jwks", encode_template(fn, self.ctx, basedir))
-
-        with open(scim_rs_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "scim_rs_jks_base64",
-                encode_text(fr.read(), encoded_salt),
-            )
-
-    def scim_rp_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        self.set_config("scim_rp_client_id", "1202.{}".format(uuid.uuid4()))
-        scim_rp_client_jks_fn = self.set_config("scim_rp_client_jks_fn", "/etc/certs/scim-rp.jks")
-        scim_rp_client_jwks_fn = self.set_config("scim_rp_client_jwks_fn", "/etc/certs/scim-rp-keys.json")
-        scim_rp_client_jks_pass = self.set_secret("scim_rp_client_jks_pass", get_random_chars())
-        self.set_secret(
-            "scim_rp_client_jks_pass_encoded",
-            encode_text(scim_rp_client_jks_pass, encoded_salt),
-        )
-
-        _, err, retcode = generate_openid_keys(
-            scim_rp_client_jks_pass,
-            scim_rp_client_jks_fn,
-            scim_rp_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate SCIM RP keys; reason={err}")
-            raise click.Abort()
-
-        basedir, fn = os.path.split(scim_rp_client_jwks_fn)
-        self.set_secret("scim_rp_client_base64_jwks", encode_template(fn, self.ctx, basedir))
-
-        with open(scim_rp_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "scim_rp_jks_base64",
-                encode_text(fr.read(), encoded_salt),
-            )
-        self.set_config("scim_resource_oxid", "1203.{}".format(uuid.uuid4()))
-
     def passport_rs_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
         self.set_config("passport_rs_client_id", "1501.{}".format(uuid.uuid4()))
@@ -729,8 +657,6 @@ class CtxGenerator:
         self.redis_ctx()
         self.auth_ctx()
         self.config_api_ctx()
-        # self.scim_rs_ctx()
-        # self.scim_rp_ctx()
         # self.passport_rs_ctx()
         # self.passport_rp_ctx()
         # self.passport_sp_ctx()
