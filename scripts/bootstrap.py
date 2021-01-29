@@ -48,7 +48,6 @@ CN_RADIUS_ENABLED = os.environ.get("CN_RADIUS_ENABLED", False)
 CN_CASA_ENABLED = os.environ.get("CN_CASA_ENABLED", False)
 CN_SAML_ENABLED = os.environ.get("CN_SAML_ENABLED", False)
 CN_SCIM_ENABLED = os.environ.get("CN_SCIM_ENABLED", False)
-# CN_SCIM_TEST_MODE = os.environ.get("CN_SCIM_TEST_MODE", False)
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -356,12 +355,6 @@ def get_base_ctx(manager):
         # "passport_rp_client_jks_pass": manager.secret.get("passport_rp_client_jks_pass"),
         # "encoded_ldap_pw": manager.secret.get('encoded_ldap_pw'),
         "encoded_admin_password": manager.secret.get('encoded_admin_password'),
-        # 'scim_rs_client_id': manager.config.get('scim_rs_client_id'),
-        # 'scim_rs_client_base64_jwks': manager.secret.get('scim_rs_client_base64_jwks'),
-        # 'scim_rs_client_cert_alias': manager.config.get("scim_rs_client_cert_alias"),
-        # 'scim_rp_client_id': manager.config.get('scim_rp_client_id'),
-        # 'scim_rp_client_base64_jwks': manager.secret.get('scim_rp_client_base64_jwks'),
-        # 'scim_resource_oxid': manager.config.get('scim_resource_oxid'),
         # 'passport_rp_ii_client_id': manager.config.get("passport_rp_ii_client_id"),
 
         'admin_email': manager.config.get('admin_email'),
@@ -369,8 +362,6 @@ def get_base_ctx(manager):
         'shibJksPass': manager.secret.get('shibJksPass'),
         'oxTrustConfigGeneration': str(as_boolean(CN_OXTRUST_CONFIG_GENERATION)).lower(),
         'encoded_shib_jks_pw': manager.secret.get('encoded_shib_jks_pw'),
-        # 'scim_rs_client_jks_fn': manager.config.get('scim_rs_client_jks_fn'),
-        # 'scim_rs_client_jks_pass_encoded': manager.secret.get('scim_rs_client_jks_pass_encoded'),
         'passport_rs_client_jks_fn': manager.config.get('passport_rs_client_jks_fn'),
         'passport_rs_client_jks_pass_encoded': manager.secret.get('passport_rs_client_jks_pass_encoded'),
         'shibboleth_version': manager.config.get('shibboleth_version'),
@@ -404,12 +395,6 @@ def get_base_ctx(manager):
 
         "admin_inum": manager.config.get("admin_inum"),
         "enable_scim_access_policy": str(as_boolean(CN_SCIM_ENABLED) or as_boolean(CN_PASSPORT_ENABLED)).lower(),
-        # "scimTestMode": str(as_boolean(CN_SCIM_TEST_MODE)).lower(),
-        # "scim_test_client_id": manager.config.get("scim_test_client_id"),
-        # "encoded_scim_test_client_secret": encode_text(
-        #     manager.secret.get("scim_test_client_secret"),
-        #     manager.secret.get("encoded_salt"),
-        # ).decode(),
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "casa_enable_script": str(as_boolean(CN_CASA_ENABLED)).lower(),
