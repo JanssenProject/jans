@@ -363,9 +363,6 @@ def get_base_ctx(manager):
         # 'scim_rp_client_base64_jwks': manager.secret.get('scim_rp_client_base64_jwks'),
         # 'scim_resource_oxid': manager.config.get('scim_resource_oxid'),
         # 'passport_rp_ii_client_id': manager.config.get("passport_rp_ii_client_id"),
-        # 'api_rs_client_base64_jwks': manager.secret.get("api_rs_client_base64_jwks"),
-        # 'api_rs_client_cert_alias': manager.config.get("api_rs_client_cert_alias"),
-        # 'api_rp_client_base64_jwks': manager.secret.get("api_rp_client_base64_jwks"),
 
         'admin_email': manager.config.get('admin_email'),
         'shibJksFn': manager.config.get('shibJksFn'),
@@ -379,12 +376,7 @@ def get_base_ctx(manager):
         'shibboleth_version': manager.config.get('shibboleth_version'),
         'idp3Folder': manager.config.get('idp3Folder'),
         'ldap_site_binddn': manager.config.get('ldap_site_binddn'),
-        # 'api_rs_client_jks_fn': manager.config.get("api_rs_client_jks_fn"),
-        # 'api_rs_client_jks_pass_encoded': manager.secret.get("api_rs_client_jks_pass_encoded"),
 
-        # "oxtrust_requesting_party_client_id": manager.config.get("oxtrust_requesting_party_client_id"),
-        # "oxtrust_resource_server_client_id": manager.config.get("oxtrust_resource_server_client_id"),
-        # "oxtrust_resource_id": manager.config.get("oxtrust_resource_id"),
         "passport_resource_id": manager.config.get("passport_resource_id"),
 
         "gluu_radius_client_id": manager.config.get("gluu_radius_client_id"),
