@@ -687,7 +687,9 @@ class JCA_CLI:
             self.print_exception(e)
 
         if return_value:
-            return api_response
+            if api_response:
+                return api_response
+            return False
 
         selections = ['q', 'b']
         item_counters = []
@@ -811,9 +813,9 @@ class JCA_CLI:
         for prop in schema['properties']:
             
             item = schema['properties'][prop]
-            if getitem and item != getitem or prop in ('dn', 'inum'):
+            if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
                 continue
-            
+
             prop_ = self.get_model_key_map(model, prop)
             if item['type'] == 'object' and 'properties' in item:
                 print()
@@ -1065,24 +1067,22 @@ class JCA_CLI:
 
         initialised = False
         cur_model = None
-
+        go_back = False
         if 'x-cli-getdata' in endpoint.info:
-            print("YESSS", endpoint.info['x-cli-getdata'])
             for m in endpoint.parent:
-                print("Checking", m, m.info['operationId'])
                 if m.info['operationId'] == endpoint.info['x-cli-getdata']:
-                   
-                    
                     cur_model = self.process_get(m, return_value=True)
                     initialised = True
                     get_endpoint = m
-                    print("GET ENDPOINT", get_endpoint)
                     break
 
         else:
             for m in endpoint.parent:
                 if m.method=='get' and m.path.endswith('}'):
-                    cur_model = self.process_get(m, return_value=True)
+                    while True:
+                        cur_model = self.process_get(m, return_value=True)
+                        if not cur_model is False:
+                            break
                     initialised = True
                     get_endpoint = m
                     break
@@ -1131,6 +1131,7 @@ class JCA_CLI:
                     item = attr_name_list[int(selection)-1]
                     item_unmapped = self.get_model_key_map(cur_model, item)
                     schema_item = schema['properties'][item]
+                    schema_item['__name__'] = item
                     self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
                     changed_items.append(item)
 
@@ -1147,10 +1148,11 @@ class JCA_CLI:
                     selection = self.get_input(values=['y', 'n'], text='Continue?')
                     if selection == 'y':
                         print("Please wait while posting data ...\n")                
-                        api_caller = self.get_api_caller(endpoint)
+                        api_caller = self.get_api_caller(endpoint)                        
+                        put_pname = self.get_url_param(endpoint.path)
                         try:
-                            if end_point_param_val:
-                                args_ = {'body': cur_model, end_point_param['name']:end_point_param_val}
+                            if put_pname:
+                                args_ = {'body': cur_model, put_pname:end_point_param_val}
                                 api_response = api_caller(**args_)
                             else:
                                 api_response = api_caller(body=cur_model)
@@ -1161,7 +1163,13 @@ class JCA_CLI:
                         if api_response:
                             api_response_unmapped = self.unmap_model(api_response)
                             self.print_colored_output(api_response_unmapped)
-                    
+                            go_back = True
+                            break
+        if go_back:
+            selection = self.get_input(values=['q', 'b'])
+            if selection == 'b':
+                self.display_menu(endpoint.parent)
+        else:
             self.get_input_for_schema_(schema, cur_model, initialised=initialised)
 
 
