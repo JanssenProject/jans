@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim2.client.servicemeta;
 
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -29,13 +23,6 @@ import java.util.Optional;
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_ID;
 import static org.testng.Assert.*;
 
-/**
- * Created by jgomer on 2017-10-21.
- *
- * Important: Method inspectUserExtensionSchema is a server-dependant test. It requires the scimCustom 1st, 2nd and 3rd attributes with
- * the usual data types as in https://github.com/GluuFederation/community-edition-setup/templates/test/scim-client/data/scim-test-data.ldif
- * and https://github.com/GluuFederation/community-edition-setup/templates/test/scim-client/schema/scim_test.schema
- */
 public class SchemasTest extends BaseTest {
 
     private ListResponse listResponse;
