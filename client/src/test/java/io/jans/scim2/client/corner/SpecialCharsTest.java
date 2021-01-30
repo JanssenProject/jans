@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim2.client.corner;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -24,11 +18,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 import static org.testng.Assert.*;
 
-/**
- * NOTES:
- * Check first if /install/community-edition-setup/templates/test/scim-client/data/scim-test-data.ldif has been loaded to LDAP.
- * Created by jgomer on 2018-07-23.
- */
 public class SpecialCharsTest extends UserBaseTest {
 
     private static final String[] SPECIAL_CHARS = new String[]{"*", "\\", "(", ")"};    //, "\0" (see nullChar test)

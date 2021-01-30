@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim2.client.search;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -26,12 +20,6 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.Response.Status.*;
 import static org.testng.Assert.*;
 
-/**
- * NOTES:
- * Check first if /install/community-edition-setup/templates/test/scim-client/data/scim-test-data.ldif has been loaded to LDAP.
- *
- * Created by jgomer on 2017-10-23.
- */
 public class ComplexSearchUserTest extends UserBaseTest {
 
     @Test
