@@ -21,16 +21,16 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 
 |Scope|Actions allowed|
 |-|-|
-|https://jans.io/scim/users.read|Query user resources|
-|https://jans.io/scim/users.write|Modify user resources|
-|https://jans.io/scim/groups.read|Query group resources|
-|https://jans.io/scim/groups.write|Modify group resources|
-|https://jans.io/scim/fido.read|Query fido resources|
-|https://jans.io/scim/fido.write|Modify fido resources|
-|https://jans.io/scim/fido2.read|Query fido 2 resources|
-|https://jans.io/scim/fido2.write|Modify fido 2 resources|
-|https://jans.io/scim/all-resources.search|Access the root .search endpoint| 
-|https://jans.io/scim/bulk|Send requests to the bulk endpoint|
+|`https://jans.io/scim/users.read`|Query user resources|
+|`https://jans.io/scim/users.write`|Modify user resources|
+|`https://jans.io/scim/groups.read`|Query group resources|
+|`https://jans.io/scim/groups.write`|Modify group resources|
+|`https://jans.io/scim/fido.read`|Query fido resources|
+|`https://jans.io/scim/fido.write`|Modify fido resources|
+|`https://jans.io/scim/fido2.read`|Query fido 2 resources|
+|`https://jans.io/scim/fido2.write`|Modify fido 2 resources|
+|`https://jans.io/scim/all-resources.search`|Access the root .search endpoint| 
+|`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
 In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all of the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
