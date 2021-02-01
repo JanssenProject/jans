@@ -806,7 +806,7 @@ class JCA_CLI:
 
 
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
-
+        print(required_only)
         data = {}
         for prop in schema['properties']:
             item = schema['properties'][prop]
@@ -926,29 +926,29 @@ class JCA_CLI:
 
 
     def process_post(self, endpoint):
-        
         schema = self.get_scheme_for_endpoint(endpoint)
         
         title = schema.get('description') or schema['title']
         data_dict = {}
-        
+
         model_class = getattr(swagger_client.models, schema['__schema_name__'])
-        
+
         if my_op_mode == 'scim':
             if endpoint.path == '/jans-scim/restv1/v2/Groups':
                 schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:Group']
             elif endpoint.path == '/jans-scim/restv1/v2/Users':
                 schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
+            if endpoint.info['operationId'] == 'create-user':
+                schema['required'] = ['userName', 'name', 'displayName', 'emails', 'password']
 
         model = self.get_input_for_schema_(schema, model_class, required_only=True)
-
 
         optional_fields = []
         required_fields = schema.get('required', []) + ['dn', 'inum']
         for field in schema['properties']:
             if not field in required_fields:
                 optional_fields.append(field)
-
+                
 
         if optional_fields:
             fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
