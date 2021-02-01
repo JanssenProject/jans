@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
-@Path("/stat")
+@Path("/internal/stat")
 public class StatWS {
 
     private static final int DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS = 60;
@@ -66,7 +66,42 @@ public class StatWS {
     }
 
     public Response stat(String month) {
-        return null;
+        log.debug("Attempting to request stat, month: " + month);
+
+        validateAuthorization();
+        final List<String> months = validateMonth(month);
+
+        if (!allowToRun()) {
+            log.trace("Interval request limit exceeded. Request is rejected. Current interval limit: " + appConfiguration.getStatWebServiceIntervalLimitInSeconds() + " (or 60 seconds if not set).");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, TokenErrorResponseType.ACCESS_DENIED, "Interval request limit exceeded.");
+        }
+
+        lastProcessedAt = System.currentTimeMillis();
+
+        try {
+            log.trace("Recognized months: " + months);
+            final String responseAsStr = ServerUtil.asJson(buildResponse(months));
+            log.trace("Stat: " + responseAsStr);
+            return Response.ok().entity(responseAsStr).build();
+        } catch (WebApplicationException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
+        }
+    }
+
+    private StatResponse buildResponse(List<String> months) {
+        StatResponse response = new StatResponse();
+        for (String month : months) {
+            final StatResponseItem responseItem = buildItem(month);
+            if (responseItem != null) {
+                response.getResponse().put(month, responseItem);
+            }
+        }
+
+        return response;
     }
 
     private StatResponseItem buildItem(String month) {
