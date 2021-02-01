@@ -1,5 +1,6 @@
 dn: inum=F0C4,ou=scopes,o=jans
 description: Authenticate using OpenID Connect.
+displayName: authenticate_openid_connect
 inum: F0C4
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
@@ -10,6 +11,7 @@ objectClass: jansScope
 
 dn: inum=43F1,ou=scopes,o=jans
 description: View your basic profile info.
+displayName: view_profile
 inum: 43F1
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=2B29,ou=attributes,o=jans
@@ -35,6 +37,7 @@ objectClass: jansScope
 
 dn: inum=764C,ou=scopes,o=jans
 description: View your email address.
+displayName: view_email_address
 inum: 764C
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=8F88,ou=attributes,o=jans
@@ -47,6 +50,7 @@ objectClass: jansScope
 
 dn: inum=C17A,ou=scopes,o=jans
 description: View your address.
+displayName: view_address
 inum: C17A
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=27DB,ou=attributes,o=jans
@@ -66,6 +70,7 @@ objectClass: jansScope
 
 dn: inum=D491,ou=scopes,o=jans
 description: View your phone number.
+displayName: view_phone_number
 inum: D491
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=B17A,ou=attributes,o=jans
@@ -78,6 +83,7 @@ objectClass: jansScope
 
 dn: inum=341A,ou=scopes,o=jans
 description: View the client info.
+displayName: view_client
 inum: 341A
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=2B29,ou=attributes,o=jans
@@ -90,6 +96,7 @@ objectClass: jansScope
 
 dn: inum=10B2,ou=scopes,o=jans
 description: View your local username in the Janssen Server.
+displayName: view_username
 inum: 10B2
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=42E0,ou=attributes,o=jans
@@ -134,6 +141,7 @@ objectClass: jansScope
 
 dn: inum=8A01,ou=scopes,o=jans
 description: View your mobile phone number.
+displayName: view_mobile_phone_number
 inum: 8A01
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansClaim: inum=6DA6,ou=attributes,o=jans
@@ -145,6 +153,7 @@ objectClass: jansScope
 
 dn: inum=C4F5,ou=scopes,o=jans
 description: View your user permission and roles.
+displayName: view_user_permissions_roles
 inum: C4F5
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
@@ -156,6 +165,7 @@ objectClass: jansScope
 
 dn: inum=C4F6,ou=scopes,o=jans
 description: This scope value requests that an OAuth 2.0 Refresh Token be issued.
+displayName: refresh_token
 inum: C4F6
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
