@@ -680,11 +680,17 @@ class JCA_CLI:
         api_caller = self.get_api_caller(endpoint)
 
         api_response = None
-
+        raise_error = False
         try:
             api_response = api_caller(**parameters)
         except Exception as e:
-            self.print_exception(e)
+            if return_value:
+                raise_error = True
+            else:
+                self.print_exception(e)
+
+        if raise_error:
+            raise ValueError('Not found')
 
         if return_value:
             if api_response:
@@ -806,7 +812,6 @@ class JCA_CLI:
 
 
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
-        print(required_only)
         data = {}
         for prop in schema['properties']:
             item = schema['properties'][prop]
@@ -948,7 +953,6 @@ class JCA_CLI:
         for field in schema['properties']:
             if not field in required_fields:
                 optional_fields.append(field)
-                
 
         if optional_fields:
             fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
@@ -1099,7 +1103,16 @@ class JCA_CLI:
         if 'x-cli-getdata' in endpoint.info:
             for m in endpoint.parent:
                 if m.info['operationId'] == endpoint.info['x-cli-getdata']:
-                    cur_model = self.process_get(m, return_value=True)
+                    while True:
+                        try:
+                            cur_model = self.process_get(m, return_value=True)
+                            break
+                        except ValueError as e:
+                            print(self.colored_text("Server returned no data", error_color))
+                            retry = self.get_input(values=['y', 'n'], text='Retry?')
+                            if retry == 'n':
+                                self.display_menu(endpoint.parent)
+                                break
                     initialised = True
                     get_endpoint = m
                     break
@@ -1108,9 +1121,20 @@ class JCA_CLI:
             for m in endpoint.parent:
                 if m.method=='get' and m.path.endswith('}'):
                     while True:
-                        cur_model = self.process_get(m, return_value=True)
+                        while True:
+                            try:
+                                cur_model = self.process_get(m, return_value=True)
+                                break
+                            except ValueError as e:
+                                print(self.colored_text("Server returned no data", error_color))
+                                retry = self.get_input(values=['y', 'n'], text='Retry?')
+                                if retry == 'n':
+                                    self.display_menu(endpoint.parent)
+                                    break
+
                         if not cur_model is False:
                             break
+
                     initialised = True
                     get_endpoint = m
                     break

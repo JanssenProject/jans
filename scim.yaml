@@ -2425,6 +2425,7 @@ components:
             description: Device name suitable for display to end-users
     UserResource:
       description: Represents a user resource. See section 4.1 of RFC 7643
+      required: ['userName', 'name', 'displayName', 'emails', 'password']
       allOf:
       - $ref: '#/components/schemas/BaseResource'
       - type: object
