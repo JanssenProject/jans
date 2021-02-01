@@ -805,15 +805,15 @@ class JCA_CLI:
                 return attribute
 
 
-    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None):
-
-        #self.drop_to_shell(locals())
+    def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
 
         data = {}
         for prop in schema['properties']:
-            
             item = schema['properties'][prop]
             if getitem and prop != getitem['__name__'] or prop in ('dn', 'inum'):
+                continue
+
+            if (required_only and schema.get('required')) and not prop in schema.get('required'):
                 continue
 
             prop_ = self.get_model_key_map(model, prop)
@@ -940,7 +940,35 @@ class JCA_CLI:
             elif endpoint.path == '/jans-scim/restv1/v2/Users':
                 schema['properties']['schemas']['default'] = ['urn:ietf:params:scim:schemas:core:2.0:User']
 
-        model = self.get_input_for_schema_(schema, model_class)
+        model = self.get_input_for_schema_(schema, model_class, required_only=True)
+
+
+        optional_fields = []
+        required_fields = schema.get('required', []) + ['dn', 'inum']
+        for field in schema['properties']:
+            if not field in required_fields:
+                optional_fields.append(field)
+
+
+        if optional_fields:
+            fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
+            fields_numbers = []
+            if fill_optional == 'y':
+                print("Optiaonal Fields:")
+                for i, field in enumerate(optional_fields):
+                    print(i+1, field)
+                    fields_numbers.append(str(i+1))
+
+                while True:
+                    optional_selection = self.get_input(values=['q','c']+fields_numbers, help_text="c: continue, #: populate filed")
+                    if optional_selection == 'c':
+                        break
+                    if optional_selection in fields_numbers:
+                        
+                        item_name = optional_fields[int(optional_selection)-1]
+                        schema_item = schema['properties'][item_name].copy()
+                        schema_item['__name__'] = item_name
+                        self.get_input_for_schema_(schema, model, initialised=True, getitem=schema_item)
 
         print("Obtained Data:\n")
         model_unmapped = self.unmap_model(model)
