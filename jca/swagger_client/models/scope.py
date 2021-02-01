@@ -93,8 +93,7 @@ class Scope(object):
             self.id = id
         if icon_url is not None:
             self.icon_url = icon_url
-        if description is not None:
-            self.description = description
+        self.description = description
         self.scope_type = scope_type
         if claims is not None:
             self.claims = claims
@@ -112,7 +111,8 @@ class Scope(object):
             self.uma_type = uma_type
         if deletable is not None:
             self.deletable = deletable
-        self.expiration_date = expiration_date
+        if expiration_date is not None:
+            self.expiration_date = expiration_date
 
     @property
     def dn(self):
@@ -249,6 +249,8 @@ class Scope(object):
         :param description: The description of this Scope.  # noqa: E501
         :type: str
         """
+        if description is None:
+            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
 
         self._description = description
 
@@ -485,8 +487,6 @@ class Scope(object):
         :param expiration_date: The expiration_date of this Scope.  # noqa: E501
         :type: date
         """
-        if expiration_date is None:
-            raise ValueError("Invalid value for `expiration_date`, must not be `None`")  # noqa: E501
 
         self._expiration_date = expiration_date
 

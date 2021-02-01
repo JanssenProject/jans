@@ -3580,7 +3580,8 @@ components:
       required:
         - displayName
         - scopeType
-        - expirationDate
+        - description
+        - id
       properties:
         dn:
           type: string
