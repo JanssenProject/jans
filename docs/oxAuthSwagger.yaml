@@ -4400,26 +4400,134 @@ paths:
               description: An object containing various options for the option creation
               type: object
               required:
-                - _type
-                - clientDataJSON
+                - type
+                - response
               properties:
                 type:
                   type: string
-                clientDataJSON:
-                  type: array
-                  description: The base64url encoded clientDataJSON returned by the client
-                  items:
-                    type: string
-                  example:
-                    - challenge
-                    - origin
-                id:
-                  type: string
-
-      responses:
+                  enum: 
+                    - public-key
+                response:
+                  type: object
+                  required:
+                    - clientDataJSON
+                  properties:
+                    clientDataJSON:
+                      type: object
+                      description: The base64url encoded clientDataJSON returned by the client
+                      required:
+                        - challenge
+                        - origin
+                        - type
+                      properties:
+                        type:
+                          type: string
+                          enum: 
+                            - webauthn.create
+                        origin:
+                          type: string
+                        challenge:
+                          type: string
+                        tokenBinding:
+                          type: object
+                          required:
+                            - status
+                          properties:
+                            status:
+                              type: string
+                            id:
+                              type: string
+      responses:        
         200:
           description: OK
-          content: {}
+          content:
+            application/json:
+              schema:
+                title: Fido2RegistrationData
+                type: object
+                properties:
+                  createdDate:
+                    type: string
+                    format: date-time
+                  updatedDate:
+                    type: string
+                    format: date-time
+                  createdBy:
+                    type: string
+                  updatedBy:
+                    type: string
+                  username:
+                    type: string
+                  domain:
+                    type: string
+                  userId:
+                    type: string
+                  challenge:
+                    type: string
+                  attenstationRequest:
+                    type: string
+                  attenstationResponse:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - public-key
+                      id:
+                        type: string
+                      response:
+                        type: object
+                        required:
+                          - attestationObject
+                          - clientDataJSON
+                        properties:
+                          attestationObject:
+                            type: string
+                          clientDataJSON:
+                            type: string
+                          clientExtensionResults:
+                            type: array
+                            items:
+                              type: string
+                  uncompressedECPoint:
+                    type: string
+                  publicKeyId:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - public-key
+                  status:
+                    type: string
+                    enum:
+                      - registered
+                  counter:
+                    type: integer
+                  attestationType:
+                    type: string
+                  signatureAlgorithm:
+                    type: integer
+                  applicationId:
+                    type: string					
+                  authenticatorSelection:
+                    type: object
+                    properties:
+                      authenticatorAttachment:
+                        type: string
+                        format: enum
+                         - platform
+                         - cross-platform
+                      userVerification:
+                        type: string
+                        format: enum
+                         - required
+                         - preferred
+                         - discouraged
+                      requireResidentKey:
+                        type: boolean
+                  errorMessage:
+                    type: string
+
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
