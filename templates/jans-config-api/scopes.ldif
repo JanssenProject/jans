@@ -58,6 +58,16 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.36FC16,ou=scopes,o=jans
+description: Delete attribute related information
+displayName: Config API scope https://jans.io/oauth/config/attributes.delete
+inum: 1800.36FC16
+jansDefScope: false
+jansId: https://jans.io/oauth/config/attributes.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
 dn: inum=1800.0D9CCC,ou=scopes,o=jans
 description: View ACRS related information
 displayName: Config API scope https://jans.io/oauth/config/acrs.readonly
@@ -98,6 +108,16 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.F4E351,ou=scopes,o=jans
+description: Delete LDAP database related information
+displayName: Config API scope https://jans.io/oauth/config/database/ldap.delete
+inum: 1800.F4E351
+jansDefScope: false
+jansId: https://jans.io/oauth/config/database/ldap.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
 dn: inum=1800.3263EF,ou=scopes,o=jans
 description: View Couchbase database information
 displayName: Config API scope https://jans.io/oauth/config/database/couchbase.readonly
@@ -118,6 +138,16 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.419DD5,ou=scopes,o=jans
+description: Delete Couchbase database related information
+displayName: Config API scope https://jans.io/oauth/config/database/couchbase.delete
+inum: 1800.419DD5
+jansDefScope: false
+jansId: https://jans.io/oauth/config/database/couchbase.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
 dn: inum=1800.158007,ou=scopes,o=jans
 description: View cache scripts information
 displayName: Config API scope https://jans.io/oauth/config/scripts.readonly
@@ -134,6 +164,16 @@ displayName: Config API scope https://jans.io/oauth/config/scripts.write
 inum: 1800.671341
 jansDefScope: false
 jansId: https://jans.io/oauth/config/scripts.write
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
+dn: inum=1800.79932F,ou=scopes,o=jans
+description: Delete scripts related information
+displayName: Config API scope https://jans.io/oauth/config/scripts.delete
+inum: 1800.79932F
+jansDefScope: false
+jansId: https://jans.io/oauth/config/scripts.delete
 jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
@@ -174,6 +214,16 @@ displayName: Config API scope https://jans.io/oauth/config/smtp.write
 inum: 1800.D2E431
 jansDefScope: false
 jansId: https://jans.io/oauth/config/smtp.write
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
+dn: inum=1800.05CA71,ou=scopes,o=jans
+description: Delete SMTP related information
+displayName: Config API scope https://jans.io/oauth/config/smtp.delete
+inum: 1800.05CA71
+jansDefScope: false
+jansId: https://jans.io/oauth/config/smtp.delete
 jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
@@ -238,6 +288,16 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.FE975D,ou=scopes,o=jans
+description: Delete clients related information
+displayName: Config API scope https://jans.io/oauth/config/openid/clients.delete
+inum: 1800.FE975D
+jansDefScope: false
+jansId: https://jans.io/oauth/config/openid/clients.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
 dn: inum=1800.70A20C,ou=scopes,o=jans
 description: View sector related information
 displayName: Config API scope https://jans.io/oauth/config/openid/sectoridentifiers.readonly
@@ -254,6 +314,16 @@ displayName: Config API scope https://jans.io/oauth/config/openid/sectoridentifi
 inum: 1800.F20BAA
 jansDefScope: false
 jansId: https://jans.io/oauth/config/openid/sectoridentifiers.write
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
+dn: inum=1800.47E8E5,ou=scopes,o=jans
+description: Delete sector related information
+displayName: Config API scope https://jans.io/oauth/config/openid/sectoridentifiers.delete
+inum: 1800.47E8E5
+jansDefScope: false
+jansId: https://jans.io/oauth/config/openid/sectoridentifiers.delete
 jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
@@ -278,6 +348,16 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.DCE0C3,ou=scopes,o=jans
+description: Delete scope related information
+displayName: Config API scope https://jans.io/oauth/config/scopes.delete
+inum: 1800.DCE0C3
+jansDefScope: false
+jansId: https://jans.io/oauth/config/scopes.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
+
 dn: inum=1800.BDCE9B,ou=scopes,o=jans
 description: View UMA Resource related information
 displayName: Config API scope https://jans.io/oauth/config/uma/resources.readonly
@@ -298,3 +378,12 @@ jansScopeTyp: openid
 objectclass: top
 objectclass: jansScope
 
+dn: inum=1800.B15085,ou=scopes,o=jans
+description: Delete UMA Resource related information
+displayName: Config API scope https://jans.io/oauth/config/uma/resources.delete
+inum: 1800.B15085
+jansDefScope: false
+jansId: https://jans.io/oauth/config/uma/resources.delete
+jansScopeTyp: openid
+objectclass: top
+objectclass: jansScope
