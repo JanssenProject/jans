@@ -3,11 +3,11 @@ on:
   push:
     branches: [master]
     paths:
-      - "helm/**"
+      - "jans/**"
   pull_request:
     branches: [master]
     paths:
-      - "helm/**"
+      - "jans/**"
   workflow_dispatch:
 jobs:
   build:
@@ -42,7 +42,7 @@ jobs:
           sudo microk8s.config > config
           sudo mv config ~/.kube/config
           sudo microk8s.kubectl create ns jans
-          sudo helm install jans -f helm/values.yaml helm -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap"
+          sudo helm install jans -f jans/values.yaml jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap"
           sleep 30
           sudo kubectl get po -n jans
           sudo kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server || sudo kubectl logs -l APP_NAME=auth-server -c jans-auth-server -n jans || echo "Not Found"

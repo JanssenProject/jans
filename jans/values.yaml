@@ -1,0 +1,281 @@
+auth-server:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/auth-server
+    tag: 1.0.0_dev
+  replicas: 1
+  resources:
+    limits:
+      cpu: 2500m
+      memory: 2500Mi
+    requests:
+      cpu: 2500m
+      memory: 2500Mi
+  service:
+    authServerServiceName: auth-server
+auth-server-key-rotation:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/certmanager
+    tag: 1.0.0_dev
+  keysLife: 23
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 300m
+      memory: 300Mi
+client-api:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/client-api
+    tag: 1.0.0_dev
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 400Mi
+    requests:
+      cpu: 1000m
+      memory: 400Mi
+  service:
+    clientApiServerServiceName: client-api
+config:
+  adminPassword: P@ssw0rd
+  city: Austin
+  configmap:
+    cnAuthServerBackend: "auth-server:8080"
+    cnCacheType: NATIVE_PERSISTENCE
+    cnClientApiAdminCertCn: client-api
+    cnClientApiApplicationCertCn: client-api
+    cnClientApiBindIpAddresses: "*"
+    cnClientApiServerUrl: "client-api:8443"
+    cnConfigKubernetesConfigMap: cn
+    cnCouchbaseBucketPrefix: jans
+    cnCouchbaseCertFile: /etc/certs/couchbase.crt
+    cnCouchbaseCrt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURlakNDQW1LZ0F3SUJBZ0lKQUwyem5UWlREUHFNTUEwR0NTcUdTSWIzRFFFQkN3VUFNQzB4S3pBcEJnTlYKQkFNTUlpb3VZMkpuYkhWMUxtUmxabUYxYkhRdWMzWmpMbU5zZFhOMFpYSXViRzlqWVd3d0hoY05NakF3TWpBMQpNRGt4T1RVeFdoY05NekF3TWpBeU1Ea3hPVFV4V2pBdE1Tc3dLUVlEVlFRRERDSXFMbU5pWjJ4MWRTNWtaV1poCmRXeDBMbk4yWXk1amJIVnpkR1Z5TG14dlkyRnNNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUIKQ2dLQ0FRRUFycmQ5T3lvSnRsVzhnNW5nWlJtL2FKWjJ2eUtubGU3dVFIUEw4Q2RJa1RNdjB0eHZhR1B5UkNQQgo3RE00RTFkLzhMaU5takdZZk41QjZjWjlRUmNCaG1VNmFyUDRKZUZ3c0x0cTFGT3MxaDlmWGo3d3NzcTYrYmlkCjV6Umw3UEE0YmdvOXVkUVRzU1UrWDJUUVRDc0dxVVVPWExrZ3NCMjI0RDNsdkFCbmZOeHcvYnFQa2ZCQTFxVzYKVXpxellMdHN6WE5GY0dQMFhtU3c4WjJuaFhhUGlva2pPT2dyMkMrbVFZK0htQ2xGUWRpd2g2ZjBYR0V0STMrKwoyMStTejdXRkF6RlFBVUp2MHIvZnk4TDRXZzh1YysvalgwTGQrc2NoQTlNQjh3YmJORUp2ZjNMOGZ5QjZ0cTd2CjF4b0FnL0g0S1dJaHdqSEN0dFVnWU1oU0xWV3UrUUlEQVFBQm80R2NNSUdaTUIwR0ExVWREZ1FXQkJTWmQxWU0KVGNIRVZjSENNUmp6ejczZitEVmxxREJkQmdOVkhTTUVWakJVZ0JTWmQxWU1UY0hFVmNIQ01Sanp6NzNmK0RWbApxS0V4cEM4d0xURXJNQ2tHQTFVRUF3d2lLaTVqWW1kc2RYVXVaR1ZtWVhWc2RDNXpkbU11WTJ4MWMzUmxjaTVzCmIyTmhiSUlKQUwyem5UWlREUHFNTUF3R0ExVWRFd1FGTUFNQkFmOHdDd1lEVlIwUEJBUURBZ0VHTUEwR0NTcUcKU0liM0RRRUJDd1VBQTRJQkFRQk9meTVWSHlKZCtWUTBXaUQ1aSs2cmhidGNpSmtFN0YwWVVVZnJ6UFN2YWVFWQp2NElVWStWOC9UNnE4Mk9vVWU1eCtvS2dzbFBsL01nZEg2SW9CRnVtaUFqek14RTdUYUhHcXJ5dk13Qk5IKzB5CnhadG9mSnFXQzhGeUlwTVFHTEs0RVBGd3VHRlJnazZMRGR2ZEN5NVdxWW1MQWdBZVh5VWNaNnlHYkdMTjRPUDUKZTFiaEFiLzRXWXRxRHVydFJrWjNEejlZcis4VWNCVTRLT005OHBZN05aaXFmKzlCZVkvOEhZaVQ2Q0RRWWgyTgoyK0VWRFBHcFE4UkVsRThhN1ZLL29MemlOaXFyRjllNDV1OU1KdjM1ZktmNUJjK2FKdWduTGcwaUZUYmNaT1prCkpuYkUvUENIUDZFWmxLaEFiZUdnendtS1dDbTZTL3g0TklRK2JtMmoKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    cnCouchbaseIndexNumReplica: 0
+    cnCouchbasePassword: P@ssw0rd
+    cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
+    cnCouchbaseSuperUser: admin
+    cnCouchbaseSuperUserPassword: P@ssw0rd
+    cnCouchbaseSuperUserPasswordFile: /etc/jans/conf/couchbase_superuser_password
+    cnCouchbaseUrl: cbjans.default.svc.cluster.local
+    cnCouchbaseUser: jans
+    cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
+    cnLdapUrl: "opendj:1636"
+    cnMaxRamPercent: "75.0"
+    cnPersistenceLdapMapping: default
+    cnRedisSentinelGroup: ""
+    cnRedisSslTruststore: ""
+    cnRedisType: STANDALONE
+    cnRedisUrl: "redis.redis.svc.cluster.local:6379"
+    cnRedisUseSsl: false
+    cnSecretKubernetesSecret: cn
+    configAdapterName: kubernetes
+    configSecretAdapter: kubernetes
+    containerMetadataName: kubernetes
+    lbAddr: ""
+    ldapServiceName: opendj
+  countryCode: US
+  email: support@jans.io
+  image:
+    repository: janssenproject/configuration-manager
+    tag: 1.0.0_dev
+  ldapPassword: P@ssw0rds
+  orgName: Janssen
+  redisPassword: P@assw0rd
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 300m
+      memory: 300Mi
+  state: TX
+config-api:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/config-api
+    tag: 1.0.0_dev
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 400Mi
+    requests:
+      cpu: 1000m
+      memory: 400Mi
+  service:
+    configApiServerServiceName: config-api
+fido2:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/fido2
+    tag: 1.0.0_dev
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 500m
+      memory: 500Mi
+  service:
+    fido2ServiceName: fido2
+global:
+  alb:
+    ingress: false
+  auth-server:
+    enabled: true
+  auth-server-key-rotation:
+    enabled: false
+  awsStorageType: io1
+  azureStorageAccountType: Standard_LRS
+  azureStorageKind: Managed
+  client-api:
+    enabled: false
+  cloud:
+    testEnviroment: false
+  cnPersistenceType: ldap
+  config:
+    enabled: true
+  config-api:
+    enabled: true
+  fqdn: demoexample.jans.io
+  fido2:
+    enabled: true
+  gcePdStorageType: pd-standard
+  isFqdnRegistered: "false"
+  istio:
+    enabled: false
+    ingress: false
+    namespace: istio-system
+  lbIp: ""
+  nginx-ingress:
+    enabled: true
+  opendj:
+    enabled: true
+  persistence:
+    enabled: true
+  scim:
+    enabled: true
+  storageClass:
+    allowVolumeExpansion: true
+    allowedTopologies: []
+    mountOptions:
+    - debug
+    parameters:
+      fsType: ""
+      kind: ""
+      pool: ""
+      storageAccountType: ""
+      type: ""
+    provisioner: microk8s.io/hostpath
+    reclaimPolicy: Retain
+    volumeBindingMode: WaitForFirstConsumer
+  upgrade:
+    enabled: false
+nginx-ingress:
+  ingress:
+    openidConfigEnabled: true
+    uma2ConfigEnabled: true
+    webfingerEnabled: true
+    webdiscoveryEnabled: true
+    scimConfigEnabled: true
+    scimEnabled: true
+    configApiEnabled: true
+    u2fConfigEnabled: true
+    fido2ConfigEnabled: true
+    authServerEnabled: true
+    additionalAnnotations: {}
+    path: /
+    hosts:
+    - demoexample.jans.io
+    tls:
+    - secretName: tls-certificate
+      hosts:
+      - demoexample.jans.io
+opendj:
+  image:
+    pullPolicy: Always
+    repository: gluufederation/opendj
+    tag: 5.0.0_dev
+  multiCluster:
+    enabled: false
+    serfAdvertiseAddr: "firstldap.jans.io:30946"
+    serfKey: Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk=
+    serfPeers:
+    - "firstldap.jans.io:30946"
+    - "secondldap.jans.io:31946"
+  persistence:
+    size: 5Gi
+  ports:
+    tcp-admin:
+      nodePort: ""
+      port: 4444
+      protocol: TCP
+      targetPort: 4444
+    tcp-ldap:
+      nodePort: ""
+      port: 1389
+      protocol: TCP
+      targetPort: 1389
+    tcp-ldaps:
+      nodePort: ""
+      port: 1636
+      protocol: TCP
+      targetPort: 1636
+    tcp-repl:
+      nodePort: ""
+      port: 8989
+      protocol: TCP
+      targetPort: 8989
+    tcp-serf:
+      nodePort: ""
+      port: 7946
+      protocol: TCP
+      targetPort: 7946
+    udp-serf:
+      nodePort: ""
+      port: 7946
+      protocol: UDP
+      targetPort: 7946
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 2000Mi
+    requests:
+      cpu: 1500m
+      memory: 2000Mi
+  service:
+    ldapServiceName: opendj
+persistence:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/persistence-loader
+    tag: 1.0.0_dev
+  resources:
+    limits:
+      cpu: 300m
+      memory: 300Mi
+    requests:
+      cpu: 300m
+      memory: 300Mi
+scim:
+  image:
+    pullPolicy: Always
+    repository: janssenproject/scim
+    tag: 1.0.0_dev
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1000Mi
+    requests:
+      cpu: 1000m
+      memory: 1000Mi
+  service:
+    scimServiceName: scim

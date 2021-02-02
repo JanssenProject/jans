@@ -1,0 +1,56 @@
+apiVersion: v2
+appVersion: "1.0.0-a4"
+home: https://jans.io
+maintainers:
+- name: Janssen
+description: A Helm chart for Janssen IDP
+kubeVersion: ">= 1.17.0"
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/prerelease: "true"
+name: jans
+version: 1.0.0-a4
+dependencies:
+- name: config
+  condition: global.config.enabled
+  version: 1.0.0-a4
+
+- name: config-api
+  condition: global.config-api.enabled
+  version: 1.0.0-a4
+
+- name: opendj
+  condition: global.opendj.enabled
+  version: 1.0.0-a4
+
+- name: auth-server
+  condition: global.auth-server.enabled
+  version: 1.0.0-a4
+
+- name: fido2
+  condition: global.fido2.enabled
+  version: 1.0.0-a4
+
+- name: scim
+  condition: global.scim.enabled
+  version: 1.0.0-a4
+
+- name: nginx-ingress
+  condition: global.nginx-ingress.enabled
+  version: 1.0.0-a4
+
+- name: auth-server-key-rotation
+  condition: global.auth-server-key-rotation.enabled
+  version: 1.0.0-a4
+
+- name: client-api
+  condition: global.client-api.enabled
+  version: 1.0.0-a4
+
+- name: persistence
+  condition: global.persistence.enabled
+  version: 1.0.0-a4
+
+- name: cn-istio-ingress
+  condition: global.istio.ingress
+  version: 1.0.0-a4

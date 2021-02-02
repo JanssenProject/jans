@@ -27,4 +27,4 @@ microk8s.kubectl create namespace jans || echo "namespace exists"
 microk8s.config > ~/.kube/config
 default_iface=$(awk '$2 == 00000000 { print $1 }' /proc/net/route)
 ip=$(ip addr show dev "$default_iface" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }')
-helm install jans -f ./helm/values.yaml ./helm -n jans --set global.lbIp="$ip" || echo "Please get ip of the instance and run helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp=<ip>"
+helm install jans -f ./jans/values.yaml ./jans -n jans --set global.lbIp="$ip" || echo "Please get ip of the instance and run helm install jans -f ./jans-cloud-native/helm/values.yaml ./jans-cloud-native/helm -n jans --set global.lbIp=<ip>"

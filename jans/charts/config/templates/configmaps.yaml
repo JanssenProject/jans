@@ -1,0 +1,258 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: {{ .Release.Name }}-config-cm
+  namespace: {{ .Release.Namespace }}
+data:
+  CN_CONFIG_ADAPTER: {{ .Values.configmap.configAdapterName }}
+  CN_SECRET_ADAPTER: {{ .Values.configmap.configSecretAdapter }}
+  CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
+  CN_SECRET_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
+  CN_CONFIG_KUBERNETES_CONFIGMAP: {{ .Values.configmap.cnConfigKubernetesConfigMap }}
+  CN_SECRET_KUBERNETES_SECRET: {{ .Values.configmap.cnSecretKubernetesSecret }}
+  CN_CONTAINER_METADATA: {{ .Values.configmap.containerMetadataName | quote }}
+  CN_MAX_RAM_PERCENTAGE: {{ .Values.configmap.cnMaxRamPercent | quote }}
+  CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
+  CN_DOCUMENT_STORE_TYPE: {{ .Values.configmap.cnDocumentStoreType | quote }}
+  DOMAIN: {{ .Values.global.fqdn | quote }}
+  CN_AUTH_SERVER_BACKEND: {{ .Values.configmap.cnAuthServerBackend | quote }}
+  CN_CLIENT_API_SERVER_URL: {{ .Values.configmap.cnClientApiServerUrl | quote }}
+  CN_CLIENT_API_BIND_IP_ADDRESSES: {{ .Values.configmap.cnClientApiBindIpAddresses | quote }}
+  {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+  LB_ADDR: {{ .Values.configmap.lbAddr }}
+  {{- end }}
+  CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}
+  {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid")  }}
+  # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
+  CN_LDAP_URL: {{ .Values.configmap.cnLdapUrl | quote }}
+  {{- else if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+  #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
+  CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
+  CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.cnCouchbaseBucketPrefix }}
+  CN_COUCHBASE_INDEX_NUM_REPLICA: {{ .Values.configmap.cnCouchbaseIndexNumReplica | quote }}
+  CN_COUCHBASE_USER: {{ .Values.configmap.cnCouchbaseUser }}
+  CN_COUCHBASE_CERT_FILE: {{ .Values.configmap.cnCouchbaseCertFile | quote }}
+  CN_COUCHBASE_PASSWORD_FILE: {{ .Values.configmap.cnCouchbasePasswordFile | quote }}
+  CN_COUCHBASE_SUPERUSER: {{ .Values.configmap.cnCouchbaseSuperUser }}
+  CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.configmap.cnCouchbaseSuperUserPasswordFile | quote }}
+  {{- end }}
+  CN_KEY_ROTATION_FORCE: "false"
+  CN_KEY_ROTATION_CHECK: "3600"
+  CN_KEY_ROTATION_INTERVAL: "48"
+  CN_SSL_CERT_FROM_SECRETS: "true"
+  CN_CONTAINER_MAIN_NAME: {{ .Release.Name }}-auth-server
+  # options: default/user/site/cache/statistic used only if CN_PERSISTENCE_TYPE is hybrid or hybrid
+  {{- if or (eq .Values.global.cnPersistenceType "hybrid") (eq .Values.global.cnPersistenceType "ldap") }}
+  CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceLdapMapping | quote }}
+  {{- end }}
+  CN_LDAP_INIT_HOST: {{ .Values.configmap.ldapServiceName }} #{{ template "cn.fullname" . }}-service
+  CN_LDAP_INIT: {{ .Values.cnLdapInit | quote }} # TODO: To be removed
+  CN_LDAP_INIT_PORT: {{ .Values.cnLdapInitPort | quote }}
+  # must the same as the opendj service name
+  CN_CERT_ALT_NAME: {{ .Values.configmap.ldapServiceName }} #{{ template "cn.fullname" . }}-service
+  # Auto enable installation of some services
+  CN_CLIENT_API_APPLICATION_CERT_CN: {{ .Values.configmap.cnClientApiApplicationCertCn | quote }}
+  CN_CLIENT_API_ADMIN_CERT_CN: {{ .Values.configmap.cnClientApiAdminCertCn | quote }}
+  {{ if eq .Values.configmap.cnCacheType "REDIS" }}
+  CN_REDIS_URL: {{ .Values.configmap.cnRedisUrl | quote }}
+  CN_REDIS_TYPE: {{ .Values.configmap.cnRedisType | quote }}
+  CN_REDIS_USE_SSL: {{ .Values.configmap.cnRedisUseSsl | quote }}
+  CN_REDIS_SSL_TRUSTSTORE: {{ .Values.configmap.cnRedisSslTruststore | quote }}
+  CN_REDIS_SENTINEL_GROUP: {{ .Values.configmap.cnRedisSentinelGroup | quote }}
+  {{- end }}
+  {{- if .Values.global.istio.enabled }}
+  CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
+  {{- end }}
+
+---
+
+apiVersion: v1
+data:
+  tls_generator.py: |-
+    from pprint import pprint
+    from kubernetes import config, client
+    import logging
+
+    #use the serviceAccount k8s gives to pods
+    config.load_incluster_config()
+    v1 = client.CoreV1Api()
+
+    #global vars
+    name = "tls-certificate"
+    namespace = {{ .Release.Namespace | quote }}
+
+    # if istio is enabled
+    istio_ns = {{ .Values.global.istio.namespace | quote }}
+
+    # create cert in istio-system
+    def create_tls_in_istio(cert, key):
+
+        v1 = client.CoreV1Api()
+        try:
+            secret = v1.read_namespaced_secret(name, istio_ns)
+        except client.rest.ApiException as e:
+            if e.status == 404:
+                print('secret/{} in ns/{} does not exist. Creating...'.format(
+                    name, istio_ns))
+                metadata = {
+                    'name': name,
+                    'namespace': istio_ns
+                }
+                data = {
+                    'tls.crt': cert,
+                    'tls.key' : key,
+                }
+                api_version = 'v1'
+                kind = 'Secret'
+                body = client.V1Secret(api_version, data , kind, metadata,
+                    type='kubernetes.io/tls')
+                api_response = v1.create_namespaced_secret(istio_ns, body )
+            else:
+                logging.exception(e)
+            return False
+        else:
+            print('tls-certificate already exists.')
+
+
+    # check if cn secret exists
+    def get_certs():
+        if ( v1.read_namespaced_secret( 'cn', namespace ) ):
+            ssl_cert = v1.read_namespaced_secret( 'cn', namespace ).data['ssl_cert']
+            ssl_key = v1.read_namespaced_secret( "cn", namespace ).data['ssl_key']
+
+        return ssl_cert, ssl_key
+
+    def create_tls(cert, key):
+
+        v1 = client.CoreV1Api()
+        try:
+            secret = v1.read_namespaced_secret(name, namespace)
+        except client.rest.ApiException as e:
+            if e.status == 404:
+                print('secret/{} in ns/{} does not exist. Creating...'.format(
+                    name, namespace))
+                metadata = {
+                    'name': name,
+                    'namespace': namespace
+                }
+                data = {
+                    'tls.crt': cert,
+                    'tls.key' : key,
+                }
+                api_version = 'v1'
+                kind = 'Secret'
+                body = client.V1Secret(api_version, data , kind, metadata,
+                    type='kubernetes.io/tls')
+                api_response = v1.create_namespaced_secret(namespace, body )
+            else:
+                logging.exception(e)
+            return False
+        else:
+            print('tls-certificate already exists.')
+
+    def main():
+        cert, key = get_certs()
+        create_tls(cert, key)
+
+        # create or check cert if istio is enabled
+        {{- if .Values.global.istio.ingress }}
+        create_tls_in_istio(cert, key)
+        {{- end }}
+
+    if __name__ == "__main__":
+        main()
+
+kind: ConfigMap
+metadata:
+  name: {{ include "config.fullname" . }}-tls-script
+  namespace: {{ .Release.Namespace }}
+
+---
+
+apiVersion: v1
+data:
+  updatelbip.py: |-
+    #!/usr/bin/env python3
+    # -*- coding: utf-8 -*-
+
+    # Update the IP of the load balancer automatically
+
+    """
+     License terms and conditions for Janssen Cloud Native Edition:
+     https://www.apache.org/licenses/LICENSE-2.0
+    """
+
+    import socket
+    import os
+    import logging
+    import time
+
+    logger = logging.getLogger("update-lb-ip")
+    logger.setLevel(logging.INFO)
+    ch = logging.StreamHandler()
+    fmt = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+
+
+    def backup(hosts):
+        timenow = time.strftime("%c")
+        timestamp = "Backup occurred %s \n" % timenow
+        logger.info("Backing up hosts file to /etc/hosts.back ...")
+        with open('/etc/hosts.back', 'a+') as f:
+            f.write(timestamp)
+            for line in hosts:
+                f.write(line)
+
+
+    def get_hosts(lb_addr, domain):
+        ip_list = []
+        hosts_list = []
+        ais = socket.getaddrinfo(lb_addr, 0, 0, 0, 0)
+        for result in ais:
+            ip_list.append(result[-1][0])
+        ip_list = list(set(ip_list))
+        for ip in ip_list:
+            add_host = ip + " " + domain
+            hosts_list.append(add_host)
+
+        return hosts_list
+
+
+    def main():
+        try:
+            while True:
+                lb_addr = os.environ.get("LB_ADDR", "")
+                domain = os.environ.get("DOMAIN", "demoexample.jans.io")
+                host_file = open('/etc/hosts', 'r').readlines()
+                hosts = get_hosts(lb_addr, domain)
+                stop = []
+                for host in hosts:
+                    for i in host_file:
+                        if host.replace(" ", "") in i.replace(" ", ""):
+                            stop.append("found")
+                if len(stop) != len(hosts):
+                    backup(host_file)
+                    logger.info("Writing new hosts file")
+                    with open('/etc/hosts', 'w') as f:
+                        for line in host_file:
+                            if domain not in line:
+                                f.write(line)
+                        for host in hosts:
+                            f.write(host)
+                            f.write("\n")
+                        f.write("\n")
+                time.sleep(300)
+        except KeyboardInterrupt:
+            logger.warning("Canceled by user; exiting ...")
+
+
+    if __name__ == "__main__":
+        main()
+
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-updatelbip
+  namespace: {{ .Release.Namespace }}

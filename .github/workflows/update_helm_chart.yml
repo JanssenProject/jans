@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo bash automation/prepare_chart.sh
           sudo python3 automation/analyze_chart.py
-          sudo cp -rf /home/runner/work/test/pygluu/kubernetes/templates/helm/gluu/. helm
+          sudo cp -rf /home/runner/work/test/pygluu/kubernetes/templates/helm/gluu/. jans
           # sudo cp /home/runner/work/test/pygluu/kubernetes/__init__.py __version__.py
           sudo rm -rf home/runner/work/test
 
