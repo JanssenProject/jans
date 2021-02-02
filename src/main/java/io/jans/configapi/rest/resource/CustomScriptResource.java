@@ -109,7 +109,7 @@ public class CustomScriptResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_DELETE_ACCESS})
     public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
             CustomScript existingScript = customScriptService.getScriptByInum(inum);

@@ -94,7 +94,7 @@ public class ConfigSmtpResource extends BaseResource {
     }
 
     @DELETE
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_DELETE_ACCESS})
     public Response removeSmtpConfiguration() {
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());

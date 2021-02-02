@@ -68,7 +68,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.DATABASE_COUCHBASE_DELETE_ACCESS})
     public Response delete(@PathParam(ApiConstants.NAME) String name) {
         findByName(name);
         logger.trace("Delete configuration by name " + name);

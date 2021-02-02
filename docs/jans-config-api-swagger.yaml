@@ -268,7 +268,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/config/attributes.write]
+        - jans-auth: [https://jans.io/oauth/config/attributes.delete]
     patch:
       summary: Partially modify a GluuAttribute.
       description: Partially modify a GluuAttribute.
@@ -421,7 +421,7 @@ paths:
       security:
         - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
     parameters: []
-  '/jans-config-api/api/v1/config/database/ldap/{name}':
+  /jans-config-api/api/v1/config/database/ldap/{name}:
     parameters:
       - name: name
         in: path
@@ -466,7 +466,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/config/database/ldap.write]
+        - jans-auth: [https://jans.io/oauth/config/database/ldap.delete]
     patch:
       summary: Partially modify an LDAP configuration.
       description: Partially modify an LDAP configuration.
@@ -674,7 +674,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - jans-auth: [https://jans.io/oauth/config/database/couchbase.write]
+        - jans-auth: [https://jans.io/oauth/config/database/couchbase.delete]
   /jans-config-api/api/v1/config/database/couchbase/test:
     post:
       summary: Tests a Couchbase configuration.
@@ -893,7 +893,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/scripts.write]
+        - jans-auth: [https://jans.io/oauth/config/scripts.delete]
   /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
@@ -1322,7 +1322,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/smtp.write]
+        - jans-auth: [https://jans.io/oauth/config/smtp.delete]
     parameters: []
   /jans-config-api/api/v1/config/smtp/test:
     post:
@@ -1565,7 +1565,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
-  '/jans-config-api/api/v1/openid/clients/{inum}':
+  /jans-config-api/api/v1/openid/clients/{inum}:
     parameters:
       - schema:
           type: string
@@ -1608,7 +1608,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
+        - jans-auth: [https://jans.io/oauth/config/openid/clients.delete]
     patch:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -1758,7 +1758,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
+        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.delete]
     patch:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -1875,7 +1875,7 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
-  '/jans-config-api/api/v1/uma/resources/{id}':
+  /jans-config-api/api/v1/uma/resources/{id}:
     parameters:
       - name: id
         in: path
@@ -1921,7 +1921,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/uma/resources.write]
+        - jans-auth: [https://jans.io/oauth/config/uma/resources.delete]
     patch:
       tags:
         - OAuth - UMA Resources
@@ -2088,7 +2088,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - jans-auth: [https://jans.io/oauth/config/scopes.write]
+        - jans-auth: [https://jans.io/oauth/config/scopes.delete]
     patch:
       tags:
         - OAuth - Scopes
@@ -2134,30 +2134,39 @@ components:
             https://jans.io/oauth/config/fido2.write: Manage FIDO2 related information
             https://jans.io/oauth/config/attributes.readonly: View attribute related information
             https://jans.io/oauth/config/attributes.write: Manage attribute related information
+            https://jans.io/oauth/config/attributes.delete: Delete attribute related information
             https://jans.io/oauth/config/acrs.readonly: View ACRS related information
             https://jans.io/oauth/config/acrs.write: Manage ACRS related information
             https://jans.io/oauth/config/database/ldap.readonly: View LDAP database related information
             https://jans.io/oauth/config/database/ldap.write: Manage LDAP database related information
+            https://jans.io/oauth/config/database/ldap.delete: Delete LDAP database related information
             https://jans.io/oauth/config/database/couchbase.readonly: View Couchbase database information
             https://jans.io/oauth/config/database/couchbase.write: Manage Couchbase database related information
+            https://jans.io/oauth/config/database/couchbase.delete: Delete Couchbase database related information
             https://jans.io/oauth/config/scripts.readonly: View cache scripts information
             https://jans.io/oauth/config/scripts.write: Manage scripts related information
+            https://jans.io/oauth/config/scripts.delete: Delete scripts related information
             https://jans.io/oauth/config/cache.readonly: View cache related information
             https://jans.io/oauth/config/cache.write: Manage cache related information
             https://jans.io/oauth/config/smtp.readonly: View SMTP related information
             https://jans.io/oauth/config/smtp.write: Manage SMTP related information
+            https://jans.io/oauth/config/smtp.delete: Delete SMTP related information
             https://jans.io/oauth/config/logging.readonly: View logging related information
             https://jans.io/oauth/config/logging.write: Manage logging related information
             https://jans.io/oauth/config/jwks.readonly: View JWKS related information
             https://jans.io/oauth/config/jwks.write: Manage JWKS related information
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
             https://jans.io/oauth/config/openid/clients.write: Manage clients related information
+            https://jans.io/oauth/config/openid/clients.delete: Delete clients related information
             https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
             https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information
+            https://jans.io/oauth/config/openid/sectoridentifiers.delete: Delete sector related information
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: Manage scope related information
+            https://jans.io/oauth/config/scopes.delete: Delete scope related information
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
             https://jans.io/oauth/config/uma/resources.write: Manage UMA Resource related information
+            https://jans.io/oauth/config/uma/resources.delete: Delete UMA Resource related information
   responses:
     Found:
       description: Resource Found.
@@ -2315,11 +2324,13 @@ components:
       required:
         - configId
         - bindDN
+        - maxConnections
+        - primaryKey
+        - localPrimaryKey
         - bindPassword
         - servers
-        - useSSL
         - baseDNs
-        - primaryKey
+        - useSSL
       properties:
         configId:
           type: string
@@ -3437,10 +3448,11 @@ components:
       description: Attribute.
       type: object
       required:
+      - name
       - description
       - displayName
       - dataType
-      - name
+      - status
       - viewType
       properties:
         dn:
@@ -3579,8 +3591,9 @@ components:
       type: object
       required:
         - displayName
+        - id
+        - description
         - scopeType
-        - expirationDate
       properties:
         dn:
           type: string
@@ -4123,10 +4136,9 @@ components:
       description: UMAResource
       type: object
       required:
-        - dn
-        - inum
         - id
         - type
+        - iconUri
       properties:
         dn:
           type: string
