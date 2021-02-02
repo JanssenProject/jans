@@ -31,7 +31,7 @@
 		<jackson.databind.version>2.11.2</jackson.databind.version>
 		<json.version>20200518</json.version>
 
-		<log4j.version>2.13.3</log4j.version>
+		<log4j.version>2.14.0</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 
 		<guava.version>29.0-jre</guava.version>
@@ -148,17 +148,17 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
+                <artifactId>jans-orm-filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
                 <artifactId>jans-orm-couchbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>jans-orm-sql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jans</groupId>
-                <artifactId>jans-orm-filter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -354,7 +354,7 @@
 				<version>3.2.2</version>
 			</dependency>
 
-			<!-- Logging -->
+			<!-- \Logging -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
