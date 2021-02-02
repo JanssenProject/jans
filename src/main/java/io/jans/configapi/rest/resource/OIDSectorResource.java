@@ -102,7 +102,7 @@ public class OIDSectorResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_SECTORS_DELETE_ACCESS})
     public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);

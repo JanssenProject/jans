@@ -6,7 +6,6 @@
 
 package io.jans.configapi.rest.resource;
 
-import com.couchbase.client.core.message.ResponseStatus;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;

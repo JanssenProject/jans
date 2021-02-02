@@ -111,7 +111,7 @@ public class UmaResourcesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.ID_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS})
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);

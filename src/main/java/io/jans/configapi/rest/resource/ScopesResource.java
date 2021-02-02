@@ -127,7 +127,7 @@ public class ScopesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_DELETE_ACCESS})
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
