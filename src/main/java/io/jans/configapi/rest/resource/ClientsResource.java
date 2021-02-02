@@ -127,7 +127,7 @@ public class ClientsResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS})
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);

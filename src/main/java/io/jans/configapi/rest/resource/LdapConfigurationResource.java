@@ -80,7 +80,7 @@ public class LdapConfigurationResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.NAME_PARAM_PATH)
-	@ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS })
 	public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
 		findLdapConfigurationByName(name);
 		logger.info("Delete Ldap Configuration by name " + name);

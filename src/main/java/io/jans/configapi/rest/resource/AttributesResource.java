@@ -126,7 +126,7 @@ public class AttributesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS})
+    @ProtectedApi(scopes = {ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS})
     public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
