@@ -18,7 +18,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-01-27 12:55'
+ENV CN_BUILD_DATE='2021-02-02 08:53'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
 
 RUN mkdir -p /opt/jans/jans-config-api \
