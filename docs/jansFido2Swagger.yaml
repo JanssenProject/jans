@@ -1,0 +1,520 @@
+# raw swagger spec link:
+# https://raw.githubusercontent.com/JanssenProject/jans-fido2/master/docs/jansFido2Swagger.yaml
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-fido2/master/docs/jansFido2Swagger.yaml
+openapi: 3.0.1
+info:
+  title: Janssen Fido2
+  description: Janssen Fido2 - FIDO 2.0 is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
+  contact:
+    email: xx@gluu.org
+  license:
+    name: License
+    url: https://github.com/JanssenProject/jans-fido2/blob/master/LICENSE
+  version: 1.0.0-SNAPSHOT
+tags:
+  - name: developers
+    description: Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
+  - name: FIDO2 configuration
+  - name: FIDO2 Assertion
+  - name: FIDO2 Attestation
+paths:
+  /fido2/configuration:
+    get:
+      tags:
+        - FIDO2 configuration
+      summary: FIDO2 configuration
+      description: FIDO2 configuration
+      operationId: get-fido2-configuration
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: FIDO2 configuration
+                description: FIDO2 configuration.
+                required:
+                  - version
+                  - issuer
+                  - attestation
+                properties:
+                  version:
+                    type: string
+                    description: The version of the FIDO2 U2F core protocol to which this server conforms. The value MUST be the string 1.0.
+                  issuer:
+                    type: string
+                    description: A URI indicating the party operating the FIDO U2F server.
+                  attestation:
+                    type: array
+                    items:
+                      type: object
+                      description: list of fido2 attestation endpoints
+                      properties:
+                        base_path:
+                          type: string
+                          description: fido2 attestation endpoint
+                        options_enpoint:
+                          type: string
+                          description: fido2 attestation options endpoint
+                        result_enpoint:
+                          type: string
+                          description: fido2 attestation result endpoint
+                  assertion:
+                    type: array
+                    items:
+                      type: object
+                      description: list of fido2 assertion endpoints
+                      properties:
+                        base_path:
+                          type: string
+                          description: fido2 assertion endpoint
+                        options_enpoint:
+                          type: string
+                          description: fido2 assertion options endpoint
+                        result_enpoint:
+                          type: string
+                          description: fido2 assertion result endpoint
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /fido2/assertion/options:
+    post:
+      tags:
+        - FIDO2 Assertion
+      summary: FIDO2 Assertion Options
+      description: FIDO2 Assertion Options
+      operationId: options
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: AssertionOptions
+              type: object
+              properties:
+                content:
+                  type: object
+                  description: An object that contains the extensions to enable, and the options to use for each of them.
+                  properties:
+                    username:
+                      type: string
+                    authenticatorSelection:
+                      type: array
+                      items:
+                        type: string
+                        description: Set of parameters required for FIDO2 assertion option.
+                    documentDomain:
+                      type: string
+                    extensions:
+                      type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AssertionOptionsResponse
+                type: object
+                required:
+                  - challenge
+                  - user
+                  - allowCredentials
+                  - userVerification
+                  - extensions
+                properties:
+                  challenge:
+                    type: string
+                    description: Websafe-base64 encoding of the challenge.
+                  user:
+                    type: string
+                    description: username
+                  allowCredentials:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - type
+                      - transports
+                      - id
+                  userVerification:
+                    type: string
+                  extensions:
+                    type: string
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /fido2/assertion/result:
+    post:
+      tags:
+        - FIDO2 Assertion
+      summary: FIDO2 Assertion Result - Parses and validates an assertion response from the client.
+      description: FIDO2 Assertion Result.
+      operationId: result
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: AssertionOptions
+              required:
+                - clientDataJSON
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: The base64url encoded id returned by the client
+                type:
+                  type: string
+                  example:
+                    - public-key
+                rawId:
+                  type: string
+                  description: The base64url encoded rawId returned by the client. If res.rawId is missing, res.id will be used instead. If both are missing an error will be thrown.
+                userHandle:
+                  type: string
+                  description: The base64url encoded userHandle returned by the client. May be null or an empty string.
+                clientDataJSON:
+                  type: array
+                  description: The base64url encoded clientDataJSON returned by the client
+                  items:
+                    type: string
+                  example:
+                    - challenge
+                    - origin
+      responses:
+        200:
+          description: OK
+          content: {}
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /fido2/attestation/options:
+    post:
+      tags:
+        - FIDO2 Attestation
+      summary: Created new registration.
+      description: Created new registration.
+      operationId: attestation-options
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: AttestationOptions
+              description: An object containing various options for the option creation
+              type: object
+              properties:
+                username:
+                  type: string
+                displayName:
+                  type: string
+                attestation:
+                  type: string
+                  format: enum
+                   - direct
+                   - indirect
+                   - none
+                authenticatorSelection:
+                  type: object
+                  properties:
+                   authenticatorAttachment:
+                     type: string
+                     format: enum
+                       - platform
+                       - cross-platform
+                   userVerification:
+                     type: string
+                     format: enum
+                       - direct
+                       - indirect
+                       - none
+                   requireResidentKey:
+                     type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CredentialCreationOptions
+                type: object
+                properties:
+                  attestation:
+                    type: string
+                    format: enum
+                     - direct
+                     - indirect
+                     - none
+                  authenticatorSelection:
+                    type: object
+                    properties:
+                      authenticatorAttachment:
+                        type: string
+                        format: enum
+                         - platform
+                         - cross-platform
+                      userVerification:
+                        type: string
+                        format: enum
+                         - required
+                         - preferred
+                         - discouraged
+                      requireResidentKey:
+                        type: boolean
+                  challenge:
+                    type: string
+                    description: The base64url encoded challenge that was sent to the client, as generated by assertionOptions.
+                  pubKeyCredParams:
+                    type: object
+                    properties:
+                     type:
+                       type: string
+                     alg:
+                       type: string				  
+                  rp:
+                    type: object
+                    description: RP credentials
+                    properties:
+                     name:
+                       type: string
+                     id:
+                       type: string	
+                  username:
+                    type: string
+                  displayName:
+                    type: string
+                  user:
+                    type: object
+                    description: User object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      displayName:
+                        type: string
+                  excludeCredentials:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                  timeout: 
+                    type: integer
+                  extensions:
+                    type: array
+                    items:
+                      type: string
+                  status:
+                    type: string
+                  errorMessage:
+                    type: string
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /fido2/attestation/result:
+    post:
+      tags:
+        - FIDO2 Attestation
+      summary: FIDO2 attestation result.
+      description: FIDO2 attestation result
+      operationId: attestation-result
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: AttestationOptions
+              description: An object containing various options for the option creation
+              type: object
+              required:
+                - type
+                - response
+              properties:
+                type:
+                  type: string
+                  enum: 
+                    - public-key
+                response:
+                  type: object
+                  required:
+                    - clientDataJSON
+                  properties:
+                    clientDataJSON:
+                      type: object
+                      description: The base64url encoded clientDataJSON returned by the client
+                      required:
+                        - challenge
+                        - origin
+                        - type
+                      properties:
+                        type:
+                          type: string
+                          enum: 
+                            - webauthn.create
+                        origin:
+                          type: string
+                        challenge:
+                          type: string
+                        tokenBinding:
+                          type: object
+                          required:
+                            - status
+                          properties:
+                            status:
+                              type: string
+                            id:
+                              type: string
+      responses:        
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Fido2RegistrationData
+                type: object
+                properties:
+                  createdDate:
+                    type: string
+                    format: date-time
+                  updatedDate:
+                    type: string
+                    format: date-time
+                  createdBy:
+                    type: string
+                  updatedBy:
+                    type: string
+                  username:
+                    type: string
+                  domain:
+                    type: string
+                  userId:
+                    type: string
+                  challenge:
+                    type: string
+                  attenstationRequest:
+                    type: string
+                  attenstationResponse:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - public-key
+                      id:
+                        type: string
+                      response:
+                        type: object
+                        required:
+                          - attestationObject
+                          - clientDataJSON
+                        properties:
+                          attestationObject:
+                            type: string
+                          clientDataJSON:
+                            type: string
+                          clientExtensionResults:
+                            type: array
+                            items:
+                              type: string
+                  uncompressedECPoint:
+                    type: string
+                  publicKeyId:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - public-key
+                  status:
+                    type: string
+                    enum:
+                      - registered
+                  counter:
+                    type: integer
+                  attestationType:
+                    type: string
+                  signatureAlgorithm:
+                    type: integer
+                  applicationId:
+                    type: string					
+                  authenticatorSelection:
+                    type: object
+                    properties:
+                      authenticatorAttachment:
+                        type: string
+                        format: enum
+                         - platform
+                         - cross-platform
+                      userVerification:
+                        type: string
+                        format: enum
+                         - required
+                         - preferred
+                         - discouraged
+                      requireResidentKey:
+                        type: boolean
+                  errorMessage:
+                    type: string
+
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  responses:
+    Found: #302 - FOUND
+      description: Resource Found.
+      content: {}
+    InvalidRequest: #400 - BAD_REQUEST
+      description: Invalid parameters are provided to endpoint.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized: #401 - UNAUTHORIZED
+      description: Unauthorized access request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    AccessDenied: #403 - FORBIDDEN
+      description: Invalid details provided hence access denied.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound: #404 - NOT_FOUND
+      description: Resource Not Found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAcceptable: #406 - NOT_ACCEPTABLE
+      description: Request Not Acceptable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError: #500 - INTERNAL_SERVER_ERROR
+      description: Internal error occured. Please check log file for details.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      required:
+        - error
+        - error_description
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+        details:
+          type: string
