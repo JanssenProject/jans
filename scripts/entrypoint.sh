@@ -44,7 +44,6 @@ if [ ! -f /deploy/touched ]; then
 fi
 
 python3 /app/scripts/jks_sync.py &
-python3 /app/scripts/jca_sync.py &
 python3 /app/scripts/mod_context.py
 
 # run auth-server
