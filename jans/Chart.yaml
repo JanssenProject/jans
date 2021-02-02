@@ -4,7 +4,7 @@ home: https://jans.io
 maintainers:
 - name: Janssen
 description: A Helm chart for Janssen IDP
-kubeVersion: ^v1.17.0
+kubeVersion: ">=v1.17.0-0"
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: "true"
