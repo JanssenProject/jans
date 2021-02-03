@@ -6,7 +6,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-02-03T13:34:18.303196904Z"
+    created: "2021-02-03T10:01:37.0788519-05:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -63,6 +63,6 @@ entries:
     sources:
     - https://github.com/JanssenProject/jans-cloud-native/charts
     urls:
-    - jans-1.0.0-a4.tgz
+    - https://github.com/JanssenProject/jans-cloud-native/releases/download/1.0.0-a4/jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-02-03T13:34:18.282448533Z"
+generated: "2021-02-03T10:01:37.0728292-05:00"
