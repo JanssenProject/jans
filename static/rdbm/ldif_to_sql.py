@@ -3,9 +3,10 @@ import sys
 import json
 from ldap3.utils import dn as dnutils
 
+from pathlib import Path
+
 sql_type = 'mysql'
 
-from pathlib import Path
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 cur_path = Path(cur_dir)
 sys.path.append(cur_path.parent.parent.joinpath('setup_app/pylib').as_posix())
@@ -84,7 +85,8 @@ for ldif_path in Path(output_dir).glob('**/*.ldif'):
                 if lkey in ('jansConfProperty', 'jansModuleProperty'):
                     for i, k in enumerate(entry[lkey][:]):
                         entry[lkey][i] = json.loads(k)
-                vals.append("'{}'".format(json.dumps(entry[lkey])))
+                data_= "'{}'".format(json.dumps({'v':entry[lkey]}))
+                vals.append(data_)
             else:
                 vals.append(json.dumps(entry[lkey][0]))
 
