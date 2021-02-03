@@ -387,6 +387,14 @@ class JCA_CLI:
                     print(self.colored_text("File {} does not exist".format(fname), warning_color))
                     continue
 
+            if selection == '_x':
+                if self.current_menu.parent:
+                    self.display_menu(self.current_menu.parent)
+                else:
+                    print("Quiting...")
+                    sys.exit()
+                break
+
             if itype == 'boolean' and not selection:
                 return False
 
