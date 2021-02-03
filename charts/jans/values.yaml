@@ -61,8 +61,7 @@ config:
     cnCouchbaseSuperUser: admin
     cnCouchbaseSuperUserPassword: Test1234#
     cnCouchbaseSuperUserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-    # Should read cbjans.default.svc.cluster.local
-    cnCouchbaseUrl: cbjans.default.svc
+    cnCouchbaseUrl: cbjans.default.svc.cluster.local
     cnCouchbaseUser: jans
     cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
     cnLdapUrl: "opendj:1636"
