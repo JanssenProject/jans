@@ -3,11 +3,11 @@ on:
   push:
     branches: [master]
     paths:
-      - "jans/**"
+      - "charts/**"
   pull_request:
     branches: [master]
     paths:
-      - "jans/**"
+      - "charts/**"
   workflow_dispatch:
 jobs:
   build:
