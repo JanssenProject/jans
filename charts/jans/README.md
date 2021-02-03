@@ -1,9 +1,9 @@
 ## TL;DR
 
 ```
-helm repo add jans https://moabu.github.io/jans-cloud-native/jans/
+helm repo add jans https://janssenproject.github.io/jans-cloud-native
 # get ip of loadbalancer or node ip for microk8s/minikube. If on EKS get the address and use --set config.configmap.lbAddr="$Address"
-helm install jans -f -n jans --set global.lbIp="$ip"
+helm install jans-auth jans/jans -n jans --set global.lbIp="$ip" --devel
 ```
 
 
