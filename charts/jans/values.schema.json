@@ -1,0 +1,2208 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"properties": {
+		"auth-server": {
+			"type": "object",
+			"properties": {}
+		},
+		"auth-server-key-rotation": {
+			"type": "object",
+			"properties": {}
+		},
+		"casa": {
+			"type": "object",
+			"properties": {}
+		},
+		"client-api": {
+			"type": "object",
+			"properties": {}
+		},
+		"config": {
+			"type": "object",
+			"properties": {
+				"adminPass": {
+					"$ref": "#/definitions/password"
+				},
+				"city": {
+					"type": "string",
+					"pattern": "^[a-zA-Z]+$"
+				},
+				"configmap": {
+					"type": "object",
+					"properties": {
+						"cnAuthServerBackend": {
+							"type": "string",
+							"pattern": "^[a-z0-9-:]+$"
+						},
+						"cnCacheType": {
+							"type": "string",
+							"pattern": "^(NATIVE_PERSISTENCE|REDIS|IN_MEMORY)$"
+						},
+						"cnCasaEnabled": {
+							"type": "boolean"
+						},
+						"cnClientApiAdminCertCn": {
+							"type": "string",
+							"pattern": "^[a-z-]+$"
+						},
+						"cnClientApiApplicationCertCn": {
+							"type": "string",
+							"pattern": "^[a-z-]+$"
+						},
+						"cnClientApiBindIpAddresses": {
+							"$ref": "#/definitions/ip-pattern"
+						},
+						"cnClientApiServerUrl": {
+							"type": "string",
+							"pattern": "^[a-z0-9-:]+$"
+						},
+						"cnConfigKubernetesConfigMap": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnCouchbaseBucketPrefix": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnCouchbaseCertFile": {
+							"type": "string",
+							"pattern": ".*couchbase.crt\\b.*"
+						},
+						"cnCouchbaseCrt": {
+							"type": "string",
+							"pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+						},
+						"cnCouchbaseIndexNumReplica": {
+							"type": "integer"
+						},
+						"cnCouchbasePass": {
+							"$ref": "#/definitions/password"
+						},
+						"cnCouchbasePassFile": {
+							"type": "string",
+							"pattern": ".*couchbase_password\\b.*"
+						},
+						"cnCouchbaseSuperUser": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnCouchbaseSuperUserPass": {
+							"$ref": "#/definitions/password"
+						},
+						"cnCouchbaseSuperUserPassFile": {
+							"type": "string",
+							"pattern": ".*couchbase_superuser_password\\b.*"
+						},
+						"cnCouchbaseUrl": {
+							"$ref": "#/definitions/fqdn-pattern"
+						},
+						"cnCouchbaseUser": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnDocumentStoreType": {
+							"type": "string",
+							"pattern": "^(LOCAL|JCA)$"
+						},
+						"cnJackrabbitAdminId": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnJackrabbitAdminIdFile": {
+							"type": "string",
+							"pattern": ".*jackrabbit_admin_id\\b.*"
+						},
+						"cnJackrabbitAdminPassFile": {
+							"type": "string",
+							"pattern": ".*jackrabbit_admin_password\\b.*"
+						},
+						"cnJackrabbitPostgresDatabaseName": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnJackrabbitPostgresHost": {
+							"$ref": "#/definitions/fqdn-pattern"
+						},
+						"cnJackrabbitPostgresPasswordFile": {
+							"type": "string",
+							"pattern": ".*postgres_password\\b.*"
+						},
+						"cnJackrabbitPostgresPort": {
+							"type": "integer"
+						},
+						"cnJackrabbitPostgresUser": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnJackrabbitSyncInterval": {
+							"type": "integer"
+						},
+						"cnJackrabbitUrl": {
+							"type": "string",
+							"pattern": "^(http:\/\/)?[a-z0-9-:]+$"
+						},
+						"cnLdapUrl": {
+							"type": "string",
+							"pattern": "^[a-z0-9-:]+$"
+						},
+						"cnMaxRamPercent": {
+							"type": "string",
+							"pattern": "^(\\d{0,2}(\\.\\d{1,2})?|100(\\.0?)?)$"
+						},
+						"cnOxtrustApiEnabled": {
+							"type": "boolean"
+						},
+						"cnOxtrustApiTestMode": {
+							"type": "boolean"
+						},
+						"cnOxtrustBackend": {
+							"type": "string",
+							"pattern": "^[a-z0-9-:]+$"
+						},
+						"cnPassportEnabled": {
+							"type": "boolean"
+						},
+						"cnPersistenceLdapMapping": {
+							"type": "string",
+							"pattern": "^(default|user|site|cache|statistic)$"
+						},
+						"cnRadiusEnabled": {
+							"type": "boolean"
+						},
+						"cnRedisSentinelGroup": {
+							"type": "string"
+						},
+						"cnRedisSslTruststore": {
+							"type": "string"
+						},
+						"cnRedisType": {
+							"type": "string",
+							"pattern": "^(SHARDED|STANDALONE|CLUSTER|SENTINEL)$"
+						},
+						"cnRedisUrl": {
+							"$ref": "#/definitions/url-pattern"
+						},
+						"cnRedisUseSsl": {
+							"type": "boolean"
+						},
+						"cnSamlEnabled": {
+							"type": "boolean"
+						},
+						"cnSecretKubernetesSecret": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnSyncCasaManifests": {
+							"type": "boolean"
+						},
+						"cnSyncShibManifests": {
+							"type": "boolean"
+						},
+						"configAdapterName": {
+							"type": "string",
+							"pattern": "^(kubernetes)$"
+						},
+						"configSecretAdapter": {
+							"type": "string",
+							"pattern": "^(kubernetes)$"
+						},
+						"containerMetadataName": {
+							"type": "string",
+							"pattern": "^(kubernetes)$"
+						},
+						"lbAddr": {
+							"$ref": "#/definitions/url-pattern"
+						},
+						"ldapServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				},
+				"countryCode": {
+					"type": "string",
+					"pattern": "^[A-Z]+$"
+				},
+				"email": {
+					"$ref": "#/definitions/email-format"
+				},
+				"image": {
+					"type": "object",
+					"properties": {
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"ldapPass": {
+					"$ref": "#/definitions/password"
+				},
+				"orgName": {
+					"type": "string",
+					"pattern": "^[a-zA-Z]+$"
+				},
+				"redisPass": {
+					"$ref": "#/definitions/password"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"state": {
+					"type": "string",
+					"pattern": "^[a-zA-Z]+$"
+				}
+			}
+		},
+		"config-api": {
+			"type": "object",
+			"properties": {}
+		},
+		"cr-rotate": {
+			"type": "object",
+			"properties": {}
+		},
+		"fido2": {
+			"type": "object",
+			"properties": {}
+		},
+		"global": {
+			"type": "object",
+			"properties": {
+				"alb": {
+					"type": "object",
+					"properties": {
+						"ingress": {
+							"type": "boolean"
+						}
+					}
+				},
+				"auth-server": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"auth-server-key-rotation": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"azureStorageAccountType": {
+					"type": "string",
+					"pattern": "^(Standard_LRS|Premium_LRS|StandardSSD_LRS|UltraSSD_LRS)$"
+				},
+				"azureStorageKind": {
+					"type": "string",
+					"pattern": "^(Managed)$"
+				},
+				"client-api": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"cloud": {
+					"type": "object",
+					"properties": {
+						"testEnviroment": {
+							"type": "boolean"
+						}
+					}
+				},
+				"cnJackrabbitCluster": {
+					"type": "boolean"
+				},
+				"cnPersistenceType": {
+					"type": "string",
+					"pattern": "^(ldap|couchbase|hybrid)$"
+				},
+				"config": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"config-api": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"cr-rotate": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"domain": {
+					"$ref": "#/definitions/fqdn-pattern"
+				},
+				"fido2": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"gcePdStorageType": {
+					"type": "string",
+					"pattern": "^(pd-standard|pd-balanced|pd-ssd)$"
+				},
+				"isDomainRegistered": {
+					"type": "boolean"
+				},
+				"istio": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						},
+						"ingress": {
+							"type": "boolean"
+						},
+						"namespace": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						}
+					}
+				},
+				"jackrabbit": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"lbIp": {
+					"$ref": "#/definitions/ip-pattern"
+				},
+				"nginx-ingress": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"opendj": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"oxshibboleth": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"persistence": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"scim": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				},
+				"storageClass": {
+					"type": "object",
+					"properties": {
+						"allowVolumeExpansion": {
+							"type": "boolean"
+						},
+						"allowedTopologies": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"mountOptions": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"parameters": {
+							"type": "object",
+							"properties": {
+								"fsType": {
+									"type": "string"
+								},
+								"kind": {
+									"type": "string"
+								},
+								"pool": {
+									"type": "string"
+								},
+								"storageAccountType": {
+									"type": "string"
+								},
+								"type": {
+									"type": "string"
+								}
+							}
+						},
+						"provisioner": {
+							"type": "string"
+						},
+						"reclaimPolicy": {
+							"type": "string"
+						},
+						"volumeBindingMode": {
+							"type": "string"
+						}
+					}
+				},
+				"upgrade": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						}
+					}
+				}
+			}
+		},
+		"jackrabbit": {
+			"type": "object",
+			"properties": {}
+		},
+		"nginx-ingress": {
+			"type": "object",
+			"properties": {}
+		},
+		"opendj": {
+			"type": "object",
+			"properties": {}
+		},
+		"oxpassport": {
+			"type": "object",
+			"properties": {}
+		},
+		"oxshibboleth": {
+			"type": "object",
+			"properties": {}
+		},
+		"persistence": {
+			"type": "object",
+			"properties": {}
+		},
+		"radius": {
+			"type": "object",
+			"properties": {}
+		},
+		"scim": {
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"allOf": [
+		{
+			"$ref": "#/definitions/auth-server-enabled"
+		},
+		{
+			"$ref": "#/definitions/auth-server-key-rotation-enabled"
+		},
+		{
+			"$ref": "#/definitions/casa-enabled"
+		},
+		{
+			"$ref": "#/definitions/client-api-enabled"
+		},
+		{
+			"$ref": "#/definitions/config-api-enabled"
+		},
+		{
+			"$ref": "#/definitions/cr-rotate-enabled"
+		},
+		{
+			"$ref": "#/definitions/fido2-enabled"
+		},
+		{
+			"$ref": "#/definitions/jackrabbit-enabled"
+		},
+		{
+			"$ref": "#/definitions/nginx-ingress-enabled"
+		},
+		{
+			"$ref": "#/definitions/opendj-enabled"
+		},
+		{
+			"$ref": "#/definitions/oxpassport-enabled"
+		},
+		{
+			"$ref": "#/definitions/oxshibboleth-enabled"
+		},
+		{
+			"$ref": "#/definitions/persistence-enabled"
+		},
+		{
+			"$ref": "#/definitions/radius-enabled"
+		},
+		{
+			"$ref": "#/definitions/scim-enabled"
+		}
+
+
+	],
+	"definitions": {
+		"password": {
+			"anyOf": [
+				{
+					"type": "string",
+					"minLength": 8,
+					"pattern": "",
+					"description": "Password does not meet requirements. The password must contain one digit, one uppercase letter, one lower case letter and one symbol",
+					"errors": {
+						"minLength": "Password minimum 6 character",
+						"pattern": "Password does not meet requirements. The password must contain one digit, one uppercase letter, one lower case letter and one symbol"
+					}
+				},
+				{
+					"type": "string",
+					"maxLength": 0
+				}
+			]
+		},
+		"password-pattern": {
+			"type": "string",
+			"minLength": 6,
+			"pattern": "",
+			"errors": {
+				"minLength": "Password minimum 6 character",
+				"pattern": "Password does not meet requirements. The password must contain one digit, one uppercase letter, one lower case letter and one symbol"
+			}
+		},
+		"email-format": {
+			"type": "string",
+			"format": "email"
+		},
+		"fqdn-pattern": {
+			"anyOf": [
+				{
+					"type": "string",
+					"pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){2,}([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]){2,}$",
+					"errors": {
+						"pattern": "Setting not FQDN structured. Please enter a FQDN with the format demoexample.jans.io"
+					}
+				},
+				{
+					"type": "string",
+					"maxLength": 0
+				}
+			]
+		},
+		"url-pattern": {
+			"anyOf": [
+				{
+					"type": "string",
+					"pattern": "(^|\\s)((https?:\\/\\/)?[\\w-]+(\\.[\\w-]+)+\\.?(:\\d+)?(\\/\\S*)?)",
+					"errors": {
+						"pattern": "URL pattern is not meeting standards."
+					}
+				},
+				{
+					"type": "string",
+					"maxLength": 0
+				}
+			]
+		},
+		"ip-pattern": {
+			"anyOf": [
+				{
+					"type": "string",
+					"pattern": "^(\\*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$",
+					"errors": {
+						"pattern": "Not a valid IP. You may place "
+					}
+				},
+				{
+					"type": "string",
+					"maxLength": 0
+				}
+			]
+		},
+		"auth-server-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"auth-server": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"auth-server": {
+				"required": [
+				"image",
+				"replicas",
+				"resources",
+				"service"
+			],
+				"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"authServerServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+			}}},
+			"else": true
+		},
+		"auth-server-key-rotation-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"auth-server-key-rotation": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"auth-server-key-rotation": {
+						"properties": {
+							"image": {
+								"type": "object",
+								"properties": {
+									"pullPolicy": {
+										"type": "string",
+										"pattern": "^(Always|Never|IfNotPresent)$"
+									},
+									"repository": {
+										"type": "string",
+										"pattern": "^[a-z0-9-_/]+$"
+									},
+									"tag": {
+										"type": "string",
+										"pattern": "^[a-z0-9-_.]+$"
+									}
+								}
+							},
+							"keysLife": {
+								"type": "integer"
+							},
+							"resources": {
+								"type": "object",
+								"properties": {
+									"limits": {
+										"type": "object",
+										"properties": {
+											"cpu": {
+												"type": "string",
+												"pattern": "^[0-9m]+$"
+											},
+											"memory": {
+												"type": "string",
+												"pattern": "^[0-9Mi]+$"
+											}
+										}
+									},
+									"requests": {
+										"type": "object",
+										"properties": {
+											"cpu": {
+												"type": "string",
+												"pattern": "^[0-9m]+$"
+											},
+											"memory": {
+												"type": "string",
+												"pattern": "^[0-9Mi]+$"
+											}
+										}
+									}
+								}
+							}
+						},
+						"required": [
+							"image",
+							"resources",
+							"keysLife"
+						]
+					}
+				}
+			},
+			"else": true
+		},
+		"casa-enabled": {
+			"if": {
+				"properties": {
+					"config": {
+						"properties": {
+							"configmap": {
+								"properties": {
+									"cnCasaEnabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+
+			},
+			"then": {
+				"properties": {
+					"casa": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"properties": {
+							"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+							"replicas": {
+					"type": "integer"
+				},
+							"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+							"service": {
+					"type": "object",
+					"properties": {
+						"casaServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+						}
+					}
+				}
+			},
+			"else": true
+		},
+		"client-api-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"client-api": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"client-api": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"properties": {
+							"image": {
+								"type": "object",
+								"properties": {
+									"pullPolicy": {
+										"type": "string",
+										"pattern": "^(Always|Never|IfNotPresent)$"
+									},
+									"repository": {
+										"type": "string",
+										"pattern": "^[a-z0-9-_/]+$"
+									},
+									"tag": {
+										"type": "string",
+										"pattern": "^[a-z0-9-_.]+$"
+									}
+								}
+							},
+							"replicas": {
+								"type": "integer"
+							},
+							"resources": {
+								"type": "object",
+								"properties": {
+									"limits": {
+										"type": "object",
+										"properties": {
+											"cpu": {
+												"type": "string",
+												"pattern": "^[0-9m]+$"
+											},
+											"memory": {
+												"type": "string",
+												"pattern": "^[0-9Mi]+$"
+											}
+										}
+									},
+									"requests": {
+										"type": "object",
+										"properties": {
+											"cpu": {
+												"type": "string",
+												"pattern": "^[0-9m]+$"
+											},
+											"memory": {
+												"type": "string",
+												"pattern": "^[0-9Mi]+$"
+											}
+										}
+									}
+								}
+							},
+							"service": {
+								"type": "object",
+								"properties": {
+									"clientApiServerServiceName": {
+										"type": "string",
+										"pattern": "^[a-z0-9-]+$"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"else": true
+		},
+		"config-api-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"config-api": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"config-api": {
+										"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+			"type": "object",
+			"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"configApiServerServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+					}
+				}
+			},
+			"else": true
+		},
+		"cr-rotate-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"cr-rotate": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"cr-rotate": {
+			"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"crRotateServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+			}}},
+			"else": true
+		},
+		"fido2-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"fido2": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"fido2": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"fido2ServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+					}
+				}
+			},
+			"else": true
+		},
+		"jackrabbit-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"jackrabbit": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"jackrabbit": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"secrets": {
+					"type": "object",
+					"properties": {
+						"cnJackrabbitAdminPass": {
+							"$ref": "#/definitions/password"
+						},
+						"cnJackrabbitPostgresPass": {
+							"$ref": "#/definitions/password"
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"jackRabbitServiceName": {
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				},
+				"storage": {
+					"type": "object",
+					"properties": {
+						"size": {
+							"type": "string",
+							"pattern": "^[0-9]Gi+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"nginx-ingress-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"nginx-ingress": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"nginx-ingress": {
+						"type": "object",
+						  "properties": {
+							"ingress": {
+							  "type": "object",
+								"required": [
+								"openidConfigEnabled",
+								"uma2ConfigEnabled",
+								"webfingerEnabled",
+								"webdiscoveryEnabled",
+								"scimConfigEnabled",
+								"scimEnabled",
+								"configApiEnabled",
+								"u2fConfigEnabled",
+								"fido2ConfigEnabled",
+								"authServerEnabled",
+								"additionalAnnotations",
+								"path",
+								"hosts",
+								"tls"
+							  ],
+
+							  "properties": {
+								"openidConfigEnabled": {
+								  "type": "boolean"
+								},
+								"uma2ConfigEnabled": {
+								  "type": "boolean"
+								},
+								"webfingerEnabled": {
+								  "type": "boolean"
+								},
+								"webdiscoveryEnabled": {
+								  "type": "boolean"
+								},
+								"scimConfigEnabled": {
+								  "type": "boolean"
+								},
+								"scimEnabled": {
+								  "type": "boolean"
+								},
+								"configApiEnabled": {
+								  "type": "boolean"
+								},
+								"u2fConfigEnabled": {
+								  "type": "boolean"
+								},
+								"fido2ConfigEnabled": {
+								  "type": "boolean"
+								},
+								"authServerEnabled": {
+								  "type": "boolean"
+								},
+								"additionalAnnotations": {
+								  "type": "object"
+								},
+								"hosts": {
+									"type": "array",
+									"items": {
+										"$ref": "#/definitions/fqdn-pattern"
+									}
+								},
+								"path": {
+									"type": "string"
+								},
+								"tls": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"hosts": {
+												"type": "array",
+												"items": {
+													"$ref": "#/definitions/fqdn-pattern"
+												}
+											},
+											"secretName": {
+												"type": "string",
+												"pattern": "^[a-z-]+$"
+											}
+										}
+									}
+								}
+							  }
+							}
+						  }
+					}
+				}
+			},
+			"else": true
+		},
+		"opendj-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"opendj": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"opendj": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"multiCluster": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						},
+						"serfAdvertiseAddr": {
+							"type": "string"
+						},
+						"serfKey": {
+							"type": "string"
+						},
+						"serfPeers": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"persistence": {
+					"type": "object",
+					"properties": {
+						"size": {
+							"type": "string",
+							"pattern": "^[0-9]Gi+$"
+						}
+					}
+				},
+				"ports": {
+					"type": "object",
+					"properties": {
+						"tcp-admin": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						},
+						"tcp-ldap": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						},
+						"tcp-ldaps": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						},
+						"tcp-repl": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						},
+						"tcp-serf": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						},
+						"udp-serf": {
+							"type": "object",
+							"properties": {
+								"nodePort": {
+									"type": "string"
+								},
+								"port": {
+									"type": "integer"
+								},
+								"protocol": {
+									"type": "string"
+								},
+								"targetPort": {
+									"type": "integer"
+								}
+							}
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"ldapServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"oxpassport-enabled": {
+			"if": {
+				"properties": {
+					"config": {
+						"properties": {
+							"configmap": {
+								"properties": {
+									"cnPassportEnabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"oxpassport": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"oxPassportServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"oxshibboleth-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"oxshibboleth": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"oxshibboleth": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"oxShibbolethServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"persistence-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"persistence": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"persistence": {
+						"required": [
+							"image",
+							"resources"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"radius-enabled": {
+			"if": {
+				"properties": {
+					"config": {
+						"properties": {
+							"configmap": {
+								"properties": {
+									"cnRadiusEnabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"radius": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/]+$"
+						},
+						"tag": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_.]+$"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string",
+									"pattern": "^[0-9m]+$"
+								},
+								"memory": {
+									"type": "string",
+									"pattern": "^[0-9Mi]+$"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"oxTrustServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		},
+		"scim-enabled": {
+			"if": {
+				"properties": {
+					"global": {
+						"properties": {
+							"scim": {
+								"properties": {
+									"enabled": {
+										"const": "true"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"then": {
+				"properties": {
+					"scim": {
+						"required": [
+							"image",
+							"replicas",
+							"resources",
+							"service"
+						],
+						"type": "object",
+						"properties": {
+				"image": {
+					"type": "object",
+					"properties": {
+						"pullPolicy": {
+							"type": "string"
+						},
+						"repository": {
+							"type": "string"
+						},
+						"tag": {
+							"type": "string"
+						}
+					}
+				},
+				"replicas": {
+					"type": "integer"
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"service": {
+					"type": "object",
+					"properties": {
+						"scimServiceName": {
+							"type": "string",
+							"pattern": "^[a-z0-9-]+$"
+						}
+					}
+				}
+			}
+
+					}
+				}
+			},
+			"else": true
+		}
+	}
+}

@@ -1,0 +1,58 @@
+{{- if ( not .Values.global.upgrade.enabled ) }}
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: configuration-manager
+{{ include "config.labels" . | indent 4}}
+spec:
+  template:
+    metadata:
+      name: {{ include "config.name" . }}-job
+      labels:
+        APP_NAME: configuration-manager
+        app: {{ include "config.name" . }}-init-load
+    spec:
+      volumes:
+        - name: {{ include "config.fullname" . }}-mount-gen-file
+          secret:
+            secretName: {{ include "config.fullname" . }}-gen-json-file
+        - name: {{ include "config.fullname" . }}-tls-script
+          configMap:
+            name: {{ include "config.fullname" . }}-tls-script
+      containers:
+      - name: {{ include "config.name" . }}-load
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        volumeMounts:
+          - mountPath: /app/db/generate.json
+            name: {{ include "config.fullname" . }}-mount-gen-file
+            subPath: generate.json
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "config.fullname" . }}-tls-script
+            subPath: tls_generator.py
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        command:
+          - tini
+          - -g
+          - --
+          - /bin/sh
+          - -c
+          - |
+              /app/scripts/entrypoint.sh load
+              /usr/bin/python3 /scripts/tls_generator.py
+              {{- if .Values.global.istio.enabled }}
+              curl -X POST http://localhost:15020/quitquitquit
+              {{- end }}
+      restartPolicy: Never
+{{- end }}

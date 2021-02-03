@@ -4,6 +4,7 @@ on:
     paths:
       - __version__.py
     branches: [master]
+  workflow_dispatch:
 jobs:
   build:
 
@@ -21,10 +22,18 @@ jobs:
         sudo apt-get update
         sudo apt-get install ruby
 
-    - name: Checkout code
-      uses: actions/checkout@master
 
-    - name: Build Zipapp
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Prepare directory
       run: |
         mkdir /home/runner/work/test
         cp -r . /home/runner/work/test/
@@ -39,6 +48,7 @@ jobs:
         echo "::set-output name=gitproject::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[1])')"
         echo "::set-output name=gitbranch::$(python3 -c 'import os ; BRANCH = os.environ.get("GITHUB_REF") ; print(str(BRANCH).split("/")[2])')"
         echo "::set-output name=releasedate::$(date +'%d-%m-%Y')"
+        
     - name: Create Release
       id: create_release
       uses: actions/create-release@master
