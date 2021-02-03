@@ -33,21 +33,21 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      # Package chart as tgz file
-      - name: Package Helm chart
-        run: helm package jans
-        working-directory: ./charts
+    # Package chart as tgz file
+    - name: Package Helm chart
+      run: helm package jans
+      working-directory: ./charts
 
-      # Update the index
-      - name: Update chart index
-        run: helm repo index .
-        working-directory: ./charts
+    # Update the index
+    - name: Update chart index
+      run: helm repo index .
+      working-directory: ./charts
 
-      # Push updated index and packaged tgz back into git repo
-      - name: Update repo with output
-        uses: mikeal/publish-to-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Push updated index and packaged tgz back into git repo
+    - name: Update repo with output
+      uses: mikeal/publish-to-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Prepare directory
       run: |
