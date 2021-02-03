@@ -1,0 +1,68 @@
+apiVersion: v1
+entries:
+  jans:
+  - annotations:
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 1.0.0-a4
+    created: "2021-02-03T13:34:18.303196904Z"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.nginx-ingress.enabled
+      name: nginx
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-a4
+    - condition: global.istio.ingress
+      name: cn-istio-ingress
+      repository: ""
+      version: 1.0.0-a4
+    description: Janssen Authorization server
+    digest: 0fbe881832e5471487ffb10d1c415c728fe94fe8ac4f4228aba70173b62781c6
+    home: https://github.com/JanssenProject/jans-cloud-native
+    icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
+    kubeVersion: '>=v1.17.0-0'
+    maintainers:
+    - name: Mohammad Abudayyeh
+    name: jans
+    sources:
+    - https://github.com/JanssenProject/jans-cloud-native/charts
+    urls:
+    - jans-1.0.0-a4.tgz
+    version: 1.0.0-a4
+generated: "2021-02-03T13:34:18.282448533Z"
