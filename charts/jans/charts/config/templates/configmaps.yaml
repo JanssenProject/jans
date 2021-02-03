@@ -30,7 +30,7 @@ data:
   {{- else if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
   #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
-  CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.cnCouchbaseBucketPrefix }}
+  CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
   CN_COUCHBASE_INDEX_NUM_REPLICA: {{ .Values.configmap.cnCouchbaseIndexNumReplica | quote }}
   CN_COUCHBASE_USER: {{ .Values.configmap.cnCouchbaseUser }}
   CN_COUCHBASE_CERT_FILE: {{ .Values.configmap.cnCouchbaseCertFile | quote }}
