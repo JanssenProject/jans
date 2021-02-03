@@ -2,6 +2,7 @@
 ![couchbase](https://github.com/JanssenProject/jans-cloud-native/workflows/couchbase/badge.svg)
 ![opendj](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj/badge.svg)
 ![opendj-istio](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj-istio/badge.svg)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 
 ## System Requirements for cloud deployments
 
