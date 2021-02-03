@@ -1,0 +1,49 @@
+{{- if not .Values.global.upgrade.enabled }}
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ include "opendj.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    storage: opendj
+  annotations:
+    storageclass.beta.kubernetes.io/is-default-class: "false"
+    {{- if eq .Values.global.storageClass.provisioner "openebs.io/local" }}
+    openebs.io/cas-type: local
+    cas.openebs.io/config: |
+      - name: StorageType
+        value: hostpath
+      - name: BasePath
+        value: /var/local-hostpath
+    {{- end }}
+provisioner: {{ .Values.global.storageClass.provisioner }}
+{{- if and ( ne .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) ( ne .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") ( ne .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") ( ne .Values.global.storageClass.provisioner "kubernetes.io/gce-pd") ( ne .Values.global.storageClass.provisioner "dobs.csi.digitalocean.com") ( ne .Values.global.storageClass.provisioner "openebs.io/local") ( ne .Values.global.storageClass.provisioner "kubernetes.io/azure-disk") }}
+parameters:
+{{ toYaml .Values.global.storageClass.parameters | indent 4 }}
+{{- else }}
+parameters:
+  {{- if eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs" }}
+  type: {{ .Values.global.awsStorageType }}
+  fsType: ext4
+  {{- else if eq .Values.global.storageClass.provisioner "kubernetes.io/gce-pd" }}
+  type: {{ .Values.global.gcePdStorageType }}
+  {{- else if eq .Values.global.storageClass.provisioner "kubernetes.io/azure-disk" }}
+  storageAccountType: {{ .Values.global.azureStorageAccountType }}
+  kind: {{ .Values.global.azureStorageKind }}
+  {{- else if eq .Values.global.storageClass.provisioner "dobs.csi.digitalocean.com" }}
+  {{- else if eq .Values.global.storageClass.provisioner "openebs.io/local" }}
+  {{- else }}
+  pool: default
+  fsType: ext4
+  {{- end }}
+{{- end }}
+allowVolumeExpansion: {{ .Values.global.storageClass.allowVolumeExpansion }}
+volumeBindingMode: {{ .Values.global.storageClass.volumeBindingMode }}
+reclaimPolicy: {{ .Values.global.storageClass.reclaimPolicy }}
+mountOptions: {{ .Values.global.storageClass.mountOptions | toJson }}
+allowedTopologies: {{ .Values.global.storageClass.allowedTopologies | toJson }}
+{{- end }}
+{{- end }}

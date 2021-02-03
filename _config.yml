@@ -1,0 +1,10 @@
+title: 'Janssen Authorization Server'
+remote_theme: benc-uk/theme-msdark
+favicon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
+buttons:
+  - b0:
+    text: Main Docs
+    href: /jans-cloud-native
+  - b1:
+    text: Helm Chart
+    href: /jans-cloud-native/charts/jans
