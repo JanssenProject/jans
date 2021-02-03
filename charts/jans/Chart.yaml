@@ -1,7 +1,8 @@
 apiVersion: v2
 appVersion: "1.0.0-a4"
 maintainers:
-- name: Mohammad Abudayyeh
+- name: moabu
+  email: mo@gluu.org
 icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
 home: https://github.com/JanssenProject/jans-cloud-native
 sources:
