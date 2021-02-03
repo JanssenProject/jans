@@ -61,6 +61,7 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.I
                 "/restv1/revoke",
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
+                "/restv1/internal/stat",
                 "/restv1/device_authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
@@ -127,6 +128,7 @@ public class AuthenticationFilter implements Filter {
             boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthzEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
+            boolean statEndpoint = requestUrl.endsWith("/stat");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
             if (processMTLS(httpRequest, httpResponse, filterChain)) {
@@ -139,7 +141,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint) {
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || statEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
