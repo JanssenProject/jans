@@ -14,6 +14,12 @@ You will see the main menu as below:
 
 Using IM is very simple and intuitive. Just make selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning.
 
+### Tips
+1. `_` is escape character for IM mode. For example you can create a list `["me", "you"]` by entering `me_,you`
+2. `_x` exits current process and go back to parent menu
+3. `_q` refers to `quit`
+
+
 ### Attribute
 
 Using **Janssen CLI**, You can perform some quick operation in _Attribute_. Such as:
