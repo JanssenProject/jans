@@ -36,7 +36,7 @@
   },
   "member": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -148,8 +148,7 @@
   },
   "jansClaim": {
     "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
+      "type": "TEXT"
     }
   },
   "jansClaimName": {
@@ -232,13 +231,13 @@
   },
   "jansLogoutURI": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansModuleProperty": {
     "mysql": {
-      "size": 64,
+      "size": 128,
       "type": "VARCHAR"
     }
   },
@@ -286,8 +285,7 @@
   },
   "jansScope": {
     "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
+      "type": "TEXT"
     }
   },
   "jansScopeTyp": {
