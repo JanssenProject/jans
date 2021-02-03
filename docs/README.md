@@ -17,6 +17,7 @@ Using IM is very simple and intuitive. Just make selection and answer questions.
 ### Tips
 1. `_` is escape character for IM mode. For example you can create a list `["me", "you"]` by entering `me_,you`
 1. `_true` means bolean **True** instead of string `"true"`, similarly `_false` is boolean **False** instead of string `"false"`
+1. `_null` comprehended as **None** (or in json **null**)
 1. `_x` exits current process and go back to parent menu
 1. `_q` refers to `quit`
 
