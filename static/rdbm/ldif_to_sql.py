@@ -3,6 +3,8 @@ import sys
 import json
 from ldap3.utils import dn as dnutils
 
+sql_type = 'mysql'
+
 from pathlib import Path
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 cur_path = Path(cur_dir)
@@ -69,6 +71,7 @@ for ldif_path in Path(output_dir).glob('**/*.ldif'):
         for lkey in entry:
             cols.append('`{}`'.format(lkey))
             data_type = ldap_sql_data_type_mapping[get_attr_syntax(lkey, jans_attributes)]
+            data_type = data_type[sql_type]['type']
 
             if data_type in ('SMALLINT', 'INT'):
                 if entry[lkey][0].lower() in ('1', 'on', 'true', 'yes'):
