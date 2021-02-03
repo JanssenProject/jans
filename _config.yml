@@ -1,0 +1,10 @@
+title: 'Janssen Authorization Server'
+remote_theme: benc-uk/theme-msdark
+favicon: https://www.gluu.org/wp-content/uploads/2020/12/janssen-logo.png
+buttons:
+  - b0:
+    text: Main Docs
+    href: /jans-cloud-native
+  - b1:
+    text: Helm Chart
+    href: /jans-cloud-native/jans

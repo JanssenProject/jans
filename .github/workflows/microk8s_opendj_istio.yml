@@ -44,7 +44,7 @@ jobs:
       run: |
           sudo microk8s.kubectl create ns jans
           sudo microk8s.kubectl label ns jans istio-injection=enabled
-          sudo helm install jans -f jans/values.yaml jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap" --set global.istio.enabled="true"
+          sudo helm install jans -f charts/jans/values.yaml charts/jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap" --set global.istio.enabled="true"
           sleep 30
           sudo kubectl get po -n jans
           sudo kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server || sudo kubectl logs -l APP_NAME=auth-server -c jans-auth-server -n jans || echo "Not Found"
