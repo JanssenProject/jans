@@ -1,0 +1,10 @@
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_uid` (`uid`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_lower_uid_` (`lower(uid)`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_dn` (`dn`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_docid` (`docid`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_0` (`jansExtUidValues( (CAST(jansExtUid->'$.v' AS UNSIGNED ARRAY)) )`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_1` (`address( (CAST(address->'$.v' AS CHAR(48) ARRAY)) )`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_2` (`jansExtUidValueO( (CAST(jansExtUid->'$.v[0]' AS UNSIGNED)) )`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_3` (`jansExtUidValuel( (CAST(jansExtUid->'$.v[1]' AS UNSIGNED)) )`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_4` (`jansExtUidValue2( (CAST(jansExtUid->'$.v[2]' AS UNSIGNED)) )`);
+ALTER TABLE jans.jansPerson ADD INDEX `jansPerson_5` (`objectClass((objectClass))`);
