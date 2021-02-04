@@ -324,6 +324,7 @@ public class AuthenticationFilter implements Filter {
                                 || servletRequest.getRequestURI().endsWith("/revoke_session")
                                 || servletRequest.getRequestURI().endsWith("/userinfo")
                                 || servletRequest.getRequestURI().endsWith("/bc-authorize")
+                                || servletRequest.getRequestURI().endsWith("/stat")
                                 || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                             Client client = clientService.getClient(username);
                             if (client == null
