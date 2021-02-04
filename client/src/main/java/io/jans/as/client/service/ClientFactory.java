@@ -40,6 +40,16 @@ public class ClientFactory {
         return INSTANCE;
     }
 
+    public StatService createStatService(String url) {
+        return createStatService(url, engine);
+    }
+
+    public StatService createStatService(String url, ClientHttpEngine engine) {
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
+        return target.proxy(StatService.class);
+    }
+
     public IntrospectionService createIntrospectionService(String p_url) {
         return createIntrospectionService(p_url, engine);
     }
