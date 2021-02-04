@@ -61,7 +61,7 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.I
                 "/restv1/revoke",
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
-                "/restv1/internal/stat",
+                "/restv1/internal/*",
                 "/restv1/device_authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
