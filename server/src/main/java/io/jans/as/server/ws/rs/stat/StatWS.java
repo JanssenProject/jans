@@ -168,7 +168,7 @@ public class StatWS {
     private void validateAuthorization() {
         SessionClient sessionClient = identity.getSessionClient();
         if (sessionClient == null || sessionClient.getClient() == null) {
-            log.trace("Client is not unknown. Skip stat processing.");
+            log.trace("Client is unknown. Skip stat processing.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.INVALID_CLIENT, "Failed to authenticate client.");
         }
     }
