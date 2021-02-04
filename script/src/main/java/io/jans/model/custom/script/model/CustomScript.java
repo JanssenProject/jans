@@ -31,7 +31,7 @@ import io.jans.orm.model.base.BaseEntry;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@DataEntry(sortBy = "level")
+@DataEntry(sortBy = "jansLevel")
 @ObjectClass("jansCustomScr")
 public class CustomScript extends BaseEntry {
 
