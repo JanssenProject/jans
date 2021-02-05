@@ -1,16 +1,17 @@
 import os
 import json
 import ldap3
+import pymysql
 from ldap3.utils import dn as dnutils
 
 from setup_app import static
 from setup_app.config import Config
-from setup_app.static import InstallTypes, BackendTypes
+from setup_app.static import InstallTypes, BackendTypes, colors
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
- 
+
 
 class DBUtils:
 
@@ -20,6 +21,9 @@ class DBUtils:
 
         if Config.mappingLocations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
+        elif Config.mappingLocations['default'] == 'rdbm':
+            if Config.rdbm_type == 'mysql':
+                self.moddb = BackendTypes.MYSQL
         else:
             self.moddb = BackendTypes.COUCHBASE
 
@@ -34,14 +38,68 @@ class DBUtils:
                                 user=Config.ldap_binddn,
                                 password=Config.ldapPass,
                                 )
-
                     base.logIt("Making LDAP Connection to host {}:{} with user {}".format(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn))
                     self.ldap_conn.bind()
-
                     break
+                    
+        if not hasattr(self, 'mysql_conn'):
+            for group in Config.mappingLocations:
+                if Config.mappingLocations[group] == 'rdbm':
+                    if Config.rdbm_type == 'mysql':
+                        result = self.mysqlconnection()
+                        if not result[0]:
+                            print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
+                        break
 
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
+
+    def mysqlconnection(self):
+        self.read_jans_schema()
+        base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
+        try:
+            self.mysql_conn = pymysql.connect(
+                            host=Config.rdbm_host,
+                            user=Config.rdbm_user,
+                            password=Config.rdbm_password,
+                            database=Config.rdbm_db,
+                            port=Config.rdbm_port,
+                            charset='utf8mb4',
+                            autocommit=True,
+                            cursorclass=pymysql.cursors.DictCursor
+                        )
+            base.logIt("MySQL Connection was successful")
+            self.cursor = self.mysql_conn.cursor()
+            return True, self.mysql_conn
+        except pymysql.err.OperationalError as e:
+            base.logIt("Can't connect to MySQL server: {}".format(e.args[1]), True)
+            return False, e.args[1]
+
+    def read_jans_schema(self):
+        self.jans_attributes = []
+        for schema_fn_ in ('jans_schema.json', 'custom_schema.json'):
+            schema_fn = os.path.join(Config.install_dir, 'schema', schema_fn_)
+            schema = base.readJsonFile(schema_fn)
+            self.jans_attributes += schema['attributeTypes']
+
+        self.ldap_sql_data_type_mapping = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'ldap_sql_data_type_mapping.json'))
+        self.sql_data_types = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sql_data_types.json'))
+        self.opendj_attributes_syntax = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_attributes_syntax.json'))
+
+
+    def exec_rdbm_query(self, query, getresult=False):
+        base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))
+        if Config.rdbm_type == 'mysql':
+            try:
+                self.cursor.execute(query)
+            except Exception as e:
+                base.logIt("ERROR executing query {}".format(e.args))
+                base.logIt("ERROR executing query {}".format(e.args), True)
+            else:
+                if getresult == 1:
+                    return self.cursor.fetchone()
+                elif getresult:
+                    return self.cursor.fetchall()
 
     def set_cbm(self):
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
@@ -57,6 +115,18 @@ class DBUtils:
 
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
+        
+        elif self.moddb == BackendTypes.MYSQL:
+            sql_cmd = 'SELECT dn, jansConfDyn FROM jansAppConf'
+            dn = self.ldap_conn.response[0]['dn'] 
+            result = self.exec_rdbm_query(sql_cmd, 2)
+            
+            for entry in result:
+                if entry['jansConfDyn']:
+                    oxAuthConfDynamic = json.loads(entry['jansConfDyn'])
+                    dn = entry['dn']
+                    break
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth  "'.format(self.default_bucket)
             result = cbm.exec_query(n1ql)
@@ -65,26 +135,6 @@ class DBUtils:
             oxAuthConfDynamic = js['results'][0][self.default_bucket]['oxAuthConfDynamic']
 
         return dn, oxAuthConfDynamic
-
-
-    def get_oxTrustConfApplication(self):
-        if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.search(
-                        search_base='o=jans',
-                        search_scope=ldap3.SUBTREE,
-                        search_filter='(objectClass=oxTrustConfiguration)',
-                        attributes=['oxTrustConfApplication']
-                        )
-            dn = self.ldap_conn.response[0]['dn']
-            oxTrustConfApplication = json.loads(self.ldap_conn.response[0]['attributes']['oxTrustConfApplication'][0])
-        elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_oxtrust"'.format(self.default_bucket)
-            result = self.cbm.exec_query(n1ql)
-            js = result.json()
-            dn = js['results'][0][self.default_bucket]['dn']
-            oxTrustConfApplication = json.loads(js['results'][0][self.default_bucket]['oxTrustConfApplication'])
-
-        return dn, oxTrustConfApplication
 
 
     def set_oxAuthConfDynamic(self, entries):
@@ -98,27 +148,17 @@ class DBUtils:
                     )
             self.log_ldap_result(ldap_operation_result)
 
+        elif self.moddb == BackendTypes.MYSQL:
+            dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
+            oxAuthConfDynamic.update(entries)
+            sql_cmd = "UPDATE jansAppConf SET jansConfDyn='{}' WHERE dn='{}'".format(json.dumps(oxAuthConfDynamic, indent=2), dn)
+            self.exec_rdbm_query(sql_cmd)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
                 n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET {}={}'.format(self.default_bucket, k, entries[k])
                 self.cbm.exec_query(n1ql)
 
-
-    def set_oxTrustConfApplication(self, entries):
-        dn, oxTrustConfApplication = self.get_oxTrustConfApplication()
-        oxTrustConfApplication.update(entries)
-        oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
-
-        if self.moddb == BackendTypes.LDAP:
-            ldap_operation_result = self.ldap_conn.modify(
-                    dn,
-                    {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, oxTrustConfApplication_js]}
-                    )
-            self.log_ldap_result(ldap_operation_result)
-
-        elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET `oxTrustConfApplication`={}'.format(self.default_bucket, json.dumps(oxTrustConfApplication_js))
-            self.cbm.exec_query(n1ql)
 
     def enable_script(self, inum):
         if self.moddb == BackendTypes.LDAP:
@@ -127,6 +167,11 @@ class DBUtils:
                     {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
             self.log_ldap_result(ldap_operation_result)
+            
+        elif self.moddb == BackendTypes.MYSQL:
+            sql_cmd = "UPDATE jansCustomScr SET jansEnabled=1 WHERE dn='inum={},ou=scripts,o=jans'".format(inum)
+            self.exec_rdbm_query(sql_cmd)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
             self.cbm.exec_query(n1ql)
@@ -138,6 +183,11 @@ class DBUtils:
                 {service: [ldap3.MODIFY_REPLACE, 'true']}
                 )
             self.log_ldap_result(ldap_operation_result)
+        
+        elif self.moddb == BackendTypes.MYSQL:
+            sql_cmd = "UPDATE jansAppConf SET {}=1 WHERE dn='ou=configuration,o=jans'".format(service)
+            self.exec_rdbm_query(sql_cmd)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
@@ -150,6 +200,11 @@ class DBUtils:
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
             self.log_ldap_result(ldap_operation_result)
+
+        elif self.moddb == BackendTypes.MYSQL:
+            sql_cmd = "UPDATE jansAppConf SET {}='{}' WHERE dn='ou=configuration,o=jans'".format(component, value)
+            self.exec_rdbm_query(sql_cmd)
+        
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
             self.cbm.exec_query(n1ql)
@@ -159,6 +214,10 @@ class DBUtils:
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
+    def dn_exists_rdbm(self, dn, table):
+        return self.exec_rdbm_query("select dn from {} where dn='{}'".format(table, dn), 1)
+
+
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
         backend_location = self.get_backend_location_for_dn(search_base)
@@ -167,6 +226,9 @@ class DBUtils:
             if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
                 key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
                 return document
+        if backend_location == BackendTypes.MYSQL:
+            # to be implemented
+            return None
 
         if backend_location == BackendTypes.COUCHBASE:
             key = ldif_utils.get_key_from(search_base)
@@ -227,6 +289,28 @@ class DBUtils:
                                 {'jansConfProperty': [ldap3.MODIFY_ADD, jansConfProperty_js]}
                                 )
                             self.log_ldap_result(ldap_operation_result)
+
+        elif backend_location == BackendTypes.MYSQL:
+            if self.dn_exists_rdbm(dn, 'jansCustomScr'):
+                sql_cmd = 'SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn)
+                jansConfProperty_s = self.exec_rdbm_query(sql_cmd, 1)
+                if jansConfProperty_s and jansConfProperty_s['jansConfProperty']:
+                    jansConfProperty = json.loads(jansConfProperty_s['jansConfProperty'])
+                else:
+                    jansConfProperty = {'v': []}
+
+                for oxconfigprop in jansConfProperty['v']:
+                    if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
+                        oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
+                        break
+                else:
+                    jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
+
+                sql_cmd = "UPDATE jansCustomScr SET jansConfProperty='{}' WHERE dn='{}'".format(
+                                        json.dumps(jansConfProperty), dn)
+
+                self.exec_rdbm_query(sql_cmd)
+
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
             n1ql = 'SELECT jansConfProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
@@ -266,7 +350,23 @@ class DBUtils:
             base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
             base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
 
+
+    def get_attr_syntax(self, attrname):
+        for jans_attr in self.jans_attributes:
+            if attrname in jans_attr['names']:
+                if jans_attr.get('multivalued'):
+                    return 'JSON'
+                return jans_attr['syntax']
+        else:
+            opendj_syntax = self.opendj_attributes_syntax.get(attrname)
+            if opendj_syntax is None:
+                opendj_syntax = '1.3.6.1.4.1.1466.115.121.1.15'
+
+            return opendj_syntax
+
     def import_ldif(self, ldif_files, bucket=None, force=None):
+
+        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
             base.logIt("Importing entries from " + ldif_fn)
@@ -292,6 +392,74 @@ class DBUtils:
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
                         ldap_operation_result = self.ldap_conn.add(dn, attributes=entry)
                         self.log_ldap_result(ldap_operation_result)
+
+                elif backend_location == BackendTypes.MYSQL:
+
+                    dn_parsed = dnutils.parse_dn(dn)
+                    rdn_name = dn_parsed[0][0]
+                    doc_id = dn_parsed[0][1]
+                    objectClass = entry.get('objectClass') or entry.get('objectclass')
+                    if 'top' in objectClass:
+                        objectClass.remove('top')
+                    if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
+                        continue
+
+                    objectClass = objectClass[-1]
+                    entry.pop(rdn_name)
+                    if 'objectClass' in entry:
+                        entry.pop('objectClass')
+                    elif 'objectclass' in entry:
+                        entry.pop('objectclass')
+
+                    table_name = objectClass
+
+                    if self.dn_exists_rdbm(dn, table_name):
+                        base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
+                        continue
+
+                    cols = ['`doc_id`', '`objectClass`', '`dn`']
+                    vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
+                    for lkey in entry:
+                        cols.append('`{}`'.format(lkey))
+                        data_type = self.ldap_sql_data_type_mapping[self.get_attr_syntax(lkey)]
+                        data_type = data_type[Config.rdbm_type]['type']
+
+                        if data_type in ('SMALLINT', 'INT'):
+                            if entry[lkey][0].lower() in ('1', 'on', 'true', 'yes'):
+                                vals.append('1')
+                            else:
+                                vals.append('0')
+                        elif data_type == 'DATETIME':
+                            vals.append(entry[lkey])
+                        elif data_type == 'JSON':
+                            if lkey in ('jansConfProperty', 'jansModuleProperty'):
+                                for i, k in enumerate(entry[lkey][:]):
+                                    entry[lkey][i] = json.loads(k)
+                            data_= "'{}'".format(json.dumps({'v':entry[lkey]}))
+                            vals.append(data_)
+                        else:
+                            vals.append(json.dumps(entry[lkey][0]))
+
+                    if 'add' in  entry and 'changetype' in entry:
+                        # to be implemented
+                        pass
+                
+                    elif 'replace' in  entry and 'changetype' in entry:
+                        # to be implemented
+                        pass
+
+                    else:
+                        sql_cmd = 'INSERT INTO {} ({}) VALUES ({});'.format(
+                                    table_name,
+                                    ', '.join(cols),
+                                    ', '.join(vals)
+                                    )
+
+                    self.exec_rdbm_query(sql_cmd)
+
+                    with open(sql_data_fn, 'a') as w:
+                        w.write(sql_cmd+'\n')
+
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
@@ -372,6 +540,10 @@ class DBUtils:
         if Config.mappingLocations[group] == 'ldap':
             return static.BackendTypes.LDAP
 
+        if Config.mappingLocations[group] == 'rdbm':
+            if Config.rdbm_type == 'mysql':
+                return static.BackendTypes.MYSQL
+        
         if Config.mappingLocations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
 

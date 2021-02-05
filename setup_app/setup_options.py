@@ -31,6 +31,8 @@ def get_setup_options():
     ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     #ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
 
+    parser.add_argument('-remote-rdbm', choices=['mysql'], help="Enables using remote RDBM server")
+    
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
@@ -81,11 +83,15 @@ def get_setup_options():
         'properties_password': None,
     }
 
-    if not argsp.remote_couchbase:
+    if not (argsp.remote_couchbase or argsp.remote_rdbm):
         setupOptions['wrends_install'] = InstallTypes.LOCAL
     else:
         setupOptions['wrends_install'] = InstallTypes.NONE
-        setupOptions['cb_install'] = InstallTypes.REMOTE
+        if argsp.remote_couchbase:
+            setupOptions['cb_install'] = InstallTypes.REMOTE
+        if argsp.remote_rdbm:
+            setupOptions['rdbm_install'] = InstallTypes.REMOTE
+            setupOptions['rdbm_type'] = argsp.remote_rdbm
 
     if argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
