@@ -1,6 +1,6 @@
 class InstallTypes:
-    NONE = 0
-    LOCAL = '1'
+    NONE   =  0
+    LOCAL  = '1'
     REMOTE = '2'
 
 class colors:
@@ -17,6 +17,7 @@ class colors:
 class BackendTypes:
     LDAP      = 1
     COUCHBASE = 2
+    MYSQL     = 3
 
 class AppType:
     APPLICATION = 1
