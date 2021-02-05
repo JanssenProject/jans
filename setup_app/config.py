@@ -144,6 +144,17 @@ class Config:
         #DB installation types
         self.wrends_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
+        self.rdbm_install = InstallTypes.NONE
+
+        #rdbm
+        self.rdbm_type = 'mysql'
+        self.rdbm_host = 'localhost'
+        self.rdbm_port = 3306
+        self.rdbm_db = 'jans'
+        self.rdbm_user = None
+        self.rdbm_password = None
+        self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
+
 
         # Jans components installation status
         self.loadData = True
@@ -251,6 +262,7 @@ class Config:
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'jans-ldap.properties')
         self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
+        self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
         
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')

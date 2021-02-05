@@ -56,7 +56,7 @@ from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.eleven import ElevenInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
-
+from setup_app.installers.rdbm import RDBMInstaller
 
 #from setup_app.installers.oxd import OxdInstaller
 
@@ -144,6 +144,7 @@ jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
+rdbmInstaller= RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
@@ -155,7 +156,7 @@ jansCliInstaller = JansCliInstaller()
 
 
 if Config.installed_instance:
-    for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
+    for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller, 
                         jansAuthInstaller, scimInstaller, fidoInstaller,
                         elevenInstaller, jansCliInstaller
                         #oxdInstaller
@@ -259,7 +260,9 @@ def do_installation():
 
             if Config.cb_install:
                 couchbaseInstaller.start_installation()
-
+            
+            if Config.rdbm_install:
+                rdbmInstaller.start_installation()
 
         if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installHttpd):
             httpdinstaller.configure()
