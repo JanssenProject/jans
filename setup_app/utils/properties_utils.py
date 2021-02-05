@@ -86,8 +86,12 @@ class PropertiesUtils(SetupUtils):
         if Config.cb_install and not Config.get('cb_password'):
             Config.cb_password = Config.admin_password
 
-        if Config.cb_install and not Config.wrends_install:
-            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+        if not Config.wrends_install:
+            if Config.cb_install:
+                Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+
+            if Config.rdbm_install:
+                Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
 
         self.set_persistence_type()
 
@@ -336,7 +340,7 @@ class PropertiesUtils(SetupUtils):
                                     Config.cb_query_node = cb_host
                                     retval['result'] = True
                                     if not Config.thread_queue:
-                                        print("    Successfully connected to Couchbase server")
+                                        print("{}    Successfully connected to Couchbase server{}".format(colors.OKGREEN, colors.ENDC))
                                     return retval
                 except:
                     pass
@@ -451,10 +455,12 @@ class PropertiesUtils(SetupUtils):
             Config.mappingLocations[m] = 'couchbase'
 
     def set_persistence_type(self):
-        if Config.wrends_install and not  Config.cb_install:
+        if Config.wrends_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
-        elif not Config.wrends_install and Config.cb_install:
+        elif (not Config.wrends_install)  and (not Config.rdbm_install) and Config.cb_install:
             Config.persistence_type = 'couchbase'
+        elif (not Config.wrends_install)  and Config.rdbm_install and (not Config.cb_install):
+            Config.persistence_type = Config.rdbm_type
         elif Config.wrends_install and Config.cb_install:
             Config.persistence_type = 'hybrid'
 
@@ -553,6 +559,28 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installConfigApi:
             Config.addPostSetupService.append('installConfigApi')
 
+    def prompt_for_rdbm(self):
+        if Config.rdbm_type == 'mysql':
+            while True:
+                Config.rdbm_host = self.getPrompt("    MySQL host", Config.rdbm_host)
+                Config.rdbm_port = self.getPrompt("    MySQL port", Config.rdbm_port)
+                Config.rdbm_db = self.getPrompt("    Jnas Database", Config.rdbm_db)
+                Config.rdbm_user = self.getPrompt("    Jans Database Username", Config.rdbm_user)
+                Config.rdbm_password = self.getPrompt("    Jans Database Password", Config.rdbm_password)
+
+                result = dbUtils.mysqlconnection()
+                
+                #we don't need jans-ldap.properties
+                Config.ce_templates[Config.ox_ldap_properties] = False
+                
+                if result[0]:
+                    print("    {}Successfully connected to MySQL server{}".format(colors.OKGREEN, colors.ENDC))
+                    break
+                else:
+                    print("    {}Can't connect to MySQL server with provided credidentals.{}".format(colors.FAIL, colors.ENDC))
+                    print("    ERROR:", result[1])
+
+
     def promptForProperties(self):
 
         if Config.noPrompt or '-x' in sys.argv:
@@ -620,7 +648,7 @@ class PropertiesUtils(SetupUtils):
 
             localWrendsOnly = False
 
-            if (Config.wrends_install != InstallTypes.REMOTE) and (not Config.cb_install) and (available_backends == ['wrends']):
+            if (Config.wrends_install != InstallTypes.REMOTE) and (not Config.cb_install) and (not Config.rdbm_install) and (available_backends == ['wrends']):
                 Config.wrends_install = InstallTypes.LOCAL
                 
             elif Config.wrends_install != InstallTypes.REMOTE and (Config.cb_install == InstallTypes.REMOTE or 'couchbase' in available_backends):
@@ -668,6 +696,9 @@ class PropertiesUtils(SetupUtils):
             if Config.cb_install == InstallTypes.REMOTE:
                 self.prompt_remote_couchbase()
 
+            if Config.rdbm_install:
+                 self.prompt_for_rdbm()
+
             elif 'couchbase' in available_backends:
                 promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
                 if promptForCB[0] == 'y':
@@ -684,7 +715,7 @@ class PropertiesUtils(SetupUtils):
 
                     Config.cb_password = cbPass
 
-            if not (Config.wrends_install or Config.cb_install):
+            if not (Config.wrends_install or Config.cb_install or Config.rdbm_install):
                 print("{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC))
                 sys.exit(False)
 
@@ -693,6 +724,8 @@ class PropertiesUtils(SetupUtils):
 
             if not Config.wrends_install and Config.cb_install:
                 Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+            if not Config.wrends_install and Config.rdbm_install:
+                Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
             elif Config.wrends_install and Config.cb_install:
                 self.promptForBackendMappings()
 
@@ -714,7 +747,6 @@ class PropertiesUtils(SetupUtils):
                 else:
                     Config.java_type = 'jdk'
                     Config.defaultTrustStoreFN = '%s/lib/security/cacerts' % Config.jre_home
-
 
             self.promptForHTTPD()
 
