@@ -4349,22 +4349,22 @@ components:
           type: integer
           format: int32
           multipleOf: 1
-        requires-ssl:
+        requires_ssl:
           description: Boolean value with default value false. If true, SSL will be enabled.
           type: boolean
-        trust-host:
+        trust_host:
           type: boolean
           description: Boolean value with default value false.
-        from-name:
+        from_name:
           description: Name of the sender.
           type: string
-        from-email-address:
+        from_email_address:
           description: Email Address of the Sender.
           type: string
-        requires-authentication:
+        requires_authentication:
           description: Boolean value with default value false. It true it will enable sender authentication.
           type: boolean
-        user-name:
+        user_name:
           description: Username of the SMTP.
           type: string
         password:
