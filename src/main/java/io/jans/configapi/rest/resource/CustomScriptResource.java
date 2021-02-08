@@ -85,7 +85,8 @@ public class CustomScriptResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
-    public Response createPersonScript(@Valid CustomScript customScript) {
+    public Response createScript(@Valid CustomScript customScript) {
+    	logger.trace("CustomScriptResource::createScript() - customScript = "+customScript+"\n\n");
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
         if (StringHelper.isEmpty(inum)) {
@@ -99,7 +100,8 @@ public class CustomScriptResource extends BaseResource {
 
     @PUT
     @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
-    public Response updatePersonScript(@Valid @NotNull CustomScript customScript) {
+    public Response updateScript(@Valid @NotNull CustomScript customScript) {
+    	logger.trace("CustomScriptResource::updateScript() - customScript = "+customScript+"\n\n");
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
@@ -110,8 +112,9 @@ public class CustomScriptResource extends BaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_DELETE_ACCESS})
-    public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
+        	logger.trace("CustomScriptResource::deleteScript() - inum = "+inum+"\n\n");
             CustomScript existingScript = customScriptService.getScriptByInum(inum);
             customScriptService.remove(existingScript);
             return Response.noContent().build();
