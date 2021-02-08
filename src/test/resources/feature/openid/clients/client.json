@@ -1,5 +1,4 @@
 {
-  "inum": "1800.9test",
   "applicationType": "web",
   "accessTokenAsJwt": false,
   "claimRedirectUris": [
