@@ -84,13 +84,14 @@ class UmaResource(object):
         self._expiration_date = None
         self._deletable = None
         self.discriminator = None
-        self.dn = dn
-        self.inum = inum
+        if dn is not None:
+            self.dn = dn
+        if inum is not None:
+            self.inum = inum
         self.id = id
         if name is not None:
             self.name = name
-        if icon_uri is not None:
-            self.icon_uri = icon_uri
+        self.icon_uri = icon_uri
         if scopes is not None:
             self.scopes = scopes
         if scope_expression is not None:
@@ -131,8 +132,6 @@ class UmaResource(object):
         :param dn: The dn of this UmaResource.  # noqa: E501
         :type: str
         """
-        if dn is None:
-            raise ValueError("Invalid value for `dn`, must not be `None`")  # noqa: E501
 
         self._dn = dn
 
@@ -156,8 +155,6 @@ class UmaResource(object):
         :param inum: The inum of this UmaResource.  # noqa: E501
         :type: str
         """
-        if inum is None:
-            raise ValueError("Invalid value for `inum`, must not be `None`")  # noqa: E501
 
         self._inum = inum
 
@@ -229,6 +226,8 @@ class UmaResource(object):
         :param icon_uri: The icon_uri of this UmaResource.  # noqa: E501
         :type: str
         """
+        if icon_uri is None:
+            raise ValueError("Invalid value for `icon_uri`, must not be `None`")  # noqa: E501
 
         self._icon_uri = icon_uri
 

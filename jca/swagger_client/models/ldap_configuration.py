@@ -79,13 +79,11 @@ class LdapConfiguration(object):
         self.bind_dn = bind_dn
         self.bind_password = bind_password
         self.servers = servers
-        if max_connections is not None:
-            self.max_connections = max_connections
+        self.max_connections = max_connections
         self.use_ssl = use_ssl
         self.base_d_ns = base_d_ns
         self.primary_key = primary_key
-        if local_primary_key is not None:
-            self.local_primary_key = local_primary_key
+        self.local_primary_key = local_primary_key
         if use_anonymous_bind is not None:
             self.use_anonymous_bind = use_anonymous_bind
         if enabled is not None:
@@ -215,6 +213,8 @@ class LdapConfiguration(object):
         :param max_connections: The max_connections of this LdapConfiguration.  # noqa: E501
         :type: int
         """
+        if max_connections is None:
+            raise ValueError("Invalid value for `max_connections`, must not be `None`")  # noqa: E501
 
         self._max_connections = max_connections
 
@@ -313,6 +313,8 @@ class LdapConfiguration(object):
         :param local_primary_key: The local_primary_key of this LdapConfiguration.  # noqa: E501
         :type: str
         """
+        if local_primary_key is None:
+            raise ValueError("Invalid value for `local_primary_key`, must not be `None`")  # noqa: E501
 
         self._local_primary_key = local_primary_key
 
