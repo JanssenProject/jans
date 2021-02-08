@@ -63,16 +63,16 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def generate_configuration(self):
 
-        uma_rs_protect = self.loadJson(self.rs_protect_fn)
-
         try:
             config_api_swagger_yaml_fn = os.path.join(Config.install_dir, 'setup_app/data/jans-config-api-swagger.yaml')
             yml_str = self.readFile(config_api_swagger_yaml_fn)
             yml_str = yml_str.replace('\t', ' ')
             cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
             scopes_def = cfg_yml['components']['securitySchemes']['jans-auth']['flows']['clientCredentials']['scopes']
+            scope_type = cfg_yml['components']['securitySchemes']['jans-auth']['type']
         except:
             scopes_def = {}
+            scope_type = 'oauth2'
 
         self.check_clients([('jca_client_id', '1801.')])
 
@@ -86,34 +86,32 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         scopes = {}
         jansUmaScopes_all = []
 
-        load_resources = False
 
-        for resource in uma_rs_protect['resources']:
+        for scope in scopes_def:
 
             jansUmaScopes = []
 
-            for condition in resource['conditions']:
-                for scope in condition['scopes']:
-                    if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
-                        continue
-                    if not scope in scopes:
-                        inum = '1800.' + os.urandom(3).hex().upper()
-                        scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
-                        scopes[scope] = {'dn': scope_dn}
-                        display_name = 'Config API scope {}'.format(scope)
-                        ldif_scopes_writer.unparse(
-                                scope_dn, {
-                                    'objectclass': ['top', 'jansScope'],
-                                    'description': [scopes_def.get(scope, display_name)],
-                                    'displayName': [display_name],
-                                    'inum': [inum],
-                                    'jansDefScope': ['false'],
-                                    'jansId': [scope],
-                                    'jansScopeTyp': ['openid'],
-                                })
+            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
+                continue
 
-                        jansUmaScopes.append(scopes[scope]['dn'])
-                        jansUmaScopes_all.append(scopes[scope]['dn'])
+            if not scope in scopes:
+                inum = '1800.' + os.urandom(3).hex().upper()
+                scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
+                scopes[scope] = {'dn': scope_dn}
+                display_name = 'Config API scope {}'.format(scope)
+                ldif_scopes_writer.unparse(
+                        scope_dn, {
+                            'objectclass': ['top', 'jansScope'],
+                            'description': [scopes_def[scope]],
+                            'displayName': [display_name],
+                            'inum': [inum],
+                            'jansDefScope': ['false'],
+                            'jansId': [scope],
+                            'jansScopeTyp': [scope_type],
+                        })
+
+                jansUmaScopes.append(scopes[scope]['dn'])
+                jansUmaScopes_all.append(scopes[scope]['dn'])
 
         scope_ldif_fd.close()
 
