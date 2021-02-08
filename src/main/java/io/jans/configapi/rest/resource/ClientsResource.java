@@ -74,8 +74,11 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
-        String inum = clientService.generateInumForNewClient();
-        client.setClientId(inum);
+        String inum = client.getClientId();
+       	if(inum==null || inum.isEmpty() || inum.isBlank()) {
+	        inum = clientService.generateInumForNewClient();
+	        client.setClientId(inum);
+    	}
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         if (client.getClientSecret() != null) {
             client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));

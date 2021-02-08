@@ -3454,6 +3454,7 @@ components:
       - dataType
       - status
       - viewType
+      - editType
       properties:
         dn:
           type: string
