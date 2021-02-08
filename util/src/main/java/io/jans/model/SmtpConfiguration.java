@@ -28,22 +28,22 @@ public class SmtpConfiguration implements java.io.Serializable {
     @JsonProperty("port")
     private int port;
 
-    @JsonProperty("requires-ssl")
+    @JsonProperty("requires_ssl")
     private boolean requiresSsl;
 
-    @JsonProperty("trust-host")
+    @JsonProperty("trust_host")
     private boolean serverTrust;
 
-    @JsonProperty("from-name")
+    @JsonProperty("from_name")
     private String fromName;
 
-    @JsonProperty("from-email-address")
+    @JsonProperty("from_email_address")
     private String fromEmailAddress;
 
-    @JsonProperty("requires-authentication")
+    @JsonProperty("requires_authentication")
     private boolean requiresAuthentication;
 
-    @JsonProperty("user-name")
+    @JsonProperty("user_name")
     private String userName;
 
     @JsonProperty("password")
