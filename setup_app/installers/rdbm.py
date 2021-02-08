@@ -98,7 +98,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def rdbmProperties(self):
         Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-        Config.templateRenderingDict['server_time_zone'] = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo)
+        my_time_zone = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo)
+        if not my_time_zone == 'UTC':
+            my_time_zone = 'GMT'+my_time_zone
+        Config.templateRenderingDict['server_time_zone'] = my_time_zone
+        
         self.renderTemplateInOut(Config.jansRDBMProperties, Config.templateFolder, Config.configFolder)
 
     def create_folders(self):
