@@ -36,7 +36,10 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # ======
 
 COPY requirements.txt /app/requirements.txt
+# downgrade cryptography to anything that below v3.4 as it requires Rust 1.45+
+# which is not available in alpine 3.12
 RUN pip3 install --no-cache-dir -U pip \
+    && pip3 install --no-cache-dir "cryptography<3.4" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && rm -rf /src/jans-pycloudlib/.git
 
