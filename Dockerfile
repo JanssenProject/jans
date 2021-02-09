@@ -1,9 +1,4 @@
-FROM adoptopenjdk/openjdk11:jre-11.0.8_10-alpine
-
-# symlink JVM
-RUN mkdir -p /usr/lib/jvm/default-jvm /usr/java/latest \
-    && ln -sf /opt/java/openjdk /usr/lib/jvm/default-jvm/jre \
-    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
+FROM alpine:3.13
 
 # ===============
 # Alpine packages
@@ -11,7 +6,11 @@ RUN mkdir -p /usr/lib/jvm/default-jvm /usr/java/latest \
 
 RUN apk update \
     && apk add --no-cache openssl py3-pip tini curl bash \
-    && apk add --no-cache --virtual build-deps wget git gcc musl-dev python3-dev libffi-dev openssl-dev
+    && apk add --no-cache --virtual build-deps wget git gcc musl-dev python3-dev libffi-dev openssl-dev cargo
+
+RUN apk add --no-cache openjdk11-jre-headless \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
 
 # =====
 # Jetty
@@ -74,10 +73,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 # ======
 
 COPY requirements.txt /app/requirements.txt
-# downgrade cryptography to anything that below v3.4 as it requires Rust 1.45+
-# which is not available in alpine 3.12
 RUN pip3 install -U pip \
-    && pip3 install --no-cache-dir "cryptography<3.4" \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && rm -rf /src/jans-pycloudlib/.git
 
