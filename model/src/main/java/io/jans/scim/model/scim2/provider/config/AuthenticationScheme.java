@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.model.scim2.provider.config;
 
 import io.jans.scim.model.scim2.annotations.Attribute;
@@ -12,9 +6,6 @@ import io.jans.scim.model.scim2.AttributeDefinition;
 /**
  * This class represents the <code>authenticationSchemes</code> complex attribute in the Service Provider Config
  * (see section 5 of RFC 7643).
- */
-/*
- * Updated by jgomer on 2017-10-21
  */
 public class AuthenticationScheme {
 
@@ -168,35 +159,9 @@ public class AuthenticationScheme {
 	 */
 	public static AuthenticationScheme createOAuth2(boolean primary) {
 		return new AuthenticationScheme(
-				"OAuth 2.0", "OAuth2 Access Token Authentication Scheme. Enabled only on 'SCIM Test Mode'.",
+				"OAuth 2.0", "OAuth2 Bearer Token Authentication Scheme'.",
 				"http://tools.ietf.org/html/rfc6749", "http://tools.ietf.org/html/rfc6749",
 				"oauth2", primary);
-	}
-
-	/*
-	public static AuthenticationScheme createOAuth2(boolean primary) {
-		return new AuthenticationScheme(
-				"OAuth 2.0",
-				"The OAuth 2.0 Bearer Token Authentication scheme. OAuth enables "
-						+ "clients to access protected resources by obtaining an access "
-						+ "token, which is defined in RFC 6750 as \"a string "
-						+ "representing an access authorization issued to the client\", "
-						+ "rather than using the resource owner's credentials directly.",
-				"http://tools.ietf.org/html/rfc6750", "http://oauth.net/2/",
-				"oauth2", primary);
-	}
-	*/
-
-    /**
-     * Convenience method that creates a new AuthenticationScheme instances of type UMA 2.
-     * @param primary A boolean value for the "primary" field of object
-     * @return An AuthenticationScheme object
-     */
-	public static AuthenticationScheme createUma(boolean primary) {
-		return new AuthenticationScheme(
-				"UMA 2.0", "UMA Authentication Scheme",
-				"https://docs.kantarainitiative.org/uma/ed/oauth-uma-grant-2.0-06.html", "https://www.gluu.org/docs/gluu-server/admin-guide/uma/",
-				"uma", primary);
 	}
 
 }
