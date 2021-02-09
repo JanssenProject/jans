@@ -185,8 +185,8 @@ public class ConfigurationFactory {
 
 	public void create() {
 		if (!createFromLdap(true)) {
-			log.error("Failed to load configuration from LDAP. Please fix it!!!.");
-			throw new ConfigurationException("Failed to load configuration from LDAP.");
+			log.error("Failed to load configuration from DB. Please fix it!!!.");
+			throw new ConfigurationException("Failed to load configuration from DB.");
 		} else {
 			log.info("Configuration loaded successfully.");
 		}
