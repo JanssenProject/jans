@@ -21,7 +21,7 @@ import java.util.Date;
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
-@DataEntry(sortBy = "startDate")
+@DataEntry(sortBy = "startDate", sortByName = "jansStartDate")
 @ObjectClass(value = "jansMetric")
 public class MetricEntry {
 
