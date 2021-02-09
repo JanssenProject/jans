@@ -21,7 +21,7 @@ import javax.validation.constraints.Size;
  * @author Javier Rojas Blum
  * @version March 20, 2018
  */
-@DataEntry(sortBy = {"id","description"})
+@DataEntry(sortBy = {"id","description"}, sortByName = {"jansId", "description"})
 @ObjectClass(value = "jansSectorIdentifier")
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
