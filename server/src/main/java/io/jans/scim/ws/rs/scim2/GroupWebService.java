@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.ws.rs.scim2;
 
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -91,7 +85,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.write"})
     @RefAdjusted
     @ApiOperation(value = "Create group", notes = "Create group (https://tools.ietf.org/html/rfc7644#section-3.3)", response = GroupResource.class)
     public Response createGroup(
@@ -118,7 +112,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.read"})
     @RefAdjusted
     @ApiOperation(value = "Find group by id", notes = "Returns a group by id as path param (https://tools.ietf.org/html/rfc7644#section-3.4.2.1)",
             response = GroupResource.class)
@@ -160,7 +154,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.write"})
     @RefAdjusted
     @ApiOperation(value = "Update group", notes = "Update group (https://tools.ietf.org/html/rfc7644#section-3.5.1)", response = GroupResource.class)
     public Response updateGroup(
@@ -192,7 +186,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.write"})
     @ApiOperation(value = "Delete group", notes = "Delete group (https://tools.ietf.org/html/rfc7644#section-3.6)")
     public Response deleteGroup(@PathParam("id") String id){
 
@@ -214,7 +208,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @GET
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.read"})
     @RefAdjusted
     @ApiOperation(value = "Search groups", notes = "Returns a list of groups (https://tools.ietf.org/html/rfc7644#section-3.4.2.2)", response = ListResponse.class)
     public Response searchGroups(
@@ -253,7 +247,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.read"})
     @RefAdjusted
     @ApiOperation(value = "Search group POST /.search", notes = "Returns a list of groups (https://tools.ietf.org/html/rfc7644#section-3.4.3)", response = ListResponse.class)
     public Response searchGroupsPost(@ApiParam(value = "SearchRequest", required = true) SearchRequest searchRequest){
@@ -280,7 +274,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi
+    @ProtectedApi(scopes = {"https://jans.io/scim/groups.write"})
     @RefAdjusted
     @ApiOperation(value = "PATCH operation", notes = "https://tools.ietf.org/html/rfc7644#section-3.5.2", response = GroupResource.class)
     public Response patchGroup(

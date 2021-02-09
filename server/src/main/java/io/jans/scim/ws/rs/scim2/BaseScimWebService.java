@@ -130,7 +130,7 @@ public class BaseScimWebService {
     }
 
     int getMaxCount(){
-        return appConfiguration.getScimProperties().getMaxCount();
+        return appConfiguration.getMaxCount();
     }
 
     String getValueFromHeaders(HttpHeaders headers, String name){

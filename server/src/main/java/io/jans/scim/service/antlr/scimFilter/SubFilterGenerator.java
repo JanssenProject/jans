@@ -41,12 +41,14 @@ public class SubFilterGenerator {
      * @param attrType The attribute definition type of the attribute
      * @param type See compvalue in ScimFilter.g4 grammar file
      * @param operator The operator
-     * @param multiValued Whether the attribute referenced in parameter is multivalued or not
+     * @param multiValued Whether the attribute referenced in parameter is multivalued or not (null tries to handle both) 
      * @return The filter built after processing this atomic expression (accompanied with an error string if any)
      */
     public Pair<Filter, String> build(String subAttribute, String attribute, String compValue, Type attrType,
-                                      CompValueType type, ScimOperator operator, boolean multiValued) {
-
+                                      CompValueType type, ScimOperator operator, Boolean multiValued) {
+    
+        log.debug("Preparing subfilter with attribute={}, subAttribute={}, compValue={}, attrType={}, multiValued={}",
+        	attribute, subAttribute, compValue, attrType, multiValued);
         Filter filth = null;
         error = null;
 
@@ -84,7 +86,7 @@ public class SubFilterGenerator {
 
     }
 
-    private Filter getSubFilterString(String subAttribute, String attribute, String value, ScimOperator operator, boolean multivalued) {
+    private Filter getSubFilterString(String subAttribute, String attribute, String value, ScimOperator operator, Boolean multivalued) {
 
         Filter subfilter = null;
         log.trace("getSubFilterString");
@@ -189,7 +191,7 @@ public class SubFilterGenerator {
 
     }
 
-    private Filter getSubFilterNumeric(String subAttribute, String attribute, String value, ScimOperator operator, Type attrType, boolean multivalued) {
+    private Filter getSubFilterNumeric(String subAttribute, String attribute, String value, ScimOperator operator, Type attrType, Boolean multivalued) {
 
         Filter subfilter = null;
         Object objValue;
@@ -259,7 +261,7 @@ public class SubFilterGenerator {
 
     }
 
-    private Filter getSubFilterBoolean(String subAttribute, String attribute, String value, ScimOperator operator, boolean multivalued) {
+    private Filter getSubFilterBoolean(String subAttribute, String attribute, String value, ScimOperator operator, Boolean multivalued) {
 
         Filter subfilter = null;
         log.trace("getSubFilterBoolean");
@@ -284,7 +286,7 @@ public class SubFilterGenerator {
 
     }
 
-    private Filter getSubFilterDateTime(String subAttribute, String attribute, String value, ScimOperator operator, boolean multivalued) {
+    private Filter getSubFilterDateTime(String subAttribute, String attribute, String value, ScimOperator operator, Boolean multivalued) {
 
         Filter subfilter = null;
         log.trace("getSubFilterDateTime");
