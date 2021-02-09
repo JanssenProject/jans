@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim2.client;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,13 +25,14 @@ public class SampleTest extends BaseTest {
 
     private Logger logger = LogManager.getLogger(getClass());
 
+    //This tests assumes client_secret_basic for token endpoint authentication
     @Test
-    @Parameters ({"domainURL", "umaAatClientId", "umaAatClientJksPath", "umaAatClientJksPassword", "umaAatClientKeyId"})
-    public void smallerClient(String domainURL, String umaAatClientId, String umaAatClientJksPath, String umaAatClientJksPassword,
-                              String umaAatClientKeyId) throws Exception {
+    @Parameters ({"domainURL", "OIDCMetadataUrl", "clientId", "clientSecret"})
+    public void smallerClient(String domainURL, String OIDCMetadataUrl, String clientId, 
+    	String clientSecret) throws Exception {
 
-        IUserWebService myclient = ScimClientFactory.getClient(IUserWebService.class, domainURL, umaAatClientId,
-                umaAatClientJksPath, umaAatClientJksPassword, umaAatClientKeyId);
+        IUserWebService myclient = ScimClientFactory.getClient(IUserWebService.class, 
+        	domainURL, OIDCMetadataUrl, clientId, clientSecret, false);
 
         SearchRequest sr=new SearchRequest();
         sr.setFilter("userName eq \"admin\"");
@@ -47,26 +42,6 @@ public class SampleTest extends BaseTest {
 
         UserResource u = (UserResource) response.readEntity(ListResponse.class).getResources().get(0);
         logger.debug("Hello {}!", u.getDisplayName());
-
-    }
-
-    //@Test
-    @Parameters({"domainURL", "OIDCMetadataUrl"})
-    //This test showcases test mode usage (not typical UMA protection mode). Run only under such condition
-    public void testModeTest(String domain, String url) throws Exception{
-
-        IUserWebService myclient = ScimClientFactory.getTestClient(IUserWebService.class, domain, url);
-
-        SearchRequest sr=new SearchRequest();
-        sr.setFilter("pairwiseIdentifiers pr");
-        sr.setSortBy("meta.lastModified");
-
-        Response response = myclient.searchUsersPost(sr);
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        
-		int size = Optional.ofNullable(response.readEntity(ListResponse.class)
-						.getResources()).map(List::size).orElse(0);
-        logger.debug("There are {} users with PPIDs associated", size);
 
     }
 

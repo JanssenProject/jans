@@ -9,7 +9,7 @@ package io.jans.scim.ws.rs.scim2;
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
@@ -42,16 +42,15 @@ public class ServiceProviderConfigWS extends BaseScimWebService {
 
         try {
             ServiceProviderConfig serviceProviderConfig = new ServiceProviderConfig();
-            serviceProviderConfig.getFilter().setMaxResults(appConfiguration.getScimProperties().getMaxCount());
+            serviceProviderConfig.getFilter().setMaxResults(appConfiguration.getMaxCount());
 
             Meta meta = new Meta();
             meta.setLocation(endpointUrl);
             meta.setResourceType(ScimResourceUtil.getType(serviceProviderConfig.getClass()));
             serviceProviderConfig.setMeta(meta);
 
-            boolean onTestMode = appConfiguration.isScimTestMode();
-            serviceProviderConfig.setAuthenticationSchemes(Arrays.asList(
-                    AuthenticationScheme.createOAuth2(onTestMode), AuthenticationScheme.createUma(!onTestMode)));
+            serviceProviderConfig.setAuthenticationSchemes(Collections.singletonList(
+                    AuthenticationScheme.createOAuth2(true)));
 
             return Response.ok(resourceSerializer.serialize(serviceProviderConfig)).build();
         }

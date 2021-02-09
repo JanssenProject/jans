@@ -40,11 +40,13 @@ public class FilterListener extends ScimFilterBaseListener {
     private String error;
     private SubFilterGenerator subFilterGenerator;
     private ExtensionService extService;
+    private boolean ldapBackend;
 
     public FilterListener(Class<? extends BaseScimResource> resourceClass, boolean ldapBackend) {
         filter = new ArrayDeque<>();
         extService = CdiUtil.bean(ExtensionService.class);
         this.resourceClass = resourceClass;
+        this.ldapBackend = ldapBackend;
 
         subFilterGenerator =  new SubFilterGenerator(ldapBackend);
     }
@@ -63,9 +65,7 @@ public class FilterListener extends ScimFilterBaseListener {
             Attribute attrAnnot = IntrospectUtil.getFieldAnnotation(path, resourceClass, Attribute.class);
             String ldapAttribute = null;
             boolean isNested = false;
-            //Assuming single valued gives better chances of successful results in couchbase.
-            //LDAP usually behaves as expected
-            boolean multiValued = false;
+            Boolean multiValued = false;
 
             if (attrAnnot == null) {
                 ExtensionField field = extService.getFieldOfExtendedAttribute(resourceClass, path);
@@ -79,10 +79,10 @@ public class FilterListener extends ScimFilterBaseListener {
                 }
             } else {
                 attrType = attrAnnot.type();
-                multiValued = !attrAnnot.multiValueClass().equals(NullType.class);
                 Pair<String, Boolean> pair = FilterUtil.getLdapAttributeOfResourceAttribute(path, resourceClass);
                 ldapAttribute = pair.getFirst();
                 isNested = pair.getSecond();
+                multiValued = computeMultivaluedForCoreAttribute(path, attrAnnot, ldapAttribute);
             }
 
             if (error != null) {
@@ -152,5 +152,44 @@ public class FilterListener extends ScimFilterBaseListener {
         }
         return null;
     }
+    
+    /**
+     * Tries to determine a "convenient" value for multivalued with the aim of building a filter. In some cases the 
+     * Attribute annotation (specifically multiValueClass) is not enough to determine this value. For instance:
+     * - The terminal part of address.streetAddress entails usage of singled valued (see Address class), however a more
+     *   convenient value would be multiValued=true because the parent (address) is multi valued 
+     * - When multivalued seems the right fit, there can be existing data (in the case of couchbase database) expressed 
+     *   as a singe value, for instance "mail": "mymail@example.com". In cases like this, a more convenient value would be 
+     *   null where the filter produced tries to account both cases
+     * - While using null seems to be better overall choice regardless of attribute, the generated WHERE clause may 
+     *   become complex  
+     * @param path Path to the scim attribute in dot notation, eg. "name.familyName"
+     * @param attrAnnot References the Attribute annotation over the Java bean field that represents the terminal 
+     *                  portion of the path (familyName in the example)
+     * @param dbAttribute Physical attribute name mapped to the path passed
+     * @return True/False/null as more convenient
+     */
+ 	private Boolean computeMultivaluedForCoreAttribute(String path, Attribute attrAnnot, String dbAttribute) {
+		
+ 		Boolean multiValued;
+ 		
+ 		if (dbAttribute.equals("mail") && !ldapBackend) {
+ 			multiValued = null;
+ 		} else {
+ 			multiValued = !attrAnnot.multiValueClass().equals(NullType.class);
+			
+			if (!multiValued) {
+				int i = path.indexOf(".");
+			
+				if (i > 0) {
+					//path exists and is annotated with @Attribute
+					attrAnnot = IntrospectUtil.getFieldAnnotation(path.substring(0, i), resourceClass, Attribute.class);
+					multiValued = !attrAnnot.multiValueClass().equals(NullType.class);
+				}
+			}
+		}
+		return multiValued;
+ 
+	}
 
 }
