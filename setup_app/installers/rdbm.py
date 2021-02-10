@@ -16,6 +16,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     packageUtils = None
 
     def __init__(self):
+        self.needdb = False # we will connect later
         self.service_name = 'rdbm-server'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.OPTONAL
@@ -38,11 +39,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             Config.rdbm_user = 'jans'
 
         if Config.rdbm_install_type == InstallTypes.LOCAL:
-            if Config.rdbm_type == 'mysql':
-                if not self.packageUtils.check_installed('mysql-server'):
-                    self.packageUtils.installNetPackage('mysql-server')
 
-            result, conn = self.dbUtils.mysqlconnection()
+            result, conn = self.dbUtils.mysqlconnection(log=False)
             if not result:
                 sql_cmd_list = [
                     "CREATE DATABASE {};\n".format(Config.rdbm_db),
@@ -52,6 +50,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 for cmd in sql_cmd_list:
                     self.run("echo \"{}\" | mysql".format(cmd), shell=True)
 
+        self.dbUtils.bind()
 
     def create_tables(self):
 
