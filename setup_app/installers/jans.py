@@ -37,16 +37,25 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     txt += 'OpenDJ max ram (MB)'.ljust(30) + str(Config.opendj_max_ram).rjust(35) + "\n"
 
                 bc = []
+
                 if Config.wrends_install:
                     t_ = 'wrends'
                     if Config.wrends_install == InstallTypes.REMOTE:
                         t_ += '[R]'
                     bc.append(t_)
+
                 if Config.cb_install:
                     t_ = 'couchbase'
                     if Config.cb_install == InstallTypes.REMOTE:
                         t_ += '[R]'
                     bc.append(t_)
+
+                if Config.rdbm_install:
+                    t_ = Config.rdbm_type
+                    if Config.rdbm_install_type == InstallTypes.REMOTE:
+                        t_ += '[R]'
+                    bc.append(t_)
+
 
                 if bc:
                     bct = ', '.join(bc)
