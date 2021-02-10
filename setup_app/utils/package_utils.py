@@ -25,6 +25,17 @@ class PackageUtils(SetupUtils):
             
         return install_command, update_command, query_command, check_text
 
+
+    def check_installed(self, package):
+        install_command, update_command, query_command, check_text = self.get_install_commands()
+        sout, serr = self.run(query_command.format(package), shell=True, get_stderr=True)
+        return not check_text in sout+serr
+
+
+    def installNetPackage(self, packages):
+        install_command, update_command, query_command, check_text = self.get_install_commands()
+        self.run(install_command.format(packages), shell=True)
+
     def check_and_install_packages(self):
 
         install_command, update_command, query_command, check_text = self.get_install_commands()
@@ -41,19 +52,19 @@ class PackageUtils(SetupUtils):
                     package_query = package.replace('python3-', 'python36-')
                 else:
                     package_query = package
-                sout, serr = self.run(query_command.format(package_query), shell=True, get_stderr=True)
-                if check_text in sout+serr:
+    
+                if self.check_installed(package_query):
+                    self.logIt('Package {0} was installed'.format(package_query))
+                else:
                     self.logIt('Package {0} was not installed'.format(package_query))
                     install_list[install_type].append(package_query)
-                else:
-                    self.logIt('Package {0} was installed'.format(package_query))
+
 
         install = {'mondatory': True, 'optional': False}
 
         for install_type in install_list:
             if install_list[install_type]:
                 packages = " ".join(install_list[install_type])
-
 
                 if install_type == 'mondatory':
                     print("The following packages are required for Janssen Server")
@@ -77,7 +88,7 @@ class PackageUtils(SetupUtils):
                     print("Installing packages", packages)
                     if not base.os_type == 'fedora':
                         sout, serr = self.run(update_command, shell=True, get_stderr=True)
-                    self.run(install_command.format(packages), shell=True)
+                    self.installNetPackage(packages)
 
         if base.clone_type == 'deb':
             self.run('a2enmod ssl headers proxy proxy_http proxy_ajp', shell=True)
@@ -92,6 +103,7 @@ class PackageUtils(SetupUtils):
 
 
     def installPackage(self, packageName, remote=False):
+        base.logIt("Installing " + packageName)
         install_command, update_command, query_command, check_text = self.get_install_commands()
         if remote:
             output = self.run(install_command.format(packageName), shell=True)

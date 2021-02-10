@@ -6,10 +6,14 @@ import datetime
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
+from setup_app.static import InstallTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
 
+
 class RDBMInstaller(BaseInstaller, SetupUtils):
+
+    packageUtils = None
 
     def __init__(self):
         self.service_name = 'rdbm-server'
@@ -21,9 +25,33 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.output_dir = os.path.join(Config.outputFolder, Config.rdbm_type)
 
     def install(self):
+        self.local_install()
         self.create_tables()
         self.create_indexes()
         self.rdbmProperties()
+
+
+    def local_install(self):
+        if not Config.rdbm_password:
+            Config.rdbm_password = self.getPW()
+        if not Config.rdbm_user:
+            Config.rdbm_user = 'jans'
+
+        if Config.rdbm_install_type == InstallTypes.LOCAL:
+            if Config.rdbm_type == 'mysql':
+                if not self.packageUtils.check_installed('mysql-server'):
+                    self.packageUtils.installNetPackage('mysql-server')
+
+            result, conn = self.dbUtils.mysqlconnection()
+            if not result:
+                sql_cmd_list = [
+                    "CREATE DATABASE {};\n".format(Config.rdbm_db),
+                    "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}';\n".format(Config.rdbm_user, Config.rdbm_password),
+                    "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost';\n".format(Config.rdbm_db, Config.rdbm_user),
+                    ]
+                for cmd in sql_cmd_list:
+                    self.run("echo \"{}\" | mysql".format(cmd), shell=True)
+
 
     def create_tables(self):
 
