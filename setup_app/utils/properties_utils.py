@@ -560,7 +560,7 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installConfigApi')
 
     def prompt_for_rdbm(self):
-        if Config.rdbm_type == 'mysql':
+        if Config.rdbm_install_type == InstallTypes.REMOTE and  Config.rdbm_type == 'mysql':
             while True:
                 Config.rdbm_host = self.getPrompt("    MySQL host", Config.rdbm_host)
                 Config.rdbm_port = self.getPrompt("    MySQL port", Config.rdbm_port)
