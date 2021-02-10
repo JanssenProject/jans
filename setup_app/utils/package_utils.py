@@ -46,6 +46,9 @@ class PackageUtils(SetupUtils):
 
         os_type_version = base.os_type + ' ' + base.os_version
 
+        if '-local-rdbm' in sys.argv and 'mysql' in sys.argv:
+            package_list[os_type_version]['mondatory'] += ' mysql-server'
+
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
                 if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
@@ -69,12 +72,13 @@ class PackageUtils(SetupUtils):
                 if install_type == 'mondatory':
                     print("The following packages are required for Janssen Server")
                     print(packages)
-                    r = input("Do you want to install these now? [Y/n] ")
-                    if r and r.lower()=='n':
-                        install[install_type] = False
-                        if install_type == 'mondatory':
-                            print("Can not proceed without installing required packages. Exiting ...")
-                            sys.exit()
+                    if not '-n' in sys.argv:
+                        r = input("Do you want to install these now? [Y/n] ")
+                        if r and r.lower()=='n':
+                            install[install_type] = False
+                            if install_type == 'mondatory':
+                                print("Can not proceed without installing required packages. Exiting ...")
+                                sys.exit()
 
                 elif install_type == 'optional':
                     print("You may need the following packages")

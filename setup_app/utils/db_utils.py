@@ -54,7 +54,7 @@ class DBUtils:
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
 
-    def mysqlconnection(self):
+    def mysqlconnection(self, log=True):
         self.read_jans_schema()
         base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
         try:
@@ -71,8 +71,9 @@ class DBUtils:
             base.logIt("MySQL Connection was successful")
             self.cursor = self.mysql_conn.cursor()
             return True, self.mysql_conn
-        except pymysql.err.OperationalError as e:
-            base.logIt("Can't connect to MySQL server: {}".format(e.args[1]), True)
+        except Exception as e:
+            if log:
+                base.logIt("Can't connect to MySQL server: {}".format(e.args[1]), True)
             return False, e.args[1]
 
     def read_jans_schema(self):
