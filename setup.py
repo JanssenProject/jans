@@ -155,6 +155,8 @@ jansCliInstaller = JansCliInstaller()
 #oxdInstaller = OxdInstaller()
 
 
+rdbmInstaller.packageUtils = packageUtils
+
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller, 
                         jansAuthInstaller, scimInstaller, fidoInstaller,
@@ -260,7 +262,7 @@ def do_installation():
 
             if Config.cb_install:
                 couchbaseInstaller.start_installation()
-            
+
             if Config.rdbm_install:
                 rdbmInstaller.start_installation()
 
