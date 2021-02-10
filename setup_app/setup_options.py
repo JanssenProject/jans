@@ -90,7 +90,7 @@ def get_setup_options():
         'properties_password': None,
     }
 
-    if not (argsp.remote_couchbase or argsp.remote_rdbm):
+    if not (argsp.remote_couchbase or argsp.remote_rdbm or argsp.local_rdbm):
         setupOptions['wrends_install'] = InstallTypes.LOCAL
     else:
         setupOptions['wrends_install'] = InstallTypes.NONE
@@ -99,11 +99,13 @@ def get_setup_options():
             setupOptions['cb_install'] = InstallTypes.REMOTE
 
         if argsp.remote_rdbm:
-            setupOptions['rdbm_install'] = InstallTypes.REMOTE
+            setupOptions['rdbm_install'] = True
+            setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
             setupOptions['rdbm_type'] = argsp.remote_rdbm
 
         if argsp.local_rdbm:
-            setupOptions['rdbm_install'] = InstallTypes.LOCAL
+            setupOptions['rdbm_install'] = True
+            setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
             setupOptions['rdbm_type'] = argsp.local_rdbm
             setupOptions['rdbm_host'] = 'localhost'
 

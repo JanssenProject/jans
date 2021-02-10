@@ -144,9 +144,10 @@ class Config:
         #DB installation types
         self.wrends_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
-        self.rdbm_install = InstallTypes.NONE
+        self.rdbm_install = False
 
         #rdbm
+        self.rdbm_install_type = InstallTypes.NONE
         self.rdbm_type = 'mysql'
         self.rdbm_host = 'localhost'
         self.rdbm_port = 3306
