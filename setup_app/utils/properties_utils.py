@@ -569,10 +569,10 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_password = self.getPrompt("    Jans Database Password", Config.rdbm_password)
 
                 result = dbUtils.mysqlconnection()
-                
+
                 #we don't need jans-ldap.properties
                 Config.ce_templates[Config.ox_ldap_properties] = False
-                
+
                 if result[0]:
                     print("    {}Successfully connected to MySQL server{}".format(colors.OKGREEN, colors.ENDC))
                     break
