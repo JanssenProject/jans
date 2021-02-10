@@ -24,6 +24,7 @@ class BaseInstaller:
         else:
             pbar_text = self.pbar_text
         self.logIt(pbar_text, pbar=self.service_name)
+
         if self.needdb:
             self.dbUtils.bind()
 
