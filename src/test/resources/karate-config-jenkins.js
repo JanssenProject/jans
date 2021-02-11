@@ -28,16 +28,19 @@ function() {
     var testClientSecret = testProps.get('test.client.secret');
     var tokenEndpoint = testProps.get('token.endpoint');
     var testScopes = testProps.get('test.scopes');
+    var issuer = testProps.get('test.issuer');
     karate.log(' testClientId = '+testClientId);
     karate.log(' testClientSecret = '+testClientSecret);
     karate.log(' tokenEndpoint = '+tokenEndpoint);
     karate.log(' testScopes = '+testScopes);
+    karate.log(' issuer = '+issuer);
     
     
     var config = {
         env: env,
         baseUrl: baseUrl,
         testProps: testProps,
+        issuer: issuer,
         accessToken: '123',
         healthUrl: baseUrl + '/health',
         fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',

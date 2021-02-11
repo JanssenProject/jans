@@ -25,7 +25,7 @@ public abstract class AuthorizationService implements Serializable {
     @Inject
     AuthUtil authUtil;
 
-    public abstract void processAuthorization(String token, ResourceInfo resourceInfo, String method,
+    public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception;
 
     protected Response getErrorResponse(Response.Status status, String detail) {

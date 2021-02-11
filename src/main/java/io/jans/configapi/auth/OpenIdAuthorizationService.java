@@ -32,16 +32,17 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public void processAuthorization(String token, ResourceInfo resourceInfo, String method, String path)
+    public void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.trace("oAuth  Authorization parameters , token:{}, resourceInfo:{}, method: {}, path: {} ", token, resourceInfo, method, path);
+        log.trace("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ", token, issuer, resourceInfo, method, path);
         if (StringUtils.isBlank(token)) {
             log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim());
+        log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo, resourceScopes);
+        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim(), issuer);
        
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
             log.error("Token is Invalid.");
