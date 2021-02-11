@@ -40,11 +40,14 @@ class CollectProperties(SetupUtils, BaseInstaller):
         oxauth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
-        if Config.persistence_type == 'couchbase':
-            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-            default_storage = 'couchbase'
 
-        if Config.persistence_type != 'ldap' and os.path.exists(Config.jansCouchebaseProperties):
+        if Config.persistence_type in ('couchbase', 'mysql'):
+            ptype = 'rdbm' if Config.persistence_type == 'mysql' else 'couchbase'
+            Config.mappingLocations = { group: ptype for group in Config.couchbaseBucketDict }
+            default_storage = Config.persistence_type
+
+
+        if not Config.persistence_type in ('ldap', 'mysql') and os.path.exists(Config.jansCouchebaseProperties):
 
             jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
 
@@ -57,12 +60,24 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.encoded_couchbaseTrustStorePass = jans_cb_prop['ssl.trustStore.pin']
             Config.couchbaseTrustStorePass = self.unobscure(jans_cb_prop['ssl.trustStore.pin'])
 
-        if Config.persistence_type != 'couchbase' and os.path.exists(Config.ox_ldap_properties):
+        if not Config.persistence_type in ('couchbase', 'mysql') and os.path.exists(Config.ox_ldap_properties):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
             Config.ldap_binddn = jans_ldap_prop['bindDN']
             Config.ldapPass = self.unobscure(jans_ldap_prop['bindPassword'])
             Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
             Config.ldap_hostname, Config.ldaps_port = jans_ldap_prop['servers'].split(',')[0].split(':')
+
+
+        if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansRDBMProperties):
+            jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
+            uri_re = re.match('jdbc:mysql://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
+            Config.rdbm_host, self.rdbm_port, self.rdbm_db = uri_re.groups()
+            Config.rdbm_port = int(self.rdbm_port)
+            Config.rdbm_install_type = static.InstallTypes.LOCAL if Config.rdbm_host == 'localhost' else static.InstallTypes.REMOTE
+            Config.rdbm_type = 'mysql'
+            Config.rdbm_user = jans_sql_prop['auth.userName']
+            Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
+            Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
 
 
         if Config.persistence_type in ['hybrid']:
@@ -82,6 +97,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         dbUtils.bind()
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(inum=1701.*)', search_scope=ldap3.SUBTREE)
+
 
         if result:
             Config.jans_radius_client_id = result['inum']

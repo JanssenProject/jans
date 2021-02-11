@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import ldap3
 import pymysql
@@ -16,7 +17,7 @@ from setup_app.utils.attributes import attribDataTypes
 class DBUtils:
 
     processedKeys = []
-
+    
     def bind(self, use_ssl=True):
 
         if Config.mappingLocations['default'] == 'ldap':
@@ -45,6 +46,7 @@ class DBUtils:
         if not hasattr(self, 'mysql_conn'):
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
+                    self.dn_table_fn = os.path.join(Config.install_dir, 'setup_app/data/dn_table.txt')
                     if Config.rdbm_type == 'mysql':
                         result = self.mysqlconnection()
                         if not result[0]:
@@ -53,6 +55,21 @@ class DBUtils:
 
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
+
+    def get_table_for_dn(self, dn):
+        dn_table_dict = {}
+        with open(self.dn_table_fn) as f:
+            for l in f:
+                dn, table = l.strip().split()
+                dn_table_dict[dn] = table
+                
+        for dn_ in dn_table_dict:
+            if dn_ == dn:
+                return dn_table_dict[dn_]
+                
+        for dn_ in dn_table_dict:
+            if dn_.endswith(dn):
+                return dn_table_dict[dn_]
 
     def mysqlconnection(self, log=True):
         self.read_jans_schema()
@@ -227,9 +244,34 @@ class DBUtils:
             if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
                 key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
                 return document
+
         if backend_location == BackendTypes.MYSQL:
-            # to be implemented
-            return None
+            s_table = None
+            filter_re = re.match('\((.*?)=(.*?)\)', search_filter)
+            s_col, s_val = filter_re.groups()
+            s_val = s_val.replace('*', '%')
+            q_operator = 'LIKE' if '%' in s_val else '='
+            result = None
+            if s_val != '%':
+                if s_col.lower() == 'objectclass':
+                    s_table = s_val
+            
+            if not s_table:
+            
+                tbl_list = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
+                for tbl_ in tbl_list:
+                    tbl = tbl_['TABLE_NAME']
+                    if self.exec_rdbm_query("SHOW COLUMNS FROM `{}` LIKE '{}'".format(tbl, s_col), 1):
+                        sql_cmd = 'SELECT * FROM {} WHERE (dn LIKE "%{}") AND ({} {} "{}")'.format(tbl, search_base, s_col, q_operator, s_val)
+                        result = self.exec_rdbm_query(sql_cmd, 1)
+                        if result:
+                            break
+            
+            else:
+                sql_cmd = 'SELECT * FROM {} WHERE (dn LIKE "%{}") AND ({} {} "{}")'.format(s_table, search_base, s_col, q_operator, s_val)
+                result = self.exec_rdbm_query(sql_cmd, 1)
+
+            return result
 
         if backend_location == BackendTypes.COUCHBASE:
             key = ldif_utils.get_key_from(search_base)
@@ -413,6 +455,10 @@ class DBUtils:
                         entry.pop('objectclass')
 
                     table_name = objectClass
+
+                    with open(self.dn_table_fn, 'a') as w:
+                        w.write('{}\t{}\n'.format(dn, table_name))
+
 
                     if self.dn_exists_rdbm(dn, table_name):
                         base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
