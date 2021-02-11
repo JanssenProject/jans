@@ -5,10 +5,8 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip curl tini \
-    && apk add --no-cache --virtual build-deps wget git gcc musl-dev python3-dev libffi-dev openssl-dev cargo
-
-RUN apk add --no-cache openjdk11-jre-headless \
+    && apk add --no-cache openssl py3-pip curl tini openjdk11-jre-headless py3-cryptography \
+    && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
 
