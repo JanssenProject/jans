@@ -15,6 +15,9 @@ from queue import Queue
 queue = Queue()
 
 os.environ['LC_ALL'] = 'C'
+from setup_app.utils.arg_parser import arg_parser
+
+argsp = arg_parser()
 
 #first import paths and make changes if necassary
 from setup_app import paths
@@ -26,6 +29,9 @@ from setup_app import static
 
 # second import module base, this makes some initial settings
 from setup_app.utils import base
+
+# we will access args via base module
+base.argsp = argsp
 
 from setup_app.utils.package_utils import packageUtils
 packageUtils.check_and_install_packages()
@@ -75,7 +81,7 @@ Config.determine_version()
 SetupUtils.init()
 
 # get setup options from args
-argsp, setupOptions = get_setup_options()
+setupOptions = get_setup_options()
 
 terminal_size = shutil.get_terminal_size()
 tty_rows=terminal_size.lines 
@@ -144,7 +150,7 @@ jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
-rdbmInstaller= RDBMInstaller()
+rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()

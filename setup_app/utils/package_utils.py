@@ -46,7 +46,7 @@ class PackageUtils(SetupUtils):
 
         os_type_version = base.os_type + ' ' + base.os_version
 
-        if '-local-rdbm' in sys.argv and 'mysql' in sys.argv:
+        if base.argsp.local_rdbm == 'mysql':
             package_list[os_type_version]['mondatory'] += ' mysql-server'
 
         for install_type in install_list:
@@ -72,7 +72,7 @@ class PackageUtils(SetupUtils):
                 if install_type == 'mondatory':
                     print("The following packages are required for Janssen Server")
                     print(packages)
-                    if not '-n' in sys.argv:
+                    if not base.argsp.n:
                         r = input("Do you want to install these now? [Y/n] ")
                         if r and r.lower()=='n':
                             install[install_type] = False
