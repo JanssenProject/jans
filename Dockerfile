@@ -5,10 +5,8 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip curl tini \
-    && apk add --no-cache --virtual build-deps wget git gcc musl-dev python3-dev libffi-dev openssl-dev cargo
-
-RUN apk add --no-cache openjdk11-jre-headless \
+    && apk add --no-cache openssl py3-pip curl tini openjdk11-jre-headless py3-cryptography \
+    && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
 
@@ -117,16 +115,19 @@ LABEL name="configuration-manager" \
 COPY scripts /app/scripts
 RUN mkdir -p /etc/certs /app/db \
     && chmod +x /app/scripts/entrypoint.sh
-# # create non-root user
+
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
  # adjust ownership
 RUN chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /app/db \
-    && chmod -R g+w /usr/lib/jvm/default-jvm/jre/lib/security/cacerts \
     && chgrp -R 0 /app/db && chmod -R g=u /app/db \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs
+    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
+    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+
 USER 1000
+
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]
