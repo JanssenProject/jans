@@ -146,7 +146,7 @@ RUN chown -R 1000:1000 /etc/jans \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chgrp -R 0 /opt/jans && chmod -R g=u /opt/jans \
-    && chgrp -R 0 /usr/lib/jvm/default-jvm/jre/lib/security/cacerts && chmod -R g=u /usr/lib/jvm/default-jvm/jre/lib/security/cacerts
+    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
 
 USER 1000
 
