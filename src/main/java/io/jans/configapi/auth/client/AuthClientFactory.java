@@ -17,11 +17,7 @@ import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.client.uma.UmaPermissionService;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.model.uma.UmaMetadata;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import io.jans.configapi.util.Jackson;
 
 import java.util.List;
 import javax.inject.Inject;
@@ -32,11 +28,21 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AuthClientFactory {
     
     @Inject
     @RestClient
     OpenIdClientService openIdClientService;
+    
+    private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
@@ -230,7 +236,25 @@ public class AuthClientFactory {
         return null;
 
     }
-
+    
+    public static String getIntrospectionEndpoint(String issuer) throws Exception {
+        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - issuer = "+issuer);
+        String configurationEndpoint = issuer + "/.well-known/openid-configuration";        
+        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - configurationEndpoint = "+configurationEndpoint);
+        
+        Builder request = ResteasyClientBuilder.newClient().target(configurationEndpoint).request();
+        request.header("Content-Type", MediaType.APPLICATION_JSON);
+        Response response = request.get();     
+        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - response = "+response);
+        
+        if (response.getStatus() == 200) {
+        	 String entity = response.readEntity(String.class);
+        	 log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - entity = "+entity);
+        	 return Jackson.getElement(entity, "introspection_endpoint");    
+        }
+        return null;
+    }
+    
     private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(followRedirects);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())

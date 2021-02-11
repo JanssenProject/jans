@@ -26,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
+import org.slf4j.Logger;
+
 
 /**
  * @author Mougang T.Gasmyr
@@ -37,11 +39,12 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 public class ClientsResource extends BaseResource {
-    /**
-     *
-     */
+
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
+    @Inject
+    Logger log;
+    
     @Inject
     ClientService clientService;
 
@@ -142,7 +145,11 @@ public class ClientsResource extends BaseResource {
 		if (clients!=null && !clients.isEmpty()) {
 			for (Client client : clients)
 				if (client.getClientSecret() != null) {
-					client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+					try {
+						client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+					}catch (EncryptionException exp) {
+						log.error("Error while client secret decryption - "+exp);
+					}
 				}
 		}
 		return clients;

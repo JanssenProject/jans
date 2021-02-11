@@ -85,6 +85,7 @@ public class ApiConstants {
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
     public static final String PROTECTION_TYPE_UMA = "uma";
+    public static final String ISSUER = "issuer";
 
     // Connection pool properties
     public static final int CONNECTION_POOL_MAX_TOTAL = 200;

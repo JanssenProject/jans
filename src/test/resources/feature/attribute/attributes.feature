@@ -12,7 +12,10 @@ Scenario: Fetch all attributes without bearer token
 
 Scenario: Fetch all attributes 
 	Given url mainUrl 
-	And header Authorization = 'Bearer ' + accessToken 
+	And print 'accessToken = '+accessToken
+	And print 'issuer = '+issuer
+	And header Authorization = 'Bearer ' + accessToken
+	And header issuer = issuer  
 	When method GET 
 	Then status 200 
 	And print response
