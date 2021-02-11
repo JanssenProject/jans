@@ -144,4 +144,4 @@ def get_setup_options():
 
     setupOptions['properties_password'] = base.argsp.properties_password
 
-    return base.argsp, setupOptions
+    return setupOptions
