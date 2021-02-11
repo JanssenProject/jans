@@ -76,7 +76,7 @@ class BaseInstaller:
 
             self.logIt("Checking ID for client {}".format(client_var_name))
             if not Config.get(client_var_name):
-                result = self.dbUtils.search('ou={},o=jans'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
+                result = self.dbUtils.search('ou={},o=jans'.format(ou), '(&({}={}*)(objectClass=jansClnt))'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
