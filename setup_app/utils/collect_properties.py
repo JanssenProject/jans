@@ -96,8 +96,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         # It is time to bind database
         dbUtils.bind()
 
-        result = dbUtils.search('ou=clients,o=jans', search_filter='(inum=1701.*)', search_scope=ldap3.SUBTREE)
-
+        result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
 
         if result:
             Config.jans_radius_client_id = result['inum']
@@ -108,7 +107,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             if result:
                 Config.enableRadiusScripts = result['jansEnabled']
 
-            result = dbUtils.search('ou=clients,o=jans', search_filter='(inum=1402.*)', search_scope=ldap3.SUBTREE)
+            result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1402.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
             if result:
                 Config.oxtrust_requesting_party_client_id = result['inum']
 
@@ -124,7 +123,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         #            Config.admin_inum = str(rd[1])
         #            break
 
-        oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_scope=ldap3.BASE)
+        oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
@@ -143,6 +142,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         result = dbUtils.search(
                         search_base='inum={},ou=clients,o=jans'.format(Config.oxauth_client_id),
+                        search_filter='(objectClass=jansClnt)',
                         search_scope=ldap3.BASE,
                         )
         Config.oxauthClient_encoded_pw = result['jansClntSecret']
@@ -165,7 +165,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.oxauth_openid_jks_fn = oxAuthConfDynamic['keyStoreFile']
         if 'keyStoreSecret' in oxAuthConfDynamic:
             Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
-
 
         ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
         Config.countryCode = ssl_subj['C']
