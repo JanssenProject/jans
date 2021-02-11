@@ -5,10 +5,8 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl \
-    && apk add --no-cache --virtual build-deps wget git gcc musl-dev python3-dev libffi-dev openssl-dev cargo
-
-RUN apk add --no-cache openjdk11-jre-headless \
+    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography \
+    && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
 
@@ -168,13 +166,14 @@ RUN chown -R 1000:1000 /opt/jans/jetty \
     && chown -R 1000:1000 /opt/jetty \
     && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
-    && chmod -R g+w /usr/lib/jvm/default-jvm/jre/lib/security/cacerts \
     && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
     && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
+    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
+    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+
 USER 1000
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
