@@ -1,6 +1,6 @@
 CN_VERSION=1.0.0
 IMAGE_NAME=janssenproject/persistence-loader
-UNSTABLE_VERSION=dev
+UNSTABLE_VERSION=dev_sql
 
 build-dev:
 	@echo "[I] Building Docker image ${IMAGE_NAME}:${CN_VERSION}_${UNSTABLE_VERSION}"

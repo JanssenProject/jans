@@ -1,0 +1,15 @@
+{
+    "mysql": {
+        "jansPerson": {
+            "fields": ["uid", "dn", "doc_id", "objectClass"],
+            "custom": [
+                "CAST(jansExtUid->'$.v' AS UNSIGNED ARRAY)",
+                "CAST(address->'$.v' AS CHAR(48) ARRAY)",
+                "CAST(jansExtUid->'$.v[0]' AS UNSIGNED)",
+                "CAST(jansExtUid->'$.v[1]' AS UNSIGNED)",
+                "CAST(jansExtUid->'$.v[2]' AS UNSIGNED)",
+                "lower(`uid`)"
+                ]
+        }
+    }
+}

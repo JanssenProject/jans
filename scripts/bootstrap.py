@@ -5,6 +5,7 @@ from jans.pycloudlib import get_manager
 from hybrid_setup import HybridBackend
 from ldap_setup import LDAPBackend
 from couchbase_setup import CouchbaseBackend
+from sql_setup import SQLBackend
 
 
 def main():
@@ -14,6 +15,7 @@ def main():
         "ldap": LDAPBackend,
         "couchbase": CouchbaseBackend,
         "hybrid": HybridBackend,
+        "sql": SQLBackend,
     }
 
     # initialize the backend
