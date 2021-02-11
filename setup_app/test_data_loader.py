@@ -286,7 +286,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.dbUtils.ldap_conn.bind()
 
-        result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(jansDbAuth=*)', search_scope=ldap3.BASE)
+        result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
 
         oxIDPAuthentication = json.loads(result['jansDbAuth'])
         oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
