@@ -46,7 +46,6 @@ class DBUtils:
         if not hasattr(self, 'mysql_conn'):
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
-                    self.dn_table_fn = os.path.join(Config.install_dir, 'setup_app/data/dn_table.txt')
                     if Config.rdbm_type == 'mysql':
                         result = self.mysqlconnection()
                         if not result[0]:
@@ -56,20 +55,6 @@ class DBUtils:
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
 
-    def get_table_for_dn(self, dn):
-        dn_table_dict = {}
-        with open(self.dn_table_fn) as f:
-            for l in f:
-                dn, table = l.strip().split()
-                dn_table_dict[dn] = table
-                
-        for dn_ in dn_table_dict:
-            if dn_ == dn:
-                return dn_table_dict[dn_]
-                
-        for dn_ in dn_table_dict:
-            if dn_.endswith(dn):
-                return dn_table_dict[dn_]
 
     def mysqlconnection(self, log=True):
         self.read_jans_schema()
@@ -455,10 +440,6 @@ class DBUtils:
                         entry.pop('objectclass')
 
                     table_name = objectClass
-
-                    with open(self.dn_table_fn, 'a') as w:
-                        w.write('{}\t{}\n'.format(dn, table_name))
-
 
                     if self.dn_exists_rdbm(dn, table_name):
                         base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
