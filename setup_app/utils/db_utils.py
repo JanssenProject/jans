@@ -394,6 +394,8 @@ class DBUtils:
 
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
+        base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
+
         sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
@@ -564,7 +566,7 @@ class DBUtils:
     def get_backend_location_for_dn(self, dn):
         key = ldif_utils.get_key_from(dn)
         group = self.get_group_for_key(key)
-    
+
         if Config.mappingLocations[group] == 'ldap':
             return static.BackendTypes.LDAP
 
