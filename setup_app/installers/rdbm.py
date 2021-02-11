@@ -29,8 +29,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.local_install()
         self.create_tables()
         self.create_indexes()
+        self.import_ldif()
         self.rdbmProperties()
-
+        
 
     def local_install(self):
         if not Config.rdbm_password:
@@ -122,6 +123,23 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(os.path.join(self.output_dir, 'jans_indexes.sql'), '\n'.join(indexes))
 
+
+    def import_ldif(self):
+        ldif_files = []
+
+        if Config.mappingLocations['default'] == 'rdbm':
+            ldif_files += Config.couchbaseBucketDict['default']['ldif']
+
+        ldap_mappings = self.getMappingType('rdbm')
+
+        for group in ldap_mappings:
+            ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
+
+        Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
+        if not Config.ldif_base in ldif_files:
+            self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.MYSQL)
+
+        self.dbUtils.import_ldif(ldif_files)
 
     def rdbmProperties(self):
         Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
