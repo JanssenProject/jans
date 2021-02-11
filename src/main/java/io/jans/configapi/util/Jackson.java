@@ -33,6 +33,12 @@ public class Jackson {
     public static JsonNode asJsonNode(String objAsString) throws JsonProcessingException {
         return JacksonUtils.newMapper().readTree(objAsString);
     }
+    
+    @SuppressWarnings("unchecked")
+    public static String getElement(String jsonString, String fieldName) throws JsonProcessingException {
+    	JsonNode jsonNode = JacksonUtils.newMapper().readTree(jsonString);
+    	return jsonNode.get(fieldName).textValue();
+    }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));

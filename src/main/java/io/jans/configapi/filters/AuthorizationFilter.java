@@ -7,6 +7,7 @@
 package io.jans.configapi.filters;
 
 import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.util.ApiConstants;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -59,16 +60,17 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
+        String issuer = context.getHeaderString(ApiConstants.ISSUER);
 
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + "\n\n\n");
-
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , issuer = "+issuer+"\n\n\n");
+               
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
-            this.authorizationService.processAuthorization(authorizationHeader, resourceInfo, context.getMethod(), request.getRequestURI());
+            this.authorizationService.processAuthorization(authorizationHeader,issuer, resourceInfo, context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
