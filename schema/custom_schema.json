@@ -4,6 +4,7 @@
     {
       "kind": "AUXILIARY",
       "may": [
+        "inum",
         "telephoneNumber",
         "mobile",
         "carLicense",

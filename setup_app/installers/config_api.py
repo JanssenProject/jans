@@ -91,7 +91,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
             jansUmaScopes = []
 
-            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(jansId={})'.format(scope)):
+            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope)):
                 continue
 
             if not scope in scopes:
@@ -117,7 +117,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         createClient = True
         config_api_dn = 'inum={},ou=clients,o=jans'.format(Config.jca_client_id)
-        if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(inum={})'.format(Config.jca_client_id)):
+        if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
             createClient = False
 
         jansUmaScopes_all += [

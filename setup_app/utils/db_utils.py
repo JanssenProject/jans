@@ -120,15 +120,9 @@ class DBUtils:
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
         
         elif self.moddb == BackendTypes.MYSQL:
-            sql_cmd = 'SELECT dn, jansConfDyn FROM jansAppConf'
-            dn = self.ldap_conn.response[0]['dn'] 
-            result = self.exec_rdbm_query(sql_cmd, 2)
-            
-            for entry in result:
-                if entry['jansConfDyn']:
-                    oxAuthConfDynamic = json.loads(entry['jansConfDyn'])
-                    dn = entry['dn']
-                    break
+            result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
+            dn = result['dn'] 
+            oxAuthConfDynamic = json.loads(result['jansConfDyn'])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth  "'.format(self.default_bucket)
@@ -232,29 +226,44 @@ class DBUtils:
 
         if backend_location == BackendTypes.MYSQL:
             s_table = None
-            filter_re = re.match('\((.*?)=(.*?)\)', search_filter)
-            s_col, s_val = filter_re.groups()
-            s_val = s_val.replace('*', '%')
-            q_operator = 'LIKE' if '%' in s_val else '='
-            result = None
-            if s_val != '%':
-                if s_col.lower() == 'objectclass':
-                    s_table = s_val
+            
+            where_clause = ''
+            search_list = []
+
+            if '&' in search_filter:
+                re_match = re.match('\(&\((.*?)=(.*?)\)\((.*?)=(.*?)\)', search_filter)
+                if re_match:
+                    re_list = re_match.groups()
+                    search_list.append((re_list[0], re_list[1]))
+                    search_list.append((re_list[2], re_list[3]))
+            else:
+                re_match = re.match('\((.*?)=(.*?)\)', search_filter)
+
+                if re_match:
+                    re_list = re_match.groups()
+                    search_list.append((re_list[0], re_list[1]))
+        
+            for col, val in search_list:
+                if val == '*':
+                    continue
+                
+                if col.lower() == 'objectclass':
+                    s_table = val
+                else:
+                    val = val.replace('*', '%')
+                    q_operator = 'LIKE' if '%' in val else '='
+                    where_clause = 'AND {} {} "{}"'.format(col, q_operator, val)
             
             if not s_table:
-            
-                tbl_list = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
-                for tbl_ in tbl_list:
-                    tbl = tbl_['TABLE_NAME']
-                    if self.exec_rdbm_query("SHOW COLUMNS FROM `{}` LIKE '{}'".format(tbl, s_col), 1):
-                        sql_cmd = 'SELECT * FROM {} WHERE (dn LIKE "%{}") AND ({} {} "{}")'.format(tbl, search_base, s_col, q_operator, s_val)
-                        result = self.exec_rdbm_query(sql_cmd, 1)
-                        if result:
-                            break
-            
+                return
+                
+            if search_scope == ldap3.BASE:
+                dn_clause = 'dn = "{}"'.format(search_base)
             else:
-                sql_cmd = 'SELECT * FROM {} WHERE (dn LIKE "%{}") AND ({} {} "{}")'.format(s_table, search_base, s_col, q_operator, s_val)
-                result = self.exec_rdbm_query(sql_cmd, 1)
+                dn_clause = 'dn LIKE "%{}"'.format(search_base)
+
+            sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
+            result = self.exec_rdbm_query(sql_cmd, 1)
 
             return result
 
@@ -435,7 +444,7 @@ class DBUtils:
                         continue
 
                     objectClass = objectClass[-1]
-                    entry.pop(rdn_name)
+                    #entry.pop(rdn_name)
                     if 'objectClass' in entry:
                         entry.pop('objectClass')
                     elif 'objectclass' in entry:
