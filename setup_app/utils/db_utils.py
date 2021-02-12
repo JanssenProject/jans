@@ -401,6 +401,59 @@ class DBUtils:
 
             return opendj_syntax
 
+    def get_rootdn(self, dn):
+        dn_parsed = dnutils.parse_dn(dn)
+        dn_parsed.pop(0)
+        dnl=[]
+
+        for dnp in dn_parsed:
+            dnl.append('='.join(dnp[:2]))
+
+        return ','.join(dnl)
+
+    def get_table_for_dn(self, dn):
+
+        tables = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
+
+        for tbl_ in tables:
+            tbl = tbl_['TABLE_NAME']
+            result = self.exec_rdbm_query("SELECT dn FROM {} WHERE dn='{}'".format(tbl, dn),1)
+            if result:
+                return tbl
+
+        rootdn = self.get_rootdn(dn)
+
+        for tbl_ in tables:
+            tbl = tbl_['TABLE_NAME']
+            result = self.exec_rdbm_query("SELECT dn FROM {} WHERE dn LIKE '%{}'".format(tbl, rootdn),1)
+            if result:
+                return tbl
+
+    def get_rdbm_val(self, key, val):
+        
+        if key in self.sql_data_types:
+            data_type = self.sql_data_types[key]
+        else:
+            attr_syntax = self.get_attr_syntax(key)
+            data_type = self.ldap_sql_data_type_mapping[attr_syntax]
+    
+        data_type = data_type[Config.rdbm_type]['type']
+
+        if data_type in ('SMALLINT',):
+            if val[0][0].lower() in ('1', 'on', 'true', 'yes'):
+                return '1'
+            return '0'
+
+        if data_type == 'JSON':
+            if key in ('jansConfProperty', 'jansModuleProperty'):
+                for i, k in enumerate(val[:]):
+                    val[i] = json.loads(k)
+            data_= "'{}'".format(json.dumps({'v': val}))
+            return data_
+
+        return  json.dumps(val[0])
+
+
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
@@ -434,64 +487,57 @@ class DBUtils:
 
                 elif backend_location == BackendTypes.MYSQL:
 
-                    dn_parsed = dnutils.parse_dn(dn)
-                    rdn_name = dn_parsed[0][0]
-                    doc_id = dn_parsed[0][1]
-                    objectClass = entry.get('objectClass') or entry.get('objectclass')
-                    if 'top' in objectClass:
-                        objectClass.remove('top')
-                    if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
-                        continue
-
-                    objectClass = objectClass[-1]
-                    #entry.pop(rdn_name)
-                    if 'objectClass' in entry:
-                        entry.pop('objectClass')
-                    elif 'objectclass' in entry:
-                        entry.pop('objectclass')
-
-                    table_name = objectClass
-
-                    if self.dn_exists_rdbm(dn, table_name):
-                        base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
-                        continue
-
-                    cols = ['`doc_id`', '`objectClass`', '`dn`']
-                    vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
-                    for lkey in entry:
-                        cols.append('`{}`'.format(lkey))
-                        data_type = self.ldap_sql_data_type_mapping[self.get_attr_syntax(lkey)]
-                        data_type = data_type[Config.rdbm_type]['type']
-
-                        if data_type in ('SMALLINT', 'INT'):
-                            if entry[lkey][0].lower() in ('1', 'on', 'true', 'yes'):
-                                vals.append('1')
-                            else:
-                                vals.append('0')
-                        elif data_type == 'DATETIME':
-                            vals.append(entry[lkey])
-                        elif data_type == 'JSON':
-                            if lkey in ('jansConfProperty', 'jansModuleProperty'):
-                                for i, k in enumerate(entry[lkey][:]):
-                                    entry[lkey][i] = json.loads(k)
-                            data_= "'{}'".format(json.dumps({'v':entry[lkey]}))
-                            vals.append(data_)
-                        else:
-                            vals.append(json.dumps(entry[lkey][0]))
-
                     if 'add' in  entry and 'changetype' in entry:
-                        # to be implemented
-                        pass
-                
-                    elif 'replace' in  entry and 'changetype' in entry:
-                        # to be implemented
-                        pass
+                        table = self.get_table_for_dn(dn)
+                        attribute = entry['add'][0]
+                        new_val = entry[attribute][0]
+                        qresult = self.exec_rdbm_query("SELECT {} FROM {} WHERE dn='{}'".format(attribute, table, dn),1)
+                        if qresult:
+                            cur_val = json.loads(qresult[attribute])
+                            cur_val['v'].append(new_val)
+                            sql_cmd = "UPDATE `{}` SET {}='{}' WHERE dn='{}'".format(table, attribute, json.dumps(cur_val), dn)
+                        else:
+                            sql_cmd= ''
+                        
+                    elif 'replace' in entry and 'changetype' in entry:
+                        attribute = entry['replace'][0]
+                        new_value = self.get_rdbm_val(attribute, entry[attribute])
+                        table = self.get_table_for_dn(dn)
+                        sql_cmd = "UPDATE `{}` SET {}={} WHERE dn='{}'".format(table, attribute, new_value, dn)
 
                     else:
-                        sql_cmd = 'INSERT INTO {} ({}) VALUES ({});'.format(
-                                    table_name,
-                                    ', '.join(cols),
-                                    ', '.join(vals)
+                        dn_parsed = dnutils.parse_dn(dn)
+                        rdn_name = dn_parsed[0][0]
+                        doc_id = dn_parsed[0][1]
+                        objectClass = entry.get('objectClass') or entry.get('objectclass')
+                        if objectClass:
+                            if 'top' in objectClass:
+                                objectClass.remove('top')
+                            if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
+                                continue
+                            objectClass = objectClass[-1]
+                        #entry.pop(rdn_name)
+                        if 'objectClass' in entry:
+                            entry.pop('objectClass')
+                        elif 'objectclass' in entry:
+                            entry.pop('objectclass')
+
+                        table_name = objectClass
+
+                        if self.dn_exists_rdbm(dn, table_name):
+                            base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
+                            continue
+
+                        cols = ['`doc_id`', '`objectClass`', '`dn`']
+                        vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
+                        for lkey in entry:
+                            cols.append('`{}`'.format(lkey))
+                            vals.append(self.get_rdbm_val(lkey, entry[lkey]))
+
+                            sql_cmd = 'INSERT INTO {} ({}) VALUES ({});'.format(
+                                        table_name,
+                                        ', '.join(cols),
+                                        ', '.join(vals)
                                     )
 
                     self.exec_rdbm_query(sql_cmd)

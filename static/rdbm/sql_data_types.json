@@ -334,5 +334,10 @@
       "size": 48,
       "type": "VARCHAR"
     }
+  },
+  "member": {
+    "mysql": {
+      "type": "JSON"
+    }
   }
 }
