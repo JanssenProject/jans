@@ -1,3 +1,5 @@
+#credit: this file is ported from https://github.com/python-ldap/python-ldap/blob/master/Lib/ldap/schema/models.py
+
 from tokenizer import split_tokens, extract_tokens
 
 
