@@ -40,9 +40,6 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName
-	private String lifetime;
-
 	@AttributeName(name = "jansSourceAttr")
 	private String sourceAttribute;
 
@@ -134,14 +131,6 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	public void setInum(String inum) {
 		this.inum = inum;
-	}
-
-	public String getLifetime() {
-		return lifetime;
-	}
-
-	public void setLifetime(String lifetime) {
-		this.lifetime = lifetime;
 	}
 
 	public String getSourceAttribute() {
@@ -371,7 +360,6 @@ public class GluuAttribute extends Entry implements Serializable {
 		result = prime * result + Arrays.hashCode(editType);
 		result = prime * result + ((tooltip == null) ? 0 : tooltip.hashCode());
 		result = prime * result + ((inum == null) ? 0 : inum.hashCode());
-		result = prime * result + ((lifetime == null) ? 0 : lifetime.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
