@@ -46,9 +46,6 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName(name = "jansSourceAttr")
 	private String sourceAttribute;
 
-	@AttributeName
-	private String salt;
-
 	@AttributeName(name = "jansNameIdType")
 	private String nameIdType;
 
@@ -153,14 +150,6 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	public void setSourceAttribute(String sourceAttribute) {
 		this.sourceAttribute = sourceAttribute;
-	}
-
-	public String getSalt() {
-		return salt;
-	}
-
-	public void setSalt(String salt) {
-		this.salt = salt;
 	}
 
 	public String getNameIdType() {
@@ -390,7 +379,6 @@ public class GluuAttribute extends Entry implements Serializable {
 		result = prime * result + ((oxMultiValuedAttribute == null) ? 0 : oxMultiValuedAttribute.hashCode());
 		result = prime * result + ((scimCustomAttr == null) ? 0 : scimCustomAttr.hashCode());
 		result = prime * result + (requred ? 1231 : 1237);
-		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
 		result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
 		result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
 		result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());
