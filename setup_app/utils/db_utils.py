@@ -497,7 +497,8 @@ class DBUtils:
                             cur_val['v'].append(new_val)
                             sql_cmd = "UPDATE `{}` SET {}='{}' WHERE dn='{}'".format(table, attribute, json.dumps(cur_val), dn)
                         else:
-                            sql_cmd= ''
+                            self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            continue
                         
                     elif 'replace' in entry and 'changetype' in entry:
                         attribute = entry['replace'][0]
