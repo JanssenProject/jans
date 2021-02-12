@@ -4,6 +4,7 @@ import glob
 import json
 import uuid
 import ruamel.yaml
+import base64
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -159,7 +160,12 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             clients_ldif_fd.close()
             self.load_ldif_files.append(self.clients_ldif_fn)
 
-    def render_import_templates(self):        
+    def render_import_templates(self):
+        oxauth_config_str = base64.decodestring(Config.templateRenderingDict['oxauth_config_base64'].encode())
+        oxauth_config = json.loads(oxauth_config_str.decode())
+        for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
+            Config.templateRenderingDict[param] = oxauth_config[param]
+
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
         self.dbUtils.import_ldif(self.load_ldif_files)
