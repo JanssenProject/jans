@@ -103,6 +103,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
+        if self.getMappingType('rdbm'):
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/ config-oxauth-test-sql.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            config_oxauth_test_properties += '\n#sql\n' +  rendered_text
 
         self.writeFile(
             os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
@@ -279,7 +283,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)))
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)), True)
 
-        else:
+        elif self.dbUtils.moddb == static.BackendTypes.MYSQL:
+            
+        elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr1 ON `gluu`(myCustomAttr1) USING GSI WITH {"defer_build":true}')
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr2 ON `gluu`(myCustomAttr2) USING GSI WITH {"defer_build":true}')
             self.dbUtils.cbm.exec_query('BUILD INDEX ON `gluu` (def_gluu_myCustomAttr1, def_gluu_myCustomAttr2)')
