@@ -1,0 +1,27 @@
+config.sql.db.schema.name=%(rdbm_db)s
+
+config.sql.connection.uri=jdbc:%(rdbm_type)s://localhost:%(rdbm_port)s/%(rdbm_db)s
+
+config.sql.connection.driver-property.serverTimezone=%(server_time_zone)s
+# Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties
+#config.sql.connection.driver-property.driverProperty=driverPropertyValue
+
+config.sql.auth.userName=%(rdbm_user)s
+config.sql.auth.userPassword=%(rdbm_password_enc)s
+
+# Password hash method
+config.sql.password.encryption.method=SSHA-256
+
+# Connection pool size
+config.sql.connection.pool.max-total=20
+config.sql.connection.pool.max-idle=10
+config.sql.connection.pool.min-idle=5
+
+# Max time needed to create connection pool in milliseconds
+config.sql.connection.pool.create-max-wait-time-millis=20000
+
+# Max wait 20 seconds
+config.sql.connection.pool.max-wait-time-millis=20000
+
+# Allow to evict connection in pool after 30 minutes
+config.sql.connection.pool.min-evictable-idle-time-millis=1800000
