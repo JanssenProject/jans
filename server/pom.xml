@@ -102,6 +102,10 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-core</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-sql</artifactId>
+		</dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-common</artifactId>
