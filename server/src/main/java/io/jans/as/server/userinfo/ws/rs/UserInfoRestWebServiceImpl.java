@@ -330,8 +330,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             Map<String, Object> claims = getClaims(user, scope);
+            if (claims == null) {
+                continue;
+            }
+            if (scope == null) {
+                log.trace("Unable to find scope in persistence. Is it removed? Scope name: " + scopeName);
+            }
 
-            if (Boolean.TRUE.equals(scope.isGroupClaims())) {
+            if (scope != null && Boolean.TRUE.equals(scope.isGroupClaims())) {
                 JwtSubClaimObject groupClaim = new JwtSubClaimObject();
                 groupClaim.setName(scope.getId());
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
