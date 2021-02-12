@@ -234,23 +234,22 @@ class AuthHandler(BaseHandler):
 
         new_jwks = deque(json.loads(out).get("keys", []))
 
-        logger.info("Merging non-expired keys from previous rotation (if any)")
+        logger.info("Merging keys from previous rotation (if any)")
         # make sure keys sorted by newer ``exp`` first, so the older one
         # won't be added to new JWKS
         old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
 
+        cnt = Counter(j["alg"] for j in new_jwks)
+
         for jwk in old_jwks:
-            # filter out expired key
-            if key_expired(jwk["exp"]):
-                continue
-
             # cannot have more than 2 keys for same algorithm in new JWKS
-            cnt = Counter(j["alg"] for j in new_jwks)
-            if cnt[jwk["alg"]] >= 2:
+            if cnt[jwk["alg"]] > 1:
                 continue
 
+            # insert old key to new keys
             new_jwks.appendleft(jwk)
-            # new_jwks.append(jwk)
+            cnt[jwk["alg"]] += 1
+
             # import key to new JKS
             keytool_import_key(old_jks_fn, jks_fn, jwk["kid"], jks_pass)
 
@@ -401,7 +400,6 @@ class AuthHandler(BaseHandler):
             if int(self.privkey_push_delay) > 0:
                 logger.info(f"Waiting for private key push delay ({int(self.privkey_push_delay)} seconds) ...")
                 time.sleep(int(self.privkey_push_delay))
-
                 for container in auth_containers:
                     logger.info(f"creating new {name}:{jks_fn}")
                     self.meta_client.copy_to_container(container, jks_fn)
@@ -457,30 +455,38 @@ class AuthHandler(BaseHandler):
         except TypeError:
             web_keys = config["jansConfWebKeys"]
 
-        logger.info("Cleaning up expired keys (if any)")
+        logger.info("Cleaning up keys (if any)")
 
         jks_fn = "/etc/certs/auth-keys.jks"
         self.manager.secret.to_file("auth_jks_base64", jks_fn, decode=True, binary_mode=True)
 
-        should_update = False
+        # non-pruned keys
+        new_jwks = []
 
-        keys = []
-        for jwk in web_keys.get("keys", []):
-            if key_expired(jwk["exp"]):
+        # make sure keys sorted by newer ``exp`` first, so the older one
+        # won't be added to new JWKS
+        old_jwks = web_keys.get("keys", [])
+        old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
+
+        cnt = Counter(j["alg"] for j in new_jwks)
+
+        for jwk in old_jwks:
+            # cannot have more than 1 key for same algorithm in new JWKS
+            if cnt[jwk["alg"]]:
                 keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
-                should_update = True
                 continue
-            keys.append(jwk)
 
-        web_keys["keys"] = keys
+            # preserve the key
+            new_jwks.append(jwk)
+            cnt[jwk["alg"]] += 1
+
+        web_keys["keys"] = new_jwks
+
         jwks_fn = "/etc/certs/auth-keys.json"
         with open(jwks_fn, "w") as f:
             f.write(json.dumps(web_keys, indent=2))
 
         if self.dry_run:
-            return
-
-        if not should_update:
             return
 
         auth_containers = []
