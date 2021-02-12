@@ -41,13 +41,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
 
-        if Config.persistence_type in ('couchbase', 'mysql'):
-            ptype = 'rdbm' if Config.persistence_type == 'mysql' else 'couchbase'
+        if Config.persistence_type in ('couchbase', 'sql'):
+            ptype = 'rdbm' if Config.persistence_type == 'sql' else 'couchbase'
             Config.mappingLocations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
 
 
-        if not Config.persistence_type in ('ldap', 'mysql') and os.path.exists(Config.jansCouchebaseProperties):
+        if not Config.persistence_type in ('ldap', 'sql') and os.path.exists(Config.jansCouchebaseProperties):
 
             jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
 
@@ -60,7 +60,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.encoded_couchbaseTrustStorePass = jans_cb_prop['ssl.trustStore.pin']
             Config.couchbaseTrustStorePass = self.unobscure(jans_cb_prop['ssl.trustStore.pin'])
 
-        if not Config.persistence_type in ('couchbase', 'mysql') and os.path.exists(Config.ox_ldap_properties):
+        if not Config.persistence_type in ('couchbase', 'sql') and os.path.exists(Config.ox_ldap_properties):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
             Config.ldap_binddn = jans_ldap_prop['bindDN']
             Config.ldapPass = self.unobscure(jans_ldap_prop['bindPassword'])

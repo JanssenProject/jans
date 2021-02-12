@@ -460,7 +460,7 @@ class PropertiesUtils(SetupUtils):
         elif (not Config.wrends_install)  and (not Config.rdbm_install) and Config.cb_install:
             Config.persistence_type = 'couchbase'
         elif (not Config.wrends_install)  and Config.rdbm_install and (not Config.cb_install):
-            Config.persistence_type = Config.rdbm_type
+            Config.persistence_type = 'sql'
         elif Config.wrends_install and Config.cb_install:
             Config.persistence_type = 'hybrid'
 
