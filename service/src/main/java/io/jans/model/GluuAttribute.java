@@ -43,7 +43,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName(name = "jansSourceAttr")
 	private String sourceAttribute;
 
-	@AttributeName(name = "jansNameIdType")
+	@AttributeName(name = "jansNameIdTyp")
 	private String nameIdType;
 
 	@NotNull
