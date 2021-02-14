@@ -202,6 +202,7 @@ class CtxGenerator:
             self.get_config("country_code"),
             self.get_config("state"),
             self.get_config("city"),
+            extra_dns=["ldap"],
         )
         with open("/etc/certs/opendj.pem", "w") as fw:
             with open("/etc/certs/opendj.crt") as fr:
