@@ -53,7 +53,7 @@ public class ConfigApiProtectionCache {
         resourceCache.invalidateAll();
     }
 
-    public static List<Scope> getResource(String resourceName) {
+    public static List<Scope> getResourceScopes(String resourceName) {
         Preconditions.checkNotNull(resourceName);
         Preconditions.checkState(!Strings.isNullOrEmpty(resourceName));
         return resourceCache.getIfPresent(resourceName);

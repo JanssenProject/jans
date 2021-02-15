@@ -143,7 +143,7 @@ public class AuthUtil {
 
                     // Verify Method
                     if (httpmethod.contains(method)) {
-                    	scopeList = ConfigApiProtectionCache.getResource(key);
+                    	scopeList = ConfigApiProtectionCache.getResourceScopes(key);
                         log.debug(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
                         break;
                     }
@@ -170,7 +170,7 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(String path) {
-        List<Scope> scopeList = ConfigApiProtectionCache.getResource(path);
+        List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
         log.trace("getRequestedScopes() - scopeList = "+scopeList);
         List<String> scopeStrList = new ArrayList();
         if (scopeList != null && scopeList.size() > 0) {

@@ -26,9 +26,16 @@
                 ]
             },
             {
-                "httpMethods":["PATCH","POST","PUT","DELETE"],
+                "httpMethods":["PATCH","POST","PUT"],
                 "scopes":[
                     "https://jans.io/oauth/config/attributes.write"
+                ]
+            }
+            ,
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/attributes.delete"
                 ]
             }
         ]
@@ -64,6 +71,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/cache.write"
                 ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/cache.write"
+                ]
             }
         ]
     },
@@ -78,6 +91,12 @@
             },
             {
                 "httpMethods":["PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/cache.write"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/cache.write"
                 ]
@@ -98,6 +117,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/cache.write"
                 ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/cache.write"
+                ]
             }
         ]
     },
@@ -115,6 +140,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/cache.write"
                 ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/cache.write"
+                ]
             }
         ]
     },
@@ -128,9 +159,15 @@
                 ]
             },
             {
-                "httpMethods":["PATCH","POST","PUT","DELETE"],
+                "httpMethods":["PATCH","POST","PUT"],
                 "scopes":[
                     "https://jans.io/oauth/config/openid/clients.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/openid/clients.delete"
                 ]
             }
         ]
@@ -162,9 +199,15 @@
                 ]
             },
             {
-                "httpMethods":["POST","PUT","DELETE"],
+                "httpMethods":["POST","PUT"],
                 "scopes":[
                     "https://jans.io/oauth/config/smtp.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/smtp.delete"
                 ]
             }
         ]
@@ -190,9 +233,15 @@
                 ]
             },
             {
-                "httpMethods":["PATCH","POST","PUT","DELETE"],
+                "httpMethods":["PATCH","POST","PUT"],
                 "scopes":[
                     "https://jans.io/oauth/config/database/couchbase.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/couchbase.delete"
                 ]
             }
         ]
@@ -253,7 +302,7 @@
             {
                 "httpMethods":["DELETE"],
                 "scopes":[
-                    "https://jans.io/oauth/config/scripts.write"
+                    "https://jans.io/oauth/config/scripts.delete"
                 ]
             }
         ]
@@ -319,9 +368,15 @@
                 ]
             },
             {
-                "httpMethods":["DELETE","PATCH"],
+                "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/database/ldap.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/ldap.delete"
                 ]
             }
         ]
@@ -381,9 +436,15 @@
                 ]
             },
             {
-                "httpMethods":["DELETE","PATCH"],
+                "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/openid/sectoridentifiers.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/openid/sectoridentifiers.delete"
                 ]
             }
         ]
@@ -415,9 +476,15 @@
                 ]
             },
             {
-                "httpMethods":["DELETE","PATCH"],
+                "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/scopes.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scopes.delete"
                 ]
             }
         ]
@@ -449,11 +516,18 @@
                 ]
             },
             {
-               "httpMethods":["DELETE","PATCH"],
+               "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/uma/resources.write"
                 ]
+            },
+            {
+               "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/uma/resources.delete"
+                ]
             }
+            
         ]
     }
 ]
