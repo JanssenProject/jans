@@ -18,7 +18,7 @@ class ObjectClass:
                 'MAY':(),
                 'X-ORIGIN': '',
               }
-        
+
         l = split_tokens(s)
         self.oid = l[1]
         self.tokens = extract_tokens(l, token_defaults)
@@ -31,7 +31,7 @@ class ObjectClass:
           self.kind = 2
         if self.kind==0 and not self.tokens['SUP'] and self.oid!='2.5.6.0':
           self.tokens['SUP'] = ('top',)
-      
+
     def key_attr(self, key, value, quoted=0):
         if type(value) == type(()):
             value = value[0]
@@ -42,7 +42,7 @@ class ObjectClass:
             return " %s %s" % (key, value)
         else:
           return ""
-      
+
 
     def key_list(self, key, values, sep=' ', quoted=0):
         if not values:
