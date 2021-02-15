@@ -92,3 +92,44 @@ def get_documents_from_ldif(ldif_file):
     return documents
 
 
+def schema2json(schema_file, out_dir=None):
+
+    ldif_parser = myLdifParser(schema_file)
+    ldif_parser.parse()
+
+    jans_schema = OrderedDict((('attributeTypes',[]), ('objectClasses',[])))
+
+    for attr_str in ldif_parser.entries[0][1]['attributeTypes']:
+        attr_type = schema.AttributeType(attr_str)
+        jans_schema['attributeTypes'].append({
+                  "desc": attr_type.tokens['DESC'][0],
+                  "equality": attr_type.tokens['EQUALITY'][0],
+                  "names": list(attr_type.tokens['NAME']),
+                  "multivalued": False,
+                  "oid": attr_type.oid,
+                  "syntax": attr_type.tokens['SYNTAX'][0],
+                  "x_origin": attr_type.tokens['X-ORIGIN'][0]
+                })
+
+    for objcls_str in ldif_parser.entries[0][1]['objectClasses']:
+        objcls_type = schema.ObjectClass(objcls_str)
+
+        jans_schema['objectClasses'].append({
+                  "kind": "AUXILIARY",
+                  "may": list(objcls_type.tokens['MAY']),
+                  "names": list(objcls_type.tokens['NAME']),
+                  "oid": objcls_type.oid,
+                  "sup": list(objcls_type.tokens['SUP']),
+                  "x_origin": objcls_type.tokens['X-ORIGIN'][0] 
+        })
+
+    path, fn = os.path.split(schema_file)
+    if not out_dir:
+        out_dir = path
+
+    name, ext = os.path.splitext(fn)
+
+    schema_str = json.dumps(jans_schema, indent=2)
+    out_file = os.path.join(out_dir, name + '.json')
+    with open(out_file, 'w') as w:
+        w.write(schema_str)
