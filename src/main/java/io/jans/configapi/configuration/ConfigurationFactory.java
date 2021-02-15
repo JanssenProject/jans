@@ -16,7 +16,6 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.ConfigApiResourceProtectionService;
-import io.jans.configapi.util.ApiConstants;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -40,8 +39,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
@@ -100,6 +97,10 @@ public class ConfigurationFactory {
     private static String API_CLIENT_PASSWORD;
     
     @Inject
+    @ConfigProperty(name = "api.approved.issuer")
+    private static List<String> API_APPROVED_ISSUER;
+    
+    @Inject
     ConfigApiResourceProtectionService configApiResourceProtectionService;
     
     @Inject
@@ -137,6 +138,10 @@ public class ConfigurationFactory {
     public static String getApiClientPassword() {
         return API_CLIENT_PASSWORD;
     }    
+    
+    public static List<String> getApiApprovedIssuer() {
+        return API_APPROVED_ISSUER;
+    }   
     
     public void create() {
         loadBaseConfiguration();
@@ -294,7 +299,7 @@ public class ConfigurationFactory {
         }
         try {
         	// Verify resources available
-            configApiResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType()); 
+            configApiResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType(),ConfigurationFactory.getApiClientId()); 
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);
