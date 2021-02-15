@@ -284,6 +284,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)), True)
 
         elif self.dbUtils.moddb == static.BackendTypes.MYSQL:
+            self.logIt("Adding custom attributs and indexes")
             
         elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr1 ON `gluu`(myCustomAttr1) USING GSI WITH {"defer_build":true}')
