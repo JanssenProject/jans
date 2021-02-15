@@ -450,7 +450,7 @@ Getting access token for scope https://jans.io/oauth/config/cache.readonly
 }
 ```
 
-__Option 2__ to update redis cache configuration. fill each property os keep as empty to set default.
+__Option 2__ to update redis cache configuration. fill each property or keep as empty to set default.
 press enter and `Continue?` press `y` to update redis configuration.
 ```text
 Selection: 2
@@ -4468,6 +4468,254 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
 ]
 ```
 
-It will show all the openid clients together.
+It will show all the openid clients together. To search using parameters:
+
+```text
+/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args limit:2
+```
+
+It will show random 2 client id configuration.
+
+```text
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+Calling with params limit=2
+[
+  {
+    "dn": "inum=1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805,ou=clients,o=jans",
+    "inum": "1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805",
+    "clientSecret": "KfwZeAfq4jrL",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/admin-ui",
+      "http//:localhost:4100"
+    ],
+    "claimRedirectUris": null,
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "Jans Config Api Client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1800.F6E877,ou=scopes,o=jans",
+      "inum=1800.D4F3E7,ou=scopes,o=jans",
+      "inum=1800.2FD7EF,ou=scopes,o=jans",
+      "inum=1800.97B23C,ou=scopes,o=jans",
+      "inum=1800.8FC2C7,ou=scopes,o=jans",
+      "inum=1800.1FFDF2,ou=scopes,o=jans",
+      "inum=1800.5CF44C,ou=scopes,o=jans",
+      "inum=1800.CCA518,ou=scopes,o=jans",
+      "inum=1800.E62D6E,ou=scopes,o=jans",
+      "inum=1800.11CB33,ou=scopes,o=jans",
+      "inum=1800.781FA2,ou=scopes,o=jans",
+      "inum=1800.ADAD8F,ou=scopes,o=jans",
+      "inum=1800.40F22F,ou=scopes,o=jans",
+      "inum=1800.7619BA,ou=scopes,o=jans",
+      "inum=1800.E0DAF5,ou=scopes,o=jans",
+      "inum=1800.7F45B0,ou=scopes,o=jans",
+      "inum=1800.778C57,ou=scopes,o=jans",
+      "inum=1800.E39293,ou=scopes,o=jans",
+      "inum=1800.939483,ou=scopes,o=jans",
+      "inum=1800.0ED2E8,ou=scopes,o=jans",
+      "inum=1800.66CA59,ou=scopes,o=jans",
+      "inum=1800.A4DBE5,ou=scopes,o=jans",
+      "inum=1800.9AF358,ou=scopes,o=jans",
+      "inum=1800.478CCF,ou=scopes,o=jans",
+      "inum=1800.450A9A,ou=scopes,o=jans",
+      "inum=1800.27A193,ou=scopes,o=jans",
+      "inum=1800.3971D5,ou=scopes,o=jans",
+      "inum=1800.891693,ou=scopes,o=jans",
+      "inum=1800.A35DFD,ou=scopes,o=jans",
+      "inum=1800.3516DE,ou=scopes,o=jans",
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  },
+  {
+    "dn": "inum=1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f,ou=clients,o=jans",
+    "inum": "1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f",
+    "clientSecret": "4OJLToBXav0P",
+    "frontChannelLogoutUri": "https://testjans.gluu.com/identity/ssologout.htm",
+    "frontChannelLogoutSessionRequired": true,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/identity/scim/auth",
+      "https://testjans.gluu.com/identity/authcode.htm",
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims?authentication=true"
+    ],
+    "claimRedirectUris": [
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims"
+    ],
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "implicit",
+      "refresh_token"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "oxTrust Admin GUI",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": "HS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": [
+      "https://testjans.gluu.com/identity/finishlogout.htm"
+    ],
+    "requestUris": null,
+    "scopes": [
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": true,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  }
+]
+```
+
 
 
