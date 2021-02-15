@@ -27,7 +27,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def install(self):
         self.local_install()
-        self.create_tables()
+        jans_schema_files = []
+        
+        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
+            jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
+
+        self.create_tables(jans_schema_files)
         self.create_indexes()
         self.import_ldif()
         self.rdbmProperties()
@@ -53,12 +58,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.bind()
 
-    def create_tables(self):
+    def create_tables(self, jans_schema_files):
 
         tables = []
 
-        for jans_schema_fn_ in ('jans_schema.json', 'custom_schema.json'):
-            jans_schema_fn = os.path.join(Config.install_dir, 'schema', jans_schema_fn_)
+        for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
 
             for obj in jans_schema['objectClasses']:
@@ -85,12 +89,20 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                             data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
                         else:
                             data_type = type_[Config.rdbm_type]['type']
+                    col_def = '`{}` {}'.format(attrname, data_type)
+                    if data_type.lower() == 'json':
+                        col_def += ' NOT NULL DEFAULT (\'{"v":[]}\')'
+                    sql_tbl_cols.append(col_def)
 
-                    sql_tbl_cols.append('`{}` {}'.format(attrname, data_type))
-
-                sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
-                self.dbUtils.exec_rdbm_query(sql_cmd)
-                tables.append(sql_cmd)
+                if self.dbUtils.table_exists(sql_tbl_name):
+                    for tbl_col in sql_tbl_cols:
+                        sql_cmd = 'ALTER TABLE `{}` ADD {};'.format(sql_tbl_name, tbl_col)
+                        self.dbUtils.exec_rdbm_query(sql_cmd)
+                        tables.append(sql_cmd)
+                else:
+                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
+                    tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
 
@@ -147,13 +159,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.import_ldif(ldif_files)
 
-    def rdbmProperties(self):
-        Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
+    def server_time_zone(self):
         my_time_zone = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo)
         if not my_time_zone == 'UTC':
             my_time_zone = 'GMT'+my_time_zone
         Config.templateRenderingDict['server_time_zone'] = my_time_zone
-        
+
+    def rdbmProperties(self):
+        self.server_time_zone()
+        Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
         self.renderTemplateInOut(Config.jansRDBMProperties, Config.templateFolder, Config.configFolder)
 
     def create_folders(self):

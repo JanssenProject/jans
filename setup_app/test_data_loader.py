@@ -14,7 +14,7 @@ from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app.utils.ldif_utils import myLdifParser
+from setup_app.utils.ldif_utils import myLdifParser, schema2json
 from setup_app.pylib.schema import ObjectClass
 from setup_app.pylib.ldif4.ldif import LDIFWriter
 
@@ -23,6 +23,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     passportInstaller = None
     scimInstaller = None
+    rdbmInstaller = None
 
     def __init__(self):
         self.service_name = 'test-data'
@@ -104,9 +105,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
         if self.getMappingType('rdbm'):
-            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/ config-oxauth-test-sql.properties.nrnd'))
+            self.rdbmInstaller.server_time_zone()
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-sql.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_oxauth_test_properties += '\n#sql\n' +  rendered_text
+
+            self.logIt("Adding custom attributs and indexes")
+
+            schema2json(
+                    os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'),
+                    os.path.join(Config.outputFolder, 'test/jans-auth/schema/')
+                    )
+            schema2json(
+                    os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
+                    os.path.join(Config.outputFolder, 'test/scim-client/schema/'),
+                    )
+            jans_schema_json_files = [
+                    os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json'),
+                    os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json'),
+                        ]
+            self.rdbmInstaller.create_tables(jans_schema_json_files)
 
         self.writeFile(
             os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
@@ -284,14 +302,15 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)), True)
 
         elif self.dbUtils.moddb == static.BackendTypes.MYSQL:
-            self.logIt("Adding custom attributs and indexes")
-            
+            pass
+
         elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr1 ON `gluu`(myCustomAttr1) USING GSI WITH {"defer_build":true}')
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr2 ON `gluu`(myCustomAttr2) USING GSI WITH {"defer_build":true}')
             self.dbUtils.cbm.exec_query('BUILD INDEX ON `gluu` (def_gluu_myCustomAttr1, def_gluu_myCustomAttr2)')
 
-        self.dbUtils.ldap_conn.bind()
+        if self.dbUtils.moddb == static.BackendTypes.LDAP:
+            self.dbUtils.ldap_conn.bind()
 
         result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
 

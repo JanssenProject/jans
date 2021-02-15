@@ -183,6 +183,7 @@ if Config.installed_instance:
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
     testDataLoader.scimInstaller = scimInstaller
+    testDataLoader.rdbmInstaller = rdbmInstaller
 
 if argsp.x:
     print("Loading test data")

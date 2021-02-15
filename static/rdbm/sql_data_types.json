@@ -100,12 +100,6 @@
       "type": "VARCHAR"
     }
   },
-  "jansAttrEditTyp": {
-    "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
-    }
-  },
   "jansAttrName": {
     "mysql": {
       "size": 48,
@@ -124,12 +118,6 @@
       "type": "VARCHAR"
     }
   },
-  "jansAttrViewTyp": {
-    "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
-    }
-  },
   "jansAttrs": {
     "mysql": {
       "type": "TEXT"
@@ -142,11 +130,6 @@
     }
   },
   "jansCacheConf": {
-    "mysql": {
-      "type": "TEXT"
-    }
-  },
-  "jansClaim": {
     "mysql": {
       "type": "TEXT"
     }
@@ -182,12 +165,6 @@
   "jansConfErrors": {
     "mysql": {
       "type": "TEXT"
-    }
-  },
-  "jansConfProperty": {
-    "mysql": {
-      "size": 256,
-      "type": "VARCHAR"
     }
   },
   "jansConfStatic": {
@@ -229,39 +206,15 @@
       "type": "VARCHAR"
     }
   },
-  "jansLogoutURI": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
-  "jansModuleProperty": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    }
-  },
   "jansOrgShortName": {
     "mysql": {
       "size": 48,
       "type": "VARCHAR"
     }
   },
-  "jansPostLogoutRedirectURI": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
   "jansProgLng": {
     "mysql": {
       "size": 48,
-      "type": "VARCHAR"
-    }
-  },
-  "jansRedirectURI": {
-    "mysql": {
-      "size": 128,
       "type": "VARCHAR"
     }
   },
@@ -281,11 +234,6 @@
     "mysql": {
       "size": 48,
       "type": "VARCHAR"
-    }
-  },
-  "jansScope": {
-    "mysql": {
-      "type": "TEXT"
     }
   },
   "jansScopeTyp": {
@@ -338,6 +286,39 @@
   "member": {
     "mysql": {
       "type": "JSON"
+    }
+  },
+  "jansDeviceKeyHandle": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPublicKeyId": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    }
+  },
+  "jansRegistrationData": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDeviceRegistrationConf": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDeviceData": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "picture": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
     }
   }
 }
