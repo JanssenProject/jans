@@ -6,7 +6,11 @@
 
 package io.jans.configapi.auth;
 
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.configapi.auth.util.AuthUtil;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -17,31 +21,47 @@ import java.util.List;
 
 public abstract class AuthorizationService implements Serializable {
 
-    private static final long serialVersionUID = 4012335221233316230L;
+	private static final long serialVersionUID = 4012335221233316230L;
 
-    @Inject
-    Logger log;
-    
-    @Inject
-    AuthUtil authUtil;
+	@Inject
+	Logger log;
 
-    public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-            String path) throws Exception;
+	@Inject
+	ConfigurationFactory configurationFactory;
 
-    protected Response getErrorResponse(Response.Status status, String detail) {
-        return Response.status(status).entity(detail).build();
-    }
+	@Inject
+	AuthUtil authUtil;
 
-    public List<String> getRequestedScopes(String path) {
-        return authUtil.getRequestedScopes(path); 
-    }
-    
-    public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-        return authUtil.getRequestedScopes(resourceInfo);
-    }
+	public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
+			String path) throws Exception;
 
-    public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        return authUtil.validateScope(authScopes, resourceScopes);
-    }   
+	protected Response getErrorResponse(Response.Status status, String detail) {
+		return Response.status(status).entity(detail).build();
+	}
+
+	public List<String> getRequestedScopes(String path) {
+		return authUtil.getRequestedScopes(path);
+	}
+
+	public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
+		return authUtil.getRequestedScopes(resourceInfo);
+	}
+
+	public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
+		return authUtil.validateScope(authScopes, resourceScopes);
+	}
+
+	public List<String> getApiApprovedIssuer() {
+		return this.configurationFactory.getApiApprovedIssuer();
+	}
+
+	public Jwt parse(String encodedJwt) throws InvalidJwtException {
+		log.trace("\n\n Jwt string to parse encodedJwt = " + encodedJwt);
+		if (StringHelper.isNotEmpty(encodedJwt)) {
+			return Jwt.parse(encodedJwt);
+		}
+
+		return null;
+	}
 
 }

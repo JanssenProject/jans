@@ -89,6 +89,18 @@ public class ScopeService {
     public List<Scope> searchScopes(String pattern, int sizeLimit) {
         return searchScopes(pattern, sizeLimit, null);
     }
+    
+    public List<Scope> searchScopesById(String jsId, int sizeLimit) {
+    	 String[] targetArray = new String[] { jsId };
+    	 Filter jsIdFilter = Filter.createSubstringFilter(AttributeConstants.jsId, null, targetArray, null);
+         Filter searchFilter = Filter.createANDFilter(jsIdFilter);
+         try {
+             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, sizeLimit);
+         } catch (Exception e) {
+             logger.error("No scopes found by pattern: " + jsId, e);
+             return new ArrayList<>();
+         }
+    }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };
