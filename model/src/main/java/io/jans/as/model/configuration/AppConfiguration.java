@@ -210,6 +210,12 @@ public class AppConfiguration implements Configuration {
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
+    private Boolean dcrSignatureValidationEnabled = false;
+    private String dcrSignatureValidationSoftwareStatementJwksURIClaim;
+    private String dcrSignatureValidationSoftwareStatementJwksClaim;
+    private String dcrSignatureValidationJwks;
+    private String dcrSignatureValidationJwksUri;
+
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
@@ -438,6 +444,47 @@ public class AppConfiguration implements Configuration {
 
     public void setFapiCompatibility(Boolean fapiCompatibility) {
         this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getDcrSignatureValidationEnabled() {
+        if (dcrSignatureValidationEnabled == null) dcrSignatureValidationEnabled = false;
+        return dcrSignatureValidationEnabled;
+    }
+
+    public void setDcrSignatureValidationEnabled(Boolean dcrSignatureValidationEnabled) {
+        this.dcrSignatureValidationEnabled = dcrSignatureValidationEnabled;
+    }
+
+    public String getDcrSignatureValidationSoftwareStatementJwksURIClaim() {
+        return dcrSignatureValidationSoftwareStatementJwksURIClaim;
+    }
+
+    public void setDcrSignatureValidationSoftwareStatementJwksURIClaim(String dcrSignatureValidationSoftwareStatementJwksURIClaim) {
+        this.dcrSignatureValidationSoftwareStatementJwksURIClaim = dcrSignatureValidationSoftwareStatementJwksURIClaim;
+    }
+
+    public String getDcrSignatureValidationSoftwareStatementJwksClaim() {
+        return dcrSignatureValidationSoftwareStatementJwksClaim;
+    }
+
+    public void setDcrSignatureValidationSoftwareStatementJwksClaim(String dcrSignatureValidationSoftwareStatementJwksClaim) {
+        this.dcrSignatureValidationSoftwareStatementJwksClaim = dcrSignatureValidationSoftwareStatementJwksClaim;
+    }
+
+    public String getDcrSignatureValidationJwks() {
+        return dcrSignatureValidationJwks;
+    }
+
+    public void setDcrSignatureValidationJwks(String dcrSignatureValidationJwks) {
+        this.dcrSignatureValidationJwks = dcrSignatureValidationJwks;
+    }
+
+    public String getDcrSignatureValidationJwksUri() {
+        return dcrSignatureValidationJwksUri;
+    }
+
+    public void setDcrSignatureValidationJwksUri(String dcrSignatureValidationJwksUri) {
+        this.dcrSignatureValidationJwksUri = dcrSignatureValidationJwksUri;
     }
 
     public Boolean getForceIdTokenHintPrecense() {
