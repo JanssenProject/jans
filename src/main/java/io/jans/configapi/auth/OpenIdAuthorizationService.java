@@ -7,6 +7,9 @@
 package io.jans.configapi.auth;
 
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.configapi.auth.service.OpenIdService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,16 +35,26 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
+    public void processAuthorization(String token, String issuer, String tokenType, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.trace("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ", token, issuer, resourceInfo, method, path);
+        log.info("oAuth  Authorization parameters , token:{}, issuer:{}, tokenType:{}, resourceInfo:{}, method: {}, path: {} ", token, issuer, tokenType, resourceInfo, method, path);
         if (StringUtils.isBlank(token)) {
             log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo, resourceScopes);
+        log.info("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo, resourceScopes);
+        
+        //Validate issuer
+        if(StringUtils.isNotBlank(issuer) && !this.validIssuer(issuer)) {
+        	throw new WebApplicationException("Header Issuer is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        
+        //Check the type of token simple, jwt, reference
+        validateToken(token, issuer, tokenType,resourceScopes);
+        
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim(), issuer);
        
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
@@ -57,6 +70,34 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
+    }
+    
+    private void validateToken(String token, String issuer, String tokenType,List<String> resourceScopes) throws Exception{
+    	log.info("oAuth  validateToken parameters , token:{}, issuer:{}, tokenType:{}, resourceScopes:{} ", token, issuer, tokenType,resourceScopes);
+    	try {
+    		Jwt jwt = parse(token);
+    		log.info("JWT details : jwt.toString() - "+jwt.toString()+" , jwt.getClaims() "+jwt.getClaims()+" , jwt.getHeader() = "+jwt.getHeader());
+    		
+    		log.info("JWT details : jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER) - "+jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+    		log.info("JWT details : jwt.getClaims().getClaimAsString(scope) - "+jwt.getClaims().getClaimAsString("scope"));
+    		
+    		//Validate issuer
+            if(!this.validIssuer(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER))) {
+            	throw new WebApplicationException("Jwt Issuer is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+    		
+    	    if (!validateScope(jwt.getClaims().getClaimAsStringList("scope"), resourceScopes)) {
+                log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
+                        + jwt.getClaims().getClaimAsStringList("scope"));
+                throw new WebApplicationException("Insufficient scopes. Required scope",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+    	}
+    	catch(InvalidJwtException exp) {
+    		log.error("Not a valid Jwt token = "+exp);
+    	}
+    	
     }
 
 }
