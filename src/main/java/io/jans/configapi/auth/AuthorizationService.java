@@ -32,7 +32,7 @@ public abstract class AuthorizationService implements Serializable {
 	@Inject
 	AuthUtil authUtil;
 
-	public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
+	public abstract void processAuthorization(String token, String issuer, String tokenType, ResourceInfo resourceInfo, String method,
 			String path) throws Exception;
 
 	protected Response getErrorResponse(Response.Status status, String detail) {
@@ -56,7 +56,7 @@ public abstract class AuthorizationService implements Serializable {
 	}
 
 	public Jwt parse(String encodedJwt) throws InvalidJwtException {
-		log.trace("\n\n Jwt string to parse encodedJwt = " + encodedJwt);
+		log.info("\n\n Jwt string to parse encodedJwt = " + encodedJwt);
 		if (StringHelper.isNotEmpty(encodedJwt)) {
 			return Jwt.parse(encodedJwt);
 		}
@@ -64,4 +64,8 @@ public abstract class AuthorizationService implements Serializable {
 		return null;
 	}
 
+	public boolean validIssuer(String issuer) throws Exception {
+		log.info("\n\n Is Valid Issuer - this.configurationFactory.getApiApprovedIssuer().contains(issuer) = " + this.configurationFactory.getApiApprovedIssuer().contains(issuer));
+		return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
+	}
 }
