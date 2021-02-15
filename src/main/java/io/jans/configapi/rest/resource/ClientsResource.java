@@ -148,7 +148,7 @@ public class ClientsResource extends BaseResource {
 					try {
 						client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
 					}catch (EncryptionException exp) {
-						log.error("Error while client secret decryption - "+exp);
+						log.error("Error while client(["+client+"]) secret decryption - "+exp+"!");
 					}
 				}
 		}
