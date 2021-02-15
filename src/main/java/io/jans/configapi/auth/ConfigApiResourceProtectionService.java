@@ -173,7 +173,7 @@ public class ConfigApiResourceProtectionService {
 		if (StringUtils.isBlank(clientId)) {
 			return;
 		}
-		clientId="1800.9test";
+		//clientId="1802.9dcd98ad-fe2c-4fd9-b717-d9436d9f2009";
 		try {
 			Client client = this.clientService.getClientByInum(clientId);
 			log.debug(" \n\n updateScopeForClientIfNeeded() - Verify client = " + client + "\n\n");
@@ -191,7 +191,7 @@ public class ConfigApiResourceProtectionService {
 			client = this.clientService.getClientByInum(clientId);
 			log.trace(" Verify scopes post assignment, clientId ="+clientId+" ,scopes = "+Arrays.asList(client.getScopes()));
 		} catch (Exception ex) {
-			log.error("Error while searching client " + ex);
+			log.error("Error while searching internal client " + ex);
 		}
 
 	}
