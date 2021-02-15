@@ -267,6 +267,7 @@ def determine_package(glob_pattern):
 
 
 def readJsonFile(jsonFile, ordered=False):
+    logIt("Loading json file: {}".format(jsonFile))
     object_pairs_hook = OrderedDict if ordered else None
     if os.path.exists(jsonFile):
         with open(jsonFile) as f:

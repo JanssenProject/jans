@@ -23,6 +23,7 @@ class DBUtils:
         if Config.mappingLocations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
         elif Config.mappingLocations['default'] == 'rdbm':
+            self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
         else:
@@ -57,7 +58,6 @@ class DBUtils:
 
 
     def mysqlconnection(self, log=True):
-        self.read_jans_schema()
         base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
         try:
             self.mysql_conn = pymysql.connect(
@@ -429,6 +429,12 @@ class DBUtils:
             if result:
                 return tbl
 
+    def table_exists(self, table):
+        tables = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
+        for tbl_ in tables:
+            if table == tbl_['TABLE_NAME']:
+                return True
+
     def get_rdbm_val(self, key, val):
         
         if key in self.sql_data_types:
@@ -444,8 +450,12 @@ class DBUtils:
                 return '1'
             return '0'
 
+        if data_type in ('DATETIME(3)',):
+            dval = val[0].strip('Z')
+            return '"{}-{}-{} {}:{}:{}{}"'.format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
+
         if data_type == 'JSON':
-            if key in ('jansConfProperty', 'jansModuleProperty'):
+            if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres'):
                 for i, k in enumerate(val[:]):
                     val[i] = json.loads(k)
             data_= "'{}'".format(json.dumps({'v': val}))
@@ -531,6 +541,7 @@ class DBUtils:
 
                         cols = ['`doc_id`', '`objectClass`', '`dn`']
                         vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
+
                         for lkey in entry:
                             cols.append('`{}`'.format(lkey))
                             vals.append(self.get_rdbm_val(lkey, entry[lkey]))

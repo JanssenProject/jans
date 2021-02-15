@@ -189,7 +189,7 @@ class SetupUtils(Crypto64):
 
     def insertLinesInFile(self, inFilePath, index, text):        
             inFilePathLines = None                    
-            try:            
+            try:
                 inFilePathLines = self.readFile(inFilePath).splitlines()            
                 try:
                     
@@ -201,7 +201,7 @@ class SetupUtils(Crypto64):
                     self.logIt("Error writing %s" % inFilePathLines, True)            
             except:            
                 self.logIt("Error reading %s" % inFilePathLines, True)
-                    
+
     def commentOutText(self, text):
         textLines = text.splitlines()
 
