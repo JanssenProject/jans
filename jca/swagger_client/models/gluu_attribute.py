@@ -127,8 +127,7 @@ class GluuAttribute(object):
         self.display_name = display_name
         self.description = description
         self.data_type = data_type
-        if status is not None:
-            self.status = status
+        self.status = status
         if lifetime is not None:
             self.lifetime = lifetime
         if source_attribute is not None:
@@ -358,6 +357,8 @@ class GluuAttribute(object):
         :param status: The status of this GluuAttribute.  # noqa: E501
         :type: str
         """
+        if status is None:
+            raise ValueError("Invalid value for `status`, must not be `None`")  # noqa: E501
         allowed_values = ["ACTIVE", "INACTIVE", "EXPIRED", "REGISTER"]  # noqa: E501
         if status not in allowed_values:
             raise ValueError(

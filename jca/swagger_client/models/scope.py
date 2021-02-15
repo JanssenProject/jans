@@ -89,8 +89,7 @@ class Scope(object):
         if inum is not None:
             self.inum = inum
         self.display_name = display_name
-        if id is not None:
-            self.id = id
+        self.id = id
         if icon_url is not None:
             self.icon_url = icon_url
         self.description = description
@@ -203,6 +202,8 @@ class Scope(object):
         :param id: The id of this Scope.  # noqa: E501
         :type: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
