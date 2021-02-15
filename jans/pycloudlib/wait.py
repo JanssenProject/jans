@@ -17,6 +17,7 @@ import requests
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import decode_text
 
@@ -349,6 +350,14 @@ def wait_for_oxd(manager, **kwargs):
         raise WaitError(req.reason)
 
 
+@retry_on_exception
+def wait_for_sql_conn(manager, **kwargs):
+    """Wait for readiness/liveness of an SQL database.
+    """
+    # checking connection
+    SQLClient().is_alive()
+
+
 def wait_for(manager, deps=None):
     """A high-level function to run one or more ``wait_for_*`` function(s).
 
@@ -365,6 +374,7 @@ def wait_for(manager, deps=None):
     - `oxauth`
     - `oxtrust`
     - `oxd`
+    - `sql_conn`
 
     .. code-block:: python
 
@@ -400,6 +410,7 @@ def wait_for(manager, deps=None):
         "oxauth": {"func": wait_for_oxauth, "kwargs": {"label": "oxAuth"}},
         "oxtrust": {"func": wait_for_oxtrust, "kwargs": {"label": "oxTrust"}},
         "oxd": {"func": wait_for_oxd, "kwargs": {"label": "oxd"}},
+        "sql_conn": {"func": wait_for_sql_conn, "kwargs": {"label": "SQL"}},
     }
 
     for dep in deps:

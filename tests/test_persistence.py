@@ -411,3 +411,19 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
     dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
+
+
+# ===
+# SQL
+# ===
+
+
+def test_get_sql_password(monkeypatch, tmpdir):
+    from jans.pycloudlib.persistence.sql import get_sql_password
+
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+
+    assert get_sql_password() == "secret"
