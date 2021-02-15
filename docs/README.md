@@ -1836,6 +1836,23 @@ OAuth - OpenID Connect - Clients
 ```
 Using Janssen CLI, Administrator can easily `create/update/delete` openid Connect without any interrupt.
 
+
+### User Managed Access (UMA)
+
+UMA helps to mange user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
+
+![](img/im-uma-menu.png)
+
+you can perform such operations:
+- view/find
+- create
+- update / partially update
+- delete
+
+To get list of UMA resources of your Janssen Server, you can select option 1.
+It will ask `search limit[50]` by default set upto 50 and `pattern` of string.
+
+
 ## Command Line Argument Mode
 We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
 ```
