@@ -91,8 +91,7 @@ class CustomScript(object):
         self.name = name
         if aliases is not None:
             self.aliases = aliases
-        if description is not None:
-            self.description = description
+        self.description = description
         self.script = script
         self.script_type = script_type
         self.programming_language = programming_language
@@ -223,6 +222,8 @@ class CustomScript(object):
         :param description: The description of this CustomScript.  # noqa: E501
         :type: str
         """
+        if description is None:
+            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
 
         self._description = description
 

@@ -42,12 +42,12 @@ class SmtpConfiguration(object):
     attribute_map = {
         'host': 'host',
         'port': 'port',
-        'requires_ssl': 'requires-ssl',
-        'trust_host': 'trust-host',
-        'from_name': 'from-name',
-        'from_email_address': 'from-email-address',
-        'requires_authentication': 'requires-authentication',
-        'user_name': 'user-name',
+        'requires_ssl': 'requires_ssl',
+        'trust_host': 'trust_host',
+        'from_name': 'from_name',
+        'from_email_address': 'from_email_address',
+        'requires_authentication': 'requires_authentication',
+        'user_name': 'user_name',
         'password': 'password'
     }
 
