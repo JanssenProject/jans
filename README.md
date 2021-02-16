@@ -53,3 +53,4 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_BUCKET_PREFIX`: Prefix for Couchbase buckets (default to `jans`).
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `CN_CONFIG_API_LOG_LEVEL`: Log level for config api. Options include `OFF`, `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`.  and `ALL`. This defaults to `INFO`
