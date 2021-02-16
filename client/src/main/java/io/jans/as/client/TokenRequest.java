@@ -286,8 +286,8 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("username", username);
         builder.append("password", password);
         builder.append("assertion", assertion);
-        builder.append("refreshToken", refreshToken);
-        builder.append("authReqId", authReqId);
+        builder.append("refresh_token", refreshToken);
+        builder.append("auth_req_id", authReqId);
         builder.append("device_code", deviceCode);
         appendClientAuthnToQuery(builder);
         for (String key : getCustomParameters().keySet()) {
