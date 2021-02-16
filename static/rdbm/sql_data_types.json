@@ -320,5 +320,50 @@
       "size": 96,
       "type": "VARCHAR"
     }
+  },
+  "jansInitiateLoginURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansJwksURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansLogoURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansPolicyURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansReqURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansSectorIdentifierURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansClntURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansTosURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansClaimRedirectURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
   }
 }
