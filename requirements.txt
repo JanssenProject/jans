@@ -1,2 +1,2 @@
 click==6.7
--e git+https://github.com/JanssenProject/jans-pycloudlib@51b58ed0dd05d4afcbe155167c57d013bca3ee47#egg=jans-pycloudlib
+-e git+https://github.com/JanssenProject/jans-pycloudlib@8c56ce10f32743ddb8925b8cf5315d5b1db22faf#egg=jans-pycloudlib
