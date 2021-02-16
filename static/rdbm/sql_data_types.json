@@ -148,7 +148,7 @@
   },
   "jansClntSecret": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -190,7 +190,7 @@
   },
   "jansGrantTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
