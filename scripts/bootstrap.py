@@ -714,7 +714,8 @@ class CouchbaseBackend(object):
 
             # only default and user buckets buckets that may have initial data;
             # these data also affected by LDAP mapping selection;
-            bucket, key = bucket_prefix, "configuration_jans-auth"
+            jca_client_id = self.manager.config.get("jca_client_id")
+            bucket, key = bucket_prefix, f"clients_{jca_client_id}"
 
             # if `hybrid` is selected and default mapping is stored in LDAP,
             # the default bucket won't have data, hence we check the user bucket instead
@@ -909,10 +910,10 @@ class LDAPBackend(object):
             persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
             ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
-            # a minimum service stack is having oxTrust, hence check whether entry
-            # for oxTrust exists in LDAP
-            default_search = ("ou=jans-auth,ou=configuration,o=jans",
-                              "(objectClass=jansAppConf)")
+            # a minimum service stack is having config-api client
+            jca_client_id = self.manager.config.get("jca_client_id")
+            default_search = (f"inum={jca_client_id},ou=clients,o=jans",
+                              "(objectClass=jansClnt)")
 
             if persistence_type == "hybrid":
                 # `cache` and `token` mapping only have base entries
