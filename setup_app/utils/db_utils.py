@@ -455,7 +455,7 @@ class DBUtils:
             return '"{}-{}-{} {}:{}:{}{}"'.format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
 
         if data_type == 'JSON':
-            if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres'):
+            if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres', 'jansPhotos'):
                 for i, k in enumerate(val[:]):
                     val[i] = json.loads(k)
             data_= "'{}'".format(json.dumps({'v': val}))
