@@ -49,7 +49,7 @@ public interface IAuthorizationGrant {
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing);
+            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing, Function<JsonWebResponse, Void> postProcessing);
 
     RefreshToken getRefreshToken(String refreshTokenCode);
 

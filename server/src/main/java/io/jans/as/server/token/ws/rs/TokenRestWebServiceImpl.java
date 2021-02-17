@@ -6,8 +6,27 @@
 
 package io.jans.as.server.token.ws.rs;
 
+import java.util.Arrays;
+import java.util.Date;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
@@ -22,37 +41,44 @@ import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractAuthorizationGrant;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCodeGrant;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.common.ClientCredentialsGrant;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.DeviceCodeGrant;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.IdToken;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.AuthenticationFilterService;
+import io.jans.as.server.service.AuthenticationService;
+import io.jans.as.server.service.DeviceAuthorizationService;
+import io.jans.as.server.service.GrantService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
+import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.uma.service.UmaTokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Arrays;
-import java.util.Date;
 
 /**
  * Provides interface for token REST web services
@@ -111,6 +137,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
+    
+    @Inject
+    private ExternalUpdateTokenService externalUpdateTokenService;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -226,12 +255,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         }
                         return null;
                     };
+                    
+                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationCodeGrant, client, appConfiguration, attributeService);
+                    Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
 
                     idToken = authorizationCodeGrant.createIdToken(
                             nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null,
-                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
+                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null),
+                            postProcessor);
                 }
-
 
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
 
@@ -282,9 +314,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     boolean includeIdTokenClaims = Boolean.TRUE.equals(
                             appConfiguration.getLegacyIdTokenClaims());
 
+                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationGrant, client, appConfiguration, attributeService);
+                    Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
                     idToken = authorizationGrant.createIdToken(
                             null, null, accToken, null,
-                            null, authorizationGrant, includeIdTokenClaims, idTokenPreProcessing);
+                            null, authorizationGrant, includeIdTokenClaims, idTokenPreProcessing, postProcessor);
                 }
 
                 builder.entity(getJSonResponse(accToken,
@@ -311,9 +346,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (appConfiguration.getOpenidScopeBackwardCompatibility() && clientCredentialsGrant.getScopes().contains("openid")) {
                     boolean includeIdTokenClaims = Boolean.TRUE.equals(
                             appConfiguration.getLegacyIdTokenClaims());
+
+                    ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, clientCredentialsGrant, client, appConfiguration, attributeService);
+                    Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
                     idToken = clientCredentialsGrant.createIdToken(
                             null, null, null, null,
-                            null, clientCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
+                            null, clientCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing, postProcessor);
                 }
 
                 oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -390,9 +429,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (appConfiguration.getOpenidScopeBackwardCompatibility() && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                 appConfiguration.getLegacyIdTokenClaims());
+
+                        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, resourceOwnerPasswordCredentialsGrant, client, appConfiguration, attributeService);
+                        Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
                         idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
                                 null, null, null, null,
-                                null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
+                                null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing, postProcessor);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
@@ -435,9 +478,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             AccessToken accessToken = cibaGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
                             log.debug("Issuing access token: {}", accessToken.getCode());
 
+                            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, cibaGrant, client, appConfiguration, attributeService);
+                            Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
                             IdToken idToken = cibaGrant.createIdToken(
                                     null, null, accessToken, refToken,
-                                    null, cibaGrant, false, null);
+                                    null, cibaGrant, false, null, postProcessor);
 
                             cibaGrant.setTokensDelivered(true);
                             cibaGrant.save();
@@ -550,9 +596,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             AccessToken accessToken = deviceCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
             log.debug("Issuing access token: {}", accessToken.getCode());
 
+            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, deviceCodeGrant, client, appConfiguration, attributeService);
+            Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
             IdToken idToken = deviceCodeGrant.createIdToken(
                     null, null, accessToken, refToken,
-                    null, deviceCodeGrant, false, null);
+                    null, deviceCodeGrant, false, null, postProcessor);
 
             RefreshToken reToken = null;
             if (isRefreshTokenAllowed(client, scope, deviceCodeGrant)) {
