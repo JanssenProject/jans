@@ -6,11 +6,8 @@
 
 package io.jans.configapi.auth;
 
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -32,7 +29,7 @@ public abstract class AuthorizationService implements Serializable {
 	@Inject
 	AuthUtil authUtil;
 
-	public abstract void processAuthorization(String token, String issuer, String tokenType, ResourceInfo resourceInfo, String method,
+	public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
 			String path) throws Exception;
 
 	protected Response getErrorResponse(Response.Status status, String detail) {
@@ -55,17 +52,4 @@ public abstract class AuthorizationService implements Serializable {
 		return this.configurationFactory.getApiApprovedIssuer();
 	}
 
-	public Jwt parse(String encodedJwt) throws InvalidJwtException {
-		log.info("\n\n Jwt string to parse encodedJwt = " + encodedJwt);
-		if (StringHelper.isNotEmpty(encodedJwt)) {
-			return Jwt.parse(encodedJwt);
-		}
-
-		return null;
-	}
-
-	public boolean validIssuer(String issuer) throws Exception {
-		log.info("\n\n Is Valid Issuer - this.configurationFactory.getApiApprovedIssuer().contains(issuer) = " + this.configurationFactory.getApiApprovedIssuer().contains(issuer));
-		return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
-	}
 }

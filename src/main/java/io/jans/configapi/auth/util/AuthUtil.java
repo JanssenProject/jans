@@ -1,6 +1,5 @@
 package io.jans.configapi.auth.util;
 
-
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -45,354 +44,361 @@ import javax.ws.rs.core.Response;
 @ApplicationScoped
 public class AuthUtil {
 
-    @Inject
-    Logger log;
+	@Inject
+	Logger log;
 
-    @Inject
-    ConfigurationFactory configurationFactory;
+	@Inject
+	ConfigurationFactory configurationFactory;
 
-    @Inject
-    ConfigurationService configurationService;
+	@Inject
+	ConfigurationService configurationService;
 
-    @Inject
-    ClientService clientService;
+	@Inject
+	ClientService clientService;
 
-    @Inject
-    ScopeService scopeService;
+	@Inject
+	ScopeService scopeService;
 
-    @Inject
-    UmaService umaService;
+	@Inject
+	UmaService umaService;
 
-    @Inject
-    EncryptionService encryptionService;
+	@Inject
+	EncryptionService encryptionService;
 
-    public String getClientId() {
-        return this.configurationFactory.getApiClientId();
-    }
+	public String getClientId() {
+		return this.configurationFactory.getApiClientId();
+	}
 
-    public String getTokenUrl() {
-        return this.configurationService.find().getTokenEndpoint();
-    }
+	public String getTokenUrl() {
+		return this.configurationService.find().getTokenEndpoint();
+	}
 
-    public String getTokenRevocationEndpoint() {
-        return this.configurationService.find().getTokenRevocationEndpoint();
-    }
+	public String getTokenRevocationEndpoint() {
+		return this.configurationService.find().getTokenRevocationEndpoint();
+	}
 
-    public Client getClient(String clientId) {
-        return clientService.getClientByInum(clientId);
-    }
+	public Client getClient(String clientId) {
+		return clientService.getClientByInum(clientId);
+	}
 
-    public String getClientPassword(String clientId) {
-        return this.getClient(clientId).getClientSecret();
-    }
+	public String getClientPassword(String clientId) {
+		return this.getClient(clientId).getClientSecret();
+	}
 
-    public String getClientDecryptPassword(String clientId) {
-        return decryptPassword(getClientPassword(clientId));
-    }
+	public String getClientDecryptPassword(String clientId) {
+		return decryptPassword(getClientPassword(clientId));
+	}
 
-    public String decryptPassword(String clientPassword) {
-        String decryptedPassword = null;
-        if (clientPassword != null) {
-            try {
-                decryptedPassword = encryptionService.decrypt(clientPassword);
-            } catch (EncryptionException ex) {
-                log.error("Failed to decrypt password", ex);
-            }
-        }
-        return decryptedPassword;
-    }
+	public String decryptPassword(String clientPassword) {
+		String decryptedPassword = null;
+		if (clientPassword != null) {
+			try {
+				decryptedPassword = encryptionService.decrypt(clientPassword);
+			} catch (EncryptionException ex) {
+				log.error("Failed to decrypt password", ex);
+			}
+		}
+		return decryptedPassword;
+	}
 
-    public String encryptPassword(String clientPassword) {
-        String encryptedPassword = null;
-        if (clientPassword != null) {
-            try {
-                encryptedPassword = encryptionService.encrypt(clientPassword);
-            } catch (EncryptionException ex) {
-                log.error("Failed to decrypt password", ex);
-            }
-        }
-        return encryptedPassword;
-    }
+	public String encryptPassword(String clientPassword) {
+		String encryptedPassword = null;
+		if (clientPassword != null) {
+			try {
+				encryptedPassword = encryptionService.encrypt(clientPassword);
+			} catch (EncryptionException ex) {
+				log.error("Failed to decrypt password", ex);
+			}
+		}
+		return encryptedPassword;
+	}
 
-    public List<Scope> getResourceScopeList(String method, String path) {
-        log.trace(" AuthUtil::getResourceScopeList() method = "
-                + method + " , path = " + path + "\n");
+	public List<Scope> getResourceScopeList(String method, String path) {
+		log.trace(" AuthUtil::getResourceScopeList() method = " + method + " , path = " + path + "\n");
 
-        // Verify in cache
-        Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
+		// Verify in cache
+		Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
 
-        // Filter paths based on resource name
-        Set<String> keys = resources.keySet();
-        List<String> filteredPaths = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
+		// Filter paths based on resource name
+		Set<String> keys = resources.keySet();
+		List<String> filteredPaths = keys.stream().filter(k -> k.contains(path)).collect(Collectors.toList());
 
-        if (filteredPaths == null || filteredPaths.isEmpty()) {
-            throw new WebApplicationException("No matching resource found .",
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
+		if (filteredPaths == null || filteredPaths.isEmpty()) {
+			throw new WebApplicationException("No matching resource found .",
+					Response.status(Response.Status.UNAUTHORIZED).build());
+		}
 
-        List<Scope> scopeList = null;
-        for (String key : filteredPaths) {
-            String[] result = key.split(":::");
-            if (result != null && result.length > 1) {
-                String httpmethod = result[0];
-                String pathUrl = result[1];
-                log.debug(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
-                if (pathUrl != null && pathUrl.contains(path)) {
-                    // Matching url
-                    log.debug(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = " + pathUrl);
+		List<Scope> scopeList = null;
+		for (String key : filteredPaths) {
+			String[] result = key.split(":::");
+			if (result != null && result.length > 1) {
+				String httpmethod = result[0];
+				String pathUrl = result[1];
+				log.debug(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+				if (pathUrl != null && pathUrl.contains(path)) {
+					// Matching url
+					log.debug(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = "
+							+ pathUrl);
 
-                    // Verify Method
-                    if (httpmethod.contains(method)) {
-                    	scopeList = ConfigApiProtectionCache.getResourceScopes(key);
-                        log.debug(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
-                        break;
-                    }
-                    
-                }
+					// Verify Method
+					if (httpmethod.contains(method)) {
+						scopeList = ConfigApiProtectionCache.getResourceScopes(key);
+						log.debug(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
+						break;
+					}
 
-            }
+				}
 
-        }
-     
-        return scopeList;
-    }
-    
-    public List<String> getAllResourceScopes() {
-       Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
-        log.trace("getAllResourceScopes() - scopeMap = "+scopeMap);
-        List<String> scopeStrList = null;
-        if (scopeMap != null && !scopeMap.isEmpty()) {        	
-        	Set<String> scopeSet = scopeMap.keySet();
-        	scopeStrList = new ArrayList<String>(scopeSet);
-        }
-        log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
-        return scopeStrList;
-    }
+			}
 
-    public List<String> getRequestedScopes(String path) {
-        List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
-        log.trace("getRequestedScopes() - scopeList = "+scopeList);
-        List<String> scopeStrList = new ArrayList();
-        if (scopeList != null && scopeList.size() > 0) {
-            for (Scope s : scopeList) {
-            	scopeStrList.add(s.getId());
-            }
-        }
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
-        return scopeStrList;
-    }
-    
-    public List<String> getRequestedScopes(String method, String path) {
-        log.trace("getRequestedScopes() - method = "+method+" , path = "+path);
-        List<Scope> scopeList = this.getResourceScopeList(method,path);
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = "+scopeList+"\n\n\n");
-        List<String> scopeStrList = new ArrayList();
-        if (scopeList != null && scopeList.size() > 0) {
-            for (Scope s : scopeList) {
-            	scopeStrList.add(s.getId());
-            }
-        }
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
-        return scopeStrList;
-    }
+		}
 
-    public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
+		return scopeList;
+	}
 
-        Class<?> resourceClass = resourceInfo.getResourceClass();
-        ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
-        List<String> scopes = new ArrayList<String>();
-        if (typeAnnotation == null) {
-            addMethodScopes(resourceInfo, scopes);
-        } else {
-            scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
-            addMethodScopes(resourceInfo, scopes);
-        }
-        return scopes;
-    }
+	public List<String> getAllResourceScopes() {
+		Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+		log.trace("getAllResourceScopes() - scopeMap = " + scopeMap);
+		List<String> scopeStrList = null;
+		if (scopeMap != null && !scopeMap.isEmpty()) {
+			Set<String> scopeSet = scopeMap.keySet();
+			scopeStrList = new ArrayList<String>(scopeSet);
+		}
+		log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		return scopeStrList;
+	}
 
-    public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-        Set<String> authScopeSet = new HashSet<String>(authScopes);
-        Set<String> resourceScopeSet = new HashSet<String>(resourceScopes);
-        return authScopeSet.containsAll(resourceScopeSet);
-    }
+	public List<String> getRequestedScopes(String path) {
+		List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
+		log.trace("getRequestedScopes() - scopeList = " + scopeList);
+		List<String> scopeStrList = new ArrayList();
+		if (scopeList != null && scopeList.size() > 0) {
+			for (Scope s : scopeList) {
+				scopeStrList.add(s.getId());
+			}
+		}
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		return scopeStrList;
+	}
 
-    private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
-        Method resourceMethod = resourceInfo.getResourceMethod();
-        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
-        if (methodAnnotation != null) {
-            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
-        }
-    }
+	public List<String> getRequestedScopes(String method, String path) {
+		log.trace("getRequestedScopes() - method = " + method + " , path = " + path);
+		List<Scope> scopeList = this.getResourceScopeList(method, path);
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = " + scopeList + "\n\n\n");
+		List<String> scopeStrList = new ArrayList();
+		if (scopeList != null && scopeList.size() > 0) {
+			for (Scope s : scopeList) {
+				scopeStrList.add(s.getId());
+			}
+		}
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		return scopeStrList;
+	}
 
-    public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
-            throws Exception {
-        log.trace("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
-                + "\n");
+	public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
 
-        // Get clientSecret
-        String clientSecret = this.getClientDecryptPassword(clientId);
+		Class<?> resourceClass = resourceInfo.getResourceClass();
+		ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
+		List<String> scopes = new ArrayList<String>();
+		if (typeAnnotation == null) {
+			addMethodScopes(resourceInfo, scopes);
+		} else {
+			scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
+			addMethodScopes(resourceInfo, scopes);
+		}
+		return scopes;
+	}
 
-        // distinct scopes
-        Set<String> scopesSet = new HashSet<String>(scopes);
+	public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
+		Set<String> authScopeSet = new HashSet<String>(authScopes);
+		Set<String> resourceScopeSet = new HashSet<String>(resourceScopes);
+		return authScopeSet.containsAll(resourceScopeSet);
+	}
 
-        String scope = ScopeType.OPENID.getValue();
-        if (scopesSet != null && scopesSet.size() > 0) {
-            for (String s : scopes) {
-                scope = scope + " " + s;
-            }
-        }
-        log.trace("\n\n\n RequestAccessToken() - scope = "+scope);
-        
-        TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
-        if (tokenResponse != null) {
-            log.debug(" tokenScope: {} = ", tokenResponse.getScope());
-            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getScope() = "+tokenResponse.getScope());
-            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getAccessToken() = "+tokenResponse.getAccessToken());
-            final String accessToken = tokenResponse.getAccessToken();
-            final Integer expiresIn = tokenResponse.getExpiresIn();
-            if (Util.allNotBlank(accessToken)) {
-                return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
-            }
-        }
-        return null;
-    }
+	private void addMethodScopes(ResourceInfo resourceInfo, List<String> scopes) {
+		Method resourceMethod = resourceInfo.getResourceMethod();
+		ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+		if (methodAnnotation != null) {
+			scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+		}
+	}
 
-    public Token requestPat(final String tokenUrl, final String clientId, final ScopeType scopeType,
-            final List<String> scopes) throws Exception {
-        return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopeType, scopes);
-    }
+	public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
+			throws Exception {
+		log.trace("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
+				+ "\n");
 
-    public Token request(final String tokenUrl, final String clientId, final String clientSecret, ScopeType scopeType,
-            List<String> scopes) throws Exception {
+		// Get clientSecret
+		String clientSecret = this.getClientDecryptPassword(clientId);
 
-        String scope = scopeType.getValue();
-        if (scopes != null && scopes.size() > 0) {
-            for (String s : scopes) {
-                scope = scope.trim() + " " + s;
-            }
-        }
+		// distinct scopes
+		Set<String> scopesSet = new HashSet<String>(scopes);
 
-        TokenResponse tokenResponse = AuthClientFactory.patRequest(tokenUrl, clientId, clientSecret, scope);
+		String scope = ScopeType.OPENID.getValue();
+		if (scopesSet != null && scopesSet.size() > 0) {
+			for (String s : scopes) {
+				scope = scope + " " + s;
+			}
+		}
+		log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
 
-        if (tokenResponse != null) {
-            log.debug(" tokenScope: {} = ", tokenResponse.getScope());
-            final String patToken = tokenResponse.getAccessToken();
-            final Integer expiresIn = tokenResponse.getExpiresIn();
-            if (Util.allNotBlank(patToken)) {
-                return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
-            }
-        }
-        return null;
-    }
+		TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+		if (tokenResponse != null) {
+			log.debug(" tokenScope: {} = ", tokenResponse.getScope());
+			log.trace("\n\n\n RequestAccessToken() - tokenResponse.getScope() = " + tokenResponse.getScope());
+			log.trace(
+					"\n\n\n RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());
+			final String accessToken = tokenResponse.getAccessToken();
+			final Integer expiresIn = tokenResponse.getExpiresIn();
+			if (Util.allNotBlank(accessToken)) {
+				return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
+			}
+		}
+		return null;
+	}
 
-    public TokenResponse requestRpt(final String clientId, final String resourceId, final List<String> scopes,
-            Token patToken) throws Exception {
-        log.trace(" RPT request parameters, clientId: {}, resourceId: {}, scopes: {}, patToken: {} ", clientId,
-                resourceId, scopes, patToken);
+	public Token requestPat(final String tokenUrl, final String clientId, final ScopeType scopeType,
+			final List<String> scopes) throws Exception {
+		return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopeType, scopes);
+	}
 
-        // Get client
-        // Client client = getClient(clientId);
+	public Token request(final String tokenUrl, final String clientId, final String clientSecret, ScopeType scopeType,
+			List<String> scopes) throws Exception {
 
-        // Generate Token with required scope for testing
-        String scope = UmaScopeType.PROTECTION.getValue();
-        if (scopes != null && scopes.size() > 0) {
-            for (String s : scopes) {
-                scope = scope + " " + s;
-            }
-        }
+		String scope = scopeType.getValue();
+		if (scopes != null && scopes.size() > 0) {
+			for (String s : scopes) {
+				scope = scope.trim() + " " + s;
+			}
+		}
 
-        // Register Permission
-        UmaPermission umaPermission = new UmaPermission();
-        umaPermission.setResourceId(resourceId);
-        umaPermission.setScopes(scopes);
+		TokenResponse tokenResponse = AuthClientFactory.patRequest(tokenUrl, clientId, clientSecret, scope);
 
-        PermissionTicket permissionTicket = umaService.getUmaPermissionService()
-                .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(umaPermission));
+		if (tokenResponse != null) {
+			log.debug(" tokenScope: {} = ", tokenResponse.getScope());
+			final String patToken = tokenResponse.getAccessToken();
+			final Integer expiresIn = tokenResponse.getExpiresIn();
+			if (Util.allNotBlank(patToken)) {
+				return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
+			}
+		}
+		return null;
+	}
 
-        if (permissionTicket == null) {
-            return null;
-        }
-        log.debug(" permissionTicket: {} = ", permissionTicket.toString());
+	public TokenResponse requestRpt(final String clientId, final String resourceId, final List<String> scopes,
+			Token patToken) throws Exception {
+		log.trace(" RPT request parameters, clientId: {}, resourceId: {}, scopes: {}, patToken: {} ", clientId,
+				resourceId, scopes, patToken);
 
-        // Register RPT token
-        TokenResponse tokenResponse = null;
-        try {
+		// Get client
+		// Client client = getClient(clientId);
 
-            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId, this.getClientDecryptPassword(clientId), scopes,
-                    permissionTicket.getTicket(), GrantType.OXAUTH_UMA_TICKET,
-                    AuthenticationMethod.CLIENT_SECRET_BASIC);
+		// Generate Token with required scope for testing
+		String scope = UmaScopeType.PROTECTION.getValue();
+		if (scopes != null && scopes.size() > 0) {
+			for (String s : scopes) {
+				scope = scope + " " + s;
+			}
+		}
 
-            log.trace(" Rpt Token Response  = " + tokenResponse);
-            if (tokenResponse != null) {
-                log.debug(" Rpt Token Response Scope(): {} = ", tokenResponse.getScope());
-            }
+		// Register Permission
+		UmaPermission umaPermission = new UmaPermission();
+		umaPermission.setResourceId(resourceId);
+		umaPermission.setScopes(scopes);
 
-        } catch (Exception ex) {
-            log.error("Failed to determine RPT status", ex);
-            ex.printStackTrace();
-        }
+		PermissionTicket permissionTicket = umaService.getUmaPermissionService()
+				.registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(umaPermission));
 
-        return tokenResponse;
-    }
+		if (permissionTicket == null) {
+			return null;
+		}
+		log.debug(" permissionTicket: {} = ", permissionTicket.toString());
 
-    public void assignAllScope(final String clientId) {
-        log.trace(" AssignAllScope to clientId = " + clientId + "\n");
+		// Register RPT token
+		TokenResponse tokenResponse = null;
+		try {
 
-        // Get Client
-        Client client = this.clientService.getClientByInum(clientId);
-        if (client != null) {
+			tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId,
+					this.getClientDecryptPassword(clientId), scopes, permissionTicket.getTicket(),
+					GrantType.OXAUTH_UMA_TICKET, AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-            // Prepare scope array
-            List<String> scopes = getScopeWithDn(getAllScopes());
-            String[] scopeArray = this.getAllScopesArray(scopes);
-            log.debug(" AllScope = " + Arrays.asList(scopeArray) + "\n");
+			log.trace(" Rpt Token Response  = " + tokenResponse);
+			if (tokenResponse != null) {
+				log.debug(" Rpt Token Response Scope(): {} = ", tokenResponse.getScope());
+			}
 
-            if (client != null) {
-                // Assign scope
-                client.setScopes(scopeArray);
-                this.clientService.updateClient(client);
-            }
-        }
-        client = this.clientService.getClientByInum(clientId);
-        log.debug(" Verify scopes post assignment, clientId: {} , scopes: {}", clientId,
-                Arrays.asList(client.getScopes()));
-    }
+		} catch (Exception ex) {
+			log.error("Failed to determine RPT status", ex);
+			ex.printStackTrace();
+		}
 
-    public List<String> getAllScopes() {
-        List<String> scopes = new ArrayList<String>();
+		return tokenResponse;
+	}
 
-        // Verify in cache
-        Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
-        Set<String> keys = scopeMap.keySet();
+	public void assignAllScope(final String clientId) {
+		log.trace(" AssignAllScope to clientId = " + clientId + "\n");
 
-        for (String id : keys) {
-            Scope scope = ConfigApiProtectionCache.getScope(id);
-            scopes.add(scope.getInum());
-        }
-        return scopes;
-    }
+		// Get Client
+		Client client = this.clientService.getClientByInum(clientId);
+		if (client != null) {
 
-    public String[] getAllScopesArray(List<String> scopes) {
-        String[] scopeArray = null;
+			// Prepare scope array
+			List<String> scopes = getScopeWithDn(getAllScopes());
+			String[] scopeArray = this.getAllScopesArray(scopes);
+			log.debug(" AllScope = " + Arrays.asList(scopeArray) + "\n");
 
-        if (scopes != null && !scopes.isEmpty()) {
-            scopeArray = new String[scopes.size()];
-            for (int i = 0; i < scopes.size(); i++) {
-                scopeArray[i] = scopes.get(i);
-            }
-        }
-        return scopeArray;
-    }
+			if (client != null) {
+				// Assign scope
+				client.setScopes(scopeArray);
+				this.clientService.updateClient(client);
+			}
+		}
+		client = this.clientService.getClientByInum(clientId);
+		log.debug(" Verify scopes post assignment, clientId: {} , scopes: {}", clientId,
+				Arrays.asList(client.getScopes()));
+	}
 
-    public List<String> getScopeWithDn(List<String> scopes) {
-        List<String> scopeList = null;
-        if (scopes != null && !scopes.isEmpty()) {
-            scopeList = new ArrayList<String>();
-            for (String id : scopes) {
-                scopeList.add(this.scopeService.getDnForScope(id));
-            }
-        }
-        return scopeList;
-    }
+	public List<String> getAllScopes() {
+		List<String> scopes = new ArrayList<String>();
 
+		// Verify in cache
+		Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+		Set<String> keys = scopeMap.keySet();
+
+		for (String id : keys) {
+			Scope scope = ConfigApiProtectionCache.getScope(id);
+			scopes.add(scope.getInum());
+		}
+		return scopes;
+	}
+
+	public String[] getAllScopesArray(List<String> scopes) {
+		String[] scopeArray = null;
+
+		if (scopes != null && !scopes.isEmpty()) {
+			scopeArray = new String[scopes.size()];
+			for (int i = 0; i < scopes.size(); i++) {
+				scopeArray[i] = scopes.get(i);
+			}
+		}
+		return scopeArray;
+	}
+
+	public List<String> getScopeWithDn(List<String> scopes) {
+		List<String> scopeList = null;
+		if (scopes != null && !scopes.isEmpty()) {
+			scopeList = new ArrayList<String>();
+			for (String id : scopes) {
+				scopeList.add(this.scopeService.getDnForScope(id));
+			}
+		}
+		return scopeList;
+	}
+	
+	public boolean isValidIssuer(String issuer) throws Exception {
+		log.info("\n\n AuthUtil:::isValidIssuer() - issuer = " + issuer
+				+ " , this.configurationFactory.getApiApprovedIssuer().contains(issuer) = "
+				+ this.configurationFactory.getApiApprovedIssuer().contains(issuer));
+		return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
+	}
 }
