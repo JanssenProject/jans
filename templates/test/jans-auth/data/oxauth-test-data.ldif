@@ -228,26 +228,6 @@ jansScopeTyp: uma
 objectClass: jansScope
 objectClass: top
 
-dn: inum=C17A,ou=scopes,o=jans
-objectClass: jansScope
-objectClass: top
-jansDefScope: true
-description: View your address.
-inum: C17A
-jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInCon
- figurationEndpoint":true}
-jansClaim: inum=27DB,ou=attributes,o=jans
-jansClaim: inum=2A3D,ou=attributes,o=jans
-jansClaim: inum=6609,ou=attributes,o=jans
-jansClaim: inum=6EEB,ou=attributes,o=jans
-jansClaim: inum=BCE8,ou=attributes,o=jans
-jansClaim: inum=D90B,ou=attributes,o=jans
-jansClaim: inum=E6B8,ou=attributes,o=jans
-jansClaim: inum=E999,ou=attributes,o=jans
-jansGrpClaims: true
-jansId: address
-jansScopeTyp: openid
-
 dn: jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans
 jansId: a55ede29-8f5a-461d-b06e-76caee8d40b5
 jansRedirectURI: https://www.jans.org

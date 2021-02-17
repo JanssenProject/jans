@@ -279,8 +279,7 @@
   },
   "jansValidation": {
     "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
+      "type": "TINYTEXT"
     }
   },
   "member": {
