@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2021, Janssen Project
+ */
+
 package io.jans.as.server.service.external.context;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +32,6 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 		super(httpRequest);
 		this.client = client;
 		this.grant = grant;
-		this.script = script;
 		this.appConfiguration = appConfiguration;
 		this.attributeService = attributeService;
 	}
