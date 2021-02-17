@@ -61,9 +61,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
-        String tokenType = context.getHeaderString(ApiConstants.AUTH_TOKEN_TYPE);
-
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , tokenType = "+tokenType+" , issuer = "+issuer+"\n\n\n");
+        
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , issuer = "+issuer+"\n\n\n");
                
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
@@ -71,7 +70,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            this.authorizationService.processAuthorization(authorizationHeader, issuer, tokenType, resourceInfo, context.getMethod(), request.getRequestURI());
+            this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo, context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
