@@ -6,6 +6,9 @@
 
 package io.jans.model.custom.script;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.BaseExternalType;
@@ -41,12 +44,21 @@ import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.model.custom.script.type.session.DummyApplicationSessionType;
 import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
-import io.jans.model.custom.script.type.uma.*;
-import io.jans.model.custom.script.type.user.*;
+import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
+import io.jans.model.custom.script.type.token.UpdateTokenType;
+import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
+import io.jans.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
+import io.jans.model.custom.script.type.uma.UmaDummyRptClaimsType;
+import io.jans.model.custom.script.type.uma.UmaDummyRptPolicyType;
+import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
+import io.jans.model.custom.script.type.uma.UmaRptPolicyType;
+import io.jans.model.custom.script.type.user.CacheRefreshType;
+import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
+import io.jans.model.custom.script.type.user.DummyUpdateUserType;
+import io.jans.model.custom.script.type.user.DummyUserRegistrationType;
+import io.jans.model.custom.script.type.user.UpdateUserType;
+import io.jans.model.custom.script.type.user.UserRegistrationType;
 import io.jans.orm.annotation.AttributeEnum;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -87,7 +99,8 @@ public enum CustomScriptType implements AttributeEnum {
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
     REVOKE_TOKEN("revoke_token", "Revoke Token", RevokeTokenType.class, CustomScript.class, "RevokeToken", new DummyRevokeTokenType()),
     PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
-    IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType());
+    IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
+    UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType());
 
     private String value;
     private String displayName;
