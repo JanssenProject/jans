@@ -254,7 +254,7 @@
             <h:panelGroup rendered="#{!(''.equals(identity.getWorkingParameter('registration_url')))}">
               <div id="register" class="bind_option">
                 <form id="registerForm" class=""
-                  action="#{identity.getWorkingParameter('registration_url')}" method="POST">
+                  action="#{identity.getWorkingParameter('registration_url')}" method="post">
                   <div class="">
                     <div class="">
                       <h:commandButton id="registerUser" styleClass="button button--action" value="Register a new user" />
