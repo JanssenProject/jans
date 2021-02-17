@@ -1,9 +1,16 @@
+import warnings
+import sys
 import os
 import re
 import json
+import logging
 import ldap3
 import pymysql
 from ldap3.utils import dn as dnutils
+from pathlib import PurePath
+
+warnings.filterwarnings("ignore")
+
 
 from setup_app import static
 from setup_app.config import Config
@@ -12,6 +19,12 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
+
+my_path = path = PurePath(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
+
+from sqlalchemy import create_engine, Column, String, Integer, Table, MetaData
+from sqlalchemy.orm import mapper, sessionmaker
 
 
 class DBUtils:
@@ -59,24 +72,28 @@ class DBUtils:
 
     def mysqlconnection(self, log=True):
         base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
+        
+        bind_uri = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4'.format(
+                        Config.rdbm_user,
+                        Config.rdbm_password,
+                        Config.rdbm_host,
+                        Config.rdbm_port,
+                        Config.rdbm_db,
+                )
+
         try:
-            self.mysql_conn = pymysql.connect(
-                            host=Config.rdbm_host,
-                            user=Config.rdbm_user,
-                            password=Config.rdbm_password,
-                            database=Config.rdbm_db,
-                            port=Config.rdbm_port,
-                            charset='utf8mb4',
-                            autocommit=True,
-                            cursorclass=pymysql.cursors.DictCursor
-                        )
+            engine = create_engine(bind_uri)
+            logging.basicConfig(filename=os.path.join(Config.install_dir, 'logs/sqlalchemy.log'))
+            logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+            Session = sessionmaker(bind=engine)
+            self.session = Session()
             base.logIt("MySQL Connection was successful")
-            self.cursor = self.mysql_conn.cursor()
-            return True, self.mysql_conn
+            return True, self.session
+
         except Exception as e:
             if log:
-                base.logIt("Can't connect to MySQL server: {}".format(e.args[1]), True)
-            return False, e.args[1]
+                base.logIt("Can't connect to MySQL server: {}".format(str(e), True))
+            return False, e
 
     def read_jans_schema(self):
         self.jans_attributes = []
@@ -94,15 +111,17 @@ class DBUtils:
         base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))
         if Config.rdbm_type == 'mysql':
             try:
-                self.cursor.execute(query)
+                qresult = self.session.execute(query)
+                self.session.commit()
             except Exception as e:
                 base.logIt("ERROR executing query {}".format(e.args))
                 base.logIt("ERROR executing query {}".format(e.args), True)
             else:
                 if getresult == 1:
-                    return self.cursor.fetchone()
+                    return qresult.first()
                 elif getresult:
-                    return self.cursor.fetchall()
+                    return qresult.fetchall()
+
 
     def set_cbm(self):
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
@@ -212,7 +231,7 @@ class DBUtils:
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
     def dn_exists_rdbm(self, dn, table):
-        return self.exec_rdbm_query("select dn from {} where dn='{}'".format(table, dn), 1)
+        return self.session.execute("select dn from {} where dn='{}'".format(table, dn)).first()
 
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
@@ -263,8 +282,10 @@ class DBUtils:
                 dn_clause = 'dn LIKE "%{}"'.format(search_base)
 
             sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
-            result = self.exec_rdbm_query(sql_cmd, 1)
+            result = self.session.execute(sql_cmd).first()
 
+            if result:
+                result = dict(result)
             return result
 
         if backend_location == BackendTypes.COUCHBASE:
@@ -435,8 +456,7 @@ class DBUtils:
             if table == tbl_['TABLE_NAME']:
                 return True
 
-    def get_rdbm_val(self, key, val):
-        
+    def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
             data_type = self.sql_data_types[key]
         else:
@@ -445,23 +465,41 @@ class DBUtils:
     
         data_type = data_type[Config.rdbm_type]['type']
 
+        return data_type
+
+    def get_rdbm_val(self, key, val):
+        
+        data_type = self.get_attr_sql_data_type(key)
+
         if data_type in ('SMALLINT',):
             if val[0][0].lower() in ('1', 'on', 'true', 'yes'):
-                return '1'
-            return '0'
+                return 1
+            return 0
+
+        if data_type == 'INT':
+            return int(val[0])
 
         if data_type in ('DATETIME(3)',):
             dval = val[0].strip('Z')
-            return '"{}-{}-{} {}:{}:{}{}"'.format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
+            return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
 
         if data_type == 'JSON':
-            if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres', 'jansPhotos'):
-                for i, k in enumerate(val[:]):
-                    val[i] = json.loads(k)
-            data_= "'{}'".format(json.dumps({'v': val}))
-            return data_
+            #if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres', 'jansPhotos'):
+            #    for i, k in enumerate(val[:]):
+            #        val[i] = json.loads(k)
+            json_data = {'v':[]}
+            for d in val:
+                #try:
+                #    jsdata = json.loads(d)
+                #except:
+                #    jsdata = None
+                #if isinstance(jsdata, dict) or isinstance(jsdata, list):
+                #    json_data['v'].append(json.dumps(d))
+                json_data['v'].append(d)
 
-        return  json.dumps(val[0])
+            return json.dumps(json_data)
+
+        return val[0]
 
 
     def import_ldif(self, ldif_files, bucket=None, force=None):
@@ -509,7 +547,7 @@ class DBUtils:
                         else:
                             self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
                             continue
-                        
+
                     elif 'replace' in entry and 'changetype' in entry:
                         attribute = entry['replace'][0]
                         new_value = self.get_rdbm_val(attribute, entry[attribute])
@@ -517,16 +555,22 @@ class DBUtils:
                         sql_cmd = "UPDATE `{}` SET {}={} WHERE dn='{}'".format(table, attribute, new_value, dn)
 
                     else:
+                        vals = {}
                         dn_parsed = dnutils.parse_dn(dn)
                         rdn_name = dn_parsed[0][0]
-                        doc_id = dn_parsed[0][1]
                         objectClass = entry.get('objectClass') or entry.get('objectclass')
+                        
                         if objectClass:
                             if 'top' in objectClass:
                                 objectClass.remove('top')
                             if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
                                 continue
                             objectClass = objectClass[-1]
+
+                        vals['doc_id'] = dn_parsed[0][1]
+                        vals['dn'] = dn
+                        vals['objectClass'] = objectClass
+
                         #entry.pop(rdn_name)
                         if 'objectClass' in entry:
                             entry.pop('objectClass')
@@ -539,23 +583,37 @@ class DBUtils:
                             base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
                             continue
 
-                        cols = ['`doc_id`', '`objectClass`', '`dn`']
-                        vals = ['"{}"'.format(doc_id), '"{}"'.format(objectClass), '"{}"'.format(dn)]
+                        sqlalch_columns = [
+                            Column('doc_id', String, primary_key=True), 
+                            Column('objectClass', String), 
+                            Column('dn', String), 
+                            ]
+
 
                         for lkey in entry:
-                            cols.append('`{}`'.format(lkey))
-                            vals.append(self.get_rdbm_val(lkey, entry[lkey]))
+                            
+                            vals[lkey] = self.get_rdbm_val(lkey, entry[lkey])
+                            data_type = self.get_attr_sql_data_type(lkey)
+                            if data_type in ('SMALLINT', 'INT'):
+                                sqlalch_columns.append(Column(lkey, Integer))
+                            else:
+                                sqlalch_columns.append(Column(lkey, String))
 
-                            sql_cmd = 'INSERT INTO {} ({}) VALUES ({});'.format(
-                                        table_name,
-                                        ', '.join(cols),
-                                        ', '.join(vals)
-                                    )
+                        sqlalch_table = Table(table_name, MetaData(bind=None), *tuple(sqlalch_columns))
+                
+                        class SqlAlchObject(object):
+                            pass
+                
+                        mapper(SqlAlchObject, sqlalch_table)
 
-                    self.exec_rdbm_query(sql_cmd)
-
-                    with open(sql_data_fn, 'a') as w:
-                        w.write(sql_cmd+'\n')
+                        dbObj = SqlAlchObject()
+                        
+                        for v in vals:
+                            setattr(dbObj, v, vals[v])
+                        
+                        base.logIt("Adding {}".format(dbObj.doc_id))
+                        self.session.add(dbObj)
+                        self.session.commit()
 
 
                 elif backend_location == BackendTypes.COUCHBASE:
