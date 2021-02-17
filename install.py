@@ -72,6 +72,9 @@ if not (argsp.u or argsp.uninstall):
     download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
     download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
     download('https://api.github.com/repos/JanssenProject/jans-cli/tarball/main', os.path.join(jans_app_dir, 'jans-cli.tgz'))
+    download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', os.path.join(jans_app_dir, 'sqlalchemy.zip'))
+    
+    
 
 jetty_home = '/opt/jans/jetty'
 jetty_services = ('jans-auth', 'jans-fido2', 'jans-scim', 'jans-eleven')
@@ -154,6 +157,17 @@ else:
         setup_zip.extract(filename, jans_dir)
 
     shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
+
+    sqlalchemy_zfn = os.path.join(jans_app_dir, 'sqlalchemy.zip')
+    sqlalchemy_zip = zipfile.ZipFile(sqlalchemy_zfn, "r")
+    sqlalchemy_par_dir = sqlalchemy_zip.namelist()[0]
+    tmp_dir = os.path.join('/tmp', os.urandom(2).hex())
+    sqlalchemy_zip.extractall(tmp_dir)
+    shutil.copytree(
+            os.path.join(tmp_dir, sqlalchemy_par_dir, 'lib/sqlalchemy'), 
+            os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy')
+            )
+    shutil.rmtree(tmp_dir)
 
     download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
     download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
