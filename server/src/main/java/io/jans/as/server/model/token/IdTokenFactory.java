@@ -6,8 +6,34 @@
 
 package io.jans.as.server.model.token;
 
+import static io.jans.as.model.common.ScopeType.DYNAMIC;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -21,7 +47,14 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCode;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.IAuthorizationGrant;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
@@ -31,19 +64,6 @@ import io.jans.model.GluuAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static io.jans.as.model.common.ScopeType.DYNAMIC;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -58,6 +78,7 @@ import static io.jans.as.model.common.ScopeType.DYNAMIC;
  * @author Yuriy Zabrovarnyy
  * @version 12 Feb, 2020
  */
+@ApplicationScoped
 @Stateless
 @Named
 public class IdTokenFactory {
@@ -110,7 +131,7 @@ public class IdTokenFactory {
                             IAuthorizationGrant authorizationGrant, String nonce,
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
                             String state, Set<String> scopes, boolean includeIdTokenClaims, Function<io.jans.as.model.token.JsonWebResponse,
-                            Void> preProcessing, String requestedClaims) throws Exception {
+                            Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String requestedClaims) throws Exception {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
@@ -224,6 +245,10 @@ public class IdTokenFactory {
         }
 
         processCiba(jwr, authorizationGrant, refreshToken);
+
+        if (postProcessing != null) {
+        	postProcessing.apply(jwr);
+        }
     }
 
     /**
@@ -319,13 +344,13 @@ public class IdTokenFactory {
             IAuthorizationGrant grant, String nonce,
             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, Set<String> scopes, boolean includeIdTokenClaims, Function<io.jans.as.model.token.JsonWebResponse,
-            Void> preProcessing, String claims) throws Exception {
+            Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String claims) throws Exception {
 
         final Client client = grant.getClient();
 
         JsonWebResponse jwr = jwrService.createJwr(client);
         fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes,
-                includeIdTokenClaims, preProcessing, claims);
+                includeIdTokenClaims, preProcessing, postProcessing, claims);
         return jwrService.encode(jwr, client);
     }
 
