@@ -332,6 +332,51 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
+    private void validateRequestObject(String requestParams, JSONObject softwareStatement) {
+        try {
+            if (!appConfiguration.getDcrSignatureValidationEnabled()) {
+                return;
+            }
+
+            final Jwt jwt = Jwt.parse(requestParams);
+            final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
+
+            String jwksUriClaim = null;
+            if (StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim())) {
+                jwksUriClaim = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim());
+            }
+            if (StringUtils.isBlank(jwksUriClaim) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwksUri())) {
+                jwksUriClaim = appConfiguration.getDcrSignatureValidationJwksUri();
+            }
+
+            String jwksClaim = null;
+            if (StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksClaim())) {
+                jwksClaim = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksClaim());
+            }
+            if (StringUtils.isBlank(jwksClaim) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwks())) {
+                jwksClaim = appConfiguration.getDcrSignatureValidationJwks();
+            }
+
+            log.trace("Validating request object jwksUriClaim: " + jwksUriClaim + ", jwksClaim: " + jwksClaim + " ...");
+
+            JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
+                    new JSONObject(jwksClaim) :
+                    JwtUtil.getJSONWebKeys(jwksUriClaim);
+
+            boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(),
+                    jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
+
+            log.trace("Request object validation result: " + validSignature);
+            if (!validSignature) {
+                throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
+            }
+        } catch (Exception e) {
+            final String msg = "Unable to validate request object JWT.";
+            log.error(msg, e);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, msg);
+        }
+    }
+
     private JSONObject validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
         if (!requestObject.has(SOFTWARE_STATEMENT.toString())) {
             return null;
