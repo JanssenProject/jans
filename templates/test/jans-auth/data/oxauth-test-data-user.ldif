@@ -35,8 +35,8 @@ mobile: (512) 516-2413
 nickname: user
 o: Test
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 phoneNumberVerified: true
 picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredLanguage: en_US
@@ -72,8 +72,8 @@ mobile: (512) 516-2414
 nickname: user2
 o: Test
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 phoneNumberVerified: true
 picture: http://www.jans.org/wp-content/uploads/2012/04/mike3.png
 preferredLanguage: en_US
