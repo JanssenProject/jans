@@ -234,7 +234,7 @@ public class AuthenticationService {
 			// Use local LDAP server for user authentication
 			boolean authenticated = false;
 			try {
-				authenticated = ldapEntryManager.authenticate(user.getDn(), password);
+				authenticated = ldapEntryManager.authenticate(user.getDn(), User.class, password);
 			} catch (AuthenticationException ex) {
 				log.error("Authentication failed: " + ex.getMessage());
 				if (log.isDebugEnabled()) {
