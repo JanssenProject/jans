@@ -23,14 +23,17 @@ from setup_app.utils.attributes import attribDataTypes
 my_path = path = PurePath(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
 
-from sqlalchemy import create_engine, Column, String, Integer, Table, MetaData
-from sqlalchemy.orm import mapper, sessionmaker
+
+import sqlalchemy
+import sqlalchemy.orm
+import sqlalchemy.ext.automap
 
 
 class DBUtils:
 
     processedKeys = []
-    
+    Base = None
+
     def bind(self, use_ssl=True):
 
         if Config.mappingLocations['default'] == 'ldap':
@@ -82,11 +85,12 @@ class DBUtils:
                 )
 
         try:
-            engine = create_engine(bind_uri)
+            self.engine = sqlalchemy.create_engine(bind_uri)
             logging.basicConfig(filename=os.path.join(Config.install_dir, 'logs/sqlalchemy.log'))
             logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-            Session = sessionmaker(bind=engine)
+            Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
             self.session = Session()
+            self.metadata = sqlalchemy.MetaData()
             self.session.connection()
             base.logIt("MySQL Connection was successful")
             return True, self.session
@@ -218,8 +222,13 @@ class DBUtils:
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb == BackendTypes.MYSQL:
-            sql_cmd = "UPDATE jansAppConf SET {}='{}' WHERE dn='ou=configuration,o=jans'".format(component, value)
-            self.exec_rdbm_query(sql_cmd)
+            result = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
+            table_name = result.objectClass
+            sqlalchemy_table = self.Base.classes[table_name]
+            sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn =='ou=configuration,o=jans').first()
+            cur_val = getattr(sqlalchemyObj, component)
+            setattr(sqlalchemyObj, component, value)
+            self.session.commit()
         
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
@@ -231,8 +240,8 @@ class DBUtils:
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
     def dn_exists_rdbm(self, dn, table):
-        return self.session.execute("select dn from {} where dn='{}'".format(table, dn)).first()
-
+        sqlalchemy_table = self.Base.classes[table].__table__
+        return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
@@ -244,6 +253,9 @@ class DBUtils:
                 return document
 
         if backend_location == BackendTypes.MYSQL:
+            if self.Base is None:
+                self.rdm_automapper()
+
             s_table = None
             
             where_clause = ''
@@ -261,32 +273,40 @@ class DBUtils:
                 if re_match:
                     re_list = re_match.groups()
                     search_list.append((re_list[0], re_list[1]))
-        
+
+
+            for col, val in search_list:
+                if col.lower() == 'objectclass':
+                    s_table = val
+                    break
+
+            if not s_table:
+                return
+    
+            sqlalchemy_table = self.Base.classes[s_table]
+            sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
+
             for col, val in search_list:
                 if val == '*':
                     continue
                 
-                if col.lower() == 'objectclass':
-                    s_table = val
-                else:
+                if col.lower() != 'objectclass':
                     val = val.replace('*', '%')
-                    q_operator = 'LIKE' if '%' in val else '='
-                    where_clause = 'AND {} {} "{}"'.format(col, q_operator, val)
-            
-            if not s_table:
-                return
-                
+                    sqlalchemyCol = getattr(sqlalchemy_table, col)
+                    if '%' in val:
+                        sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemyCol.like(val))
+                    else:
+                        sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemyCol == val)
+
             if search_scope == ldap3.BASE:
-                dn_clause = 'dn = "{}"'.format(search_base)
+                sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn == search_base)
             else:
-                dn_clause = 'dn LIKE "%{}"'.format(search_base)
+                sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn.like('%'+search_base))
 
-            sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
-            result = self.session.execute(sql_cmd).first()
-
+            result = sqlalchemyQueryObject.first()
             if result:
-                result = dict(result)
-            return result
+                return result.__dict__
+            
 
         if backend_location == BackendTypes.COUCHBASE:
             key = ldif_utils.get_key_from(search_base)
@@ -349,14 +369,13 @@ class DBUtils:
                             self.log_ldap_result(ldap_operation_result)
 
         elif backend_location == BackendTypes.MYSQL:
-            if self.dn_exists_rdbm(dn, 'jansCustomScr'):
-                sql_cmd = 'SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn)
-                jansConfProperty_s = self.exec_rdbm_query(sql_cmd, 1)
-                if jansConfProperty_s and jansConfProperty_s['jansConfProperty']:
-                    jansConfProperty = json.loads(jansConfProperty_s['jansConfProperty'])
+            sqlalchemyObj = self.dn_exists_rdbm(dn, 'jansCustomScr')
+            if sqlalchemyObj:
+                if sqlalchemyObj.jansConfProperty:
+                    jansConfProperty = sqlalchemyObj.jansConfProperty
                 else:
                     jansConfProperty = {'v': []}
-
+    
                 for oxconfigprop in jansConfProperty['v']:
                     if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                         oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
@@ -364,10 +383,8 @@ class DBUtils:
                 else:
                     jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
 
-                sql_cmd = "UPDATE jansCustomScr SET jansConfProperty='{}' WHERE dn='{}'".format(
-                                        json.dumps(jansConfProperty), dn)
-
-                self.exec_rdbm_query(sql_cmd)
+                sqlalchemyObj.jansConfProperty = jansConfProperty
+                self.session.commit()
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
@@ -432,35 +449,38 @@ class DBUtils:
 
         return ','.join(dnl)
 
-    def get_table_for_dn(self, dn):
 
-        tables = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
+    def rdm_automapper(self, force=False):
+        if not force and self.Base:
+            return
 
-        for tbl_ in tables:
-            tbl = tbl_['TABLE_NAME']
-            result = self.exec_rdbm_query("SELECT dn FROM {} WHERE dn='{}'".format(tbl, dn),1)
+        base.logIt("Reflecting ORM tables")
+
+        self.metadata.reflect(self.engine)
+        self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
+        self.Base.prepare()
+
+        base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
+
+    def get_sqlalchObj_for_dn(self, dn):
+
+        for tbl in self.Base.classes:
+            result = self.session.query(tbl).filter(tbl.dn == dn).first()
             if result:
-                return tbl
+                return result
 
-        rootdn = self.get_rootdn(dn)
-
-        for tbl_ in tables:
-            tbl = tbl_['TABLE_NAME']
-            result = self.exec_rdbm_query("SELECT dn FROM {} WHERE dn LIKE '%{}'".format(tbl, rootdn),1)
+        for tbl in self.Base.classes:
+            result = self.session.query(tbl).filter(tbl.dn.like('%'+dn)).first()
             if result:
-                return tbl
-
-    def get_mysql_table_columns(self, table):
-        result = self.session.execute("SELECT COLUMN_NAME, COLUMN_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{}'".format(table)).fetchall()
-        if result:
-            return dict(result)
-        return {}
+                return result
 
     def table_exists(self, table):
-        tables = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
-        for tbl_ in tables:
-            if table == tbl_['TABLE_NAME']:
-                return True
+        metadata = sqlalchemy.MetaData()
+        try:
+            metadata.reflect(engine, only=[table])
+            return True
+        except:
+            pass
 
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
@@ -494,7 +514,7 @@ class DBUtils:
             for d in val:
                 json_data['v'].append(d)
 
-            return json.dumps(json_data)
+            return json_data
 
         return val[0]
 
@@ -531,25 +551,38 @@ class DBUtils:
                         self.log_ldap_result(ldap_operation_result)
 
                 elif backend_location == BackendTypes.MYSQL:
-
+                    if self.Base is None:
+                        self.rdm_automapper()
+                    
                     if 'add' in  entry and 'changetype' in entry:
-                        table = self.get_table_for_dn(dn)
                         attribute = entry['add'][0]
                         new_val = entry[attribute][0]
-                        qresult = self.exec_rdbm_query("SELECT {} FROM {} WHERE dn='{}'".format(attribute, table, dn),1)
-                        if qresult:
-                            cur_val = json.loads(qresult[attribute])
-                            cur_val['v'].append(new_val)
-                            sql_cmd = "UPDATE `{}` SET {}='{}' WHERE dn='{}'".format(table, attribute, json.dumps(cur_val), dn)
+                        sqlalchObj = self.get_sqlalchObj_for_dn(dn)
+
+                        if sqlalchObj:
+                            if isinstance(sqlalchObj.__table__.columns[attribute].type, sqlalchemy.dialects.mysql.json.JSON):
+                                cur_val = getattr(sqlalchObj, attribute)
+                                cur_val['v'].append(new_val)
+                                setattr(sqlalchObj, attribute, cur_val)
+                            else:
+                                setattr(sqlalchObj, attribute, new_val)
+                            self.session.commit()
+
                         else:
                             self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
                             continue
 
                     elif 'replace' in entry and 'changetype' in entry:
                         attribute = entry['replace'][0]
-                        new_value = self.get_rdbm_val(attribute, entry[attribute])
-                        table = self.get_table_for_dn(dn)
-                        sql_cmd = "UPDATE `{}` SET {}={} WHERE dn='{}'".format(table, attribute, new_value, dn)
+                        new_val = self.get_rdbm_val(attribute, entry[attribute])
+                        sqlalchObj = self.get_sqlalchObj_for_dn(dn)
+
+                        if sqlalchObj:
+                            setattr(sqlalchObj, attribute, new_val)
+                            self.session.commit()
+                        else:
+                            self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            continue
 
                     else:
                         vals = {}
@@ -580,42 +613,22 @@ class DBUtils:
                             base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
                             continue
 
-                        sqlalch_columns = [
-                            Column('doc_id', String, primary_key=True), 
-                            Column('objectClass', String), 
-                            Column('dn', String), 
-                            ]
-
                         for lkey in entry:
-
                             vals[lkey] = self.get_rdbm_val(lkey, entry[lkey])
-                            data_type = self.get_attr_sql_data_type(lkey)
-                            if data_type in ('SMALLINT', 'INT'):
-                                sqlalch_columns.append(Column(lkey, Integer))
-                            else:
-                                sqlalch_columns.append(Column(lkey, String))
 
-                        columns = self.get_mysql_table_columns(table_name)
+                        sqlalchCls = self.Base.classes[table_name]
 
-                        for col in columns:
-                            if columns[col].lower() == 'json' and not col in vals:
-                                vals[col] = json.dumps({'v': []})
-                                sqlalch_columns.append(Column(col, String))
+                        for col in sqlalchCls.__table__.columns:
+                            if isinstance(col.type, sqlalchemy.dialects.mysql.json.JSON) and not col.name in vals:
+                                vals[col.name] = {'v': []}
 
-                        sqlalch_table = Table(table_name, MetaData(bind=None), *tuple(sqlalch_columns))
-
-                        class SqlAlchObject(object):
-                            pass
-
-                        mapper(SqlAlchObject, sqlalch_table)
-
-                        dbObj = SqlAlchObject()
+                        sqlalchObj = sqlalchCls()
 
                         for v in vals:
-                            setattr(dbObj, v, vals[v])
+                            setattr(sqlalchObj, v, vals[v])
 
-                        base.logIt("Adding {}".format(dbObj.doc_id))
-                        self.session.add(dbObj)
+                        base.logIt("Adding {}".format(sqlalchObj.doc_id))
+                        self.session.add(sqlalchObj)
                         self.session.commit()
 
 
