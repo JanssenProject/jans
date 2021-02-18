@@ -9,8 +9,10 @@ package io.jans.as.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.*;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
@@ -125,6 +127,7 @@ public class RegisterRequest extends BaseRequest {
     // internal state
     private JSONObject jsonObject;
     private String httpMethod;
+    private String jwtRequestAsString;
 
     /**
      * Common constructor.
@@ -170,6 +173,14 @@ public class RegisterRequest extends BaseRequest {
     public RegisterRequest(String registrationAccessToken) {
         this();
         this.registrationAccessToken = registrationAccessToken;
+    }
+
+    @Override
+    public String getContentType() {
+        if (hasJwtRequestAsString()) {
+            return "application/jwt";
+        }
+        return super.getContentType();
     }
 
     public String getTlsClientAuthSubjectDn() {
@@ -1718,5 +1729,33 @@ public class RegisterRequest extends BaseRequest {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    public RegisterRequest sign(SignatureAlgorithm signatureAlgorithm, String kid, AuthCryptoProvider cryptoProvider) throws Exception {
+        final SoftwareStatement softwareStatement = new SoftwareStatement(signatureAlgorithm, cryptoProvider);
+        softwareStatement.setKeyId(kid);
+        return sign(softwareStatement);
+    }
+
+    public RegisterRequest signWithSharedKey(SignatureAlgorithm signatureAlgorithm, String sharedKey, AuthCryptoProvider cryptoProvider) throws Exception {
+        return sign(new SoftwareStatement(signatureAlgorithm, sharedKey, cryptoProvider));
+    }
+
+    private RegisterRequest sign(SoftwareStatement softwareStatement) throws Exception {
+        softwareStatement.setClaims(getJSONParameters());
+        jwtRequestAsString = softwareStatement.getEncodedJwt();
+        return this;
+    }
+
+    public String getJwtRequestAsString() {
+        return jwtRequestAsString;
+    }
+
+    public void setJwtRequestAsString(String jwtRequestAsString) {
+        this.jwtRequestAsString = jwtRequestAsString;
+    }
+
+    public boolean hasJwtRequestAsString() {
+        return StringUtils.isNotBlank(jwtRequestAsString);
     }
 }
