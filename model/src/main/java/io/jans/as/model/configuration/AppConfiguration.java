@@ -206,7 +206,6 @@ public class AppConfiguration implements Configuration {
     private Boolean logClientNameOnClientAuthentication;
     private Boolean disableJdkLogger = true;
     private Set<String> authorizationRequestCustomAllowedParameters;
-    private Boolean legacyDynamicRegistrationScopeParam;
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
@@ -1804,14 +1803,6 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
         this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
-    }
-
-    public Boolean getLegacyDynamicRegistrationScopeParam() {
-        return Boolean.TRUE.equals(legacyDynamicRegistrationScopeParam);
-    }
-
-    public void setLegacyDynamicRegistrationScopeParam(Boolean legacyDynamicRegistrationScopeParam) {
-        this.legacyDynamicRegistrationScopeParam = legacyDynamicRegistrationScopeParam;
     }
 
     public Boolean getOpenidScopeBackwardCompatibility() {
