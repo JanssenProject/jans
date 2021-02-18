@@ -50,6 +50,7 @@ import io.jans.orm.model.base.CustomAttribute;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -144,13 +145,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
-            final JSONObject requestObject = new JSONObject(requestParams);
+            final JSONObject requestObject = parseRequestObjectWithoutValidation(requestParams);
             final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
             if (softwareStatement != null) {
                 log.trace("Override request parameters by software_statement");
                 for (String key : softwareStatement.keySet()) {
                     requestObject.putOpt(key, softwareStatement.get(key));
                 }
+            }
+            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+                validateRequestObject(requestParams, softwareStatement);
             }
 
             final RegisterRequest r = RegisterRequest.fromJson(requestObject, appConfiguration.getLegacyDynamicRegistrationScopeParam());
@@ -372,6 +376,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         } catch (Exception e) {
             final String msg = "Unable to validate request object JWT.";
+            log.error(msg, e);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, msg);
+        }
+    }
+
+    @NotNull
+    private JSONObject parseRequestObjectWithoutValidation(String requestParams) throws JSONException {
+        try {
+            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+                return Jwt.parse(requestParams).getClaims().toJsonObject();
+            }
+            return new JSONObject(requestParams);
+        } catch (Exception e) {
+            final String msg = "Unable to parse request object.";
             log.error(msg, e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, msg);
         }
@@ -742,6 +760,19 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final String accessToken = tokenService.getToken(authorization);
 
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
+
+                final JSONObject requestObject = parseRequestObjectWithoutValidation(requestParams);
+                final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
+                if (softwareStatement != null) {
+                    log.trace("Override request parameters by software_statement");
+                    for (String key : softwareStatement.keySet()) {
+                        requestObject.putOpt(key, softwareStatement.get(key));
+                    }
+                }
+                if (appConfiguration.getDcrSignatureValidationEnabled()) {
+                    validateRequestObject(requestParams, softwareStatement);
+                }
+
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
                 if (request != null) {
                     boolean redirectUrisValidated = true;
