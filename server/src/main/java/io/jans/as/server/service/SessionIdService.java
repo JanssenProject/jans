@@ -841,7 +841,7 @@ public class SessionIdService {
             if (appConfiguration.getSessionIdPersistInCache()) {
                 cacheService.remove(sessionId.getDn());
             } else {
-                persistenceEntryManager.remove(sessionId.getDn());
+                persistenceEntryManager.remove(sessionId.getDn(), SessionId.class);
             }
             localCacheService.remove(sessionId.getDn());
             externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
