@@ -90,8 +90,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         else:
                             data_type = type_[Config.rdbm_type]['type']
                     col_def = '`{}` {}'.format(attrname, data_type)
-                    if data_type.lower() == 'json':
-                        col_def += ' NOT NULL DEFAULT (\'{"v":[]}\')'
                     sql_tbl_cols.append(col_def)
 
                 if self.dbUtils.table_exists(sql_tbl_name):
