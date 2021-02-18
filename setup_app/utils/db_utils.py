@@ -208,9 +208,8 @@ class DBUtils:
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
-        
+
     def set_configuration(self, component, value):
-        
         if self.moddb == BackendTypes.LDAP:
             ldap_operation_result = self.ldap_conn.modify(
                 'ou=configuration,o=jans',
@@ -451,6 +450,12 @@ class DBUtils:
             if result:
                 return tbl
 
+    def get_mysql_table_columns(self, table):
+        result = self.session.execute("SELECT COLUMN_NAME, COLUMN_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{}'".format(table)).fetchall()
+        if result:
+            return dict(result)
+        return {}
+
     def table_exists(self, table):
         tables = self.exec_rdbm_query("SELECT table_name FROM information_schema.tables WHERE table_schema = '{}'".format(Config.rdbm_db), 2)
         for tbl_ in tables:
@@ -581,9 +586,8 @@ class DBUtils:
                             Column('dn', String), 
                             ]
 
-
                         for lkey in entry:
-                            
+
                             vals[lkey] = self.get_rdbm_val(lkey, entry[lkey])
                             data_type = self.get_attr_sql_data_type(lkey)
                             if data_type in ('SMALLINT', 'INT'):
@@ -591,18 +595,25 @@ class DBUtils:
                             else:
                                 sqlalch_columns.append(Column(lkey, String))
 
+                        columns = self.get_mysql_table_columns(table_name)
+
+                        for col in columns:
+                            if columns[col].lower() == 'json' and not col in vals:
+                                vals[col] = json.dumps({'v': []})
+                                sqlalch_columns.append(Column(col, String))
+
                         sqlalch_table = Table(table_name, MetaData(bind=None), *tuple(sqlalch_columns))
-                
+
                         class SqlAlchObject(object):
                             pass
-                
+
                         mapper(SqlAlchObject, sqlalch_table)
 
                         dbObj = SqlAlchObject()
-                        
+
                         for v in vals:
                             setattr(dbObj, v, vals[v])
-                        
+
                         base.logIt("Adding {}".format(dbObj.doc_id))
                         self.session.add(dbObj)
                         self.session.commit()
