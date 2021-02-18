@@ -175,7 +175,7 @@ public class JwtUtil {
 
 	public boolean validateSignature(Jwt idToken, JSONWebKeySet jSONWebKeySet) {
 		System.out.println(
-				"\n\n JwtUtil::getPublicKey() - idToken = " + idToken + " , jSONWebKeySet =" + jSONWebKeySet + "\n");
+				"\n\n JwtUtil::validateSignature() - idToken = " + idToken + " , jSONWebKeySet =" + jSONWebKeySet + "\n");
 		try {
 			/*
 			 * // Verify the signature used to sign the access token AuthCryptoProvider
@@ -185,7 +185,13 @@ public class JwtUtil {
 			 */
 			final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 			final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
+			System.out.println(
+					"\n\n JwtUtil::validateSignature() - kid = " + kid + " , algorithm =" + algorithm + "\n");
 			RSAPublicKey publicKey = getPublicKey(kid, jSONWebKeySet);
+			
+			System.out.println(
+					"\n\n JwtUtil::validateSignature() - publicKey = " + publicKey + "\n");
+			
 			if (publicKey != null) {
 				RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.fromString(algorithm), publicKey);
 				boolean signature = rsaSigner.validate(idToken);
