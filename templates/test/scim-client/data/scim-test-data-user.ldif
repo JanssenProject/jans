@@ -8,8 +8,8 @@ inum: XXXX.AAAA-1111
 jansStatus: active
 mail: aaaa1111@test.email
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: aaaa1111
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -25,8 +25,8 @@ givenName: Aaaa 2222
 inum: XXXX.AAAA-2222
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: aaaa2222
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -39,8 +39,8 @@ givenName: Aaaa 3333
 inum: XXXX.AAAA-3333
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: aaaa3333
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -53,8 +53,8 @@ givenName: Aaaa 4444
 inum: XXXX.AAAA-4444
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: aaaa4444
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -67,8 +67,8 @@ givenName: Aaaa 5555
 inum: XXXX.AAAA-5555
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: aaaa5555
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -83,8 +83,8 @@ inum: XXXX.BBBB-1111
 jansStatus: active
 mail: bbbb1111@test.email
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: bbbb1111
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -98,8 +98,8 @@ givenName: Bbbb 2222
 inum: XXXX.BBBB-2222
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: bbbb2222
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -112,8 +112,8 @@ givenName: Bbbb 3333
 inum: XXXX.BBBB-3333
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: bbbb3333
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -126,8 +126,8 @@ givenName: Bbbb 4444
 inum: XXXX.BBBB-4444
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: bbbb4444
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -140,8 +140,8 @@ givenName: Bbbb 5555
 inum: XXXX.BBBB-5555
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: bbbb5555
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -156,8 +156,8 @@ inum: XXXX.CCCC-1111
 jansStatus: active
 mail: cccc1111@test.email
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: cccc1111
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -171,8 +171,8 @@ givenName: Cccc 2222
 inum: XXXX.CCCC-2222
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: cccc2222
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -185,8 +185,8 @@ givenName: Cccc 3333
 inum: XXXX.CCCC-3333
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: cccc3333
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -199,8 +199,8 @@ givenName: Cccc 4444
 inum: XXXX.CCCC-4444
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: cccc4444
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -213,8 +213,8 @@ givenName: Cccc 5555
 inum: XXXX.CCCC-5555
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: cccc5555
 userPassword: {SSHA}NuYCT1iY8F6GMogft08qWxitT5Pm5wjM
@@ -225,8 +225,8 @@ givenName: Dddd 1111
 inum: XXXX.DDDD-1111
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: dddd1111 *char
 
@@ -236,8 +236,8 @@ givenName: Dddd 2222
 inum: XXXX.DDDD-2222
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: dddd2222 * \ (char
 
@@ -247,8 +247,8 @@ givenName: Dddd 3333
 inum: XXXX.DDDD-3333
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: dddd3333 * \ (char) /
 
@@ -258,15 +258,15 @@ givenName: (special chars\)/*
 inum: XXXX.DDDD-4444
 jansStatus: active
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 sn: FilterTest
 uid: dddd4444
 
 dn: inum=XXXX.EEEE-1111,ou=people,o=jans
 objectClass: top
-objectClass: jansPerson
 objectClass: jansCustomPerson
+objectClass: jansPerson
 inum: XXXX.EEEE-1111
 uid: eeee1111
 jansStatus: active
