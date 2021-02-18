@@ -250,11 +250,6 @@ public enum RegisterRequestParam {
     REQUEST_URIS("request_uris"),
 
     /**
-     * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
-     */
-    SCOPES("scopes"),
-
-    /**
      * String containing a space-separated list of claims that can be requested individually.
      */
     CLAIMS("claims"),

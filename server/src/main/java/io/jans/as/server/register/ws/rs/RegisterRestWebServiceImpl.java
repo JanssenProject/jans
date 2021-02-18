@@ -157,7 +157,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 validateRequestObject(requestParams, softwareStatement);
             }
 
-            final RegisterRequest r = RegisterRequest.fromJson(requestObject, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            final RegisterRequest r = RegisterRequest.fromJson(requestObject);
             if (requestObject.has(SOFTWARE_STATEMENT.toString())) {
                 r.setSoftwareStatement(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             }
@@ -773,7 +773,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     validateRequestObject(requestParams, softwareStatement);
                 }
 
-                final RegisterRequest request = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+                final RegisterRequest request = RegisterRequest.fromJson(requestParams);
                 if (request != null) {
                     boolean redirectUrisValidated = true;
                     if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
@@ -990,11 +990,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         }
 
-        if (appConfiguration.getLegacyDynamicRegistrationScopeParam()) {
-            Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
-        } else {
-            Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
-        }
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
 
         String[] claimNames = null;
         String[] claimDns = client.getClaims();
