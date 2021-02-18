@@ -555,6 +555,20 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
+dn: inum=2D3E.5A03,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Update token sample script
+displayName: update_token_sample
+inum: 2D3E.5A03
+jansEnabled: false
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansRevision: 12
+jansScr::%(update_token_sample_script)s
+jansScrTyp: update_token
+jansProgLng: python
+
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
 description: Firebase notification sender
 displayName: firebase_ciba_end_user_notification
