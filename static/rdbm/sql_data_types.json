@@ -190,8 +190,7 @@
   },
   "jansGrantTyp": {
     "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
+      "type": "JSON"
     }
   },
   "jansId": {
@@ -220,8 +219,7 @@
   },
   "jansRespTyp": {
     "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
+      "type": "JSON"
     }
   },
   "jansSAML1URI": {
