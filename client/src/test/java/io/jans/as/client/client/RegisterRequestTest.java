@@ -32,7 +32,7 @@ public class RegisterRequestTest {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("additional_audience", new JSONArray(Lists.newArrayList("aud1", "aud2")));
 
-        final RegisterRequest registerRequest = RegisterRequest.fromJson(jsonObject.toString(), true);
+        final RegisterRequest registerRequest = RegisterRequest.fromJson(jsonObject.toString());
 
         assertEquals(Lists.newArrayList("aud1", "aud2"), registerRequest.getAdditionalAudience());
     }
