@@ -87,6 +87,7 @@ class DBUtils:
             logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
             Session = sessionmaker(bind=engine)
             self.session = Session()
+            self.session.connection()
             base.logIt("MySQL Connection was successful")
             return True, self.session
 
@@ -484,17 +485,8 @@ class DBUtils:
             return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
 
         if data_type == 'JSON':
-            #if key in ('jansConfProperty', 'jansModuleProperty', 'jansEmail', 'jansAddres', 'jansPhotos'):
-            #    for i, k in enumerate(val[:]):
-            #        val[i] = json.loads(k)
             json_data = {'v':[]}
             for d in val:
-                #try:
-                #    jsdata = json.loads(d)
-                #except:
-                #    jsdata = None
-                #if isinstance(jsdata, dict) or isinstance(jsdata, list):
-                #    json_data['v'].append(json.dumps(d))
                 json_data['v'].append(d)
 
             return json.dumps(json_data)
