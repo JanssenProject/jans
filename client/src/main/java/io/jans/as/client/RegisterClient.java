@@ -12,16 +12,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.Map;
-
-import static io.jans.as.model.register.RegisterRequestParam.*;
-import static io.jans.as.model.util.StringUtils.implode;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
@@ -94,199 +89,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 clientRequest.header("Content-Type", getRequest().getContentType());
                 clientRequest.accept(getRequest().getMediaType());
 
-                JSONObject requestBody = new JSONObject();
-
                 if (StringUtils.isNotBlank(getRequest().getRegistrationAccessToken())) {
                     clientRequest.header("Authorization", "Bearer " + getRequest().getRegistrationAccessToken());
                 }
-                if (getRequest().getRedirectUris() != null && !getRequest().getRedirectUris().isEmpty()) {
-                    requestBody.put(REDIRECT_URIS.toString(), new JSONArray(getRequest().getRedirectUris()));
-                }
-                if (getRequest().getClaimsRedirectUris() != null && !getRequest().getClaimsRedirectUris().isEmpty()) {
-                    requestBody.put(CLAIMS_REDIRECT_URIS.toString(), new JSONArray(getRequest().getClaimsRedirectUris()));
-                }
-                if (getRequest().getResponseTypes() != null && !getRequest().getResponseTypes().isEmpty()) {
-                    requestBody.put(RESPONSE_TYPES.toString(), new JSONArray(getRequest().getResponseTypes_()));
-                }
-                if (getRequest().getGrantTypes() != null && !getRequest().getGrantTypes().isEmpty()) {
-                    requestBody.put(GRANT_TYPES.toString(), new JSONArray(getRequest().getGrantTypes()));
-                }
-                if (getRequest().getApplicationType() != null) {
-                    requestBody.put(APPLICATION_TYPE.toString(), getRequest().getApplicationType());
-                }
-                if (getRequest().getContacts() != null && !getRequest().getContacts().isEmpty()) {
-                    requestBody.put(CONTACTS.toString(), new JSONArray(getRequest().getContacts()));
-                }
-                if (StringUtils.isNotBlank(getRequest().getClientName())) {
-                    requestBody.put(CLIENT_NAME.toString(), getRequest().getClientName());
-                }
-                if (StringUtils.isNotBlank(getRequest().getIdTokenTokenBindingCnf())) {
-                    requestBody.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), getRequest().getIdTokenTokenBindingCnf());
-                }
-                if (StringUtils.isNotBlank(getRequest().getLogoUri())) {
-                    requestBody.put(LOGO_URI.toString(), getRequest().getLogoUri());
-                }
-                if (StringUtils.isNotBlank(getRequest().getClientUri())) {
-                    requestBody.put(CLIENT_URI.toString(), getRequest().getClientUri());
-                }
-                if (StringUtils.isNotBlank(getRequest().getPolicyUri())) {
-                    requestBody.put(POLICY_URI.toString(), getRequest().getPolicyUri());
-                }
-                if (StringUtils.isNotBlank(getRequest().getTosUri())) {
-                    requestBody.put(TOS_URI.toString(), getRequest().getTosUri());
-                }
-                if (StringUtils.isNotBlank(getRequest().getJwksUri())) {
-                    requestBody.put(JWKS_URI.toString(), getRequest().getJwksUri());
-                }
-                if (StringUtils.isNotBlank(getRequest().getJwks())) {
-                    requestBody.put(JWKS.toString(), getRequest().getJwks());
-                }
-                if (StringUtils.isNotBlank(getRequest().getSectorIdentifierUri())) {
-                    requestBody.put(SECTOR_IDENTIFIER_URI.toString(), getRequest().getSectorIdentifierUri());
-                }
-                if (getRequest().getSubjectType() != null) {
-                    requestBody.put(SUBJECT_TYPE.toString(), getRequest().getSubjectType());
-                }
-                if (getRequest().getAccessTokenAsJwt() != null) {
-                    requestBody.put(ACCESS_TOKEN_AS_JWT.toString(), getRequest().getAccessTokenAsJwt().toString());
-                }
-                if (getRequest().getAccessTokenSigningAlg() != null) {
-                    requestBody.put(ACCESS_TOKEN_SIGNING_ALG.toString(), getRequest().getAccessTokenSigningAlg().toString());
-                }
-                if (getRequest().getRptAsJwt() != null) {
-                    requestBody.put(RPT_AS_JWT.toString(), getRequest().getRptAsJwt().toString());
-                }
-                if (getRequest().getTlsClientAuthSubjectDn() != null) {
-                    requestBody.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), getRequest().getTlsClientAuthSubjectDn());
-                }
-                if (getRequest().getAllowSpontaneousScopes() != null) {
-                    requestBody.put(ALLOW_SPONTANEOUS_SCOPES.toString(), getRequest().getAllowSpontaneousScopes());
-                }
-                if (getRequest().getSpontaneousScopes() != null) {
-                    requestBody.put(SPONTANEOUS_SCOPES.toString(), new JSONArray(getRequest().getSpontaneousScopes()));
-                }
-                if (getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-                    requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims().toString());
-                }
-                if (getRequest().getKeepClientAuthorizationAfterExpiration() != null) {
-                    requestBody.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), getRequest().getKeepClientAuthorizationAfterExpiration().toString());
-                }
-                if (getRequest().getIdTokenSignedResponseAlg() != null) {
-                    requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
-                }
-                if (getRequest().getIdTokenEncryptedResponseAlg() != null) {
-                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), getRequest().getIdTokenEncryptedResponseAlg().getName());
-                }
-                if (getRequest().getIdTokenEncryptedResponseEnc() != null) {
-                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), getRequest().getIdTokenEncryptedResponseEnc().getName());
-                }
-                if (getRequest().getUserInfoSignedResponseAlg() != null) {
-                    requestBody.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), getRequest().getUserInfoSignedResponseAlg().getName());
-                }
-                if (getRequest().getUserInfoEncryptedResponseAlg() != null) {
-                    requestBody.put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), getRequest().getUserInfoEncryptedResponseAlg().getName());
-                }
-                if (getRequest().getUserInfoEncryptedResponseEnc() != null) {
-                    requestBody.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), getRequest().getUserInfoEncryptedResponseEnc().getName());
-                }
-                if (getRequest().getRequestObjectSigningAlg() != null) {
-                    requestBody.put(REQUEST_OBJECT_SIGNING_ALG.toString(), getRequest().getRequestObjectSigningAlg().getName());
-                }
-                if (getRequest().getRequestObjectEncryptionAlg() != null) {
-                    requestBody.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), getRequest().getRequestObjectEncryptionAlg().getName());
-                }
-                if (getRequest().getRequestObjectEncryptionEnc() != null) {
-                    requestBody.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), getRequest().getRequestObjectEncryptionEnc().getName());
-                }
-                if (getRequest().getTokenEndpointAuthMethod() != null) {
-                    requestBody.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), getRequest().getTokenEndpointAuthMethod());
-                }
-                if (getRequest().getTokenEndpointAuthSigningAlg() != null) {
-                    requestBody.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), getRequest().getTokenEndpointAuthSigningAlg());
-                }
-                if (getRequest().getDefaultMaxAge() != null) {
-                    requestBody.put(DEFAULT_MAX_AGE.toString(), getRequest().getDefaultMaxAge());
-                }
-                if (getRequest().getRequireAuthTime() != null) {
-                    requestBody.put(REQUIRE_AUTH_TIME.toString(), getRequest().getRequireAuthTime());
-                }
-                if (getRequest().getDefaultAcrValues() != null && !getRequest().getDefaultAcrValues().isEmpty()) {
-                    requestBody.put(DEFAULT_ACR_VALUES.toString(), getRequest().getDefaultAcrValues());
-                }
-                if (StringUtils.isNotBlank(getRequest().getInitiateLoginUri())) {
-                    requestBody.put(INITIATE_LOGIN_URI.toString(), getRequest().getInitiateLoginUri());
-                }
-                if (getRequest().getPostLogoutRedirectUris() != null && !getRequest().getPostLogoutRedirectUris().isEmpty()) {
-                    requestBody.put(POST_LOGOUT_REDIRECT_URIS.toString(), getRequest().getPostLogoutRedirectUris());
-                }
-                if (StringUtils.isNotBlank(getRequest().getFrontChannelLogoutUri())) {
-                    requestBody.put(FRONT_CHANNEL_LOGOUT_URI.getName(), getRequest().getFrontChannelLogoutUri());
-                }
-                if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
-                    requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
-                }
-                if (getRequest().getBackchannelLogoutUris() != null && !getRequest().getBackchannelLogoutUris().isEmpty()) {
-                    requestBody.put(BACKCHANNEL_LOGOUT_URI.getName(), getRequest().getBackchannelLogoutUris());
-                }
-                if (getRequest().getBackchannelLogoutSessionRequired() != null) {
-                    requestBody.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getBackchannelLogoutSessionRequired());
-                }
-                if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
-                    requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
-                }
-                if (getRequest().getAuthorizedOrigins() != null && !getRequest().getAuthorizedOrigins().isEmpty()) {
-                    requestBody.put(AUTHORIZED_ORIGINS.toString(), new JSONArray(getRequest().getAuthorizedOrigins()));
-                }
-                if (getRequest().getAccessTokenLifetime() != null) {
-                    requestBody.put(ACCESS_TOKEN_LIFETIME.toString(), getRequest().getAccessTokenLifetime());
-                }
-                if (StringUtils.isNotBlank(getRequest().getSoftwareId())) {
-                    requestBody.put(SOFTWARE_ID.toString(), getRequest().getSoftwareId());
-                }
-                if (StringUtils.isNotBlank(getRequest().getSoftwareVersion())) {
-                    requestBody.put(SOFTWARE_VERSION.toString(), getRequest().getSoftwareVersion());
-                }
-                if (StringUtils.isNotBlank(getRequest().getSoftwareStatement())) {
-                    requestBody.put(SOFTWARE_STATEMENT.toString(), getRequest().getSoftwareStatement());
-                }
 
-                if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {
-                    requestBody.put(SCOPES.toString(), new JSONArray(getRequest().getScopes()));
-                } else if (getRequest().getScope() != null && !getRequest().getScope().isEmpty()) {
-                    String spaceSeparatedScope = implode(getRequest().getScope(), " ");
-                    requestBody.put(SCOPE.toString(), spaceSeparatedScope);
-                }
+                JSONObject requestBody = getRequest().getJSONParameters();
 
-                if (getRequest().getClaims() != null && !getRequest().getClaims().isEmpty()) {
-                    String spaceSeparatedClaims = implode(getRequest().getClaims(), " ");
-                    requestBody.put(CLAIMS.toString(), spaceSeparatedClaims);
-                }
-
-                // CIBA
-                if (getRequest().getBackchannelTokenDeliveryMode() != null) {
-                    requestBody.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), getRequest().getBackchannelTokenDeliveryMode());
-                }
-                if (StringUtils.isNotBlank(getRequest().getBackchannelClientNotificationEndpoint())) {
-                    requestBody.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), getRequest().getBackchannelClientNotificationEndpoint());
-                }
-                if (getRequest().getBackchannelAuthenticationRequestSigningAlg() != null) {
-                    requestBody.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), getRequest().getBackchannelAuthenticationRequestSigningAlg());
-                }
-                if (getRequest().getBackchannelUserCodeParameter() != null) {
-                    requestBody.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), getRequest().getBackchannelUserCodeParameter());
-                }
-
-                // Custom params
-                final Map<String, String> customAttributes = getRequest().getCustomAttributes();
-                if (customAttributes != null && !customAttributes.isEmpty()) {
-                    for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
-                        final String name = entry.getKey();
-                        final String value = entry.getValue();
-                        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(value)) {
-                            requestBody.put(name, value);
-                        }
-                    }
-                }
                 clientRequest.body(MediaType.APPLICATION_JSON, ClientUtil.toPrettyJson(requestBody));
             } else { // GET, Client Read
                 clientRequest.accept(MediaType.APPLICATION_JSON);
