@@ -127,8 +127,7 @@ def render_client_api_config():
         # likely "couchbase"
         conn = "jans-couchbase.properties"
 
-    # data["storage"] = "jans_server_configuration"
-    data["storage"] = "gluu_server_configuration"
+    data["storage"] = "jans_server_configuration"
     data["storage_configuration"] = {
         "baseDn": "o=jans",
         "type": "/etc/jans/conf/jans.properties",
