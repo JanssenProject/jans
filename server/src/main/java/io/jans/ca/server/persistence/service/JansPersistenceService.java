@@ -7,7 +7,7 @@ import io.jans.ca.common.PersistenceConfigKeys;
 import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.modal.OrganizationBranch;
 import io.jans.ca.server.persistence.modal.RpObject;
-import io.jans.ca.server.persistence.providers.GluuPersistenceConfiguration;
+import io.jans.ca.server.persistence.providers.JansPersistenceConfiguration;
 import io.jans.ca.server.persistence.providers.PersistenceEntryManagerFactory;
 import io.jans.ca.server.service.MigrationService;
 import io.jans.ca.server.service.Rp;
@@ -20,28 +20,28 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class GluuPersistenceService implements PersistenceService {
+public class JansPersistenceService implements PersistenceService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GluuPersistenceService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JansPersistenceService.class);
     private RpServerConfiguration configuration;
     private PersistenceEntryManager persistenceEntryManager;
     private String persistenceType;
     private String baseDn;
 
-    public GluuPersistenceService(RpServerConfiguration configuration) {
+    public JansPersistenceService(RpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
-    public GluuPersistenceService(RpServerConfiguration configuration, String persistenceType) {
+    public JansPersistenceService(RpServerConfiguration configuration, String persistenceType) {
         this.configuration = configuration;
         this.persistenceType = persistenceType;
     }
 
     public void create() {
-        LOG.debug("Creating GluuPersistenceService ...");
+        LOG.debug("Creating JansPersistenceService ...");
         try {
-            GluuPersistenceConfiguration gluuPersistenceConfiguration = new GluuPersistenceConfiguration(configuration);
-            Properties props = gluuPersistenceConfiguration.getPersistenceProps();
+            JansPersistenceConfiguration jansPersistenceConfiguration = new JansPersistenceConfiguration(configuration);
+            Properties props = jansPersistenceConfiguration.getPersistenceProps();
             this.baseDn = props.getProperty(PersistenceConfigKeys.BaseDn.getKeyName());
             if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")
                     || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {

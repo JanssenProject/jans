@@ -46,12 +46,12 @@ public class PersistenceServiceImpl implements PersistenceService {
             case "jdbc":
                 this.sqlProvider = new JDBCPersistenceProvider(this.configurationService);
                 return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
-            case "gluu_server_configuration":
-                return new GluuPersistenceService(this.configurationService.getConfiguration());
+            case "jans_server_configuration":
+                return new JansPersistenceService(this.configurationService.getConfiguration());
             case "ldap":
-                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
+                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
             case "couchbase":
-                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
+                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + this.configurationService.get());
     }
