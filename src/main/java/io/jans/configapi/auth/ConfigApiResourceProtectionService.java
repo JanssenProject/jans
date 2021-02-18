@@ -75,9 +75,9 @@ public class ConfigApiResourceProtectionService {
 		Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
 		createScopeIfNeeded(apiProtectionType);
-		log.info("ConfigApiResourceProtectionService:::verifyResources() - configApiProtectionCache.getAllScopes() = "
+		log.trace("ConfigApiResourceProtectionService:::verifyResources() - configApiProtectionCache.getAllScopes() = "
 				+ configApiProtectionCache.getAllScopes() + "\n\n");
-		log.info(
+		log.trace(
 				"ConfigApiResourceProtectionService:::verifyResources() - configApiProtectionCache.getAllResources() = "
 						+ configApiProtectionCache.getAllResources() + "\n\n");
 
@@ -88,8 +88,6 @@ public class ConfigApiResourceProtectionService {
 	private void createScopeIfNeeded(String apiProtectionType) {
 		log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - apiProtectionType = "
 				+ apiProtectionType + "\n ***********");
-		log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - apiProtectionType = "
-				+ apiProtectionType + "\n ***********");
 		List<String> rsScopes = null;
 		List<Scope> scopeList = null;
 		for (RsResource rsResource : rsResourceList) {
@@ -97,30 +95,28 @@ public class ConfigApiResourceProtectionService {
 				String resourceName = condition.getHttpMethods() + ":::" + rsResource.getPath();
 				scopeList = new ArrayList<Scope>();
 				rsScopes = condition.getScopes();
-				log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
+				log.trace("ConfigApiResourceProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
 						+ " ,rsScopes = " + rsScopes + "\n\n");
-				log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
-						+ " ,rsScopes = " + rsScopes + "\n\n");
+
 				for (String scopeName : rsScopes) {
-					log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - scopeName = "+scopeName);
+					log.trace("ConfigApiResourceProtectionService:::createScopeIfNeeded() - scopeName = "+scopeName);
 					// Check in cache
 					Scope scope = configApiProtectionCache.getScope(scopeName);
-					log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() -configApiProtectionCache.getScope(scopeName) = "+configApiProtectionCache.getScope(scopeName));
+					log.trace("ConfigApiResourceProtectionService:::createScopeIfNeeded() -configApiProtectionCache.getScope(scopeName) = "+configApiProtectionCache.getScope(scopeName));
 					if (scope != null) {
-						log.info("Scope - '" + scopeName + "' exists in cache.");
-						log.info("Scope - '" + scopeName + "' exists in cache.");
+						log.trace("Scope - '" + scopeName + "' exists in cache.");
 						scopeList.add(scope);
 						break;
 					}
 					// Check in DB
-					log.info("Verify Scope in DB - '" + scopeName);
+					log.trace("Verify Scope in DB - '" + scopeName);
 					List<Scope> scopes = scopeService.searchScopesById(scopeName, 2);
-					log.info("Scopes from DB - '" + scopes);
+					log.trace("Scopes from DB - '" + scopes);
 					
 					if (scopes != null && !scopes.isEmpty()) {
 						// Fetch existing scope to store in cache
 						scope = scopes.get(0);
-						log.info("Scope from DB is - '" + scope.getDisplayName() +" from DB");
+						log.trace("Scope from DB is - '" + scope.getDisplayName() +" from DB");
 						scopeList.add(scope);
 						if (scopes.size() > 1) {
 							log.error(scopes.size() + " Scope with same name - "+scopeName+"!");
@@ -133,7 +129,6 @@ public class ConfigApiResourceProtectionService {
 					log.info("Scope details from DB - '" + scopes);
 					if (scopes == null || scopes.isEmpty()) {
 						log.info("Scope - '" + scopeName + "' does not exist, hence creating it.");
-						log.info("Scope - '" + scopeName + "' does not exist, hence creating it.");
 						// Scope does not exists hence create Scope
 						scope = new Scope();
 						String inum = UUID.randomUUID().toString();
@@ -145,7 +140,6 @@ public class ConfigApiResourceProtectionService {
 						scopeService.addScope(scope);
 					} else {
 						// Update resource
-						log.info("Scope - '" + scopeName + "' already exists, hence updating it.");
 						log.info("Scope - '" + scopeName + "' already exists, hence updating it.");
 						scope.setId(scopeName);
 						//scope.setDisplayName(scopeName);
@@ -161,7 +155,7 @@ public class ConfigApiResourceProtectionService {
 
 				// Add to resource cache
 				configApiProtectionCache.putResource(resourceName, scopeList);
-				log.info("ConfigApiResourceProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
+				log.trace("ConfigApiResourceProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
 						+ " ,scopeList = " + scopeList);
 			} // condition
 		}
@@ -177,11 +171,10 @@ public class ConfigApiResourceProtectionService {
 		try {
 			Client client = this.clientService.getClientByInum(clientId);
 			log.debug(" \n\n updateScopeForClientIfNeeded() - Verify client = " + client + "\n\n");
-			log.info(" \n\n updateScopeForClientIfNeeded() - Verify client = " + client + "\n\n");
 			// Prepare scope array
 			List<String> scopes = getScopeWithDn(getAllScopes());
 			String[] scopeArray = this.getAllScopesArray(scopes);
-			log.info(" AllScope = " + Arrays.asList(scopeArray) + "\n");
+			log.trace(" AllScope = " + Arrays.asList(scopeArray) + "\n");
 
 			if (client != null) {
 				// Assign scope
@@ -189,7 +182,7 @@ public class ConfigApiResourceProtectionService {
 				this.clientService.updateClient(client);
 			}
 			client = this.clientService.getClientByInum(clientId);
-			log.info(" Verify scopes post assignment, clientId ="+clientId+" ,scopes = "+Arrays.asList(client.getScopes()));
+			log.trace(" Verify scopes post assignment, clientId ="+clientId+" ,scopes = "+Arrays.asList(client.getScopes()));
 		} catch (Exception ex) {
 			log.error("Error while searching internal client " + ex);
 		}

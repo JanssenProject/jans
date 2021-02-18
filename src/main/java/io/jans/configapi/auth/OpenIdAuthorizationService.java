@@ -6,6 +6,8 @@
 
 package io.jans.configapi.auth;
 
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.auth.service.OpenIdService;
 import io.jans.configapi.auth.util.AuthUtil;
@@ -45,6 +47,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 		log.info(
 				"oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
 				token, issuer, resourceInfo, method, path);
+		System.out.println(
+				"oAuth  Authorization parameters , token ="+token+" ,issuer = "+issuer+" , resourceInfo ="+resourceInfo+" ,  method = "+method+" path = "+path);
+
 		if (StringUtils.isBlank(token)) {
 			log.error("Token is blank !!!");
 			throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
@@ -52,25 +57,36 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
 		List<String> resourceScopes = getRequestedScopes(resourceInfo);
 		log.info("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo,
-				resourceScopes);
-
+				resourceScopes);		
+		System.out.println("oAuth Authorization Resource details, resourceInfo ="+resourceInfo+" resourceScopes = "+resourceScopes);
+						
 		// Validate issuer
 		if (StringUtils.isNotBlank(issuer) && !authUtil.isValidIssuer(issuer)) {
 			throw new WebApplicationException("Header Issuer is Invalid.",
 					Response.status(Response.Status.UNAUTHORIZED).build());
 		}
 
-		// Check the type of token simple, jwt, reference
-		boolean isJwtToken = jwtUtil.isJwt(token);
+		// Check the type of token simple, jwt, reference	
+		boolean isJwtToken = false;
+		try {
+			String acccessToken = token.substring("Bearer".length()).trim();
+			Jwt idToken = jwtUtil.parse(acccessToken);
+			isJwtToken = true;
+			System.out.println(" Is Jwt Token isJwtToken = " + isJwtToken);
+			jwtUtil.validateToken(acccessToken, resourceScopes);
+		}
+		catch(InvalidJwtException exp) {
+			log.error("oAuth Invalid Jwt "+token);
+		}
+		
+		//boolean isJwtToken = jwtUtil.isJwt(token.substring("Bearer".length()).trim());
 		System.out.println(" \n isJwtToken = " + isJwtToken);
 
-		if (isJwtToken) {
-			jwtUtil.validateToken(token, resourceScopes);
-		} else {
-
-			IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
+		if (!isJwtToken) {
+				System.out.println(" Not a Jwt Token isJwtToken = " + isJwtToken);
+				IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
 					token.substring("Bearer".length()).trim(), issuer);
-
+			System.out.println("oAuth  Authorization introspectionResponse = "+introspectionResponse);
 			if (introspectionResponse == null || !introspectionResponse.isActive()) {
 				log.error("Token is Invalid.");
 				throw new WebApplicationException("Token is Invalid.",

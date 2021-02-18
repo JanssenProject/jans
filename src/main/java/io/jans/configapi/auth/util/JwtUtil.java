@@ -72,7 +72,7 @@ public class JwtUtil {
 		return null;
 	}
 
-	public void validateToken(String token, List<String> resourceScopes) throws Exception {
+	public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException,Exception {
 		System.out.println(
 				"\n\n JwtUtil::validateToken() - token = " + token + " , resourceScopes =" + resourceScopes + "\n");
 		// 1. Parse Jwt token
@@ -86,7 +86,7 @@ public class JwtUtil {
 		try {
 			// Parse Token
 			Jwt idToken = this.parse(token);
-			log.info("JwtUtil::validateToken() -JWT details : idToken.toString() - " + idToken.toString()
+			System.out.println("JwtUtil::validateToken() -JWT details : idToken.toString() - " + idToken.toString()
 					+ " , idToken.getClaims() " + idToken.getClaims() + " , idToken.getHeader() = "
 					+ idToken.getHeader());
 
@@ -137,6 +137,7 @@ public class JwtUtil {
 
 		} catch (InvalidJwtException exp) {
 			log.error("Not a valid Jwt token = " + exp);
+			throw exp;
 		}
 
 	}
@@ -190,6 +191,7 @@ public class JwtUtil {
 				boolean signature = rsaSigner.validate(idToken);
 				if (signature) {
 					log.debug("ID Token is successfully validated.");
+					System.out.println("ID Token is successfully validated.");
 					return true;
 				}
 				log.error("ID Token signature is invalid.");
@@ -237,5 +239,5 @@ public class JwtUtil {
 		System.out.println("\n\n JwtUtil::getJSONWebKeys() - jSONWebKeySet = " + jSONWebKeySet + " \n");
 		return jSONWebKeySet;
 	}
-
+	
 }
