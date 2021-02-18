@@ -225,7 +225,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         try {
             // check whether values are really updated
-            RegisterRequest r = RegisterRequest.fromJson(entity, true);
+            RegisterRequest r = RegisterRequest.fromJson(entity);
             assertTrue(r.getContacts() != null && r.getContacts().contains(contactEmailNewValue));
             assertTrue(r.getClientUri().equals(clientUriNewValue));
             assertTrue(r.getLogoUri().equals(logoUriNewValue));

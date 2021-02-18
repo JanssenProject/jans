@@ -111,12 +111,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> additionalAudience;
 
     /**
-     * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
-     */
-    private List<String> scopes;
-
-    /**
-     * String containing a space-separated list of scope values.
+     * String containing a space-separated list of scope values. (correct name is 'scope' not 'scopes', see (rfc7591).)
      */
     private List<String> scope;
 
@@ -147,7 +142,6 @@ public class RegisterRequest extends BaseRequest {
         this.postLogoutRedirectUris = new ArrayList<String>();
         this.requestUris = new ArrayList<String>();
         this.authorizedOrigins = new ArrayList<String>();
-        this.scopes = new ArrayList<String>();
         this.scope = new ArrayList<String>();
         this.claims = new ArrayList<String>();
         this.customAttributes = new HashMap<String, String>();
@@ -972,20 +966,6 @@ public class RegisterRequest extends BaseRequest {
         this.authorizedOrigins = authorizedOrigins;
     }
 
-    /**
-     * @deprecated This function will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
-     */
-    public List<String> getScopes() {
-        return scopes;
-    }
-
-    /**
-     * @deprecated This method will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
-     */
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
-    }
-
     public List<String> getScope() {
         return scope;
     }
@@ -1270,9 +1250,6 @@ public class RegisterRequest extends BaseRequest {
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
             parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
         }
-        if (scopes != null && !scopes.isEmpty()) {
-            parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
-        }
         if (scope != null && !scope.isEmpty()) {
             parameters.put(SCOPE.toString(), implode(scope, " "));
         }
@@ -1335,11 +1312,11 @@ public class RegisterRequest extends BaseRequest {
         return parameters;
     }
 
-    public static RegisterRequest fromJson(String p_json, boolean authorizationRequestCustomAllowedParameters) throws JSONException {
-        return fromJson(new JSONObject(p_json), authorizationRequestCustomAllowedParameters);
+    public static RegisterRequest fromJson(String p_json) throws JSONException {
+        return fromJson(new JSONObject(p_json));
     }
 
-    public static RegisterRequest fromJson(JSONObject requestObject, boolean authorizationRequestCustomAllowedParameters) throws JSONException {
+    public static RegisterRequest fromJson(JSONObject requestObject) throws JSONException {
         final List<String> redirectUris = new ArrayList<String>();
         if (requestObject.has(REDIRECT_URIS.toString())) {
             JSONArray redirectUrisJsonArray = requestObject.getJSONArray(REDIRECT_URIS.toString());
@@ -1418,12 +1395,7 @@ public class RegisterRequest extends BaseRequest {
         }
 
         final List<String> scope = new ArrayList<String>();
-        if (authorizationRequestCustomAllowedParameters && requestObject.has(SCOPES.toString())) {
-            JSONArray scopesJsonArray = requestObject.getJSONArray(SCOPES.toString());
-            for (int i = 0; i < scopesJsonArray.length(); i++) {
-                scope.add(scopesJsonArray.getString(i));
-            }
-        } else if (requestObject.has(SCOPE.toString())) {
+        if (requestObject.has(SCOPE.toString())) {
             String scopeString = requestObject.getString(SCOPE.toString());
             String[] scopeArray = scopeString.split(" ");
             for (String s : scopeArray) {
@@ -1496,7 +1468,6 @@ public class RegisterRequest extends BaseRequest {
         result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
                 SignatureAlgorithm.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
-        result.setScopes(scope);
         result.setScope(scope);
         result.setClaims(claims);
         result.setResponseTypes_(new ArrayList<String>(responseTypes));
@@ -1605,7 +1576,7 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(JWKS_URI.toString(), jwksUri);
         }
         if (StringUtils.isNotBlank(jwks)) {
-            parameters.put(JWKS_URI.toString(), jwks);
+            parameters.put(JWKS.toString(), jwks);
         }
         if (StringUtils.isNotBlank(sectorIdentifierUri)) {
             parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
@@ -1687,9 +1658,6 @@ public class RegisterRequest extends BaseRequest {
         }
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
             parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
-        }
-        if (scopes != null && !scopes.isEmpty()) {
-            parameters.put(SCOPES.toString(), toJSONArray(scopes));
         }
         if (scope != null && !scope.isEmpty()) {
             parameters.put(SCOPE.toString(), implode(scope, " "));
