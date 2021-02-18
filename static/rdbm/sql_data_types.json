@@ -7,8 +7,7 @@
   },
   "dat": {
     "mysql": {
-      "size": 48,
-      "type": "VARCHAR"
+      "type": "TEXT"
     }
   },
   "description": {
@@ -361,6 +360,43 @@
   "jansClaimRedirectURI": {
     "mysql": {
       "type": "TINYTEXT"
+    }
+  },
+  "jansJwt": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansPermissionGrantedMap": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansInvolvedClnts": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansSessAttr": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansSessState": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "scp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "clnId": {
+    "mysql": {
+      "size": 48,
+      "type": "VARCHAR"
     }
   }
 }
