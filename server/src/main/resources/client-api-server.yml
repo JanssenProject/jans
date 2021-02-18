@@ -7,7 +7,7 @@ trust_store_password: ''
 enable_jwks_generation: true
 crypt_provider_key_store_path: '/opt/client-api/conf/client-api-jwks.keystore'
 crypt_provider_key_store_password: 'example'
-crypt_provider_dn_name: 'CN=oxd CA Certificates'
+crypt_provider_dn_name: 'CN=jans-client CA Certificates'
 support-google-logout: true
 state_expiration_in_minutes: 5
 nonce_expiration_in_minutes: 5
@@ -50,7 +50,7 @@ logging:
 
   # Logger-specific levels.
   loggers:
-    org.gluu: TRACE
+    io.jans: TRACE
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz

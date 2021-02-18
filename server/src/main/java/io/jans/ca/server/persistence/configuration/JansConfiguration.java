@@ -1,6 +1,6 @@
 package io.jans.ca.server.persistence.configuration;
 
-public class GluuConfiguration {
+public class JansConfiguration {
 
     private String baseDn;
     private String type;
@@ -41,7 +41,7 @@ public class GluuConfiguration {
 
     @Override
     public String toString() {
-        return "GluuConfiguration{" +
+        return "JansConfiguration{" +
                 "baseDn='" + baseDn + '\'' +
                 ", type='" + type + '\'' +
                 ", connection='" + connection + '\'' +
