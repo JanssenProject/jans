@@ -387,12 +387,6 @@
       "type": "TEXT"
     }
   },
-  "scp": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
   "clnId": {
     "mysql": {
       "size": 64,
@@ -403,6 +397,69 @@
     "mysql": {
       "size": 64,
       "type": "VARCHAR"
+    }
+  },
+  "jwtReq": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "attr": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "nnc": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "scp": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "tknBndCnf": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "tknTyp": {
+    "mysql": {
+      "size": 32,
+      "type": "VARCHAR"
+    }
+  },
+  "acr": {
+    "mysql": {
+      "size": 48,
+      "type": "VARCHAR"
+    }
+  },
+  "jansLogoutURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansJwks": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansUmaScope": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansSoftStatement": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansScopeExpression": {
+    "mysql": {
+      "type": "TEXT"
     }
   }
 }
