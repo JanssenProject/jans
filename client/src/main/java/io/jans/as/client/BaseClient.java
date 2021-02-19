@@ -157,7 +157,11 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
                 sb.append("\n");
                 sb.append("\n");
-                sb.append(request.getQueryString());
+                if (request instanceof RegisterRequest && ((RegisterRequest)request).hasJwtRequestAsString()) {
+                    sb.append(((RegisterRequest)request).getJwtRequestAsString());
+                } else {
+                    sb.append(request.getQueryString());
+                }
             } else if (getHttpMethod().equals(HttpMethod.GET)) {
                 sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
                 if (StringUtils.isNotBlank(request.getQueryString())) {
