@@ -114,7 +114,7 @@ public class AuthUtil {
 	}
 
 	public List<Scope> getResourceScopeList(String method, String path) {
-		System.out.println(" AuthUtil::getResourceScopeList() method = " + method + " , path = " + path + "\n");
+		log.trace(" AuthUtil::getResourceScopeList() method = " + method + " , path = " + path + "\n");
 
 		// Verify in cache
 		Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
@@ -134,16 +134,17 @@ public class AuthUtil {
 			if (result != null && result.length > 1) {
 				String httpmethod = result[0];
 				String pathUrl = result[1];
-				System.out.println(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+				log.trace(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+				
 				if (pathUrl != null && pathUrl.contains(path)) {
 					// Matching url
-					System.out.println(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = "
+					log.trace(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = "
 							+ pathUrl);
 
 					// Verify Method
 					if (httpmethod.contains(method)) {
 						scopeList = ConfigApiProtectionCache.getResourceScopes(key);
-						System.out.println(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
+						log.trace(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
 						break;
 					}
 
@@ -158,40 +159,42 @@ public class AuthUtil {
 
 	public List<String> getAllResourceScopes() {
 		Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
-		System.out.println("getAllResourceScopes() - scopeMap = " + scopeMap);
+		log.trace("getAllResourceScopes() - scopeMap = " + scopeMap);
+		
 		List<String> scopeStrList = null;
 		if (scopeMap != null && !scopeMap.isEmpty()) {
 			Set<String> scopeSet = scopeMap.keySet();
 			scopeStrList = new ArrayList<String>(scopeSet);
 		}
-		System.out.println("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
 		return scopeStrList;
 	}
 
 	public List<String> getRequestedScopes(String path) {
 		List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
-		System.out.println("getRequestedScopes() - scopeList = " + scopeList);
+		log.trace("getRequestedScopes() - scopeList = " + scopeList);
+		
 		List<String> scopeStrList = new ArrayList();
 		if (scopeList != null && scopeList.size() > 0) {
 			for (Scope s : scopeList) {
 				scopeStrList.add(s.getId());
 			}
 		}
-		System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
 		return scopeStrList;
 	}
 
 	public List<String> getRequestedScopes(String method, String path) {
-		System.out.println("getRequestedScopes() - method = " + method + " , path = " + path);
+		log.trace("getRequestedScopes() - method = " + method + " , path = " + path);
 		List<Scope> scopeList = this.getResourceScopeList(method, path);
-		System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = " + scopeList + "\n\n\n");
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = " + scopeList + "\n\n\n");
 		List<String> scopeStrList = new ArrayList();
 		if (scopeList != null && scopeList.size() > 0) {
 			for (Scope s : scopeList) {
 				scopeStrList.add(s.getId());
 			}
 		}
-		System.out.println("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
+		log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
 		return scopeStrList;
 	}
 
@@ -225,7 +228,7 @@ public class AuthUtil {
 
 	public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
 			throws Exception {
-		System.out.println("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
+		log.trace("RequestAccessToken() - tokenUrl = " + tokenUrl + " ,clientId = " + clientId + " ,scopes = " + scopes
 				+ "\n");
 
 		// Get clientSecret
@@ -240,14 +243,12 @@ public class AuthUtil {
 				scope = scope + " " + s;
 			}
 		}
-		System.out.println("\n\n\n RequestAccessToken() - scope = " + scope);
+		log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
 
 		TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
 		if (tokenResponse != null) {
 			log.debug(" tokenScope: {} = ", tokenResponse.getScope());
-			System.out.println("\n\n\n RequestAccessToken() - tokenResponse.getScope() = " + tokenResponse.getScope());
-			System.out.println(
-					"\n\n\n RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());
+			log.trace("RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());
 			final String accessToken = tokenResponse.getAccessToken();
 			final Integer expiresIn = tokenResponse.getExpiresIn();
 			if (Util.allNotBlank(accessToken)) {
@@ -322,7 +323,7 @@ public class AuthUtil {
 					this.getClientDecryptPassword(clientId), scopes, permissionTicket.getTicket(),
 					GrantType.OXAUTH_UMA_TICKET, AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-			System.out.println(" Rpt Token Response  = " + tokenResponse);
+			log.trace(" Rpt Token Response  = " + tokenResponse);
 			if (tokenResponse != null) {
 				log.debug(" Rpt Token Response Scope(): {} = ", tokenResponse.getScope());
 			}
@@ -336,7 +337,7 @@ public class AuthUtil {
 	}
 
 	public void assignAllScope(final String clientId) {
-		System.out.println(" AssignAllScope to clientId = " + clientId + "\n");
+		log.trace(" AssignAllScope to clientId = " + clientId + "\n");
 
 		// Get Client
 		Client client = this.clientService.getClientByInum(clientId);

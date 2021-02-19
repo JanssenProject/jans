@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,11 +103,13 @@ public class ConfigApiResourceProtectionService {
 					// Check in cache
 					Scope scope = configApiProtectionCache.getScope(scopeName);
 					log.trace("ConfigApiResourceProtectionService:::createScopeIfNeeded() -configApiProtectionCache.getScope(scopeName) = "+configApiProtectionCache.getScope(scopeName));
+					
 					if (scope != null) {
 						log.trace("Scope - '" + scopeName + "' exists in cache.");
 						scopeList.add(scope);
 						break;
 					}
+					
 					// Check in DB
 					log.trace("Verify Scope in DB - '" + scopeName);
 					List<Scope> scopes = scopeService.searchScopesById(scopeName, 2);
@@ -177,10 +178,11 @@ public class ConfigApiResourceProtectionService {
 				// Assign scope
 				// Prepare scope array
 				List<String> scopes = getScopeWithDn(getAllScopes());
-				System.out.println(" \n\n updateScopeForClientIfNeeded() - All scopes = " + scopes + "\n\n");
+				log.trace(" \n\n updateScopeForClientIfNeeded() - All scopes = " + scopes + "\n\n");
+				
 				if(client.getScopes()!=null) {
 					List<String> existingScopes = Arrays.asList(client.getScopes());
-					System.out.println(" \n\n updateScopeForClientIfNeeded() - Clients existing scopes = " + existingScopes + "\n\n");
+					log.trace(" \n\n updateScopeForClientIfNeeded() - Clients existing scopes = " + existingScopes + "\n\n");
 					scopes.addAll(existingScopes);
 				}
 
@@ -188,10 +190,10 @@ public class ConfigApiResourceProtectionService {
 				 List<String> distinctScopes = scopes.stream()
 					     .distinct()
 					     .collect(Collectors.toList());
-				System.out.println(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add = " + distinctScopes + "\n\n");
+				log.trace(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add = " + distinctScopes + "\n\n");
 				
 				String[] scopeArray = this.getAllScopesArray(distinctScopes);
-				System.out.println(" All Scope to assign to client = " + Arrays.asList(scopeArray) + "\n");
+				log.trace(" All Scope to assign to client = " + Arrays.asList(scopeArray) + "\n");
 				
 				client.setScopes(scopeArray);
 				this.clientService.updateClient(client);

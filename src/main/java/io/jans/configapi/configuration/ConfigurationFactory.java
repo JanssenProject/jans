@@ -272,11 +272,9 @@ public class ConfigurationFactory {
                     }
                 }
                 log.debug("BC registered: " + hasBC);
-                System.out.println("\n\n BC registered: " + hasBC);
                 if (!hasBC) {
                     Security.addProvider(new BouncyCastleProvider());
                     log.debug("Registered BC successfully.");
-                    System.out.println("\n\n Registered BC successfully.\n\n");
                 }
             }
         } catch (Exception e) {
