@@ -13,15 +13,16 @@ import io.jans.configapi.service.ScopeService;
 import io.jans.configapi.util.Jackson;
 
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -171,13 +172,27 @@ public class ConfigApiResourceProtectionService {
 		try {
 			Client client = this.clientService.getClientByInum(clientId);
 			log.debug(" \n\n updateScopeForClientIfNeeded() - Verify client = " + client + "\n\n");
-			// Prepare scope array
-			List<String> scopes = getScopeWithDn(getAllScopes());
-			String[] scopeArray = this.getAllScopesArray(scopes);
-			log.trace(" AllScope = " + Arrays.asList(scopeArray) + "\n");
-
+			
 			if (client != null) {
 				// Assign scope
+				// Prepare scope array
+				List<String> scopes = getScopeWithDn(getAllScopes());
+				System.out.println(" \n\n updateScopeForClientIfNeeded() - All scopes = " + scopes + "\n\n");
+				if(client.getScopes()!=null) {
+					List<String> existingScopes = Arrays.asList(client.getScopes());
+					System.out.println(" \n\n updateScopeForClientIfNeeded() - Clients existing scopes = " + existingScopes + "\n\n");
+					scopes.addAll(existingScopes);
+				}
+
+				//Distinct scopes
+				 List<String> distinctScopes = scopes.stream()
+					     .distinct()
+					     .collect(Collectors.toList());
+				System.out.println(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add = " + distinctScopes + "\n\n");
+				
+				String[] scopeArray = this.getAllScopesArray(distinctScopes);
+				System.out.println(" All Scope to assign to client = " + Arrays.asList(scopeArray) + "\n");
+				
 				client.setScopes(scopeArray);
 				this.clientService.updateClient(client);
 			}
