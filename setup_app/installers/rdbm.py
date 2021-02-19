@@ -62,48 +62,65 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         tables = []
 
+        all_schema = {}
+
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
-
             for obj in jans_schema['objectClasses']:
-                if obj.get('sql', {}).get('ignore'):
+                all_schema[obj['names'][0]] = obj
+
+        for obj_name in all_schema:
+            obj = all_schema[obj_name]
+
+            if obj.get('sql', {}).get('ignore'):
+                continue
+
+            sql_tbl_name = obj['names'][0]
+            sql_tbl_cols = []
+
+            attr_list = obj['may']
+            if 'sql' in obj:
+                attr_list += obj['sql'].get('include',[])
+                if 'includeObjectClass' in obj['sql']:
+                    for incobjcls in obj['sql']['includeObjectClass']:
+                        attr_list += all_schema[incobjcls]['may']
+            cols_ =[]
+            for attrname in attr_list:
+                if attrname in cols_:
                     continue
+                cols_.append(attrname)
 
-                sql_tbl_name = obj['names'][0]
-                sql_tbl_cols = []
-
-                for attrname in obj['may'] + obj.get('sql', {}).get('include',[]):
-                    if attrname in self.dbUtils.sql_data_types:
-                        type_ = self.dbUtils.sql_data_types[attrname]
-                        if type_[Config.rdbm_type]['type'] == 'VARCHAR':
-                            if type_[Config.rdbm_type]['size'] <= 127:
-                                data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
-                            elif type_[Config.rdbm_type]['size'] <= 255:
-                                data_type = 'TINYTEXT'
-                            else:
-                                data_type = 'TEXT'
-                        else:
-                            data_type = type_[Config.rdbm_type]['type']
-
-                    else:
-                        attr_syntax = self.dbUtils.get_attr_syntax(attrname)
-                        type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]
-                        if type_[Config.rdbm_type]['type'] == 'VARCHAR':
+                if attrname in self.dbUtils.sql_data_types:
+                    type_ = self.dbUtils.sql_data_types[attrname]
+                    if type_[Config.rdbm_type]['type'] == 'VARCHAR':
+                        if type_[Config.rdbm_type]['size'] <= 127:
                             data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
+                        elif type_[Config.rdbm_type]['size'] <= 255:
+                            data_type = 'TINYTEXT'
                         else:
-                            data_type = type_[Config.rdbm_type]['type']
-                    col_def = '`{}` {}'.format(attrname, data_type)
-                    sql_tbl_cols.append(col_def)
+                            data_type = 'TEXT'
+                    else:
+                        data_type = type_[Config.rdbm_type]['type']
 
-                if self.dbUtils.table_exists(sql_tbl_name):
-                    for tbl_col in sql_tbl_cols:
-                        sql_cmd = 'ALTER TABLE `{}` ADD {};'.format(sql_tbl_name, tbl_col)
-                        self.dbUtils.exec_rdbm_query(sql_cmd)
-                        tables.append(sql_cmd)
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                    attr_syntax = self.dbUtils.get_attr_syntax(attrname)
+                    type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]
+                    if type_[Config.rdbm_type]['type'] == 'VARCHAR':
+                        data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
+                    else:
+                        data_type = type_[Config.rdbm_type]['type']
+                col_def = '`{}` {}'.format(attrname, data_type)
+                sql_tbl_cols.append(col_def)
+
+            if self.dbUtils.table_exists(sql_tbl_name):
+                for tbl_col in sql_tbl_cols:
+                    sql_cmd = 'ALTER TABLE `{}` ADD {};'.format(sql_tbl_name, tbl_col)
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                     tables.append(sql_cmd)
+            else:
+                sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                self.dbUtils.exec_rdbm_query(sql_cmd)
+                tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
 
