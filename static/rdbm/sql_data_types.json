@@ -5,6 +5,12 @@
       "type": "VARCHAR"
     }
   },
+  "doc_id": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
   "dat": {
     "mysql": {
       "type": "TEXT"
