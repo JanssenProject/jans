@@ -10,6 +10,7 @@ import io.jans.as.model.configuration.BaseFilter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;
+import io.jans.orm.model.base.BaseEntry;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
@@ -211,11 +212,11 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public String loadEntryDN(PersistenceEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
+    public <T> String loadEntryDN(PersistenceEntryManager p_manager, Class<T> entryClass, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter).multiValued(false);
-        List<DummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), DummyEntry.class, ldapFilter, new String[0]);
+        List<T> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), entryClass, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
             log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
@@ -226,7 +227,7 @@ public abstract class BaseAuthFilterService {
             return null;
         }
 
-        return foundEntries.get(0).getDn();
+        return ((BaseEntry) foundEntries.get(0)).getDn();
     }
 
     public String processAuthenticationFilters(Map<?, ?> attributeValues) throws SearchException {
