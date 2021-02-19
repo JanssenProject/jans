@@ -3760,6 +3760,8 @@
         "exp",
         "del",
         "tknCde",
+        "ssnId",
+        "amr",
         "jansClaimValues"
       ],
       "must": [
