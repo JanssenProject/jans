@@ -29,13 +29,13 @@
   },
   "givenName": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "inum": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -47,37 +47,37 @@
   },
   "middleName": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "nickname": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "o": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "ou": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "sn": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "uid": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -95,31 +95,31 @@
   },
   "jansAccessTknSigAlg": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansAppTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansAttrName": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansAttrOrigin": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansAttrTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -130,7 +130,7 @@
   },
   "jansAuthMode": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -141,7 +141,7 @@
   },
   "jansClaimName": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -206,19 +206,19 @@
   },
   "jansIdTknSignedRespAlg": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansOrgShortName": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansProgLng": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -235,13 +235,13 @@
   },
   "jansSAML2URI": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansScopeTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -252,31 +252,31 @@
   },
   "jansScrTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansStatus": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansSubjectTyp": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansThemeColor": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
   "jansTknEndpointAuthMethod": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   },
@@ -401,7 +401,7 @@
   },
   "clnId": {
     "mysql": {
-      "size": 48,
+      "size": 64,
       "type": "VARCHAR"
     }
   }
