@@ -3519,6 +3519,7 @@
         "del",
         "tknCde",
         "usrId",
+        "ssnId",
         "jansUmaPermission",
         "uuid"
       ],
