@@ -101,7 +101,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                         tables.append(sql_cmd)
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                     tables.append(sql_cmd)
 
