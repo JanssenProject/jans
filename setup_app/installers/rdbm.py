@@ -72,7 +72,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 sql_tbl_name = obj['names'][0]
                 sql_tbl_cols = []
 
-                for attrname in obj['may']:
+                for attrname in obj['may'] + obj.get('sql', {}).get('include',[]):
                     if attrname in self.dbUtils.sql_data_types:
                         type_ = self.dbUtils.sql_data_types[attrname]
                         if type_[Config.rdbm_type]['type'] == 'VARCHAR':
@@ -101,7 +101,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                         tables.append(sql_cmd)
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(48) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                     tables.append(sql_cmd)
 
