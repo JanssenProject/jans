@@ -106,7 +106,8 @@
       "sup": [
         "top"
       ],
-      "x_origin": "Jans - Custom persom objectclass"
+      "x_origin": "Jans - Custom persom objectclass",
+      "sql": {"ignore": true}
     }
   ],
   "oidMacros": {}
