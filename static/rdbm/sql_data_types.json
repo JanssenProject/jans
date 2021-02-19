@@ -466,5 +466,10 @@
     "mysql": {
       "type": "JSON"
     }
+  },
+  "tknCde": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
   }
 }
