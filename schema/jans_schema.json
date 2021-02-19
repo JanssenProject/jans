@@ -3055,7 +3055,7 @@
         "top"
       ],
       "x_origin": "Jans created objectclass",
-      "sql": {"include": ["telephoneNumber"]}
+      "sql": {"include": ["telephoneNumber"], "includeObjectClass": ["jansCustomPerson"]}
     },
     {
       "kind": "STRUCTURAL",
