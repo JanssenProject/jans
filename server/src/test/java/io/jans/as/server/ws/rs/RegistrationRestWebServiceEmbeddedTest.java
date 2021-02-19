@@ -138,7 +138,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(SCOPE.toString()));
 
             JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(jsonObj.getString((SCOPE.toString()))));
-            List<String> scopes = new ArrayList<String>();
+            List<String> scopes = new ArrayList<>();
             for (int i = 0; i < scopesJsonArray.length(); i++) {
                 scopes.add(scopesJsonArray.get(i).toString());
             }
@@ -227,8 +227,8 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
             // check whether values are really updated
             RegisterRequest r = RegisterRequest.fromJson(entity);
             assertTrue(r.getContacts() != null && r.getContacts().contains(contactEmailNewValue));
-            assertTrue(r.getClientUri().equals(clientUriNewValue));
-            assertTrue(r.getLogoUri().equals(logoUriNewValue));
+            assertEquals(clientUriNewValue, r.getClientUri());
+            assertEquals(logoUriNewValue, r.getLogoUri());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
