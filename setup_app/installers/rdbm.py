@@ -72,7 +72,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 sql_tbl_name = obj['names'][0]
                 sql_tbl_cols = []
 
-                for attrname in obj['may']:
+                for attrname in obj['may'] + obj.get('sql', {}).get('include',[]):
                     if attrname in self.dbUtils.sql_data_types:
                         type_ = self.dbUtils.sql_data_types[attrname]
                         if type_[Config.rdbm_type]['type'] == 'VARCHAR':
