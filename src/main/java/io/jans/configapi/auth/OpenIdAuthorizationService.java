@@ -47,19 +47,16 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 		log.info(
 				"oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
 				token, issuer, resourceInfo, method, path);
-		System.out.println(
-				"oAuth  Authorization parameters , token ="+token+" ,issuer = "+issuer+" , resourceInfo ="+resourceInfo+" ,  method = "+method+" path = "+path);
-
+		
 		if (StringUtils.isBlank(token)) {
 			log.error("Token is blank !!!");
 			throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
 		}
 
 		List<String> resourceScopes = getRequestedScopes(resourceInfo);
-		log.info("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo,
+		log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo,
 				resourceScopes);		
-		System.out.println("oAuth Authorization Resource details, resourceInfo ="+resourceInfo+" resourceScopes = "+resourceScopes);
-						
+								
 		// Validate issuer
 		if (StringUtils.isNotBlank(issuer) && !authUtil.isValidIssuer(issuer)) {
 			throw new WebApplicationException("Header Issuer is Invalid.",
@@ -72,21 +69,21 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 			String acccessToken = token.substring("Bearer".length()).trim();
 			Jwt idToken = jwtUtil.parse(acccessToken);
 			isJwtToken = true;
-			System.out.println(" Is Jwt Token isJwtToken = " + isJwtToken);
+			log.trace(" Is Jwt Token isJwtToken = " + isJwtToken);
 			jwtUtil.validateToken(acccessToken, resourceScopes);
 		}
 		catch(InvalidJwtException exp) {
 			log.error("oAuth Invalid Jwt "+token);
 		}
 		
-		//boolean isJwtToken = jwtUtil.isJwt(token.substring("Bearer".length()).trim());
-		System.out.println(" \n isJwtToken = " + isJwtToken);
+		log.trace(" \n isJwtToken = " + isJwtToken);
 
 		if (!isJwtToken) {
-				System.out.println(" Not a Jwt Token isJwtToken = " + isJwtToken);
+				log.trace(" Not a Jwt Token isJwtToken = " + isJwtToken);
 				IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
 					token.substring("Bearer".length()).trim(), issuer);
-			System.out.println("oAuth  Authorization introspectionResponse = "+introspectionResponse);
+				
+			log.trace("oAuth  Authorization introspectionResponse = "+introspectionResponse);
 			if (introspectionResponse == null || !introspectionResponse.isActive()) {
 				log.error("Token is Invalid.");
 				throw new WebApplicationException("Token is Invalid.",
