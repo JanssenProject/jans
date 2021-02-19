@@ -461,5 +461,10 @@
     "mysql": {
       "type": "TEXT"
     }
+  },
+  "memberOf": {
+    "mysql": {
+      "type": "JSON"
+    }
   }
 }
