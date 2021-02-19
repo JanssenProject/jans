@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Openid connect Scopes
 
 Background:
