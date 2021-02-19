@@ -66,6 +66,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             jans_schema = base.readJsonFile(jans_schema_fn)
 
             for obj in jans_schema['objectClasses']:
+                if obj.get('sql', {}).get('ignore'):
+                    continue
+
                 sql_tbl_name = obj['names'][0]
                 sql_tbl_cols = []
 
