@@ -241,7 +241,7 @@ public class ClientService {
 			removeFromCache(client);
 
 			String clientDn = client.getDn();
-			ldapEntryManager.removeRecursively(clientDn);
+			ldapEntryManager.removeRecursively(clientDn, Client.class);
 		}
 	}
 
