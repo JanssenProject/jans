@@ -498,7 +498,7 @@ class DBUtils:
         data_type = self.get_attr_sql_data_type(key)
 
         if data_type in ('SMALLINT',):
-            if val[0][0].lower() in ('1', 'on', 'true', 'yes'):
+            if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
                 return 1
             return 0
 
