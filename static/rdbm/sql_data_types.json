@@ -393,7 +393,13 @@
       "type": "VARCHAR"
     }
   },
-  "clnId": {
+  "clntId": {
+    "mysql": {
+      "size": 48,
+      "type": "VARCHAR"
+    }
+  },
+  "jansClntId": {
     "mysql": {
       "size": 48,
       "type": "VARCHAR"
