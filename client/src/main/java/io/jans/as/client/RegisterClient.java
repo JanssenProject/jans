@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
-import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
@@ -93,9 +92,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     clientRequest.header("Authorization", "Bearer " + getRequest().getRegistrationAccessToken());
                 }
 
-                JSONObject requestBody = getRequest().getJSONParameters();
+                String bodyString = getRequest().hasJwtRequestAsString() ? getRequest().getJwtRequestAsString() : ClientUtil.toPrettyJson(getRequest().getJSONParameters());
 
-                clientRequest.body(MediaType.APPLICATION_JSON, ClientUtil.toPrettyJson(requestBody));
+                clientRequest.body(MediaType.APPLICATION_JSON, bodyString);
             } else { // GET, Client Read
                 clientRequest.accept(MediaType.APPLICATION_JSON);
 
