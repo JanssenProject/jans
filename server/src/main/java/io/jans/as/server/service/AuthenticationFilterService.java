@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
@@ -46,7 +47,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
             return null;
         }
         final Map<String, String> normalizedAttributeValues = normalizeAttributeMap(attributeValues);
-        final String resultDn = loadEntryDN(ldapEntryManager, authenticationFilterWithParameters, normalizedAttributeValues);
+        final String resultDn = loadEntryDN(ldapEntryManager, User.class, authenticationFilterWithParameters, normalizedAttributeValues);
         if (StringUtils.isBlank(resultDn)) {
             return null;
         }
