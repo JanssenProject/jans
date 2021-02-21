@@ -1,2 +1,2 @@
 ldif3==3.2.2
--e git+https://github.com/JanssenProject/jans-pycloudlib@ecfcdac1835a8a04383554935f248e3a4fb61156#egg=jans-pycloudlib
+-e git+https://github.com/JanssenProject/jans-pycloudlib@73d647f370318edbd6f86305d474d0f0b15f960f#egg=jans-pycloudlib
