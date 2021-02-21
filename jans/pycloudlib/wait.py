@@ -354,10 +354,28 @@ def wait_for_oxd(manager, **kwargs):
 
 @retry_on_exception
 def wait_for_sql_conn(manager, **kwargs):
-    """Wait for readiness/liveness of an SQL database.
+    """Wait for readiness/liveness of an SQL database connection.
     """
     # checking connection
     SQLClient().is_alive()
+
+
+@retry_on_exception
+def wait_for_sql(manager, **kwargs):
+    """Wait for readiness/liveness of an SQL database.
+    """
+    from sqlalchemy.sql import text
+
+    client = SQLClient()
+
+    with client.engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT COUNT(doc_id) FROM jansClnt WHERE doc_id = :doc_id"),
+            **{"doc_id": manager.config.get("jca_client_id")}
+        )
+
+        if not result.fetchone()[0]:
+            raise WaitError("SQL is not fully initialized")
 
 
 def wait_for(manager, deps=None):
@@ -376,6 +394,7 @@ def wait_for(manager, deps=None):
     - `oxauth`
     - `oxtrust`
     - `oxd`
+    - `sql`
     - `sql_conn`
 
     .. code-block:: python
@@ -413,6 +432,7 @@ def wait_for(manager, deps=None):
         "oxtrust": {"func": wait_for_oxtrust, "kwargs": {"label": "oxTrust"}},
         "oxd": {"func": wait_for_oxd, "kwargs": {"label": "oxd"}},
         "sql_conn": {"func": wait_for_sql_conn, "kwargs": {"label": "SQL"}},
+        "sql": {"func": wait_for_sql, "kwargs": {"label": "SQL"}},
     }
 
     for dep in deps:
