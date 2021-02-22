@@ -9,10 +9,8 @@ package io.jans.as.server.uma.service;
 import java.util.List;
 import java.util.UUID;
 
-import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,7 +29,6 @@ import io.jans.orm.search.filter.Filter;
  * @author yuriyz on 05/31/2017.
  */
 @ApplicationScoped
-@Named
 public class UmaPctService {
 
     public static final int DEFAULT_PCT_LIFETIME = 2592000;
