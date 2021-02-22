@@ -96,6 +96,7 @@ class AttributeType:
             'USAGE':('userApplications',),
             'X-ORIGIN':(None,),
             'X-ORDERED':(None,),
+            'X-RDBM-ADD': (None,),
           }
 
         l = split_tokens(s)
