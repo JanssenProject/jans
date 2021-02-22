@@ -124,7 +124,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json'),
                     os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json'),
                         ]
+            schema_files = [
+                        os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json'),
+                        os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json'),
+                        ]
+            self.dbUtils.read_jans_schema(others=schema_files)
+
             self.rdbmInstaller.create_tables(jans_schema_json_files)
+            self.dbUtils.rdm_automapper()
 
         self.writeFile(
             os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
