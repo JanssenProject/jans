@@ -4,6 +4,7 @@ import os
 import re
 import json
 import logging
+import copy
 import ldap3
 import pymysql
 from ldap3.utils import dn as dnutils
@@ -59,7 +60,7 @@ class DBUtils:
                     base.logIt("Making LDAP Connection to host {}:{} with user {}".format(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn))
                     self.ldap_conn.bind()
                     break
-                    
+
         if not hasattr(self, 'mysql_conn'):
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
@@ -75,7 +76,7 @@ class DBUtils:
 
     def mysqlconnection(self, log=True):
         base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
-        
+
         bind_uri = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4'.format(
                         Config.rdbm_user,
                         Config.rdbm_password,
@@ -100,10 +101,11 @@ class DBUtils:
                 base.logIt("Can't connect to MySQL server: {}".format(str(e), True))
             return False, e
 
-    def read_jans_schema(self):
+    def read_jans_schema(self, others=[]):
         self.jans_attributes = []
-        for schema_fn_ in ('jans_schema.json', 'custom_schema.json'):
-            schema_fn = os.path.join(Config.install_dir, 'schema', schema_fn_)
+
+        for schema_fn_ in ['jans_schema.json', 'custom_schema.json'] + others:
+            schema_fn = schema_fn_ if schema_fn_.startswith('/') else os.path.join(Config.install_dir, 'schema', schema_fn_)
             schema = base.readJsonFile(schema_fn)
             self.jans_attributes += schema['attributeTypes']
 
@@ -142,7 +144,7 @@ class DBUtils:
 
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
-        
+
         elif self.moddb == BackendTypes.MYSQL:
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
             dn = result['dn'] 
@@ -188,7 +190,7 @@ class DBUtils:
                     {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
             self.log_ldap_result(ldap_operation_result)
-            
+
         elif self.moddb == BackendTypes.MYSQL:
             sql_cmd = "UPDATE jansCustomScr SET jansEnabled=1 WHERE dn='inum={},ou=scripts,o=jans'".format(inum)
             self.exec_rdbm_query(sql_cmd)
@@ -204,7 +206,7 @@ class DBUtils:
                 {service: [ldap3.MODIFY_REPLACE, 'true']}
                 )
             self.log_ldap_result(ldap_operation_result)
-        
+
         elif self.moddb == BackendTypes.MYSQL:
             sql_cmd = "UPDATE jansAppConf SET {}=1 WHERE dn='ou=configuration,o=jans'".format(service)
             self.exec_rdbm_query(sql_cmd)
@@ -229,7 +231,7 @@ class DBUtils:
             cur_val = getattr(sqlalchemyObj, component)
             setattr(sqlalchemyObj, component, value)
             self.session.commit()
-        
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
             self.cbm.exec_query(n1ql)
@@ -246,7 +248,7 @@ class DBUtils:
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
         backend_location = self.get_backend_location_for_dn(search_base)
-        
+
         if backend_location == BackendTypes.LDAP:
             if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
                 key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
@@ -257,7 +259,6 @@ class DBUtils:
                 self.rdm_automapper()
 
             s_table = None
-            
             where_clause = ''
             search_list = []
 
@@ -282,14 +283,14 @@ class DBUtils:
 
             if not s_table:
                 return
-    
+
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
 
             for col, val in search_list:
                 if val == '*':
                     continue
-                
+
                 if col.lower() != 'objectclass':
                     val = val.replace('*', '%')
                     sqlalchemyCol = getattr(sqlalchemy_table, col)
@@ -306,7 +307,7 @@ class DBUtils:
             result = sqlalchemyQueryObject.first()
             if result:
                 return result.__dict__
-            
+
 
         if backend_location == BackendTypes.COUCHBASE:
             key = ldif_utils.get_key_from(search_base)
@@ -322,15 +323,15 @@ class DBUtils:
                     search_clause = 'LIKE "{}"'.format(val.replace('*', '%'))
                 else:
                     search_clause = '="{}"'.format(val.replace('*', '%'))
-                
+
                 n1ql = 'SELECT * FROM `{}` WHERE `{}` {}'.format(bucket, attr, search_clause)
-                
+
             result = self.cbm.exec_query(n1ql)
             if result.ok:
                 data = result.json()
                 if data.get('results'):
                     return data['results'][0][bucket]
-            
+
 
     def add2strlist(self, client_id, strlist):
         value2 = []
@@ -340,7 +341,7 @@ class DBUtils:
         value2.append(client_id)
 
         return  ','.join(value2)
-    
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
 
@@ -375,7 +376,7 @@ class DBUtils:
                     jansConfProperty = sqlalchemyObj.jansConfProperty
                 else:
                     jansConfProperty = {'v': []}
-    
+
                 for oxconfigprop in jansConfProperty['v']:
                     if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                         oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
@@ -553,19 +554,21 @@ class DBUtils:
                 elif backend_location == BackendTypes.MYSQL:
                     if self.Base is None:
                         self.rdm_automapper()
-                    
+
                     if 'add' in  entry and 'changetype' in entry:
                         attribute = entry['add'][0]
-                        new_val = entry[attribute][0]
+                        new_val = entry[attribute]
                         sqlalchObj = self.get_sqlalchObj_for_dn(dn)
 
                         if sqlalchObj:
                             if isinstance(sqlalchObj.__table__.columns[attribute].type, sqlalchemy.dialects.mysql.json.JSON):
-                                cur_val = getattr(sqlalchObj, attribute)
-                                cur_val['v'].append(new_val)
+                                cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
+                                for val_ in new_val:
+                                    cur_val['v'].append(val_)
                                 setattr(sqlalchObj, attribute, cur_val)
                             else:
-                                setattr(sqlalchObj, attribute, new_val)
+                                setattr(sqlalchObj, attribute, new_val[0])
+
                             self.session.commit()
 
                         else:
@@ -589,7 +592,7 @@ class DBUtils:
                         dn_parsed = dnutils.parse_dn(dn)
                         rdn_name = dn_parsed[0][0]
                         objectClass = entry.get('objectClass') or entry.get('objectclass')
-                        
+
                         if objectClass:
                             if 'top' in objectClass:
                                 objectClass.remove('top')

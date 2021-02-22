@@ -107,7 +107,8 @@ def schema2json(schema_file, out_dir=None):
     if 'attributeTypes' in ldif_parser.entries[0][1]:
         for attr_str in ldif_parser.entries[0][1]['attributeTypes']:
             attr_type = AttributeType(attr_str)
-            jans_schema['attributeTypes'].append({
+
+            attr_dict = {
                       "desc": attr_type.tokens['DESC'][0],
                       "equality": attr_type.tokens['EQUALITY'][0],
                       "names": list(attr_type.tokens['NAME']),
@@ -115,7 +116,12 @@ def schema2json(schema_file, out_dir=None):
                       "oid": attr_type.oid,
                       "syntax": attr_type.tokens['SYNTAX'][0],
                       "x_origin": attr_type.tokens['X-ORIGIN'][0]
-                    })
+                    }
+
+            if 'X-RDBM-ADD' in attr_type.tokens and attr_type.tokens['X-RDBM-ADD'][0]:
+                attr_dict['sql'] = {'add_table': attr_type.tokens['X-RDBM-ADD'][0]}
+
+            jans_schema['attributeTypes'].append(attr_dict)
 
     if 'objectClasses' in ldif_parser.entries[0][1]:
         for objcls_str in ldif_parser.entries[0][1]['objectClasses']:
