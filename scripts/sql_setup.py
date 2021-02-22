@@ -10,6 +10,7 @@ from ldap3.utils import dn as dnutils
 from ldif3 import LDIFParser
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.sql import text
 
 from jans.pycloudlib.persistence.sql import SQLClient
@@ -243,12 +244,21 @@ class SQLBackend:
 
     def initialize(self):
         def is_initialized():
+            initialized = False
+
             with self.client.engine.connect() as conn:
-                result = conn.execute(
-                    text("SELECT COUNT(id) FROM jansClnt WHERE doc_id = :doc_id"),
-                    **{"doc_id": self.manager.config.get("jca_client_id")}
-                )
-                return as_boolean(result.fetchone()[0])
+                try:
+                    result = conn.execute(
+                        text("SELECT COUNT(id) FROM jansClnt WHERE doc_id = :doc_id"),
+                        **{"doc_id": self.manager.config.get("jca_client_id")}
+                    )
+                    return as_boolean(result.fetchone()[0])
+                except ProgrammingError as exc:
+                    # the following code should be ignored
+                    # - 1146: table doesn't exist
+                    if exc.orig.args[0] in (1146,):
+                        pass
+            return initialized
 
         should_skip = as_boolean(
             os.environ.get("CN_PERSISTENCE_SKIP_EXISTING", True),
