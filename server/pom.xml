@@ -130,6 +130,7 @@
 								</resource>
 							</resources>
 							<filters>
+								<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
 								<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
 							</filters>
 						</configuration>
