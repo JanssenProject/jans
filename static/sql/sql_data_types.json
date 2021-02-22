@@ -466,5 +466,15 @@
     "mysql": {
       "type": "JSON"
     }
+  },
+  "tknCde": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansUmaPermission": {
+    "mysql": {
+      "type": "JSON"
+    }
   }
 }

@@ -3519,7 +3519,9 @@
         "del",
         "tknCde",
         "usrId",
+        "ssnId",
         "jansUmaPermission",
+        "amr",
         "uuid"
       ],
       "must": [
@@ -3759,6 +3761,8 @@
         "exp",
         "del",
         "tknCde",
+        "ssnId",
+        "amr",
         "jansClaimValues"
       ],
       "must": [
