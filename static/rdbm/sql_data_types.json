@@ -471,5 +471,10 @@
     "mysql": {
       "type": "TINYTEXT"
     }
+  },
+  "jansUmaPermission": {
+    "mysql": {
+      "type": "JSON"
+    }
   }
 }

@@ -1647,7 +1647,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.16 NAME 'jansUmaRPT'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( authnTime $ clnId $ iat $ exp $ del $ tknCde $ usrId $ ssnId $ jansUmaPermission $ uuid )
+  MAY ( authnTime $ clnId $ iat $ exp $ del $ tknCde $ usrId $ ssnId $ amr $ jansUmaPermission $ uuid )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.17 NAME 'jansScr'
   SUP ( top )
