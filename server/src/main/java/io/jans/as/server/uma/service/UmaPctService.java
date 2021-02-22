@@ -6,6 +6,17 @@
 
 package io.jans.as.server.uma.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
@@ -15,20 +26,11 @@ import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.INumGenerator;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author yuriyz on 05/31/2017.
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class UmaPctService {
 
@@ -106,7 +108,7 @@ public class UmaPctService {
     }
 
     public UmaPCT createPct(String clientId) {
-        String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
+        String code = generateCode();
 
         UmaPCT pct = new UmaPCT(pctLifetime());
         pct.setCode(code);
@@ -171,6 +173,12 @@ public class UmaPctService {
 
         ldapEntryManager.persist(branch);
     }
+
+	private String generateCode() {
+		String code = UUID.randomUUID().toString();
+
+		return code;
+	}
 
     public String dn(String pctCode) {
         if (StringUtils.isBlank(pctCode)) {
