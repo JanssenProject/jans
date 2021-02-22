@@ -13,6 +13,8 @@ import sys
 import backoff
 import ldap3
 import requests
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.sql import text
 
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -364,18 +366,25 @@ def wait_for_sql_conn(manager, **kwargs):
 def wait_for_sql(manager, **kwargs):
     """Wait for readiness/liveness of an SQL database.
     """
-    from sqlalchemy.sql import text
-
     client = SQLClient()
 
-    with client.engine.connect() as conn:
-        result = conn.execute(
-            text("SELECT COUNT(doc_id) FROM jansClnt WHERE doc_id = :doc_id"),
-            **{"doc_id": manager.config.get("jca_client_id")}
-        )
+    init = False
 
-        if not result.fetchone()[0]:
-            raise WaitError("SQL is not fully initialized")
+    with client.engine.connect() as conn:
+        try:
+            result = conn.execute(
+                text("SELECT COUNT(doc_id) FROM jansClnt WHERE doc_id = :doc_id"),
+                **{"doc_id": manager.config.get("jca_client_id")}
+            )
+            init = as_boolean(result.fetchone()[0])
+        except ProgrammingError as exc:
+            # the following code should be ignored
+            # - 1146: table doesn't exist
+            if exc.orig.args[0] in (1146,):
+                pass
+
+    if not init:
+        raise WaitError("SQL is not fully initialized")
 
 
 def wait_for(manager, deps=None):

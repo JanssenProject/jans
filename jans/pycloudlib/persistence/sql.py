@@ -38,6 +38,7 @@ class SQLClient:
         self.engine = create_engine(
             f"{connector}://{user}:{password}@{host}:{port}/{database}",
             pool_pre_ping=True,
+            hide_parameters=True,
         )
 
     def is_alive(self):
