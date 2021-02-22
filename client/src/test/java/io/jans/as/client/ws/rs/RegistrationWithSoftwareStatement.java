@@ -473,7 +473,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
             "RS256_keyId", "clientJwksUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` configuration property should be set to true to get this test passed.")
-    @Test
+    //@Test
     public void registerClientWithRequestObject(final String redirectUris, final String sectorIdentifierUri,
                                         final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
                                         final String dnName, final String keyId, final String clientJwksUri) throws Exception {
