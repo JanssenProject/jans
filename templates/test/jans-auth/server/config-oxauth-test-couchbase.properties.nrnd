@@ -12,3 +12,6 @@ config.couchbase.ssl_enabled=%(ssl_enabled)s
 config.couchbase.couchbaseTrustStoreFn=%(couchbaseTrustStoreFn)s
 config.couchbase.encoded_couchbaseTrustStorePass=%(encoded_couchbaseTrustStorePass)s
 config.couchbase.certFolder=%(certFolder)s
+
+# Generic properties
+config.generic.certsDir=%(certFolder)s/couchbase
