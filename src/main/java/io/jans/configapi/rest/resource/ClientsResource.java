@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
 
-
 /**
  * @author Mougang T.Gasmyr
  *
@@ -44,7 +43,7 @@ public class ClientsResource extends BaseResource {
 
     @Inject
     Logger log;
-    
+
     @Inject
     ClientService clientService;
 
@@ -52,7 +51,7 @@ public class ClientsResource extends BaseResource {
     EncryptionService encryptionService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) throws Exception {
@@ -66,7 +65,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
@@ -75,13 +74,13 @@ public class ClientsResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         String inum = client.getClientId();
-       	if(inum==null || inum.isEmpty() || inum.isBlank()) {
-	        inum = clientService.generateInumForNewClient();
-	        client.setClientId(inum);
-    	}
+        if (inum == null || inum.isEmpty() || inum.isBlank()) {
+            inum = clientService.generateInumForNewClient();
+            client.setClientId(inum);
+        }
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         if (client.getClientSecret() != null) {
             client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
@@ -91,13 +90,13 @@ public class ClientsResource extends BaseResource {
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         if (result.getClientSecret() != null) {
-        	result.setClientSecret(encryptionService.encrypt(result.getClientSecret()));
+            result.setClientSecret(encryptionService.encrypt(result.getClientSecret()));
         }
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
@@ -120,9 +119,10 @@ public class ClientsResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
+    public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+            throws JsonPatchException, IOException {
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
@@ -133,27 +133,26 @@ public class ClientsResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS })
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         clientService.removeClient(client);
         return Response.noContent().build();
     }
-    
-	private List<Client> getClients(List<Client> clients) throws Exception {
-		if (clients!=null && !clients.isEmpty()) {
-			for (Client client : clients)
-				if (client.getClientSecret() != null) {
-					try {
-						client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-					}catch (EncryptionException exp) {
-						log.error("Error while client(["+client+"]) secret decryption - "+exp+"!");
-					}
-				}
-		}
-		return clients;
-	}
 
+    private List<Client> getClients(List<Client> clients) throws Exception {
+        if (clients != null && !clients.isEmpty()) {
+            for (Client client : clients)
+                if (client.getClientSecret() != null) {
+                    try {
+                        client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                    } catch (EncryptionException exp) {
+                        log.error("Error while client([" + client + "]) secret decryption - " + exp + "!");
+                    }
+                }
+        }
+        return clients;
+    }
 
 }

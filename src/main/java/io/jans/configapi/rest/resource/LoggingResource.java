@@ -31,13 +31,13 @@ public class LoggingResource {
     ConfigurationService configurationService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.LOGGING_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS })
     public Response getLogging() {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.LOGGING_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
     public Response updateHero(@Valid Logging logging) {
         Conf conf = configurationService.findConf();
 
@@ -47,26 +47,26 @@ public class LoggingResource {
         if (!StringUtils.isBlank(logging.getLoggingLayout())) {
             conf.getDynamic().setLoggingLayout(logging.getLoggingLayout());
         }
-        
+
         conf.getDynamic().setHttpLoggingEnabled(logging.isHttpLoggingEnabled());
         conf.getDynamic().setDisableJdkLogger(logging.isDisableJdkLogger());
         conf.getDynamic().setEnabledOAuthAuditLogging(logging.isEnabledOAuthAuditLogging());
-        
+
         if (!StringUtils.isBlank(logging.getExternalLoggerConfiguration())) {
             conf.getDynamic().setExternalLoggerConfiguration(logging.getExternalLoggerConfiguration());
         }
-        conf.getDynamic().setHttpLoggingExludePaths(logging.getHttpLoggingExludePaths());     
-        
+        conf.getDynamic().setHttpLoggingExludePaths(logging.getHttpLoggingExludePaths());
+
         configurationService.merge(conf);
-        
-        logging = this.getLoggingConfiguration(); 
+
+        logging = this.getLoggingConfiguration();
         return Response.ok(logging).build();
     }
-    
+
     private Logging getLoggingConfiguration() {
-    	Logging logging = new Logging();
+        Logging logging = new Logging();
         AppConfiguration appConfiguration = configurationService.find();
-       
+
         logging.setLoggingLevel(appConfiguration.getLoggingLevel());
         logging.setLoggingLayout(appConfiguration.getLoggingLayout());
         logging.setHttpLoggingEnabled(appConfiguration.getHttpLoggingEnabled());

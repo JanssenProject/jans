@@ -13,6 +13,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.configapi.auth.AuthorizationService;
 import io.jans.configapi.auth.OpenIdAuthorizationService;
 import io.jans.configapi.auth.ConfigApiResourceProtectionService;
@@ -50,7 +51,8 @@ public class ConfigurationFactory {
     static {
         if (System.getProperty("jans.base") != null) {
             BASE_DIR = System.getProperty("jans.base");
-        } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
+        } else if ((System.getProperty("catalina.base") != null)
+                && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
             BASE_DIR = System.getProperty("catalina.home");
@@ -86,7 +88,7 @@ public class ConfigurationFactory {
     private FileConfiguration baseConfiguration;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
-    
+
     @Inject
     @ConfigProperty(name = "api.protection.type")
     private static String API_PROTECTION_TYPE;
@@ -94,21 +96,21 @@ public class ConfigurationFactory {
     @Inject
     @ConfigProperty(name = "api.client.id")
     private static String API_CLIENT_ID;
-    
+
     @Inject
     @ConfigProperty(name = "api.client.password")
     private static String API_CLIENT_PASSWORD;
-    
+
     @Inject
     @ConfigProperty(name = "api.approved.issuer")
     private static List<String> API_APPROVED_ISSUER;
-    
+
     @Inject
     ConfigApiResourceProtectionService configApiResourceProtectionService;
-    
+
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
-    
+
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -124,7 +126,7 @@ public class ConfigurationFactory {
     public FileConfiguration getBaseConfiguration() {
         return baseConfiguration;
     }
-    
+
     public static String getAppPropertiesFile() {
         return APP_PROPERTIES_FILE;
     }
@@ -132,20 +134,19 @@ public class ConfigurationFactory {
     public static String getApiProtectionType() {
         return API_PROTECTION_TYPE;
     }
- 
 
     public static String getApiClientId() {
         return API_CLIENT_ID;
     }
-    
+
     public static String getApiClientPassword() {
         return API_CLIENT_PASSWORD;
-    }    
-    
+    }
+
     public static List<String> getApiApprovedIssuer() {
         return API_APPROVED_ISSUER;
-    }   
-    
+    }
+
     public void create() {
         loadBaseConfiguration();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
@@ -161,8 +162,8 @@ public class ConfigurationFactory {
         }
 
         createAuthorizationService();
-        addSecurityProviders();
-        
+        installSecurityProvider();
+
     }
 
     private boolean createFromDb() {
@@ -260,8 +261,16 @@ public class ConfigurationFactory {
 
         return PropertiesDecrypter.decryptAllProperties(getStringEncrypter(), connectionProperties);
     }
+
+    private void installSecurityProvider() {
+        try {
+            SecurityProviderUtility.installBCProvider();
+        } catch (Exception ex) {
+            log.error("Failed to install BC provider properly",ex);
+        }
+    }
     
-    private void addSecurityProviders() {
+    /*private void addSecurityProviders() {
         try {
             final Provider[] providers = Security.getProviders();
             if (providers != null) {
@@ -278,9 +287,9 @@ public class ConfigurationFactory {
                 }
             }
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
-    }
+    }*/
 
     @Produces
     @ApplicationScoped
@@ -323,8 +332,9 @@ public class ConfigurationFactory {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
-        	// Verify resources available
-            configApiResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType(),ConfigurationFactory.getApiClientId()); 
+            // Verify resources available
+            configApiResourceProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType(),
+                    ConfigurationFactory.getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);

@@ -41,13 +41,14 @@ public class UmaResourceService {
     }
 
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
-        String[] targetArray = new String[]{pattern};
+        String[] targetArray = new String[] { pattern };
         Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+                null);
         Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter, sizeLimit);
     }
-    
+
     public List<UmaResource> findResourcesByName(String name, int sizeLimit) {
         if (StringUtils.isNotBlank(name)) {
             Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.displayName, name);
@@ -56,7 +57,7 @@ public class UmaResourceService {
         }
         return null;
     }
-    
+
     public List<UmaResource> getAllResources(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, null, sizeLimit);
     }
