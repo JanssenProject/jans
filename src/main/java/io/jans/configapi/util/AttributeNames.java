@@ -20,7 +20,7 @@ public class AttributeNames {
     public static final String SCOPES = "scopes";
     public static final String GRANT_TYPES = "grant types";
     public static final String DATA_TYPE = "dataType";
-    
+
     private AttributeNames() {
     }
 }

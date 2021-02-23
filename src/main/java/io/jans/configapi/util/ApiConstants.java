@@ -62,7 +62,6 @@ public class ApiConstants {
     public static final String TYPE_PATH = "/{type}";
     public static final String NAME_PARAM_PATH = "/{name}";
 
-
     public static final String LIMIT = "limit";
     public static final String PATTERN = "pattern";
     public static final String STATUS = "status";
@@ -81,7 +80,7 @@ public class ApiConstants {
 
     // Custom CODE
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
-    
+
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
     public static final String PROTECTION_TYPE_UMA = "uma";

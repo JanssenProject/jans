@@ -29,13 +29,11 @@ public class GlobalErrorHandler implements ExceptionMapper<Exception> {
             return ((WebApplicationException) e).getResponse();
         }
         log.error(e.getMessage(), e);
-        return Response
-                .serverError()
+        return Response.serverError()
                 .entity(new ApiError.ErrorBuilder()
                         .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
                         .withMessage("Internal Server error")
-                        .andDescription("Internal error occurs, for more details please check log files.")
-                        .build())
+                        .andDescription("Internal error occurs, for more details please check log files.").build())
                 .build();
     }
 }

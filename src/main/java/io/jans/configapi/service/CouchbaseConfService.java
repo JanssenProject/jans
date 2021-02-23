@@ -33,7 +33,8 @@ public class CouchbaseConfService {
     private EncryptionService encryptionService;
 
     public List<CouchbaseConnectionConfiguration> findAll() {
-        return getIDPAuthConf().stream().filter(c -> c.asCouchbaseConfiguration() != null).map(IDPAuthConf::asCouchbaseConfiguration).collect(Collectors.toList());
+        return getIDPAuthConf().stream().filter(c -> c.asCouchbaseConfiguration() != null)
+                .map(IDPAuthConf::asCouchbaseConfiguration).collect(Collectors.toList());
     }
 
     public void save(CouchbaseConnectionConfiguration conf) {
@@ -50,7 +51,8 @@ public class CouchbaseConfService {
     public void remove(String name) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         final List<IDPAuthConf> existing = gluuConfiguration.getIdpAuthn();
-        Optional<IDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(name)).findFirst();
+        Optional<IDPAuthConf> existingConf = existing.stream()
+                .filter(o -> o.getName() != null && o.getName().equals(name)).findFirst();
         if (existingConf.isEmpty())
             return; // does not exist, nothing to remove
 
@@ -62,7 +64,8 @@ public class CouchbaseConfService {
 
     public Optional<CouchbaseConnectionConfiguration> findByName(String name) {
         final List<CouchbaseConnectionConfiguration> all = findAll();
-        return all.stream().filter(d -> d != null && d.getConfigId() != null && d.getConfigId().equals(name)).findFirst();
+        return all.stream().filter(d -> d != null && d.getConfigId() != null && d.getConfigId().equals(name))
+                .findFirst();
     }
 
     private List<IDPAuthConf> getIDPAuthConf() {
@@ -73,13 +76,15 @@ public class CouchbaseConfService {
         return idpConfList;
     }
 
-    private List<IDPAuthConf> getOrCreateIDPAuthConfs(List<IDPAuthConf> existing, List<CouchbaseConnectionConfiguration> confs) {
+    private List<IDPAuthConf> getOrCreateIDPAuthConfs(List<IDPAuthConf> existing,
+            List<CouchbaseConnectionConfiguration> confs) {
         if (existing == null) {
             existing = Lists.newArrayList();
         }
 
         for (CouchbaseConnectionConfiguration conf : confs) {
-            Optional<IDPAuthConf> existingConf = existing.stream().filter(o -> o.getName() != null && o.getName().equals(conf.getConfigId())).findFirst();
+            Optional<IDPAuthConf> existingConf = existing.stream()
+                    .filter(o -> o.getName() != null && o.getName().equals(conf.getConfigId())).findFirst();
 
             final IDPAuthConf idpConf;
             if (existingConf.isEmpty()) {
