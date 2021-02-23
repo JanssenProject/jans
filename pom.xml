@@ -133,10 +133,7 @@
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -156,10 +153,7 @@
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -179,10 +173,7 @@
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -197,10 +188,7 @@
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -216,22 +204,13 @@
 					<groupId>org.bouncycastle</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+				
 			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.nimbusds</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>bcprov-jdk15on</artifactId>			
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
