@@ -375,7 +375,7 @@ public class OpenIdConfiguration extends HttpServlet {
 						for (String claimDn : claimIdList) {
 							final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 							final String claimName = attribute.getClaimName();
-							if (StringUtils.isNotBlank(claimName)) {
+							if (StringUtils.isNotBlank(claimName) && !Boolean.TRUE.equals(attribute.getJansHideOnDiscovery())) {
 								claimsList.put(claimName);
 								claims.add(claimName);
 							}
