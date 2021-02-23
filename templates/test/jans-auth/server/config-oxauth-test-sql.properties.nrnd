@@ -25,6 +25,3 @@ config.sql.connection.pool.max-wait-time-millis=20000
 
 # Allow to evict connection in pool after 30 minutes
 config.sql.connection.pool.min-evictable-idle-time-millis=1800000
-
-# Generic properties
-config.generic.certsDir=%(certFolder)s/sql
