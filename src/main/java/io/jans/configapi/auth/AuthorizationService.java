@@ -18,38 +18,38 @@ import java.util.List;
 
 public abstract class AuthorizationService implements Serializable {
 
-	private static final long serialVersionUID = 4012335221233316230L;
+    private static final long serialVersionUID = 4012335221233316230L;
 
-	@Inject
-	Logger log;
+    @Inject
+    Logger log;
 
-	@Inject
-	ConfigurationFactory configurationFactory;
+    @Inject
+    ConfigurationFactory configurationFactory;
 
-	@Inject
-	AuthUtil authUtil;
+    @Inject
+    AuthUtil authUtil;
 
-	public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
-			String path) throws Exception;
+    public abstract void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
+            String path) throws Exception;
 
-	protected Response getErrorResponse(Response.Status status, String detail) {
-		return Response.status(status).entity(detail).build();
-	}
+    protected Response getErrorResponse(Response.Status status, String detail) {
+        return Response.status(status).entity(detail).build();
+    }
 
-	public List<String> getRequestedScopes(String path) {
-		return authUtil.getRequestedScopes(path);
-	}
+    public List<String> getRequestedScopes(String path) {
+        return authUtil.getRequestedScopes(path);
+    }
 
-	public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-		return authUtil.getRequestedScopes(resourceInfo);
-	}
+    public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
+        return authUtil.getRequestedScopes(resourceInfo);
+    }
 
-	public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
-		return authUtil.validateScope(authScopes, resourceScopes);
-	}
+    public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
+        return authUtil.validateScope(authScopes, resourceScopes);
+    }
 
-	public List<String> getApiApprovedIssuer() {
-		return this.configurationFactory.getApiApprovedIssuer();
-	}
+    public List<String> getApiApprovedIssuer() {
+        return this.configurationFactory.getApiApprovedIssuer();
+    }
 
 }

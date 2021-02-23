@@ -88,9 +88,9 @@ public class UmaService implements Serializable {
     public void validateRptToken(Token patToken, String authorization, String resourceId, List<String> scopeIds) {
         log.trace("Validating RPT, patToken: {}, authorization: {}, resourceId: {}, scopeIds: {} ", patToken,
                 authorization, resourceId, scopeIds);
-        
+
         if (patToken == null) {
-            log.trace("Token is blank"); 
+            log.trace("Token is blank");
             Response registerPermissionsResponse = prepareRegisterPermissionsResponse(patToken, resourceId, scopeIds);
             throw new WebApplicationException("Token is blank.", registerPermissionsResponse);
         }

@@ -29,7 +29,7 @@ public class ConfigResource extends BaseResource {
     ConfigurationService configurationService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
         return Response.ok(appConfiguration).build();
@@ -37,7 +37,7 @@ public class ConfigResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());

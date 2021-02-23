@@ -30,9 +30,9 @@ import javax.ws.rs.ext.Provider;
 @ProtectedApi
 @Priority(Priorities.AUTHENTICATION)
 public class AuthorizationFilter implements ContainerRequestFilter {
-   
+
     private static final String AUTHENTICATION_SCHEME = "Bearer";
-    
+
     @Inject
     Logger log;
 
@@ -47,30 +47,34 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Context
     private ResourceInfo resourceInfo;
-    
 
     @Inject
     AuthorizationService authorizationService;
 
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
-        log.info("====== info.getAbsolutePath() = " +info.getAbsolutePath()+" , info.getRequestUri() = "+info.getRequestUri()+"\n\n");
-        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath() + " info.toString()=" + info.toString());
-        log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()=" + request.getRequestURI()+ " request.toString() " + request.toString());
+        log.info("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = "
+                + info.getRequestUri() + "\n\n");
+        log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath()
+                + " info.toString()=" + info.toString());
+        log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()="
+                + request.getRequestURI() + " request.toString() " + request.toString());
         log.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
         log.info("======PERFORMING AUTHORIZATION=========================================");
         String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
-        
-        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader+" , issuer = "+issuer+"\n\n\n");
-               
+
+        log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + " , issuer = "
+                + issuer + "\n\n\n");
+
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
-            this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo, context.getMethod(), request.getRequestURI());
+            this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
+                    context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
