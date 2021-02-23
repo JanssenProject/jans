@@ -44,32 +44,35 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
-        log.trace("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ", token,
-              
-                issuer, resourceInfo, method, path);
+        log.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+                token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
             log.error("Token is blank !!!");
             throw new WebApplicationException("Token is blank.", Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
+        log.info("Get requested scopes");
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
         log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {} ", resourceInfo,
                 resourceScopes);
 
         // Validate issuer
+        log.info("Validate issuer");
         if (StringUtils.isNotBlank(issuer) && !authUtil.isValidIssuer(issuer)) {
             throw new WebApplicationException("Header Issuer is Invalid.",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         // Check the type of token simple, jwt, reference
+        log.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = jwtUtil.isJwt(acccessToken);
         log.trace(" Is Jwt Token isJwtToken = " + isJwtToken);
-        
+
         if (isJwtToken) {
             try {
+                log.info("Validate JWT");
                 Jwt jwt = jwtUtil.parse(acccessToken);
                 jwtUtil.validateToken(acccessToken, resourceScopes);
                 return;
@@ -80,7 +83,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             }
         }
 
-        log.trace(" Not a Jwt Token isJwtToken = " + isJwtToken);
+        log.info("\n Validate Reference token \n");
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
                 token.substring("Bearer".length()).trim(), issuer);
 
@@ -91,6 +94,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
+        log.info("Validate token scopes");
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
             log.error("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: "
                     + introspectionResponse.getScope());

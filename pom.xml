@@ -129,11 +129,6 @@
 					<groupId>org.apache.jackrabbit</groupId>
 					<artifactId>jackrabbit-core</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -149,11 +144,6 @@
 					<groupId>org.apache.jackrabbit</groupId>
 					<artifactId>jackrabbit-core</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -169,11 +159,6 @@
 					<groupId>org.apache.jackrabbit</groupId>
 					<artifactId>jackrabbit-core</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -184,11 +169,6 @@
 					<artifactId>org.jboss.resteasy</artifactId>
 					<groupId>*</groupId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -200,18 +180,9 @@
 					<artifactId>org.jboss.resteasy</artifactId>
 					<groupId>*</groupId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.bouncycastle</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>			
-		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>

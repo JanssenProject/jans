@@ -29,7 +29,6 @@ import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import io.quarkus.arc.AlternativePriority;
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
@@ -39,8 +38,6 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
-import java.security.Provider;
-import java.security.Security;
 import java.util.List;
 import java.util.Properties;
 
@@ -270,27 +267,6 @@ public class ConfigurationFactory {
         }
     }
     
-    /*private void addSecurityProviders() {
-        try {
-            final Provider[] providers = Security.getProviders();
-            if (providers != null) {
-                boolean hasBC = false;
-                for (Provider p : providers) {
-                    if (p.getName().equalsIgnoreCase("BC")) {
-                        hasBC = true;
-                    }
-                }
-                log.debug("BC registered: " + hasBC);
-                if (!hasBC) {
-                    Security.addProvider(new BouncyCastleProvider());
-                    log.debug("Registered BC successfully.");
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }*/
-
     @Produces
     @ApplicationScoped
     public StaticConfiguration getStaticConf() {
