@@ -1349,6 +1349,15 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "equality": "booleanMatch",
+      "names": [
+        "jansHideOnDiscovery"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Name",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3054,7 +3063,8 @@
       "sup": [
         "top"
       ],
-      "x_origin": "Jans created objectclass"
+      "x_origin": "Jans created objectclass",
+      "sql": {"include": ["telephoneNumber"], "includeObjectClass": ["jansCustomPerson"]}
     },
     {
       "kind": "STRUCTURAL",
@@ -3192,6 +3202,7 @@
         "jansStatus",
         "inum",
         "jansMultivaluedAttr",
+        "jansHideOnDiscovery",
         "jansNameIdTyp",
         "jansScimCustomAttr",
         "jansSourceAttr",
@@ -3248,7 +3259,8 @@
       "sup": [
         "top"
       ],
-      "x_origin": "Jans created objectclass"
+      "x_origin": "Jans created objectclass",
+      "sql": {"ignore": true}
     },
     {
       "kind": "STRUCTURAL",
@@ -3517,7 +3529,9 @@
         "del",
         "tknCde",
         "usrId",
+        "ssnId",
         "jansUmaPermission",
+        "amr",
         "uuid"
       ],
       "must": [
@@ -3757,6 +3771,8 @@
         "exp",
         "del",
         "tknCde",
+        "ssnId",
+        "amr",
         "jansClaimValues"
       ],
       "must": [
