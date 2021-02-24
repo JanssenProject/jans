@@ -3531,7 +3531,6 @@
         "usrId",
         "ssnId",
         "jansUmaPermission",
-        "amr",
         "uuid"
       ],
       "must": [
@@ -3772,7 +3771,6 @@
         "del",
         "tknCde",
         "ssnId",
-        "amr",
         "jansClaimValues"
       ],
       "must": [
