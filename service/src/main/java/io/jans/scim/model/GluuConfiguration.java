@@ -7,9 +7,9 @@
 package io.jans.scim.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SmtpConfiguration;
@@ -22,8 +22,6 @@ import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 /**
  * GluuConfiguration
  * 
@@ -31,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Yuriy Movchan Date: 04/20/2014
  */
 @DataEntry
-@ObjectClass(value = "jansConfiguration")
+@ObjectClass(value = "jansAppConf")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuConfiguration extends InumEntry implements Serializable {
 
