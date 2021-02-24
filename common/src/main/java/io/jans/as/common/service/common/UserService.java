@@ -548,7 +548,7 @@ public abstract class UserService {
 		return persistenceEntryManager.decodeTime(baseDn, date);
 	}
 
-	protected abstract List<String> getPersonCustomObjectClassList();
+	public abstract List<String> getPersonCustomObjectClassList();
 
-	protected abstract String getPeopleBaseDn();
+	public abstract String getPeopleBaseDn();
 }
