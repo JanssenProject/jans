@@ -29,6 +29,7 @@ import io.jans.model.security.SimplePrincipal;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
@@ -559,7 +560,7 @@ public class AuthenticationService {
 		CustomEntry customEntry = new CustomEntry();
 		customEntry.setDn(user.getDn());
 
-		List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+		List<String> personCustomObjectClassList = userService.getPersonCustomObjectClassList();
 		if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
 			// Combine object classes from LDAP and configuration in one list
 			Set<Object> customPersonCustomObjectClassList = new HashSet<Object>();
