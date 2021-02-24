@@ -723,9 +723,7 @@ def _save_generated_ctx(manager, data, type_):
         backend = manager.secret
 
     logger.info("Saving {} to backend".format(type_))
-
-    for k, v in data.items():
-        backend.set(k, v)
+    backend.set_all(data)
 
 
 def _load_from_file(manager, filepath, type_):
@@ -750,9 +748,8 @@ def _load_from_file(manager, filepath, type_):
     # tolerancy before checking existing key
     time.sleep(5)
 
-    for k, v in ctx.items():
-        val = setter(k, v)
-        backend.set(k, val)
+    data = {k: setter(k, v) for k, v in ctx.items()}
+    backend.set_all(data)
 
 
 def _dump_to_file(manager, filepath, type_):
@@ -763,7 +760,7 @@ def _dump_to_file(manager, filepath, type_):
 
     logger.info("Saving {} to {}".format(type_, filepath))
 
-    data = {"_{}".format(type_): backend.all()}
+    data = {"_{}".format(type_): backend.get_all()}
     data = json.dumps(data, sort_keys=True, indent=4)
     with open(filepath, "w") as f:
         f.write(data)

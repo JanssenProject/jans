@@ -1,4 +1,4 @@
 click==6.7
 Cerberus==1.3.1
 fqdn==1.4.0
--e git+https://github.com/JanssenProject/jans-pycloudlib@8e5b0be0753a71ecdfca40dcde635eca1beed7b4#egg=jans-pycloudlib
+-e git+https://github.com/JanssenProject/jans-pycloudlib@1d095e183b969cce461d21398407284f6934db1f#egg=jans-pycloudlib
