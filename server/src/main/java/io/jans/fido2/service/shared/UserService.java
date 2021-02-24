@@ -33,12 +33,12 @@ public class UserService extends io.jans.as.common.service.common.UserService {
     private AppConfiguration appConfiguration;
 
     @Override
-	protected List<String> getPersonCustomObjectClassList() {
+	public List<String> getPersonCustomObjectClassList() {
 		return appConfiguration.getPersonCustomObjectClassList();
 	}
 
     @Override
-	protected String getPeopleBaseDn() {
+    public String getPeopleBaseDn() {
 		return staticConfiguration.getBaseDn().getPeople();
 	}
 
