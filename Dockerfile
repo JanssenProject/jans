@@ -5,7 +5,7 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography \
+    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
@@ -64,7 +64,9 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_NAMESPACE=jans \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
+    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
 
 # ==========
 # Secret ENV
@@ -83,7 +85,10 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_NAMESPACE=jans \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
+    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
 
 # ===============
 # Persistence ENV
@@ -109,7 +114,9 @@ ENV CN_PERSISTENCE_TYPE=ldap \
 ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_JAVA_OPTIONS=""
+    CN_JAVA_OPTIONS="" \
+    GOOGLE_PROJECT_ID="" \
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
 
 # ====
 # misc
