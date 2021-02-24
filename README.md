@@ -24,6 +24,8 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
+- `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
+- `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
 - `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` or `kubernetes`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
@@ -37,6 +39,9 @@ The following environment variables are supported by the container:
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
+- `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
+- `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
+- `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Google Secret Manager (default to `secret`).
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
@@ -53,3 +58,5 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_BUCKET_PREFIX`: Prefix for Couchbase buckets (default to `jans`).
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
