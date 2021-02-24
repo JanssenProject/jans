@@ -5,7 +5,7 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache py3-pip curl tini py3-cryptography \
+    && apk add --no-cache py3-pip curl tini py3-cryptography py3-grpcio \
     && apk add --no-cache --virtual build-deps git
 
 # ======
@@ -47,7 +47,9 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_TOKEN_FILE=/etc/certs/consul_token \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
+    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
 
 # ==========
 # Secret ENV
@@ -65,7 +67,11 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
+    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+
 
 # ===============
 # Persistence ENV
@@ -104,7 +110,9 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_RMI_URL="" \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
-    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password
+    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
+    GOOGLE_PROJECT_ID="" \
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
 
 # ====
 # misc
