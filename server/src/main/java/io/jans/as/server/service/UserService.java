@@ -11,6 +11,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
@@ -43,12 +44,16 @@ public class UserService extends io.jans.as.common.service.common.UserService {
     private NetworkService networkService;
 
     @Override
-	protected List<String> getPersonCustomObjectClassList() {
-		return appConfiguration.getPersonCustomObjectClassList();
+	public List<String> getPersonCustomObjectClassList() {
+		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType())) {
+			return appConfiguration.getPersonCustomObjectClassList();
+		}
+		
+		return null;
 	}
 
     @Override
-	protected String getPeopleBaseDn() {
+    public String getPeopleBaseDn() {
 		return staticConfiguration.getBaseDn().getPeople();
 	}
 
