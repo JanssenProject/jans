@@ -289,7 +289,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         }
         AccessToken accessToken = new AccessToken(lifetime);
 
-        accessToken.setAuthMode(getAcrValues());
         accessToken.setSessionDn(getSessionDn());
         accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(certAsPem));
 
@@ -305,7 +304,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
-        refreshToken.setAuthMode(getAcrValues());
         refreshToken.setSessionDn(getSessionDn());
 
         return refreshToken;

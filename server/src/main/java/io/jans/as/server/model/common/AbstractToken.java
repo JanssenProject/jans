@@ -46,9 +46,6 @@ public abstract class AbstractToken implements Serializable, Deletable {
     private boolean revoked;
     private boolean expired;
 
-    @AttributeName(name = "amr")
-    private String authMode;
-
     @AttributeName(name = "ssnId")
     private String sessionDn;
     private String x5ts256;
@@ -216,24 +213,6 @@ public abstract class AbstractToken implements Serializable, Deletable {
      */
     public synchronized void setExpired(boolean expired) {
         this.expired = expired;
-    }
-
-    /**
-     * Returns the authentication mode.
-     *
-     * @return The authentication mode.
-     */
-    public String getAuthMode() {
-        return authMode;
-    }
-
-    /**
-     * Sets the authentication mode.
-     *
-     * @param authMode The authentication mode.
-     */
-    public void setAuthMode(String authMode) {
-        this.authMode = authMode;
     }
 
     public String getX5ts256() {
