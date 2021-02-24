@@ -269,7 +269,6 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         try {
             RefreshToken refreshToken = new RefreshToken(HandleTokenFactory.generateHandleToken(), new Date(), expirationDate);
 
-            refreshToken.setAuthMode(getAcrValues());
             refreshToken.setSessionDn(getSessionDn());
 
             if (refreshToken.getExpiresIn() > 0) {
