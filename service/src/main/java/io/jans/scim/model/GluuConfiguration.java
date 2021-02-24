@@ -75,9 +75,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "gluuConfigurationDnsServer")
-	private String configurationDnsServer;
-
 	@AttributeName(name = "jansenticationMode")
 	private String authenticationMode;
 
@@ -101,14 +98,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public final void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
 		this.smtpConfiguration = smtpConfiguration;
-	}
-
-	public String getConfigurationDnsServer() {
-		return configurationDnsServer;
-	}
-
-	public void setConfigurationDnsServer(String configurationDnsServer) {
-		this.configurationDnsServer = configurationDnsServer;
 	}
 
 	public String getAuthenticationMode() {
