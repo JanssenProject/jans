@@ -47,9 +47,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansLastUpd", updateOnly = true)
 	private Date lastUpdate;
 
-	@AttributeName(name = "gluuConfigurationPollingInterval")
-	private String pollingInterval;
-
 	@AttributeName(name = "jansStatus", updateOnly = true)
 	private GluuStatus status;
 
@@ -62,9 +59,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansOrgProfileMgt")
 	private boolean profileManagment;
 
-	@AttributeName(name = "jansManageIdentityPermission")
-	private boolean manageIdentityPermission;
-
 	@AttributeName(name = "jansScimEnabled")
 	private boolean scimEnabled;
 
@@ -74,9 +68,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "jansSmtpConf")
 	@JsonObject
 	private SmtpConfiguration smtpConfiguration;
-
-	@AttributeName(name = "jansenticationMode")
-	private String authenticationMode;
 
 	@AttributeName(name = "jansLogConfigLocation")
 	private String logConfigLocation;
@@ -98,14 +89,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public final void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
 		this.smtpConfiguration = smtpConfiguration;
-	}
-
-	public String getAuthenticationMode() {
-		return authenticationMode;
-	}
-
-	public void setAuthenticationMode(String authenticationMode) {
-		this.authenticationMode = authenticationMode;
 	}
 
 	public String getDescription() {
@@ -140,28 +123,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 		this.lastUpdate = lastUpdate;
 	}
 
-	public boolean isManageIdentityPermission() {
-		return manageIdentityPermission;
-	}
-
-	public void setManageIdentityPermission(boolean manageIdentityPermission) {
-		this.manageIdentityPermission = manageIdentityPermission;
-	}
-
 	public String getLogConfigLocation() {
 		return logConfigLocation;
 	}
 
 	public void setLogConfigLocation(String logConfigLocation) {
 		this.logConfigLocation = logConfigLocation;
-	}
-
-	public String getPollingInterval() {
-		return pollingInterval;
-	}
-
-	public void setPollingInterval(String pollingInterval) {
-		this.pollingInterval = pollingInterval;
 	}
 
 	public String getContactEmail() {
