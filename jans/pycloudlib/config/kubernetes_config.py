@@ -55,7 +55,7 @@ class KubernetesConfig(BaseConfig):
         :returns: Value based on given key or default one.
         """
         result = self.all()
-        return result.get(key, default)
+        return result.get(key) or default
 
     @property
     def client(self):
@@ -91,7 +91,7 @@ class KubernetesConfig(BaseConfig):
                         "data": {},
                     }
                     created = self.client.create_namespaced_config_map(
-                        self.settings["CN_CONFIG_KUBERNETES_NAMESPACE"], body
+                        self.settings["CN_CONFIG_KUBERNETES_NAMESPACE"], body,
                     )
                     if created:
                         self.name_exists = True
@@ -119,7 +119,14 @@ class KubernetesConfig(BaseConfig):
         )
         return bool(ret)
 
-    def all(self) -> dict:
+    def all(self) -> dict:  # pragma: no cover
+        """Get all key-value pairs.
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+        return self.get_all()
+
+    def get_all(self) -> dict:
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
@@ -130,3 +137,22 @@ class KubernetesConfig(BaseConfig):
             self.settings["CN_CONFIG_KUBERNETES_NAMESPACE"],
         )
         return result.data or {}
+
+    def set_all(self, data: dict) -> bool:
+        """Set all key-value pairs.
+
+        :returns: A ``bool`` indicating operation is succeed or not.
+        """
+        self._prepare_configmap()
+        body = {
+            "kind": "ConfigMap",
+            "apiVersion": "v1",
+            "metadata": {"name": self.settings["CN_CONFIG_KUBERNETES_CONFIGMAP"]},
+            "data": {key: safe_value(value) for key, value in data.items()},
+        }
+        ret = self.client.patch_namespaced_config_map(
+            self.settings["CN_CONFIG_KUBERNETES_CONFIGMAP"],
+            self.settings["CN_CONFIG_KUBERNETES_NAMESPACE"],
+            body=body,
+        )
+        return bool(ret)

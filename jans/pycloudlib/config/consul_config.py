@@ -148,20 +148,12 @@ class ConsulConfig(BaseConfig):
         """
         return self.client.kv.put(self._merge_path(key), safe_value(value))
 
-    def all(self) -> dict:
+    def all(self) -> dict:  # pragma: no cover
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
         """
-        _, resultset = self.client.kv.get(self._merge_path(""), recurse=True)
-
-        if not resultset:
-            return {}
-
-        return {
-            self._unmerge_path(item["Key"]): item["Value"].decode()
-            for item in resultset
-        }
+        return self.get_all()
 
     def _request_warning(self, scheme: str, verify: bool) -> None:
         """Emit warning about unverified request to unsecure Consul address.
@@ -176,8 +168,7 @@ class ConsulConfig(BaseConfig):
             logger.warning(
                 "All requests to Consul will be unverified. "
                 "Please adjust CN_CONFIG_CONSUL_SCHEME and "
-                "CN_CONFIG_CONSUL_VERIFY environment variables."
-            )
+                "CN_CONFIG_CONSUL_VERIFY environment variables.")
 
     def _token_from_file(self, path) -> str:
         """Get the token string from a path.
@@ -214,3 +205,30 @@ class ConsulConfig(BaseConfig):
             if all([os.path.isfile(cert_file), os.path.isfile(key_file)]):
                 cert = (cert_file, key_file)
         return cert, verify
+
+    def set_all(self, data: dict) -> bool:
+        """Set key-value pairs.
+
+        :params data: Key-value pairs.
+        :returns: A ``bool`` to mark whether config is set or not.
+        """
+
+        for k, v in data.items():
+            self.set(k, v)
+        return True
+
+    def get_all(self):
+        """Get all key-value pairs.
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+
+        _, resultset = self.client.kv.get(self._merge_path(""), recurse=True)
+
+        if not resultset:
+            return {}
+
+        return {
+            self._unmerge_path(item["Key"]): item["Value"].decode()
+            for item in resultset
+        }

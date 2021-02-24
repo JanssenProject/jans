@@ -90,7 +90,7 @@ class KubernetesSecret(BaseSecret):
                         "data": {},
                     }
                     created = self.client.create_namespaced_secret(
-                        self.settings["CN_SECRET_KUBERNETES_NAMESPACE"], body
+                        self.settings["CN_SECRET_KUBERNETES_NAMESPACE"], body,
                     )
                     if created:
                         self.name_exists = True
@@ -118,7 +118,14 @@ class KubernetesSecret(BaseSecret):
         )
         return bool(ret)
 
-    def all(self) -> dict:
+    def all(self) -> dict:  # pragma: no cover
+        """Get all key-value pairs.
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+        return self.get_all()
+
+    def get_all(self) -> dict:
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
@@ -131,3 +138,27 @@ class KubernetesSecret(BaseSecret):
 
         data = result.data or {}
         return {k: base64.b64decode(v).decode() for k, v in data.items()}
+
+    def set_all(self, data: dict) -> bool:
+        """Set all key-value pairs.
+
+        :params key: Key name.
+        :params value: Value of the key.
+        :returns: A ``bool`` to mark whether config is set or not.
+        """
+        self._prepare_secret()
+        body = {
+            "kind": "Secret",
+            "apiVersion": "v1",
+            "metadata": {"name": self.settings["CN_SECRET_KUBERNETES_SECRET"]},
+            "data": {
+                key: base64.b64encode(safe_value(value).encode()).decode()
+                for key, value in data.items()
+            },
+        }
+        ret = self.client.patch_namespaced_secret(
+            self.settings["CN_SECRET_KUBERNETES_SECRET"],
+            self.settings["CN_SECRET_KUBERNETES_NAMESPACE"],
+            body=body,
+        )
+        return bool(ret)

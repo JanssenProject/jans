@@ -57,7 +57,7 @@ class VaultSecret(BaseSecret):
         )
         self.settings.setdefault(
             "CN_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
-        ),
+        )
         self.settings.setdefault(
             "CN_SECRET_VAULT_SECRET_ID_FILE", "/etc/certs/vault_secret_id",
         )
@@ -152,23 +152,19 @@ class VaultSecret(BaseSecret):
         val = {"value": safe_value(value)}
 
         # hvac.v1.Client.write checks for status code 200,
-        # but Vault HTTP API returns 205 if request succeeded;
+        # but Vault HTTP API returns 204 if request succeeded;
         # hence we're using lower level of `hvac.v1.Client` API to set key-val
         response = self.client._adapter.post(
-            f"/v1/{self.prefix}/{key}", json=val
+            f"/v1/{self.prefix}/{key}", json=val,
         )
         return response.status_code == 204
 
-    def all(self) -> dict:
+    def all(self) -> dict:  # pragma: no cover
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
         """
-        self._authenticate()
-        result = self.client.list(self.prefix)
-        if not result:
-            return {}
-        return {key: self.get(key) for key in result["data"]["keys"]}
+        return self.get_all()
 
     def _request_warning(self, scheme: str, verify: bool) -> None:
         """Emit warning about unverified request to unsecure Consul address.
@@ -183,8 +179,7 @@ class VaultSecret(BaseSecret):
             logger.warning(
                 "All requests to Vault will be unverified. "
                 "Please adjust CN_SECRET_VAULT_SCHEME and "
-                "CN_SECRET_VAULT_VERIFY environment variables."
-            )
+                "CN_SECRET_VAULT_VERIFY environment variables.")
 
     def _verify_cert(self, scheme, verify, cacert_file, cert_file, key_file) -> Tuple[Union[None, tuple], Union[bool, str]]:
         """Verify client cert and key.
@@ -208,3 +203,25 @@ class VaultSecret(BaseSecret):
             if all([os.path.isfile(cert_file), os.path.isfile(key_file)]):
                 cert = (cert_file, key_file)
         return cert, verify
+
+    def set_all(self, data: dict) -> bool:
+        """Set key-value pairs.
+
+        :params data: Key-value pairs.
+        :returns: A ``bool`` to mark whether config is set or not.
+        """
+
+        for k, v in data.items():
+            self.set(k, v)
+        return True
+
+    def get_all(self) -> dict:
+        """Get all key-value pairs.
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+        self._authenticate()
+        result = self.client.list(self.prefix)
+        if not result:
+            return {}
+        return {key: self.get(key) for key in result["data"]["keys"]}
