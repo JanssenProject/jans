@@ -24,10 +24,17 @@ def test_secret_set(gsecret):
     assert "" in str(exc.value)
 
 
-def test_secret_all(gsecret):
+def test_secret_get_all(gsecret):
     with pytest.raises(NotImplementedError) as exc:
-        gsecret.all()
+        gsecret.get_all()
     assert "" in str(exc.value)
+
+
+def test_secret_set_all(gsecret):
+    with pytest.raises(NotImplementedError) as exc:
+        gsecret.set_all({})
+    assert "" in str(exc.value)
+
 
 
 # ============

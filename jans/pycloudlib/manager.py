@@ -13,8 +13,10 @@ from typing import NamedTuple
 
 from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
+from jans.pycloudlib.config import GoogleConfig
 from jans.pycloudlib.secret import KubernetesSecret
 from jans.pycloudlib.secret import VaultSecret
+from jans.pycloudlib.secret import GoogleSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 
@@ -26,6 +28,7 @@ class ConfigManager:
 
     - :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
     - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
+    - :class:`~jans.pycloudlib.secret.google_config.GoogleConfig`
     """
     def __init__(self):
         _adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul",)
@@ -33,6 +36,8 @@ class ConfigManager:
             self.adapter = ConsulConfig()
         elif _adapter == "kubernetes":
             self.adapter = KubernetesConfig()
+        elif _adapter == "google":
+            self.adapter = GoogleConfig()
         else:
             self.adapter = None
 
@@ -54,12 +59,26 @@ class ConfigManager:
         """
         return self.adapter.set(key, value)
 
-    def all(self) -> dict:
+    def all(self) -> dict:  # noqa: A003
+        """Get all key-value pairs (deprecated in favor of ``get_all``).
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+        return self.get_all()
+
+    def get_all(self) -> dict:
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
         """
-        return {k: v for k, v in self.adapter.all().items()}
+        return self.adapter.get_all()
+
+    def set_all(self, data: dict) -> bool:
+        """Set all key-value pairs.
+
+        :params data: Key-value pairs.
+        """
+        return self.adapter.set_all(data)
 
 
 class SecretManager:
@@ -69,6 +88,7 @@ class SecretManager:
 
     - :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
     - :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
+    - :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
     """
 
     def __init__(self):
@@ -77,6 +97,8 @@ class SecretManager:
             self.adapter = VaultSecret()
         elif _adapter == "kubernetes":
             self.adapter = KubernetesSecret()
+        elif _adapter == "google":
+            self.adapter = GoogleSecret()
         else:
             self.adapter = None
 
@@ -99,11 +121,25 @@ class SecretManager:
         return self.adapter.set(key, value)
 
     def all(self) -> dict:  # noqa: A003
+        """Get all key-value pairs (deprecated in favor of ``get_all``).
+
+        :returns: A ``dict`` of key-value pairs (if any).
+        """
+        return self.get_all()
+
+    def get_all(self) -> dict:
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
         """
-        return self.adapter.all()
+        return self.adapter.get_all()
+
+    def set_all(self, data: dict) -> bool:
+        """Set all key-value pairs.
+
+        :params data: Key-value pairs.
+        """
+        return self.adapter.set_all(data)
 
     def to_file(
         self, key: str, dest: str, decode: bool = False, binary_mode: bool = False
@@ -209,7 +245,7 @@ def get_manager() -> NamedTuple:
     """Convenient function to get config and secret manager instances.
 
     :returns: A ``namedtuple`` consists of :class:`~jans.pycloudlib.manager.ConfigManager`
-              and :class:`~jans.pycloudlib.manager.SecretManager` instances.
+        and :class:`~jans.pycloudlib.manager.SecretManager` instances.
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()

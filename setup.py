@@ -39,6 +39,8 @@ setup(
         "docker>=3.7.2",
         "requests-toolbelt>=0.9.1",
         "cryptography>=2.8",
+        "google-cloud-secret-manager>=2.2.0"
+
     ],
     classifiers=[
         "Intended Audience :: Developers",

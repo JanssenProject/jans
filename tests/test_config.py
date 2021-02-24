@@ -23,10 +23,17 @@ def test_config_set(gconfig):
     assert "" in str(exc.value)
 
 
-def test_config_all(gconfig):
+def test_config_get_all(gconfig):
     with pytest.raises(NotImplementedError) as exc:
         gconfig.all()
     assert "" in str(exc.value)
+
+
+def test_config_set_all(gconfig):
+    with pytest.raises(NotImplementedError) as exc:
+        gconfig.set_all({})
+    assert "" in str(exc.value)
+
 
 # =============
 # consul config

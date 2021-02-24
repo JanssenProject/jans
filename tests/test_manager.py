@@ -11,6 +11,12 @@ class GAdapter(object):
     def all(self):
         return {}
 
+    def get_all(self):
+        return {}
+
+    def set_all(self, data):
+        return True
+
 
 @pytest.mark.parametrize("adapter, adapter_cls", [
     ("consul", "ConsulConfig"),

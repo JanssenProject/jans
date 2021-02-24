@@ -9,7 +9,7 @@ from typing import Any
 from typing import NoReturn
 
 
-class BaseSecret(object):
+class BaseSecret:
     """Base class for secret adapter. Must be sub-classed per
     implementation details.
     """
@@ -30,7 +30,21 @@ class BaseSecret(object):
         """
         raise NotImplementedError
 
-    def all(self) -> NoReturn:
+    def all(self) -> NoReturn:  # pragma: no cover
+        """Get all secrets (deprecated in favor of ``get_all``).
+
+        Subclass **MUST** implement this method.
+        """
+        return self.get_all()
+
+    def set_all(self, data: dict) -> NoReturn:
+        """Set all secrets.
+
+        Subclass **MUST** implement this method.
+        """
+        raise NotImplementedError
+
+    def get_all(self) -> NoReturn:
         """Get all secrets.
 
         Subclass **MUST** implement this method.
