@@ -24,6 +24,7 @@ def arg_parser():
 
     ldap_group = parser.add_mutually_exclusive_group()
     ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+    ldap_group.add_argument('--disable-local-ldap', help="Disables installing local LDAP server", action='store_true')
     #ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
 
     rdbm_group = parser.add_mutually_exclusive_group()
@@ -37,6 +38,11 @@ def arg_parser():
     parser.add_argument('-rdbm-host', help="RDBM host")
 
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
+    parser.add_argument('--local-couchbase', help="Enables installing couchbase server", action='store_true')
+    parser.add_argument('-couchbase-admin-user', help="Couchbase admin user")
+    parser.add_argument('-couchbase-admin-password', help="Couchbase admin user password")
+    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
+
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
     parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
@@ -56,7 +62,7 @@ def arg_parser():
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
-    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
+    
     #parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")

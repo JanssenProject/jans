@@ -26,6 +26,8 @@ def get_setup_options():
         'properties_password': None,
     }
 
+
+
     if not (base.argsp.remote_couchbase or base.argsp.remote_rdbm or base.argsp.local_rdbm):
         setupOptions['wrends_install'] = InstallTypes.LOCAL
     else:
@@ -53,6 +55,17 @@ def get_setup_options():
             setupOptions['rdbm_user'] = base.argsp.rdbm_user
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
+
+
+    if base.argsp.disable_local_ldap:
+        setupOptions['wrends_install'] = InstallTypes.NONE
+        
+    if base.argsp.local_couchbase:
+        setupOptions['cb_install'] = InstallTypes.LOCAL
+
+    setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
+    setupOptions['cb_password'] = base.argsp.couchbase_admin_password
+    setupOptions['couchebaseClusterAdmin'] = base.argsp.couchbase_admin_user
 
     if base.argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
@@ -118,7 +131,6 @@ def get_setup_options():
     setupOptions['loadTestDataExit'] = base.argsp.x
     setupOptions['allowPreReleasedFeatures'] = base.argsp.allow_pre_released_features
     setupOptions['listenAllInterfaces'] = base.argsp.listen_all_interfaces
-    setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
     setupOptions['config_patch_creds'] = base.argsp.config_patch_creds
     setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
 
