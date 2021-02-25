@@ -60,7 +60,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.encoded_couchbaseTrustStorePass = jans_cb_prop['ssl.trustStore.pin']
             Config.couchbaseTrustStorePass = self.unobscure(jans_cb_prop['ssl.trustStore.pin'])
             Config.cb_query_node = Config.couchbase_hostname
-
+            Config.couchbase_buckets = [b.strip() for b in jans_cb_prop['buckets'].split(',')]
 
         if not Config.persistence_type in ('couchbase', 'sql') and os.path.exists(Config.ox_ldap_properties):
             jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
