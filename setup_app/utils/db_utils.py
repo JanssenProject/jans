@@ -151,11 +151,11 @@ class DBUtils:
             oxAuthConfDynamic = json.loads(result['jansConfDyn'])
 
         elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth  "'.format(self.default_bucket)
+            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth"'.format(self.default_bucket)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
             dn = js['results'][0][self.default_bucket]['dn']
-            oxAuthConfDynamic = js['results'][0][self.default_bucket]['oxAuthConfDynamic']
+            oxAuthConfDynamic = js['results'][0][self.default_bucket]['jansConfDyn']
 
         return dn, oxAuthConfDynamic
 

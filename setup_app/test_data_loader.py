@@ -24,6 +24,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
     passportInstaller = None
     scimInstaller = None
     rdbmInstaller = None
+    couchbaseInstaller = None
 
     def __init__(self):
         self.service_name = 'test-data'
@@ -98,10 +99,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))            
             config_oxauth_test_properties += '#ldap\n' +  rendered_text
 
-
         if self.getMappingType('couchbase'):
+            couchbaseDict = self.couchbaseInstaller.couchbaseDict()
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-couchbase.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
         if self.getMappingType('rdbm'):
@@ -312,16 +313,20 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             pass
 
         elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
-            self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr1 ON `gluu`(myCustomAttr1) USING GSI WITH {"defer_build":true}')
-            self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr2 ON `gluu`(myCustomAttr2) USING GSI WITH {"defer_build":true}')
-            self.dbUtils.cbm.exec_query('BUILD INDEX ON `gluu` (def_gluu_myCustomAttr1, def_gluu_myCustomAttr2)')
+            self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr1 ON `{0}`(myCustomAttr1) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
+            self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr2 ON `{0}`(myCustomAttr2) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
+            self.dbUtils.cbm.exec_query('BUILD INDEX ON `{0}` (def_{0}_myCustomAttr1, def_{0}_myCustomAttr2)'.format(Config.couchbase_bucket_prefix))
 
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             self.dbUtils.ldap_conn.bind()
 
         result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
 
-        oxIDPAuthentication = json.loads(result['jansDbAuth'])
+        if isinstance(result['jansDbAuth'], str):
+            oxIDPAuthentication = json.loads(result['jansDbAuth'])
+        else:
+            oxIDPAuthentication = result['jansDbAuth']
+
         oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
         oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
         self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
