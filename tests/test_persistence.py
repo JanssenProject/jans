@@ -411,3 +411,51 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
     dest = tmpdir.join("jans-hybrid.properties")
     render_hybrid_properties(str(dest))
     assert dest.read() == expected
+
+
+# ===
+# SQL
+# ===
+
+
+def test_get_sql_password(monkeypatch, tmpdir):
+    from jans.pycloudlib.persistence.sql import get_sql_password
+
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+
+    assert get_sql_password() == "secret"
+
+
+def test_render_sql_properties(monkeypatch, tmpdir, gmanager):
+    from jans.pycloudlib.persistence.sql import render_sql_properties
+
+    passwd = tmpdir.join("sql_password")
+    passwd.write("secret")
+
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(passwd))
+
+    tmpl = """
+db.schema.name=%(rdbm_db)s
+connection.uri=jdbc:%(rdbm_type)s://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s
+connection.driver-property.serverTimezone=%(server_time_zone)s
+auth.userName=%(rdbm_user)s
+auth.userPassword=%(rdbm_password_enc)s
+""".strip()
+
+    expected = """
+db.schema.name=jans
+connection.uri=jdbc:mysql://localhost:3306/jans
+connection.driver-property.serverTimezone=UTC
+auth.userName=jans
+auth.userPassword=fHL54sT5qHk=
+""".strip()
+
+    src = tmpdir.join("jans-sql.properties.tmpl")
+    src.write(tmpl)
+    dest = tmpdir.join("jans-sql.properties")
+
+    render_sql_properties(gmanager, str(src), str(dest))
+    assert dest.read() == expected

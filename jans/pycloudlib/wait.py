@@ -13,10 +13,13 @@ import sys
 import backoff
 import ldap3
 import requests
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.sql import text
 
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import decode_text
 
@@ -351,6 +354,39 @@ def wait_for_oxd(manager, **kwargs):
         raise WaitError(req.reason)
 
 
+@retry_on_exception
+def wait_for_sql_conn(manager, **kwargs):
+    """Wait for readiness/liveness of an SQL database connection.
+    """
+    # checking connection
+    SQLClient().is_alive()
+
+
+@retry_on_exception
+def wait_for_sql(manager, **kwargs):
+    """Wait for readiness/liveness of an SQL database.
+    """
+    client = SQLClient()
+
+    init = False
+
+    with client.engine.connect() as conn:
+        try:
+            result = conn.execute(
+                text("SELECT COUNT(doc_id) FROM jansClnt WHERE doc_id = :doc_id"),
+                **{"doc_id": manager.config.get("jca_client_id")}
+            )
+            init = as_boolean(result.fetchone()[0])
+        except ProgrammingError as exc:
+            # the following code should be ignored
+            # - 1146: table doesn't exist
+            if exc.orig.args[0] in (1146,):
+                pass
+
+    if not init:
+        raise WaitError("SQL is not fully initialized")
+
+
 def wait_for(manager, deps=None):
     """A high-level function to run one or more ``wait_for_*`` function(s).
 
@@ -367,6 +403,8 @@ def wait_for(manager, deps=None):
     - `oxauth`
     - `oxtrust`
     - `oxd`
+    - `sql`
+    - `sql_conn`
 
     .. code-block:: python
 
@@ -402,6 +440,8 @@ def wait_for(manager, deps=None):
         "oxauth": {"func": wait_for_oxauth, "kwargs": {"label": "oxAuth"}},
         "oxtrust": {"func": wait_for_oxtrust, "kwargs": {"label": "oxTrust"}},
         "oxd": {"func": wait_for_oxd, "kwargs": {"label": "oxd"}},
+        "sql_conn": {"func": wait_for_sql_conn, "kwargs": {"label": "SQL"}},
+        "sql": {"func": wait_for_sql, "kwargs": {"label": "SQL"}},
     }
 
     for dep in deps:
