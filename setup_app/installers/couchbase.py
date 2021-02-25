@@ -211,7 +211,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchebaseCreateIndexes(self, bucket):
         
-        self.couchbase_buckets.append(bucket)
+        Config.couchbase_buckets.append(bucket)
         couchbase_index_str = self.readFile(self.couchbaseIndexJson)
         couchbase_index_str = couchbase_index_str.replace('!bucket_prefix!', Config.couchbase_bucket_prefix)
         couchbase_index = json.loads(couchbase_index_str)
