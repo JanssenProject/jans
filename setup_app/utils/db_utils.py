@@ -316,7 +316,16 @@ class DBUtils:
             if search_scope == ldap3.BASE:
                 n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
             else:
-                parsed_dn = dnutils.parse_dn(search_filter.strip('(').strip(')'))
+
+                if '&' in search_filter:
+                    re_match = re.match('\(&\((.*?)\)\((.*?)\)\)', search_filter)
+                    if re_match:
+                        re_list = re_match.groups()
+                        dn_to_parse = re_list[0] if 'objectclass' in re_list[1].lower() else re_list[1]
+                else:
+                    dn_to_parse = search_filter.strip('(').strip(')')
+
+                parsed_dn = dnutils.parse_dn(dn_to_parse)
                 attr = parsed_dn[0][0]
                 val = parsed_dn[0][1]
                 if '*' in val:

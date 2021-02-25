@@ -39,7 +39,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             Config.couchebaseClusterAdmin = 'admin'
             
         if Config.cb_install == InstallTypes.LOCAL:
-            Config.isCouchbaseUserAdmin = False
+            Config.isCouchbaseUserAdmin = True
 
         if not Config.get('couchbaseTrustStorePass'):
             Config.couchbaseTrustStorePass = 'secret'
@@ -50,6 +50,12 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
+
+
+        if Config.cb_install == InstallTypes.LOCAL:
+            Config.couchbase_hostname = 'localhost'
+        
+        self.dbUtils.set_cbm()
 
         if Config.cb_install == InstallTypes.LOCAL:
             self.add_couchbase_post_messages()
@@ -92,14 +98,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         installOutput = self.installPackage(packageName)
         Config.post_messages.append(installOutput)
 
-        if base.os_name == 'ubuntu16':
-            script_name = os.path.basename(self.couchbaseInitScript)
-            target_file = os.path.join('/etc/init.d', script_name)
-            self.copyFile(self.couchbaseInitScript, target_file)
-            self.run([paths.cmd_chmod, '+x', target_file])
-            self.reload_daemon()
-            self.enable()
-            self.start()
 
     def couchebaseCreateCluster(self):
         
