@@ -184,6 +184,7 @@ if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
     testDataLoader.scimInstaller = scimInstaller
     testDataLoader.rdbmInstaller = rdbmInstaller
+    testDataLoader.couchbaseInstaller = couchbaseInstaller
 
 if argsp.x:
     print("Loading test data")

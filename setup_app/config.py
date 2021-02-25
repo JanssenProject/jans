@@ -145,7 +145,9 @@ class Config:
         self.wrends_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
         self.rdbm_install = False
-
+        
+        self.couchbase_buckets = []
+        
         #rdbm
         self.rdbm_install_type = InstallTypes.NONE
         self.rdbm_type = 'mysql'
