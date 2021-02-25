@@ -1,0 +1,480 @@
+{
+  "attr": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "dat": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "description": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "displayName": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "givenName": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "inum": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "member": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "middleName": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "nickname": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "o": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "ou": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "sn": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "uid": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "urn": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "userPassword": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAccessTknSigAlg": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAppTyp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAttrName": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAttrOrigin": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAttrTyp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansAttrs": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansAuthMode": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansCacheConf": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansClaimName": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansClaimRedirectURI": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansClntSecret": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansConfApp": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansConfDyn": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansConfErrors": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansConfStatic": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansConfWebKeys": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDbAuth": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDocStoreConf": {
+    "mysql": {
+      "size": 256,
+      "type": "VARCHAR"
+    }
+  },
+  "jansGrantTyp": {
+    "mysql": {
+      "type": "JSON"
+    }
+  },
+  "jansId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansIdTknSignedRespAlg": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansOrgShortName": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansProgLng": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansRespTyp": {
+    "mysql": {
+      "type": "JSON"
+    }
+  },
+  "jansSAML1URI": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansSAML2URI": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansScopeTyp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansScr": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansScrTyp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansStatus": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansSubjectTyp": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansThemeColor": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTknEndpointAuthMethod": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansValidation": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "member": {
+    "mysql": {
+      "type": "JSON"
+    }
+  },
+  "jansDeviceKeyHandle": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPublicKeyId": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    }
+  },
+  "jansRegistrationData": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDeviceRegistrationConf": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansDeviceData": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "picture": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    }
+  },
+  "jansInitiateLoginURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansJwksURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansLogoURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansPolicyURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansReqURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansSectorIdentifierURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansClntURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansTosURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansClaimRedirectURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansJwt": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansPermissionGrantedMap": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansInvolvedClnts": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansSessAttr": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansSessState": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "clnId": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansClntId": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jwtReq": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "attr": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "nnc": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "scp": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "tknBndCnf": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "tknTyp": {
+    "mysql": {
+      "size": 32,
+      "type": "VARCHAR"
+    }
+  },
+  "acr": {
+    "mysql": {
+      "size": 48,
+      "type": "VARCHAR"
+    }
+  },
+  "jansLogoutURI": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansJwks": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansUmaScope": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "jansSoftStatement": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "jansScopeExpression": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "memberOf": {
+    "mysql": {
+      "type": "JSON"
+    }
+  },
+  "tknCde": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansUmaPermission": {
+    "mysql": {
+      "type": "JSON"
+    }
+  }
+}
