@@ -30,7 +30,8 @@ public class LoggingFilter implements ContainerRequestFilter {
 
     public void filter(ContainerRequestContext context) {
         logger.info("***********************************************************************");
-        logger.info("****Request " + context.getMethod() + " " + info.getPath() + " from IP " + request.getRemoteAddr());
+        logger.info(
+                "****Request " + context.getMethod() + " " + info.getPath() + " from IP " + request.getRemoteAddr());
 
     }
 

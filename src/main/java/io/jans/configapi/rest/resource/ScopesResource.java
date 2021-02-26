@@ -50,7 +50,7 @@ public class ScopesResource extends BaseResource {
     UriInfo uriInfo;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -64,7 +64,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
@@ -73,7 +73,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
@@ -94,7 +94,7 @@ public class ScopesResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
@@ -115,9 +115,10 @@ public class ScopesResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
+    public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+            throws JsonPatchException, IOException {
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
@@ -127,7 +128,7 @@ public class ScopesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCOPES_DELETE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS })
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
