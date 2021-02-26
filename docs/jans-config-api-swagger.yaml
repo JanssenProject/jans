@@ -3563,7 +3563,10 @@ components:
             maxLength:
               type: integer
         tooltip:
-          type: string    
+          type: string
+        jansHideOnDiscovery:
+          type: boolean
+          description: Boolean value indicating if the attribute should be shown on that discovery page.		  
     PatchRequest: 
       description: A JSONPatch document as defined by RFC 6902 
       required:
