@@ -44,14 +44,14 @@ public class ConfigSmtpResource extends BaseResource {
     MailService mailService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS })
     public Response getSmtpServerConfiguration() {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         return Response.ok(Objects.requireNonNullElseGet(smtpConfiguration, SmtpConfiguration::new)).build();
     }
 
     @POST
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS })
     public Response setupSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
@@ -65,7 +65,7 @@ public class ConfigSmtpResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS })
     public Response updateSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
@@ -79,7 +79,7 @@ public class ConfigSmtpResource extends BaseResource {
 
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS })
     public Response testSmtpConfiguration() throws EncryptionException {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
@@ -94,7 +94,7 @@ public class ConfigSmtpResource extends BaseResource {
     }
 
     @DELETE
-    @ProtectedApi(scopes = {ApiAccessConstants.SMTP_DELETE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_DELETE_ACCESS })
     public Response removeSmtpConfiguration() {
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());

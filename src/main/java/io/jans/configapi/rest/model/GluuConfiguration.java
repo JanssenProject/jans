@@ -122,8 +122,7 @@ public class GluuConfiguration extends InumEntry implements Serializable {
         this.displayName = displayName;
     }
 
-
-	public String getHostname() {
+    public String getHostname() {
         return hostname;
     }
 
@@ -140,12 +139,12 @@ public class GluuConfiguration extends InumEntry implements Serializable {
     }
 
     public String getLogConfigLocation() {
-		return logConfigLocation;
-	}
+        return logConfigLocation;
+    }
 
-	public void setLogConfigLocation(String logConfigLocation) {
-		this.logConfigLocation = logConfigLocation;
-	}
+    public void setLogConfigLocation(String logConfigLocation) {
+        this.logConfigLocation = logConfigLocation;
+    }
 
     public String getPollingInterval() {
         return pollingInterval;
@@ -229,6 +228,5 @@ public class GluuConfiguration extends InumEntry implements Serializable {
     public void setCustomObjectClasses(String[] customObjectClasses) {
         this.customObjectClasses = customObjectClasses;
     }
-
 
 }

@@ -61,9 +61,9 @@ public class ConfigApiProtectionCache {
     }
 
     public static void putResource(String resourceName, List<Scope> scopeList) {
-        Preconditions.checkNotNull(resourceName);       
+        Preconditions.checkNotNull(resourceName);
         resourceCache.put(resourceName, scopeList);
-        
+
     }
 
     public static Map<String, List<Scope>> getAllResources() {

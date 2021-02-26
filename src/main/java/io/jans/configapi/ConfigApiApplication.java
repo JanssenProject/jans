@@ -72,9 +72,12 @@ public class ConfigApiApplication {
     @ApplicationScoped
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     public PersistenceEntryManager createPersistenceEntryManager() throws OxIntializationException {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
-        PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(configurationFactory.getDecryptedConnectionProperties());
-        logger.debug("Created {} with operation service {}", persistenceEntryManager, persistenceEntryManager.getOperationService());
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService
+                .getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
+        PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory
+                .createEntryManager(configurationFactory.getDecryptedConnectionProperties());
+        logger.debug("Created {} with operation service {}", persistenceEntryManager,
+                persistenceEntryManager.getOperationService());
         return persistenceEntryManager;
     }
 
@@ -82,15 +85,18 @@ public class ConfigApiApplication {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
-        logger.debug("Recreated instance {} with operation service: {}", ldapEntryManager, ldapEntryManager.getOperationService());
+        logger.debug("Recreated instance {} with operation service: {}", ldapEntryManager,
+                ldapEntryManager.getOperationService());
     }
 
     private void closePersistenceEntryManager() {
-        PersistenceEntryManager oldInstance = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
+        PersistenceEntryManager oldInstance = CdiUtil.getContextBean(beanManager, PersistenceEntryManager.class,
+                ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
         if (oldInstance == null || oldInstance.getOperationService() == null)
             return;
 
-        logger.debug("Attempting to destroy {} with operation service: {}", oldInstance, oldInstance.getOperationService());
+        logger.debug("Attempting to destroy {} with operation service: {}", oldInstance,
+                oldInstance.getOperationService());
         oldInstance.destroy();
         logger.debug("Destroyed {} with operation service: {}", oldInstance, oldInstance.getOperationService());
     }

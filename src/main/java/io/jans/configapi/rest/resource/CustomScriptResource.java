@@ -47,7 +47,7 @@ public class CustomScriptResource extends BaseResource {
     CustomScriptService customScriptService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getAllCustomScripts() {
         List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
         return Response.ok(customScripts).build();
@@ -55,10 +55,10 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
-                                                  @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-                                                  @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
                 CustomScriptType.getByValue(type.toLowerCase()), limit);
         if (customScripts != null && !customScripts.isEmpty())
@@ -69,7 +69,7 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         CustomScript script = null;
         try {
@@ -84,9 +84,9 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response createScript(@Valid CustomScript customScript) {
-    	logger.trace("CustomScriptResource::createScript() - customScript = "+customScript+"\n\n");
+        logger.trace("CustomScriptResource::createScript() - customScript = " + customScript + "\n\n");
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
         if (StringHelper.isEmpty(inum)) {
@@ -99,9 +99,9 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
     public Response updateScript(@Valid @NotNull CustomScript customScript) {
-    	logger.trace("CustomScriptResource::updateScript() - customScript = "+customScript+"\n\n");
+        logger.trace("CustomScriptResource::updateScript() - customScript = " + customScript + "\n\n");
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
@@ -111,10 +111,10 @@ public class CustomScriptResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.SCRIPTS_DELETE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS })
     public Response deleteScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
-        	logger.trace("CustomScriptResource::deleteScript() - inum = "+inum+"\n\n");
+            logger.trace("CustomScriptResource::deleteScript() - inum = " + inum + "\n\n");
             CustomScript existingScript = customScriptService.getScriptByInum(inum);
             customScriptService.remove(existingScript);
             return Response.noContent().build();

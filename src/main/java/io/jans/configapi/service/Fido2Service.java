@@ -32,7 +32,8 @@ public class Fido2Service {
 
     public DbApplicationConfiguration find() {
         try {
-            String configurationDn = configurationFactory.getBaseConfiguration().getString("fido2_ConfigurationEntryDN");
+            String configurationDn = configurationFactory.getBaseConfiguration()
+                    .getString("fido2_ConfigurationEntryDN");
             return persistenceManager.find(DbApplicationConfiguration.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load Fido2 configuration from LDAP");

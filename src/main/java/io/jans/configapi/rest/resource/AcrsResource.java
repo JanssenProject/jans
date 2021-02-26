@@ -31,7 +31,7 @@ public class AcrsResource extends BaseResource {
     ConfigurationService configurationService;
 
     @GET
-    @ProtectedApi(scopes = {ApiAccessConstants.ACRS_READ_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
     public Response getDefaultAuthenticationMethod() {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
@@ -41,7 +41,7 @@ public class AcrsResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = {ApiAccessConstants.ACRS_WRITE_ACCESS})
+    @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
