@@ -288,3 +288,45 @@ def prepare_template_ctx(manager):
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
     return ctx
+
+
+def get_ldif_mappings():
+    ldif_mappings = {
+        "default": [
+            "base.ldif",
+            "attributes.ldif",
+            "scopes.ldif",
+            "scripts.ldif",
+            "configuration.ldif",
+            "jans-auth/configuration.ldif",
+            "jans-auth/clients.ldif",
+            "jans-fido2/configuration.ldif",
+            "jans-scim/configuration.ldif",
+            "jans-scim/scopes.ldif",
+            "jans-scim/clients.ldif",
+            "jans-config-api/scopes.ldif",
+            "jans-config-api/clients.ldif",
+            # "oxidp.ldif",
+            # "passport.ldif",
+            # "oxpassport-config.ldif",
+            # "gluu_radius_base.ldif",
+            # "gluu_radius_server.ldif",
+            # "clients.ldif",
+            "o_metric.ldif",
+            # "gluu_radius_clients.ldif",
+            # "passport_clients.ldif",
+            # "casa.ldif",
+            # "scripts_casa.ldif",
+        ],
+        "user": [
+            "people.ldif",
+            "groups.ldif",
+        ],
+        "site": [
+            "o_site.ldif",
+        ],
+        "cache": [],
+        "token": [],
+        "session": [],
+    }
+    return ldif_mappings

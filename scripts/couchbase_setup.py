@@ -4,7 +4,6 @@ import json
 import logging.config
 import os
 import time
-from collections import OrderedDict
 
 from ldif3 import LDIFParser
 
@@ -18,6 +17,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
 from utils import render_ldif
+from utils import get_ldif_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -25,83 +25,49 @@ logger = logging.getLogger("entrypoint")
 
 def get_bucket_mappings():
     prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-    bucket_mappings = OrderedDict({
+    bucket_mappings = {
         "default": {
             "bucket": prefix,
-            "files": [
-                "base.ldif",
-                "attributes.ldif",
-                "scopes.ldif",
-                "scripts.ldif",
-                "configuration.ldif",
-                "jans-auth/configuration.ldif",
-                "jans-auth/clients.ldif",
-                "jans-fido2/configuration.ldif",
-                "jans-scim/configuration.ldif",
-                "jans-scim/scopes.ldif",
-                "jans-scim/clients.ldif",
-                "jans-config-api/scopes.ldif",
-                "jans-config-api/clients.ldif",
-                # "oxidp.ldif",
-                # "passport.ldif",
-                # "oxpassport-config.ldif",
-                # "jans_radius_base.ldif",
-                # "jans_radius_server.ldif",
-                # "clients.ldif",
-                "o_metric.ldif",
-                # "jans_radius_clients.ldif",
-                # "passport_clients.ldif",
-                # "casa.ldif",
-                # "scripts_casa.ldif",
-            ],
             "mem_alloc": 100,
             "document_key_prefix": [],
         },
         "user": {
             "bucket": f"{prefix}_user",
-            "files": [
-                "people.ldif",
-                "groups.ldif",
-            ],
             "mem_alloc": 300,
             "document_key_prefix": ["groups_", "people_", "authorizations_"],
         },
         "site": {
             "bucket": f"{prefix}_site",
-            "files": [
-                "o_site.ldif",
-            ],
             "mem_alloc": 100,
             "document_key_prefix": ["site_", "cache-refresh_"],
         },
         "token": {
             "bucket": f"{prefix}_token",
-            "files": [],
             "mem_alloc": 300,
             "document_key_prefix": ["tokens_"],
         },
         "cache": {
             "bucket": f"{prefix}_cache",
-            "files": [],
             "mem_alloc": 100,
             "document_key_prefix": ["cache_"],
         },
         "session": {
             "bucket": f"{prefix}_session",
-            "files": [],
             "mem_alloc": 200,
             "document_key_prefix": [],
         },
+    }
 
-    })
+    for name, files in get_ldif_mappings().items():
+        bucket_mappings[name]["files"] = files
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-    if persistence_type != "couchbase":
-        bucket_mappings = OrderedDict({
+    if persistence_type == "hybrid":
+        bucket_mappings = {
             name: mapping for name, mapping in bucket_mappings.items()
             if name != ldap_mapping
-        })
+        }
     return bucket_mappings
 
 
