@@ -179,7 +179,7 @@ class DBUtils:
 
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
-                n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET {}={}'.format(self.default_bucket, k, entries[k])
+                n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET jansConfDyn.{}={}'.format(self.default_bucket, k, entries[k])
                 self.cbm.exec_query(n1ql)
 
 
