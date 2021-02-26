@@ -1,6 +1,5 @@
 package io.jans.configapi.auth.util;
 
-
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -24,7 +23,6 @@ import io.jans.configapi.service.ClientService;
 import io.jans.configapi.service.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
-
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -115,8 +113,7 @@ public class AuthUtil {
     }
 
     public List<Scope> getResourceScopeList(String method, String path) {
-        log.trace(" AuthUtil::getResourceScopeList() method = "
-                + method + " , path = " + path + "\n");
+        log.trace(" AuthUtil::getResourceScopeList() method = " + method + " , path = " + path + "\n");
 
         // Verify in cache
         Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
@@ -136,63 +133,67 @@ public class AuthUtil {
             if (result != null && result.length > 1) {
                 String httpmethod = result[0];
                 String pathUrl = result[1];
-                log.debug(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+                log.trace(" AuthUtil::getResourceScopeList() - httpmethod = " + httpmethod + " , pathUrl = " + pathUrl);
+
                 if (pathUrl != null && pathUrl.contains(path)) {
                     // Matching url
-                    log.debug(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = " + pathUrl);
+                    log.trace(" AuthUtil::getResourceScopeList() - Matching url, path = " + path + " , pathUrl = "
+                            + pathUrl);
 
                     // Verify Method
                     if (httpmethod.contains(method)) {
-                    	scopeList = ConfigApiProtectionCache.getResourceScopes(key);
-                        log.debug(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
+                        scopeList = ConfigApiProtectionCache.getResourceScopes(key);
+                        log.trace(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
                         break;
                     }
-                    
+
                 }
 
             }
 
         }
-     
+
         return scopeList;
     }
-    
+
     public List<String> getAllResourceScopes() {
-       Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
-        log.trace("getAllResourceScopes() - scopeMap = "+scopeMap);
+        Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+        log.trace("getAllResourceScopes() - scopeMap = " + scopeMap);
+
         List<String> scopeStrList = null;
-        if (scopeMap != null && !scopeMap.isEmpty()) {        	
-        	Set<String> scopeSet = scopeMap.keySet();
-        	scopeStrList = new ArrayList<String>(scopeSet);
+        if (scopeMap != null && !scopeMap.isEmpty()) {
+            Set<String> scopeSet = scopeMap.keySet();
+            scopeStrList = new ArrayList<String>(scopeSet);
         }
-        log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        log.trace("\n\n\n AuthUtil:::getAllResourceScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
         return scopeStrList;
     }
 
     public List<String> getRequestedScopes(String path) {
         List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
-        log.trace("getRequestedScopes() - scopeList = "+scopeList);
+        log.trace("getRequestedScopes() - scopeList = " + scopeList);
+
         List<String> scopeStrList = new ArrayList();
         if (scopeList != null && scopeList.size() > 0) {
             for (Scope s : scopeList) {
-            	scopeStrList.add(s.getId());
+                scopeStrList.add(s.getId());
             }
         }
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
         return scopeStrList;
     }
-    
+
     public List<String> getRequestedScopes(String method, String path) {
-        log.trace("getRequestedScopes() - method = "+method+" , path = "+path);
-        List<Scope> scopeList = this.getResourceScopeList(method,path);
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = "+scopeList+"\n\n\n");
+        log.trace("getRequestedScopes() - method = " + method + " , path = " + path);
+        List<Scope> scopeList = this.getResourceScopeList(method, path);
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeList = " + scopeList + "\n\n\n");
         List<String> scopeStrList = new ArrayList();
         if (scopeList != null && scopeList.size() > 0) {
             for (Scope s : scopeList) {
-            	scopeStrList.add(s.getId());
+                scopeStrList.add(s.getId());
             }
         }
-        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = "+scopeStrList+"\n\n\n");
+        log.trace("\n\n\n AuthUtil:::getRequestedScopes() - scopeStrList = " + scopeStrList + "\n\n\n");
         return scopeStrList;
     }
 
@@ -241,13 +242,12 @@ public class AuthUtil {
                 scope = scope + " " + s;
             }
         }
-        log.trace("\n\n\n RequestAccessToken() - scope = "+scope);
-        
+        log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
+
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
-            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getScope() = "+tokenResponse.getScope());
-            log.trace("\n\n\n RequestAccessToken() - tokenResponse.getAccessToken() = "+tokenResponse.getAccessToken());
+            log.trace("RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
             if (Util.allNotBlank(accessToken)) {
@@ -318,9 +318,9 @@ public class AuthUtil {
         TokenResponse tokenResponse = null;
         try {
 
-            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId, this.getClientDecryptPassword(clientId), scopes,
-                    permissionTicket.getTicket(), GrantType.OXAUTH_UMA_TICKET,
-                    AuthenticationMethod.CLIENT_SECRET_BASIC);
+            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId,
+                    this.getClientDecryptPassword(clientId), scopes, permissionTicket.getTicket(),
+                    GrantType.OXAUTH_UMA_TICKET, AuthenticationMethod.CLIENT_SECRET_BASIC);
 
             log.trace(" Rpt Token Response  = " + tokenResponse);
             if (tokenResponse != null) {
@@ -395,4 +395,10 @@ public class AuthUtil {
         return scopeList;
     }
 
+    public boolean isValidIssuer(String issuer) throws Exception {
+        log.info("\n\n AuthUtil:::isValidIssuer() - issuer = " + issuer
+                + " , this.configurationFactory.getApiApprovedIssuer().contains(issuer) = "
+                + this.configurationFactory.getApiApprovedIssuer().contains(issuer));
+        return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
+    }
 }

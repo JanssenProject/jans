@@ -78,7 +78,8 @@ public class LdapConfigurationService {
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
-        return idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH)).collect(Collectors.toCollection(ArrayList::new));
+        return idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private List<IDPAuthConf> getIDPAuthConfs(List<GluuLdapConfiguration> ldapConfigurations) {
@@ -109,7 +110,7 @@ public class LdapConfigurationService {
     }
 
     private List<GluuLdapConfiguration> excludeFromConfigurations(List<GluuLdapConfiguration> ldapConfigurations,
-                                                                  GluuLdapConfiguration ldapConfiguration) {
+            GluuLdapConfiguration ldapConfiguration) {
         boolean hadConfiguration = Iterables.removeIf(ldapConfigurations,
                 c -> c.getConfigId().equals(ldapConfiguration.getConfigId()));
         if (!hadConfiguration) {

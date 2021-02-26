@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 
 @Provider
-@WebFilter(urlPatterns = {"*"})
+@WebFilter(urlPatterns = { "*" })
 public class MetricFilter implements Filter {
 
     private static final String METER = "meter_";
