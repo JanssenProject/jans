@@ -33,6 +33,9 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def install(self):
 
+        if Config.couchbase_hostname == 'localhost':
+            Config.couchbase_hostname = Config.hostname
+
         if not Config.get('couchebaseClusterAdmin'):
             Config.couchebaseClusterAdmin = 'admin'
             
@@ -51,7 +54,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
 
         if Config.cb_install == InstallTypes.LOCAL:
-            Config.couchbase_hostname = 'localhost'
+            Config.couchbase_hostname = Config.hostname
         
         self.dbUtils.set_cbm()
 
