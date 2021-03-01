@@ -299,9 +299,6 @@ def do_installation():
         #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
         #    oxdInstaller.start_installation()
 
-        if argsp.t:
-            testDataLoader.load_test_data()
-
         jansProgress.progress(PostSetup.service_name, "Saving properties")
         propertiesUtils.save_properties()
         time.sleep(2)
@@ -317,6 +314,9 @@ def do_installation():
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
+
+        if argsp.t:
+            testDataLoader.load_test_data()
 
         jansProgress.progress(static.COMPLETED)
 
