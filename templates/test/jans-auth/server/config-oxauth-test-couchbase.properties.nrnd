@@ -1,4 +1,4 @@
-config.couchbase.couchbase_servers=%(hostname)s
+config.couchbase.couchbase_servers=%(couchbase_query_node)s
 config.couchbase.couchbase_server_user=%(couchbase_server_user)s
 config.couchbase.encoded_couchbase_server_pw=%(encoded_couchbase_server_pw)s
 config.couchbase.couchbase_buckets=%(couchbase_buckets)s
