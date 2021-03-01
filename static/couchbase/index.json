@@ -8,11 +8,11 @@
       ["uid"], 
       ["mail"], 
       ["jansStatus"], 
-      ["jansApplication"], 
+      ["jansApp"], 
       ["jansDeviceHashCode"], 
       ["jansDeviceKeyHandle"],
-      ["jansAuthClientId"],
-      ["jansAuthUserId"]
+      ["jansClntId"],
+      ["jansUsrId"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"jansPerson\""], 
@@ -24,33 +24,33 @@
   "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
-      ["jansScriptType"], 
+      ["jansScrTyp"], 
       ["iat"], 
-      ["jansAuthClientSecretExpiresAt"], 
+      ["jansClntSecretExpAt"], 
       ["creationDate"], 
       ["tknCde"], 
       ["inum"], 
       ["displayName"], 
-      ["jansAuthRegistrationAccessToken"], 
-      ["jansAuthUmaScope"], 
+      ["jansRegistrationAccessTkn"], 
+      ["jansUmaScope"], 
       ["mail"], 
       ["jansId"], 
       ["jansTicket"], 
       ["del"],
       ["ssnId"],
-      ["jansAuthClientId"],
+      ["jansClntId"],
       ["clnId"],
-      ["jansAuthUserDN"],
+      ["jansUsrDN"],
       ["jansState"],
       ["del","exp"],
       ["objectClass","creationDate","jansStatus"]
     ],
     "static" : [
-      [["creationDate"], "objectClass = \"jansPasswordResetRequest\""],
-      [["jansScriptType"], "objectClass = \"jansCustomScript\""],
-      [["jansApplicationType", "jansMetricType", "jansStartDate", "jansEndDate"], "objectClass = \"jansMetric\""],
+      [["creationDate"], "objectClass = \"jansPassResetReq\""],
+      [["jansScrTyp"], "objectClass = \"jansScr\""],
+      [["jansAppTyp", "jansMetricTyp", "jansStartDate", "jansEndDate"], "objectClass = \"jansMetric\""],
       [["exp"], "del=true"],
-      [["jansStatus", "exp"], "objectClass = \"cibaRequest\""]
+      [["jansStatus", "exp"], "objectClass = \"jansCibaReq\""]
         
     ]
   },
