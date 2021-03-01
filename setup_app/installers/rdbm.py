@@ -36,8 +36,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
 
         self.create_tables(jans_schema_files)
-        self.create_indexes()
         self.import_ldif()
+        self.create_indexes()
         self.rdbmProperties()
         
 
@@ -174,6 +174,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             tblObj = self.dbUtils.Base.classes[tblCls]()
             tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields'] + cb_fields
             for attr in tblObj.__table__.columns:
+                if attr.name == 'doc_id':
+                    continue
                 ind_name = re.sub(r'[^0-9a-zA-Z\s]+','_', attr.name)
                 if isinstance(attr.type, sqlalchemy.dialects.mysql.json.JSON):
                     for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
