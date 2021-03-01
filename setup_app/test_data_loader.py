@@ -66,6 +66,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
 
     def load_test_data(self):
+        self.logIt("Re-binding database")
+        self.dbUtils.bind(force=True)
+        
         self.logIt("Checking Internet conncetion")
         socket.setdefaulttimeout(3)
         try:
