@@ -11,6 +11,8 @@ from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import safe_render
 
+from utils import get_injected_urls
+
 
 def render_app_properties(manager):
     client_id = manager.config.get("jca_client_id")
@@ -21,6 +23,7 @@ def render_app_properties(manager):
         "jca_client_id": client_id,
         "jca_client_encoded_pw": client_encoded_pw,
     }
+    ctx.update(get_injected_urls())
 
     with open("/app/templates/application.properties.tmpl") as f:
         txt = safe_render(f.read(), ctx)

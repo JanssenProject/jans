@@ -61,6 +61,14 @@ api.protection.type=oauth2
 api.client.id=%(jca_client_id)s
 api.client.password=%(jca_client_encoded_pw)s
 
+# endpoints
+endpoint.injection.enabled=true
+auth.issuer.url=%(issuer)s
+auth.openid.configuration.url=%(openIdConfigurationEndpoint)s
+auth.openid.introspection.url=%(introspectionEndpoint)s
+auth.openid.token.url=%(tokenEndpoint)s
+auth.openid.revoke.url=%(tokenRevocationEndpoint)s
+
 # healthCheck Configuration
 quarkus.smallrye-health.root-path=/health-check
 
