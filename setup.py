@@ -227,6 +227,12 @@ if not argsp.no_progress:
     jansProgress.queue = queue
 
 
+app_vars = locals().copy()
+
+for app_var in app_vars:
+    setattr(base.current_app, app_var, app_vars[app_var])
+
+
 def do_installation():
 
     jansProgress.before_start()
