@@ -54,7 +54,8 @@ class GluuAttribute(object):
         'custom': 'bool',
         'requred': 'bool',
         'attribute_validation': 'GluuAttributeAttributeValidation',
-        'tooltip': 'str'
+        'tooltip': 'str',
+        'jans_hide_on_discovery': 'bool'
     }
 
     attribute_map = {
@@ -84,10 +85,11 @@ class GluuAttribute(object):
         'custom': 'custom',
         'requred': 'requred',
         'attribute_validation': 'attributeValidation',
-        'tooltip': 'tooltip'
+        'tooltip': 'tooltip',
+        'jans_hide_on_discovery': 'jansHideOnDiscovery'
     }
 
-    def __init__(self, dn=None, inum=None, selected=None, name=None, display_name=None, description=None, data_type=None, status=None, lifetime=None, source_attribute=None, salt=None, name_id_type=None, origin=None, edit_type=None, view_type=None, usage_type=None, claim_name=None, see_also=None, saml1_uri=None, saml2_uri=None, urn=None, scim_custom_attr=None, ox_multi_valued_attribute=None, custom=None, requred=None, attribute_validation=None, tooltip=None):  # noqa: E501
+    def __init__(self, dn=None, inum=None, selected=None, name=None, display_name=None, description=None, data_type=None, status=None, lifetime=None, source_attribute=None, salt=None, name_id_type=None, origin=None, edit_type=None, view_type=None, usage_type=None, claim_name=None, see_also=None, saml1_uri=None, saml2_uri=None, urn=None, scim_custom_attr=None, ox_multi_valued_attribute=None, custom=None, requred=None, attribute_validation=None, tooltip=None, jans_hide_on_discovery=None):  # noqa: E501
         """GluuAttribute - a model defined in Swagger"""  # noqa: E501
         self._dn = None
         self._inum = None
@@ -116,6 +118,7 @@ class GluuAttribute(object):
         self._requred = None
         self._attribute_validation = None
         self._tooltip = None
+        self._jans_hide_on_discovery = None
         self.discriminator = None
         if dn is not None:
             self.dn = dn
@@ -138,8 +141,7 @@ class GluuAttribute(object):
             self.name_id_type = name_id_type
         if origin is not None:
             self.origin = origin
-        if edit_type is not None:
-            self.edit_type = edit_type
+        self.edit_type = edit_type
         self.view_type = view_type
         if usage_type is not None:
             self.usage_type = usage_type
@@ -165,6 +167,8 @@ class GluuAttribute(object):
             self.attribute_validation = attribute_validation
         if tooltip is not None:
             self.tooltip = tooltip
+        if jans_hide_on_discovery is not None:
+            self.jans_hide_on_discovery = jans_hide_on_discovery
 
     @property
     def dn(self):
@@ -493,6 +497,8 @@ class GluuAttribute(object):
         :param edit_type: The edit_type of this GluuAttribute.  # noqa: E501
         :type: list[str]
         """
+        if edit_type is None:
+            raise ValueError("Invalid value for `edit_type`, must not be `None`")  # noqa: E501
         allowed_values = ["ADMIN", "OWNER", "MANAGER", "USER", "WHITEPAGES"]  # noqa: E501
         if not set(edit_type).issubset(set(allowed_values)):
             raise ValueError(
@@ -796,6 +802,29 @@ class GluuAttribute(object):
         """
 
         self._tooltip = tooltip
+
+    @property
+    def jans_hide_on_discovery(self):
+        """Gets the jans_hide_on_discovery of this GluuAttribute.  # noqa: E501
+
+        Boolean value indicating if the attribute should be shown on that discovery page.  # noqa: E501
+
+        :return: The jans_hide_on_discovery of this GluuAttribute.  # noqa: E501
+        :rtype: bool
+        """
+        return self._jans_hide_on_discovery
+
+    @jans_hide_on_discovery.setter
+    def jans_hide_on_discovery(self, jans_hide_on_discovery):
+        """Sets the jans_hide_on_discovery of this GluuAttribute.
+
+        Boolean value indicating if the attribute should be shown on that discovery page.  # noqa: E501
+
+        :param jans_hide_on_discovery: The jans_hide_on_discovery of this GluuAttribute.  # noqa: E501
+        :type: bool
+        """
+
+        self._jans_hide_on_discovery = jans_hide_on_discovery
 
     def to_dict(self):
         """Returns the model properties as a dict"""
