@@ -150,7 +150,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, 'sql_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
-        cb_indexes = base.readJsonFile(base.installers.CouchbaseInstaller.couchbaseIndexJson)
+        cb_indexes = base.readJsonFile(base.current_app.couchbaseInstaller.couchbaseIndexJson)
 
         cb_fields = []
 
