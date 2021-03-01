@@ -275,7 +275,8 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
                     'encoded_couchbaseTrustStorePass': Config.encoded_couchbaseTrustStorePass,
                     'certFolder': Config.certFolder,
-                    'jansOptPythonFolder': Config.jansOptPythonFolder
+                    'jansOptPythonFolder': Config.jansOptPythonFolder,
+                    'couchbase_query_node': Config.cb_query_node
                     }
 
         couchbase_mappings = []
