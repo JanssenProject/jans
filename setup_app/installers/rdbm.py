@@ -2,6 +2,9 @@ import os
 import re
 import sys
 import datetime
+import sqlalchemy
+
+from string import Template
 
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -147,28 +150,50 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, 'sql_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
-        for table in sql_indexes[Config.rdbm_type]:
-            for field in sql_indexes[Config.rdbm_type][table]['fields']:
-                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
+        cb_indexes = base.readJsonFile(base.installers.CouchbaseInstaller.couchbaseIndexJson)
+
+        cb_fields = []
+
+        for bucket in cb_indexes:
+            bucket_indexes = cb_indexes[bucket]
+            if 'attributes' in bucket_indexes:
+                for atr_list in bucket_indexes['attributes']:
+                    for field in atr_list: 
+                        if not field in cb_fields:
+                            cb_fields.append(field)
+
+
+            if 'static' in bucket_indexes:
+                for atr_list in bucket_indexes['static']:
+                    for field in atr_list[0]: 
+                        if not field in cb_fields and not '(' in field:
+                            cb_fields.append(field)
+
+
+        for tblCls in self.dbUtils.Base.classes.keys():
+            tblObj = self.dbUtils.Base.classes[tblCls]()
+            tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields'] + cb_fields
+            for attr in tblObj.__table__.columns:
+                ind_name = re.sub(r'[^0-9a-zA-Z\s]+','_', attr.name)
+                if isinstance(attr.type, sqlalchemy.dialects.mysql.json.JSON):
+                    for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                        tmp_str = Template(ind_str)
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
+                                    Config.rdbm_db,
+                                    tblCls,
+                                    ind_name,
+                                    i+1,
+                                    tmp_str.safe_substitute({'field':attr.name})
+                                    )
+                        self.dbUtils.exec_rdbm_query(sql_cmd)
+                elif attr.name in tbl_fields:
+                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
                                 Config.rdbm_db,
-                                table,
-                                re.sub(r'[^0-9a-zA-Z\s]+','_', field),
-                                field
+                                tblCls,
+                                ind_name,
+                                attr.name
                                 )
-                self.dbUtils.exec_rdbm_query(sql_cmd)
-                indexes.append(sql_cmd)
-
-            for i, custom in enumerate(sql_indexes[Config.rdbm_type][table]['custom']):
-                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}`(({3}));'.format(
-                    Config.rdbm_db,
-                    table,
-                    i,
-                    custom
-                    )
-                self.dbUtils.exec_rdbm_query(sql_cmd)
-                indexes.append(sql_cmd)
-
-        self.writeFile(os.path.join(self.output_dir, 'jans_indexes.sql'), '\n'.join(indexes))
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
 
 
     def import_ldif(self):
