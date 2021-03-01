@@ -40,6 +40,8 @@ parser.add_argument('-u', help="Use downloaded components", action='store_true')
 parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
 parser.add_argument('-uninstall', help="Uninstall Jans server and removes all files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
+parser.add_argument('--keep-downloads', help="Keep downloaded files", action='store_true')
+
 argsp = parser.parse_args()
 
 
@@ -139,7 +141,11 @@ elif argsp.uninstall:
             print("Stopping", service)
             os.system('systemctl stop ' + service)
 
-    for p in ('/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/dist', '/opt/jetty*', '/opt/jython*', '/opt/opendj'):
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/jetty*', '/opt/jython*', '/opt/opendj']
+    if not argsp.keep_downloads:
+        remove_list.append('/opt/dist')
+
+    for p in remove_list:
         cmd = 'rm -r -f ' + p
         print("Executing", cmd)
         os.system('rm -r -f ' + p)
