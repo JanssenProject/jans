@@ -476,5 +476,10 @@
     "mysql": {
       "type": "JSON"
     }
+  },
+  "jansScrError": {
+    "mysql": {
+      "type": "TEXT"
+    }
   }
 }
