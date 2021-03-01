@@ -171,7 +171,7 @@ if Config.installed_instance:
                         ):
 
         setattr(Config, installer.install_var, installer.installed())
-
+        setattr(base.installers, installer.__class__.__name__, installer)
 
     if not argsp.shell:
         propertiesUtils.promptForProperties()

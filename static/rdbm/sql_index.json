@@ -1,15 +1,26 @@
 {
-    "mysql": {
-        "jansPerson": {
-            "fields": ["uid", "dn", "doc_id", "objectClass"],
-            "custom": [
-                "CAST(jansExtUid->'$.v' AS UNSIGNED ARRAY)",
-                "CAST(address->'$.v' AS CHAR(48) ARRAY)",
-                "CAST(jansExtUid->'$.v[0]' AS UNSIGNED)",
-                "CAST(jansExtUid->'$.v[1]' AS UNSIGNED)",
-                "CAST(jansExtUid->'$.v[2]' AS UNSIGNED)",
-                "lower(`uid`)"
-                ]
-        }
+  "mysql": {
+    "jansPerson": {
+      "fields": [],
+      "custom": [
+        "CAST(address->'$.v' AS CHAR(48) ARRAY)",
+        "lower(`uid`)",
+        "lower(`mail')"
+      ]
     }
+  },
+  "__common__": {
+    "JSON": [
+      "CAST($field->'$.v' AS UNSIGNED ARRAY)CAST($field->'$.v[0]' AS UNSIGNED)",
+      "CAST($field->'$.v[1]' AS UNSIGNED)",
+      "CAST($field->'$.v[2]' AS UNSIGNED)"
+    ],
+    "fields": [
+      "uid",
+      "dn",
+      "doc_id",
+      "objectClass"
+    ]
+  }
 }
+
