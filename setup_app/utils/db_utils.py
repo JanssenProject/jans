@@ -35,7 +35,9 @@ class DBUtils:
     processedKeys = []
     Base = None
 
-    def bind(self, use_ssl=True):
+    def bind(self, use_ssl=True, force=False):
+
+        base.logIt("Bind to database")
 
         if Config.mappingLocations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
@@ -47,10 +49,10 @@ class DBUtils:
             self.moddb = BackendTypes.COUCHBASE
 
 
-        if not hasattr(self, 'ldap_conn'):
+        if not hasattr(self, 'ldap_conn') or force:
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'ldap':
-
+                    base.logIt("Making LDAP Conncetion")
                     ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
                     self.ldap_conn = ldap3.Connection(
                                 ldap_server,
@@ -61,10 +63,11 @@ class DBUtils:
                     self.ldap_conn.bind()
                     break
 
-        if not hasattr(self, 'mysql_conn'):
+        if not hasattr(self, 'mysql_conn') or force:
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
                     if Config.rdbm_type == 'mysql':
+                        base.logIt("Making MySql Conncetion")
                         result = self.mysqlconnection()
                         if not result[0]:
                             print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
@@ -581,7 +584,7 @@ class DBUtils:
                             self.session.commit()
 
                         else:
-                            self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
                             continue
 
                     elif 'replace' in entry and 'changetype' in entry:
@@ -593,7 +596,7 @@ class DBUtils:
                             setattr(sqlalchObj, attribute, new_val)
                             self.session.commit()
                         else:
-                            self.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
                             continue
 
                     else:
