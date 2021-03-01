@@ -95,6 +95,12 @@ current_number_of_cpu = multiprocessing.cpu_count()
 disk_st = os.statvfs(snap_common if snap else '/')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
+class Installers:
+    pass
+
+installers = Installers()
+
+
 def check_resources():
 
     if '--shell' in sys.argv or '-x' in sys.argv:
