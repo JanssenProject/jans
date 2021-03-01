@@ -97,8 +97,8 @@
       ["jansUsrDN"]
     ],
     "static" : [
-        [["sid"], "objectClass = \"jansToken\""],
-        [["exp"], "objectClass = \"jansToken\""]
+        [["sid"], "objectClass = \"jansSessId\""],
+        [["exp"], "objectClass = \"jansSessId\""]
     ]
   },
 
