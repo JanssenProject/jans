@@ -18,7 +18,6 @@
     "fields": [
       "uid",
       "dn",
-      "doc_id",
       "objectClass"
     ]
   }
