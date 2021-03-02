@@ -6,14 +6,6 @@
 
 package io.jans.model;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.attribute.AttributeValidation;
 import io.jans.orm.annotation.AttributeName;
@@ -21,6 +13,13 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
+
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Attribute Metadata
@@ -103,6 +102,9 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	@AttributeName(name = "jansMultivaluedAttr")
 	private Boolean oxMultiValuedAttribute;
+
+    @AttributeName(name = "jansHideOnDiscovery")
+    private Boolean jansHideOnDiscovery;
 
 	@Transient
 	private boolean custom;
@@ -344,6 +346,14 @@ public class GluuAttribute extends Entry implements Serializable {
 	public void setAttributeValidation(AttributeValidation attributeValidation) {
 		this.attributeValidation = attributeValidation;
 	}
+
+    public Boolean getJansHideOnDiscovery() {
+        return jansHideOnDiscovery;
+    }
+
+    public void setJansHideOnDiscovery(Boolean jansHideOnDiscovery) {
+        this.jansHideOnDiscovery = jansHideOnDiscovery;
+    }
 
 	/*
 	 * (non-Javadoc)
