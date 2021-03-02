@@ -170,7 +170,7 @@ public abstract class MetricService implements Serializable {
     }
 
     public void removeBranch(String branchDn) {
-        getEntryManager().removeRecursively(branchDn);
+        getEntryManager().removeRecursively(branchDn, SimpleBranch.class);
     }
 
     public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
