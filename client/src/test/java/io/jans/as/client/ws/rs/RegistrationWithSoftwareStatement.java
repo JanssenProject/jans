@@ -516,7 +516,6 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
 
         RegisterRequest registerRequest = new RegisterRequest();
         registerRequest.setSoftwareStatement(encodedSoftwareStatement);
-        ;
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest.sign(SignatureAlgorithm.RS256, keyId, cryptoProvider));
