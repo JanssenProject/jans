@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Verify Auth configuration endpoint
 
   	Background:
@@ -12,6 +12,33 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     And assert response.length != null
+    
+    @ignore
+    @auth-config-dcr-patch
+  	Scenario: Patch DCR Auth configuration
+  	Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And request "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationEnabled\", \"value\": \"true\" } ,{\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksURIClaim\", \"value\": \"jwks_uri\" } ,{\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksClaim\", \"value\": \"https://pujavs.jans.server2/jans-auth/restv1/jwks\" } ,{\"op\":\"replace\", \"path\": \"/dcrSignatureValidationJwksUri\", \"value\": \"https://pujavs.jans.server2/jans-auth/restv1/jwks\" },{\"op\":\"replace\", \"path\": \"/dcrSignatureValidationJwks\", \"value\": \"key\" }]"
+	Then print request
+    When method PATCH
+    Then status 200
+    And print response
+    
+    @ignore
+    @auth-config-softwareStatementValidationType-patch
+  	Scenario: Patch softwareStatementValidationType Auth configuration
+  	Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And request "[ {\"op\":\"replace\", \"path\": \"/softwareStatementValidationType\", \"value\": \"jwks_uri\" } ,{\"op\":\"replace\", \"path\": \"/softwareStatementValidationClaimName\", \"value\": \"jwks_uri\" } ]"
+	Then print request
+    When method PATCH
+    Then status 200
+    And print response
+    
     
     @ignore
     @auth-config-patch
