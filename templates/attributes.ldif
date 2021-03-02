@@ -2,6 +2,7 @@ dn: inum=29DA,ou=attributes,o=jans
 description: XRI i-number, persistent non-reassignable identifier
 displayName: Inum
 inum: 29DA
+jansAttrEditTyp: admin
 jansAttrName: inum
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
