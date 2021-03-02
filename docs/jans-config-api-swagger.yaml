@@ -3442,6 +3442,22 @@ components:
           type: string
           description: Path to external log4j2 logging configuration.
           example: /identity/logviewer/configure
+        dcrSignatureValidationEnabled:
+          type: boolean
+          description: Boolean value enables DCR signature validation. Default is false.
+        dcrSignatureValidationSoftwareStatementJwksURIClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
+        dcrSignatureValidationSoftwareStatementJwksClaim:
+          type: string
+          description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
+        dcrSignatureValidationJwks:
+          type: string
+          description: Specifies JWKS for all DCR's validations.		  
+        dcrSignatureValidationJwksUri:
+          type: string
+          description: specifies JWKS URI for all DCR's validations.
+		  
  
     GluuAttribute:
       title: GluuAttribute
