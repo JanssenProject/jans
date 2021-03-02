@@ -107,13 +107,10 @@ public class StringEncrypter {
      * @param bytes
      *            Byte stream
      * @return String representation
+     * @throws UnsupportedEncodingException 
      */
-    private static String bytes2String(final byte[] bytes) {
-        final StringBuffer stringBuffer = new StringBuffer();
-        for (final byte element : bytes) {
-            stringBuffer.append((char) element);
-        }
-        return stringBuffer.toString();
+    private static String bytes2String(final byte[] bytes) throws UnsupportedEncodingException {
+        return new String(bytes, Util.UTF8);
     }
 
     /**
