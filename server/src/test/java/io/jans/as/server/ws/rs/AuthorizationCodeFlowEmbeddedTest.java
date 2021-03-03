@@ -201,8 +201,6 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         }
     }
 
-    @Parameters({"tokenPath", "validateTokenPath", "redirectUri"})
-    @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowStep2"}, priority = 10)
     public void completeFlowStep3(final String tokenPath, final String refreshToken) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
@@ -346,8 +344,6 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         }
     }
 
-    @Parameters({"tokenPath", "validateTokenPath", "redirectUri"})
-    @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowWithOptionalNonceStep2"}, priority = 20)
     public void completeFlowWithOptionalNonceStep3(final String tokenPath, final String refreshToken) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
