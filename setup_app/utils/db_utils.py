@@ -675,6 +675,14 @@ class DBUtils:
                                     data = [data]
                                 n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=%s' % (cur_bucket, key, attribute, json.dumps(data)))
                     else:
+                        for k in document:
+                            try:
+                                kdata = json.loads(document[k])
+                                if isinstance(kdata, dict):
+                                    document[k] = kdata
+                            except:
+                                pass
+
                         n1ql_list.append('UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (cur_bucket, key, json.dumps(document)))
 
                     for q in n1ql_list:
