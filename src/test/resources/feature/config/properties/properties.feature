@@ -39,6 +39,34 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
+    @ignore
+    @auth-config-cleanServiceBaseDns-patch
+  	Scenario: Patch cleanServiceBaseDns Auth configuration
+  	Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    #And request "[ {\"op\":\"replace\", \"path\": \"/cleanServiceBaseDns\", \"value\": \"{ \"jansClient\":\"value5\", \"jansKey\":\"value8\"}\" }  ]"
+    And request "[ {\"op\":\"replace\", \"path\": \"/cleanServiceBaseDns\", \"value\": {\"jansClient\": \"value6\" , \"ou\": \"value7\"} }]"
+    Then print request
+    When method PATCH
+    Then status 200
+    And print response
+    
+    @ignore
+    @auth-config-statistical-patch
+  	Scenario: Patch statistical Auth configuration
+  	Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And request "[ {\"op\":\"replace\", \"path\": \"/statEnabled\", \"value\": \"true\" },{\"op\":\"replace\", \"path\": \"/statTimerIntervalInSeconds\", \"value\": \"200\" },{\"op\":\"replace\", \"path\": \"/statWebServiceIntervalLimitInSeconds\", \"value\": \"800\" }  ]"
+    Then print request
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
     
     @ignore
     @auth-config-patch
