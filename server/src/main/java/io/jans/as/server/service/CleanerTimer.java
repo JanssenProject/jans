@@ -41,6 +41,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -148,7 +149,7 @@ public class CleanerTimer {
             Date now = new Date();
 
             final Set<String> processedBaseDns = new HashSet<>();
-			for (Map.Entry<String, Class> baseDn : createCleanServiceBaseDns().entrySet()) {
+			for (Map.Entry<String, Class<?>> baseDn : createCleanServiceBaseDns().entrySet()) {
 				try {
                     if (entryManager.hasExpirationSupport(baseDn.getKey())) {
                         continue;
@@ -181,10 +182,10 @@ public class CleanerTimer {
 		}
 	}
 
-	private Map<String, Class> createCleanServiceBaseDns() {
+	private Map<String, Class<?>> createCleanServiceBaseDns() {
         final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 
-        final Map<String, Class> cleanServiceBaseDns = Maps.newHashMap();
+        final Map<String, Class<?>> cleanServiceBaseDns = Maps.newHashMap();
 
         for (Map.Entry<String, String> entry : appConfiguration.getCleanServiceBaseDns().entrySet()) {
             try {
