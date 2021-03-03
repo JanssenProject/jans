@@ -3,10 +3,7 @@ package io.jans.as.server.service.stat;
 import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.config.Conf;
-import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
@@ -42,9 +39,6 @@ public class StatService {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private ConfigurationFactory configurationFactory;
 
     @Inject
     private PersistenceEntryManager entryManager;
@@ -163,19 +157,9 @@ public class StatService {
             return;
         }
 
-        String dn = configurationFactory.getBaseConfiguration().getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
-        Conf conf = entryManager.find(Conf.class, dn);
-
-        if (StringUtils.isNotBlank(conf.getDynamic().getStatNodeId())) {
-            nodeId = conf.getDynamic().getStatNodeId();
-            return;
-        }
-
         try {
             nodeId = UUID.randomUUID().toString();
-            conf.getDynamic().setStatNodeId(nodeId);
-            conf.setRevision(conf.getRevision() + 1);
-            entryManager.merge(conf);
+            // todo save to local file ?
             log.info("Updated statNodeId {} successfully", nodeId);
         } catch (Exception e) {
             nodeId = null;
