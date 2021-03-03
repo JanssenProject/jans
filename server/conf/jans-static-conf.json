@@ -9,7 +9,6 @@
         "authorizations": "ou=authorizations,o=jans",
         "scopes": "ou=scopes,o=jans",
         "attributes": "ou=attributes,o=jans",
-        "sessionId": "ou=session,o=jans",
         "scripts": "ou=scripts,o=jans",
         "umaBase": "ou=uma,o=jans",
         "umaPolicy": "ou=policies,ou=uma,o=jans",

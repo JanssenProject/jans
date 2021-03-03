@@ -14,6 +14,7 @@ import net.agkn.hll.HLL;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -56,6 +57,13 @@ public class StatService {
     private StatEntry currentEntry;
     private HLL hll;
     private ConcurrentMap<String, Map<String, Long>> tokenCounters;
+    
+    private boolean initialized = false;
+    
+    @PostConstruct
+    public void create() {
+    	initialized = false;
+    }
 
     public boolean init() {
         try {
@@ -80,6 +88,7 @@ public class StatService {
 
             setupCurrentEntry(now);
             log.info("Initialized Stat Service");
+            initialized = true;
             return true;
         } catch (Exception e) {
             log.error("Failed to initialize Stat Service.", e);
@@ -88,6 +97,10 @@ public class StatService {
     }
 
     public void updateStat() {
+    	if (!initialized) {
+    		return;
+    	}
+
         Date now = new Date();
         prepareMonthlyBranch(now);
         if (StringUtils.isBlank(monthlyDn)) {
@@ -214,7 +227,11 @@ public class StatService {
     }
 
     public void reportActiveUser(String id) {
-        if (StringUtils.isBlank(id)) {
+    	if (!initialized) {
+    		return;
+    	}
+
+    	if (StringUtils.isBlank(id)) {
             return;
         }
         setupCurrentEntry();
@@ -239,6 +256,10 @@ public class StatService {
 
 
     private void reportToken(GrantType grantType, String tokenKey) {
+    	if (!initialized) {
+    		return;
+    	}
+
         if (grantType == null || tokenKey == null) {
             return;
         }
