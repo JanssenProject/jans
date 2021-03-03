@@ -57,100 +57,100 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Named
 public class CleanerTimer {
 
-	public final static int BATCH_SIZE = 1000;
-	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+    public final static int BATCH_SIZE = 1000;
+    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Inject
-	private PersistenceEntryManager entryManager;
+    @Inject
+    private PersistenceEntryManager entryManager;
 
-	@Inject
-	private UmaPctService umaPctService;
+    @Inject
+    private UmaPctService umaPctService;
 
-	@Inject
-	private UmaResourceService umaResourceService;
+    @Inject
+    private UmaResourceService umaResourceService;
 
-	@Inject
-	private CacheProvider cacheProvider;
+    @Inject
+    private CacheProvider cacheProvider;
 
-	@Inject
-	@Named("u2fRequestService")
-	private RequestService u2fRequestService;
+    @Inject
+    @Named("u2fRequestService")
+    private RequestService u2fRequestService;
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
-	@Inject
-	private StaticConfiguration staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
-	@Inject
-	private Event<TimerEvent> cleanerEvent;
+    @Inject
+    private Event<TimerEvent> cleanerEvent;
 
-	private long lastFinishedTime;
+    private long lastFinishedTime;
 
-	private AtomicBoolean isActive;
+    private AtomicBoolean isActive;
 
-	public void initTimer() {
-		log.debug("Initializing Cleaner Timer");
-		this.isActive = new AtomicBoolean(false);
+    public void initTimer() {
+        log.debug("Initializing Cleaner Timer");
+        this.isActive = new AtomicBoolean(false);
 
-		// Schedule to start cleaner every 30 seconds
-		cleanerEvent.fire(
-				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+        // Schedule to start cleaner every 30 seconds
+        cleanerEvent.fire(
+                new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
 
-		this.lastFinishedTime = System.currentTimeMillis();
-	}
+        this.lastFinishedTime = System.currentTimeMillis();
+    }
 
-	@Asynchronous
-	public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
-		if (this.isActive.get()) {
-			return;
-		}
+    @Asynchronous
+    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
+        if (this.isActive.get()) {
+            return;
+        }
 
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
+        if (!this.isActive.compareAndSet(false, true)) {
+            return;
+        }
 
-		try {
-			processImpl();
-		} finally {
-			this.isActive.set(false);
-		}
-	}
-
-	private boolean isStartProcess() {
-		int interval = appConfiguration.getCleanServiceInterval();
-		if (interval < 0) {
-			log.info("Cleaner Timer is disabled.");
-			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
-			return false;
-		}
-
-		long cleaningInterval = interval * 1000;
-
-		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
-
-		return timeDiffrence >= cleaningInterval;
-	}
-
-	public void processImpl() {
         try {
-			if (!isStartProcess()) {
-				log.trace("Starting conditions aren't reached");
-				return;
-			}
+            processImpl();
+        } finally {
+            this.isActive.set(false);
+        }
+    }
 
-			int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+    private boolean isStartProcess() {
+        int interval = appConfiguration.getCleanServiceInterval();
+        if (interval < 0) {
+            log.info("Cleaner Timer is disabled.");
+            log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+            return false;
+        }
+
+        long cleaningInterval = interval * 1000;
+
+        long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+
+        return timeDiffrence >= cleaningInterval;
+    }
+
+    public void processImpl() {
+        try {
+            if (!isStartProcess()) {
+                log.trace("Starting conditions aren't reached");
+                return;
+            }
+
+            int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
             if (chunkSize <= 0)
                 chunkSize = BATCH_SIZE;
 
             Date now = new Date();
 
             final Set<String> processedBaseDns = new HashSet<>();
-			for (Map.Entry<String, Class<?>> baseDn : createCleanServiceBaseDns().entrySet()) {
-				try {
+            for (Map.Entry<String, Class<?>> baseDn : createCleanServiceBaseDns().entrySet()) {
+                try {
                     if (entryManager.hasExpirationSupport(baseDn.getKey())) {
                         continue;
                     }
@@ -164,25 +164,25 @@ public class CleanerTimer {
                     processedBaseDns.add(processedBaseDn);
 
                     log.debug("Start clean up for baseDn: " + baseDn.getValue() + ", class: " + baseDn.getValue());
-					final Stopwatch started = Stopwatch.createStarted();
+                    final Stopwatch started = Stopwatch.createStarted();
 
-					int removed = cleanup(baseDn, now, chunkSize);
+                    int removed = cleanup(baseDn, now, chunkSize);
 
-					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
-				} catch (Exception e) {
-					log.error("Failed to process clean up for baseDn: " + baseDn + ", class: " + baseDn.getValue(), e);
-				}
-			}
+                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
+                } catch (Exception e) {
+                    log.error("Failed to process clean up for baseDn: " + baseDn + ", class: " + baseDn.getValue(), e);
+                }
+            }
 
-			processCache(now);
+            processCache(now);
 
-			this.lastFinishedTime = System.currentTimeMillis();
-		} catch (Exception e) {
-			log.error("Failed to process clean up.", e);
-		}
-	}
+            this.lastFinishedTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            log.error("Failed to process clean up.", e);
+        }
+    }
 
-	private Map<String, Class<?>> createCleanServiceBaseDns() {
+    private Map<String, Class<?>> createCleanServiceBaseDns() {
         final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 
         final Map<String, Class<?>> cleanServiceBaseDns = Maps.newHashMap();
@@ -200,17 +200,17 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
         cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
         cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getMetric(), MetricEntry.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
-		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getMetric(), MetricEntry.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
 
-		return cleanServiceBaseDns;
-	}
+        return cleanServiceBaseDns;
+    }
 
-	public int cleanup(final Map.Entry<String, Class<?>> baseDn, final Date now, final int batchSize) {
+    public int cleanup(final Map.Entry<String, Class<?>> baseDn, final Date now, final int batchSize) {
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
@@ -222,15 +222,15 @@ public class CleanerTimer {
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);
         }
-        
+
         return 0;
     }
 
-	private void processCache(Date now) {
-		try {
+    private void processCache(Date now) {
+        try {
             cacheProvider.cleanup(now);
-		} catch (Exception e) {
-			log.error("Failed to clean up cache.", e);
-		}
-	}
+        } catch (Exception e) {
+            log.error("Failed to clean up cache.", e);
+        }
+    }
 }
