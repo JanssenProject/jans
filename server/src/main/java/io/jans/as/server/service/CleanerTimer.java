@@ -10,6 +10,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
@@ -30,7 +31,11 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -84,7 +89,7 @@ public class CleanerTimer {
 		log.debug("Initializing Cleaner Timer");
 		this.isActive = new AtomicBoolean(false);
 
-		// Schedule to start cleaner every 1 minute
+		// Schedule to start cleaner every 30 seconds
 		cleanerEvent.fire(
 				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
 
@@ -134,9 +139,11 @@ public class CleanerTimer {
             if (chunkSize <= 0)
                 chunkSize = BATCH_SIZE;
 
-            Date now = new Date();
+            	Date now = new Date();
 
-			for (String baseDn : createCleanServiceBaseDns()) {
+            	final Set<String> processedBaseDns = new HashSet<>();
+            	for (CleanDescriptor cleanDescriptor : createCleanServiceBaseDns()) {
+				String baseDn = cleanDescriptor.getBaseDn();
 				try {
                     if (entryManager.hasExpirationSupport(baseDn)) {
                         continue;
@@ -145,7 +152,20 @@ public class CleanerTimer {
                     log.debug("Start clean up for baseDn: " + baseDn);
 					final Stopwatch started = Stopwatch.createStarted();
 
-					int removed = cleanup(baseDn, now, chunkSize);
+					Class<?> entryClass = cleanDescriptor.getClass();
+					if (entryManager.hasBranchesSupport(baseDn)) {
+						// In LDAP we can do clean from baseDN
+						entryClass = null;
+					}
+
+					String processedBaseDn = baseDn.toLowerCase() + "_" + (entryClass == null ? "" : entryClass.getSimpleName());
+					if (processedBaseDns.contains(processedBaseDn)) {
+						log.warn("baseDn: {}, already processed. Please fix cleaner configuration! Skipping second run...", baseDn);
+						continue;
+					}
+
+					processedBaseDns.add(processedBaseDn);
+					int removed = cleanup(baseDn, entryClass, now, chunkSize);
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 				} catch (Exception e) {
@@ -161,34 +181,43 @@ public class CleanerTimer {
 		}
 	}
 
-	public Set<String> createCleanServiceBaseDns() {
+	public List<CleanDescriptor> createCleanServiceBaseDns() {
         final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 
-        final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
-        cleanServiceBaseDns.add(umaPctService.branchBaseDn());
-        cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
-        cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
-        cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getTokens());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getAuthorizations());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getScopes());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getSessions());
+        List<CleanDescriptor> cleanServiceBaseDns = new ArrayList<CleanDescriptor>();
+        for (String cleanServiceBaseDn : appConfiguration.getCleanServiceBaseDns()) {
+        	cleanServiceBaseDns.add(new CleanDescriptor(cleanServiceBaseDn, null));
+        }
+
+        cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getClients(), null));
+        cleanServiceBaseDns.add(new CleanDescriptor(umaPctService.branchBaseDn(), null));
+        cleanServiceBaseDns.add(new CleanDescriptor(umaResourceService.getBaseDnForResource(), null));
+        cleanServiceBaseDns.add(new CleanDescriptor(String.format("ou=registration_requests,%s", u2fBase), null));
+        cleanServiceBaseDns.add(new CleanDescriptor(String.format("ou=registered_devices,%s", u2fBase), null));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getPeople(), null));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getMetric(), null));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getAuthorizations(), null));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getScopes(), null));
+		cleanServiceBaseDns.add(new CleanDescriptor(staticConfiguration.getBaseDn().getSessions(), null));
 
         log.debug("Built-in base dns: " + cleanServiceBaseDns);
 
 		return cleanServiceBaseDns;
 	}
 
-	public int cleanup(final String baseDn, final Date now, final int batchSize) {
+	public int cleanup(final String baseDn, final Class<?> entryClass, final Date now, final int batchSize) {
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now)));
 
-            int removedCount = entryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
+            Class<?> cleanEntryClass = entryClass;
+            if (cleanEntryClass == null) {
+            	cleanEntryClass = DeletableEntity.class;
+            }
+
+            int removedCount = entryManager.remove(baseDn, cleanEntryClass, filter, batchSize);
             
             return removedCount;
         } catch (Exception e) {
@@ -205,4 +234,34 @@ public class CleanerTimer {
 			log.error("Failed to clean up cache.", e);
 		}
 	}
+	
+	private class CleanDescriptor {
+
+		String baseDn;
+		Class<?> entryClass;
+
+		public CleanDescriptor(String baseDn, Class<?> entryClass) {
+			super();
+			this.baseDn = baseDn;
+			this.entryClass = entryClass;
+		}
+
+		public String getBaseDn() {
+			return baseDn;
+		}
+
+		public void setBaseDn(String baseDn) {
+			this.baseDn = baseDn;
+		}
+
+		public Class<?> getEntryClass() {
+			return entryClass;
+		}
+
+		public void setEntryClass(Class<?> entryClass) {
+			this.entryClass = entryClass;
+		}
+
+	}
+
 }
