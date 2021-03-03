@@ -334,6 +334,5 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code",
-    "statNodeId" : "673ead02-9cb4-4ff6-87eb-e509d53d45f9" 
+    "deviceAuthzResponseTypeToProcessAuthz": "code"
 }
