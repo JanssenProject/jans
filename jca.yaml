@@ -2225,7 +2225,6 @@ components:
       description: Script
       required:
         - name
-        - description
         - script
         - scriptType
         - programmingLanguage
@@ -2279,6 +2278,7 @@ components:
             - CIBA_END_USER_NOTIFICATION
             - PERSISTENCE_EXTENSION
             - IDP
+            - UPDATE_TOKEN
         programmingLanguage:
           type: string
           enum:
@@ -2946,12 +2946,12 @@ components:
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
           example: 10000
         cleanServiceBaseDns:
-          type: array
-          description: List of additional base dns under which AS will look up for expired entities.
-          items:
+          type: object
+          description: Map of additional base dns under which AS will look up for expired entities.
+          additionalProperties:
             type: string
           example:
-            - ssn
+            - {"key1": "value1","key2": "value2"}
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
@@ -3457,7 +3457,15 @@ components:
         dcrSignatureValidationJwksUri:
           type: string
           description: specifies JWKS URI for all DCR's validations.
-		  
+        statEnabled:
+          type: boolean	
+          description: Boolean value indicating if statistical service is enabled.	  
+        statTimerIntervalInSeconds:
+          type: integer				  
+          description: Statistical data capture time interval.
+        statWebServiceIntervalLimitInSeconds:
+          type: integer		
+          description: Statistical data capture time interval limit.
  
     GluuAttribute:
       title: GluuAttribute
@@ -3579,10 +3587,10 @@ components:
             maxLength:
               type: integer
         tooltip:
-          type: string    
+          type: string
         jansHideOnDiscovery:
           type: boolean
-          description: Boolean value indicating if the attribute should be shown on that discovery page.
+          description: Boolean value indicating if the attribute should be shown on that discovery page.		  
     PatchRequest: 
       description: A JSONPatch document as defined by RFC 6902 
       required:
