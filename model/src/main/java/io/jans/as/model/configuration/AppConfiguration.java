@@ -51,7 +51,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean sessionAsJwt = false;
 
-    public int sectorIdentifierCacheLifetimeInMinutes = 1440;
+    private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
@@ -64,10 +64,9 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
-    public Boolean statEnabled = true;
-    public int statTimerIntervalInSeconds;
-    public int statWebServiceIntervalLimitInSeconds;
-    public String statNodeId;
+    private Boolean statEnabled = true;
+    private int statTimerIntervalInSeconds;
+    private int statWebServiceIntervalLimitInSeconds;
 
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
@@ -260,7 +259,7 @@ public class AppConfiguration implements Configuration {
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
 
-    public int discoveryCacheLifetimeInMinutes = 60;
+    private int discoveryCacheLifetimeInMinutes = 60;
 
     public Boolean getUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
@@ -927,14 +926,6 @@ public class AppConfiguration implements Configuration {
 
     public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
         this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
-    }
-
-    public String getStatNodeId() {
-        return statNodeId;
-    }
-
-    public void setStatNodeId(String statNodeId) {
-        this.statNodeId = statNodeId;
     }
 
     public List<String> getUserInfoEncryptionEncValuesSupported() {
