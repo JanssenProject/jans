@@ -441,7 +441,9 @@ public class ConfigurationFactory {
 
 			return conf;
 		} catch (BasePersistenceException ex) {
-			ex.printStackTrace();
+			if (!dn.contains("_test")) {
+				ex.printStackTrace();
+			}
 			log.error(ex.getMessage());
 		}
 
