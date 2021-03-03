@@ -42,6 +42,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,7 +95,7 @@ public class CleanerTimer {
 		log.debug("Initializing Cleaner Timer");
 		this.isActive = new AtomicBoolean(false);
 
-		// Schedule to start cleaner every 1 minute
+		// Schedule to start cleaner every 30 seconds
 		cleanerEvent.fire(
 				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
 
@@ -146,11 +147,20 @@ public class CleanerTimer {
 
             Date now = new Date();
 
+            final Set<String> processedBaseDns = new HashSet<>();
 			for (Map.Entry<String, Class> baseDn : createCleanServiceBaseDns().entrySet()) {
 				try {
                     if (entryManager.hasExpirationSupport(baseDn.getKey())) {
                         continue;
                     }
+
+                    String processedBaseDn = baseDn.getKey() + "_" + (baseDn.getValue() == null ? "" : baseDn.getValue().getSimpleName());
+                    if (processedBaseDns.contains(processedBaseDn)) {
+                        log.warn("baseDn: {}, already processed. Please fix cleaner configuration! Skipping second run...", baseDn);
+                        continue;
+                    }
+
+                    processedBaseDns.add(processedBaseDn);
 
                     log.debug("Start clean up for baseDn: " + baseDn.getValue() + ", class: " + baseDn.getValue());
 					final Stopwatch started = Stopwatch.createStarted();
@@ -199,7 +209,7 @@ public class CleanerTimer {
 		return cleanServiceBaseDns;
 	}
 
-	public int cleanup(final Map.Entry<String, Class> baseDn, final Date now, final int batchSize) {
+	public int cleanup(final Map.Entry<String, Class<?>> baseDn, final Date now, final int batchSize) {
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
