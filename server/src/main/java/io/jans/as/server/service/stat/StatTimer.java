@@ -46,11 +46,6 @@ public class StatTimer {
     public void initTimer() {
         log.info("Initializing Stat Service Timer");
 
-        final boolean initialized = statService.init();
-        if (!initialized) {
-            log.error("Failed to initialize Stat Service Timer.");
-            return;
-        }
         this.isActive = new AtomicBoolean(false);
 
         timerEvent.fire(new TimerEvent(new TimerSchedule(TIMER_TICK_INTERVAL_IN_SECONDS, TIMER_TICK_INTERVAL_IN_SECONDS), new StatEvent(), Scheduled.Literal.INSTANCE));

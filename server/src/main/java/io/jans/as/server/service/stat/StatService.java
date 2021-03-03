@@ -4,6 +4,7 @@ import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.net.InetAddressUtility;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
@@ -51,12 +52,12 @@ public class StatService {
     private StatEntry currentEntry;
     private HLL hll;
     private ConcurrentMap<String, Map<String, Long>> tokenCounters;
-    
+
     private boolean initialized = false;
-    
+
     @PostConstruct
     public void create() {
-    	initialized = false;
+        initialized = false;
     }
 
     public boolean init() {
@@ -91,9 +92,11 @@ public class StatService {
     }
 
     public void updateStat() {
-    	if (!initialized) {
-    		return;
-    	}
+        if (!initialized) {
+            return;
+        }
+
+        log.trace("Started updateStat ...");
 
         Date now = new Date();
         prepareMonthlyBranch(now);
@@ -110,6 +113,8 @@ public class StatService {
 
         currentEntry.setUserHllData(new String(hll.toBytes(), StandardCharsets.UTF_8));
         entryManager.merge(currentEntry);
+
+        log.trace("Finished updateStat.");
     }
 
     private void setupCurrentEntry() {
@@ -158,12 +163,15 @@ public class StatService {
         }
 
         try {
+            nodeId = InetAddressUtility.getMACAddressOrNull();
+            if (StringUtils.isNotBlank(nodeId)) {
+                return;
+            }
+
             nodeId = UUID.randomUUID().toString();
-            // todo save to local file ?
-            log.info("Updated statNodeId {} successfully", nodeId);
         } catch (Exception e) {
-            nodeId = null;
-            log.error("Failed to update statNodeId.", e);
+            log.error("Failed to identify nodeId.", e);
+            nodeId = UUID.randomUUID().toString();
         }
     }
 
@@ -177,12 +185,12 @@ public class StatService {
 
     private void prepareMonthlyBranch(Date now) {
         final String baseDn = getBaseDn();
-
-        final String month = PERIOD_DATE_FORMAT.format(now); // yyyyMM
-        monthlyDn = String.format("ou=%s,%s", month, baseDn); // ou=yyyyMM,ou=stat,o=gluu
         if (!entryManager.hasBranchesSupport(baseDn)) {
             return;
         }
+
+        final String month = PERIOD_DATE_FORMAT.format(now); // yyyyMM
+        monthlyDn = String.format("ou=%s,%s", month, baseDn); // ou=yyyyMM,ou=stat,o=gluu
 
         try {
             if (!entryManager.contains(monthlyDn, SimpleBranch.class)) { // Create ou=yyyyMM branch if needed
@@ -211,11 +219,11 @@ public class StatService {
     }
 
     public void reportActiveUser(String id) {
-    	if (!initialized) {
-    		return;
-    	}
+        if (!initialized) {
+            return;
+        }
 
-    	if (StringUtils.isBlank(id)) {
+        if (StringUtils.isBlank(id)) {
             return;
         }
         setupCurrentEntry();
@@ -240,9 +248,9 @@ public class StatService {
 
 
     private void reportToken(GrantType grantType, String tokenKey) {
-    	if (!initialized) {
-    		return;
-    	}
+        if (!initialized) {
+            return;
+        }
 
         if (grantType == null || tokenKey == null) {
             return;
