@@ -21,6 +21,7 @@ import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
+import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.stat.StatTimer;
 import io.jans.as.server.service.status.ldap.LdapStatusTimer;
 import io.jans.exception.ConfigurationException;
@@ -175,6 +176,9 @@ public class AppInitializer {
 	@Inject
 	private CibaRequestsProcessorJob cibaRequestsProcessorJob;
 
+    @Inject
+    private StatService statService;
+
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
 	private AuthenticationMode authenticationMode;
@@ -214,6 +218,8 @@ public class AppInitializer {
 		supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
 		supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
 		supportedCustomScriptTypes.remove(CustomScriptType.IDP);
+
+        statService.init();
 
 		// Start timer
 		initSchedulerService();
