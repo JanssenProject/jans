@@ -7,14 +7,24 @@
 package io.jans.as.server.service;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.fido.u2f.DeviceRegistration;
+import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
+import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.service.fido.u2f.RequestService;
+import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
+import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.cache.CacheProvider;
 import io.jans.service.cdi.async.Asynchronous;
@@ -31,7 +41,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -136,20 +146,20 @@ public class CleanerTimer {
 
             Date now = new Date();
 
-			for (String baseDn : createCleanServiceBaseDns()) {
+			for (Map.Entry<String, Class> baseDn : createCleanServiceBaseDns().entrySet()) {
 				try {
-                    if (entryManager.hasExpirationSupport(baseDn)) {
+                    if (entryManager.hasExpirationSupport(baseDn.getKey())) {
                         continue;
                     }
 
-                    log.debug("Start clean up for baseDn: " + baseDn);
+                    log.debug("Start clean up for baseDn: " + baseDn.getValue() + ", class: " + baseDn.getValue());
 					final Stopwatch started = Stopwatch.createStarted();
 
 					int removed = cleanup(baseDn, now, chunkSize);
 
 					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 				} catch (Exception e) {
-					log.error("Failed to process clean up for baseDn: " + baseDn, e);
+					log.error("Failed to process clean up for baseDn: " + baseDn + ", class: " + baseDn.getValue(), e);
 				}
 			}
 
@@ -161,35 +171,42 @@ public class CleanerTimer {
 		}
 	}
 
-	public Set<String> createCleanServiceBaseDns() {
+	private Map<String, Class> createCleanServiceBaseDns() {
         final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 
-        final Set<String> cleanServiceBaseDns = Sets.newHashSet(appConfiguration.getCleanServiceBaseDns());
-        cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getClients());
-        cleanServiceBaseDns.add(umaPctService.branchBaseDn());
-        cleanServiceBaseDns.add(umaResourceService.getBaseDnForResource());
-        cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
-        cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getMetric());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getTokens());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getAuthorizations());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getScopes());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getSessions());
+        final Map<String, Class> cleanServiceBaseDns = Maps.newHashMap();
 
-        log.debug("Built-in base dns: " + cleanServiceBaseDns);
+        for (Map.Entry<String, String> entry : appConfiguration.getCleanServiceBaseDns().entrySet()) {
+            try {
+                cleanServiceBaseDns.put(entry.getKey(), Class.forName(entry.getValue()));
+            } catch (Exception e) {
+                log.error("Failed to populate clean up map from cleanServiceBaseDns configuration property. dn:" + entry.getKey() + ", class: " + entry.getValue(), e);
+            }
+        }
+
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getClients(), Client.class);
+        cleanServiceBaseDns.put(umaPctService.branchBaseDn(), UmaPCT.class);
+        cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
+        cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
+        cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getMetric(), MetricEntry.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
+		cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
 
 		return cleanServiceBaseDns;
 	}
 
-	public int cleanup(final String baseDn, final Date now, final int batchSize) {
+	public int cleanup(final Map.Entry<String, Class> baseDn, final Date now, final int batchSize) {
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
-                    Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now)));
+                    Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn.getKey(), now)));
 
-            int removedCount = entryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
-            
+            int removedCount = entryManager.remove(baseDn.getKey(), baseDn.getValue(), filter, batchSize);
+            log.trace("Removed " + removedCount + " entries from " + baseDn.getKey());
             return removedCount;
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);
