@@ -58,6 +58,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     private static String authorizationCode4;
     private static String accessToken1;
     private static String refreshToken1;
+    private static String refreshToken2;
+    private static String refreshToken3;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
@@ -189,9 +191,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
 
             String accessToken = jsonObj.getString("access_token");
-            String refreshToken = jsonObj.getString("refresh_token");
-
-            completeFlowStep3(tokenPath, refreshToken);
+            refreshToken2 = jsonObj.getString("refresh_token");
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -201,11 +201,13 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         }
     }
 
-    public void completeFlowStep3(final String tokenPath, final String refreshToken) throws Exception {
+    @Parameters({"tokenPath"})
+    @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowStep2"}, priority = 10)
+    public void completeFlowStep3(final String tokenPath) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
-        tokenRequest.setRefreshToken(refreshToken);
+        tokenRequest.setRefreshToken(refreshToken2);
         tokenRequest.setScope("email read_stream manage_pages");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -329,12 +331,10 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
 
             String accessToken = jsonObj.getString("access_token");
-            String refreshToken = jsonObj.getString("refresh_token");
+            refreshToken3 = jsonObj.getString("refresh_token");
             String idToken = jsonObj.getString("id_token");
             Jwt jwt = Jwt.parse(idToken);
             assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE));
-
-            completeFlowWithOptionalNonceStep3(tokenPath, refreshToken);
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -344,11 +344,13 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         }
     }
 
-    public void completeFlowWithOptionalNonceStep3(final String tokenPath, final String refreshToken) throws Exception {
+    @Parameters({"tokenPath"})
+    @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowWithOptionalNonceStep2"}, priority = 20)
+    public void completeFlowWithOptionalNonceStep3(final String tokenPath) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
         io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.REFRESH_TOKEN);
-        tokenRequest.setRefreshToken(refreshToken);
+        tokenRequest.setRefreshToken(refreshToken3);
         tokenRequest.setScope("email read_stream manage_pages");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
