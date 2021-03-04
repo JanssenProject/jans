@@ -17,7 +17,7 @@ RUN apk update \
 # @TODO: this package is deprecated; should downloads all required JARs from jans-auth-server.war
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-01-19 02:14'
+ENV CN_BUILD_DATE='2021-03-04 02:57'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
