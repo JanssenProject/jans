@@ -6,7 +6,6 @@
 
 package io.jans.configapi.rest.resource;
 
-import com.couchbase.client.core.message.ResponseStatus;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
@@ -22,10 +21,15 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+
 @Path(ApiConstants.LOGGING)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class LoggingResource {
+    
+    @Inject
+    Logger log;
 
     @Inject
     ConfigurationService configurationService;
@@ -38,7 +42,8 @@ public class LoggingResource {
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
-    public Response updateHero(@Valid Logging logging) {
+    public Response updateLogConf(@Valid Logging logging) {
+        log.debug("LOGGING configuration to be updated -logging = "+logging);
         Conf conf = configurationService.findConf();
 
         if (!StringUtils.isBlank(logging.getLoggingLevel())) {
