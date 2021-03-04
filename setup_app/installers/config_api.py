@@ -5,6 +5,7 @@ import json
 import uuid
 import ruamel.yaml
 import base64
+from string import Template
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -170,3 +171,24 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
         self.dbUtils.import_ldif(self.load_ldif_files)
 
+
+    def load_test_data(self):
+        if self.dbUtils.dn_exists('inum=1801.test-client,ou=clients,o=jans'):
+            warning = "Test data for Config Api was allready loaded."
+            self.logIt(warning)
+            if Config.installed_instance:
+                print(warning)
+        
+        result = self.dbUtils.search('ou=scopes,o=jans', '(inum=1800.*)', fetchmany=True)
+        scopes = []
+        for scope in result:
+            scopes.append('jansScope: ' + scope[1]['dn'])
+        
+        Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
+        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/jans-config-api.ldif')
+        template_text = self.readFile(template_fn)
+        template_str = Template(template_text)
+        rendered_text = template_str.substitute(**self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+        out_fn = os.path.join(self.output_folder, 'test_jans-config-api.ldif')
+        self.writeFile(out_fn, rendered_text)
+        self.dbUtils.import_ldif([out_fn])

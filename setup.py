@@ -180,21 +180,28 @@ if Config.installed_instance:
             print("No service was selected to install. Exiting ...")
             sys.exit()
 
-if argsp.t or argsp.x:
-    testDataLoader = TestDataLoader()
-    testDataLoader.scimInstaller = scimInstaller
-    testDataLoader.rdbmInstaller = rdbmInstaller
-    testDataLoader.couchbaseInstaller = couchbaseInstaller
 
 if argsp.x:
-    print("Loading test data")
-    testDataLoader.dbUtils.bind()
-    testDataLoader.createLdapPw()
-    testDataLoader.load_test_data()
-    testDataLoader.deleteLdapPw()
-    print("Test data loaded. Exiting ...")
-    sys.exit()
 
+    if argsp.t:
+        print("Loading test data")
+        testDataLoader = TestDataLoader()
+        testDataLoader.scimInstaller = scimInstaller
+        testDataLoader.rdbmInstaller = rdbmInstaller
+        testDataLoader.couchbaseInstaller = couchbaseInstaller
+        testDataLoader.dbUtils.bind()
+        testDataLoader.createLdapPw()
+        testDataLoader.load_test_data()
+        testDataLoader.deleteLdapPw()
+        configApiInstaller.load_test_data()
+        print("Test data loaded. Exiting ...")
+
+    if not argsp.t and argsp.load_config_api_test:
+        print("Loading Config Api Test data")
+        configApiInstaller.load_test_data()
+        print("Test data loaded. Exiting ...")
+
+    sys.exit()
 
 Config.installJansCli = Config.installConfigApi or Config.installScimServer
 
@@ -323,6 +330,10 @@ def do_installation():
 
         if argsp.t:
             testDataLoader.load_test_data()
+            configApiInstaller.load_test_data()
+            
+        elif argsp.load_config_api_test:
+            configApiInstaller.load_test_data()
 
         jansProgress.progress(static.COMPLETED)
 
