@@ -21,6 +21,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
@@ -28,6 +30,9 @@ import java.io.IOException;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class JwksResource extends BaseResource {
+    
+    @Inject
+    Logger log;
 
     @Inject
     ConfigurationService configurationService;
@@ -42,6 +47,7 @@ public class JwksResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     public Response put(WebKeysConfiguration webkeys) {
+        log.debug("JWKS details to be updated - webkeys = "+webkeys);
         final Conf conf = configurationService.findConf();
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
@@ -53,6 +59,7 @@ public class JwksResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     public Response patch(String requestString) throws JsonPatchException, IOException {
+        log.debug("JWKS details to be patched - requestString = "+requestString);
         final Conf conf = configurationService.findConf();
         WebKeysConfiguration webKeys = conf.getWebKeys();
         webKeys = Jackson.applyPatch(requestString, webKeys);

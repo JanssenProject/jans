@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 /**
  * @author Mougang T.Gasmyr
  *
@@ -36,6 +38,9 @@ import java.util.List;
 public class AttributesResource extends BaseResource {
 
     private static final String GLUU_ATTRIBUTE = "gluu attribute";
+    
+    @Inject
+    Logger log;
 
     @Inject
     AttributeService attributeService;
@@ -83,6 +88,7 @@ public class AttributesResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
     public Response createAttribute(@Valid GluuAttribute attribute) {
+        log.debug(" GluuAttribute details to add - attribute = "+attribute );
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
@@ -97,6 +103,7 @@ public class AttributesResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
     public Response updateAttribute(@Valid GluuAttribute attribute) {
+        log.debug(" GluuAttribute details to update - attribute = "+attribute );
         String inum = attribute.getInum();
         checkResourceNotNull(inum, GLUU_ATTRIBUTE);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
@@ -117,6 +124,7 @@ public class AttributesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
+        log.debug(" GluuAttribute details to patch - inum = "+inum+" , pathString = "+pathString);
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
 
@@ -129,6 +137,7 @@ public class AttributesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS })
     public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.debug(" GluuAttribute details to delete - inum = "+inum);
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
         attributeService.removeAttribute(attribute);
