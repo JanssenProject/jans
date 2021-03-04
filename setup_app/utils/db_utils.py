@@ -248,14 +248,21 @@ class DBUtils:
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
-    def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
+    def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL, fetchmany=False):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
         backend_location = self.get_backend_location_for_dn(search_base)
 
         if backend_location == BackendTypes.LDAP:
             if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
-                key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
-                return document
+                if not fetchmany:
+                    key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
+                    return document
+                
+                documents = []
+                for result in self.ldap_conn.response:
+                    key, document = ldif_utils.get_document_from_entry(result['dn'], result['attributes'])
+                    documents.append((key, document))
+                return documents
 
         if backend_location == BackendTypes.MYSQL:
             if self.Base is None:
