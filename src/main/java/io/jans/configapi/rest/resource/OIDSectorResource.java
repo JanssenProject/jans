@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+
 /**
  * @author Mougang T.Gasmyr
  */
@@ -34,6 +36,9 @@ import java.util.UUID;
 public class OIDSectorResource extends BaseResource {
 
     private static final String SECTOR_IDENTIFIER = "sector identifier";
+    
+    @Inject
+    Logger log;
 
     @Inject
     SectorService sectorIdentifierService;
@@ -43,6 +48,7 @@ public class OIDSectorResource extends BaseResource {
     public Response getSectorIdentifiers(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+        log.debug("SECTOR_IDENTIFIER to be fetched - limit = "+limit+" , pattern = "+pattern);
         final List<SectorIdentifier> sectors;
         if (!pattern.isEmpty()) {
             sectors = sectorIdentifierService.searchSectorIdentifiers(pattern, limit);
@@ -56,6 +62,7 @@ public class OIDSectorResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_SECTORS_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getSectorByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.debug("SECTOR_IDENTIFIER to be fetched inum = "+inum);
         SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
         return Response.ok().entity(sectorIdentifier).build();
@@ -64,6 +71,7 @@ public class OIDSectorResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS })
     public Response createNewOpenIDSector(@Valid SectorIdentifier sectorIdentifier) {
+        log.debug("SECTOR_IDENTIFIER to be added sectorIdentifier = "+sectorIdentifier);
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
         String jsId = UUID.randomUUID().toString();
         sectorIdentifier.setId(jsId);
@@ -76,6 +84,7 @@ public class OIDSectorResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_SECTORS_WRITE_ACCESS })
     public Response updateSector(@Valid SectorIdentifier sectorIdentifier) {
+        log.debug("SECTOR_IDENTIFIER to be updated sectorIdentifier = "+sectorIdentifier);
         String inum = sectorIdentifier.getId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
@@ -94,6 +103,7 @@ public class OIDSectorResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
+        log.debug("SECTOR_IDENTIFIER to be patched inum = "+inum+" ,pathString = "+pathString);
         SectorIdentifier existingSector = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(existingSector, SECTOR_IDENTIFIER);
         existingSector = Jackson.applyPatch(pathString, existingSector);
@@ -105,6 +115,7 @@ public class OIDSectorResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_SECTORS_DELETE_ACCESS })
     public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.debug("SECTOR_IDENTIFIER to be deleted inum = "+inum);
         SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
         sectorIdentifierService.removeSectorIdentifier(sectorIdentifier);

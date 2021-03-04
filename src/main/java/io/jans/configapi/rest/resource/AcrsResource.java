@@ -19,6 +19,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+
 /**
  * @author Puja Sharma
  */
@@ -27,6 +29,9 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AcrsResource extends BaseResource {
 
+    @Inject
+    Logger log;
+    
     @Inject
     ConfigurationService configurationService;
 
@@ -43,6 +48,7 @@ public class AcrsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
+        log.debug("ACRS details to  update - authenticationMethod = "+authenticationMethod );
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
         configurationService.merge(gluuConfiguration);

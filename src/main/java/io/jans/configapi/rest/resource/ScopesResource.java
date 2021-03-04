@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+
 /**
  * Configures both OpenID Connect and UMA scopes.
  *
@@ -42,6 +44,9 @@ import java.util.UUID;
 public class ScopesResource extends BaseResource {
 
     private static final String SCOPE = "scope";
+    
+    @Inject
+    Logger log;
 
     @Inject
     ScopeService scopeService;
@@ -54,6 +59,7 @@ public class ScopesResource extends BaseResource {
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+        log.debug("SCOPES to be fetched type = "+type+" , limit = "+limit+" , pattern = "+pattern);
         final List<Scope> scopes;
         if (StringHelper.isNotEmpty(pattern)) {
             scopes = scopeService.searchScopes(pattern, limit, type);
@@ -67,6 +73,7 @@ public class ScopesResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
+        log.debug("SCOPES to be fetched - inum = "+inum);
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
@@ -75,6 +82,7 @@ public class ScopesResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
+        log.debug("SCOPES to be added - scope = "+scope);
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
             scope.setDisplayName(scope.getId());
@@ -96,6 +104,7 @@ public class ScopesResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
+        log.debug("SCOPES to be updated - scope = "+scope);
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -119,6 +128,7 @@ public class ScopesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
+        log.debug("SCOPES to be patched - inum = "+inum+" , pathString = "+pathString);
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
@@ -130,6 +140,7 @@ public class ScopesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS })
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.debug("SCOPES to be deleted - inum = "+inum);
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);

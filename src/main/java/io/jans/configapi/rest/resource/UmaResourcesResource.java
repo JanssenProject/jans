@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+
 /**
  * @author Mougang T.Gasmyr
  */
@@ -36,6 +38,9 @@ import java.util.UUID;
 public class UmaResourcesResource extends BaseResource {
 
     private static final String UMA_RESOURCE = "Uma resource";
+    
+    @Inject
+    Logger log;
 
     @Inject
     UmaResourceService umaResourceService;
@@ -45,6 +50,7 @@ public class UmaResourcesResource extends BaseResource {
     public Response fetchUmaResources(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+        log.debug("UMA_RESOURCE to be fetched - limit = "+limit+" , pattern = "+pattern);
         final List<UmaResource> resources;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             resources = umaResourceService.findResources(pattern, 1000);
@@ -58,12 +64,14 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS })
     public Response getUmaResourceByImun(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+        log.debug("UMA_RESOURCE to fetch by id = "+id);
         return Response.ok(findOrThrow(id)).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
     public Response createUmaResource(@Valid UmaResource umaResource) {
+        log.debug("UMA_RESOURCE to be added umaResource = "+umaResource);
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
         checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
         String id = UUID.randomUUID().toString();
@@ -88,6 +96,7 @@ public class UmaResourcesResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
     public Response updateUmaResource(@Valid UmaResource resource) {
+        log.debug("UMA_RESOURCE to be upated - umaResource = "+resource);
         String id = resource.getId();
         checkNotNull(id, AttributeNames.ID);
         UmaResource existingResource = findOrThrow(id);
@@ -104,6 +113,7 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
+        log.debug("UMA_RESOURCE to be patched - id = "+id+" , pathString = "+pathString);
         UmaResource existingResource = findOrThrow(id);
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
@@ -115,6 +125,7 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS })
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+        log.debug("UMA_RESOURCE to delete - id = "+id);
         UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);
         return Response.status(Response.Status.NO_CONTENT).build();
