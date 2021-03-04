@@ -1,4 +1,3 @@
-@ignore
 Feature: Verify Custom Script configuration endpoint
 
 	Background:
