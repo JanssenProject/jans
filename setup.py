@@ -171,7 +171,7 @@ if Config.installed_instance:
                         ):
 
         setattr(Config, installer.install_var, installer.installed())
-        setattr(base.installers, installer.__class__.__name__, installer)
+
 
     if not argsp.shell:
         propertiesUtils.promptForProperties()
@@ -197,6 +197,12 @@ if argsp.x:
 
 
 Config.installJansCli = Config.installConfigApi or Config.installScimServer
+
+
+app_vars = locals().copy()
+
+for app_var in app_vars:
+    setattr(base.current_app, app_var, app_vars[app_var])
 
 if argsp.shell:
     code.interact(local=locals())
@@ -225,12 +231,6 @@ jansProgress.register(PostSetup)
 
 if not argsp.no_progress:
     jansProgress.queue = queue
-
-
-app_vars = locals().copy()
-
-for app_var in app_vars:
-    setattr(base.current_app, app_var, app_vars[app_var])
 
 
 def do_installation():
