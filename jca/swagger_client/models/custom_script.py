@@ -91,7 +91,8 @@ class CustomScript(object):
         self.name = name
         if aliases is not None:
             self.aliases = aliases
-        self.description = description
+        if description is not None:
+            self.description = description
         self.script = script
         self.script_type = script_type
         self.programming_language = programming_language
@@ -222,8 +223,6 @@ class CustomScript(object):
         :param description: The description of this CustomScript.  # noqa: E501
         :type: str
         """
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
 
         self._description = description
 
@@ -274,7 +273,7 @@ class CustomScript(object):
         """
         if script_type is None:
             raise ValueError("Invalid value for `script_type`, must not be `None`")  # noqa: E501
-        allowed_values = ["PERSON_AUTHENTICATION", "INTROSPECTION", "RESOURCE_OWNER_PASSWORD_CREDENTIALS", "APPLICATION_SESSION", "CACHE_REFRESH", "UPDATE_USER", "USER_REGISTRATION", "CLIENT_REGISTRATION", "ID_GENERATOR", "UMA_RPT_POLICY", "UMA_RPT_CLAIMS", "UMA_CLAIMS_GATHERING", "CONSENT_GATHERING", "DYNAMIC_SCOPE", "SPONTANEOUS_SCOPE", "END_SESSION", "POST_AUTHN", "SCIM", "CIBA_END_USER_NOTIFICATION", "PERSISTENCE_EXTENSION", "IDP"]  # noqa: E501
+        allowed_values = ["PERSON_AUTHENTICATION", "INTROSPECTION", "RESOURCE_OWNER_PASSWORD_CREDENTIALS", "APPLICATION_SESSION", "CACHE_REFRESH", "UPDATE_USER", "USER_REGISTRATION", "CLIENT_REGISTRATION", "ID_GENERATOR", "UMA_RPT_POLICY", "UMA_RPT_CLAIMS", "UMA_CLAIMS_GATHERING", "CONSENT_GATHERING", "DYNAMIC_SCOPE", "SPONTANEOUS_SCOPE", "END_SESSION", "POST_AUTHN", "SCIM", "CIBA_END_USER_NOTIFICATION", "PERSISTENCE_EXTENSION", "IDP", "UPDATE_TOKEN"]  # noqa: E501
         if script_type not in allowed_values:
             raise ValueError(
                 "Invalid value for `script_type` ({0}), must be one of {1}"  # noqa: E501
