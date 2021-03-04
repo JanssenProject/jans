@@ -25,8 +25,11 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
-- `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
+- `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Janssen configuration secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
+- `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to `jans`. If left intact `jans-configuration` secret will be created.
+- `CN_SECRET_GOOGLE_SECRET_VERSION_ID`:  Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
+- `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
+- `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_SECRET_ADAPTER`: The secrets adapter, can be `vault` (default), `kubernetes`, or `google`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
