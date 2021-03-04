@@ -173,6 +173,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         for tblCls in self.dbUtils.Base.classes.keys():
             tblObj = self.dbUtils.Base.classes[tblCls]()
             tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields'] + cb_fields
+            
             for attr in tblObj.__table__.columns:
                 if attr.name == 'doc_id':
                     continue
@@ -197,6 +198,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
+            for i, custom_index in enumerate(sql_indexes['mysql'].get(tblCls, {}).get('custom', [])):
+                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
+                                Config.rdbm_db,
+                                tblCls,
+                                'custom_{}'.format(i+1),
+                                custom_index
+                                )
+                self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def import_ldif(self):
         ldif_files = []
