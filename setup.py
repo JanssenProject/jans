@@ -295,7 +295,7 @@ def do_installation():
 
         if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
             configApiInstaller.start_installation()
-            if not argsp.t argsp.load_config_api_test:
+            if not argsp.t and argsp.load_config_api_test:
                 configApiInstaller.load_test_data()
 
         if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
