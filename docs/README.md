@@ -24,7 +24,7 @@ Using IM is very simple and intuitive. Just make selection and answer questions.
 
 ### Attribute
 
-Using **Janssen CLI**, You can perform some quick operation in _Attribute_. Such as:
+Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Such as:
 - `view/find` list of Attributes in details.
 - `add` new attributes.
 - `update` an existing attribute
@@ -1724,6 +1724,94 @@ Custom Scripts
 5 Gets a script by Inum
 6 Deletes a custom script
 ```
+- **get info of custom scripts**
+
+To get status of each type of script select option 1, you will get below result in return:
+
+```
+Gets a list of custom scripts
+-----------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/scripts.readonly
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|    | scriptType                          | name                                                      | enabled   | inum      |
++====+=====================================+===========================================================+===========+===========+
+|  0 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_example               | False     | 2DAF-AA91 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  1 | INTROSPECTION                       | introspection_custom_params                               | False     | 2DAF-BA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  2 | UMA_CLAIMS_GATHERING                | sampleClaimsGathering                                     | False     | 2DAF-F996 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  3 | END_SESSION                         | frontchannel_logout_sample                                | False     | 2DAF-CA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  4 | INTROSPECTION                       | introspection_sample                                      | False     | 2DAF-AA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  5 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_custom_params_example | False     | 2DAF-BA91 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  6 | CIBA_END_USER_NOTIFICATION          | firebase_ciba_end_user_notification                       | False     | C1BA-C1BA |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  7 | PERSON_AUTHENTICATION               | basic                                                     | False     | A51E-76DA |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  8 | CONSENT_GATHERING                   | consent_gathering                                         | False     | DAA9-BA60 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  9 | PERSON_AUTHENTICATION               | basic_lock                                                | False     | 4BBE-C6A8 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 10 | PERSON_AUTHENTICATION               | cert                                                      | False     | 2124-0CF1 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 11 | PERSON_AUTHENTICATION               | yubicloud                                                 | False     | 24FD-B96E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 12 | PERSON_AUTHENTICATION               | otp                                                       | False     | 5018-D4BF |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 13 | PERSON_AUTHENTICATION               | smpp                                                      | False     | 09A0-93D7 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 14 | PERSON_AUTHENTICATION               | twilio_sms                                                | False     | 09A0-93D6 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 15 | PERSON_AUTHENTICATION               | thumb_sign_in                                             | False     | 92F0-759E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 16 | PERSON_AUTHENTICATION               | u2f                                                       | False     | 8BAF-80D6 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 17 | PERSON_AUTHENTICATION               | duo                                                       | False     | 5018-F9CF |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 18 | PERSON_AUTHENTICATION               | super_gluu                                                | False     | 92F0-BF9E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 19 | PERSON_AUTHENTICATION               | fido2                                                     | False     | 8BAF-80D7 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 20 | PERSON_AUTHENTICATION               | uaf                                                       | False     | 5018-AF9C |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 21 | USER_REGISTRATION                   | user_registration                                         | False     | 6EA0-8F0C |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 22 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 23 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 24 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 25 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 26 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 27 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 28 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 29 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 30 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 31 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 32 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 33 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 34 | USER_REGISTRATION                   | user_confirm_registration                                 | False     | 6EA0-8F0D |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 35 | UPDATE_USER                         | update_user                                               | False     | 522F-CDC5 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+
+```
+
 To Add a new script, choose option 2 and fill each property:
 
 `dn, inum, display name, valid script`
@@ -1732,6 +1820,32 @@ ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDE
 
 Programming Language: [PYTHON, JAVA]
 ```
+- **update scripts**
+
+Let update `Person Authentication basic` by its inum. Select option 3 from **custom scripts** menu
+and enter its inum, in my case it's `A51E-76DA`
+
+![](img/im-update-custom-script.png)
+
+selecting the field we are gonna update: 4
+
+```
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 4
+
+«boolean value indicating if script enabled. Type: boolean»
+enabled  [false]: true
+Please enter a(n) boolean value: _true, _false
+enabled  [false]: _true
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 4
+
+«boolean value indicating if script enabled. Type: boolean»
+enabled  [true]: 
+
+```
+In this way you can update the field you want.
 
 ### LDAP Configuration 
 
