@@ -19,7 +19,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
         self.service_name = 'jans-config-api'
-        self.needdb = False # we don't need backend connection in this class
+        self.needdb = True # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installConfigApi'
