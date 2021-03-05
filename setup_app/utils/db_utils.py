@@ -241,6 +241,8 @@ class DBUtils:
 
 
     def dn_exists(self, dn):
+        if not hasattr(self, 'ldap_conn'):
+            return
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
