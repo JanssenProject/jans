@@ -173,20 +173,18 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def load_test_data(self):
-        if not hasattr(self.dbUtils, 'ldap_conn'):
-            return
         if self.dbUtils.dn_exists('inum=1801.test-client,ou=clients,o=jans'):
             warning = "Test data for Config Api was allready loaded."
             self.logIt(warning)
             if Config.installed_instance:
                 print(warning)
             return
-        
-        result = self.dbUtils.search('ou=scopes,o=jans', '(inum=1800.*)', fetchmany=True)
+
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
         for scope in result:
-            scopes.append('jansScope: ' + scope[1]['dn'])
-        
+            scopes.append('jansScope: ' + scope['dn']) if isinstance(scope, dict) else scopes.append('jansScope: ' + scope[1]['dn'])
+
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/jans-config-api.ldif')
         template_text = self.readFile(template_fn)
