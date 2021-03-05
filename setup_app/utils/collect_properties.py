@@ -129,7 +129,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
-        oxCacheConfiguration = json.loads(oxConfiguration['jansCacheConf'])
+        if isinstance(oxConfiguration['jansCacheConf'], str):
+            oxCacheConfiguration = json.loads(oxConfiguration['jansCacheConf'])
+        else:
+            oxCacheConfiguration = oxConfiguration['jansCacheConf']
+        
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
 
         Config.scim_rp_client_jks_pass = 'secret' # this is static
