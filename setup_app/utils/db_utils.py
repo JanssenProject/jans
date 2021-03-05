@@ -35,6 +35,7 @@ class DBUtils:
     processedKeys = []
     Base = None
     session = None
+    cbm = None
 
     def bind(self, use_ssl=True, force=False):
 
@@ -249,6 +250,18 @@ class DBUtils:
                 return result.__dict__
             return
 
+        elif self.cbm:
+            bucket = self.get_bucket_for_dn(dn)
+            key = ldif_utils.get_key_from(dn)
+            n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
+            result = self.cbm.exec_query(n1ql)
+            if result.ok:
+                data = result.json()
+                if data.get('results'):
+                    return data['results'][0][bucket]
+                    
+            return
+
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
@@ -362,7 +375,10 @@ class DBUtils:
             if result.ok:
                 data = result.json()
                 if data.get('results'):
-                    return data['results'][0][bucket]
+                    if fetchmany:
+                        return [ item[bucket] for item in data['results'] ]
+                    else:
+                        return data['results'][0][bucket]
 
 
     def add2strlist(self, client_id, strlist):
