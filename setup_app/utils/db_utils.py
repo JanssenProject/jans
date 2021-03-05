@@ -34,6 +34,7 @@ class DBUtils:
 
     processedKeys = []
     Base = None
+    session = None
 
     def bind(self, use_ssl=True, force=False):
 
@@ -63,7 +64,7 @@ class DBUtils:
                     self.ldap_conn.bind()
                     break
 
-        if not hasattr(self, 'mysql_conn') or force:
+        if not self.session or force:
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
                     if Config.rdbm_type == 'mysql':
@@ -241,8 +242,13 @@ class DBUtils:
 
 
     def dn_exists(self, dn):
-        if not hasattr(self, 'ldap_conn'):
+        if self.session:
+            base.logIt("Querying RDBM for dn {}".format(dn))
+            result = self.get_sqlalchObj_for_dn(dn)
+            if result:
+                return result.__dict__
             return
+
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
@@ -259,7 +265,7 @@ class DBUtils:
                 if not fetchmany:
                     key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
                     return document
-                
+
                 documents = []
                 for result in self.ldap_conn.response:
                     key, document = ldif_utils.get_document_from_entry(result['dn'], result['attributes'])
@@ -316,9 +322,14 @@ class DBUtils:
             else:
                 sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn.like('%'+search_base))
 
-            result = sqlalchemyQueryObject.first()
-            if result:
-                return result.__dict__
+            if fetchmany:
+                result = sqlalchemyQueryObject.all()
+                return [ item.__dict__ for item in result ]
+                    
+            else:
+                result = sqlalchemyQueryObject.first()
+                if result:
+                    return result.__dict__
 
 
         if backend_location == BackendTypes.COUCHBASE:
