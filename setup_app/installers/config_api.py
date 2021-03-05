@@ -173,11 +173,14 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def load_test_data(self):
+        if not hasattr(self.dbUtils, 'ldap_conn'):
+            return
         if self.dbUtils.dn_exists('inum=1801.test-client,ou=clients,o=jans'):
             warning = "Test data for Config Api was allready loaded."
             self.logIt(warning)
             if Config.installed_instance:
                 print(warning)
+            return
         
         result = self.dbUtils.search('ou=scopes,o=jans', '(inum=1800.*)', fetchmany=True)
         scopes = []

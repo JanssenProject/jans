@@ -185,12 +185,13 @@ def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 if argsp.t:
-    
-    print_or_log("Loading test data")
     testDataLoader = TestDataLoader()
     testDataLoader.scimInstaller = scimInstaller
     testDataLoader.rdbmInstaller = rdbmInstaller
     testDataLoader.couchbaseInstaller = couchbaseInstaller
+
+if argsp.t and argsp.x:
+    print_or_log("Loading test data")
     testDataLoader.dbUtils.bind()
     testDataLoader.createLdapPw()
     testDataLoader.load_test_data()
@@ -198,7 +199,7 @@ if argsp.t:
     configApiInstaller.load_test_data()
     print_or_log("Test data loaded.")
 
-if not argsp.t and argsp.load_config_api_test:
+if not argsp.t and argsp.x and argsp.load_config_api_test:
     print_or_log("Loading Config Api Test data")
     configApiInstaller.load_test_data()
     print_or_log("Test data loaded. Exiting ...")
