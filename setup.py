@@ -181,30 +181,33 @@ if Config.installed_instance:
             sys.exit()
 
 
+def print_or_log(msg):
+    print(msg) if argsp.x else base.logIt(msg)
+
+if argsp.t:
+    
+    print_or_log("Loading test data")
+    testDataLoader = TestDataLoader()
+    testDataLoader.scimInstaller = scimInstaller
+    testDataLoader.rdbmInstaller = rdbmInstaller
+    testDataLoader.couchbaseInstaller = couchbaseInstaller
+    testDataLoader.dbUtils.bind()
+    testDataLoader.createLdapPw()
+    testDataLoader.load_test_data()
+    testDataLoader.deleteLdapPw()
+    configApiInstaller.load_test_data()
+    print_or_log("Test data loaded.")
+
+if not argsp.t and argsp.load_config_api_test:
+    print_or_log("Loading Config Api Test data")
+    configApiInstaller.load_test_data()
+    print_or_log("Test data loaded. Exiting ...")
+
 if argsp.x:
-
-    if argsp.t:
-        print("Loading test data")
-        testDataLoader = TestDataLoader()
-        testDataLoader.scimInstaller = scimInstaller
-        testDataLoader.rdbmInstaller = rdbmInstaller
-        testDataLoader.couchbaseInstaller = couchbaseInstaller
-        testDataLoader.dbUtils.bind()
-        testDataLoader.createLdapPw()
-        testDataLoader.load_test_data()
-        testDataLoader.deleteLdapPw()
-        configApiInstaller.load_test_data()
-        print("Test data loaded. Exiting ...")
-
-    if not argsp.t and argsp.load_config_api_test:
-        print("Loading Config Api Test data")
-        configApiInstaller.load_test_data()
-        print("Test data loaded. Exiting ...")
-
+    print("Exiting ...")
     sys.exit()
 
 Config.installJansCli = Config.installConfigApi or Config.installScimServer
-
 
 app_vars = locals().copy()
 
