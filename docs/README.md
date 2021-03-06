@@ -1720,9 +1720,7 @@ Custom Scripts
 1 Gets a list of custom scripts
 2 Adds a new custom script
 3 Updates a custom script
-4 Gets list of scripts by type
-5 Gets a script by Inum
-6 Deletes a custom script
+4 Deletes a custom script
 ```
 - **get info of custom scripts**
 
@@ -1845,7 +1843,12 @@ Selection: 4
 enabled  [true]: 
 
 ```
-In this way you can update the field you want.
+In this way you can update any field you want.
+
+- **Delete scripts**
+
+To delete a custom scripts, you need an `inum` of a custom script that you want to delete.
+It will ask for confirmation when you enter `inum`, simply enter `yes/y` to delete it otherwise enter `no/n` to cancel the operation.
 
 ### LDAP Configuration 
 
@@ -1861,7 +1864,10 @@ Database - LDAP configuration
 6 Partially modify an LDAP configuration
 7 Tests an LDAP configuration
 ```
-To get list of existing LDAP configurations, select option 1 and press enter: you will get as following result.
+
+- **List of Existing LDAP**
+
+To get list of existing LDAP configurations, select option 1 and press enter, you will get a list of existing ldap configuration in your janssen server.
 
 ```text
 Gets list of existing LDAP configurations
@@ -1892,19 +1898,20 @@ Getting access token for scope https://jans.io/oauth/config/database/ldap.readon
   }
 ]
 ```
+- **Adding new LDAP**
 
 To add a new LDAP configuration, choose option 2 and add the following properties:
 ```json5
 {
-  "configId":
-  "bindDN": 
-  "bindPassword":
+  "configId":,
+  "bindDN": ,
+  "bindPassword":,
   "servers": [],
   "maxConnections": 2,
   "useSSL": false,
   "baseDNs": [],
-  "primaryKey":
-  "localPrimaryKey":
+  "primaryKey":,
+  "localPrimaryKey":,
   "useAnonymousBind": false,
   "enabled": false,
   "version": null,
@@ -1913,9 +1920,14 @@ To add a new LDAP configuration, choose option 2 and add the following propertie
 ```
 Then enter `y` to confirm.
 
+- **Update a LDAP configuration**
+
 To update an existing LDAP configuration, select option 3 and enter ldap configuration name. 
 the given name is matched with the existing configurations then It will ask to enter value for each property.
 
+- **Delete a LDAP configuration**
+
+To delete an existing ldap configuration, enter a name of an existing ldap configuration and enter `yes/y` to confirm.
 
 
 ### Couchbase Configuration
