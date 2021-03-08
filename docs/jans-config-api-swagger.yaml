@@ -3618,9 +3618,7 @@ components:
       description: Auth Scope.
       type: object
       required:
-        - displayName
         - id
-        - description
         - scopeType
       properties:
         dn:
