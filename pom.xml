@@ -7,7 +7,6 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-
 	<properties>
 		<maven.min-version>3.3.9</maven.min-version>
 		<compiler-plugin.version>3.8.1</compiler-plugin.version>
@@ -246,25 +245,6 @@
 	</repositories>
 
 	<build>
-		
-		<filters>
-			<filter>${basedir}/profiles/${cfg}/application.properties</filter>
-			<filter>${basedir}/profiles/${cfg}/karate.properties</filter>
-			<filter>${basedir}/profiles/${cfg}/test.properties</filter>
-		</filters>
-
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/*.xml</include>
-					<include>**/*.properties</include>
-					<include>**/*.json</include>
-				</includes>
-			</resource>
-		</resources>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
