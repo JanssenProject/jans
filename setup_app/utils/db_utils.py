@@ -243,14 +243,20 @@ class DBUtils:
 
 
     def dn_exists(self, dn):
-        if self.session:
+        mapping_location = self.get_backend_location_for_dn(dn)
+
+        if mapping_location == BackendTypes.MYSQL:
             base.logIt("Querying RDBM for dn {}".format(dn))
             result = self.get_sqlalchObj_for_dn(dn)
             if result:
                 return result.__dict__
             return
 
-        elif self.cbm:
+        elif mapping_location == BackendTypes.LDAP:
+            base.logIt("Querying LDAP for dn {}".format(dn))
+            return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
+
+        else:
             bucket = self.get_bucket_for_dn(dn)
             key = ldif_utils.get_key_from(dn)
             n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
@@ -259,11 +265,8 @@ class DBUtils:
                 data = result.json()
                 if data.get('results'):
                     return data['results'][0][bucket]
-                    
             return
 
-        base.logIt("Querying LDAP for dn {}".format(dn))
-        return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
     def dn_exists_rdbm(self, dn, table):
         sqlalchemy_table = self.Base.classes[table].__table__
