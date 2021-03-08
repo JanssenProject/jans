@@ -216,6 +216,9 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationJwks;
     private String dcrSignatureValidationJwksUri;
 
+    private String externalJwksUri;
+    private int externalJwksCacheLifetimeInMinutes = 60;
+
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
@@ -260,6 +263,22 @@ public class AppConfiguration implements Configuration {
     private Boolean cibaEnabled;
 
     private int discoveryCacheLifetimeInMinutes = 60;
+
+    public String getExternalJwksUri() {
+        return externalJwksUri;
+    }
+
+    public void setExternalJwksUri(String externalJwksUri) {
+        this.externalJwksUri = externalJwksUri;
+    }
+
+    public int getExternalJwksCacheLifetimeInMinutes() {
+        return externalJwksCacheLifetimeInMinutes;
+    }
+
+    public void setExternalJwksCacheLifetimeInMinutes(int externalJwksCacheLifetimeInMinutes) {
+        this.externalJwksCacheLifetimeInMinutes = externalJwksCacheLifetimeInMinutes;
+    }
 
     public Boolean getUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
