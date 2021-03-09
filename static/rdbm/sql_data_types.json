@@ -481,5 +481,12 @@
     "mysql": {
       "type": "TEXT"
     }
+  },
+  "doc_id": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR",
+      "tables": {"jansClntAuthz": {"size": 100, "type": "VARCHAR"}}
+    }
   }
 }
