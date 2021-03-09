@@ -61,10 +61,18 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.bind()
 
-    def get_sql_col_type(self, attrname):
+    def get_sql_col_type(self, attrname, table=None):
+
         if attrname in self.dbUtils.sql_data_types:
             type_ = self.dbUtils.sql_data_types[attrname]
-            if type_[Config.rdbm_type]['type'] == 'VARCHAR':
+            if table and type_[Config.rdbm_type].get('tables', {}).get(table):
+                data_type_ = type_[Config.rdbm_type]['tables'][table]
+                if 'size' in data_type_:
+                    data_type = '{}({})'.format(data_type_['type'], data_type_['size'])
+                else:
+                    data_type = data_type_['type']
+
+            elif type_[Config.rdbm_type]['type'] == 'VARCHAR':
                 if type_[Config.rdbm_type]['size'] <= 127:
                     data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
                 elif type_[Config.rdbm_type]['size'] <= 255:
@@ -119,24 +127,24 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     continue
 
                 cols_.append(attrname)
-                data_type = self.get_sql_col_type(attrname)                
+                data_type = self.get_sql_col_type(attrname, sql_tbl_name)
                 col_def = '`{}` {}'.format(attrname, data_type)
                 sql_tbl_cols.append(col_def)
-
 
             if self.dbUtils.table_exists(sql_tbl_name):
                 for tbl_col in sql_tbl_cols:
                     self.dbUtils.exec_rdbm_query(alter_table_sql_cmd.format(sql_tbl_name, tbl_col))
                     tables.append(sql_cmd)
             else:
-                sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, ', '.join(sql_tbl_cols))
+                doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
+                sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
         for attrname in all_attribs:
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
-                data_type = self.get_sql_col_type(attrname)
+                data_type = self.get_sql_col_type(attrname, sql_tbl_name)
                 col_def = '`{}` {}'.format(attrname, data_type)
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
                 self.dbUtils.exec_rdbm_query(sql_cmd)
