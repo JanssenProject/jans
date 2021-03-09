@@ -9,6 +9,7 @@ package io.jans.service.cache;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import org.apache.commons.codec.binary.Base64;
@@ -46,6 +47,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
 	private boolean skipRemoveBeforePut;
 
+	private boolean attemptUpdateBeforeInsert;
+
     @PostConstruct
     public void init() {
     }
@@ -78,6 +81,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             String persistenceType = entryManager.getPersistenceType(baseDn);
             // CouchbaseEntryManagerFactory.PERSISTENCE_TYPE
             skipRemoveBeforePut = "couchbase".equals(persistenceType);
+            attemptUpdateBeforeInsert = "sql".equals(persistenceType);
 
             log.info("Created NATIVE_PERSISTENCE cache provider. `baseDn`: " + baseDn);
         } catch (Exception e) {
@@ -178,10 +182,14 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         entity.setDeletable(true);
 
         try {
-			if (!skipRemoveBeforePut) {
-				silentlyRemoveEntityIfExists(entity.getDn());
-			}
-			entryManager.persist(entity);
+        	if (attemptUpdateBeforeInsert) {
+                entryManager.merge(entity);
+        	} else {
+				if (!skipRemoveBeforePut) {
+					silentlyRemoveEntityIfExists(entity.getDn());
+				}
+				entryManager.persist(entity);
+        	}
         } catch (EntryPersistenceException e) {
             if (e.getCause() instanceof DuplicateEntryException) { // on duplicate, remove entry and try to persist again
                 try {
@@ -192,6 +200,18 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                     log.error("Failed to retry put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + ex.getMessage(), ex);
                 }
             }
+
+			if (e.getCause() instanceof SearchException) { // on lookup error, try to persist new entry
+				if (attemptUpdateBeforeInsert) {
+					try {
+						entryManager.persist(entity);
+						return;
+					} catch (Exception ex) {
+						log.error("Failed to retry put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + ex.getMessage(), ex);
+					}
+				}
+			}
+
             log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e);
         } catch (Exception e) {
         	log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
