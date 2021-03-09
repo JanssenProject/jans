@@ -13,7 +13,7 @@ import io.jans.orm.model.base.DeletableEntity;
 import java.io.Serializable;
 import java.util.Date;
 
-@DataEntry
+@DataEntry(forceUpdate = true)
 @ObjectClass(value = "jansCache")
 public class NativePersistenceCacheEntity extends DeletableEntity implements Serializable, Deletable {
 
