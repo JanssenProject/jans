@@ -201,14 +201,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                 }
             }
 
-			if (e.getCause() instanceof SearchException) { // on lookup error, try to persist new entry
-				if (attemptUpdateBeforeInsert) {
-					try {
-						entryManager.persist(entity);
-						return;
-					} catch (Exception ex) {
-						log.error("Failed to retry put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + ex.getMessage(), ex);
-					}
+			if (attemptUpdateBeforeInsert) {
+				try {
+					entryManager.persist(entity);
+					return;
+				} catch (Exception ex) {
+					log.error("Failed to retry put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + ex.getMessage(), ex);
 				}
 			}
 
