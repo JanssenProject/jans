@@ -82,7 +82,7 @@ public class ScopesResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
-        log.debug("SCOPES to be added - scope = "+scope);
+        log.debug("SCOPE to be added - scope = "+scope);
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
             scope.setDisplayName(scope.getId());
@@ -98,13 +98,14 @@ public class ScopesResource extends BaseResource {
         }
         scopeService.addScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
+        log.debug("SCOPE added is - "+result);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
-        log.debug("SCOPES to be updated - scope = "+scope);
+        log.debug("SCOPE to be updated - scope = "+scope);
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -119,6 +120,8 @@ public class ScopesResource extends BaseResource {
         scope.setBaseDn(scopeService.getDnForScope(inum));
         scopeService.updateScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
+        
+        log.debug("SCOPE updated is - "+result);
         return Response.ok(result).build();
     }
 
@@ -133,6 +136,10 @@ public class ScopesResource extends BaseResource {
         checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
         scopeService.updateScope(existingScope);
+        
+        existingScope = scopeService.getScopeByInum(inum);        
+        log.debug("SCOPE patched is - "+existingScope);
+        
         return Response.ok(existingScope).build();
     }
 
@@ -144,6 +151,7 @@ public class ScopesResource extends BaseResource {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);
+        log.debug("SCOPE is deleted");
         return Response.noContent().build();
     }
 }
