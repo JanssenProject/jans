@@ -11,9 +11,10 @@
   },
   "__common__": {
     "JSON": [
-      "CAST($field->'$.v' AS UNSIGNED ARRAY)CAST($field->'$.v[0]' AS UNSIGNED)",
-      "CAST($field->'$.v[1]' AS UNSIGNED)",
-      "CAST($field->'$.v[2]' AS UNSIGNED)"
+      "CAST($field->'$.v' AS $data_type ARRAY)",
+      "CAST($field->'$.v[0]' AS $data_type)",
+      "CAST($field->'$.v[1]' AS $data_type)",
+      "CAST($field->'$.v[2]' AS $data_type)"
     ],
     "fields": [
       "uid",
