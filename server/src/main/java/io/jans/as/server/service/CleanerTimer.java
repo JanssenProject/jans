@@ -200,7 +200,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
         cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
         cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
-        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
+        // cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getMetric(), MetricEntry.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
