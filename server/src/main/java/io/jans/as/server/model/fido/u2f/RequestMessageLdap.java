@@ -24,7 +24,7 @@ import java.util.TimeZone;
  * @version August 9, 2017
  */
 @DataEntry(sortBy = "creationDate")
-@ObjectClass(value = "jansU2fRequest")
+@ObjectClass(value = "jansU2fReq")
 public class RequestMessageLdap extends BaseEntry {
 
     @AttributeName(ignoreDuringUpdate = true, name = "jansId")
