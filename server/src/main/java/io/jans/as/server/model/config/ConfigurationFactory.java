@@ -19,6 +19,8 @@ import io.jans.as.model.crypto.CryptoProviderFactory;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -462,15 +464,32 @@ public class ConfigurationFactory {
 		if (p_conf.getStatics() != null) {
 			staticConf = p_conf.getStatics();
 		}
-		if (p_conf.getWebKeys() != null) {
-			jwks = p_conf.getWebKeys();
-		} else {
-			generateWebKeys();
-		}
+		initWebKeys(p_conf);
 		if (p_conf.getErrors() != null) {
 			errorResponseFactory = new ErrorResponseFactory(p_conf.getErrors(), p_conf.getDynamic());
 		}
 	}
+
+	private void initWebKeys(Conf conf) {
+        final String jwksUri = conf.getDynamic().getJwksUri();
+        if (jwksUri.startsWith(conf.getDynamic().getIssuer())) {
+            if (conf.getWebKeys() != null) {
+                jwks = conf.getWebKeys();
+            } else {
+                generateWebKeys();
+            }
+            return;
+        }
+
+        // external jwks
+        final JSONObject keys = JwtUtil.getJSONWebKeys(jwksUri);
+        log.trace("Downloaded external keys from " + jwksUri + ", keys: " + keys);
+
+        final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(keys);
+
+        jwks = new WebKeysConfiguration();
+        jwks.setKeys(keySet.getKeys());
+    }
 
 	private void generateWebKeys() {
 		log.info("Failed to load JWKS. Attempting to generate new JWKS...");
