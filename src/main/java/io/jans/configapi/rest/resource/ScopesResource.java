@@ -83,6 +83,7 @@ public class ScopesResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
         log.debug("SCOPE to be added - scope = "+scope);
+        log.debug("SCOPE to be added - scope.getId() = "+scope.getId());
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
             scope.setDisplayName(scope.getId());
@@ -98,14 +99,14 @@ public class ScopesResource extends BaseResource {
         }
         scopeService.addScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
-        log.debug("SCOPE added is - "+result);
+        log.debug("SCOPE added is - "+result.getId());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
-        log.debug("SCOPE to be updated - scope = "+scope);
+        log.debug("SCOPE to be updated - scope = "+scope.getId());
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -121,7 +122,7 @@ public class ScopesResource extends BaseResource {
         scopeService.updateScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
         
-        log.debug("SCOPE updated is - "+result);
+        log.debug("SCOPE updated is - "+result.getId());
         return Response.ok(result).build();
     }
 
@@ -138,7 +139,7 @@ public class ScopesResource extends BaseResource {
         scopeService.updateScope(existingScope);
         
         existingScope = scopeService.getScopeByInum(inum);        
-        log.debug("SCOPE patched is - "+existingScope);
+        log.debug("SCOPE patched is - "+existingScope.getId());
         
         return Response.ok(existingScope).build();
     }
