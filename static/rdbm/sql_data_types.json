@@ -83,7 +83,7 @@
   },
   "userPassword": {
     "mysql": {
-      "size": 64,
+      "size": 100,
       "type": "VARCHAR"
     }
   },
