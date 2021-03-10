@@ -215,6 +215,7 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationSoftwareStatementJwksClaim;
     private String dcrSignatureValidationJwks;
     private String dcrSignatureValidationJwksUri;
+    private Boolean dcrAuthorizationWithClientCredentials = false;
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
@@ -444,6 +445,15 @@ public class AppConfiguration implements Configuration {
 
     public void setFapiCompatibility(Boolean fapiCompatibility) {
         this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getDcrAuthorizationWithClientCredentials() {
+        if (dcrAuthorizationWithClientCredentials == null) dcrAuthorizationWithClientCredentials = false;
+        return dcrAuthorizationWithClientCredentials;
+    }
+
+    public void setDcrAuthorizationWithClientCredentials(Boolean dcrAuthorizationWithClientCredentials) {
+        this.dcrAuthorizationWithClientCredentials = dcrAuthorizationWithClientCredentials;
     }
 
     public Boolean getDcrSignatureValidationEnabled() {
