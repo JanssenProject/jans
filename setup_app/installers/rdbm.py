@@ -189,16 +189,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 data_type = self.get_sql_col_type(attr, tblCls)
                 data_type = data_type.replace('VARCHAR', 'CHAR')
                 if isinstance(attr.type, sqlalchemy.dialects.mysql.json.JSON):
-                    for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
-                        tmp_str = Template(ind_str)
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
-                                    Config.rdbm_db,
-                                    tblCls,
-                                    ind_name,
-                                    i+1,
-                                    tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
-                                    )
-                        self.dbUtils.exec_rdbm_query(sql_cmd)
+                    if attr.name in tbl_fields:
+                        for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                            tmp_str = Template(ind_str)
+                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
+                                        Config.rdbm_db,
+                                        tblCls,
+                                        ind_name,
+                                        i+1,
+                                        tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                        )
+                            self.dbUtils.exec_rdbm_query(sql_cmd)
                 elif attr.name in tbl_fields:
                     sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
                                 Config.rdbm_db,
