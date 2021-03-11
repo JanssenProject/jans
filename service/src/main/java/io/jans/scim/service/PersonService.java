@@ -121,7 +121,7 @@ public class PersonService implements Serializable {
 	}
 
 	public void removePerson(GluuCustomPerson person) {
-		persistenceEntryManager.removeRecursively(person.getDn());
+		persistenceEntryManager.removeRecursively(person.getDn(), GluuCustomPerson.class);
 	}
 
 	public List<GluuCustomPerson> searchPersons(String pattern, int sizeLimit) {
