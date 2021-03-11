@@ -68,9 +68,6 @@ public class GluuGroup extends Entry implements Serializable {
 	@AttributeName(name = "jansStatus")
 	private GluuStatus status;
 
-	@AttributeName(name = "jansGrpVisibility")
-	private GluuGroupVisibility visibility;
-
 	@AttributesList(name = "name", value = "values", sortByName = true, attributesConfiguration = {
 			@AttributeName(name = "inum", ignoreDuringUpdate = true) })
 	private List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
@@ -147,14 +144,6 @@ public class GluuGroup extends Entry implements Serializable {
 		this.status = status;
 	}
 
-	public GluuGroupVisibility getVisibility() {
-		return visibility;
-	}
-
-	public void setVisibility(GluuGroupVisibility visibility) {
-		this.visibility = visibility;
-	}
-
 	public boolean isSelected() {
 		return selected;
 	}
@@ -166,8 +155,8 @@ public class GluuGroup extends Entry implements Serializable {
 	@Override
 	public String toString() {
 		return String.format(
-				"GluuGroup [countryName=%s, description=%s, displayName=%s,  inum=%s, members=%s, organization=%s, owner=%s, seeAlso=%s, status=%s, visibility=%s, toString()=%s]",
-				countryName, description, displayName, inum, members, organization, owner, seeAlso, status, visibility,
+				"GluuGroup [countryName=%s, description=%s, displayName=%s,  inum=%s, members=%s, organization=%s, owner=%s, seeAlso=%s, status=%s, toString()=%s]",
+				countryName, description, displayName, inum, members, organization, owner, seeAlso, status,
 				super.toString());
 	}
 
