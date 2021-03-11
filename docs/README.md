@@ -1,5 +1,5 @@
 # Using jans-cli
-`jans-cli` is automatically installed if you choose to install **jans-config-api** during installation of Janssen Server. `jans-cli` has two modes of operation
+`jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation
 1. Menu-driven Interactive Mode
 2. Command Line Argument Mode
 
@@ -12,29 +12,29 @@ You will see the main menu as below:
 
 ![jans-cli Main Menu](img/im-main.png)
 
-Using IM is very simple and intuitive. Just make selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning.
+Using IM is very simple and intuitive. Just make a selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose an option by selecting its number. Let's start from the beginning.
 
 ### Tips
-1. `_` is escape character for IM mode. For example you can create a list `["me", "you"]` by entering `me_,you`
+1. `_` is an escape character for IM mode. For example, you can create a list `["me", "you"]` by entering `me_,you`
 1. `_true` means boolean **True** instead of string `"true"`, similarly `_false` is boolean **False** instead of string `"false"`
 1. `_null` is comprehended as **None** (or in json **null**)
-1. `_x` exits current process and go back to parent menu
+1. `_x` exits the current process and go back to the parent menu
 1. `_q` refers to `quit`
 
 
 ### Attribute
 
 Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Such as:
-- `view/find` list of Attributes in details.
+- `view/find` list of Attributes in detail.
 - `add` new attributes.
 - `update` an existing attribute
-- `delete` an attribute using it's `inum`, etc.
+- `delete` an attribute using its `inum` etc.
 
-For example to get all attributes choose 1 from the Main Menu, you will get the following options:
+For example, to get all attributes to choose 1 from the Main Menu, you will get the following options:
 
 ![jans-cli Attributes Menu](img/im-attributes-main.png)
 
-To `View/Find` attributes choose 1, you will be asked `Search size`,  `Search pattern` and `Status of the attribute`. For simplicity leave defaults in our case:
+To `View/Find` attributes choose 1, you will be asked to enter `Search size`,  `Search pattern` and `Status of the attribute` . For simplicity, leave defaults in our case:
 
 ![jans-cli Attributes Get All](img/im-attributes-get-all.png)
 
@@ -42,9 +42,9 @@ Once press Enter, it will retrieve 50 attributes and prints to screen in green c
 
 ![jans-cli Attributes Get All Response](img/im-attributes-get-all-response.png)
 
-You can save result as a file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
+You can save the result as a file by choosing `w` in the result screen. To go back enter `b`, to quit enter `q`. If you enter a recognized command, it will display valid command.
 
-To `Add` a new attribute, choose 2 (on Attribute screen). Then enter value for each type of attribute items, after then it will ask to `continue?` enter `y` to continue. If everything are filled in the right way, it will create a new attribute on the list.
+To `Add` a new attribute, choose 2 (on the Attribute screen). Then enter a value for each type of attribute item, after then it will ask to `continue?` enter `y` to continue. If everything is filled in the right way, it will create a new attribute on the list.
 You can go with to add a new attribute quickly:
 ```text
 Obtained Data:
@@ -91,10 +91,10 @@ Obtained Data:
 
 ![add attribute](img/im-add-attrb.png) 
 
-To `update` an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. For example; I want to change description for attribute having inum **BCA8**. 
-It will retrieve current data and will ask for modification of each property, just leave defaults if you don't want to change that property.
+To `update` an attribute, choose 3 (on the Attribute screen). It will ask `inum` of the attribute you are going to update. For example, I want to change the description for an attribute having `inum=BCA8`. 
+It will retrieve current data and ask for the modification of each property, just leave defaults if you don't want to change that property.
 
-When it comes to end, it will display modified data and ask if you want to continue (this data just before it sends to server)
+When it comes to an end, it will display modified data and ask if you want to continue (this data just before it sends to a server)
 
 ```text
 Obtained Data:
@@ -141,10 +141,9 @@ Obtained Data:
 ```
 ![jans-cli Attributes Update](img/im-attributes-update.png)
 
-After you enter `y` it will perform `update` and display updated data on screen.
+After you enter `y` it will perform `update` and display updated data on the screen.
 
-If you want to update specific property of an attribute then you can go with partial updates from Attribute Menu.
-To update partially, you will be asked to enter `inum`, `op`, `path` and `value`.
+To update property of an attribute, you can go with partial updates from Attribute Menu. To update partially, you must be asked to enter `inum`, `op`, `path` and `value`.
 - **__inum__** identity of an attribute where operation to be done.
 - **__op__** means operation to be done: [`replace`, `move`, `add`, `remove`, `copy`, `test`]
 - **__path__** chose path where operation will be performed: for example `attributeValidation/minLength`
@@ -156,7 +155,7 @@ Finally, it will display the updated result.
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/attributes.write
-Please wait patching...
+Please wait for patching...
 
 {
   "dn": "inum=BCA8,ou=attributes,o=jans",
@@ -204,21 +203,21 @@ To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` 
 ![delete attribute](img/im-delete-attrb.png)
 
 ### Authentication Method
-Sometimes It's getting hard to change **Default Authentication Method** from web browser if you can't login using web interface. Here Janssen CLI is going to help you a lot. 
+Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using web interface. Here Janssen CLI is going to help you a lot. 
 
 ![default-auth](img/im-default-auth.png)
 
 - `View` Default Authentication Method.
 - `Update` Default Authentication Method.
 
-Select option 2 from the Main Menu to chose Authentication Method. You can see such option as listed above.
+Select option 2 from Main Menu to chose Authentication Method. You can see such options as listed above.
 
-To `View` default authentication method select 1 from Authentication Menu, It will show you current default authentication method of janssen server.
+To `View` default authentication method select '1' from Authentication Menu, It will show you the current default authentication method of the janssen server.
 
 ![current-default-auth](img/im-cur-default-auth.png)
 
 
-To `update` default authentication method select 2, then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
+To `update` default authentication method select '2', then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
 
 ![update-auth](img/im-update-default-auth.png)
 
@@ -240,7 +239,7 @@ Cache Configuration
 1 Returns cache configuration
 2 Partially modifies cache configuration
 ```
-If you want to view cache configuration then choose option 1
+If you want to view cache configurations then choose option 1
 from Cache Configuration Menu. It will return cache configuration in details as below:
 ```json5
 {
@@ -277,16 +276,19 @@ from Cache Configuration Menu. It will return cache configuration in details as 
 }
 ```
 
-To update partially select option 2, then you will be asked to enter `op`, `path` and `value`.
+To update partially, select option 2. then you will be asked to enter `op`, `path` and `value`.
+
 - **__op__** means operation to be done: [`replace`, `move`, `add`, `remove`, `copy`, `test`]
 - **__path__** chose path where operation will be performed: for example `memcachedConfiguration/bufferSize`
 - **__value__** value that you want update. It can be integer, boolean or string.
 
-After then, it will ask `Patch another param?` you can press `y` if you want to update multiple parameters at a time otherwise `n`.
-then it will show all the patch that are going to be performed. 
+At next it will ask `Patch another param?` you can press `y` if you want to update multiple parameters at a time otherwise `n`. After 
+then it will show all the patches that are going to be performed. 
 
-`Continue?` If you do any mistake and want to abort this operation then press `n` to cancel otherwise press `y` to go with it.
-It will show you the updated result. please see below example, you will get a clear concept on this.
+> `Continue?` 
+
+If any mistake happens simply press `n` to abort this operation  otherwise press `y` to go with it.
+It will show you the updated result. please, see below example, you will get a clear concept on this.
 
 ```text
 
@@ -373,7 +375,7 @@ Getting access token for scope https://jans.io/oauth/config/cache.readonly
 }
 ```
 
-__Option 2__ to update _memcached_ configuration. It will ask for each parameter, enter value or skip to set default.
+__Option 2__ to update _memcached_ configuration. It will ask for each parameter, enter a value or skip to set default.
 
 ```text
 Selection: 2
@@ -423,7 +425,7 @@ Please wait while posting data ...
 
 - **Cache Configuration - Redis**
 
-To `get/update` redis configuration, select option 5 to enter the menu.
+To `get/update` **redis** configuration, select option 5 to enter the menu.
 ```text
 Cache Configuration – Redis
 ---------------------------
@@ -458,8 +460,9 @@ Getting access token for scope https://jans.io/oauth/config/cache.readonly
 }
 ```
 
-__Option 2__ to update redis cache configuration. fill each property or keep as empty to set default.
-press enter and `Continue?` press `y` to update redis configuration.
+__Option 2__ to update the Redis cache configuration. You can fill each property or keep as empty to set default. 
+> `Continue?` press `y` to update the Redis configuration.
+
 ```text
 Selection: 2
 
@@ -1117,19 +1120,17 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "externalLoggerConfiguration": null
 }
 ```
-By selecting 2nd option, you can modify its properties partially. 
+By selecting the 2nd option, you can modify its properties partially. 
 
 ![update jans authorization server](img/im-update-jans-auth.png)
 
-At the end it will show the updated result.
+At the end, it will show the updated result.
 
 ### Janssen FIDO2
-Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username / password as 
-the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have the 
-option to also install the FIDO2 component.
+Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username/password as the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have an option to install the FIDO2 component.
 
 Using Janssen CLI, you can `view/update` details of the FIDO2 configuration.
-From the main menu select option 9, It will give two option to choose:
+From the main menu select option 9, you will get two options.
 
 ```text
 Configuration – Fido2
@@ -1137,7 +1138,7 @@ Configuration – Fido2
 1 Gets Jans Authorization Server Fido2 configuration properties
 2 Updates Fido2 configuration properties
 ```
-If you chose the first option, you will get some details of fido2 configuration properties:
+If you chose the first option, You will get some details of fido2 configuration properties:
 ```json5
 {
   "issuer": "https://testjans.gluu.com",
@@ -1178,13 +1179,14 @@ If you chose the first option, you will get some details of fido2 configuration 
     ]
   }
 }
+
 ```
-If you want to update fido2 configuration, you can choose 2nd option. It will ask to fill each property, skip for default values. 
+If you want to update the fido2 configuration, you can choose the 2nd option. It will ask to fill each property, skip for default values. 
 For example, if you want to change **_logginglevel_** `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
 
 ![update fido2 configuration](img/im-update-fido2.png)
 
-- **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
+> **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
 
 ```text
 Continue? y
@@ -1228,13 +1230,13 @@ Please wait while posting data ...
 ```
 
 ### SMTP Server Configuration
-Janssen CLI also supports SMTP configuration. You can do following things as stated below:
+Janssen CLI also supports SMTP configuration. You can do the following things as stated below:
 - `View/Get`
 - `Add/Delete`
 - `Update`
 - `Test`
 
-Simply select option 10 from Main Menu it will show some options as below:
+Simply select option '10' from Main Menu, It will show some options as below:
 ```text
 Configuration – SMTP
 --------------------
@@ -1319,11 +1321,11 @@ Continue?
 Fill each property with the correct information.
 - **Test SMTP Server**
 
-If server is running, and all the information you have entered are correct. You can test SMTP server from the following option 5, it will respond, if server configured properly.
+If the server is running, and all the information you have entered is correct. You can test SMTP server from the following option 5, it will respond if the server is configured properly.
 
 ### Janssen Logging Configuration
 
-Using Janssen CLI, you can easily update logging configuration. Just go with the option 11 from Main Menu, It will display two options as sated below.
+Using Janssen CLI, you can easily update the logging configuration. Just go with option 11 from Main Menu, It will display two options.
 
 ```text
 Configuration – Logging
@@ -1332,7 +1334,7 @@ Configuration – Logging
 2 Updates Jans Authorization Server logging settings
 ```
 
-First option returns current logging configuration.
+The first option returns the current logging configuration.
 ```json
 Returns Jans Authorization Server logging settings
 --------------------------------------------------
@@ -1350,7 +1352,7 @@ Getting access token for scope https://jans.io/oauth/config/logging.readonly
   "httpLoggingExludePaths": null
 }
 ```
-To update current logging configuration select option 2. For example, I have updated `logginglevel INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
+To update the current logging configuration select option 2. For example, I have updated `logging level INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
 ```json
 Returns Jans Authorization Server logging settings
 --------------------------------------------------
@@ -1412,16 +1414,16 @@ Please wait while posting data ...
 ### JSON Web Key 
 This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public 
 keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
-From the Main Menu, Select option 12, It returns some options as stated below:
+From the Main Menu, select option 12, It returns some options as stated below:
 
 ```text
 Configuration – JWK - JSON Web Key (JWK)
 ----------------------------------------
-1 Gets list of JSON Web Key (JWK) used by server
+1 Gets a list of JSON Web Key (JWK) used by a server
 2 Puts/replaces JWKS
 3 Patch JWKS
 ```
-You can `view` list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
+You can `view` the list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
 
 - **__`Get list of JSON Web Key`__**
 
@@ -1810,7 +1812,7 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 
 ```
 
-To Add a new script, choose option 2 and fill each property:
+To add a new script, choose option 2 and fill each property:
 
 `dn, inum, display name, valid script`
 ```
@@ -1847,12 +1849,12 @@ In this way you can update any field you want.
 
 - **Delete scripts**
 
-To delete a custom scripts, you need an `inum` of a custom script that you want to delete.
+To delete a custom script, you need an `inum` of a custom script that you want to delete.
 It will ask for confirmation when you enter `inum`, simply enter `yes/y` to delete it otherwise enter `no/n` to cancel the operation.
 
 ### LDAP Configuration 
 
-Using Janssen CLI, Following list of actions can be performed in LDAP.
+Using Janssen CLI, the Following list of actions can be performed in LDAP.
 ```text
 Database - LDAP configuration
 -----------------------------
@@ -1867,7 +1869,7 @@ Database - LDAP configuration
 
 - **List of Existing LDAP**
 
-To get list of existing LDAP configurations, select option 1 and press enter, you will get a list of existing ldap configuration in your janssen server.
+To get a list of existing LDAP configurations, select option 1 and press enter, you will get a list of existing LDAP configurations in your Janssen server.
 
 ```text
 Gets list of existing LDAP configurations
@@ -1920,10 +1922,9 @@ To add a new LDAP configuration, choose option 2 and add the following propertie
 ```
 Then enter `y` to confirm.
 
-- **Update a LDAP configuration**
+- **Update an LDAP configuration**
 
-To update an existing LDAP configuration, select option 3 and enter ldap configuration name. 
-the given name is matched with the existing configurations then It will ask to enter value for each property.
+To update an existing LDAP configuration, select option 3 and enter the LDAP configuration name. If it matches to the existing configuration then It will ask to enter a value for each properties.
 
 - **Delete a LDAP configuration**
 
@@ -1965,7 +1966,7 @@ Using Janssen CLI, Administrator can easily `create/update/delete` openid Connec
 
 ### User Managed Access (UMA)
 
-UMA helps to mange user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
+UMA helps to manage user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
 
 ![](img/im-uma-menu.png)
 
@@ -1975,12 +1976,12 @@ you can perform such operations:
 - update / partially update
 - delete
 
-To get list of UMA resources of your Janssen Server, you can select option 1.
-It will ask `search limit[50]` by default set upto 50 and `pattern` of string.
+To get a list of UMA resources of your Janssen Server, you can select option 1.
+It will ask `search limit[50]` by default set up to 50 and `pattern` of string.
 
 
 ## Command Line Argument Mode
-We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
+We will refer to this mode as **CL** Using this mode is difficult compared to IM. The first is to get help, so type:
 ```
 /opt/jans/jans-cli/config-cli.py --help
 ```
@@ -2022,7 +2023,7 @@ optional arguments:
   --schema SCHEMA       Get sample json schema
   --data DATA           Path to json data file
 ```
-We start with getting information about tasks, the tasks are options of argument `--info`:
+We start with getting information about tasks, tasks are options of argument `--info`:
 
 ```
 Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMemcached, CacheConfigurationNativePersistence, CacheConfigurationRedis, ConfigurationFido2, ConfigurationJWKJSONWebKeyJWK, ConfigurationLogging, ConfigurationProperties, ConfigurationSMTP, CustomScripts, DatabaseCouchbaseConfiguration, DatabaseLDAPConfiguration, DefaultAuthenticationMethod, OAuthOpenIDConnectClients, OAuthOpenIDConnectSectorIdentifiers, OAuthScopes, OAuthUMAResources
@@ -2061,7 +2062,7 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-This is how we can execute single line command to get information of the Janssen Server. As we discussed on a specific task in the Interactive Mode, similarly we will discuss here using single line command to perform such operation.
+This is how we can execute single line command to get information about the Janssen Server. As we discussed on a specific task in the Interactive Mode, similarly we will discuss here using single line command to perform such operation.
 
 ### Attribute
 
@@ -2441,7 +2442,7 @@ Now, let's add this attribute using `post-attributes`:
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id post-attributes --data /tmp/attribute.json
 ```
-It will create new attribute into the Attribute list with updated `inum & dn`:
+It will create a new attribute into the Attribute list with updated `inum & dn`:
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/attributes.write
@@ -2617,7 +2618,7 @@ Calling with params limit=3&pattern=view&type=openid
 ]
 ```
 
-Let's create a scope, for this we need a sample schema, you can use of the above result, or can get sample schema. Remember when we queried info for a task **OAuthScopes** it printed:
+Let's create a scope. Remember when we queried info for a task **OAuthScopes** it printed:
 
 ```
 Operation ID: post-oauth-scopes
@@ -2669,7 +2670,7 @@ Server Response:
 
 ```
 
-It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for the task **OAuthScopes** it printed:
+It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for the patch method. Remember when we queried info for the task **OAuthScopes** it printed:
 
 ```
 Operation ID: patch-oauth-scopes-by-id
@@ -2684,9 +2685,9 @@ This means we need schema `/components/schemas/PatchRequest`, be careful it stat
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
 ```
 
-When you examine this json, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
+When you examine this JSON, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
 * __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path separator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
+* __path__ Path of property to be changed. use path separator `/` to change a property inside an object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
 * __value__ New value to be assigned for property defined in `path`
 
 We can edit this json as follows (remember to make it an array):
@@ -2743,7 +2744,7 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 - **get-config-cache**
 
-You can get current Cache Configuration of your Janssen Server by performing this operation.
+You can get the current Cache Configuration of your Janssen Server by performing this operation.
 
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
@@ -2812,8 +2813,8 @@ Let's see the sample schema of cache configuration.
 
 When you examine this sample schema, you will see three properties in an object: op, path, and value.
 * __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path separator `/` to change a property inside object.
-* __value__ New value to be assigned for property defined in `path`
+* __path__ Path of property to be changed. use path separator `/` to change a property inside an object.
+* __value__ New value to be assigned for each property defined in `path`
 
 Let, We want to replace `memcachedConfiguration/bufferSize`:
 
@@ -3267,9 +3268,8 @@ Let's get the sample schema:
   "value": {}
 }
 ```
-Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`. 
-So we are going to perform an operation `replace` where `path` is `deletable` with `value: false`.
-
+Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`.
+So we are going to operate `replace` where `path` is `deletable` with `value: false`.
 let's update the json as below:
 
 ```json
@@ -3318,7 +3318,7 @@ Server Response:
   "deletable": false
 }
 ```
-As you see that `deletable` updated to `false`.
+you must see that `deletable` updated to `false`.
 
 ### Janssen Fido2 Configuration
 
@@ -3390,7 +3390,7 @@ To perform this operation, let's check the schema first.
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration > /tmp/fido2-schema.json
 ```
 
-This command will create fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
+This command will create a fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
 
 ![janssen fido2 configuration](img/cl-fido2-update.png)
 
@@ -3459,11 +3459,11 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 ```
 
-Jans Authorization server have two operations `id` to `get/modify` its properties.
+Jans Authorization server has two operations `id` to `get/modify` its properties.
 
 - **__get-properties__**
 
-It returns all the information of Jans Authorization server.
+It returns all the information of the Jans Authorization server.
 
 ```text
 /opt/jans/jans-cli/config-cli.py --operation-id get-properties
@@ -3949,7 +3949,7 @@ Let's modify this schema:
 
 This schema has three properties; `op`, `path` & `value`.
 Let's perform a `replace` operation at `cibaEnabled` to change it from `false` to `true`.
-So, the `.json` file will be look like this:
+So, the `.json` file will look like this:
 
 ```text
 [
@@ -4006,7 +4006,7 @@ To view the current SMTP server configuration, run the following command line:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
 ```
 
-It will show the your smtp server configuration as below:
+It will show your SMTP server configuration as below:
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/smtp.readonly
@@ -4025,7 +4025,7 @@ Getting access token for scope https://jans.io/oauth/config/smtp.readonly
 
 - **_post-config-smtp_**
 
-This operation can be performed to update/post new smtp configuration on your janssen server.
+This operation can be performed to update/post a new SMTP configuration on your Janssen server.
 Let's see the schema first:
 
 ```commandline
@@ -4040,7 +4040,7 @@ nano /tmp/smtp.json
 
 ![smtp update configuration](img/cl-update-smtp.png)
 
-You can update each of its property. To perform this operation, run the following command:
+You can update each of its properties. To perform this operation, run the following command:
 
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp --data /tmp/smtp.json
