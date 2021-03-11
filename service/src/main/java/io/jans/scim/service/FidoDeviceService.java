@@ -87,7 +87,7 @@ public class FidoDeviceService implements Serializable {
 	}
 
 	public void removeGluuCustomFidoDevice(GluuCustomFidoDevice gluuCustomFidoDevice) {
-		ldapEntryManager.removeRecursively(gluuCustomFidoDevice.getDn());
+		ldapEntryManager.removeRecursively(gluuCustomFidoDevice.getDn(), GluuCustomFidoDevice.class);
 	}
 
 	public List<GluuCustomFidoDevice> searchFidoDevices(String userInum, String... returnAttributes) {

@@ -62,6 +62,7 @@ import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.util.ServiceUtil;
 import io.jans.scim.ws.rs.scim2.GroupWebService;
+import io.jans.as.persistence.model.PairwiseIdentifier;
 
 /**
  * This class holds the most important business logic of the SCIM service for
@@ -600,7 +601,7 @@ public class Scim2UserService implements Serializable {
 	// See: https://github.com/GluuFederation/oxTrust/issues/800
 	public void removePPIDsBranch(String dn) {
 		try {
-			ldapEntryManager.removeRecursively(String.format("ou=pairwiseIdentifiers,%s", dn));
+			ldapEntryManager.removeRecursively(String.format("ou=pairwiseIdentifiers,%s", dn), PairwiseIdentifier.class);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

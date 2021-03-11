@@ -42,7 +42,7 @@ public class Fido2DeviceService implements Serializable {
 		try {
 			String finalDn = String.format("jansId=%s,ou=fido2_register,", deviceID);
 			finalDn = finalDn.concat(person.getDn());
-			ldapEntryManager.removeRecursively(finalDn);
+			ldapEntryManager.removeRecursively(finalDn, GluuFido2Device.class);
 			return true;
 		} catch (Exception e) {
 			log.error("", e);
@@ -94,7 +94,7 @@ public class Fido2DeviceService implements Serializable {
 	}
 
 	public void removeFido2Device(GluuFido2Device fido2Device) {
-		ldapEntryManager.removeRecursively(fido2Device.getDn());
+		ldapEntryManager.removeRecursively(fido2Device.getDn(), GluuFido2Device.class);
 	}
 
 	public GluuFido2Device getGluuCustomFidoDeviceById(String id, String userId) {

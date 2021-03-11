@@ -143,7 +143,7 @@ public class UserPersistenceHelper {
     }
 
     public void removePerson(ScimCustomPerson person) {
-        persistenceEntryManager.removeRecursively(person.getDn());
+        persistenceEntryManager.removeRecursively(person.getDn(), ScimCustomPerson.class);
     }
 
 }
