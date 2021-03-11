@@ -291,6 +291,14 @@ class BaseClient:
         self._session = None
 
     @property
+    def scheme(self):
+        """Scheme used when connecting to Couchbase server.
+        """
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
+            return "https"
+        return "http"
+
+    @property
     def session(self):
         """Get an instance of ``requests.Session``.
 
@@ -354,8 +362,13 @@ class N1qlClient(BaseClient):
     """This class interacts with N1QL server (part of Couchbase).
     """
 
-    #: Port where N1QL server is bind.
-    port = 18093
+    @property
+    def port(self):
+        """Port where N1QL server is bind to.
+        """
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
+            return 18093
+        return 8093
 
     def healthcheck(self, host):
         """Run healthcheck to a host.
@@ -364,7 +377,7 @@ class N1qlClient(BaseClient):
         :returns: An instance of ``requests.models.Response``.
         """
         return self.session.post(
-            f"https://{host}:{self.port}/query/service",
+            f"{self.scheme}://{host}:{self.port}/query/service",
             data={"statement": "SELECT status FROM system:indexes LIMIT 1"},
             auth=(self.user, self.password),
             timeout=10,
@@ -380,7 +393,7 @@ class N1qlClient(BaseClient):
         data = kwargs.get("data", {})
 
         resp = self.session.post(
-            f"https://{self.host}:{self.port}/{path}",
+            f"{self.scheme}://{self.host}:{self.port}/{path}",
             data=data,
             auth=(self.user, self.password),
         )
@@ -416,8 +429,13 @@ class RestClient(BaseClient):
     """This class interacts with REST server (part of Couchbase).
     """
 
-    #: Port where REST server is bind.
-    port = 18091
+    @property
+    def port(self):
+        """Port where REST server is bind to.
+        """
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)):
+            return 18091
+        return 8091
 
     def healthcheck(self, host):
         """Run healthcheck to a host.
@@ -426,7 +444,7 @@ class RestClient(BaseClient):
         :returns: An instance of ``requests.models.Response``.
         """
         return self.session.get(
-            f"https://{host}:{self.port}/pools/",
+            f"{self.scheme}://{host}:{self.port}/pools/",
             auth=(self.user, self.password),
             timeout=10,
         )
@@ -452,7 +470,7 @@ class RestClient(BaseClient):
             raise ValueError(f"Unsupported method {method}")
 
         resp = req(
-            f"https://{self.host}:{self.port}/{path}",
+            f"{self.scheme}://{self.host}:{self.port}/{path}",
             auth=(self.user, self.password),
         )
         return resp
