@@ -51,7 +51,7 @@ public class GluuCustomPerson extends User
     private List<String> ppid;
 
    // @JsonObject
-    @AttributeName(name = "jansExternalUid")
+    @AttributeName(name = "jansExtUid")
     private List<String> externalUid;
     
     @JsonObject
