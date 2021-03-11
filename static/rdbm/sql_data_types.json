@@ -482,5 +482,10 @@
       "size": 128,
       "type": "VARCHAR"
     }
+  },
+  "scimCustomSecond": {
+    "mysql": {
+      "type": "JSON"
+    }
   }
 }
