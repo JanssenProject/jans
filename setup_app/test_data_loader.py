@@ -124,15 +124,32 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
                     os.path.join(Config.outputFolder, 'test/scim-client/schema/'),
                     )
-            jans_schema_json_files = [
-                    os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json'),
-                    os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json'),
-                        ]
-            schema_files = [
-                        os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json'),
-                        os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json'),
-                        ]
-            self.dbUtils.read_jans_schema(others=schema_files)
+            
+            oxauth_json_schema_fn =os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json')
+            scim_json_schema_fn = os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json')
+            jans_schema_json_files = [ oxauth_json_schema_fn, scim_json_schema_fn ]
+
+            scim_schema = base.readJsonFile(scim_json_schema_fn)
+            may_list = []
+
+            for attribute in scim_schema['attributeTypes']:
+                may_list += attribute['names']
+
+            jansPerson = {
+                        'kind': 'STRUCTURAL',
+                        'may': may_list,
+                        'must': ['objectclass'],
+                        'names': ['jansPerson'],
+                        'oid': 'jansObjClass',
+                        'sup': ['top'],
+                        'x_origin': 'Jans created objectclass'
+                        }
+            scim_schema['objectClasses'].append(jansPerson)
+            
+            with open(scim_json_schema_fn, 'w') as w:
+                json.dump(scim_schema, w, indent=2)
+
+            self.dbUtils.read_jans_schema(others=jans_schema_json_files)
 
             self.rdbmInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper()
