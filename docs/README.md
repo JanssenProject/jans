@@ -2577,6 +2577,7 @@ Selection:
 ```
 
 - **__Get OpenID client by its inum__**
+
 `inum` is an unique identity of an OpenID client. In this option, you can use `inum` of an OpenID client to get details informaton.
 
 In my case i'm using `inum` of the above created OpenID client:
