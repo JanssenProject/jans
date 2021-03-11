@@ -133,7 +133,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             if self.dbUtils.table_exists(sql_tbl_name):
                 for tbl_col in sql_tbl_cols:
-                    self.dbUtils.exec_rdbm_query(alter_table_sql_cmd.format(sql_tbl_name, tbl_col))
+                    sql_cmd = alter_table_sql_cmd.format(sql_tbl_name, tbl_col)
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
                     tables.append(sql_cmd)
             else:
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
