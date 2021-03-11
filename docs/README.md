@@ -203,7 +203,7 @@ To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` 
 ![delete attribute](img/im-delete-attrb.png)
 
 ### Authentication Method
-Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using web interface. Here Janssen CLI is going to help you a lot. 
+Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot. 
 
 ![default-auth](img/im-default-auth.png)
 
@@ -212,12 +212,12 @@ Sometimes It's getting hard to change **Default Authentication Method** from a w
 
 Select option 2 from Main Menu to chose Authentication Method. You can see such options as listed above.
 
-To `View` default authentication method select '1' from Authentication Menu, It will show you the current default authentication method of the janssen server.
+To `View` default authentication method select '1' from Authentication Menu, It will show you the current default authentication method of the Janssen server.
 
 ![current-default-auth](img/im-cur-default-auth.png)
 
 
-To `update` default authentication method select '2', then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
+To `update` the default authentication method select '2', then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
 
 ![update-auth](img/im-update-default-auth.png)
 
@@ -239,7 +239,7 @@ Cache Configuration
 1 Returns cache configuration
 2 Partially modifies cache configuration
 ```
-If you want to view cache configurations then choose option 1
+If you want to view `cache configuration` then choose option 1
 from Cache Configuration Menu. It will return cache configuration in details as below:
 ```json5
 {
@@ -1712,9 +1712,8 @@ Please wait while posting data ...
 Just chose this option and fill the value for `op`, `path`, and `value` to patch JSON Web Key.
 
 ### Custom Scripts
-Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way 
-that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such operation 
-as listed below:
+
+Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such an operation as listed below:
 
 ```text
 Custom Scripts
@@ -1726,7 +1725,7 @@ Custom Scripts
 ```
 - **get info of custom scripts**
 
-To get status of each type of script select option 1, you will get below result in return:
+To get the status of each type of script select option 1, you will get the below result in return:
 
 ```
 Gets a list of custom scripts
@@ -1949,7 +1948,7 @@ Database - Couchbase configuration
 
 ### OpenID Connect - Clients
 
-OpenID Connect Interactive Mode supports following list of actions:
+OpenID Connect Interactive Mode supports the following list of actions:
 
 ```text
 OAuth - OpenID Connect - Clients
@@ -1961,8 +1960,726 @@ OAuth - OpenID Connect - Clients
 5 Delete OpenId Connect client
 6 Update modified properties of OpenId Connect client by Inum
 ```
-Using Janssen CLI, Administrator can easily `create/update/delete` openid Connect without any interrupt.
+Using Janssen CLI, the Administrator can easily `create/update/delete` OpenID Connect without any interruption.
 
+- **__list of OpenID Connect clients__**
+
+By selecting option '1' you will get a list of OpenID Connect clients.
+You may enter `limit[50]` and `pattern` to filter in searching.
+
+```
+Gets list of OpenID Connect clients
+-----------------------------------
+
+«Search size - max size of the results to return. Type: integer»
+limit  [50]: 
+
+«Search pattern. Type: string»
+pattern: 
+Calling Api with parameters: {'limit': 50}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+[
+  {
+    "dn": "inum=1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805,ou=clients,o=jans",
+    "inum": "1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805",
+    "clientSecret": "KfwZeAfq4jrL",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/admin-ui",
+      "http//:localhost:4100"
+    ],
+    "claimRedirectUris": null,
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "Jans Config Api Client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1800.F6E877,ou=scopes,o=jans",
+      "inum=1800.D4F3E7,ou=scopes,o=jans",
+      "inum=1800.2FD7EF,ou=scopes,o=jans",
+      "inum=1800.97B23C,ou=scopes,o=jans",
+      "inum=1800.8FC2C7,ou=scopes,o=jans",
+      "inum=1800.1FFDF2,ou=scopes,o=jans",
+      "inum=1800.5CF44C,ou=scopes,o=jans",
+      "inum=1800.CCA518,ou=scopes,o=jans",
+      "inum=1800.E62D6E,ou=scopes,o=jans",
+      "inum=1800.11CB33,ou=scopes,o=jans",
+      "inum=1800.781FA2,ou=scopes,o=jans",
+      "inum=1800.ADAD8F,ou=scopes,o=jans",
+      "inum=1800.40F22F,ou=scopes,o=jans",
+      "inum=1800.7619BA,ou=scopes,o=jans",
+      "inum=1800.E0DAF5,ou=scopes,o=jans",
+      "inum=1800.7F45B0,ou=scopes,o=jans",
+      "inum=1800.778C57,ou=scopes,o=jans",
+      "inum=1800.E39293,ou=scopes,o=jans",
+      "inum=1800.939483,ou=scopes,o=jans",
+      "inum=1800.0ED2E8,ou=scopes,o=jans",
+      "inum=1800.66CA59,ou=scopes,o=jans",
+      "inum=1800.A4DBE5,ou=scopes,o=jans",
+      "inum=1800.9AF358,ou=scopes,o=jans",
+      "inum=1800.478CCF,ou=scopes,o=jans",
+      "inum=1800.450A9A,ou=scopes,o=jans",
+      "inum=1800.27A193,ou=scopes,o=jans",
+      "inum=1800.3971D5,ou=scopes,o=jans",
+      "inum=1800.891693,ou=scopes,o=jans",
+      "inum=1800.A35DFD,ou=scopes,o=jans",
+      "inum=1800.3516DE,ou=scopes,o=jans",
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  },
+  {
+    "dn": "inum=1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f,ou=clients,o=jans",
+    "inum": "1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f",
+    "clientSecret": "4OJLToBXav0P",
+    "frontChannelLogoutUri": "https://testjans.gluu.com/identity/ssologout.htm",
+    "frontChannelLogoutSessionRequired": true,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/identity/scim/auth",
+      "https://testjans.gluu.com/identity/authcode.htm",
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims?authentication=true"
+    ],
+    "claimRedirectUris": [
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims"
+    ],
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "implicit",
+      "refresh_token"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "oxTrust Admin GUI",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": "HS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": [
+      "https://testjans.gluu.com/identity/finishlogout.htm"
+    ],
+    "requestUris": null,
+    "scopes": [
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": true,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  },
+  {
+    "dn": "inum=1201.d71e6b84-b637-4e26-b8d3-34c80934c097,ou=clients,o=jans",
+    "inum": "1201.d71e6b84-b637-4e26-b8d3-34c80934c097",
+    "clientSecret": "0vFoEhc7Zut2",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [
+      "client_credentials"
+    ],
+    "applicationType": "native",
+    "contacts": null,
+    "clientName": "SCIM client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1200.841184,ou=scopes,o=jans",
+      "inum=1200.98DDA5,ou=scopes,o=jans",
+      "inum=1200.F40A49,ou=scopes,o=jans",
+      "inum=1200.B609F0,ou=scopes,o=jans",
+      "inum=1200.492980,ou=scopes,o=jans",
+      "inum=1200.F7EC4A,ou=scopes,o=jans",
+      "inum=1200.280C97,ou=scopes,o=jans",
+      "inum=1200.E236BB,ou=scopes,o=jans",
+      "inum=1200.DC0FDE,ou=scopes,o=jans",
+      "inum=1200.2483ED,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  }
+]
+
+Selection: 
+
+```
+
+- **__Create a New OpenID Client__**
+
+To create a new OpenID client, you need two enter '2' from OpenID Menu.
+It will ask to enter below information:
+
+- frontChannelLogoutSessionRequired[false, true]
+- applicationType[web, native]
+- clientName
+- subjectType[pairwise, public]
+- includeClaimsInIdToken[false, true]
+- Populate optional fields?[y, n]
+
+If you enter `y` to **Populate optional fields?** then you will get a lot of optional fields are listed below:
+
+```
+Populate optional fields? y
+Optiaonal Fields:
+1 clientSecret
+2 frontChannelLogoutUri
+3 registrationAccessToken
+4 clientIdIssuedAt
+5 clientSecretExpiresAt
+6 redirectUris
+7 claimRedirectUris
+8 responseTypes
+9 grantTypes
+10 contacts
+11 idTokenTokenBindingCnf
+12 logoUri
+13 clientUri
+14 policyUri
+15 tosUri
+16 jwksUri
+17 jwks
+18 sectorIdentifierUri
+19 idTokenSignedResponseAlg
+20 idTokenEncryptedResponseAlg
+21 idTokenEncryptedResponseEnc
+22 userInfoSignedResponseAlg
+23 userInfoEncryptedResponseAlg
+24 userInfoEncryptedResponseEnc
+25 requestObjectSigningAlg
+26 requestObjectEncryptionAlg
+27 requestObjectEncryptionEnc
+28 tokenEndpointAuthMethod
+29 tokenEndpointAuthSigningAlg
+30 defaultMaxAge
+31 requireAuthTime
+32 defaultAcrValues
+33 initiateLoginUri
+34 postLogoutRedirectUris
+35 requestUris
+36 scopes
+37 claims
+38 trustedClient
+39 lastAccessTime
+40 lastLogonTime
+41 persistClientAuthorizations
+42 refreshTokenLifetime
+43 accessTokenLifetime
+44 customAttributes
+45 customObjectClasses
+46 rptAsJwt
+47 accessTokenAsJwt
+48 accessTokenSigningAlg
+49 disabled
+50 authorizedOrigins
+51 softwareId
+52 softwareVersion
+53 softwareStatement
+54 attributes
+55 backchannelTokenDeliveryMode
+56 backchannelClientNotificationEndpoint
+57 backchannelAuthenticationRequestSigningAlg
+58 backchannelUserCodeParameter
+59 expirationDate
+60 deletable
+61 jansId
+
+«c: continue, #: populate filed. »
+
+Selection: 1
+
+«The client secret.  The client MAY omit the parameter if the client secret is an empty string. Type: string»
+clientSecret: aabbccdd
+
+«c: continue, #: populate filed. »
+Selection: c
+
+Obtained Data:
+
+{
+  "dn": null,
+  "inum": null,
+  "clientSecret": "aabbccdd",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": null,
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": null,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": null,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": null,
+  "customObjectClasses": null,
+  "rptAsJwt": null,
+  "accessTokenAsJwt": null,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": null,
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Continue? y
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.write
+Please wait while posting data ...
+
+{
+  "dn": "inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae,ou=clients,o=jans",
+  "inum": "1929a64c-6f67-4399-bdd3-6a8d44cc04ae",
+  "clientSecret": "B3ziSqU8gWTAXICdYfNxw2cP4LmwDqrG1koRqzFxQc0=",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": false,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": [],
+  "customObjectClasses": [
+    "top"
+  ],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": null,
+    "spontaneousScopeScriptDns": null,
+    "backchannelLogoutUri": null,
+    "backchannelLogoutSessionRequired": false,
+    "additionalAudience": null,
+    "postAuthnScripts": null,
+    "consentGatheringScripts": null,
+    "introspectionScripts": null,
+    "rptClaimsScripts": null
+  },
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Selection: 
+```
+
+- **__Get OpenID client by its inum__**
+`inum` is an unique identity of an OpenID client. In this option, you can use `inum` of an OpenID client to get details informaton.
+
+In my case i'm using `inum` of the above created OpenID client:
+
+```
+Get OpenId Connect Client by Inum
+---------------------------------
+
+«inum. Type: string»
+inum: 1929a64c-6f67-4399-bdd3-6a8d44cc04ae
+Calling Api with parameters: {'inum': '1929a64c-6f67-4399-bdd3-6a8d44cc04ae'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+{
+  "dn": "inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae,ou=clients,o=jans",
+  "inum": "1929a64c-6f67-4399-bdd3-6a8d44cc04ae",
+  "clientSecret": "CpTCvlZZsQDWShGrMXFBzQ==",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": false,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": [],
+  "customObjectClasses": [
+    "top"
+  ],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": null,
+    "spontaneousScopeScriptDns": null,
+    "backchannelLogoutUri": null,
+    "backchannelLogoutSessionRequired": false,
+    "additionalAudience": null,
+    "postAuthnScripts": null,
+    "consentGatheringScripts": null,
+    "introspectionScripts": null,
+    "rptClaimsScripts": null
+  },
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Selection: 
+```
 
 ### User Managed Access (UMA)
 
@@ -4625,7 +5342,7 @@ It will show all the openid clients together. To search using parameters:
 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args limit:2
 ```
 
-It will show random 2 client id configuration.
+It will show two OpenID clients randomly.
 
 ```text
 
