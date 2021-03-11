@@ -46,6 +46,8 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class ConfigurationFactory {
 
+	public static final String CONFIGURATION_ENTRY_DN = "scim_ConfigurationEntryDN";
+
 	@Inject
 	private Logger log;
 
@@ -302,7 +304,7 @@ public class ConfigurationFactory {
 	}
 
 	public String getConfigurationDn() {
-		return this.baseConfiguration.getString("scim_ConfigurationEntryDN");
+		return this.baseConfiguration.getString(CONFIGURATION_ENTRY_DN);
 	}
 
 	private void init(Conf conf) {
