@@ -3431,7 +3431,10 @@ components:
           description: Specifies JWKS for all DCR's validations.		  
         dcrSignatureValidationJwksUri:
           type: string
-          description: specifies JWKS URI for all DCR's validations.
+          description: Specifies JWKS URI for all DCR's validations.
+        dcrAuthorizationWithClientCredentials:
+          type: boolean	
+          description: Boolean value indicating if DCR authorization to be performed using client credentials.	
         statEnabled:
           type: boolean	
           description: Boolean value indicating if statistical service is enabled.	  
