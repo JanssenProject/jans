@@ -494,5 +494,11 @@
     "mysql": {
       "type": "TINYTEXT"
     }
+  },
+  "jansUsrDN": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
   }
 }
