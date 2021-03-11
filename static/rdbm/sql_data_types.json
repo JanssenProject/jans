@@ -489,5 +489,10 @@
       "type": "VARCHAR",
       "tables": {"jansClntAuthz": {"size": 100, "type": "VARCHAR"}}
     }
+  },
+  "jansMetaLocation": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
   }
 }
