@@ -225,6 +225,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
             f"bucket.{mapping['bucket']}.mapping: {mapping['mapping']}"
         )
 
+    # always have  _default_ bucket
     if bucket_prefix not in couchbase_buckets:
         couchbase_buckets.insert(0, bucket_prefix)
 
@@ -251,6 +252,8 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "couchbase_conn_timeout": get_couchbase_conn_timeout(),
                 "couchbase_conn_max_wait": get_couchbase_conn_max_wait(),
                 "couchbase_scan_consistency": get_couchbase_scan_consistency(),
+                "couchbase_keepalive_interval": get_couchbase_keepalive_interval(),
+                "couchbase_keepalive_timeout": get_couchbase_keepalive_timeout(),
             }
             fw.write(rendered_txt)
 
@@ -328,7 +331,7 @@ class BaseClient:
                     self.host = _host
                     break
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={resp.reason}")
-            except Exception as exc:
+            except Exception as exc:  # noqa: B902
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={exc}")
         return self.host
 
@@ -562,3 +565,37 @@ def suppress_verification_warning():
 
     if as_boolean(os.environ.get("CN_COUCHBASE_SUPPRESS_VERIFICATION", True)):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def get_couchbase_keepalive_interval():
+    """Get keep-alive interval to Couchbase server.
+
+    Default keep-alive interval is 30000  milliseconds. To change the value, pass
+    `CN_COUCHBASE_KEEPALIVE_INTERVAL` environment variable.
+
+    :returns: Keep-alive interval (in milliseconds).
+    """
+    default = 30000
+
+    try:
+        val = int(os.environ.get("CN_COUCHBASE_KEEPALIVE_INTERVAL", default))
+    except ValueError:
+        val = default
+    return val
+
+
+def get_couchbase_keepalive_timeout():
+    """Get keep-alive timeout to Couchbase server.
+
+    Default keepalive timeout is 2500  milliseconds. To change the value, pass
+    `CN_COUCHBASE_KEEPALIVE_TIMEOUT` environment variable.
+
+    :returns: Keep-alive timeout (in milliseconds).
+    """
+    default = 2500
+
+    try:
+        val = int(os.environ.get("CN_COUCHBASE_KEEPALIVE_TIMEOUT", default))
+    except ValueError:
+        val = default
+    return val
