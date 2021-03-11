@@ -38,9 +38,6 @@ public class GluuCustomPerson extends User
     private String sourceServerName;
     private String sourceServerUserDn;
 
-    @AttributeName(name = "jansWhitePagesListed")
-    private String gluuAllowPublication;
-
     @AttributeName(name = "jansGuid")
     private String guid;
 
@@ -272,22 +269,6 @@ public class GluuCustomPerson extends User
     @Override
     public String toString() {
         return super.toString();
-    }
-
-    public void setGluuAllowPublication(String allowPublication) {
-        this.gluuAllowPublication = allowPublication;
-    }
-
-    public String getGluuAllowPublication() {
-        return gluuAllowPublication;
-    }
-
-    public boolean isAllowPublication() {
-        return Boolean.parseBoolean(gluuAllowPublication);
-    }
-
-    public void setAllowPublication(boolean allowPublication) {
-        this.gluuAllowPublication = Boolean.toString(allowPublication);
     }
 
     public List<String> getOptOuts() {
