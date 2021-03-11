@@ -1,10 +1,4 @@
 {
-  "attr": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    }
-  },
   "dat": {
     "mysql": {
       "type": "TEXT"
@@ -28,12 +22,6 @@
     }
   },
   "inum": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
-  "member": {
     "mysql": {
       "size": 64,
       "type": "VARCHAR"
@@ -134,12 +122,6 @@
     }
   },
   "jansClaimName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
-  "jansClaimRedirectURI": {
     "mysql": {
       "size": 64,
       "type": "VARCHAR"
