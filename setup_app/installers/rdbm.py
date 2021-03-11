@@ -64,31 +64,26 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
-            type_ = self.dbUtils.sql_data_types[attrname]
-            if table and type_[Config.rdbm_type].get('tables', {}).get(table):
-                data_type_ = type_[Config.rdbm_type]['tables'][table]
-                if 'size' in data_type_:
-                    data_type = '{}({})'.format(data_type_['type'], data_type_['size'])
-                else:
-                    data_type = data_type_['type']
-
-            elif type_[Config.rdbm_type]['type'] == 'VARCHAR':
-                if type_[Config.rdbm_type]['size'] <= 127:
-                    data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
-                elif type_[Config.rdbm_type]['size'] <= 255:
+            type_ = self.dbUtils.sql_data_types[attrname][Config.rdbm_type]
+            if table in type_.get('tables', {}):
+                type_ = type_['tables'][table]
+            if 'size' in type_:
+                data_type = '{}({})'.format(type_['type'], type_['size'])
+            else:
+                data_type = type_['type']
+        else:
+            attr_syntax = self.dbUtils.get_attr_syntax(attrname)
+            type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax][Config.rdbm_type]
+            
+            if type_['type'] == 'VARCHAR':
+                if type_['size'] <= 127:
+                    data_type = 'VARCHAR({})'.format(type_['size'])
+                elif type_['size'] <= 255:
                     data_type = 'TINYTEXT'
                 else:
                     data_type = 'TEXT'
             else:
-                data_type = type_[Config.rdbm_type]['type']
-
-        else:
-            attr_syntax = self.dbUtils.get_attr_syntax(attrname)
-            type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]
-            if type_[Config.rdbm_type]['type'] == 'VARCHAR':
-                data_type = 'VARCHAR({})'.format(type_[Config.rdbm_type]['size'])
-            else:
-                data_type = type_[Config.rdbm_type]['type']
+                data_type = type_['type']
 
         return data_type
 
