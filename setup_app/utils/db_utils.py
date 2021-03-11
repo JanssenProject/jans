@@ -529,10 +529,11 @@ class DBUtils:
     def table_exists(self, table):
         metadata = sqlalchemy.MetaData()
         try:
-            metadata.reflect(engine, only=[table])
-            return True
+            metadata.reflect(self.engine, only=[table])
         except:
             pass
+
+        return table in metadata
 
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
