@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.user.Email;
@@ -52,10 +53,12 @@ public class UserPersistenceHelper {
     private GroupService groupService;
 
     public void addCustomObjectClass(ScimCustomPerson person) {
-        String[] customObjectClasses = Optional.ofNullable(person.getCustomObjectClasses()).orElse(new String[0]);
-        Set<String> customObjectClassesSet = new HashSet<>(Stream.of(customObjectClasses).collect(Collectors.toList()));
-        customObjectClassesSet.add(attributeService.getCustomOrigin());
-        person.setCustomObjectClasses(customObjectClassesSet.toArray(new String[0]));
+		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType())) {
+	        String[] customObjectClasses = Optional.ofNullable(person.getCustomObjectClasses()).orElse(new String[0]);
+	        Set<String> customObjectClassesSet = new HashSet<>(Stream.of(customObjectClasses).collect(Collectors.toList()));
+	        customObjectClassesSet.add(attributeService.getCustomOrigin());
+	        person.setCustomObjectClasses(customObjectClassesSet.toArray(new String[0]));
+		}
     }
 
     public void addPerson(ScimCustomPerson person) throws Exception {
