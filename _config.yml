@@ -10,4 +10,4 @@ buttons:
     href: /jans-cloud-native/charts/jans
   - b2:
     text: Debugging Interception scripts
-    url: /jans-cloud-native/docs/
+    href: /jans-cloud-native/docs/interception-script-debug
