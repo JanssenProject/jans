@@ -12,6 +12,7 @@ from setup_app.installers.base import BaseInstaller
 class JythonInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jython'
         self.install_var = 'installJython'
         self.app_type = AppType.APPLICATION

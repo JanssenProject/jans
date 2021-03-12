@@ -13,6 +13,7 @@ from setup_app.installers.jetty import JettyInstaller
 class ElevenInstaller(JettyInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-eleven'
         self.needdb = True
         self.app_type = AppType.SERVICE

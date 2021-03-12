@@ -16,6 +16,7 @@ from setup_app.installers.base import BaseInstaller
 class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'opendj'
         self.pbar_text = "Installing OpenDJ"
         self.needdb = False # we don't need backend connection in this class

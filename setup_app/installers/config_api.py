@@ -18,6 +18,7 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-config-api'
         self.needdb = True # we don't need backend connection in this class
         self.app_type = AppType.SERVICE

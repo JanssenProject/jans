@@ -22,6 +22,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
     install_var = 'installJans'
 
     def __repr__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         txt = ''
         try:
             if not Config.installed_instance:
