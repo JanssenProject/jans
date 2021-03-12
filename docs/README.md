@@ -141,7 +141,7 @@ Obtained Data:
 ```
 ![jans-cli Attributes Update](img/im-attributes-update.png)
 
-After you enter `y` it will perform `update` and display updated data on the screen.
+Enter `y` to perform an `update` and display updated data on the screen.
 
 To update property of an attribute, you can go with partial updates from Attribute Menu. To update partially, you must be asked to enter `inum`, `op`, `path` and `value`.
 - **__inum__** identity of an attribute where operation to be done.
@@ -350,7 +350,7 @@ Please wait patching...
 }
 ```
 
-- **Cache Configuration - Memcached**
+#### Cache Configuration - Memcached
 
 Do You want to update _Memcached_ only? you can go with this option. _Memcached_ have two options:
 
@@ -423,7 +423,7 @@ Please wait while posting data ...
 }
 ```
 
-- **Cache Configuration - Redis**
+#### Cache Configuration - Redis
 
 To `get/update` **redis** configuration, select option 5 to enter the menu.
 ```text
@@ -544,7 +544,7 @@ Please wait while posting data ...
 }
 ```
 
-- **Cache Configuration - In-Memory**
+#### Cache Configuration - In-Memory
 
 To enter `In-Memory` menu select option 6, you will get two options as below:
 ```text
@@ -590,7 +590,7 @@ Obtained Data:
 }
 ```
 
-- **Cache Configuration - Native-Persistence**
+#### Cache Configuration - Native-Persistence
 
 ```text
 Cache Configuration – Native-Persistence
@@ -2576,11 +2576,106 @@ Please wait while posting data ...
 Selection: 
 ```
 
+- **__Update an OpenID Client by its inum__**
+
+If anything you want to update of an OpenID client, you can choose option '3' and enter the `inum` of the OpenID client. Here I've used the `inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae` of the above OpenID client. After then, You will get a list of fields to choose which one you are going to update.
+Here is what you can see in return:
+
+```
+Get OpenId Connect Client by Inum
+---------------------------------
+
+«inum. Type: string»
+inum: 1929a64c-6f67-4399-bdd3-6a8d44cc04ae
+Calling Api with parameters: {'inum': '1929a64c-6f67-4399-bdd3-6a8d44cc04ae'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+Fields:
+ 1 accessTokenAsJwt
+ 2 accessTokenLifetime
+ 3 accessTokenSigningAlg
+ 4 applicationType
+ 5 attributes
+ 6 authorizedOrigins
+ 7 backchannelAuthenticationRequestSigningAlg
+ 8 backchannelClientNotificationEndpoint
+ 9 backchannelTokenDeliveryMode
+10 backchannelUserCodeParameter
+11 claimRedirectUris
+12 claims
+13 clientIdIssuedAt
+14 clientName
+15 clientSecret
+16 clientSecretExpiresAt
+17 clientUri
+18 contacts
+19 customAttributes
+20 customObjectClasses
+21 defaultAcrValues
+22 defaultMaxAge
+23 deletable
+24 disabled
+25 expirationDate
+26 frontChannelLogoutSessionRequired
+27 frontChannelLogoutUri
+28 grantTypes
+29 idTokenEncryptedResponseAlg
+30 idTokenEncryptedResponseEnc
+31 idTokenSignedResponseAlg
+32 idTokenTokenBindingCnf
+33 includeClaimsInIdToken
+34 initiateLoginUri
+35 inum
+36 jansId
+37 jwks
+38 jwksUri
+39 lastAccessTime
+40 lastLogonTime
+41 logoUri
+42 persistClientAuthorizations
+43 policyUri
+44 postLogoutRedirectUris
+45 redirectUris
+46 refreshTokenLifetime
+47 registrationAccessToken
+48 requestObjectEncryptionAlg
+49 requestObjectEncryptionEnc
+50 requestObjectSigningAlg
+51 requestUris
+52 requireAuthTime
+53 responseTypes
+54 rptAsJwt
+55 scopes
+56 sectorIdentifierUri
+57 softwareId
+58 softwareStatement
+59 softwareVersion
+60 subjectType
+61 tokenEndpointAuthMethod
+62 tokenEndpointAuthSigningAlg
+63 tosUri
+64 trustedClient
+65 userInfoEncryptedResponseAlg
+66 userInfoEncryptedResponseEnc
+67 userInfoSignedResponseAlg
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 
+```
+
+- __q__ to quit 
+- __v__ to view each attribute with updated data
+- __l__ to get list of fields 
+- __#__ to update filed attribute
+- __id__ number of an attribute to identify which one you want to update
+
+
 - **__Get OpenID client by its inum__**
 
-`inum` is an unique identity of an OpenID client. In this option, you can use `inum` of an OpenID client to get details informaton.
+`inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
 
-In my case i'm using `inum` of the above created OpenID client:
+In my case i'm using the `inum` of the above created OpenID client:
 
 ```
 Get OpenId Connect Client by Inum
@@ -3690,6 +3785,7 @@ Now let's do the operation:
 ```
 
 It will show the updated result.
+
 ![updated result](img/cl-update-default-auth-result.png)
 
 ### OAuthUMAResources
