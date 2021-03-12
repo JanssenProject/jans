@@ -1155,7 +1155,7 @@ description: Enrollment code, non-reassignable code
 displayName: Enrollment code
 inum: 5039
 jansAttrEditTyp: admin
-jansAttrName: oxEnrollmentCode
+jansAttrName: jansEnrollmentCode
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
