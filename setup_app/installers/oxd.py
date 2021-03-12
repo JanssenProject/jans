@@ -12,6 +12,7 @@ from setup_app.installers.base import BaseInstaller
 class OxdInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'oxd-server'
         self.oxd_root = '/opt/oxd-server/'
         self.needdb = False # we don't need backend connection in this class
