@@ -49,8 +49,6 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 
 	private transient GluuBoolean[] booleanValues;
 	private transient boolean usedBooleanValues = false;
-	
-    private boolean multiValued;
 
 	public GluuCustomAttribute() {
 	}
@@ -77,12 +75,10 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		this.values = values;
 		this.newAttribute = newAttribute;
 		this.mandatory = mandatory;
-		this.multiValued = true;
 	}
 	public GluuCustomAttribute(String name, String[] values) {
 		this.name = name;
 		this.values = values;
-		this.multiValued = true;
 	}
 
 	// To avoid extra code in CR interceptor script
@@ -112,7 +108,6 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 			this.values = new String[1];
 		}
 		this.values[0] = value;
-		this.multiValued = false;
 	}
 
 	public GluuBoolean getBooleanValue() {
@@ -165,12 +160,10 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
         @XmlTransient
 	public void setValues(String[] values) {
 		this.values = values;
-		this.multiValued = true;
 	}
 
 	public void setValues(Collection<String> values) {
 		this.values = values.toArray(new String[0]);
-		this.multiValued = true;
 	}
 
 	// To avoid extra code in CR interceptor script
@@ -179,7 +172,6 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
         @XmlTransient
 	public void setValues(Set<String> values) {
 		this.values = values.toArray(new String[0]);
-		this.multiValued = true;
 	}
 
 
@@ -236,11 +228,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	}
 	
 	public boolean isMultiValued() {
-		if (this.metadata != null) {
-			return this.metadata.getOxMultiValuedAttribute();
-		}
-
-		return multiValued;
+		return (this.metadata != null) && this.metadata.getOxMultiValuedAttribute();
 	}
 	
 	public void setMultiValued(boolean multiValued) {
