@@ -55,7 +55,7 @@ class IdpExtension(IdpType):
             
             # Start: Custom part
             # Add givenName attribute
-            givenNameAttribute = IdPAttribute("oxEnrollmentCode")
+            givenNameAttribute = IdPAttribute("jansEnrollmentCode")
             givenNameAttribute.setValues(ArrayList(Arrays.asList(StringAttributeValue("Dummy"))))
             principalAttributes.add(IdPAttributePrincipal(givenNameAttribute))
             print "Idp extension. Updated attribute principal: '%s'" % principalAttributes
