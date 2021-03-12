@@ -186,9 +186,7 @@ def print_or_log(msg):
 
 if argsp.t:
     testDataLoader = TestDataLoader()
-    testDataLoader.scimInstaller = scimInstaller
-    testDataLoader.rdbmInstaller = rdbmInstaller
-    testDataLoader.couchbaseInstaller = couchbaseInstaller
+
 
 if argsp.t and argsp.x:
     print_or_log("Loading test data")
@@ -212,8 +210,6 @@ Config.installJansCli = Config.installConfigApi or Config.installScimServer
 
 app_vars = locals().copy()
 
-for app_var in app_vars:
-    setattr(base.current_app, app_var, app_vars[app_var])
 
 if argsp.shell:
     code.interact(local=locals())

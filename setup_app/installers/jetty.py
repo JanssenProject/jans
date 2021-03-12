@@ -18,6 +18,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     jetty_app_configuration = base.readJsonFile(os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json'), ordered=True)
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jetty'
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installJetty'

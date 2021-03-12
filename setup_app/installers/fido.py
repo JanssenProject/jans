@@ -3,6 +3,7 @@ import glob
 import shutil
 
 from setup_app import paths
+from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
@@ -10,6 +11,7 @@ from setup_app.installers.jetty import JettyInstaller
 class FidoInstaller(JettyInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-fido2'
         self.needdb = True
         self.app_type = AppType.SERVICE

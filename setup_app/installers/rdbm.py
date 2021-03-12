@@ -19,6 +19,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     packageUtils = None
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.needdb = False # we will connect later
         self.service_name = 'rdbm-server'
         self.app_type = AppType.APPLICATION
@@ -154,7 +155,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, 'sql_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
-        cb_indexes = base.readJsonFile(base.current_app.couchbaseInstaller.couchbaseIndexJson)
+        cb_indexes = base.readJsonFile(base.current_app.CouchbaseInstaller.couchbaseIndexJson)
 
         cb_fields = []
 
