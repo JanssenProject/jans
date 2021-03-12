@@ -17,6 +17,7 @@ from setup_app.installers.base import BaseInstaller
 class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'couchbase-server'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL

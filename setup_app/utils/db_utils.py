@@ -39,6 +39,8 @@ class DBUtils:
 
     def bind(self, use_ssl=True, force=False):
 
+        setattr(base.current_app, self.__class__.__name__, self)
+
         base.logIt("Bind to database")
 
         if Config.mappingLocations['default'] == 'ldap':
