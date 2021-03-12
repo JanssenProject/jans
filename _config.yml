@@ -8,3 +8,6 @@ buttons:
   - b1:
     text: Helm Chart
     href: /jans-cloud-native/charts/jans
+  - b2:
+    text: Debugging Interception scripts
+    href: /jans-cloud-native/docs/interception-script-debugging.md
