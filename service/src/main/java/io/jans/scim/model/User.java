@@ -26,9 +26,10 @@ public class User extends CustomEntry implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7779582184398161112L;
 
-	@AttributesList(name = "name", value = "values", sortByName = true, attributesConfiguration = {
+	@AttributesList(name = "name", value = "values", sortByName = true, multiValued = "multiValued",
+			attributesConfiguration = {
 			 @AttributeName(name = "inum", ignoreDuringUpdate = true),
-			@AttributeName(name = "uid", ignoreDuringUpdate = false), @AttributeName(name = "userPassword", ignoreDuringRead = true) })
+			 @AttributeName(name = "uid", ignoreDuringUpdate = false), @AttributeName(name = "userPassword", ignoreDuringRead = true) })
 	protected List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
 
 	public List<GluuCustomAttribute> getCustomAttributes() {
