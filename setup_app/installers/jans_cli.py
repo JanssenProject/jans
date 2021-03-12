@@ -15,6 +15,7 @@ from setup_app.installers.base import BaseInstaller
 class JansCliInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-cli'
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installJansCli'

@@ -21,12 +21,8 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class TestDataLoader(BaseInstaller, SetupUtils):
 
-    passportInstaller = None
-    scimInstaller = None
-    rdbmInstaller = None
-    couchbaseInstaller = None
-
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'test-data'
         self.pbar_text = "Loading" 
         self.needdb = True
@@ -78,10 +74,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             print("Test data loader needs internet connection. Giving up ...")
             return
 
-        if not self.scimInstaller.installed():
+        if not base.current_app.ScimInstaller.installed():
             self.logIt("Scim was not installed. Installing")
             Config.installScimServer = True
-            self.scimInstaller.start_installation()
+            base.current_app.ScimInstaller.start_installation()
 
         self.encode_test_passwords()
 
@@ -103,13 +99,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             config_oxauth_test_properties += '#ldap\n' +  rendered_text
 
         if self.getMappingType('couchbase'):
-            couchbaseDict = self.couchbaseInstaller.couchbaseDict()
+            couchbaseDict = base.current_app.CouchbaseInstaller.couchbaseDict()
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-couchbase.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
         if self.getMappingType('rdbm'):
-            self.rdbmInstaller.server_time_zone()
+            base.current_app.RDBMInstaller.server_time_zone()
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-sql.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_oxauth_test_properties += '\n#sql\n' +  rendered_text
@@ -151,7 +147,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
 
-            self.rdbmInstaller.create_tables(jans_schema_json_files)
+            base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             self.dbUtils.rdm_automapper()
 
         self.writeFile(

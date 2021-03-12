@@ -12,6 +12,7 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 class ScimInstaller(JettyInstaller):
 
     def __init__(self):
+        setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-scim'
         self.needdb = True
         self.app_type = AppType.SERVICE
