@@ -1,16 +1,6 @@
 title: 'Janssen Authorization Server'
 remote_theme: benc-uk/theme-msdark
 favicon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
-docs:
-
-- title: Introduction
-  url: /jans-cloud-native/docs/interception-script-debugging.md
-
-- title: Configuration
-  url: configuration.html
-
-- title: Deployment
-  url: deployment.html
 buttons:
   - b0:
     text: Main Docs
@@ -20,4 +10,4 @@ buttons:
     href: /jans-cloud-native/charts/jans
   - b2:
     text: Debugging Interception scripts
-    url: /jans-cloud-native/docs/interception-script-debugging.md
+    url: /jans-cloud-native/docs/
