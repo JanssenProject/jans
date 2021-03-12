@@ -2,6 +2,7 @@
 set -e
 sudo apt-get update
 sudo apt-get install python3-pip -y
+sudo pip3 install pip --upgrade
 sudo pip3 install setuptools --upgrade
 sudo pip3 install pyOpenSSL --upgrade
 sudo apt-get update
