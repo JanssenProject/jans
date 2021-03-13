@@ -38,6 +38,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
     && /opt/jython/bin/pip install --no-cache-dir "pip==19.2" \
+    && /opt/jython/bin/pip install --no-cache-dir "pydevd" \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
 
 # ===========
@@ -147,7 +148,9 @@ ENV CN_PERSISTENCE_TYPE=ldap \
     CN_COUCHBASE_CONN_MAX_WAIT=20000 \
     CN_COUCHBASE_SCAN_CONSISTENCY=not_bounded \
     CN_COUCHBASE_BUCKET_PREFIX=jans \
-    CN_COUCHBASE_TRUSTSTORE_ENABLE=true
+    CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
+    CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
 
 # ===========
 # Generic ENV
