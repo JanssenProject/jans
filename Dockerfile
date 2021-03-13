@@ -14,10 +14,9 @@ RUN apk update \
 # Auth client
 # ===========
 
-# @TODO: get JARs from jans-auth-server
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2020-12-08 09:31'
+ENV CN_BUILD_DATE='2021-03-13 02:55'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -98,6 +97,25 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
     CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+
+# ===============
+# Persistence ENV
+# ===============
+
+ENV CN_PERSISTENCE_TYPE=ldap \
+    CN_PERSISTENCE_LDAP_MAPPING=default \
+    CN_LDAP_URL=localhost:1636 \
+    CN_COUCHBASE_URL=localhost \
+    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
+    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
+    CN_COUCHBASE_CONN_TIMEOUT=10000 \
+    CN_COUCHBASE_CONN_MAX_WAIT=20000 \
+    CN_COUCHBASE_SCAN_CONSISTENCY=not_bounded \
+    CN_COUCHBASE_BUCKET_PREFIX=jans \
+    CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
+    CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
 
 # ===========
 # Generic ENV
