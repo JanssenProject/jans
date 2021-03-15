@@ -87,6 +87,7 @@ public class PersonService implements Serializable {
 			List<GluuCustomPerson> persons = getPersonsByUid(person.getUid());
 			if (persons == null || persons.size() == 0) {
 				person.setCreationDate(new Date());
+				attributeService.applyMetaData(person.getCustomAttributes());
 				persistenceEntryManager.persist(person);
 			} else {
 				throw new DuplicateEntryException("Duplicate UID value: " + person.getUid());
@@ -109,6 +110,7 @@ public class PersonService implements Serializable {
 				person.setAttribute("jansMetaLastMod",
 						ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
 			}
+			attributeService.applyMetaData(person.getCustomAttributes());
 			persistenceEntryManager.merge(person);
 		} catch (Exception e) {
 			if (e.getCause().getMessage().contains("unique attribute conflict was detected for attribute mail")) {
