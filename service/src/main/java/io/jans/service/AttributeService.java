@@ -8,18 +8,22 @@ package io.jans.service;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
+import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
 import io.jans.model.GluuAttribute;
 import io.jans.model.SchemaEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.OxConstants;
-import org.slf4j.Logger;
-
-import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
+import io.jans.util.StringHelper;
 
 /**
  * Provides operations with attributes
@@ -129,6 +133,36 @@ public abstract class AttributeService implements Serializable {
 
         return attributeList;
     }
+
+    public Map<String, GluuAttribute> getAllAttributesMap() {
+        return getAllAttributesMap(getDnForAttribute(null));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, GluuAttribute> getAllAttributesMap(String baseDn) {
+    	BaseCacheService usedCacheService = getCacheService();
+
+    	Map<String, GluuAttribute> attributeMap = (Map<String, GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
+                OxConstants.CACHE_ATTRIBUTE_KEY_MAP);
+        if (attributeMap == null) {
+        	attributeMap = getAllAttributesMapImpl(baseDn);
+
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_MAP, attributeMap);
+        }
+
+        return attributeMap;
+    }
+
+	private Map<String, GluuAttribute> getAllAttributesMapImpl(String baseDn) {
+		List<GluuAttribute> attributeList = getAllAttributes(baseDn);
+
+		Map<String, GluuAttribute> attributeMap = new HashMap<>();
+		for (GluuAttribute attribute : attributeList) {
+			attributeMap.put(StringHelper.toLowerCase(attribute.getName()), attribute);
+		}
+
+		return attributeMap;
+	}
 
     protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
         List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, null);
