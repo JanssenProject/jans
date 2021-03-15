@@ -374,6 +374,7 @@ public class RegisterRequest extends BaseRequest {
      * @return A list of grant types.
      */
     public List<GrantType> getGrantTypes() {
+        if (grantTypes == null) grantTypes = new ArrayList<>();
         return grantTypes;
     }
 
