@@ -1,10 +1,11 @@
-import contextlib
+import itertools
 import json
 import logging.config
 import os
 import re
 from collections import OrderedDict
 from collections import defaultdict
+from string import Template
 
 from ldap3.utils import dn as dnutils
 from ldif3 import LDIFParser
@@ -58,8 +59,13 @@ class SQLBackend:
         with open("/app/static/sql/sql_index.json") as f:
             self.sql_indexes = json.loads(f.read())
 
-        # cached schemas that holds JSON columns
-        self.json_columns = defaultdict(list)
+        with open("/app/static/couchbase/index.json") as f:
+            prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            txt = f.read().replace("!bucket_prefix!", prefix)
+            self.cb_indexes = json.loads(txt)
+
+        # cached schemas that holds table's column and its type
+        self.table_columns = defaultdict(dict)
 
     def get_attr_syntax(self, attr):
         for attr_type in self.attr_types:
@@ -72,34 +78,55 @@ class SQLBackend:
         # fallback to OpenDJ attribute type
         return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
 
-    def get_data_type(self, attr):
-        if attr in self.sql_data_types:
-            type_ = self.sql_data_types[attr]
+    def get_data_type(self, attr, table=None):
+        # check from SQL data types first
+        type_def = self.sql_data_types.get(attr)
 
-            if type_[self.db_dialect]["type"] == "VARCHAR":
-                if type_[self.db_dialect]["size"] <= 127:
-                    data_type = f"VARCHAR({type_[self.db_dialect]['size']})"
-                elif type_[self.db_dialect]["size"] <= 255:
-                    data_type = "TINYTEXT"
-                else:
-                    data_type = "TEXT"
-            else:
-                data_type = type_[self.db_dialect]["type"]
+        if type_def:
+            type_ = type_def[self.db_dialect]
 
+            if table in type_.get("tables", {}):
+                type_ = type_["tables"][table]
+
+            data_type = type_["type"]
+            if "size" in type_:
+                data_type = f"{data_type}({type_['size']})"
+            return data_type
+
+        # data type is undefined, hence check from syntax
+        syntax = self.get_attr_syntax(attr)
+        type_ = self.sql_data_types_mapping[syntax][self.db_dialect]
+
+        if type_["type"] != "VARCHAR":
+            return type_["type"]
+
+        if type_["size"] <= 127:
+            data_type = f"VARCHAR({type_['size']})"
+        elif type_["size"] <= 255:
+            data_type = "TINYTEXT"
         else:
-            syntax = self.get_attr_syntax(attr)
-            type_ = self.sql_data_types_mapping.get(syntax)
-
-            if type_[self.db_dialect]["type"] == "VARCHAR":
-                data_type = f"VARCHAR({type_[self.db_dialect]['size']})"
-            else:
-                data_type = type_[self.db_dialect]["type"]
+            data_type = "TEXT"
         return data_type
 
-    def create_tables(self, conn):
-        logger.info("Creating tables (if not exist)")
+    def _exec_query(self, conn, query, **prepared_data):
+        result = None
+        try:
+            result = conn.execute(text(query), **prepared_data)
+        except (OperationalError, IntegrityError) as exc:
+            if exc.orig.args[0] in (1050, 1060, 1061, 1062):
+                # error with following code will be suppressed
+                # - 1050: table exists
+                # - 1060: column exists
+                # - 1061: duplicate key name (index)
+                # - 1062: duplicate entry
+                pass
+            else:
+                logger.warning(f"Failed to execute query; reason={exc.orig.args}")
+        return result
 
+    def create_tables(self, conn):
         schemas = {}
+        attrs = {}
 
         for fn in self.schema_files:
             with open(fn) as f:
@@ -108,75 +135,126 @@ class SQLBackend:
             for oc in schema["objectClasses"]:
                 schemas[oc["names"][0]] = oc
 
+            for attr in schema["attributeTypes"]:
+                attrs[attr["names"][0]] = attr
+
         for table, oc in schemas.items():
             if oc.get("sql", {}).get("ignore"):
                 continue
 
-            table_cols = []
-
+            # ``oc["may"]`` contains list of attributes
             if "sql" in oc:
                 oc["may"] += oc["sql"].get("include", [])
 
                 for inc_oc in oc["sql"].get("includeObjectClass", []):
                     oc["may"] += schemas[inc_oc]["may"]
 
+            table_cols = []
+
+            # make sure ``oc["may"]`` doesn't have duplicate attribute
             for attr in set(oc["may"]):
-                data_type = self.get_data_type(attr)
+                data_type = self.get_data_type(attr, table)
                 col_def = f"{attr} {data_type}"
                 table_cols.append(col_def)
 
-                if data_type.lower() == "json":
-                    self.json_columns[table].append(attr)
+                # if data_type.lower() == "json":
+                #     self.json_columns[table].add(attr)
+                self.table_columns[table].update({attr: data_type})
 
-            sql_cmd = (
-                f"CREATE TABLE {table} ("
-                "id INT NOT NULL auto_increment, "
-                "doc_id VARCHAR(48) NOT NULL UNIQUE, "
-                "objectClass VARCHAR(48), "
-                "dn VARCHAR(128), "
-                f"{', '.join(table_cols)}, "
-                "PRIMARY KEY (id, doc_id)"
-                ");"
-            )
+            # if self.table_exists(conn, table):
+            #     # TODO: do we need to check existing table?
+            #     table_cols_fmt = ", ".join([f"ADD COLUMN {col}" for col in table_cols])
+            #     sql_cmd = f"ALTER TABLE {table} {table_cols_fmt};"
+            # else:
+            doc_id_type = self.get_data_type("doc_id", table)
+            mandatory_cols = [
+                "id INT NOT NULL auto_increment",
+                f"doc_id {doc_id_type} NOT NULL UNIQUE",
+                "objectClass VARCHAR(48)",
+                "dn VARCHAR(128)",
+            ]
+            pk_cols = ["PRIMARY KEY (id, doc_id)"]
+            table_cols = mandatory_cols + table_cols + pk_cols
+            table_cols_fmt = ", ".join(table_cols)
+            sql_cmd = f"CREATE TABLE {table} ({table_cols_fmt});"
 
-            try:
-                conn.execute(sql_cmd)
-                # self.tables.append(table)
-            except OperationalError as exc:
-                # the following code should be ignored
-                # - 1050: table exists
-                if exc.orig.args[0] in (1050,):
-                    continue
-                logger.warning(f"Failed to execute query; reason={exc.orig.args}")
+            self.table_columns[table].update({
+                "id": "INT",
+                "doc_id": doc_id_type,
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
+            })
+
+            self._exec_query(conn, sql_cmd)
+
+        # for name, attr in attrs.items():
+        #     table = attr.get("sql", {}).get("add_table")
+        #     logger.info(name)
+        #     logger.info(table)
+        #     if not table:
+        #         continue
+
+        #     data_type = self.get_data_type(name, table)
+        #     col_def = f"{attr} {data_type}"
+
+        #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
+        #     logger.info(sql_cmd)
 
     def create_indexes(self, conn):
         logger.info("Creating table indexes (if not exist)")
 
-        for table in self.sql_indexes[self.db_dialect]:
-            for field in self.sql_indexes[self.db_dialect][table]["fields"]:
-                field_sub = FIELD_RE.sub("_", field)
-                sql_cmd = f"ALTER TABLE {self.db_name}.{table} ADD INDEX `{table}_{field_sub}` (`{field}`);"
+        cb_fields = []
 
-                try:
-                    conn.execute(sql_cmd)
-                except OperationalError as exc:
-                    # the following code should be ignored
-                    # - 1061: duplicate key name
-                    if exc.orig.args[0] in (1061,):
-                        continue
-                    logger.warning(f"Failed to execute query; reason={exc.orig.args}")
+        for _, data in self.cb_indexes.items():
+            # extract and flatten
+            attrs = list(itertools.chain.from_iterable(data["attributes"]))
+            cb_fields += attrs
 
-            for i, custom in enumerate(self.sql_indexes[self.db_dialect][table]["custom"]):
-                sql_cmd = f"ALTER TABLE {self.db_name}.{table} ADD INDEX `{table}_{i}`(({custom}));"
+            for static in data["static"]:
+                attrs = [
+                    attr for attr in static[0]
+                    if "(" not in attr
+                ]
+                cb_fields += attrs
 
-                try:
-                    conn.execute(sql_cmd)
-                except OperationalError as exc:
-                    # the following code should be ignored
-                    # - 1061: duplicate key name
-                    if exc.orig.args[0] in (1061,):
-                        continue
-                    logger.warning(f"Failed to execute query; reason={exc.orig.args}")
+        # make unique fields
+        cb_fields = list(set(cb_fields))
+
+        for table, data in self.sql_indexes[self.db_dialect].items():
+            fields = data["fields"] + self.sql_indexes["__common__"]["fields"] + cb_fields
+
+            index_cols = []
+            for col, type_ in self.table_columns[table].items():
+                if col in ("doc_id", "id",):
+                    continue
+
+                if col in fields:
+                    index_name = FIELD_RE.sub("_", col)
+
+                    if type_.lower() == "json":
+                        # FIXME: CAST-ing data to JSON Array may not be supported by mysql version
+                        for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
+                            index_str_fmt = Template(index_str).safe_substitute({
+                                "field": col, "data_type": type_,
+                            })
+                            index_cols.append(f"{index_name}_json_{i} (({index_str_fmt}))")
+
+                    else:
+                        index_cols.append(f"{table}_{index_name} ({col})")
+
+            index_cols_fmt = ", ".join([f"ADD INDEX {col}" for col in index_cols])
+            sql_cmd = f"ALTER TABLE {self.db_name}.{table} {index_cols_fmt};"
+
+            self._exec_query(conn, sql_cmd)
+
+            index_cols = [
+                f"`{table}_{i}`(({custom}))"
+                for i, custom in enumerate(data["custom"])
+            ]
+            index_cols_fmt = ", ".join([f"ADD INDEX {col}" for col in index_cols])
+
+            sql_cmd = f"ALTER TABLE {self.db_name}.{table} {index_cols_fmt};"
+            self._exec_query(conn, sql_cmd)
 
     def import_ldif(self, conn):
         ldif_mappings = get_ldif_mappings()
@@ -184,8 +262,6 @@ class SQLBackend:
         ctx = prepare_template_ctx(self.manager)
 
         for _, files in ldif_mappings.items():
-            # self.check_indexes(mapping)
-
             for file_ in files:
                 logger.info(f"Importing {file_} file")
                 src = f"/app/templates/{file_}"
@@ -194,17 +270,8 @@ class SQLBackend:
 
                 render_ldif(src, dst, ctx)
 
-                # query_file = f"{dst}.sql"
-                # with open(query_file, "a+"):
                 for sql_cmd, data in self.ldif_to_sql(dst):
-                    try:
-                        conn.execute(text(sql_cmd), **data)
-                    except IntegrityError as exc:
-                        # the following code should be ignored
-                        # - 1061: duplicate key name
-                        if exc.orig.args[0] in (1062,):
-                            continue
-                        logger.warning(f"Failed to execute query; reason={exc.orig.args}")
+                    self._exec_query(conn, sql_cmd, **data)
 
     def initialize(self):
         def is_initialized():
@@ -233,7 +300,9 @@ class SQLBackend:
             return
 
         with self.client.engine.connect() as conn:
+            logger.info("Creating tables (if not exist)")
             self.create_tables(conn)
+
             self.create_indexes(conn)
             self.import_ldif(conn)
 
@@ -265,10 +334,7 @@ class SQLBackend:
         return values[0]
 
     def ldif_to_sql(self, filename):
-        with contextlib.ExitStack() as stack:
-            # will be automatically closed when exiting ``with`` block
-            fd = stack.enter_context(open(filename, "rb"))
-
+        with open(filename, "rb") as fd:
             parser = LDIFParser(fd)
 
             for dn, entry in parser.parse():
@@ -305,11 +371,19 @@ class SQLBackend:
 
                 # populate existing JSON columns with default if value
                 # is not defined from ldif
-                for json_col in self.json_columns.get(table, []):
-                    if json_col not in attr_mapping:
-                        attr_mapping[json_col] = json.dumps({"v": []})
+                for col, type_ in self.table_columns.get(table, {}).items():
+                    if not all([col not in attr_mapping, type_.lower() == "json"]):
+                        continue
+                    attr_mapping[col] = json.dumps({"v": []})
 
                 columns = ", ".join(attr_mapping.keys())
                 params = ", ".join(f":{column}" for column in attr_mapping.keys())
                 sql_cmd = f"INSERT INTO {table} ({columns}) VALUES ({params});"
                 yield sql_cmd, attr_mapping
+
+    def table_exists(self, conn, table):
+        result = conn.execute(
+            text("SELECT COUNT(*) FROM information_schema.tables WHERE TABLE_NAME = :table"),
+            **{"table": table}
+        )
+        return as_boolean(result.fetchone()[0])

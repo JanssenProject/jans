@@ -1,10 +1,4 @@
 {
-  "attr": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    }
-  },
   "dat": {
     "mysql": {
       "type": "TEXT"
@@ -28,12 +22,6 @@
     }
   },
   "inum": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
-  "member": {
     "mysql": {
       "size": 64,
       "type": "VARCHAR"
@@ -83,7 +71,7 @@
   },
   "userPassword": {
     "mysql": {
-      "size": 64,
+      "size": 100,
       "type": "VARCHAR"
     }
   },
@@ -134,12 +122,6 @@
     }
   },
   "jansClaimName": {
-    "mysql": {
-      "size": 64,
-      "type": "VARCHAR"
-    }
-  },
-  "jansClaimRedirectURI": {
     "mysql": {
       "size": 64,
       "type": "VARCHAR"
@@ -416,7 +398,7 @@
   },
   "scp": {
     "mysql": {
-      "type": "TINYTEXT"
+      "type": "TEXT"
     }
   },
   "tknBndCnf": {
@@ -469,10 +451,39 @@
   },
   "tknCde": {
     "mysql": {
-      "type": "TINYTEXT"
+      "size": 80,
+      "type": "VARCHAR"
     }
   },
   "jansUmaPermission": {
+    "mysql": {
+      "type": "JSON"
+    }
+  },
+  "jansScrError": {
+    "mysql": {
+      "type": "TEXT"
+    }
+  },
+  "doc_id": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR",
+      "tables": {"jansClntAuthz": {"size": 100, "type": "VARCHAR"}}
+    }
+  },
+  "jansMetaLocation": {
+    "mysql": {
+      "type": "TINYTEXT"
+    }
+  },
+  "jansUsrDN": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    }
+  },
+  "scimCustomSecond": {
     "mysql": {
       "type": "JSON"
     }

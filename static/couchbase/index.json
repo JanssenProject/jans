@@ -7,12 +7,12 @@
       ["del","exp"], 
       ["uid"], 
       ["mail"], 
-      ["oxStatus"], 
-      ["oxApplication"], 
-      ["oxDeviceHashCode"], 
-      ["oxDeviceKeyHandle"],
-      ["oxAuthClientId"],
-      ["oxAuthUserId"]
+      ["jansStatus"], 
+      ["jansApp"], 
+      ["jansDeviceHashCode"], 
+      ["jansDeviceKeyHandle"],
+      ["jansClntId"],
+      ["jansUsrId"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"jansPerson\""], 
@@ -24,33 +24,33 @@
   "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
-      ["oxScriptType"], 
+      ["jansScrTyp"], 
       ["iat"], 
-      ["oxAuthClientSecretExpiresAt"], 
+      ["jansClntSecretExpAt"], 
       ["creationDate"], 
       ["tknCde"], 
       ["inum"], 
       ["displayName"], 
-      ["oxAuthRegistrationAccessToken"], 
-      ["oxAuthUmaScope"], 
+      ["jansRegistrationAccessTkn"], 
+      ["jansUmaScope"], 
       ["mail"], 
-      ["oxId"], 
-      ["oxTicket"], 
+      ["jansId"], 
+      ["jansTicket"], 
       ["del"],
       ["ssnId"],
-      ["oxAuthClientId"],
+      ["jansClntId"],
       ["clnId"],
-      ["oxAuthUserDN"],
-      ["oxState"],
+      ["jansUsrDN"],
+      ["jansState"],
       ["del","exp"],
-      ["objectClass","creationDate","oxStatus"]
+      ["objectClass","creationDate","jansStatus"]
     ],
     "static" : [
-      [["creationDate"], "objectClass = \"jansPasswordResetRequest\""],
-      [["oxScriptType"], "objectClass = \"oxCustomScript\""],
-      [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
+      [["creationDate"], "objectClass = \"jansPassResetReq\""],
+      [["jansScrTyp"], "objectClass = \"jansScr\""],
+      [["jansAppTyp", "jansMetricTyp", "jansStartDate", "jansEndDate"], "objectClass = \"jansMetric\""],
       [["exp"], "del=true"],
-      [["oxStatus", "exp"], "objectClass = \"cibaRequest\""]
+      [["jansStatus", "exp"], "objectClass = \"jansCibaReq\""]
         
     ]
   },
@@ -67,7 +67,7 @@
   "!bucket_prefix!_statistic": {
     "attributes": [
       ["objectClass"], 
-      ["oxStartDate"], 
+      ["jansStartDate"], 
       ["del"], 
       ["exp"]
     ],
@@ -87,14 +87,14 @@
       ["authzCode"]
     ],
     "static" : [
-        [["grtId"], "objectClass = \"token\""],
-        [["ssnId"], "objectClass = \"token\""]
+        [["grtId"], "objectClass = \"jansToken\""],
+        [["ssnId"], "objectClass = \"jansToken\""]
     ]
   },
 
   "!bucket_prefix!_session": {
     "attributes": [
-      ["oxAuthUserDN"]
+      ["jansUsrDN"]
     ],
     "static" : [
         [["sid"], "objectClass = \"jansSessId\""],

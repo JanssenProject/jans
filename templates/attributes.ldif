@@ -2,6 +2,7 @@ dn: inum=29DA,ou=attributes,o=jans
 description: XRI i-number, persistent non-reassignable identifier
 displayName: Inum
 inum: 29DA
+jansAttrEditTyp: admin
 jansAttrName: inum
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
@@ -1154,7 +1155,7 @@ description: Enrollment code, non-reassignable code
 displayName: Enrollment code
 inum: 5039
 jansAttrEditTyp: admin
-jansAttrName: oxEnrollmentCode
+jansAttrName: jansEnrollmentCode
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
@@ -1254,3 +1255,4 @@ jansStatus: active
 objectClass: top
 objectClass: jansAttr
 urn: urn:mace:dir:attribute-def:jansBackchannelUsrCode
+
