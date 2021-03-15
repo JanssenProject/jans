@@ -41,7 +41,7 @@ setup(
         "cryptography>=2.8",
         "google-cloud-secret-manager>=2.2.0",
         "pymysql>=1.0.2",
-        "sqlalchemy>=1.3.23",
+        "sqlalchemy>=1.3,<1.4",
     ],
     classifiers=[
         "Intended Audience :: Developers",
