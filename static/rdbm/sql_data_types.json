@@ -259,6 +259,9 @@
   "jansValidation": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "member": {
@@ -291,6 +294,9 @@
   "jansDeviceData": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "picture": {
@@ -302,46 +308,73 @@
   "jansInitiateLoginURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansJwksURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansLogoURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansPolicyURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansReqURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansSectorIdentifierURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansClntURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansTosURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansClaimRedirectURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansJwt": {
@@ -394,6 +427,9 @@
   "nnc": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "scp": {
@@ -404,6 +440,9 @@
   "tknBndCnf": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "tknTyp": {
@@ -421,6 +460,9 @@
   "jansLogoutURI": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansJwks": {
@@ -475,6 +517,9 @@
   "jansMetaLocation": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
     }
   },
   "jansUsrDN": {

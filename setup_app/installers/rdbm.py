@@ -50,22 +50,31 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         if Config.rdbm_install_type == InstallTypes.LOCAL:
 
-            result, conn = self.dbUtils.mysqlconnection(log=False)
-            if not result:
-                sql_cmd_list = [
-                    "CREATE DATABASE {};\n".format(Config.rdbm_db),
-                    "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}';\n".format(Config.rdbm_user, Config.rdbm_password),
-                    "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost';\n".format(Config.rdbm_db, Config.rdbm_user),
-                    ]
-                for cmd in sql_cmd_list:
-                    self.run("echo \"{}\" | mysql".format(cmd), shell=True)
+            if Config.rdbm_type == 'mysql':
+                result, conn = self.dbUtils.mysqlconnection(log=False)
+                if not result:
+                    sql_cmd_list = [
+                        "CREATE DATABASE {};\n".format(Config.rdbm_db),
+                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}';\n".format(Config.rdbm_user, Config.rdbm_password),
+                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost';\n".format(Config.rdbm_db, Config.rdbm_user),
+                        ]
+                    for cmd in sql_cmd_list:
+                        self.run("echo \"{}\" | mysql".format(cmd), shell=True)
+        
+            elif Config.rdbm_type == 'pgsql':
+                cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
+                cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
+                cmd_grant_previlages = '''su - postgres -c "psql -U postgres -d postgres -c \\"GRANT ALL PRIVILEGES ON DATABASE {} TO {};\\""'''.format(Config.rdbm_db, Config.rdbm_user)
+
+                for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
+                    self.run(cmd, shell=True)
 
         self.dbUtils.bind()
 
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
-            type_ = self.dbUtils.sql_data_types[attrname][Config.rdbm_type]
+            type_ = self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
@@ -74,13 +83,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 data_type = type_['type']
         else:
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
-            type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax][Config.rdbm_type]
+            type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
             
             if type_['type'] == 'VARCHAR':
                 if type_['size'] <= 127:
                     data_type = 'VARCHAR({})'.format(type_['size'])
                 elif type_['size'] <= 255:
-                    data_type = 'TINYTEXT'
+                    data_type = 'TINYTEXT' if Config.rdbm_type == 'mysql' else 'TEXT'
                 else:
                     data_type = 'TEXT'
             else:
@@ -89,11 +98,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return data_type
 
     def create_tables(self, jans_schema_files):
-
+        qchar = '`' if Config.rdbm_type == 'mysql' else '"'
         tables = []
         all_schema = {}
         all_attribs = {}
-        alter_table_sql_cmd = 'ALTER TABLE `{}` ADD {};'
+        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD {};' % (qchar, qchar)
 
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
@@ -124,7 +133,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 cols_.append(attrname)
                 data_type = self.get_sql_col_type(attrname, sql_tbl_name)
-                col_def = '`{}` {}'.format(attrname, data_type)
+                
+                col_def = '{0}{1}{0} {2}'.format(qchar, attrname, data_type)
                 sql_tbl_cols.append(col_def)
 
             if self.dbUtils.table_exists(sql_tbl_name):
@@ -134,7 +144,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     tables.append(sql_cmd)
             else:
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
-                sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                if Config.rdbm_type == 'pgsql':
+                    sql_cmd = 'CREATE TABLE "{}" (id SERIAL, doc_id {} NOT NULL UNIQUE, objectClass VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (id, doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                else:
+                    sql_cmd = 'CREATE TABLE `{}` (`id` int NOT NULL auto_increment, `doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
@@ -142,7 +155,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
                 data_type = self.get_sql_col_type(attrname, sql_tbl_name)
-                col_def = '`{}` {}'.format(attrname, data_type)
+                col_def = '{0}{1}{0} {2}'.format(qchar, attrname, data_type)
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
@@ -150,6 +163,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
 
     def create_indexes(self):
+
         indexes = []
 
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, 'sql_index.json')
@@ -177,42 +191,65 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         for tblCls in self.dbUtils.Base.classes.keys():
             tblObj = self.dbUtils.Base.classes[tblCls]()
-            tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields'] + cb_fields
-            
+            tbl_fields = sql_indexes[Config.rdbm_type].get(tblCls, {}).get('fields', []) +  sql_indexes[Config.rdbm_type]['__common__']['fields'] + cb_fields
+
             for attr in tblObj.__table__.columns:
                 if attr.name == 'doc_id':
                     continue
                 ind_name = re.sub(r'[^0-9a-zA-Z\s]+','_', attr.name)
                 data_type = self.get_sql_col_type(attr, tblCls)
                 data_type = data_type.replace('VARCHAR', 'CHAR')
-                if isinstance(attr.type, sqlalchemy.dialects.mysql.json.JSON):
+
+                if isinstance(attr.type, self.dbUtils.json_dialects_instance):
+
                     if attr.name in tbl_fields:
-                        for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                        for i, ind_str in enumerate(sql_indexes[Config.rdbm_type]['__common__']['JSON']):
                             tmp_str = Template(ind_str)
-                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
+                            if Config.rdbm_type == 'mysql':
+                                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
                                         Config.rdbm_db,
                                         tblCls,
                                         ind_name,
                                         i+1,
                                         tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
                                         )
+                            elif Config.rdbm_type == 'pgsql':
+                                sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
+                                        tblCls,
+                                        tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                        )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
+
                 elif attr.name in tbl_fields:
-                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
-                                Config.rdbm_db,
-                                tblCls,
-                                ind_name,
-                                attr.name
+                    if Config.rdbm_type == 'mysql':
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
+                                    Config.rdbm_db,
+                                    tblCls,
+                                    ind_name,
+                                    attr.name
                                 )
+                    elif Config.rdbm_type == 'pgsql':
+                        sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
+                                    tblCls,
+                                    attr.name
+                                )
+
                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
-            for i, custom_index in enumerate(sql_indexes['mysql'].get(tblCls, {}).get('custom', [])):
-                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
-                                Config.rdbm_db,
+            for i, custom_index in enumerate(sql_indexes[Config.rdbm_type]['__common__'].get(tblCls, {}).get('custom', [])):
+                if Config.rdbm_type == 'mysql':
+                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
+                                    Config.rdbm_db,
+                                    tblCls,
+                                    'custom_{}'.format(i+1),
+                                    custom_index
+                                )
+                elif Config.rdbm_type == 'pgsql':
+                    sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
                                 tblCls,
-                                'custom_{}'.format(i+1),
                                 custom_index
                                 )
+
                 self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def import_ldif(self):
@@ -234,7 +271,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
         if not Config.ldif_base in ldif_files:
-            self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.MYSQL)
+            if Config.rdbm_type == 'mysql':
+                force = BackendTypes.MYSQL
+            elif Config.rdbm_type == 'pgsql':
+                force = BackendTypes.PGSQL
+            self.dbUtils.import_ldif([Config.ldif_base], force=force)
 
         self.dbUtils.import_ldif(ldif_files)
 

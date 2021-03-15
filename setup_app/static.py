@@ -18,6 +18,7 @@ class BackendTypes:
     LDAP      = 1
     COUCHBASE = 2
     MYSQL     = 3
+    PGSQL     = 4
 
 class AppType:
     APPLICATION = 1
