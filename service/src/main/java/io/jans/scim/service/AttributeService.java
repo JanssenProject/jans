@@ -8,14 +8,16 @@ package io.jans.scim.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
-import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.GluuAttribute;
+import io.jans.scim.model.GluuCustomAttribute;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.service.cdi.event.Events;
 import io.jans.service.BaseCacheService;
 import io.jans.util.StringHelper;
@@ -93,6 +95,22 @@ public class AttributeService extends io.jans.service.AttributeService {
 	@Override
 	protected BaseCacheService getCacheService() {
 		return cacheService;
+	}
+
+	public void applyMetaData(List<GluuCustomAttribute> customAttributes) {
+		if ((customAttributes == null) || (customAttributes.size() == 0)) {
+			return;
+		}
+		
+		Map<String, GluuAttribute> allAttributesMap = getAllAttributesMap();
+		for (GluuCustomAttribute customAttribute : customAttributes) {
+			String attributeName = StringHelper.toLowerCase(customAttribute.getName());
+			
+			GluuAttribute attribute = allAttributesMap.get(attributeName);
+			if (attribute != null) {
+				customAttribute.setMetadata(attribute);
+			}
+		}
 	}
 
 }
