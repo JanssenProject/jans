@@ -97,7 +97,7 @@ public class GluuAttribute extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String urn;
 
-	@AttributeName(name = "jansSCIMCustomAttr")
+	@AttributeName(name = "jansScimCustomAttr")
 	private Boolean scimCustomAttr;
 
 	@AttributeName(name = "jansMultivaluedAttr")
