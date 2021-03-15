@@ -49,6 +49,10 @@ def get_setup_options():
 
         if base.argsp.rdbm_port:
             setupOptions['rdbm_port'] = base.argsp.rdbm_port
+        else:
+            if setupOptions['rdbm_type'] == 'pgsql':
+                setupOptions['rdbm_port'] = 5432
+
         if base.argsp.rdbm_db:
             setupOptions['rdbm_db'] = base.argsp.rdbm_db
         if base.argsp.rdbm_user:
