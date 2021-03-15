@@ -64,6 +64,7 @@ public class UserPersistenceHelper {
     public void addPerson(ScimCustomPerson person) throws Exception {
         //It is guaranteed that no duplicate UID occurs when this method is called
         person.setCreationDate(new Date());
+        attributeService.applyMultiValued(person.getTypedCustomAttributes());
         persistenceEntryManager.persist(person);
     }
 
