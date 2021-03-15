@@ -7,20 +7,32 @@
         "lower(`uid`)",
         "lower(`mail`)"
       ]
+    },  
+    "__common__": {
+      "JSON": [
+        "CAST($field->'$.v' AS $data_type ARRAY)",
+        "CAST($field->'$.v[0]' AS $data_type)",
+         "CAST($field->'$.v[1]' AS $data_type)",
+        "CAST($field->'$.v[2]' AS $data_type)"
+      ],
+      "fields": [
+        "uid",
+        "dn",
+        "objectClass"
+      ]
     }
   },
-  "__common__": {
-    "JSON": [
-      "CAST($field->'$.v' AS $data_type ARRAY)",
-      "CAST($field->'$.v[0]' AS $data_type)",
-      "CAST($field->'$.v[1]' AS $data_type)",
-      "CAST($field->'$.v[2]' AS $data_type)"
-    ],
-    "fields": [
-      "uid",
-      "dn",
-      "objectClass"
-    ]
+
+  "pgsql": {
+    "__common__": {
+      "JSON": [
+      ],
+      "fields": [
+        "uid",
+        "dn",
+        "objectClass"
+      ]
+    }
   }
 }
 

@@ -49,6 +49,8 @@ class DBUtils:
             self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
+            elif Config.rdbm_type == 'pgsql':
+                self.moddb = BackendTypes.PGSQL
         else:
             self.moddb = BackendTypes.COUCHBASE
 
@@ -70,7 +72,7 @@ class DBUtils:
         if not self.session or force:
             for group in Config.mappingLocations:
                 if Config.mappingLocations[group] == 'rdbm':
-                    if Config.rdbm_type == 'mysql':
+                    if Config.rdbm_type in ('mysql', 'pgsql'):
                         base.logIt("Making MySql Conncetion")
                         result = self.mysqlconnection()
                         if not result[0]:
@@ -81,16 +83,24 @@ class DBUtils:
         self.default_bucket = Config.couchbase_bucket_prefix
 
 
-    def mysqlconnection(self, log=True):
-        base.logIt("Making MySQL Connection to {}:{}/{} with user {}".format(Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
+    def sqlconnection(self, log=True):
+        base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
 
-        bind_uri = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4'.format(
+        
+
+        db_str = 'mysql+pymysql' if Config.rdbm_type == 'mysql' else 'postgresql+psycopg2'
+
+        bind_uri = '{}://{}:{}@{}:{}/{}'.format(
+                        db_str,
                         Config.rdbm_user,
                         Config.rdbm_password,
                         Config.rdbm_host,
                         Config.rdbm_port,
                         Config.rdbm_db,
                 )
+                
+        if Config.rdbm_type == 'mysql':
+            bind_uri += '?charset=utf8mb4'
 
         try:
             self.engine = sqlalchemy.create_engine(bind_uri)
@@ -100,13 +110,17 @@ class DBUtils:
             self.session = Session()
             self.metadata = sqlalchemy.MetaData()
             self.session.connection()
-            base.logIt("MySQL Connection was successful")
+            base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
+            self.json_dialects_instance =  sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
             return True, self.session
 
         except Exception as e:
             if log:
-                base.logIt("Can't connect to MySQL server: {}".format(str(e), True))
+                base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e), True))
             return False, e
+
+    def mysqlconnection(self, log=True):
+        return self.sqlconnection(log)
 
     def read_jans_schema(self, others=[]):
         self.jans_attributes = []
@@ -123,7 +137,7 @@ class DBUtils:
 
     def exec_rdbm_query(self, query, getresult=False):
         base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))
-        if Config.rdbm_type == 'mysql':
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             try:
                 qresult = self.session.execute(query)
                 self.session.commit()
@@ -152,7 +166,7 @@ class DBUtils:
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
 
-        elif self.moddb == BackendTypes.MYSQL:
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
             dn = result['dn'] 
             oxAuthConfDynamic = json.loads(result['jansConfDyn'])
@@ -271,6 +285,7 @@ class DBUtils:
 
 
     def dn_exists_rdbm(self, dn, table):
+        base.logIt("Checking dn {} exists in table {}".format(dn, table))
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
@@ -290,7 +305,7 @@ class DBUtils:
                     documents.append((key, document))
                 return documents
 
-        if backend_location == BackendTypes.MYSQL:
+        if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             if self.Base is None:
                 self.rdm_automapper()
 
@@ -544,7 +559,7 @@ class DBUtils:
             attr_syntax = self.get_attr_syntax(key)
             data_type = self.ldap_sql_data_type_mapping[attr_syntax]
     
-        data_type = data_type[Config.rdbm_type]['type']
+        data_type = (data_type.get(Config.rdbm_type) or data_type['mysql'])['type']
 
         return data_type
 
@@ -605,7 +620,7 @@ class DBUtils:
                         ldap_operation_result = self.ldap_conn.add(dn, attributes=entry)
                         self.log_ldap_result(ldap_operation_result)
 
-                elif backend_location == BackendTypes.MYSQL:
+                elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
                     if self.Base is None:
                         self.rdm_automapper()
 
@@ -615,7 +630,7 @@ class DBUtils:
                         sqlalchObj = self.get_sqlalchObj_for_dn(dn)
 
                         if sqlalchObj:
-                            if isinstance(sqlalchObj.__table__.columns[attribute].type, sqlalchemy.dialects.mysql.json.JSON):
+                            if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                                 cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                                 for val_ in new_val:
                                     cur_val['v'].append(val_)
@@ -676,7 +691,7 @@ class DBUtils:
                         sqlalchCls = self.Base.classes[table_name]
 
                         for col in sqlalchCls.__table__.columns:
-                            if isinstance(col.type, sqlalchemy.dialects.mysql.json.JSON) and not col.name in vals:
+                            if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
                                 vals[col.name] = {'v': []}
 
                         sqlalchObj = sqlalchCls()
@@ -779,6 +794,8 @@ class DBUtils:
         if Config.mappingLocations[group] == 'rdbm':
             if Config.rdbm_type == 'mysql':
                 return static.BackendTypes.MYSQL
+            elif Config.rdbm_type == 'pgsql':
+                return static.BackendTypes.PGSQL
         
         if Config.mappingLocations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
