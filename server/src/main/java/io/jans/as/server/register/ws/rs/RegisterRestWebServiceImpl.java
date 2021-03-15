@@ -36,6 +36,9 @@ import io.jans.as.server.ciba.CIBARegisterClientResponseService;
 import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.ClientService;
@@ -131,6 +134,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Inject
     private CIBARegisterClientResponseService cibaRegisterClientResponseService;
 
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
     @Override
     public Response requestRegister(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.DYNAMIC_CLIENT_REGISTRATION_RATE).time();
@@ -175,6 +181,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
                 log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Password Grant Type is not allowed for Dynamic Client Registration.");
+            }
+
+            if (appConfiguration.getDcrAuthorizationWithClientCredentials() && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
+                log.info("Register request does not contain grant_type=client_credentials, however dcrAuthorizationWithClientCredentials=true which is forbidden.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Client Credentials Grant Type is not present in Dynamic Client Registration request.");
             }
 
             if (r.getSubjectType() == null) {
@@ -760,6 +771,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final String accessToken = tokenService.getToken(authorization);
 
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
+                validateAuthorizationAccessToken(accessToken, clientId);
 
                 final JSONObject requestObject = parseRequestObjectWithoutValidation(requestParams);
                 final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
@@ -857,6 +869,49 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return internalErrorResponse("Unknown.").build();
     }
 
+    private void validateAuthorizationAccessToken(String accessToken, String clientId) {
+        if (!appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+            return;
+        }
+        if (StringUtils.isBlank(accessToken) || StringUtils.isBlank(clientId)) {
+            log.trace("Access Token or clientId is blank.");
+            throw new WebApplicationException(Response.
+                    status(Response.Status.BAD_REQUEST).
+                    type(MediaType.APPLICATION_JSON_TYPE).
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID."))
+                    .build());
+        }
+
+        final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+        if (grant == null) {
+            log.trace("Unable to find grant by access token:" + accessToken);
+            throw new WebApplicationException(Response.
+                    status(Response.Status.BAD_REQUEST).
+                    type(MediaType.APPLICATION_JSON_TYPE).
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token grant is not found."))
+                    .build());
+        }
+
+        final AbstractToken accessTokenObj = grant.getAccessToken(accessToken);
+        if (accessTokenObj == null || !accessTokenObj.isValid()) {
+            log.trace("Unable to find access token object or otherwise it's expired.");
+            throw new WebApplicationException(Response.
+                    status(Response.Status.BAD_REQUEST).
+                    type(MediaType.APPLICATION_JSON_TYPE).
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token object is not found or otherwise expired."))
+                    .build());
+        }
+
+        if (!clientId.equals(grant.getClientId())) {
+            log.trace("ClientId from request does not match to access token's client id.");
+            throw new WebApplicationException(Response.
+                    status(Response.Status.BAD_REQUEST).
+                    type(MediaType.APPLICATION_JSON_TYPE).
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token object is not found or otherwise expired."))
+                    .build());
+        }
+    }
+
     @Override
     public Response requestClientRead(String clientId, String authorization, HttpServletRequest httpRequest,
                                       SecurityContext securityContext) {
@@ -870,6 +925,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         try {
             if (appConfiguration.getDynamicRegistrationEnabled()) {
                 if (registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
+                    if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+                        validateAuthorizationAccessToken(accessToken, clientId);
+                    }
+
                     Client client = clientService.getClient(clientId, accessToken);
                     if (client != null) {
                         oAuth2AuditLog.setScope(clientScopesToString(client));
@@ -1094,6 +1153,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (!registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                 log.trace("Client parameters are invalid.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "");
+            }
+
+            if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+                validateAuthorizationAccessToken(accessToken, clientId);
             }
 
             Client client = clientService.getClient(clientId, accessToken);
