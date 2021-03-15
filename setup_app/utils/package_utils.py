@@ -48,6 +48,10 @@ class PackageUtils(SetupUtils):
 
         if base.argsp.local_rdbm == 'mysql':
             package_list[os_type_version]['mondatory'] += ' mysql-server'
+        if base.argsp.local_rdbm == 'pgsql':
+            package_list[os_type_version]['mondatory'] += ' postgresql python3-psycopg2'
+            if base.clone_type == 'deb':
+                package_list[os_type_version]['mondatory'] += ' postgresql-contrib'
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
@@ -61,7 +65,6 @@ class PackageUtils(SetupUtils):
                 else:
                     self.logIt('Package {0} was not installed'.format(package_query))
                     install_list[install_type].append(package_query)
-
 
         install = {'mondatory': True, 'optional': False}
 

@@ -560,24 +560,24 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installConfigApi')
 
     def prompt_for_rdbm(self):
-        if Config.rdbm_install_type == InstallTypes.REMOTE and  Config.rdbm_type == 'mysql':
+        if Config.rdbm_install_type == InstallTypes.REMOTE and  Config.rdbm_type in ('mysql', 'pgsql'):
             while True:
-                Config.rdbm_host = self.getPrompt("    MySQL host", Config.rdbm_host)
-                Config.rdbm_port = self.getPrompt("    MySQL port", Config.rdbm_port)
+                Config.rdbm_host = self.getPrompt("    {} host".format(Config.rdbm_type.upper()), Config.rdbm_host)
+                Config.rdbm_port = self.getPrompt("    {} port".format(Config.rdbm_type.upper()), Config.rdbm_port)
                 Config.rdbm_db = self.getPrompt("    Jnas Database", Config.rdbm_db)
                 Config.rdbm_user = self.getPrompt("    Jans Database Username", Config.rdbm_user)
                 Config.rdbm_password = self.getPrompt("    Jans Database Password", Config.rdbm_password)
 
-                result = dbUtils.mysqlconnection()
+                result = dbUtils.sqlconnection()
 
                 #we don't need jans-ldap.properties
                 Config.ce_templates[Config.ox_ldap_properties] = False
 
                 if result[0]:
-                    print("    {}Successfully connected to MySQL server{}".format(colors.OKGREEN, colors.ENDC))
+                    print("    {}Successfully connected to {} server{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
                     break
                 else:
-                    print("    {}Can't connect to MySQL server with provided credidentals.{}".format(colors.FAIL, colors.ENDC))
+                    print("    {}Can't connect to {} server with provided credidentals.{}".format(colors.FAIL, Config.rdbm_type.upper(), colors.ENDC))
                     print("    ERROR:", result[1])
 
 

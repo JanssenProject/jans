@@ -325,7 +325,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)))
                     self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)), True)
 
-        elif self.dbUtils.moddb == static.BackendTypes.MYSQL:
+        elif self.dbUtils.moddb in (static.BackendTypes.MYSQL, static.BackendTypes.PGSQL):
             pass
 
         elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
