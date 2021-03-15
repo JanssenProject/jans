@@ -16,6 +16,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import io.jans.model.GluuAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.scim.model.GluuCustomAttribute;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.service.cdi.event.Events;
@@ -109,6 +110,23 @@ public class AttributeService extends io.jans.service.AttributeService {
 			GluuAttribute attribute = allAttributesMap.get(attributeName);
 			if (attribute != null) {
 				customAttribute.setMetadata(attribute);
+			}
+		}
+	}
+
+	public void applyMultiValued(List<CustomObjectAttribute> customAttributes) {
+		if ((customAttributes == null) || (customAttributes.size() == 0)) {
+			return;
+		}
+		
+		Map<String, GluuAttribute> allAttributesMap = getAllAttributesMap();
+		for (CustomObjectAttribute customAttribute : customAttributes) {
+			String attributeName = StringHelper.toLowerCase(customAttribute.getName());
+			
+			GluuAttribute attribute = allAttributesMap.get(attributeName);
+			if (attribute != null) {
+				boolean multiValued = Boolean.TRUE.equals(attribute.getOxMultiValuedAttribute());
+				customAttribute.setMultiValued(multiValued);
 			}
 		}
 	}
