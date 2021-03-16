@@ -145,9 +145,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (id, doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`id`, `doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY  (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
