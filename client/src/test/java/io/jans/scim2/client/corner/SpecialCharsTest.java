@@ -1,6 +1,8 @@
 package io.jans.scim2.client.corner;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+
+import io.jans.orm.util.StringHelper;
 import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
@@ -20,16 +22,16 @@ import static org.testng.Assert.*;
 
 public class SpecialCharsTest extends UserBaseTest {
 
-    private static final String[] SPECIAL_CHARS = new String[]{"*", "\\", "(", ")"};    //, "\0" (see nullChar test)
+    private static final String[] SPECIAL_CHARS = new String[]{"*", /*"\\",*/ "(", ")"};    //, "\0" (see nullChar test)
     private List<String> specialFilterLdapChars = null;
 
     private List<String> userNames;
 
     @BeforeTest
     private void addOne() {
-        specialFilterLdapChars = Stream.of(SPECIAL_CHARS).map(StringEscapeUtils::escapeJson).collect(Collectors.toList());
+        specialFilterLdapChars = Stream.of(SPECIAL_CHARS).map(SpecialCharsTest::escapeValue).collect(Collectors.toList());
         //Per customer request
-        specialFilterLdapChars.add(StringEscapeUtils.escapeJson("/"));
+        specialFilterLdapChars.add(escapeValue("/"));
     }
 
     @Test
@@ -130,5 +132,11 @@ public class SpecialCharsTest extends UserBaseTest {
         assertEquals(response.readEntity(ListResponse.class).getResources().size(), 1);
 
     }
+
+	private static String escapeValue(String str) {
+		String result = StringHelper.escapeJson(str);
+		
+		return result;
+	}
 
 }
