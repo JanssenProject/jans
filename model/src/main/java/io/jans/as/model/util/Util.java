@@ -282,4 +282,18 @@ public class Util {
         }
         return result;
     }
+
+    public static Integer getNumberOfSecondFromNow(Date date) {
+        if (date == null) {
+            return 0;
+        }
+
+        long now = new Date().getTime();
+        final long time = date.getTime();
+        if (time > now) {
+            return (int) (time - now) / 1000;
+        }
+
+        return null;
+    }
 }

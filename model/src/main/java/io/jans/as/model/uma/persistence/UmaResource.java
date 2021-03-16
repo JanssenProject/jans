@@ -8,6 +8,7 @@ package io.jans.as.model.uma.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
+import io.jans.as.model.util.Util;
 import io.jans.orm.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -83,6 +84,13 @@ public class UmaResource implements Serializable {
 
     public void setTtl(Integer ttl) {
         this.ttl = ttl;
+    }
+
+    public void resetTtlFromExpirationDate() {
+        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
+        if (ttl != null) {
+            setTtl(ttl);
+        }
     }
 
     public boolean isDeletable() {
