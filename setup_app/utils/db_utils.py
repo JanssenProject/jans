@@ -575,7 +575,7 @@ class DBUtils:
         if data_type == 'INT':
             return int(val[0])
 
-        if data_type in ('DATETIME(3)',):
+        if data_type in ('DATETIME(3)', 'TIMESTAMP'):
             dval = val[0].strip('Z')
             return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
 
