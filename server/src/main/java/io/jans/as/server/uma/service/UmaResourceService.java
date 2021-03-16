@@ -96,6 +96,7 @@ public class UmaResourceService {
             validate(resource);
         }
         cacheService.put(resource.getDn(), resource);
+        resource.resetTtlFromExpirationDate();
         ldapEntryManager.merge(resource);
     }
 
