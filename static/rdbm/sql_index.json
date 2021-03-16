@@ -18,7 +18,6 @@
       "fields": [
         "uid",
         "dn",
-        "objectClass"
       ]
     }
   },
@@ -30,7 +29,6 @@
       "fields": [
         "uid",
         "dn",
-        "objectClass"
       ]
     }
   }
