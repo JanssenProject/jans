@@ -126,7 +126,7 @@ Scenario: Get an attribute by inum
 	Then status 200
 	And print response
 
-
+@ignore 
 @CreateUpdate 
 Scenario: Create new attribute 
 	Given url mainUrl
