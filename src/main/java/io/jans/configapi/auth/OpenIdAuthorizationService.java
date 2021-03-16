@@ -68,11 +68,11 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         log.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = jwtUtil.isJwt(acccessToken);
-        log.trace(" Is Jwt Token isJwtToken = " + isJwtToken);
+        log.debug(" Is Jwt Token isJwtToken = " + isJwtToken);
 
         if (isJwtToken) {
             try {
-                log.info("Validate JWT");
+                log.info("Since token is JWT Validate it");
                 Jwt jwt = jwtUtil.parse(acccessToken);
                 jwtUtil.validateToken(acccessToken, resourceScopes);
                 return;
@@ -83,7 +83,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             }
         }
 
-        log.info("\n Validate Reference token \n");
+        log.info("\n Since token is NOT JWT hence introspecting it as Reference token \n");
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse(token,
                 token.substring("Bearer".length()).trim(), issuer);
 
