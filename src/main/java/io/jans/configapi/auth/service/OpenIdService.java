@@ -42,7 +42,7 @@ public class OpenIdService implements Serializable {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws Exception {
-        log.trace("oAuth Introspection request , header:{}, token:{}, issuer:{}, method: {}, path: {} ", header, token,
+        log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}, method: {}, path: {} ", header, token,
                 issuer);
 
         String introspectionUrl = getIntrospectionEndpoint();
@@ -50,6 +50,8 @@ public class OpenIdService implements Serializable {
             introspectionUrl = AuthClientFactory.getIntrospectionEndpoint(issuer);
             log.trace("\n\n oAuth Issuer's introspectionUrl = " + introspectionUrl);
         }
+        
+        log.info("\n\n oAuth Final introspectionUrl = " + introspectionUrl);
         return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
     }
 
