@@ -8,6 +8,7 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.HashUtil;
+import io.jans.as.model.util.Util;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
@@ -98,6 +99,13 @@ public abstract class AbstractToken implements Serializable, Deletable {
         }
         // unable to calculate ttl (expiration or creation date is not set), thus defaults it to 1 day
         ttl = (int) TimeUnit.DAYS.toSeconds(1);
+    }
+
+    public void resetTtlFromExpirationDate() {
+        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
+        if (ttl != null) {
+            this.ttl = ttl;
+        }
     }
 
     /**
