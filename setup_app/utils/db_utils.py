@@ -214,9 +214,11 @@ class DBUtils:
                     )
             self.log_ldap_result(ldap_operation_result)
 
-        elif self.moddb == BackendTypes.MYSQL:
-            sql_cmd = "UPDATE jansCustomScr SET jansEnabled=1 WHERE dn='inum={},ou=scripts,o=jans'".format(inum)
-            self.exec_rdbm_query(sql_cmd)
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+            sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
+            sqlalchemyObj.jansEnabled = 1
+            self.session.commit()
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
@@ -230,9 +232,10 @@ class DBUtils:
                 )
             self.log_ldap_result(ldap_operation_result)
 
-        elif self.moddb == BackendTypes.MYSQL:
-            sql_cmd = "UPDATE jansAppConf SET {}=1 WHERE dn='ou=configuration,o=jans'".format(service)
-            self.exec_rdbm_query(sql_cmd)
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            sqlalchemyObj = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
+            setattr(sqlalchemyObj, service, 1)
+            self.session.commit()
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
@@ -439,11 +442,11 @@ class DBUtils:
                                 )
                             self.log_ldap_result(ldap_operation_result)
 
-        elif backend_location == BackendTypes.MYSQL:
-            sqlalchemyObj = self.dn_exists_rdbm(dn, 'jansCustomScr')
+        elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             if sqlalchemyObj:
                 if sqlalchemyObj.jansConfProperty:
-                    jansConfProperty = sqlalchemyObj.jansConfProperty
+                    jansConfProperty = copy.deepcopy(sqlalchemyObj.jansConfProperty)
                 else:
                     jansConfProperty = {'v': []}
 
@@ -454,7 +457,7 @@ class DBUtils:
                 else:
                     jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty
+                sqlalchemyObj.jansConfProperty = jansConfProperty                
                 self.session.commit()
 
         elif backend_location == BackendTypes.COUCHBASE:
