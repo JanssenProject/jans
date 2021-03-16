@@ -144,12 +144,12 @@ Scenario: Create new attribute
 	Then status 200 
 	And print response
 	And print response.inum
-	#Given url mainUrl + '/' +response.inum
-	#And header Authorization = 'Bearer ' + accessToken 
-	#When method DELETE 
-	#Then status 204 
+	Given url mainUrl + '/' +response.inum
+	And header Authorization = 'Bearer ' + accessToken 
+	When method DELETE 
+	Then status 204 
 	
-	
+@ignore	
 Scenario: Patch jansHideOnDiscovery configuration for Country attribute
 	Given url mainUrl
 	And header Authorization = 'Bearer ' + accessToken 
