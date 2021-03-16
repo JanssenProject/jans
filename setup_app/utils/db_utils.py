@@ -86,8 +86,6 @@ class DBUtils:
     def sqlconnection(self, log=True):
         base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
 
-        
-
         db_str = 'mysql+pymysql' if Config.rdbm_type == 'mysql' else 'postgresql+psycopg2'
 
         bind_uri = '{}://{}:{}@{}:{}/{}'.format(
@@ -98,7 +96,7 @@ class DBUtils:
                         Config.rdbm_port,
                         Config.rdbm_db,
                 )
-                
+
         if Config.rdbm_type == 'mysql':
             bind_uri += '?charset=utf8mb4'
 
@@ -111,7 +109,6 @@ class DBUtils:
             self.metadata = sqlalchemy.MetaData()
             self.session.connection()
             base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
-            self.json_dialects_instance =  sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
             return True, self.session
 
         except Exception as e:
@@ -119,6 +116,10 @@ class DBUtils:
                 base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e), True))
             return False, e
 
+    @property
+    def json_dialects_instance(self):
+        return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
+        
     def mysqlconnection(self, log=True):
         return self.sqlconnection(log)
 
@@ -192,11 +193,12 @@ class DBUtils:
                     )
             self.log_ldap_result(ldap_operation_result)
 
-        elif self.moddb == BackendTypes.MYSQL:
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
             oxAuthConfDynamic.update(entries)
-            sql_cmd = "UPDATE jansAppConf SET jansConfDyn='{}' WHERE dn='{}'".format(json.dumps(oxAuthConfDynamic, indent=2), dn)
-            self.exec_rdbm_query(sql_cmd)
+            sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
+            sqlalchemyObj.jansConfDyn = json.dumps(oxAuthConfDynamic, indent=2)
+            self.session.commit()
 
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
@@ -244,7 +246,7 @@ class DBUtils:
                 )
             self.log_ldap_result(ldap_operation_result)
 
-        elif self.moddb == BackendTypes.MYSQL:
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             result = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
             table_name = result.objectClass
             sqlalchemy_table = self.Base.classes[table_name]
@@ -261,7 +263,7 @@ class DBUtils:
     def dn_exists(self, dn):
         mapping_location = self.get_backend_location_for_dn(dn)
 
-        if mapping_location == BackendTypes.MYSQL:
+        if mapping_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             base.logIt("Querying RDBM for dn {}".format(dn))
             result = self.get_sqlalchObj_for_dn(dn)
             if result:
