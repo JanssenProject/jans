@@ -192,9 +192,9 @@ if argsp.t and argsp.x:
     print_or_log("Loading test data")
     testDataLoader.dbUtils.bind()
     testDataLoader.createLdapPw()
+    configApiInstaller.load_test_data()
     testDataLoader.load_test_data()
     testDataLoader.deleteLdapPw()
-    configApiInstaller.load_test_data()
     print_or_log("Test data loaded.")
 
 if not argsp.t and argsp.x and argsp.load_config_api_test:
@@ -295,7 +295,7 @@ def do_installation():
 
         if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
             configApiInstaller.start_installation()
-            if not argsp.t and argsp.load_config_api_test:
+            if argsp.t or argsp.load_config_api_test:
                 configApiInstaller.load_test_data()
 
         if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
@@ -331,8 +331,8 @@ def do_installation():
                 service['object'].start()
 
         if argsp.t:
+            base.logIt("Loading test data")
             testDataLoader.load_test_data()
-            configApiInstaller.load_test_data()
 
         jansProgress.progress(static.COMPLETED)
 
