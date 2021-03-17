@@ -2,7 +2,6 @@ import os
 import time
 import glob
 import json
-import uuid
 import ruamel.yaml
 import base64
 from string import Template
@@ -156,7 +155,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 'jansSubjectTyp': ['pairwise'],
                 'jansTknEndpointAuthMethod': ['client_secret_basic'],
                 'jansTrustedClnt': ['false'],
-                'jansRedirectURI': ['https://{}/admin-ui'.format(Config.hostname), 'http//:localhost:4100']
+                'jansRedirectURI': ['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100']
                 })
 
             clients_ldif_fd.close()
@@ -174,7 +173,14 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def load_test_data(self):
-        if self.dbUtils.dn_exists('inum=1801.test-client,ou=clients,o=jans'):
+
+        self.check_clients([('jca_test_client_id', '1802.')])
+
+        if not Config.get('jca_test_client_pw'):
+            Config.jca_test_client_pw = self.getPW()
+            Config.jca_test_client_encoded_pw = self.obscure(Config.jca_test_client_pw)
+
+        else:
             warning = "Test data for Config Api was allready loaded."
             self.logIt(warning)
             if Config.installed_instance:
@@ -183,14 +189,24 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
+        scopes_id_list = []
         for scope in result:
-            scopes.append('jansScope: ' + scope['dn']) if isinstance(scope, dict) else scopes.append('jansScope: ' + scope[1]['dn'])
-
+            scopes.append('jansScope: ' + (scope['dn'] if isinstance(scope, dict) else scope[1]['dn']))
+            scopes_id_list.append(scope['jansId'] if isinstance(scope, dict) else scope[1]['jansId'])
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
-        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/jans-config-api.ldif')
-        template_text = self.readFile(template_fn)
-        template_str = Template(template_text)
-        rendered_text = template_str.substitute(**self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-        out_fn = os.path.join(self.output_folder, 'test_jans-config-api.ldif')
-        self.writeFile(out_fn, rendered_text)
-        self.dbUtils.import_ldif([out_fn])
+        Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+        
+        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/data/jans-config-api.ldif')
+        client_server_properties_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/client/config-api-server.properties')
+        client_test_properties_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/client/config-api-test.properties')
+
+        for tmp_fn in (template_fn, client_server_properties_fn, client_test_properties_fn):
+            template_text = self.readFile(tmp_fn)
+            template_str = Template(template_text)
+            rendered_text = template_str.substitute(**self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            out_fn = os.path.join(self.output_folder, os.path.basename(tmp_fn))
+            self.writeFile(out_fn, rendered_text)
+            if tmp_fn.endswith('.ldif'):
+                self.dbUtils.import_ldif([out_fn])
+
+
