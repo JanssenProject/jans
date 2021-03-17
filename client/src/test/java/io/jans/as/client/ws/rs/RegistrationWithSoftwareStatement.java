@@ -635,7 +635,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         softwareStatement.getClaims().put(REQUEST_OBJECT_SIGNING_ALG.toString(), SignatureAlgorithm.RS256);
         softwareStatement.getClaims().put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), KeyEncryptionAlgorithm.A256KW);
         softwareStatement.getClaims().put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-        softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_JWT);
+        softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_BASIC);
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), SignatureAlgorithm.ES256);
         softwareStatement.getClaims().put(SOFTWARE_ID.toString(), softwareId);
         softwareStatement.getClaims().put(SOFTWARE_VERSION.toString(), softwareVersion);
@@ -688,7 +688,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         assertEquals(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
                 BlockEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
-        assertEquals(AuthenticationMethod.CLIENT_SECRET_JWT,
+        assertEquals(AuthenticationMethod.CLIENT_SECRET_BASIC,
                 AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.ES256,
@@ -724,10 +724,11 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         updateRequest.setClientName("UpdatedName");
 
         RegisterClient updateClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(updateRequest);
+        updateClient.setRequest(updateRequest);
 
         final RegisterResponse updateResponse = updateClient.exec();
         showClient(tokenClient);
+        assertNotNull(updateResponse);
         assertEquals(updateResponse.getStatus(), 200, "Unexpected response code: " + response.getEntity());
     }
 
