@@ -187,6 +187,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                 print(warning)
             return
 
+        self.logIt("Loding Jans Config Api test data")
+
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
         scopes_id_list = []
@@ -195,18 +197,16 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             scopes_id_list.append(scope['jansId'] if isinstance(scope, dict) else scope[1]['jansId'])
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
-        
-        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/data/jans-config-api.ldif')
-        client_server_properties_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/client/config-api-server.properties')
-        client_test_properties_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/client/config-api-test.properties')
 
-        for tmp_fn in (template_fn, client_server_properties_fn, client_test_properties_fn):
-            template_text = self.readFile(tmp_fn)
-            template_str = Template(template_text)
-            rendered_text = template_str.substitute(**self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-            out_fn = os.path.join(self.output_folder, os.path.basename(tmp_fn))
-            self.writeFile(out_fn, rendered_text)
-            if tmp_fn.endswith('.ldif'):
-                self.dbUtils.import_ldif([out_fn])
+        if not base.argsp.t:
+            self.render_templates_folder(os.path.join(Config.templateFolder, 'test/jans-config-api'))
+
+        template_fn = os.path.join(Config.templateFolder, 'test/jans-config-api/data/jans-config-api.ldif')
+
+        template_text = self.readFile(template_fn)
+        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+        out_fn = os.path.join(self.output_folder, os.path.basename(template_fn))
+        self.writeFile(out_fn, rendered_text)
+        self.dbUtils.import_ldif([out_fn])
 
 
