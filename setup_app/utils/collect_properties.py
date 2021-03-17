@@ -80,7 +80,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_user = jans_sql_prop['auth.userName']
             Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
-
+            Config.rdbm_db = jans_sql_prop['db.schema.name']
+            
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
              Config.mappingLocations = {'default': jans_hybrid_properties['storage.default']}
@@ -96,6 +97,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         # It is time to bind database
         dbUtils.bind()
+        
+        if dbUtils.session:
+            dbUtils.rdm_automapper()
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
 
@@ -141,6 +145,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         client_var_id_list = [
                     ('oxauth_client_id', '1001.'),
                     ('jca_client_id', '1801.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'}),
+                    ('jca_test_client_id', '1802.', {'pw': 'jca_test_client_pw', 'encoded':'jca_test_client_encoded_pw'}),
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ]
         self.check_clients(client_var_id_list)

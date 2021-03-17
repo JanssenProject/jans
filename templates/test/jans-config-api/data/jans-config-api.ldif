@@ -1,9 +1,9 @@
-dn: inum=1801.test-client,ou=clients,o=jans
+dn: inum=$jca_test_client_id,ou=clients,o=jans
 objectClass: jansClnt
 objectClass: top
 del: FALSE
 displayName: Jans Config Api Client
-inum: 1801.test-client
+inum: $jca_test_client_id
 jansAccessTknAsJwt: FALSE
 jansAccessTknSigAlg: RS256
 jansAppTyp: web
@@ -13,7 +13,7 @@ jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessT
  eousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionR
  equired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGather
  ingScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
-jansClntSecret: JMzPXRjuID0PnUajqLeTHQ==
+jansClntSecret: $jca_test_client_encoded_pw
 jansDisabled: FALSE
 jansGrantTyp: authorization_code
 jansGrantTyp: client_credentials
