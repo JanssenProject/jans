@@ -11,7 +11,6 @@ from auth_handler import AuthHandler
 from client_api_handler import ClientApiHandler
 # from oxshibboleth_handler import OxshibbolethHandler
 # from passport_handler import PassportHandler
-from scim_handler import ScimHandler
 from web_handler import WebHandler
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -25,7 +24,6 @@ PATCH_SERVICE_MAP = {
     "client-api": ClientApiHandler,
     "ldap": LdapHandler,
     # "passport": PassportHandler,
-    "scim": ScimHandler,
 }
 
 PRUNE_SERVICE_MAP = {
