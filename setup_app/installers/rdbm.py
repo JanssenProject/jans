@@ -188,6 +188,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         if not field in cb_fields and not '(' in field:
                             cb_fields.append(field)
 
+        if 'objectClass' in cb_fields:
+            cb_fields.remove('objectClass')
 
         for tblCls in self.dbUtils.Base.classes.keys():
             tblObj = self.dbUtils.Base.classes[tblCls]()
