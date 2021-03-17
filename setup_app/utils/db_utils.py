@@ -21,7 +21,7 @@ from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
 
-my_path = path = PurePath(os.path.dirname(os.path.realpath(__file__)))
+my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
 
 
@@ -53,7 +53,6 @@ class DBUtils:
                 self.moddb = BackendTypes.PGSQL
         else:
             self.moddb = BackendTypes.COUCHBASE
-
 
         if not hasattr(self, 'ldap_conn') or force:
             for group in Config.mappingLocations:
