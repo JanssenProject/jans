@@ -34,7 +34,8 @@
         "memberOf",
         "displayName",
         "mail",
-        "emailVerified"
+        "emailVerified",
+        "jansAdminUIRole"
       ],
       "names": [
         "jansCustomPerson"
