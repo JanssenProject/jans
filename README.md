@@ -3,7 +3,7 @@ Janssen Project-setup
 
 Scripts and templates to automate deployment and configuration of the Janssen Project,
 
-Installing Jans Server
+Installing Janssen Server
 -----------------------
 
 We tested installation on CentOS 8, Ubuntu 18 and Ubuntu 20.
@@ -16,13 +16,13 @@ Just two steps:
 
     `python3 install.py`
 
-Uninstalling Jans Server
+Uninstalling Janssen Server
 ------------------------
 Execute installer with `-uninstall` argument
 
 `python3 install.py`
 
-Reinstalling Jans Server
+Reinstalling Janssen Server
 ------------------------
 First uninstall and then install
 
