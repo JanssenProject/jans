@@ -179,6 +179,8 @@ public class AppConfiguration implements Configuration {
     private String keyStoreFile;
     private String keyStoreSecret;
     private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
+    private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
+
     //oxEleven
     private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
@@ -215,6 +217,7 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationSoftwareStatementJwksClaim;
     private String dcrSignatureValidationJwks;
     private String dcrSignatureValidationJwksUri;
+    private Boolean dcrAuthorizationWithClientCredentials = false;
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
@@ -277,6 +280,15 @@ public class AppConfiguration implements Configuration {
 
     public void setKeySelectionStrategy(KeySelectionStrategy keySelectionStrategy) {
         this.keySelectionStrategy = keySelectionStrategy;
+    }
+
+    public List<String> getKeyAlgsAllowedForGeneration() {
+        if (keyAlgsAllowedForGeneration == null) keyAlgsAllowedForGeneration = new ArrayList<>();
+        return keyAlgsAllowedForGeneration;
+    }
+
+    public void setKeyAlgsAllowedForGeneration(List<String> keyAlgsAllowedForGeneration) {
+        this.keyAlgsAllowedForGeneration = keyAlgsAllowedForGeneration;
     }
 
     public int getDiscoveryCacheLifetimeInMinutes() {
@@ -444,6 +456,15 @@ public class AppConfiguration implements Configuration {
 
     public void setFapiCompatibility(Boolean fapiCompatibility) {
         this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getDcrAuthorizationWithClientCredentials() {
+        if (dcrAuthorizationWithClientCredentials == null) dcrAuthorizationWithClientCredentials = false;
+        return dcrAuthorizationWithClientCredentials;
+    }
+
+    public void setDcrAuthorizationWithClientCredentials(Boolean dcrAuthorizationWithClientCredentials) {
+        this.dcrAuthorizationWithClientCredentials = dcrAuthorizationWithClientCredentials;
     }
 
     public Boolean getDcrSignatureValidationEnabled() {
