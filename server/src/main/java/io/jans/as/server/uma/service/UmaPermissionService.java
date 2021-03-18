@@ -113,11 +113,13 @@ public class UmaPermissionService {
     }
 
     public void merge(UmaPermission permission) {
+        permission.resetTtlFromExpirationDate();
         ldapEntryManager.merge(permission);
     }
 
     public void mergeSilently(UmaPermission permission) {
         try {
+            permission.resetTtlFromExpirationDate();
             ldapEntryManager.merge(permission);
         } catch (Exception e) {
             log.error("Failed to persist permission: " + permission, e);
