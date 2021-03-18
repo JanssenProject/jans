@@ -36,6 +36,7 @@ import java.util.Properties;
 public abstract class ConfigurableTest extends Arquillian {
 
 	public static FileConfiguration testData;
+	public boolean initialized = false;
 
 	@Deployment
 	@OverProtocol("Servlet 3.0")
@@ -45,7 +46,11 @@ public abstract class ConfigurableTest extends Arquillian {
 
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-        Reporter.log("Invoked init test suite method", true);
+		if (initialized) {
+			return;
+		}
+
+		Reporter.log("Invoked init test suite method", true);
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {
@@ -75,6 +80,8 @@ public abstract class ConfigurableTest extends Arquillian {
 
 		// Override test parameters
 		context.getSuite().getXmlSuite().setParameters(parameters);
+		
+		initialized = true;
 	}
 
 }
