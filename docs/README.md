@@ -1,5 +1,5 @@
 # Using jans-cli
-`jans-cli` is automatically installed if you choose to install **jans-config-api** during installation of Janssen Server. `jans-cli` has two modes of operation
+`jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation
 1. Menu-driven Interactive Mode
 2. Command Line Argument Mode
 
@@ -12,29 +12,29 @@ You will see the main menu as below:
 
 ![jans-cli Main Menu](img/im-main.png)
 
-Using IM is very simple and intuitive. Just make selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose any option by selecting it's number. Let's start from the beginning.
+Using IM is very simple and intuitive. Just make a selection and answer questions. There is a special option to read value for a question from a file using **_file** tag. This option is the most suitable choice to input the large text (e.g., interception script source code or JSON file content). To use this option input **_file /path/of/file** e.g. **_file /home/user/interceptionscript.py**. From the following menu, you can choose an option by selecting its number. Let's start from the beginning.
 
 ### Tips
-1. `_` is escape character for IM mode. For example you can create a list `["me", "you"]` by entering `me_,you`
+1. `_` is an escape character for IM mode. For example, you can create a list `["me", "you"]` by entering `me_,you`
 1. `_true` means boolean **True** instead of string `"true"`, similarly `_false` is boolean **False** instead of string `"false"`
 1. `_null` is comprehended as **None** (or in json **null**)
-1. `_x` exits current process and go back to parent menu
+1. `_x` exits the current process and go back to the parent menu
 1. `_q` refers to `quit`
 
 
 ### Attribute
 
-Using **Janssen CLI**, You can perform some quick operation in _Attribute_. Such as:
-- `view/find` list of Attributes in details.
+Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Such as:
+- `view/find` list of Attributes in detail.
 - `add` new attributes.
 - `update` an existing attribute
-- `delete` an attribute using it's `inum`, etc.
+- `delete` an attribute using its `inum` etc.
 
-For example to get all attributes choose 1 from the Main Menu, you will get the following options:
+For example, to get all attributes to choose 1 from the Main Menu, you will get the following options:
 
 ![jans-cli Attributes Menu](img/im-attributes-main.png)
 
-To `View/Find` attributes choose 1, you will be asked `Search size`,  `Search pattern` and `Status of the attribute`. For simplicity leave defaults in our case:
+To `View/Find` attributes choose 1, you will be asked to enter `Search size`,  `Search pattern` and `Status of the attribute` . For simplicity, leave defaults in our case:
 
 ![jans-cli Attributes Get All](img/im-attributes-get-all.png)
 
@@ -42,9 +42,9 @@ Once press Enter, it will retrieve 50 attributes and prints to screen in green c
 
 ![jans-cli Attributes Get All Response](img/im-attributes-get-all-response.png)
 
-You can save result as a file by choosing `w` in result screen. To go back enter `b`, to quit enter `q`. If you enter an recognized command, it will display valid commands.
+You can save the result as a file by choosing `w` in the result screen. To go back enter `b`, to quit enter `q`. If you enter a recognized command, it will display valid command.
 
-To `Add` a new attribute, choose 2 (on Attribute screen). Then enter value for each type of attribute items, after then it will ask to `continue?` enter `y` to continue. If everything are filled in the right way, it will create a new attribute on the list.
+To `Add` a new attribute, choose 2 (on the Attribute screen). Then enter a value for each type of attribute item, after then it will ask to `continue?` enter `y` to continue. If everything is filled in the right way, it will create a new attribute on the list.
 You can go with to add a new attribute quickly:
 ```text
 Obtained Data:
@@ -91,10 +91,10 @@ Obtained Data:
 
 ![add attribute](img/im-add-attrb.png) 
 
-To `update` an attribute, choose 3 (on Attribute screen). It will ask `inum` of attribute you are going to update. For example; I want to change description for attribute having inum **BCA8**. 
-It will retrieve current data and will ask for modification of each property, just leave defaults if you don't want to change that property.
+To `update` an attribute, choose 3 (on the Attribute screen). It will ask `inum` of the attribute you are going to update. For example, I want to change the description for an attribute having `inum=BCA8`. 
+It will retrieve current data and ask for the modification of each property, just leave defaults if you don't want to change that property.
 
-When it comes to end, it will display modified data and ask if you want to continue (this data just before it sends to server)
+When it comes to an end, it will display modified data and ask if you want to continue (this data just before it sends to a server)
 
 ```text
 Obtained Data:
@@ -141,10 +141,9 @@ Obtained Data:
 ```
 ![jans-cli Attributes Update](img/im-attributes-update.png)
 
-After you enter `y` it will perform `update` and display updated data on screen.
+Enter `y` to perform an `update` and display updated data on the screen.
 
-If you want to update specific property of an attribute then you can go with partial updates from Attribute Menu.
-To update partially, you will be asked to enter `inum`, `op`, `path` and `value`.
+To update property of an attribute, you can go with partial updates from Attribute Menu. To update partially, you must be asked to enter `inum`, `op`, `path` and `value`.
 - **__inum__** identity of an attribute where operation to be done.
 - **__op__** means operation to be done: [`replace`, `move`, `add`, `remove`, `copy`, `test`]
 - **__path__** chose path where operation will be performed: for example `attributeValidation/minLength`
@@ -156,7 +155,7 @@ Finally, it will display the updated result.
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/attributes.write
-Please wait patching...
+Please wait for patching...
 
 {
   "dn": "inum=BCA8,ou=attributes,o=jans",
@@ -204,21 +203,21 @@ To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` 
 ![delete attribute](img/im-delete-attrb.png)
 
 ### Authentication Method
-Sometimes It's getting hard to change **Default Authentication Method** from web browser if you can't login using web interface. Here Janssen CLI is going to help you a lot. 
+Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot. 
 
 ![default-auth](img/im-default-auth.png)
 
 - `View` Default Authentication Method.
 - `Update` Default Authentication Method.
 
-Select option 2 from the Main Menu to chose Authentication Method. You can see such option as listed above.
+Select option 2 from Main Menu to chose Authentication Method. You can see such options as listed above.
 
-To `View` default authentication method select 1 from Authentication Menu, It will show you current default authentication method of janssen server.
+To `View` default authentication method select '1' from Authentication Menu, It will show you the current default authentication method of the Janssen server.
 
 ![current-default-auth](img/im-cur-default-auth.png)
 
 
-To `update` default authentication method select 2, then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
+To `update` the default authentication method select '2', then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
 
 ![update-auth](img/im-update-default-auth.png)
 
@@ -240,7 +239,7 @@ Cache Configuration
 1 Returns cache configuration
 2 Partially modifies cache configuration
 ```
-If you want to view cache configuration then choose option 1
+If you want to view `cache configuration` then choose option 1
 from Cache Configuration Menu. It will return cache configuration in details as below:
 ```json5
 {
@@ -277,16 +276,19 @@ from Cache Configuration Menu. It will return cache configuration in details as 
 }
 ```
 
-To update partially select option 2, then you will be asked to enter `op`, `path` and `value`.
+To update partially, select option 2. then you will be asked to enter `op`, `path` and `value`.
+
 - **__op__** means operation to be done: [`replace`, `move`, `add`, `remove`, `copy`, `test`]
 - **__path__** chose path where operation will be performed: for example `memcachedConfiguration/bufferSize`
 - **__value__** value that you want update. It can be integer, boolean or string.
 
-After then, it will ask `Patch another param?` you can press `y` if you want to update multiple parameters at a time otherwise `n`.
-then it will show all the patch that are going to be performed. 
+At next it will ask `Patch another param?` you can press `y` if you want to update multiple parameters at a time otherwise `n`. After 
+then it will show all the patches that are going to be performed. 
 
-`Continue?` If you do any mistake and want to abort this operation then press `n` to cancel otherwise press `y` to go with it.
-It will show you the updated result. please see below example, you will get a clear concept on this.
+> `Continue?` 
+
+If any mistake happens simply press `n` to abort this operation  otherwise press `y` to go with it.
+It will show you the updated result. please, see below example, you will get a clear concept on this.
 
 ```text
 
@@ -348,7 +350,7 @@ Please wait patching...
 }
 ```
 
-- **Cache Configuration - Memcached**
+#### Cache Configuration - Memcached
 
 Do You want to update _Memcached_ only? you can go with this option. _Memcached_ have two options:
 
@@ -373,7 +375,7 @@ Getting access token for scope https://jans.io/oauth/config/cache.readonly
 }
 ```
 
-__Option 2__ to update _memcached_ configuration. It will ask for each parameter, enter value or skip to set default.
+__Option 2__ to update _memcached_ configuration. It will ask for each parameter, enter a value or skip to set default.
 
 ```text
 Selection: 2
@@ -421,9 +423,9 @@ Please wait while posting data ...
 }
 ```
 
-- **Cache Configuration - Redis**
+#### Cache Configuration - Redis
 
-To `get/update` redis configuration, select option 5 to enter the menu.
+To `get/update` **redis** configuration, select option 5 to enter the menu.
 ```text
 Cache Configuration – Redis
 ---------------------------
@@ -458,8 +460,9 @@ Getting access token for scope https://jans.io/oauth/config/cache.readonly
 }
 ```
 
-__Option 2__ to update redis cache configuration. fill each property or keep as empty to set default.
-press enter and `Continue?` press `y` to update redis configuration.
+__Option 2__ to update the Redis cache configuration. You can fill each property or keep as empty to set default. 
+> `Continue?` press `y` to update the Redis configuration.
+
 ```text
 Selection: 2
 
@@ -541,7 +544,7 @@ Please wait while posting data ...
 }
 ```
 
-- **Cache Configuration - In-Memory**
+#### Cache Configuration - In-Memory
 
 To enter `In-Memory` menu select option 6, you will get two options as below:
 ```text
@@ -587,7 +590,7 @@ Obtained Data:
 }
 ```
 
-- **Cache Configuration - Native-Persistence**
+#### Cache Configuration - Native-Persistence
 
 ```text
 Cache Configuration – Native-Persistence
@@ -1117,19 +1120,17 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "externalLoggerConfiguration": null
 }
 ```
-By selecting 2nd option, you can modify its properties partially. 
+By selecting the 2nd option, you can modify its properties partially. 
 
 ![update jans authorization server](img/im-update-jans-auth.png)
 
-At the end it will show the updated result.
+At the end, it will show the updated result.
 
 ### Janssen FIDO2
-Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username / password as 
-the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have the 
-option to also install the FIDO2 component.
+Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username/password as the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have an option to install the FIDO2 component.
 
 Using Janssen CLI, you can `view/update` details of the FIDO2 configuration.
-From the main menu select option 9, It will give two option to choose:
+From the main menu select option 9, you will get two options.
 
 ```text
 Configuration – Fido2
@@ -1137,7 +1138,7 @@ Configuration – Fido2
 1 Gets Jans Authorization Server Fido2 configuration properties
 2 Updates Fido2 configuration properties
 ```
-If you chose the first option, you will get some details of fido2 configuration properties:
+If you chose the first option, You will get some details of fido2 configuration properties:
 ```json5
 {
   "issuer": "https://testjans.gluu.com",
@@ -1178,13 +1179,14 @@ If you chose the first option, you will get some details of fido2 configuration 
     ]
   }
 }
+
 ```
-If you want to update fido2 configuration, you can choose 2nd option. It will ask to fill each property, skip for default values. 
+If you want to update the fido2 configuration, you can choose the 2nd option. It will ask to fill each property, skip for default values. 
 For example, if you want to change **_logginglevel_** `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
 
 ![update fido2 configuration](img/im-update-fido2.png)
 
-- **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
+> **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
 
 ```text
 Continue? y
@@ -1228,13 +1230,13 @@ Please wait while posting data ...
 ```
 
 ### SMTP Server Configuration
-Janssen CLI also supports SMTP configuration. You can do following things as stated below:
+Janssen CLI also supports SMTP configuration. You can do the following things as stated below:
 - `View/Get`
 - `Add/Delete`
 - `Update`
 - `Test`
 
-Simply select option 10 from Main Menu it will show some options as below:
+Simply select option '10' from Main Menu, It will show some options as below:
 ```text
 Configuration – SMTP
 --------------------
@@ -1319,11 +1321,11 @@ Continue?
 Fill each property with the correct information.
 - **Test SMTP Server**
 
-If server is running, and all the information you have entered are correct. You can test SMTP server from the following option 5, it will respond, if server configured properly.
+If the server is running, and all the information you have entered is correct. You can test SMTP server from the following option 5, it will respond if the server is configured properly.
 
 ### Janssen Logging Configuration
 
-Using Janssen CLI, you can easily update logging configuration. Just go with the option 11 from Main Menu, It will display two options as sated below.
+Using Janssen CLI, you can easily update the logging configuration. Just go with option 11 from Main Menu, It will display two options.
 
 ```text
 Configuration – Logging
@@ -1332,7 +1334,7 @@ Configuration – Logging
 2 Updates Jans Authorization Server logging settings
 ```
 
-First option returns current logging configuration.
+The first option returns the current logging configuration.
 ```json
 Returns Jans Authorization Server logging settings
 --------------------------------------------------
@@ -1350,7 +1352,7 @@ Getting access token for scope https://jans.io/oauth/config/logging.readonly
   "httpLoggingExludePaths": null
 }
 ```
-To update current logging configuration select option 2. For example, I have updated `logginglevel INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
+To update the current logging configuration select option 2. For example, I have updated `logging level INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
 ```json
 Returns Jans Authorization Server logging settings
 --------------------------------------------------
@@ -1412,16 +1414,16 @@ Please wait while posting data ...
 ### JSON Web Key 
 This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public 
 keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
-From the Main Menu, Select option 12, It returns some options as stated below:
+From the Main Menu, select option 12, It returns some options as stated below:
 
 ```text
 Configuration – JWK - JSON Web Key (JWK)
 ----------------------------------------
-1 Gets list of JSON Web Key (JWK) used by server
+1 Gets a list of JSON Web Key (JWK) used by a server
 2 Puts/replaces JWKS
 3 Patch JWKS
 ```
-You can `view` list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
+You can `view` the list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
 
 - **__`Get list of JSON Web Key`__**
 
@@ -1710,9 +1712,8 @@ Please wait while posting data ...
 Just chose this option and fill the value for `op`, `path`, and `value` to patch JSON Web Key.
 
 ### Custom Scripts
-Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way 
-that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such operation 
-as listed below:
+
+Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such an operation as listed below:
 
 ```text
 Custom Scripts
@@ -1720,11 +1721,97 @@ Custom Scripts
 1 Gets a list of custom scripts
 2 Adds a new custom script
 3 Updates a custom script
-4 Gets list of scripts by type
-5 Gets a script by Inum
-6 Deletes a custom script
+4 Deletes a custom script
 ```
-To Add a new script, choose option 2 and fill each property:
+- **get info of custom scripts**
+
+To get the status of each type of script select option 1, you will get the below result in return:
+
+```
+Gets a list of custom scripts
+-----------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/scripts.readonly
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|    | scriptType                          | name                                                      | enabled   | inum      |
++====+=====================================+===========================================================+===========+===========+
+|  0 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_example               | False     | 2DAF-AA91 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  1 | INTROSPECTION                       | introspection_custom_params                               | False     | 2DAF-BA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  2 | UMA_CLAIMS_GATHERING                | sampleClaimsGathering                                     | False     | 2DAF-F996 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  3 | END_SESSION                         | frontchannel_logout_sample                                | False     | 2DAF-CA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  4 | INTROSPECTION                       | introspection_sample                                      | False     | 2DAF-AA90 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  5 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_custom_params_example | False     | 2DAF-BA91 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  6 | CIBA_END_USER_NOTIFICATION          | firebase_ciba_end_user_notification                       | False     | C1BA-C1BA |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  7 | PERSON_AUTHENTICATION               | basic                                                     | False     | A51E-76DA |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  8 | CONSENT_GATHERING                   | consent_gathering                                         | False     | DAA9-BA60 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+|  9 | PERSON_AUTHENTICATION               | basic_lock                                                | False     | 4BBE-C6A8 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 10 | PERSON_AUTHENTICATION               | cert                                                      | False     | 2124-0CF1 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 11 | PERSON_AUTHENTICATION               | yubicloud                                                 | False     | 24FD-B96E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 12 | PERSON_AUTHENTICATION               | otp                                                       | False     | 5018-D4BF |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 13 | PERSON_AUTHENTICATION               | smpp                                                      | False     | 09A0-93D7 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 14 | PERSON_AUTHENTICATION               | twilio_sms                                                | False     | 09A0-93D6 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 15 | PERSON_AUTHENTICATION               | thumb_sign_in                                             | False     | 92F0-759E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 16 | PERSON_AUTHENTICATION               | u2f                                                       | False     | 8BAF-80D6 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 17 | PERSON_AUTHENTICATION               | duo                                                       | False     | 5018-F9CF |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 18 | PERSON_AUTHENTICATION               | super_gluu                                                | False     | 92F0-BF9E |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 19 | PERSON_AUTHENTICATION               | fido2                                                     | False     | 8BAF-80D7 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 20 | PERSON_AUTHENTICATION               | uaf                                                       | False     | 5018-AF9C |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 21 | USER_REGISTRATION                   | user_registration                                         | False     | 6EA0-8F0C |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 22 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 23 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 24 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 25 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 26 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 27 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 28 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 29 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 30 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 31 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 32 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 33 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 34 | USER_REGISTRATION                   | user_confirm_registration                                 | False     | 6EA0-8F0D |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 35 | UPDATE_USER                         | update_user                                               | False     | 522F-CDC5 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+
+```
+
+To add a new script, choose option 2 and fill each property:
 
 `dn, inum, display name, valid script`
 ```
@@ -1732,10 +1819,41 @@ ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDE
 
 Programming Language: [PYTHON, JAVA]
 ```
+- **update scripts**
+
+Let update `Person Authentication basic` by its inum. Select option 3 from **custom scripts** menu
+and enter its inum, in my case it's `A51E-76DA`
+
+![](img/im-update-custom-script.png)
+
+selecting the field we are gonna update: 4
+
+```
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 4
+
+«boolean value indicating if script enabled. Type: boolean»
+enabled  [false]: true
+Please enter a(n) boolean value: _true, _false
+enabled  [false]: _true
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 4
+
+«boolean value indicating if script enabled. Type: boolean»
+enabled  [true]: 
+
+```
+In this way you can update any field you want.
+
+- **Delete scripts**
+
+To delete a custom script, you need an `inum` of a custom script that you want to delete.
+It will ask for confirmation when you enter `inum`, simply enter `yes/y` to delete it otherwise enter `no/n` to cancel the operation.
 
 ### LDAP Configuration 
 
-Using Janssen CLI, Following list of actions can be performed in LDAP.
+Using Janssen CLI, the Following list of actions can be performed in LDAP.
 ```text
 Database - LDAP configuration
 -----------------------------
@@ -1747,7 +1865,10 @@ Database - LDAP configuration
 6 Partially modify an LDAP configuration
 7 Tests an LDAP configuration
 ```
-To get list of existing LDAP configurations, select option 1 and press enter: you will get as following result.
+
+- **List of Existing LDAP**
+
+To get a list of existing LDAP configurations, select option 1 and press enter, you will get a list of existing LDAP configurations in your Janssen server.
 
 ```text
 Gets list of existing LDAP configurations
@@ -1778,19 +1899,20 @@ Getting access token for scope https://jans.io/oauth/config/database/ldap.readon
   }
 ]
 ```
+- **Adding new LDAP**
 
 To add a new LDAP configuration, choose option 2 and add the following properties:
 ```json5
 {
-  "configId":
-  "bindDN": 
-  "bindPassword":
+  "configId":,
+  "bindDN": ,
+  "bindPassword":,
   "servers": [],
   "maxConnections": 2,
   "useSSL": false,
   "baseDNs": [],
-  "primaryKey":
-  "localPrimaryKey":
+  "primaryKey":,
+  "localPrimaryKey":,
   "useAnonymousBind": false,
   "enabled": false,
   "version": null,
@@ -1799,9 +1921,13 @@ To add a new LDAP configuration, choose option 2 and add the following propertie
 ```
 Then enter `y` to confirm.
 
-To update an existing LDAP configuration, select option 3 and enter ldap configuration name. 
-the given name is matched with the existing configurations then It will ask to enter value for each property.
+- **Update an LDAP configuration**
 
+To update an existing LDAP configuration, select option 3 and enter the LDAP configuration name. If it matches to the existing configuration then It will ask to enter a value for each properties.
+
+- **Delete a LDAP configuration**
+
+To delete an existing ldap configuration, enter a name of an existing ldap configuration and enter `yes/y` to confirm.
 
 
 ### Couchbase Configuration
@@ -1822,7 +1948,7 @@ Database - Couchbase configuration
 
 ### OpenID Connect - Clients
 
-OpenID Connect Interactive Mode supports following list of actions:
+OpenID Connect Interactive Mode supports the following list of actions:
 
 ```text
 OAuth - OpenID Connect - Clients
@@ -1834,12 +1960,826 @@ OAuth - OpenID Connect - Clients
 5 Delete OpenId Connect client
 6 Update modified properties of OpenId Connect client by Inum
 ```
-Using Janssen CLI, Administrator can easily `create/update/delete` openid Connect without any interrupt.
+Using Janssen CLI, the Administrator can easily `create/update/delete` OpenID Connect without any interruption.
 
+- **__list of OpenID Connect clients__**
+
+By selecting option '1' you will get a list of OpenID Connect clients.
+You may enter `limit[50]` and `pattern` to filter in searching.
+
+```
+Gets list of OpenID Connect clients
+-----------------------------------
+
+«Search size - max size of the results to return. Type: integer»
+limit  [50]: 
+
+«Search pattern. Type: string»
+pattern: 
+Calling Api with parameters: {'limit': 50}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+[
+  {
+    "dn": "inum=1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805,ou=clients,o=jans",
+    "inum": "1801.d361f68d-8200-4ba2-a0bb-ca7fea79e805",
+    "clientSecret": "KfwZeAfq4jrL",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/admin-ui",
+      "http//:localhost:4100"
+    ],
+    "claimRedirectUris": null,
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "Jans Config Api Client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1800.F6E877,ou=scopes,o=jans",
+      "inum=1800.D4F3E7,ou=scopes,o=jans",
+      "inum=1800.2FD7EF,ou=scopes,o=jans",
+      "inum=1800.97B23C,ou=scopes,o=jans",
+      "inum=1800.8FC2C7,ou=scopes,o=jans",
+      "inum=1800.1FFDF2,ou=scopes,o=jans",
+      "inum=1800.5CF44C,ou=scopes,o=jans",
+      "inum=1800.CCA518,ou=scopes,o=jans",
+      "inum=1800.E62D6E,ou=scopes,o=jans",
+      "inum=1800.11CB33,ou=scopes,o=jans",
+      "inum=1800.781FA2,ou=scopes,o=jans",
+      "inum=1800.ADAD8F,ou=scopes,o=jans",
+      "inum=1800.40F22F,ou=scopes,o=jans",
+      "inum=1800.7619BA,ou=scopes,o=jans",
+      "inum=1800.E0DAF5,ou=scopes,o=jans",
+      "inum=1800.7F45B0,ou=scopes,o=jans",
+      "inum=1800.778C57,ou=scopes,o=jans",
+      "inum=1800.E39293,ou=scopes,o=jans",
+      "inum=1800.939483,ou=scopes,o=jans",
+      "inum=1800.0ED2E8,ou=scopes,o=jans",
+      "inum=1800.66CA59,ou=scopes,o=jans",
+      "inum=1800.A4DBE5,ou=scopes,o=jans",
+      "inum=1800.9AF358,ou=scopes,o=jans",
+      "inum=1800.478CCF,ou=scopes,o=jans",
+      "inum=1800.450A9A,ou=scopes,o=jans",
+      "inum=1800.27A193,ou=scopes,o=jans",
+      "inum=1800.3971D5,ou=scopes,o=jans",
+      "inum=1800.891693,ou=scopes,o=jans",
+      "inum=1800.A35DFD,ou=scopes,o=jans",
+      "inum=1800.3516DE,ou=scopes,o=jans",
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  },
+  {
+    "dn": "inum=1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f,ou=clients,o=jans",
+    "inum": "1001.0e964ce7-7670-44a4-a2d1-d0a5f689a34f",
+    "clientSecret": "4OJLToBXav0P",
+    "frontChannelLogoutUri": "https://testjans.gluu.com/identity/ssologout.htm",
+    "frontChannelLogoutSessionRequired": true,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://testjans.gluu.com/identity/scim/auth",
+      "https://testjans.gluu.com/identity/authcode.htm",
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims?authentication=true"
+    ],
+    "claimRedirectUris": [
+      "https://testjans.gluu.com/jans-auth/restv1/uma/gather_claims"
+    ],
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "implicit",
+      "refresh_token"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "oxTrust Admin GUI",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": "HS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": [
+      "https://testjans.gluu.com/identity/finishlogout.htm"
+    ],
+    "requestUris": null,
+    "scopes": [
+      "inum=F0C4,ou=scopes,o=jans",
+      "inum=10B2,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": true,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  },
+  {
+    "dn": "inum=1201.d71e6b84-b637-4e26-b8d3-34c80934c097,ou=clients,o=jans",
+    "inum": "1201.d71e6b84-b637-4e26-b8d3-34c80934c097",
+    "clientSecret": "0vFoEhc7Zut2",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [
+      "client_credentials"
+    ],
+    "applicationType": "native",
+    "contacts": null,
+    "clientName": "SCIM client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1200.841184,ou=scopes,o=jans",
+      "inum=1200.98DDA5,ou=scopes,o=jans",
+      "inum=1200.F40A49,ou=scopes,o=jans",
+      "inum=1200.B609F0,ou=scopes,o=jans",
+      "inum=1200.492980,ou=scopes,o=jans",
+      "inum=1200.F7EC4A,ou=scopes,o=jans",
+      "inum=1200.280C97,ou=scopes,o=jans",
+      "inum=1200.E236BB,ou=scopes,o=jans",
+      "inum=1200.DC0FDE,ou=scopes,o=jans",
+      "inum=1200.2483ED,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null
+  }
+]
+
+Selection: 
+
+```
+
+- **__Create a New OpenID Client__**
+
+To create a new OpenID client, you need two enter '2' from OpenID Menu.
+It will ask to enter below information:
+
+- frontChannelLogoutSessionRequired[false, true]
+- applicationType[web, native]
+- clientName
+- subjectType[pairwise, public]
+- includeClaimsInIdToken[false, true]
+- Populate optional fields?[y, n]
+
+If you enter `y` to **Populate optional fields?** then you will get a lot of optional fields are listed below:
+
+```
+Populate optional fields? y
+Optiaonal Fields:
+1 clientSecret
+2 frontChannelLogoutUri
+3 registrationAccessToken
+4 clientIdIssuedAt
+5 clientSecretExpiresAt
+6 redirectUris
+7 claimRedirectUris
+8 responseTypes
+9 grantTypes
+10 contacts
+11 idTokenTokenBindingCnf
+12 logoUri
+13 clientUri
+14 policyUri
+15 tosUri
+16 jwksUri
+17 jwks
+18 sectorIdentifierUri
+19 idTokenSignedResponseAlg
+20 idTokenEncryptedResponseAlg
+21 idTokenEncryptedResponseEnc
+22 userInfoSignedResponseAlg
+23 userInfoEncryptedResponseAlg
+24 userInfoEncryptedResponseEnc
+25 requestObjectSigningAlg
+26 requestObjectEncryptionAlg
+27 requestObjectEncryptionEnc
+28 tokenEndpointAuthMethod
+29 tokenEndpointAuthSigningAlg
+30 defaultMaxAge
+31 requireAuthTime
+32 defaultAcrValues
+33 initiateLoginUri
+34 postLogoutRedirectUris
+35 requestUris
+36 scopes
+37 claims
+38 trustedClient
+39 lastAccessTime
+40 lastLogonTime
+41 persistClientAuthorizations
+42 refreshTokenLifetime
+43 accessTokenLifetime
+44 customAttributes
+45 customObjectClasses
+46 rptAsJwt
+47 accessTokenAsJwt
+48 accessTokenSigningAlg
+49 disabled
+50 authorizedOrigins
+51 softwareId
+52 softwareVersion
+53 softwareStatement
+54 attributes
+55 backchannelTokenDeliveryMode
+56 backchannelClientNotificationEndpoint
+57 backchannelAuthenticationRequestSigningAlg
+58 backchannelUserCodeParameter
+59 expirationDate
+60 deletable
+61 jansId
+
+«c: continue, #: populate filed. »
+
+Selection: 1
+
+«The client secret.  The client MAY omit the parameter if the client secret is an empty string. Type: string»
+clientSecret: aabbccdd
+
+«c: continue, #: populate filed. »
+Selection: c
+
+Obtained Data:
+
+{
+  "dn": null,
+  "inum": null,
+  "clientSecret": "aabbccdd",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": null,
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": null,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": null,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": null,
+  "customObjectClasses": null,
+  "rptAsJwt": null,
+  "accessTokenAsJwt": null,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": null,
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Continue? y
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.write
+Please wait while posting data ...
+
+{
+  "dn": "inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae,ou=clients,o=jans",
+  "inum": "1929a64c-6f67-4399-bdd3-6a8d44cc04ae",
+  "clientSecret": "B3ziSqU8gWTAXICdYfNxw2cP4LmwDqrG1koRqzFxQc0=",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": false,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": [],
+  "customObjectClasses": [
+    "top"
+  ],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": null,
+    "spontaneousScopeScriptDns": null,
+    "backchannelLogoutUri": null,
+    "backchannelLogoutSessionRequired": false,
+    "additionalAudience": null,
+    "postAuthnScripts": null,
+    "consentGatheringScripts": null,
+    "introspectionScripts": null,
+    "rptClaimsScripts": null
+  },
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Selection: 
+```
+
+- **__Update an OpenID Client by its inum__**
+
+If anything you want to update of an OpenID client, you can choose option '3' and enter the `inum` of the OpenID client. Here I've used the `inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae` of the above OpenID client. After then, You will get a list of fields to choose which one you are going to update.
+Here is what you can see in return:
+
+```
+Get OpenId Connect Client by Inum
+---------------------------------
+
+«inum. Type: string»
+inum: 1929a64c-6f67-4399-bdd3-6a8d44cc04ae
+Calling Api with parameters: {'inum': '1929a64c-6f67-4399-bdd3-6a8d44cc04ae'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+Fields:
+ 1 accessTokenAsJwt
+ 2 accessTokenLifetime
+ 3 accessTokenSigningAlg
+ 4 applicationType
+ 5 attributes
+ 6 authorizedOrigins
+ 7 backchannelAuthenticationRequestSigningAlg
+ 8 backchannelClientNotificationEndpoint
+ 9 backchannelTokenDeliveryMode
+10 backchannelUserCodeParameter
+11 claimRedirectUris
+12 claims
+13 clientIdIssuedAt
+14 clientName
+15 clientSecret
+16 clientSecretExpiresAt
+17 clientUri
+18 contacts
+19 customAttributes
+20 customObjectClasses
+21 defaultAcrValues
+22 defaultMaxAge
+23 deletable
+24 disabled
+25 expirationDate
+26 frontChannelLogoutSessionRequired
+27 frontChannelLogoutUri
+28 grantTypes
+29 idTokenEncryptedResponseAlg
+30 idTokenEncryptedResponseEnc
+31 idTokenSignedResponseAlg
+32 idTokenTokenBindingCnf
+33 includeClaimsInIdToken
+34 initiateLoginUri
+35 inum
+36 jansId
+37 jwks
+38 jwksUri
+39 lastAccessTime
+40 lastLogonTime
+41 logoUri
+42 persistClientAuthorizations
+43 policyUri
+44 postLogoutRedirectUris
+45 redirectUris
+46 refreshTokenLifetime
+47 registrationAccessToken
+48 requestObjectEncryptionAlg
+49 requestObjectEncryptionEnc
+50 requestObjectSigningAlg
+51 requestUris
+52 requireAuthTime
+53 responseTypes
+54 rptAsJwt
+55 scopes
+56 sectorIdentifierUri
+57 softwareId
+58 softwareStatement
+59 softwareVersion
+60 subjectType
+61 tokenEndpointAuthMethod
+62 tokenEndpointAuthSigningAlg
+63 tosUri
+64 trustedClient
+65 userInfoEncryptedResponseAlg
+66 userInfoEncryptedResponseEnc
+67 userInfoSignedResponseAlg
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 
+```
+
+- __q__ to quit 
+- __v__ to view each attribute with updated data
+- __l__ to get list of fields 
+- __#__ to update filed attribute
+- __id__ number of an attribute to identify which one you want to update
+
+
+- **__Get OpenID client by its inum__**
+
+`inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
+
+In my case i'm using the `inum` of the above created OpenID client:
+
+```
+Get OpenId Connect Client by Inum
+---------------------------------
+
+«inum. Type: string»
+inum: 1929a64c-6f67-4399-bdd3-6a8d44cc04ae
+Calling Api with parameters: {'inum': '1929a64c-6f67-4399-bdd3-6a8d44cc04ae'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/clients.readonly
+{
+  "dn": "inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae,ou=clients,o=jans",
+  "inum": "1929a64c-6f67-4399-bdd3-6a8d44cc04ae",
+  "clientSecret": "CpTCvlZZsQDWShGrMXFBzQ==",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "newOID",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "pairwise",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": false,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": [],
+  "customObjectClasses": [
+    "top"
+  ],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": null,
+    "spontaneousScopeScriptDns": null,
+    "backchannelLogoutUri": null,
+    "backchannelLogoutSessionRequired": false,
+    "additionalAudience": null,
+    "postAuthnScripts": null,
+    "consentGatheringScripts": null,
+    "introspectionScripts": null,
+    "rptClaimsScripts": null
+  },
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+
+Selection: 
+```
 
 ### User Managed Access (UMA)
 
-UMA helps to mange user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
+UMA helps to manage user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
 
 ![](img/im-uma-menu.png)
 
@@ -1849,12 +2789,271 @@ you can perform such operations:
 - update / partially update
 - delete
 
-To get list of UMA resources of your Janssen Server, you can select option 1.
-It will ask `search limit[50]` by default set upto 50 and `pattern` of string.
+To get a list of UMA resources of your Janssen Server, you can select option 1.
+It will ask `search limit[50]` by default set up to 50 and `pattern` of string.
+
+
+### OAuth - Scopes
+
+In OAuth, scopes are used to specify the extent of access. For an OpenID Connect sign-in flow, scopes correspond to the release of user claims.
+`jans-cli` supports the following operations through Interactive Mode.
+
+```
+OAuth - Scopes
+--------------
+1 Gets list of Scopes
+2 Create Scope
+3 Updates existing Scope
+4 Get Scope by Inum
+5 Delete Scope
+6 Update modified attributes of existing Scope by Inum
+
+Selection: 
+```
+
+- **__Gets list of Scopes__**
+
+To view the current list of scopes of the Janssen Server, choose the first option from the following menu. It will ask to enter `type`, `limit` & `pattern` to filter in searching. You may skip by pressing `'Enter'` key to get all the scopes of the server. In my case, I have set `limit` upto 5.
+
+```
+«Scope type. Type: string»
+type: 
+
+«Search size - max size of the results to return. Type: integer»
+limit  [50]: 5
+
+«Search pattern. Type: string»
+pattern: 
+Calling Api with parameters: {'limit': 5}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/scopes.readonly
+[
+  {
+    "dn": "inum=F0C4,ou=scopes,o=jans",
+    "inum": "F0C4",
+    "displayName": "authenticate_openid_connect",
+    "id": "openid",
+    "iconUrl": null,
+    "description": "Authenticate using OpenID Connect.",
+    "scopeType": "openid",
+    "claims": null,
+    "defaultScope": true,
+    "groupClaims": null,
+    "dynamicScopeScripts": null,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    },
+    "umaType": false,
+    "deletable": false,
+    "expirationDate": null
+  },
+  {
+    "dn": "inum=43F1,ou=scopes,o=jans",
+    "inum": "43F1",
+    "displayName": "view_profile",
+    "id": "profile",
+    "iconUrl": null,
+    "description": "View your basic profile info.",
+    "scopeType": "openid",
+    "claims": [
+      "inum=2B29,ou=attributes,o=jans",
+      "inum=0C85,ou=attributes,o=jans",
+      "inum=B4B0,ou=attributes,o=jans",
+      "inum=A0E8,ou=attributes,o=jans",
+      "inum=5EC6,ou=attributes,o=jans",
+      "inum=B52A,ou=attributes,o=jans",
+      "inum=64A0,ou=attributes,o=jans",
+      "inum=EC3A,ou=attributes,o=jans",
+      "inum=3B47,ou=attributes,o=jans",
+      "inum=3692,ou=attributes,o=jans",
+      "inum=98FC,ou=attributes,o=jans",
+      "inum=A901,ou=attributes,o=jans",
+      "inum=36D9,ou=attributes,o=jans",
+      "inum=BE64,ou=attributes,o=jans",
+      "inum=6493,ou=attributes,o=jans"
+    ],
+    "defaultScope": false,
+    "groupClaims": null,
+    "dynamicScopeScripts": null,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    },
+    "umaType": false,
+    "deletable": false,
+    "expirationDate": null
+  },
+  {
+    "dn": "inum=D491,ou=scopes,o=jans",
+    "inum": "D491",
+    "displayName": "view_phone_number",
+    "id": "phone",
+    "iconUrl": null,
+    "description": "View your phone number.",
+    "scopeType": "openid",
+    "claims": [
+      "inum=B17A,ou=attributes,o=jans",
+      "inum=0C18,ou=attributes,o=jans"
+    ],
+    "defaultScope": false,
+    "groupClaims": null,
+    "dynamicScopeScripts": null,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    },
+    "umaType": false,
+    "deletable": false,
+    "expirationDate": null
+  },
+  {
+    "dn": "inum=C17A,ou=scopes,o=jans",
+    "inum": "C17A",
+    "displayName": "view_address",
+    "id": "address",
+    "iconUrl": null,
+    "description": "View your address.",
+    "scopeType": "openid",
+    "claims": [
+      "inum=27DB,ou=attributes,o=jans",
+      "inum=2A3D,ou=attributes,o=jans",
+      "inum=6609,ou=attributes,o=jans",
+      "inum=6EEB,ou=attributes,o=jans",
+      "inum=BCE8,ou=attributes,o=jans",
+      "inum=D90B,ou=attributes,o=jans",
+      "inum=E6B8,ou=attributes,o=jans",
+      "inum=E999,ou=attributes,o=jans"
+    ],
+    "defaultScope": false,
+    "groupClaims": true,
+    "dynamicScopeScripts": null,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    },
+    "umaType": false,
+    "deletable": false,
+    "expirationDate": null
+  },
+  {
+    "dn": "inum=764C,ou=scopes,o=jans",
+    "inum": "764C",
+    "displayName": "view_email_address",
+    "id": "email",
+    "iconUrl": null,
+    "description": "View your email address.",
+    "scopeType": "openid",
+    "claims": [
+      "inum=8F88,ou=attributes,o=jans",
+      "inum=CAE3,ou=attributes,o=jans"
+    ],
+    "defaultScope": false,
+    "groupClaims": null,
+    "dynamicScopeScripts": null,
+    "umaAuthorizationPolicies": null,
+    "attributes": {
+      "spontaneousClientId": null,
+      "spontaneousClientScopes": null,
+      "showInConfigurationEndpoint": true
+    },
+    "umaType": false,
+    "deletable": false,
+    "expirationDate": null
+  }
+]
+
+Selection: 
+
+```
+
+- **__create scope__**
+
+You can create a scope through the command line interface.
+It will ask to enter value for each property.
+
+
+```
+
+Selection: 2
+
+«A human-readable name of the scope. Type: string»
+displayName: testScope
+
+«The base64url encoded id. Type: string»
+id: tScope
+
+«A human-readable string describing the scope. Type: string»
+description: creating scope
+
+«The scopes type associated with Access Tokens determine what resources will. Type: string»
+scopeType: openid
+
+Populate optional fields? n
+Obtained Data:
+
+{
+  "dn": null,
+  "inum": null,
+  "displayName": "testScope",
+  "id": "tScope",
+  "iconUrl": null,
+  "description": "creating scope",
+  "scopeType": "openid",
+  "claims": null,
+  "defaultScope": null,
+  "groupClaims": null,
+  "dynamicScopeScripts": null,
+  "umaAuthorizationPolicies": null,
+  "attributes": null,
+  "umaType": false,
+  "deletable": false,
+  "expirationDate": null
+}
+
+Continue? y
+Getting access token for scope https://jans.io/oauth/config/scopes.write
+Please wait while posting data ...
+
+{
+  "dn": "inum=070daa9e-4a8f-423a-8681-f578673a2781,ou=scopes,o=jans",
+  "inum": "070daa9e-4a8f-423a-8681-f578673a2781",
+  "displayName": "testScope",
+  "id": "tScope",
+  "iconUrl": null,
+  "description": "creating scope",
+  "scopeType": "openid",
+  "claims": null,
+  "defaultScope": null,
+  "groupClaims": null,
+  "dynamicScopeScripts": null,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": true
+  },
+  "umaType": false,
+  "deletable": false,
+  "expirationDate": null
+}
+
+Selection: 
+```
+
 
 
 ## Command Line Argument Mode
-We will refer this mode as **CL** Using this mode is difficult compared to IM. First is get help, so type:
+We will refer to this mode as **CL** Using this mode is difficult compared to IM. The first is to get help, so type:
 ```
 /opt/jans/jans-cli/config-cli.py --help
 ```
@@ -1896,7 +3095,7 @@ optional arguments:
   --schema SCHEMA       Get sample json schema
   --data DATA           Path to json data file
 ```
-We start with getting information about tasks, the tasks are options of argument `--info`:
+We start with getting information about tasks, tasks are options of argument `--info`:
 
 ```
 Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMemcached, CacheConfigurationNativePersistence, CacheConfigurationRedis, ConfigurationFido2, ConfigurationJWKJSONWebKeyJWK, ConfigurationLogging, ConfigurationProperties, ConfigurationSMTP, CustomScripts, DatabaseCouchbaseConfiguration, DatabaseLDAPConfiguration, DefaultAuthenticationMethod, OAuthOpenIDConnectClients, OAuthOpenIDConnectSectorIdentifiers, OAuthScopes, OAuthUMAResources
@@ -1935,7 +3134,7 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-This is how we can execute single line command to get information of the Janssen Server. As we discussed on a specific task in the Interactive Mode, similarly we will discuss here using single line command to perform such operation.
+This is how we can execute single line command to get information about the Janssen Server. As we discussed on a specific task in the Interactive Mode, similarly we will discuss here using single line command to perform such operation.
 
 ### Attribute
 
@@ -2315,7 +3514,7 @@ Now, let's add this attribute using `post-attributes`:
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id post-attributes --data /tmp/attribute.json
 ```
-It will create new attribute into the Attribute list with updated `inum & dn`:
+It will create a new attribute into the Attribute list with updated `inum & dn`:
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/attributes.write
@@ -2491,7 +3690,7 @@ Calling with params limit=3&pattern=view&type=openid
 ]
 ```
 
-Let's create a scope, for this we need a sample schema, you can use of the above result, or can get sample schema. Remember when we queried info for a task **OAuthScopes** it printed:
+Let's create a scope. Remember when we queried info for a task **OAuthScopes** it printed:
 
 ```
 Operation ID: post-oauth-scopes
@@ -2543,7 +3742,7 @@ Server Response:
 
 ```
 
-It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for patch method. Remember when we queried info for the task **OAuthScopes** it printed:
+It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for the patch method. Remember when we queried info for the task **OAuthScopes** it printed:
 
 ```
 Operation ID: patch-oauth-scopes-by-id
@@ -2558,9 +3757,9 @@ This means we need schema `/components/schemas/PatchRequest`, be careful it stat
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
 ```
 
-When you examine this json, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
+When you examine this JSON, you will see three properties in an object: op, path, and value. Meanings of these properties are as follows:
 * __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path separator `/` to change a property inside object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
+* __path__ Path of property to be changed. use path separator `/` to change a property inside an object. For example to change **spontaneousClientId** you can use `attributes/spontaneousClientId`
 * __value__ New value to be assigned for property defined in `path`
 
 We can edit this json as follows (remember to make it an array):
@@ -2617,7 +3816,7 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 - **get-config-cache**
 
-You can get current Cache Configuration of your Janssen Server by performing this operation.
+You can get the current Cache Configuration of your Janssen Server by performing this operation.
 
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
@@ -2686,8 +3885,8 @@ Let's see the sample schema of cache configuration.
 
 When you examine this sample schema, you will see three properties in an object: op, path, and value.
 * __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path separator `/` to change a property inside object.
-* __value__ New value to be assigned for property defined in `path`
+* __path__ Path of property to be changed. use path separator `/` to change a property inside an object.
+* __value__ New value to be assigned for each property defined in `path`
 
 Let, We want to replace `memcachedConfiguration/bufferSize`:
 
@@ -2845,6 +4044,7 @@ Now let's do the operation:
 ```
 
 It will show the updated result.
+
 ![updated result](img/cl-update-default-auth-result.png)
 
 ### OAuthUMAResources
@@ -3141,9 +4341,8 @@ Let's get the sample schema:
   "value": {}
 }
 ```
-Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`. 
-So we are going to perform an operation `replace` where `path` is `deletable` with `value: false`.
-
+Let's want to update as `deletable:false` to an uma resource whose `id=1800.c4e0d1b6-e731-4c8d-a0ab-66784349a4da`.
+So we are going to operate `replace` where `path` is `deletable` with `value: false`.
 let's update the json as below:
 
 ```json
@@ -3192,7 +4391,7 @@ Server Response:
   "deletable": false
 }
 ```
-As you see that `deletable` updated to `false`.
+you must see that `deletable` updated to `false`.
 
 ### Janssen Fido2 Configuration
 
@@ -3264,7 +4463,7 @@ To perform this operation, let's check the schema first.
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration > /tmp/fido2-schema.json
 ```
 
-This command will create fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
+This command will create a fido2 schema file on `/tmp/`. You can edit this file depending on the requirements:
 
 ![janssen fido2 configuration](img/cl-fido2-update.png)
 
@@ -3333,11 +4532,11 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 ```
 
-Jans Authorization server have two operations `id` to `get/modify` its properties.
+Jans Authorization server has two operations `id` to `get/modify` its properties.
 
 - **__get-properties__**
 
-It returns all the information of Jans Authorization server.
+It returns all the information of the Jans Authorization server.
 
 ```text
 /opt/jans/jans-cli/config-cli.py --operation-id get-properties
@@ -3823,7 +5022,7 @@ Let's modify this schema:
 
 This schema has three properties; `op`, `path` & `value`.
 Let's perform a `replace` operation at `cibaEnabled` to change it from `false` to `true`.
-So, the `.json` file will be look like this:
+So, the `.json` file will look like this:
 
 ```text
 [
@@ -3880,7 +5079,7 @@ To view the current SMTP server configuration, run the following command line:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
 ```
 
-It will show the your smtp server configuration as below:
+It will show your SMTP server configuration as below:
 
 ```text
 Getting access token for scope https://jans.io/oauth/config/smtp.readonly
@@ -3899,7 +5098,7 @@ Getting access token for scope https://jans.io/oauth/config/smtp.readonly
 
 - **_post-config-smtp_**
 
-This operation can be performed to update/post new smtp configuration on your janssen server.
+This operation can be performed to update/post a new SMTP configuration on your Janssen server.
 Let's see the schema first:
 
 ```commandline
@@ -3914,7 +5113,7 @@ nano /tmp/smtp.json
 
 ![smtp update configuration](img/cl-update-smtp.png)
 
-You can update each of its property. To perform this operation, run the following command:
+You can update each of its properties. To perform this operation, run the following command:
 
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp --data /tmp/smtp.json
@@ -4499,7 +5698,7 @@ It will show all the openid clients together. To search using parameters:
 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args limit:2
 ```
 
-It will show random 2 client id configuration.
+It will show two OpenID clients randomly.
 
 ```text
 
