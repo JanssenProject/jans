@@ -88,11 +88,13 @@ class Scope(object):
             self.dn = dn
         if inum is not None:
             self.inum = inum
-        self.display_name = display_name
+        if display_name is not None:
+            self.display_name = display_name
         self.id = id
         if icon_url is not None:
             self.icon_url = icon_url
-        self.description = description
+        if description is not None:
+            self.description = description
         self.scope_type = scope_type
         if claims is not None:
             self.claims = claims
@@ -177,8 +179,6 @@ class Scope(object):
         :param display_name: The display_name of this Scope.  # noqa: E501
         :type: str
         """
-        if display_name is None:
-            raise ValueError("Invalid value for `display_name`, must not be `None`")  # noqa: E501
 
         self._display_name = display_name
 
@@ -250,8 +250,6 @@ class Scope(object):
         :param description: The description of this Scope.  # noqa: E501
         :type: str
         """
-        if description is None:
-            raise ValueError("Invalid value for `description`, must not be `None`")  # noqa: E501
 
         self._description = description
 
