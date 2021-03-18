@@ -179,6 +179,8 @@ public class AppConfiguration implements Configuration {
     private String keyStoreFile;
     private String keyStoreSecret;
     private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
+    private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
+
     //oxEleven
     private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
@@ -278,6 +280,15 @@ public class AppConfiguration implements Configuration {
 
     public void setKeySelectionStrategy(KeySelectionStrategy keySelectionStrategy) {
         this.keySelectionStrategy = keySelectionStrategy;
+    }
+
+    public List<String> getKeyAlgsAllowedForGeneration() {
+        if (keyAlgsAllowedForGeneration == null) keyAlgsAllowedForGeneration = new ArrayList<>();
+        return keyAlgsAllowedForGeneration;
+    }
+
+    public void setKeyAlgsAllowedForGeneration(List<String> keyAlgsAllowedForGeneration) {
+        this.keyAlgsAllowedForGeneration = keyAlgsAllowedForGeneration;
     }
 
     public int getDiscoveryCacheLifetimeInMinutes() {
