@@ -20,7 +20,7 @@ Uninstalling Janssen Server
 ------------------------
 Execute installer with `-uninstall` argument
 
-`python3 install.py`
+`python3 install.py -uninstall`
 
 Reinstalling Janssen Server
 ------------------------
