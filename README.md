@@ -9,9 +9,12 @@ Installing Jans Server
 We tested installation on CentOS 8, Ubuntu 18 and Ubuntu 20.
 Just two steps:
 1. Download installer
-`curl https://raw.githubusercontent.com/JanssenProject/jans-setup/master/install.py > install.py`
+
+  `curl https://raw.githubusercontent.com/JanssenProject/jans-setup/master/install.py > install.py`
+
 2. Execute installer
-`python3 install.py`
+
+  `python3 install.py`
 
 Uninstalling Jans Server
 ------------------------
