@@ -642,7 +642,7 @@ class JCA_CLI:
                 data_dict[model.attribute_map[key_]] = sub_data_dict
             else:
                 data_dict[model.attribute_map[key_]] = val
-            
+
         return data_dict
 
 
@@ -657,7 +657,7 @@ class JCA_CLI:
         tab_data = []
         headers = tabulate_endpoints[ome]
         for i, entry in enumerate(data):
-            row_ = [i]
+            row_ = [i+1]
             for header in headers:
                 row_.append(entry[header])
             tab_data.append(row_)
