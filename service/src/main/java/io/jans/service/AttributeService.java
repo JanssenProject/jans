@@ -51,8 +51,7 @@ public abstract class AttributeService implements Serializable {
     protected LocalCacheService localCacheService;
 
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
-        String[] targetArray = new String[] { attributeValue };
-        Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
+        Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
         List<GluuAttribute> result = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
 
         return result;
@@ -124,11 +123,11 @@ public abstract class AttributeService implements Serializable {
     public List<GluuAttribute> getAllAttributes(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	List<GluuAttribute> attributeList = (List<GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
+    	List<GluuAttribute> attributeList = (List<GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
         if (attributeList == null) {
             attributeList = getAllAtributesImpl(baseDn);
-            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_LIST, attributeList);
         }
 
         return attributeList;
@@ -142,12 +141,12 @@ public abstract class AttributeService implements Serializable {
     public Map<String, GluuAttribute> getAllAttributesMap(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	Map<String, GluuAttribute> attributeMap = (Map<String, GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
+    	Map<String, GluuAttribute> attributeMap = (Map<String, GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_MAP);
         if (attributeMap == null) {
         	attributeMap = getAllAttributesMapImpl(baseDn);
 
-            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_MAP, attributeMap);
+            usedCacheService.put(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME, OxConstants.CACHE_ATTRIBUTE_KEY_MAP, attributeMap);
         }
 
         return attributeMap;
