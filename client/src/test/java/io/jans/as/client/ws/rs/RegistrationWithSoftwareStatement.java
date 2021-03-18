@@ -6,12 +6,11 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -25,10 +24,7 @@ import org.testng.annotations.Ignore;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
@@ -585,6 +581,155 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
 
         registrationAccessToken2 = response.getRegistrationAccessToken();
         registrationClientUri2 = response.getRegistrationClientUri();
+    }
+
+    /**
+     * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
+     * It should be run with following server configuration settings:
+     *   - "dcrSignatureValidationEnabled": true,
+     *   - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
+     *   - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     *   - "dcrSignatureValidationJwks": null,
+     *   - "dcrSignatureValidationJwksUri": null,
+     *   - "softwareStatementValidationType": "jwks_uri",
+     *   - "softwareStatementValidationClaimName": "jwks_uri",
+     *   - "dcrAuthorizationWithClientCredentials": true
+     */
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
+            "RS256_keyId", "clientJwksUri"})
+    @Ignore("server's `dcrSignatureValidationEnabled` and `dcrAuthorizationWithClientCredentials` configuration properties should be set to true to get this test passed.")
+    //@Test
+    public void registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant(final String redirectUris, final String sectorIdentifierUri,
+                                                final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
+                                                final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+        showTitle("registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant");
+
+        String softwareId = UUID.randomUUID().toString();
+        String softwareVersion = "5.0";
+
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
+        softwareStatement.setKeyId(keyId);
+        softwareStatement.getClaims().put(GRANT_TYPES.toString(), Collections.singletonList(GrantType.CLIENT_CREDENTIALS.getValue()));
+        softwareStatement.getClaims().put(RESPONSE_TYPES.toString(), Arrays.asList(ResponseType.TOKEN.getValue(), ResponseType.ID_TOKEN.getValue(), ResponseType.CODE.getValue()));
+        softwareStatement.getClaims().put(APPLICATION_TYPE.toString(), ApplicationType.WEB);
+        softwareStatement.getClaims().put(CLIENT_NAME.toString(), "jans test app");
+        softwareStatement.getClaims().put(REDIRECT_URIS.toString(), StringUtils.spaceSeparatedToList(redirectUris));
+        softwareStatement.getClaims().put(CONTACTS.toString(), Collections.singletonList("yuriy@gluu.org"));
+        softwareStatement.getClaims().put(SCOPE.toString(), Util.listAsString(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope")));
+        softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
+        softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_BASIC);
+        softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
+        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
+        softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
+        softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
+        softwareStatement.getClaims().put(REQUEST_URIS.toString(), Collections.singletonList("http://www.gluu.org/request"));
+        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_URI.toString(), logoutUri);
+        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), true);
+        softwareStatement.getClaims().put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), SignatureAlgorithm.RS512);
+        softwareStatement.getClaims().put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), KeyEncryptionAlgorithm.RSA1_5);
+        softwareStatement.getClaims().put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+        softwareStatement.getClaims().put(USERINFO_SIGNED_RESPONSE_ALG.toString(), SignatureAlgorithm.RS384);
+        softwareStatement.getClaims().put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), KeyEncryptionAlgorithm.A128KW);
+        softwareStatement.getClaims().put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), BlockEncryptionAlgorithm.A128GCM);
+        softwareStatement.getClaims().put(REQUEST_OBJECT_SIGNING_ALG.toString(), SignatureAlgorithm.RS256);
+        softwareStatement.getClaims().put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), KeyEncryptionAlgorithm.A256KW);
+        softwareStatement.getClaims().put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+        softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_BASIC);
+        softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), SignatureAlgorithm.ES256);
+        softwareStatement.getClaims().put(SOFTWARE_ID.toString(), softwareId);
+        softwareStatement.getClaims().put(SOFTWARE_VERSION.toString(), softwareVersion);
+        String encodedSoftwareStatement = softwareStatement.getEncodedJwt();
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setSoftwareStatement(encodedSoftwareStatement);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest.sign(SignatureAlgorithm.RS256, keyId, cryptoProvider));
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getClaims().get(SCOPE.toString()));
+        assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
+        assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
+        assertEquals(logoutUri, response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
+        assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertEquals(SignatureAlgorithm.RS512,
+                SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()));
+        assertEquals(KeyEncryptionAlgorithm.RSA1_5,
+                KeyEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
+        assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()));
+        assertEquals(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
+                BlockEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
+        assertNotNull(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString()));
+        assertEquals(SignatureAlgorithm.RS384,
+                SignatureAlgorithm.fromString(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())));
+        assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()));
+        assertEquals(KeyEncryptionAlgorithm.A128KW,
+                KeyEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
+        assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()));
+        assertEquals(BlockEncryptionAlgorithm.A128GCM,
+                BlockEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        assertNotNull(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
+        assertEquals(SignatureAlgorithm.RS256,
+                SignatureAlgorithm.fromString(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())));
+        assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString()));
+        assertEquals(KeyEncryptionAlgorithm.A256KW,
+                KeyEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
+        assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString()));
+        assertEquals(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
+                BlockEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
+        assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(AuthenticationMethod.CLIENT_SECRET_BASIC,
+                AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(SignatureAlgorithm.ES256,
+                SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
+        JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
+        List<String> scopes = new ArrayList<String>();
+        for (int i = 0; i < scopesJsonArray.length(); i++) {
+            scopes.add(scopesJsonArray.get(i).toString());
+        }
+        assertTrue(scopes.contains("openid"));
+        assertTrue(scopes.contains("address"));
+        assertTrue(scopes.contains("email"));
+        assertTrue(scopes.contains("profile"));
+        assertTrue(scopes.contains("phone"));
+        assertTrue(scopes.contains("clientinfo"));
+        assertTrue(response.getClaims().containsKey(SOFTWARE_ID.toString()));
+        assertEquals(response.getClaims().get(SOFTWARE_ID.toString()), softwareId);
+        assertTrue(response.getClaims().containsKey(SOFTWARE_VERSION.toString()));
+        assertEquals(response.getClaims().get(SOFTWARE_VERSION.toString()), softwareVersion);
+        assertTrue(response.getClaims().containsKey(SOFTWARE_STATEMENT.toString()));
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setExecutor(clientExecutor(true));
+        TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant("openid", response.getClientId(), response.getClientSecret());
+
+        showClient(tokenClient);
+        assertNotNull(tokenResponse);
+        assertNotNull(tokenResponse.getAccessToken());
+
+        RegisterRequest updateRequest = new RegisterRequest();
+        updateRequest.setAccessToken(tokenResponse.getAccessToken()); // client credentials token
+        updateRequest.setHttpMethod("PUT");
+        updateRequest.setClientName("UpdatedName");
+
+        RegisterClient updateClient = new RegisterClient(registrationEndpoint);
+        updateClient.setRequest(updateRequest);
+
+        final RegisterResponse updateResponse = updateClient.exec();
+        showClient(tokenClient);
+        assertNotNull(updateResponse);
+        assertEquals(updateResponse.getStatus(), 200, "Unexpected response code: " + response.getEntity());
     }
 
 }

@@ -8,6 +8,7 @@ package io.jans.as.model.uma.persistence;
 
 import com.google.common.collect.Maps;
 import io.jans.as.model.util.Pair;
+import io.jans.as.model.util.Util;
 import io.jans.orm.annotation.*;
 
 import java.io.Serializable;
@@ -73,6 +74,13 @@ public class UmaPermission implements Serializable {
 
     public void setTtl(Integer ttl) {
         this.ttl = ttl;
+    }
+
+    public void resetTtlFromExpirationDate() {
+        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
+        if (ttl != null) {
+            setTtl(ttl);
+        }
     }
 
     public String getDn() {
