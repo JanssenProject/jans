@@ -6,7 +6,6 @@
 import urllib
 import urllib2
 import datetime
-import base64
 try:
     import json
 except ImportError:
@@ -114,19 +113,20 @@ class OneID:
 
         return json.dumps({"error":response['error'],"errorcode":str(response['errorcode']),\
                            "url":page + suffix})
-        
-    def success(self, response):
+    @classmethod
+    def success(cls, response):
         """Check errorcode in a response"""
         return response["errorcode"] == 0
 
-    def save_session(self, response):
+    @classmethod
+    def save_session(cls, response):
         """Save attributes and UID in a temporary file for account page"""
         sessionid = str(random.getrandbits(128))
         sessionfile = "/tmp/"+sessionid+".OneID"
-        f = open(sessionfile, "w")
-        f.write(json.dumps({"uid":response["uid"], "attr":response["attr"]}))
-        f.close()
-        return sessionid;
+        with open(sessionfile, "w") as w:
+            w.write(json.dumps({"uid":response["uid"], "attr":response["attr"]}))
+
+        return sessionid
 
     def get_session(self, sessionid):
         """Retrieve attributes and session ID saved by validation page"""
@@ -137,7 +137,8 @@ class OneID:
         os.remove(sessionfile)
         return json.loads(data)
 
-    def _getnonce(self, response):
+     @classmethod
+    def _getnonce(cls, response):
         """Extract base64-encoded nonce from JWT in a response"""
         return response["nonces"]["repo"]["nonce"].split('.')[1]
 
