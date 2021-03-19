@@ -6,13 +6,13 @@
 
 package io.jans.as.server.model.ldap;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Object class used to save information of every CIBA request.

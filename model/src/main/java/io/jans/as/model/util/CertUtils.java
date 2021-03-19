@@ -6,6 +6,12 @@
 
 package io.jans.as.model.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -17,12 +23,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 /**
  * @author Yuriy Zabrovarnyy

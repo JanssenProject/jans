@@ -6,10 +6,10 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.discovery.WebFingerLink;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import io.jans.as.model.discovery.WebFingerLink;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

@@ -8,6 +8,7 @@ package io.jans.as.server.model.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import io.jans.as.model.common.HasParamName;
 
 /**

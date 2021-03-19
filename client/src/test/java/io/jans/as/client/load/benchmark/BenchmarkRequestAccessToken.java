@@ -6,25 +6,30 @@
 
 package io.jans.as.client.load.benchmark;
 
-import io.jans.as.client.*;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
-import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.testng.Reporter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
+import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 
 /**
  * @author Yuriy Movchan

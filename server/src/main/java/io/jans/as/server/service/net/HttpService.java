@@ -6,10 +6,22 @@
 
 package io.jans.as.server.service.net;
 
-import io.jans.as.server.model.net.HttpServiceResponse;
-import io.jans.net.SslDefaultHttpClient;
-import io.jans.util.StringHelper;
-import io.jans.util.Util;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -34,20 +46,10 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Map.Entry;
+import io.jans.as.server.model.net.HttpServiceResponse;
+import io.jans.net.SslDefaultHttpClient;
+import io.jans.util.StringHelper;
+import io.jans.util.Util;
 /**
  * Provides operations with http requests
  *

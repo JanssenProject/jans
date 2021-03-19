@@ -6,6 +6,12 @@
 
 package io.jans.as.server.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.ext.Provider;
+
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
@@ -14,13 +20,13 @@ import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
-import io.jans.as.server.uma.ws.rs.*;
+import io.jans.as.server.uma.ws.rs.UmaGatheringWS;
+import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
+import io.jans.as.server.uma.ws.rs.UmaPermissionRegistrationWS;
+import io.jans.as.server.uma.ws.rs.UmaResourceRegistrationWS;
+import io.jans.as.server.uma.ws.rs.UmaRptIntrospectionWS;
+import io.jans.as.server.uma.ws.rs.UmaScopeWS;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
-
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Integration with Resteasy

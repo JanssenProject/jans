@@ -6,14 +6,18 @@
 
 package io.jans.as.client.ciba.push;
 
-import io.jans.as.client.BaseRequest;
-import io.jans.as.model.ciba.PushErrorResponseType;
+import static io.jans.as.model.ciba.PushErrorRequestParam.AUTHORIZATION_REQUEST_ID;
+import static io.jans.as.model.ciba.PushErrorRequestParam.ERROR;
+import static io.jans.as.model.ciba.PushErrorRequestParam.ERROR_DESCRIPTION;
+import static io.jans.as.model.ciba.PushErrorRequestParam.ERROR_URI;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static io.jans.as.model.ciba.PushErrorRequestParam.*;
+import io.jans.as.client.BaseRequest;
+import io.jans.as.model.ciba.PushErrorResponseType;
 
 /**
  * @author Javier Rojas Blum

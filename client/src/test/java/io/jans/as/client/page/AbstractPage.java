@@ -6,20 +6,22 @@
 
 package io.jans.as.client.page;
 
-import com.google.common.base.Preconditions;
-import io.jans.as.model.common.Holder;
-import io.jans.as.model.util.Util;
+import static org.testng.Assert.fail;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Set;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Set;
+import com.google.common.base.Preconditions;
 
-import static org.testng.Assert.fail;
+import io.jans.as.model.common.Holder;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Yuriy Zabrovarnyy

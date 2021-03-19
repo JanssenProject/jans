@@ -6,17 +6,18 @@
 
 package io.jans.as.server.service.external.context;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.net.util.SubnetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
-import org.apache.commons.net.util.SubnetUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Holds object required in custom scripts

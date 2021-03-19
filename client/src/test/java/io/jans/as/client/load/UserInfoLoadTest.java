@@ -6,20 +6,25 @@
 
 package io.jans.as.client.load;
 
-import io.jans.as.client.*;
-import io.jans.as.client.BaseTest;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.jwt.JwtClaimName;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.jwt.JwtClaimName;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.

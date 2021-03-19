@@ -6,22 +6,25 @@
 
 package io.jans.as.server.model.authorize;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.as.server.service.external.ExternalSpontaneousScopeService;
 import io.jans.as.server.service.external.context.SpontaneousScopeExternalContext;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Validates the scopes received for the authorize web service.

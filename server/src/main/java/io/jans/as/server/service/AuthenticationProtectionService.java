@@ -6,14 +6,14 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
-import io.jans.service.cdi.event.ConfigurationUpdate;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
+import io.jans.service.cdi.event.ConfigurationUpdate;
 
 /**
  * Brute Force authentication protection service implementation

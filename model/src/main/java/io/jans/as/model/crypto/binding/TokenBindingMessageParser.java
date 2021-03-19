@@ -6,15 +6,17 @@
 
 package io.jans.as.model.crypto.binding;
 
-import com.google.common.base.Preconditions;
-import org.apache.log4j.Logger;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.ByteUtils;
-
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.base.Preconditions;
+
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.ByteUtils;
 
 /**
  * @author Yuriy Zabrovarnyy

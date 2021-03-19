@@ -6,6 +6,20 @@
 
 package io.jans.as.server.service.expiration;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.common.SessionId;
@@ -22,18 +36,6 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import net.jodah.expiringmap.ExpirationListener;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy

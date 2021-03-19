@@ -6,6 +6,16 @@
 
 package io.jans.as.server.service.ciba;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
@@ -16,14 +26,6 @@ import io.jans.as.server.model.ldap.CIBARequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
-import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Service used to access to the database for CibaRequest ObjectClass.

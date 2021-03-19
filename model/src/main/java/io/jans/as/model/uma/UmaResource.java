@@ -6,16 +6,18 @@
 
 package io.jans.as.model.uma;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 /**
  * Resource that needs protection by registering a resource description at the AS.

@@ -6,6 +6,11 @@
 
 package io.jans.as.server.model.common;
 
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.HashUtil;
 import io.jans.as.model.util.Util;
@@ -14,11 +19,6 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.model.base.Deletable;
-
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>

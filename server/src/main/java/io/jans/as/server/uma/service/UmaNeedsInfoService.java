@@ -6,6 +6,24 @@
 
 package io.jans.as.server.uma.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.UserService;
@@ -15,20 +33,14 @@ import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
-import io.jans.as.server.uma.authorization.*;
+import io.jans.as.server.uma.authorization.Claims;
+import io.jans.as.server.uma.authorization.UmaAuthorizationContext;
+import io.jans.as.server.uma.authorization.UmaAuthorizationContextBuilder;
+import io.jans.as.server.uma.authorization.UmaPCT;
+import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.uma.ClaimDefinition;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.*;
 
 /**
  * @author yuriyz on 06/16/2017.

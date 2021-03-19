@@ -6,9 +6,10 @@
 
 package io.jans.as.model.error;
 
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * JSON error response

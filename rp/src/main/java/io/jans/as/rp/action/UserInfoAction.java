@@ -6,16 +6,18 @@
 
 package io.jans.as.rp.action;
 
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoRequest;
-import io.jans.as.model.common.AuthorizationMethod;
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serializable;
+
+import org.slf4j.Logger;
+
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoRequest;
+import io.jans.as.model.common.AuthorizationMethod;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2012

@@ -6,21 +6,22 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.uma.UmaResource;
-import io.jans.as.model.uma.UmaResourceResponse;
-import io.jans.as.model.uma.UmaTestUtil;
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.as.server.model.uma.TUma;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.assertTrue;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.model.uma.UmaResource;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.model.uma.TUma;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.server.util.RedirectUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy

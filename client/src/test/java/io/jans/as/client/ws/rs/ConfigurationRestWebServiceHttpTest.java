@@ -6,21 +6,25 @@
 
 package io.jans.as.client.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Map;
+
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.client.dev.HostnameVerifierType;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenId Configuration Web Services (HTTP)

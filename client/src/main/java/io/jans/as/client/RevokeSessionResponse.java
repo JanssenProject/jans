@@ -6,8 +6,9 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.session.EndSessionErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
+
+import io.jans.as.model.session.EndSessionErrorResponseType;
 
 /**
  * @author Yuriy Zabrovarnyy

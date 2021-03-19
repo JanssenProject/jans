@@ -6,12 +6,13 @@
 
 package io.jans.as.model.common;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.jans.orm.annotation.AttributeEnum;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Javier Rojas Blum

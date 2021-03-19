@@ -6,7 +6,30 @@
 
 package io.jans.as.server.service;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -54,26 +77,6 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum

@@ -6,11 +6,15 @@
 
 package io.jans.as.client.util;
 
-import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.SecurityProviderUtility;
-import org.apache.commons.cli.*;
+import java.io.File;
+import java.security.PrivateKey;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -18,8 +22,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.bouncycastle.util.encoders.Base64;
 
-import java.io.File;
-import java.security.PrivateKey;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 /**
  * Export private key from JKS Command example: java -cp

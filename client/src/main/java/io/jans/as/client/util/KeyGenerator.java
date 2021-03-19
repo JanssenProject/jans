@@ -6,16 +6,26 @@
 
 package io.jans.as.client.util;
 
-import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.ElevenCryptoProvider;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwk.*;
-import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.as.model.util.StringUtils;
-import io.jans.util.StringHelper;
-import org.apache.commons.cli.*;
+import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
@@ -23,12 +33,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import static io.jans.as.model.jwk.JWKParameter.*;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.ElevenCryptoProvider;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyType;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.StringUtils;
+import io.jans.util.StringHelper;
 
 /**
  * Command example:

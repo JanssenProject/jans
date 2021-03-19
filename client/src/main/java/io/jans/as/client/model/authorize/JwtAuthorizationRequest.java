@@ -6,7 +6,19 @@
 
 package io.jans.as.client.model.authorize;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.PublicKey;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.Display;
@@ -24,16 +36,6 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.PublicKey;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum

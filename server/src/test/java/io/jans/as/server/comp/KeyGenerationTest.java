@@ -6,12 +6,13 @@
 
 package io.jans.as.server.comp;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.common.service.common.EncryptionService;
+import javax.inject.Inject;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.server.BaseTest;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012

@@ -6,23 +6,27 @@
 
 package io.jans.as.server.model.uma;
 
-import io.jans.as.server.BaseTest;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

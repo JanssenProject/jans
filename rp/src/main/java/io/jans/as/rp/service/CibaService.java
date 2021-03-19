@@ -6,12 +6,13 @@
 
 package io.jans.as.rp.service;
 
-import io.jans.as.rp.ciba.CibaFlowState;
-import io.jans.as.rp.ciba.CibaRequestSession;
-import org.slf4j.Logger;
-
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.slf4j.Logger;
+
+import io.jans.as.rp.ciba.CibaFlowState;
+import io.jans.as.rp.ciba.CibaRequestSession;
 
 @Named
 public class CibaService {

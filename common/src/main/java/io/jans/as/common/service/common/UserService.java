@@ -6,6 +6,21 @@
 
 package io.jans.as.common.service.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.util.AttributeConstants;
+import io.jans.as.model.util.Util;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.CustomAttribute;
@@ -13,14 +28,6 @@ import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.util.AttributeConstants;
-import io.jans.as.model.util.Util;
-import org.slf4j.Logger;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.util.*;
 
 /**
  * Provides operations with users.
