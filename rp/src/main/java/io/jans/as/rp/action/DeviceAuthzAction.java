@@ -6,16 +6,18 @@
 
 package io.jans.as.rp.action;
 
-import io.jans.as.client.DeviceAuthzClient;
-import io.jans.as.client.DeviceAuthzRequest;
-import io.jans.as.client.DeviceAuthzResponse;
-import org.slf4j.Logger;
+import java.io.Serializable;
+import java.util.List;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serializable;
-import java.util.List;
+
+import org.slf4j.Logger;
+
+import io.jans.as.client.DeviceAuthzClient;
+import io.jans.as.client.DeviceAuthzRequest;
+import io.jans.as.client.DeviceAuthzResponse;
 
 @Named
 @SessionScoped

@@ -6,10 +6,10 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.common.AuthorizationMethod;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import io.jans.as.model.common.AuthorizationMethod;
 
 /**
  * Represents a Client Info request to send to the authorization server.

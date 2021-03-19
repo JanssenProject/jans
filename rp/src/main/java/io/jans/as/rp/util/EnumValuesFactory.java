@@ -6,15 +6,21 @@
 
 package io.jans.as.rp.util;
 
-import io.jans.as.model.common.*;
+import javax.enterprise.inject.Produces;
+import javax.inject.Named;
+
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.Display;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum

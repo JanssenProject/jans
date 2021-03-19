@@ -6,10 +6,10 @@
 
 package io.jans.as.client.ws.rs;
 
-import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
+import org.testng.annotations.Test;
 
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.GluuConfigurationClient;

@@ -6,6 +6,15 @@
 
 package io.jans.as.rp.action;
 
+import java.io.Serializable;
+import java.util.List;
+
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import io.jans.as.client.BackchannelAuthenticationClient;
 import io.jans.as.client.BackchannelAuthenticationRequest;
 import io.jans.as.client.BackchannelAuthenticationResponse;
@@ -14,13 +23,6 @@ import io.jans.as.model.util.StringUtils;
 import io.jans.as.rp.ciba.CibaFlowState;
 import io.jans.as.rp.ciba.CibaRequestSession;
 import io.jans.as.rp.service.CibaSessions;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum

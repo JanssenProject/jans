@@ -6,18 +6,19 @@
 
 package io.jans.as.model.jws;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.StringUtils;
-import io.jans.as.model.util.Util;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

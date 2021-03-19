@@ -6,21 +6,23 @@
 
 package io.jans.as.server.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.jans.as.server.BaseTest;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
-import io.jans.as.server.register.ws.rs.RegisterRestWebService;
-import io.jans.as.server.util.ServerUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.net.URI;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.register.ws.rs.RegisterRestWebService;
+import io.jans.as.server.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

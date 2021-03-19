@@ -6,6 +6,17 @@
 
 package io.jans.as.server.service;
 
+import java.net.URI;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.SubjectType;
@@ -17,15 +28,6 @@ import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.net.URI;
-import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum

@@ -6,9 +6,21 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import java.io.IOException;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.session.EndSessionRequestParam;
 import io.jans.as.model.util.Base64Util;
@@ -23,15 +35,6 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.JsonService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Javier Rojas Blum

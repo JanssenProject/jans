@@ -8,11 +8,13 @@ package io.jans.as.model.fido.u2f.protocol;
 
 import java.io.Serializable;
 
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.jans.as.model.fido.u2f.exception.BadInputException;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * FIDO U2F device authentication response

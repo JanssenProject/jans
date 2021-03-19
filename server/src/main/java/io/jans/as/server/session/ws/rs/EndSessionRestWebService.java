@@ -6,8 +6,6 @@
 
 package io.jans.as.server.session.ws.rs;
 
-import io.jans.as.model.session.EndSessionRequestParam;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -18,6 +16,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import io.jans.as.model.session.EndSessionRequestParam;
 
 /**
  * @author Javier Rojas Blum

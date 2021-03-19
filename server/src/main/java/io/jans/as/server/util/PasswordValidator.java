@@ -6,10 +6,8 @@
 
 package io.jans.as.server.util;
 
-import io.jans.as.server.i18n.LanguageBean;
-import io.jans.model.attribute.AttributeValidation;
-import io.jans.service.AttributeService;
-import io.jans.service.cdi.util.CdiUtil;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.application.FacesMessage;
@@ -19,8 +17,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import io.jans.as.server.i18n.LanguageBean;
+import io.jans.model.attribute.AttributeValidation;
+import io.jans.service.AttributeService;
+import io.jans.service.cdi.util.CdiUtil;
 
 @ApplicationScoped
 @FacesValidator(value = "gluuPasswordValidator", managed = true)

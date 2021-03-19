@@ -6,6 +6,23 @@
 
 package io.jans.as.server.comp;
 
+import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+
+import org.testng.annotations.Test;
+import org.testng.collections.Lists;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
@@ -36,15 +53,6 @@ import io.jans.as.server.uma.service.UmaRptService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.CacheService;
 import io.jans.util.security.StringEncrypter;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

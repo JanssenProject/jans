@@ -6,17 +6,32 @@
 
 package io.jans.as.client;
 
-import com.google.common.collect.Maps;
-import io.jans.as.client.dev.HostnameVerifierType;
-import io.jans.as.client.page.AbstractPage;
-import io.jans.as.client.page.PageConfig;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.error.IErrorType;
-import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.as.model.util.Util;
-import io.jans.util.StringHelper;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.UUID;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -39,8 +54,12 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jetbrains.annotations.Nullable;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.*;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -51,23 +70,18 @@ import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
-import java.util.*;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
 
-import static org.testng.Assert.*;
+import io.jans.as.client.dev.HostnameVerifierType;
+import io.jans.as.client.page.AbstractPage;
+import io.jans.as.client.page.PageConfig;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.error.IErrorType;
+import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.Util;
+import io.jans.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum

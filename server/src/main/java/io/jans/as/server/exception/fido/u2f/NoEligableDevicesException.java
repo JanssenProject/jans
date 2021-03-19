@@ -6,10 +6,10 @@
 
 package io.jans.as.server.exception.fido.u2f;
 
-import io.jans.as.server.model.fido.u2f.DeviceRegistration;
-
 import java.util.Collections;
 import java.util.List;
+
+import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 
 public class NoEligableDevicesException extends Exception {
 

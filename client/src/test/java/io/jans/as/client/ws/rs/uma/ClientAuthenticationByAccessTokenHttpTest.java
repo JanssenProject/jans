@@ -18,10 +18,15 @@ import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
-import io.jans.as.client.BaseTest;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -44,10 +49,6 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * @author yuriyz

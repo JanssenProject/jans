@@ -6,11 +6,11 @@
 
 package io.jans.as.model.token;
 
+import java.io.Serializable;
+
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
-
-import java.io.Serializable;
 
 /**
  * JSON Web Token is a compact token format intended for space constrained
