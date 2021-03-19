@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/482d45faeed647d4a2a9a48adb400441)](https://www.codacy.com/gh/JanssenProject/docker-jans-configuration-manager/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-configuration-manager&amp;utm_campaign=Badge_Grade)
+
 ## Overview
 
 Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.
