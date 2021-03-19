@@ -167,11 +167,11 @@ global:
     mountOptions:
     - debug
     parameters:
-      fsType: ""
-      kind: ""
-      pool: ""
-      storageAccountType: ""
-      type: ""
+      #fsType: ""
+      #kind: ""
+      #pool: ""
+      #storageAccountType: ""
+      #type: ""
     provisioner: microk8s.io/hostpath
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
