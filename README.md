@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/479526395cc74cb69f2f7c09296b9417)](https://www.codacy.com/gh/JanssenProject/jans-scim/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-scim&amp;utm_campaign=Badge_Grade)
+
 # Jans-SCIM
 
 A component of the Janssen Project that implements a standards-compliant SCIM service.
