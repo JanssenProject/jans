@@ -1,3 +1,4 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/441f0f8d556f4e7f98f88ff5accd26a1)](https://www.codacy.com/gh/JanssenProject/jans-config-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-config-api&amp;utm_campaign=Badge_Grade)
 # jans-config-api project
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
