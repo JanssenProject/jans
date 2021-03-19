@@ -13,6 +13,7 @@ import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
@@ -38,10 +39,17 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterResponseParam.*;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Functional tests for User Info Web Services (embedded)
@@ -76,7 +84,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String sectorIdentifierUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.CODE, io.jans.as.model.common.ResponseType.TOKEN, io.jans.as.model.common.ResponseType.ID_TOKEN);
+        List<ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.CODE, io.jans.as.model.common.ResponseType.TOKEN, io.jans.as.model.common.ResponseType.ID_TOKEN);
 
         io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -275,7 +283,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
         assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
                 "Unexpected result: " + response.getHeaderString("Pragma"));
-        assertFalse(entity.equals(null), "Unexpected result: " + entity);
+        assertNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
@@ -413,7 +421,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                                 final String userSecret, final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        List<io.jans.as.model.common.ResponseType> responseTypes = new ArrayList<io.jans.as.model.common.ResponseType>();
+        List<io.jans.as.model.common.ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -549,14 +557,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID_ISSUED_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT.toString()));
 
             clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-            clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
+            clientSecret1 = jsonObj.getString(RegisterResponseParam.CLIENT_SECRET.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -694,14 +702,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID_ISSUED_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT.toString()));
 
             clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-            clientSecret2 = jsonObj.getString(CLIENT_SECRET.toString());
+            clientSecret2 = jsonObj.getString(RegisterResponseParam.CLIENT_SECRET.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -839,14 +847,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-            assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID_ISSUED_AT.toString()));
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT.toString()));
 
             clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-            clientSecret3 = jsonObj.getString(CLIENT_SECRET.toString());
+            clientSecret3 = jsonObj.getString(RegisterResponseParam.CLIENT_SECRET.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
