@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/002d76c3ba8b4cf39b066fa6eab9d75d)](https://www.codacy.com/gh/JanssenProject/jans-eleven/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-eleven&amp;utm_campaign=Badge_Grade)
+
 # oxEleven
 
 Java web application providing REST API's for a PKCS #11 interface.
