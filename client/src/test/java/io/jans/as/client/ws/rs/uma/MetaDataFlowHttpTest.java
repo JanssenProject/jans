@@ -42,7 +42,7 @@ public class MetaDataFlowHttpTest extends BaseTest {
             throw ex;
         }
 
-        UmaTestUtil.assert_(c);
+        UmaTestUtil.assertIt(c);
     }
 
 }

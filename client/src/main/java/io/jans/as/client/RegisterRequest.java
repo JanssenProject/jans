@@ -6,85 +6,9 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ALLOW_SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_TOKEN_BINDING_CNF;
-import static io.jans.as.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
-import static io.jans.as.model.register.RegisterRequestParam.SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.TOS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.util.StringUtils.implode;
-import static io.jans.as.model.util.StringUtils.toJSONArray;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -100,6 +24,24 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.model.util.StringUtils.toJSONArray;
 
 /**
  * Represents a register request to send to the authorization server.
@@ -427,11 +369,11 @@ public class RegisterRequest extends BaseRequest {
         this.responseTypes = ResponseType.toStringList(responseTypes);
     }
 
-    public List<String> getResponseTypes_() {
+    public List<String> getResponseTypesStrings() {
         return responseTypes;
     }
 
-    public void setResponseTypes_(List<String> responseTypes) {
+    public void setResponseTypesStrings(List<String> responseTypes) {
         this.responseTypes = responseTypes;
     }
 
@@ -1550,7 +1492,7 @@ public class RegisterRequest extends BaseRequest {
         result.setRedirectUris(redirectUris);
         result.setScope(scope);
         result.setClaims(claims);
-        result.setResponseTypes_(new ArrayList<String>(responseTypes));
+        result.setResponseTypesStrings(new ArrayList<String>(responseTypes));
         result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);

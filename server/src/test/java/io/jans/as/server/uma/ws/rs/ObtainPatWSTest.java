@@ -36,13 +36,13 @@ public class ObtainPatWSTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
 		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(pat);
+		UmaTestUtil.assertIt(pat);
 	}
 
 	@Test(dependsOnMethods = "requestPat")
 	@Parameters({ "tokenPath", "umaPatClientId", "umaPatClientSecret" })
 	public void requestNewPatByRefreshTokne(String tokenPath, String umaPatClientId, String umaPatClientSecret) {
 		final Token newPat = TUma.newTokenByRefreshToken(url, tokenPath, pat, umaPatClientId, umaPatClientSecret);
-		UmaTestUtil.assert_(newPat);
+		UmaTestUtil.assertIt(newPat);
 	}
 }

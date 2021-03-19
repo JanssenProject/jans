@@ -64,7 +64,7 @@ class TRegisterPermission {
 		assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
 		try {
 			final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
-			UmaTestUtil.assert_(t);
+			UmaTestUtil.assertIt(t);
 
 			ticketH.setT(t);
 		} catch (IOException e) {

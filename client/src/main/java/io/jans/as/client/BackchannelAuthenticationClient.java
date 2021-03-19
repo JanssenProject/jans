@@ -6,30 +6,18 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.ACR_VALUES;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.BINDING_MESSAGE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.CLIENT_ID;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.CLIENT_NOTIFICATION_TOKEN;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.ID_TOKEN_HINT;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.LOGIN_HINT;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.LOGIN_HINT_TOKEN;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.REQUEST;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.REQUESTED_EXPIRY;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.REQUEST_URI;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.SCOPE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.USER_CODE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
-
-import javax.ws.rs.HttpMethod;
-
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.util.Util;
+import javax.ws.rs.HttpMethod;
+
+import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
 
 /**
  * Encapsulates functionality to make backchannel authentication request calls to an authorization server via REST Services.
@@ -66,7 +54,7 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
 
         try {
             initClientRequest();
-            response = exec_();
+            response = execInternal();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
@@ -76,7 +64,7 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         return response;
     }
 
-    private BackchannelAuthenticationResponse exec_() throws Exception {
+    private BackchannelAuthenticationResponse execInternal() throws Exception {
         // Prepare request parameters
         clientRequest.setHttpMethod(getHttpMethod());
         clientRequest.header("Content-Type", request.getContentType());

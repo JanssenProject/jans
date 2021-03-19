@@ -31,6 +31,6 @@ public class UmaConfigurationWSTest extends BaseTest {
 	@Test
 	public void configurationPresence(final String umaConfigurationPath) throws Exception {
 		final UmaMetadata c = TUma.requestConfiguration(url, umaConfigurationPath);
-		UmaTestUtil.assert_(c);
+		UmaTestUtil.assertIt(c);
 	}
 }

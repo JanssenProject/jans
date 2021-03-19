@@ -6,7 +6,7 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static io.jans.as.model.uma.UmaTestUtil.assert_;
+import static io.jans.as.model.uma.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -18,6 +18,7 @@ import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
+import io.jans.as.model.uma.UmaTestUtil;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -75,10 +76,10 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-        assert_(this.metadata);
+        UmaTestUtil.assertIt(this.metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
-        assert_(pat);
+        UmaTestUtil.assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
@@ -236,7 +237,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
             assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");
 
             needInfo = Util.createJsonMapper().readValue(entity, UmaNeedInfoResponse.class);
-            assert_(needInfo);
+            assertIt(needInfo);
             return;
         }
 

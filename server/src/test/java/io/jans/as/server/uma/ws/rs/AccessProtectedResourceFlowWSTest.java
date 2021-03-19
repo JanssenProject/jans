@@ -46,7 +46,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
 		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(pat);
+		UmaTestUtil.assertIt(pat);
 	}
 
 	@Test(dependsOnMethods = "init_0")
@@ -60,7 +60,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Parameters({ "umaRptPath"})
 	public void init(String umaRptPath) {
 		rpt = TUma.requestRpt(url, umaRptPath);
-		UmaTestUtil.assert_(rpt);
+		UmaTestUtil.assertIt(rpt);
 	}
 
 	/*
@@ -71,7 +71,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Parameters({ "umaRegisterResourcePath" })
 	public void _1_registerResource(String umaRegisterResourcePath) throws Exception {
 		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resource);
+		UmaTestUtil.assertIt(resource);
 	}
 
 	/*
@@ -111,7 +111,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
-		UmaTestUtil.assert_(ticket);
+		UmaTestUtil.assertIt(ticket);
 	}
 
 	@Test(dependsOnMethods = { "_4_registerPermissionForRpt" })
@@ -128,7 +128,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Parameters({ "umaRptStatusPath" })
 	public void _6_hostDeterminesRptStatus(String umaRptStatusPath) throws Exception {
 		final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, rpt.getRpt());
-		UmaTestUtil.assert_(status);
+		UmaTestUtil.assertIt(status);
 
 	}
 
