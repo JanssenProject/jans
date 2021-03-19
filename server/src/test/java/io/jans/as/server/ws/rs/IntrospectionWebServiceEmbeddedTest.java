@@ -49,7 +49,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
 		authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(authorization);
+		UmaTestUtil.assertIt(authorization);
 	}
 
 	@Test(dependsOnMethods = "requestAuthorization")
@@ -59,7 +59,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
 		tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(tokenToIntrospect);
+		UmaTestUtil.assertIt(tokenToIntrospect);
 	}
 
 	@Test(dependsOnMethods = "requestTokenToIntrospect")

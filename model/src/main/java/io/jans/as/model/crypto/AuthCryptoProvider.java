@@ -6,19 +6,40 @@
 
 package io.jans.as.model.crypto;
 
-import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
-import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static io.jans.as.model.jwk.JWKParameter.CURVE;
-import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
-import static io.jans.as.model.jwk.JWKParameter.KEY_TYPE;
-import static io.jans.as.model.jwk.JWKParameter.KEY_USE;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
-import static io.jans.as.model.jwk.JWKParameter.X;
-import static io.jans.as.model.jwk.JWKParameter.Y;
+import com.google.common.collect.Lists;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.impl.ECDSA;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.cert.CertIOException;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,43 +70,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.cert.CertIOException;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.common.collect.Lists;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.impl.ECDSA;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.KeySelectionStrategy;
-import io.jans.as.model.jwk.Use;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -189,7 +174,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         // Generate the key
         KeyPair keyPair = keyGen.generateKeyPair();
-        java.security.PrivateKey pk = keyPair.getPrivate();
+        PrivateKey pk = keyPair.getPrivate();
 
         // Java API requires a certificate chain
         X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm.getAlgorithm(), expirationTime);
@@ -344,15 +329,6 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 LOG.error(e.getMessage(), e);
                 return false;
             }
-        }
-    }
-
-    private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
-        try {
-            return jwks.getString(node);
-        } catch (Exception ex) {
-            JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
-            return publicKey.getString(node);
         }
     }
 

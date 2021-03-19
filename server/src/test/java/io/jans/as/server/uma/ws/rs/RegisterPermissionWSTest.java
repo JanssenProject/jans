@@ -59,13 +59,13 @@ public class RegisterPermissionWSTest extends BaseTest {
 
 		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(pat);
+		UmaTestUtil.assertIt(pat);
 	}
 
 	@Test(dependsOnMethods = { "init_" })
 	public void init() {
 		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resource);
+		UmaTestUtil.assertIt(resource);
 	}
 
 	@Test(dependsOnMethods = { "init" })
@@ -75,7 +75,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
-		UmaTestUtil.assert_(ticket);
+		UmaTestUtil.assertIt(ticket);
 	}
 
 	@Test(dependsOnMethods = { "testRegisterPermission" })

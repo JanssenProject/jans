@@ -138,7 +138,7 @@ public class TTokenRequest {
 			fail(e.getMessage());
 		}
 
-		UmaTestUtil.assert_(token);
+		UmaTestUtil.assertIt(token);
 		return token;
 	}
 
@@ -279,7 +279,7 @@ public class TTokenRequest {
 				}
 				System.out.println("Token response = " + tokenResponse);
 				RPTResponse result = ServerUtil.createJsonMapper().readValue(tokenResponse, RPTResponse.class);
-				UmaTestUtil.assert_(result);
+				UmaTestUtil.assertIt(result);
 
 				h.setT(result);
 			} catch (IOException e) {
