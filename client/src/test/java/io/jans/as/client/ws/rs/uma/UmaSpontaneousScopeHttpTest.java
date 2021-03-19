@@ -6,7 +6,7 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static io.jans.as.model.uma.UmaTestUtil.assert_;
+import static io.jans.as.model.uma.UmaTestUtil.assertIt;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -18,6 +18,7 @@ import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.List;
 
+import io.jans.as.model.uma.UmaTestUtil;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -89,12 +90,12 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl"})
     public void init(final String umaMetaDataUrl) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-        assert_(this.metadata);
+        UmaTestUtil.assertIt(this.metadata);
 
         registerClient();
 
         pat = UmaClient.requestPat(tokenEndpoint, clientResponse.getClientId(), clientResponse.getClientSecret(), clientExecutor(true));
-        assert_(pat);
+        UmaTestUtil.assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
@@ -128,7 +129,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 permissionFlowTest.ticket,
                 null, null, null, null, null);
-        assert_(response);
+        UmaTestUtil.assertIt(response);
 
         this.rpt = response.getAccessToken();
     }
@@ -138,7 +139,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     public void rptStatus() {
         showTitle("rptStatus");
         final RptIntrospectionResponse status = this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, "");
-        assert_(status);
+        UmaTestUtil.assertIt(status);
 
         // at the end scope registered by permission must be present in RPT permission with scope allowed by spontaneous scope check
         assertTrue(status.getPermissions().get(0).getScopes().contains(USER_2_SCOPE));

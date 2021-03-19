@@ -48,7 +48,7 @@ class TConfiguration {
 				fail();
 			}
 		}
-		UmaTestUtil.assert_(configuration);
+		UmaTestUtil.assertIt(configuration);
 		return configuration;
 	}
 
@@ -63,7 +63,7 @@ class TConfiguration {
 		assertEquals(response.getStatus(), 200, "Unexpected response code.");
 		try {
 			configuration = ServerUtil.createJsonMapper().readValue(entity, UmaMetadata.class);
-			UmaTestUtil.assert_(configuration);
+			UmaTestUtil.assertIt(configuration);
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail();

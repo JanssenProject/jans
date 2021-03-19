@@ -52,7 +52,7 @@ class TRegisterResource {
 			e.printStackTrace();
 			fail();
 		}
-		UmaTestUtil.assert_(registerStatus);
+		UmaTestUtil.assertIt(registerStatus);
 		return registerStatus;
 	}
 
@@ -64,7 +64,7 @@ class TRegisterResource {
 			e.printStackTrace();
 			fail();
 		}
-		UmaTestUtil.assert_(modifyStatus);
+		UmaTestUtil.assertIt(modifyStatus);
 		return modifyStatus;
 	}
 
@@ -100,7 +100,7 @@ class TRegisterResource {
 
 		registerStatus = TUma.readJsonValue(entity, UmaResourceResponse.class);
 
-		UmaTestUtil.assert_(registerStatus);
+		UmaTestUtil.assertIt(registerStatus);
 		return registerStatus;
 	}
 
@@ -130,7 +130,7 @@ class TRegisterResource {
 		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
 		modifyStatus = TUma.readJsonValue(entity, UmaResourceResponse.class);
 
-		UmaTestUtil.assert_(modifyStatus);
+		UmaTestUtil.assertIt(modifyStatus);
 		return modifyStatus;
 	}
 

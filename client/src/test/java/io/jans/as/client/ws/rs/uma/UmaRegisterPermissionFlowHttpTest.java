@@ -56,7 +56,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
             this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-            UmaTestUtil.assert_(this.metadata);
+            UmaTestUtil.assertIt(this.metadata);
         }
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
@@ -100,7 +100,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
         PermissionTicket ticket = getPermissionService().registerPermission(
                 "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
-        UmaTestUtil.assert_(ticket);
+        UmaTestUtil.assertIt(ticket);
         this.ticket = ticket.getTicket();
         return ticket.getTicket();
     }

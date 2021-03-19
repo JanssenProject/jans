@@ -60,6 +60,6 @@ public class UmaScopeWSTest extends BaseTest {
 
 		final UmaScopeDescription scope = TUma.readJsonValue(entity, UmaScopeDescription.class);
 
-		UmaTestUtil.assert_(scope);
+		UmaTestUtil.assertIt(scope);
 	}
 }

@@ -6,16 +6,15 @@
 
 package io.jans.as.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
+
+import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a token request to send to the authorization server.
@@ -24,38 +23,6 @@ import io.jans.as.model.util.QueryBuilder;
  * @version June 28, 2017
  */
 public class TokenRequest extends ClientAuthnRequest {
-
-    public static class Builder {
-
-        private GrantType grantType;
-        private String scope;
-
-        public Builder grantType(GrantType grantType) {
-            this.grantType = grantType;
-            return this;
-        }
-
-        public Builder scope(String scope) {
-            this.scope = scope;
-            return this;
-        }
-
-        public Builder pat(String... scopeArray) {
-            String scope = UmaScopeType.PROTECTION.getValue();
-            if (scopeArray != null && scopeArray.length > 0) {
-                for (String s : scopeArray) {
-                    scope = scope + " " + s;
-                }
-            }
-            return scope(scope);
-        }
-
-        public TokenRequest build() {
-            final TokenRequest request = new TokenRequest(grantType);
-            request.setScope(scope);
-            return request;
-        }
-    }
 
     private GrantType grantType;
     private String code;
@@ -305,7 +272,7 @@ public class TokenRequest extends ClientAuthnRequest {
      * @return A collection of parameters.
      */
     public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<>();
 
         if (grantType != null) {
             parameters.put("grant_type", grantType.toString());
@@ -348,5 +315,37 @@ public class TokenRequest extends ClientAuthnRequest {
         }
 
         return parameters;
+    }
+
+    public static class Builder {
+
+        private GrantType grantType;
+        private String scope;
+
+        public Builder grantType(GrantType grantType) {
+            this.grantType = grantType;
+            return this;
+        }
+
+        public Builder scope(String scope) {
+            this.scope = scope;
+            return this;
+        }
+
+        public Builder pat(String... scopeArray) {
+            StringBuilder scope = new StringBuilder(UmaScopeType.PROTECTION.getValue());
+            if (scopeArray != null && scopeArray.length > 0) {
+                for (String s : scopeArray) {
+                    scope.append(" ").append(s);
+                }
+            }
+            return scope(scope.toString());
+        }
+
+        public TokenRequest build() {
+            final TokenRequest request = new TokenRequest(grantType);
+            request.setScope(scope);
+            return request;
+        }
     }
 }

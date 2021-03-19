@@ -879,10 +879,10 @@ public abstract class BaseTest {
     }
 
     public void showTitle(String title) {
-        title = "TEST: " + title;
+        String testTitle = "TEST: " + title;
 
         System.out.println("#######################################################");
-        System.out.println(title);
+        System.out.println(testTitle);
         System.out.println("#######################################################");
     }
 
