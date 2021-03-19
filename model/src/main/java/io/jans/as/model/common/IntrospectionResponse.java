@@ -6,18 +6,16 @@
 
 package io.jans.as.model.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import io.jans.as.model.common.converter.ListConverter;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -83,7 +81,7 @@ public class IntrospectionResponse {
     }
 
     public void setScope(Collection<String> scope) {
-        this.scope = scope != null ? new ArrayList<String>(scope) : new ArrayList<String>();;
+        this.scope = scope != null ? new ArrayList<String>(scope) : new ArrayList<String>();
     }
 
     public Integer getExpiresAt() {
