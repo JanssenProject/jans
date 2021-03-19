@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c07e27ff341a43e68c5d6b3c34188014)](https://www.codacy.com/gh/JanssenProject/jans-fido2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-fido2&amp;utm_campaign=Badge_Grade)
+
 # Fido2
 
 [FIDO 2.0 (FIDO2)](https://fidoalliance.org/fido2/) is an open authentication 
