@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4d9915b7bd2347829a16a5375955dc94)](https://www.codacy.com/gh/JanssenProject/docker-jans-persistence-loader/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-persistence-loader&amp;utm_campaign=Badge_Grade)
+
 ## Overview
 
 Persistence is a special container to load initial data for LDAP or Couchbase.
