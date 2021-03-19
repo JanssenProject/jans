@@ -6,6 +6,13 @@
 
 package io.jans.as.server.service;
 
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.msgpack.core.Preconditions;
+
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -14,12 +21,6 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
-import org.msgpack.core.Preconditions;
-
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
 
 /**
  * @author Yuriy Zabrovarnyy

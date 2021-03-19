@@ -6,17 +6,9 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -26,9 +18,19 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.service.CacheService;
 
 /**
  * Service used to process data related to device code grant type.

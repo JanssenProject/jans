@@ -6,18 +6,24 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.util.Util;
+import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.CLIENT_ID;
+import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.SCOPE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.DEVICE_CODE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.INTERVAL;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.USER_CODE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
+
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-
-import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.CLIENT_ID;
-import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.SCOPE;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
+import io.jans.as.model.util.Util;
 
 /**
  * Encapsulates functionality to make Device Authz request calls to an authorization server via REST Services.

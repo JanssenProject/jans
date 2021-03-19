@@ -6,9 +6,9 @@
 
 package io.jans.as.client;
 
-import org.apache.log4j.Logger;
-
 import javax.ws.rs.HttpMethod;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author Yuriy Zabrovarnyy

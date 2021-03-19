@@ -6,14 +6,14 @@
 
 package io.jans.as.model.util;
 
-import io.jans.as.model.util.HashUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.security.Security;
 
-import static org.testng.Assert.assertEquals;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.testng.annotations.Test;
+
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Yuriy Zabrovarnyy

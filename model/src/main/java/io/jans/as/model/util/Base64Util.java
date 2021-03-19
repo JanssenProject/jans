@@ -6,11 +6,11 @@
 
 package io.jans.as.model.util;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 /**
  * @author Javier Rojas Blum

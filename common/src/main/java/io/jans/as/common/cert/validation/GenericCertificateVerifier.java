@@ -13,10 +13,11 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 
-import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on CRL

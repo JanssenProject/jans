@@ -6,12 +6,13 @@
 
 package io.jans.as.model.gluu;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Created by eugeniuparvan on 8/5/16.

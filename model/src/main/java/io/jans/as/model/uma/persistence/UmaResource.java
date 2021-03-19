@@ -6,16 +6,22 @@
 
 package io.jans.as.model.uma.persistence;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Lists;
-import io.jans.as.model.util.Util;
-import io.jans.orm.annotation.*;
-
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
+
+import io.jans.as.model.util.Util;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * Resource description.

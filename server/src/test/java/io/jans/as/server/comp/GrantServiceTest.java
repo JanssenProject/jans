@@ -6,17 +6,19 @@
 
 package io.jans.as.server.comp;
 
+import java.util.Date;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.util.TokenHashUtil;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -3,14 +3,12 @@
  *
  * Copyright (c) 2020, Janssen Project
  */
-
 package io.jans.as.model.uma;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.script.ScriptException;
-
 /**
  * @author yuriyz
  */

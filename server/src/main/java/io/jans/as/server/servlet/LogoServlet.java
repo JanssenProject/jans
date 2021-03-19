@@ -6,20 +6,26 @@
 
 package io.jans.as.server.servlet;
 
-import io.jans.as.common.service.OrganizationService;
-import io.jans.as.persistence.model.GluuOrganization;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
 
 import javax.inject.Inject;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.Date;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.persistence.model.GluuOrganization;
 
 @WebServlet(urlPatterns = "/servlet/logo")
 public class LogoServlet extends HttpServlet {

@@ -6,7 +6,26 @@
 
 package io.jans.as.server.uma.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import com.google.common.base.Preconditions;
+
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
@@ -31,16 +50,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.INumGenerator;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * RPT manager component

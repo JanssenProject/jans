@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service.custom;
 
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.util.Base64Util;
-import io.jans.service.custom.script.AbstractCustomScriptService;
+import java.io.UnsupportedEncodingException;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.interceptor.Interceptor;
-import java.io.UnsupportedEncodingException;
+
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.util.Base64Util;
+import io.jans.service.custom.script.AbstractCustomScriptService;
 
 /**
  * Operations with custom scripts

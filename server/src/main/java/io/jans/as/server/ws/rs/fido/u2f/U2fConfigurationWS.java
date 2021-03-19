@@ -6,13 +6,6 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.fido.u2f.U2fConfiguration;
-import io.jans.as.model.fido.u2f.U2fErrorResponseType;
-import io.jans.as.server.util.ServerUtil;
-import org.slf4j.Logger;
-
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -20,6 +13,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.fido.u2f.U2fConfiguration;
+import io.jans.as.model.fido.u2f.U2fErrorResponseType;
+import io.jans.as.server.util.ServerUtil;
 
 /**
  * The endpoint at which the requester can obtain FIDO U2F metadata

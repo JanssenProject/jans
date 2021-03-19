@@ -6,12 +6,13 @@
 
 package io.jans.as.server.model.common;
 
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
-
-import javax.inject.Inject;
 
 /**
  * An extension grant with the grant type value: urn:ietf:params:oauth:grant-type:device_code

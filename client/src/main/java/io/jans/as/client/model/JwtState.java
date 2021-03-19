@@ -6,6 +6,28 @@
 
 package io.jans.as.client.model;
 
+import static io.jans.as.model.jwt.JwtStateClaimName.ADDITIONAL_CLAIMS;
+import static io.jans.as.model.jwt.JwtStateClaimName.AS;
+import static io.jans.as.model.jwt.JwtStateClaimName.AT_HASH;
+import static io.jans.as.model.jwt.JwtStateClaimName.AUD;
+import static io.jans.as.model.jwt.JwtStateClaimName.C_HASH;
+import static io.jans.as.model.jwt.JwtStateClaimName.EXP;
+import static io.jans.as.model.jwt.JwtStateClaimName.IAT;
+import static io.jans.as.model.jwt.JwtStateClaimName.ISS;
+import static io.jans.as.model.jwt.JwtStateClaimName.JTI;
+import static io.jans.as.model.jwt.JwtStateClaimName.KID;
+import static io.jans.as.model.jwt.JwtStateClaimName.RFP;
+import static io.jans.as.model.jwt.JwtStateClaimName.TARGET_LINK_URI;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.PublicKey;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -19,16 +41,6 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.PublicKey;
-
-import static io.jans.as.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum

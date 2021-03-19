@@ -6,13 +6,15 @@
 
 package io.jans.as.model.uma;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author yuriyz on 06/04/2017.

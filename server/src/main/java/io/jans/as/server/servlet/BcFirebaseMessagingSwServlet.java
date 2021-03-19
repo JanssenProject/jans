@@ -6,10 +6,12 @@
 
 package io.jans.as.server.servlet;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.Util;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -17,12 +19,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 
 @WebServlet(urlPatterns = "/firebase-messaging-sw.js")
 public class BcFirebaseMessagingSwServlet extends HttpServlet {

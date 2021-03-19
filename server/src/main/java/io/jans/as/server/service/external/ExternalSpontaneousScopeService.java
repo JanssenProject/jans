@@ -6,19 +6,21 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.external.context.SpontaneousScopeExternalContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.service.custom.script.ExternalScriptService;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import java.util.List;
-import java.util.Set;
 
 @ApplicationScoped
 @DependsOn("appInitializer")

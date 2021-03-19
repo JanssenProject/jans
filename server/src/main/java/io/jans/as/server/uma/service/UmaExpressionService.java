@@ -6,7 +6,20 @@
 
 package io.jans.as.server.uma.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.JsonLogic;
 import io.jans.as.model.uma.JsonLogicNode;
@@ -19,16 +32,6 @@ import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
 import io.jans.as.server.uma.authorization.UmaAuthorizationContext;
 import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author yuriyz

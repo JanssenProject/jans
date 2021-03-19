@@ -6,7 +6,24 @@
 
 package io.jans.as.server.service;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
@@ -22,25 +39,15 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushErrorService;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Yuriy Movchan

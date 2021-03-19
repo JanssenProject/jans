@@ -9,13 +9,14 @@ package io.jans.as.common.service.common;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import io.jans.model.SmtpConfiguration;
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import org.slf4j.Logger;
 
 /**
  * GluuConfiguration service

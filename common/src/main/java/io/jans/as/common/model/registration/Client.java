@@ -6,21 +6,34 @@
 
 package io.jans.as.common.model.registration;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.common.*;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.orm.model.base.DeletableEntity;
-import io.jans.as.persistence.model.ClientAttributes;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.persistence.model.ClientAttributes;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.AttributesList;
+import io.jans.orm.annotation.CustomObjectClass;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.DeletableEntity;
 
 /**
  * @author Javier Rojas Blum

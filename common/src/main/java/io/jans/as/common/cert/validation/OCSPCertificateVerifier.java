@@ -18,7 +18,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 
-import io.jans.as.common.cert.validation.model.ValidationStatus;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -44,9 +43,11 @@ import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import io.jans.as.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on OCSP
