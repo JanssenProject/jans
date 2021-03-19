@@ -6,39 +6,6 @@
 
 package io.jans.as.server.ws.rs;
 
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.codec.binary.Base64;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -56,6 +23,25 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
+import static io.jans.as.model.register.RegisterResponseParam.*;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for User Info Web Services (embedded)
@@ -72,7 +58,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     private static String clientSecret;
 
     private static String accessToken1;
-    private static String accessToken2;
     private static String accessToken3;
     private static String accessToken4;
     private static String accessToken5;
@@ -290,7 +275,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
         assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
                 "Unexpected result: " + response.getHeaderString("Pragma"));
-        assertTrue(!entity.equals(null), "Unexpected result: " + entity);
+        assertFalse(entity.equals(null), "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
@@ -492,7 +477,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoAdditionalClaims")
-    public void requestUserInfoAdditionalClaimsStep2(final String userInfoPath) throws Exception {
+    public void requestUserInfoAdditionalClaimsStep2(final String userInfoPath) {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -501,7 +486,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Response response = request
-                .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
+                .post(Entity.form(new MultivaluedHashMap<>(userInfoRequest.getParameters())));
         String entity = response.readEntity(String.class);
 
         showResponse("requestUserInfoAdditionalClaims step 2", response, entity);
