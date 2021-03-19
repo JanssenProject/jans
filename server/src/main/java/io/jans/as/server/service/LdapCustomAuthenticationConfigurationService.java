@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.persistence.model.configuration.CustomProperty;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
@@ -15,14 +26,6 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.config.CustomAuthenticationConfiguration;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides service methods methods with LDAP configuration

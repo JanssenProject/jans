@@ -6,14 +6,15 @@
 
 package io.jans.as.model.authorize;
 
-import io.jans.as.model.authorize.CodeVerifier;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  * @author Yuriy Zabrovarnyy

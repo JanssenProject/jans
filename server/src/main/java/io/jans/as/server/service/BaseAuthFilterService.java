@@ -6,21 +6,28 @@
 
 package io.jans.as.server.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
 import io.jans.as.model.configuration.BaseFilter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;
 import io.jans.orm.model.base.BaseEntry;
-import io.jans.orm.model.base.DummyEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Yuriy Movchan

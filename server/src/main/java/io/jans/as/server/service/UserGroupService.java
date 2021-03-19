@@ -6,18 +6,20 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.server.model.ldap.UserGroup;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.search.filter.Filter;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Arrays;
-import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import io.jans.as.server.model.ldap.UserGroup;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.search.filter.Filter;
 
 /**
  * It's utility service which applications uses in custom authentication scripts 

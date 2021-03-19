@@ -6,8 +6,9 @@
 
 package io.jans.as.model.common;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * @author Yuriy Zabrovarnyy

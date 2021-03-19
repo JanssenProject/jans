@@ -6,6 +6,19 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
+import javax.inject.Inject;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -28,12 +41,6 @@ import io.jans.as.server.service.fido.u2f.UserSessionIdService;
 import io.jans.as.server.service.fido.u2f.ValidationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * The endpoint allows to start and finish U2F authentication process

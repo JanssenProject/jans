@@ -6,11 +6,11 @@
 
 package io.jans.as.server.model.common;
 
+import java.util.Date;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
-
-import java.util.Date;
 
 /**
  * <p>

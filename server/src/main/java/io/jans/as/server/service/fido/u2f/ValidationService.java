@@ -6,6 +6,12 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.fido.u2f.U2fConstants;
@@ -13,11 +19,6 @@ import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Utility to validate U2F input data

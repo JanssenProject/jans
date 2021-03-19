@@ -6,13 +6,14 @@
 
 package io.jans.as.server.service.fido.u2f;
 
-import io.jans.as.server.exception.fido.u2f.BadConfigurationException;
-import io.jans.net.InetAddressUtility;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
-import java.net.URI;
-import java.net.URISyntaxException;
+
+import io.jans.as.server.exception.fido.u2f.BadConfigurationException;
+import io.jans.net.InetAddressUtility;
 
 /**
  * Provides operations with U2F applications

@@ -6,8 +6,6 @@
 
 package io.jans.as.server;
 
-import io.jans.as.server.BaseTest;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan

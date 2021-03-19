@@ -6,7 +6,6 @@
 
 package io.jans.as.model.util;
 
-import io.jans.as.model.util.CertUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

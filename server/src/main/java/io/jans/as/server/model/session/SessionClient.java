@@ -6,11 +6,12 @@
 
 package io.jans.as.server.model.session;
 
-import io.jans.as.common.model.registration.Client;
-
-import javax.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import javax.inject.Named;
+
+import io.jans.as.common.model.registration.Client;
 
 /**
  * @author Javier Rojas Blum Date: 03.20.2012

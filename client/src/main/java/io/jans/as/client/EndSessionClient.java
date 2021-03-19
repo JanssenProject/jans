@@ -6,17 +6,19 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.session.EndSessionErrorResponseType;
-import io.jans.as.model.session.EndSessionRequestParam;
-import io.jans.as.model.session.EndSessionResponseParam;
-import io.jans.as.model.util.Util;
+import java.util.Map;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.util.Map;
+import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.session.EndSessionRequestParam;
+import io.jans.as.model.session.EndSessionResponseParam;
+import io.jans.as.model.util.Util;
 
 /**
  * Encapsulates functionality to make end session request calls to an

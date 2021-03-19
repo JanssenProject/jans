@@ -6,13 +6,18 @@
 
 package io.jans.as.client.client;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import io.jans.as.model.register.RegisterResponseParam;
-
-import static io.jans.as.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.jans.as.model.register.RegisterResponseParam;
 
 /**
  * @author yuriyz

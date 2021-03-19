@@ -6,9 +6,9 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.model.common.TokenType;
-
 import java.util.Date;
+
+import io.jans.as.model.common.TokenType;
 
 /**
  * <p>

@@ -6,10 +6,10 @@
 
 package io.jans.as.server.crypto.signature;
 
-import io.jans.as.model.exception.SignatureException;
-
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+
+import io.jans.as.model.exception.SignatureException;
 
 public interface SignatureVerification {
 

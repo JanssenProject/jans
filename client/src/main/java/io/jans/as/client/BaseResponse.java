@@ -6,9 +6,9 @@
 
 package io.jans.as.client;
 
-import org.jboss.resteasy.client.ClientResponse;
-
 import javax.ws.rs.core.MultivaluedMap;
+
+import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * @author Javier Rojas Blum

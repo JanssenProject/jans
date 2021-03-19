@@ -10,13 +10,13 @@ import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
+
+import org.slf4j.Logger;
 
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
 
 /**
  * Allows to decrypt passwords

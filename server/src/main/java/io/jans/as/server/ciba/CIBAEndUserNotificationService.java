@@ -6,6 +6,25 @@
 
 package io.jans.as.server.ciba;
 
+import static io.jans.as.model.authorize.AuthorizeRequestParam.ACR_VALUES;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.AUTH_REQ_ID;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.NONCE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.PROMPT;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.REDIRECT_URI;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
+
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingClient;
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingRequest;
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingResponse;
@@ -14,15 +33,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.ciba.CibaEncryptionService;
 import io.jans.as.server.service.external.ExternalCibaEndUserNotificationService;
 import io.jans.as.server.service.external.context.ExternalCibaEndUserNotificationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.UUID;
-
-import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

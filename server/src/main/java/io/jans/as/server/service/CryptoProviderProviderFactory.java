@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service;
 
-import io.jans.as.model.common.WebKeyStorage;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.CryptoProviderFactory;
-import org.slf4j.Logger;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.slf4j.Logger;
+
+import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.CryptoProviderFactory;
 
 /**
  * Crypto Provider

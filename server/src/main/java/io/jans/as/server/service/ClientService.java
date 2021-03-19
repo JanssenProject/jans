@@ -6,7 +6,23 @@
 
 package io.jans.as.server.service;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.json.JSONArray;
+import org.python.jline.internal.Preconditions;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -24,14 +40,6 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import org.json.JSONArray;
-import org.python.jline.internal.Preconditions;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * Provides operations with clients.

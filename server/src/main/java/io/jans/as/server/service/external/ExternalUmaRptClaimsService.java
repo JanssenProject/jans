@@ -6,19 +6,21 @@
 
 package io.jans.as.server.service.external;
 
-import io.jans.as.server.service.external.context.ExternalUmaRptClaimsContext;
-import io.jans.model.custom.script.CustomScriptType;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
-import io.jans.service.custom.script.ExternalScriptService;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import java.util.List;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.List;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import io.jans.as.server.service.external.context.ExternalUmaRptClaimsContext;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
+import io.jans.service.custom.script.ExternalScriptService;
 
 /**
  * @author Yuriy Zabrovarnyy

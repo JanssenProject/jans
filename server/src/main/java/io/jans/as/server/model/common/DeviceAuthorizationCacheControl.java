@@ -6,11 +6,11 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.common.model.registration.Client;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
+
+import io.jans.as.common.model.registration.Client;
 
 /**
  * Class used to keep all data about an OAuth2 Device Flow request.

@@ -6,16 +6,17 @@
 
 package io.jans.as.model.crypto.signature;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.jans.as.model.common.HasParamName;
-import io.jans.as.model.jwt.JwtType;
-import io.jans.orm.annotation.AttributeEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.jans.as.model.common.HasParamName;
+import io.jans.as.model.jwt.JwtType;
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Javier Rojas Blum

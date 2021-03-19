@@ -6,14 +6,15 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.TokenType;
-import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -21,7 +22,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.TokenType;
+import io.jans.as.model.util.Util;
 
 /**
  * Represents an authorization response received from the authorization server.

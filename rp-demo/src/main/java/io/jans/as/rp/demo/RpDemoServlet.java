@@ -6,18 +6,20 @@
 
 package io.jans.as.rp.demo;
 
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
 
 /**
  * @author yuriyz on 07/19/2016.

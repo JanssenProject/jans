@@ -6,14 +6,14 @@
 
 package io.jans.as.client.uma;
 
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaPermissionList;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+
+import io.jans.as.model.uma.PermissionTicket;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaPermissionList;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a

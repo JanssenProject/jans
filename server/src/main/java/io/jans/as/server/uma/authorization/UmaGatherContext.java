@@ -6,6 +6,13 @@
 
 package io.jans.as.server.uma.authorization;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
@@ -22,12 +29,6 @@ import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author yuriyz

@@ -6,17 +6,18 @@
 
 package io.jans.as.model.common;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.common.collect.Lists;
-import io.jans.orm.annotation.AttributeEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
+
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * <p>

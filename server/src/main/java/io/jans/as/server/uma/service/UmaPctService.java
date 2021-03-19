@@ -6,6 +6,15 @@
 
 package io.jans.as.server.uma.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
@@ -15,13 +24,6 @@ import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author yuriyz on 05/31/2017.
