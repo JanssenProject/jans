@@ -6,6 +6,17 @@
 
 package io.jans.as.server.comp;
 
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+
+import java.security.KeyStoreException;
+import java.security.interfaces.ECPublicKey;
+import java.util.Date;
+import java.util.List;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
@@ -16,7 +27,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.jans.as.server.BaseTest;
+
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -28,16 +39,7 @@ import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.security.KeyStoreException;
-import java.security.interfaces.ECPublicKey;
-import java.util.Date;
-import java.util.List;
-
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
+import io.jans.as.server.BaseTest;
 
 /**
  * @author Yuriy Zabrovarnyy

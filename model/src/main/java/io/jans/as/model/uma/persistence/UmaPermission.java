@@ -6,13 +6,23 @@
 
 package io.jans.as.model.uma.persistence;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Maps;
+
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.Util;
-import io.jans.orm.annotation.*;
-
-import java.io.Serializable;
-import java.util.*;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * UMA permission

@@ -6,21 +6,26 @@
 
 package io.jans.as.server.comp;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

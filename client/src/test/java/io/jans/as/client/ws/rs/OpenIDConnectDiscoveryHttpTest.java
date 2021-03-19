@@ -10,12 +10,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryRequest;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * Functional tests for SWD Web Services (HTTP)

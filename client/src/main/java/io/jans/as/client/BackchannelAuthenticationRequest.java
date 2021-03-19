@@ -6,13 +6,14 @@
 
 package io.jans.as.client;
 
+import java.util.List;
+
+import javax.ws.rs.core.MediaType;
+
 import io.jans.as.model.ciba.BackchannelAuthenticationRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.QueryBuilder;
 import io.jans.as.model.util.Util;
-
-import javax.ws.rs.core.MediaType;
-import java.util.List;
 
 /**
  * Represents a CIBA backchannel authorization request to send to the authorization server.

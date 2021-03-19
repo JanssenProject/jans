@@ -6,6 +6,27 @@
 
 package io.jans.as.client.interop;
 
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
+import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -16,15 +37,6 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static io.jans.as.model.register.RegisterRequestParam.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Support Registration Read

@@ -8,9 +8,10 @@ package io.jans.as.server.comp;
 
 import static org.testng.Assert.assertTrue;
 
+import org.testng.annotations.Test;
+
 import io.jans.saml.Response;
 import io.jans.saml.SamlConfiguration;
-import org.testng.annotations.Test;
 
 /**
  * @author Yuriy Zabrovarnyy

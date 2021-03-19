@@ -6,6 +6,40 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -32,7 +66,15 @@ import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.AuthenticationService;
+import io.jans.as.server.service.AuthorizeService;
+import io.jans.as.server.service.ClientAuthorizationsService;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.ErrorHandlerService;
+import io.jans.as.server.service.RedirectionUriService;
+import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
@@ -47,30 +89,6 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.util.*;
-
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
 
 /**
  * @author Javier Rojas Blum

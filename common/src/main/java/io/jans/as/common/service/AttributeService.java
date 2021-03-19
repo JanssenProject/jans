@@ -19,6 +19,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
+import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 
 /**
@@ -49,28 +50,35 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(GluuAttribute.class, dn), 60);
     }
 
-    public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
-        if (gluuAttributes.size() > 0) {
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
-                    return gluuAttribute;
-                }
-            }
-        }
-        return null;
-    }
+	public GluuAttribute getByLdapName(String name) {
+		BaseCacheService usedCacheService = getCacheService();
+		return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_DB_NAME + "_" + name, () -> {
+			List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
+			if (gluuAttributes.size() > 0) {
+				for (GluuAttribute gluuAttribute : gluuAttributes) {
+					if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
+						return gluuAttribute;
+					}
+				}
+			}
+
+			return null;
+		}, 30);
+	}
 
     public GluuAttribute getByClaimName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
-        if (gluuAttributes.size() > 0) {
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
-                    return gluuAttribute;
-                }
-            }
-        }
-        return null;
+		BaseCacheService usedCacheService = getCacheService();
+		return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_CLAIM_NAME + "_" + name, () -> {
+			List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
+			if (gluuAttributes.size() > 0) {
+				for (GluuAttribute gluuAttribute : gluuAttributes) {
+					if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
+						return gluuAttribute;
+					}
+				}
+			}
+			return null;
+		}, 30);
     }
 
     public String generateInumForNewAttribute() {

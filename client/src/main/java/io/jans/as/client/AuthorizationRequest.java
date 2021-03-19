@@ -6,6 +6,17 @@
 
 package io.jans.as.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.Display;
@@ -13,16 +24,6 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents an authorization request to send to the authorization server.

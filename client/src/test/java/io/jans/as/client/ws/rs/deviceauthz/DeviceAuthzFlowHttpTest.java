@@ -6,8 +6,45 @@
 
 package io.jans.as.client.ws.rs.deviceauthz;
 
-import io.jans.as.client.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
+import io.jans.as.client.DeviceAuthzClient;
+import io.jans.as.client.DeviceAuthzRequest;
+import io.jans.as.client.DeviceAuthzResponse;
+import io.jans.as.client.JwkClient;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.page.DeviceAuthzPage;
+import io.jans.as.client.page.LoginPage;
+import io.jans.as.client.page.PageConfig;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -20,28 +57,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.StringUtils;
-import io.jans.as.client.page.DeviceAuthzPage;
-import io.jans.as.client.page.LoginPage;
-import io.jans.as.client.page.PageConfig;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * Test cases for device authorization page.

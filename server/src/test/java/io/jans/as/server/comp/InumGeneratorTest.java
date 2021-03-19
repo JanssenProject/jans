@@ -6,14 +6,15 @@
 
 package io.jans.as.server.comp;
 
-import io.jans.as.model.common.IdType;
-import io.jans.as.server.BaseComponentTest;
-import io.jans.as.server.idgen.ws.rs.InumGenerator;
+import javax.inject.Inject;
+
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import io.jans.as.model.common.IdType;
+import io.jans.as.server.BaseComponentTest;
+import io.jans.as.server.idgen.ws.rs.InumGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy

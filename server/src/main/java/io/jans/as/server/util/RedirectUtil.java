@@ -6,13 +6,10 @@
 
 package io.jans.as.server.util;
 
-import io.jans.as.common.util.RedirectUri;
-import io.jans.as.model.common.ResponseMode;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+
+import java.net.MalformedURLException;
+import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
@@ -20,10 +17,15 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.net.MalformedURLException;
-import java.net.URI;
 
-import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.common.ResponseMode;
 
 /**
  * @version October 7, 2019

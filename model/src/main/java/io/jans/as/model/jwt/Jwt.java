@@ -6,9 +6,10 @@
 
 package io.jans.as.model.jwt;
 
+import org.apache.commons.lang.StringUtils;
+
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.token.JsonWebResponse;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained

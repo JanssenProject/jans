@@ -6,18 +6,30 @@
 
 package io.jans.as.rp.demo;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import io.jans.as.client.*;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.GrantType;
-import org.apache.log4j.Logger;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
+import io.jans.as.client.OpenIdConfigurationClient;
+import io.jans.as.client.OpenIdConfigurationResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 
 /**
  * @author yuriyz on 07/19/2016.

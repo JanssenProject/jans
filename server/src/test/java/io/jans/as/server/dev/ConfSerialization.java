@@ -6,22 +6,24 @@
 
 package io.jans.as.server.dev;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.error.ErrorMessage;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.server.util.ServerUtil;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -9,6 +9,7 @@ package io.jans.as.common.model.common;
 import java.util.List;
 
 import org.json.JSONArray;
+
 import io.jans.as.model.exception.InvalidClaimException;
 
 /**

@@ -6,16 +6,18 @@
 
 package io.jans.as.client;
 
-import io.jans.as.client.util.ClientUtil;
-import io.jans.as.model.register.ApplicationType;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.util.List;
+import io.jans.as.client.util.ClientUtil;
+import io.jans.as.model.register.ApplicationType;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.

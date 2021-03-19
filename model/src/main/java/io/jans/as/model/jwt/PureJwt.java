@@ -6,11 +6,12 @@
 
 package io.jans.as.model.jwt;
 
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import java.io.UnsupportedEncodingException;
+
 import org.apache.commons.lang.StringUtils;
 
-import java.io.UnsupportedEncodingException;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Yuriy Zabrovarnyy

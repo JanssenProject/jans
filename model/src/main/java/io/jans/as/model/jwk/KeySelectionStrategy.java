@@ -1,10 +1,11 @@
 package io.jans.as.model.jwk;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.jans.orm.annotation.AttributeEnum;
-
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Zabrovarnyy

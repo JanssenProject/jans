@@ -6,11 +6,16 @@
 
 package io.jans.as.client.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.as.model.common.IntrospectionResponse;
-
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jans.as.model.common.IntrospectionResponse;
 
 /**
  * Introspection service.

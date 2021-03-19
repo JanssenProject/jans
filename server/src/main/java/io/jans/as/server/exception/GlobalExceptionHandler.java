@@ -6,10 +6,7 @@
 
 package io.jans.as.server.exception;
 
-import io.jans.as.server.model.exception.InvalidSessionStateException;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Iterator;
 
 import javax.faces.FacesException;
 import javax.faces.context.ExceptionHandler;
@@ -18,7 +15,12 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.event.ExceptionQueuedEventContext;
-import java.util.Iterator;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.as.server.model.exception.InvalidSessionStateException;
 
 /**
  * Created by eugeniuparvan on 8/29/17.

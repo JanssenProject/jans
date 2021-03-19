@@ -1,16 +1,18 @@
 package io.jans.as.client.ws.rs;
 
+import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.as.client.BaseRequest;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.uma.wrapper.Token;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

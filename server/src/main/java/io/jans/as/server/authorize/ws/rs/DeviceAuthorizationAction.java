@@ -6,6 +6,32 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import static io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.NONCE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
+import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
+import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_ATTEMPTS;
+import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_LAST_ATTEMPT;
+import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
@@ -18,24 +44,6 @@ import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.jsf2.message.FacesMessages;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
-import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
-import static io.jans.as.server.service.DeviceAuthorizationService.*;
 
 /**
  * Action used to process all requests related to device authorization.
