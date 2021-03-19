@@ -1,13 +1,13 @@
 package io.jans.as.model.common.converter;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.databind.util.StdConverter;
 
 import io.jans.as.model.util.StringUtils;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * A class to facilitate two-step deserialization.

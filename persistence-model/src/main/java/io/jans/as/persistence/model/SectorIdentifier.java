@@ -9,13 +9,13 @@ package io.jans.as.persistence.model;
 import java.io.Serializable;
 import java.util.List;
 
-import io.jans.orm.model.base.BaseEntry;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * @author Javier Rojas Blum

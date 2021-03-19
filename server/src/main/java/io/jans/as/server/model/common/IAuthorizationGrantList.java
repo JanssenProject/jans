@@ -6,11 +6,11 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
-
 import java.util.Date;
 import java.util.List;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,9 +6,10 @@
 
 package io.jans.as.model.fido.u2f;
 
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * FIDO U2F metadata configuration

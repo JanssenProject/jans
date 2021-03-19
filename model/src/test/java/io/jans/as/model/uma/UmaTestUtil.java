@@ -6,27 +6,20 @@
 
 package io.jans.as.model.uma;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Id;
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.RPTResponse;
-import io.jans.as.model.uma.RptIntrospectionResponse;
-import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.uma.UmaNeedInfoResponse;
-import io.jans.as.model.uma.UmaResource;
-import io.jans.as.model.uma.UmaResourceResponse;
-import io.jans.as.model.uma.UmaScopeDescription;
-import io.jans.as.model.uma.UmaTokenResponse;
-import io.jans.as.model.uma.wrapper.Token;
-import org.jboss.resteasy.client.ClientResponse;
-
-import javax.ws.rs.core.Response;
-import java.util.Arrays;
-
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponse;
+
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Id;
+import io.jans.as.model.uma.wrapper.Token;
 
 /**
  * @author Yuriy Zabrovarnyy

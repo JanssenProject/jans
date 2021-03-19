@@ -6,8 +6,9 @@
 
 package io.jans.as.server.crypto.random;
 
-import javax.inject.Named;
 import java.security.SecureRandom;
+
+import javax.inject.Named;
 
 @Named("randomChallengeGenerator")
 public class RandomChallengeGenerator implements ChallengeGenerator {

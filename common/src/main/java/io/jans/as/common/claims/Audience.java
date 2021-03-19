@@ -6,8 +6,8 @@
 
 package io.jans.as.common.claims;
 
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.jwt.JwtClaims;
 
 /**
  * @author Yuriy Zabrovarnyy

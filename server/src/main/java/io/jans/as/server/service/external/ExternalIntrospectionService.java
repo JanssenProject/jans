@@ -6,22 +6,25 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.List;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.introspection.IntrospectionType;
 import io.jans.service.custom.script.ExternalScriptService;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

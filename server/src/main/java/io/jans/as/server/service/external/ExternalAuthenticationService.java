@@ -6,8 +6,23 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
@@ -23,14 +38,6 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * Provides factory methods needed to create external authenticator

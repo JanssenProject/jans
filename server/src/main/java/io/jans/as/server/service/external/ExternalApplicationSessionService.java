@@ -6,6 +6,13 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.Map;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.model.SimpleCustomProperty;
@@ -13,12 +20,6 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * Provides factory methods needed to create external application session extension

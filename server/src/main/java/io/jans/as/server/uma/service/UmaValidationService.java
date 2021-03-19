@@ -6,8 +6,44 @@
 
 package io.jans.as.server.uma.service;
 
+import static io.jans.as.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static io.jans.as.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_PCT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RPT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SCOPE;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_TICKET;
+import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.python.google.common.base.Function;
+import org.python.google.common.collect.Iterables;
+import org.slf4j.Logger;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -38,22 +74,6 @@ import io.jans.as.server.uma.authorization.UmaWebException;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.python.google.common.base.Function;
-import org.python.google.common.collect.Iterables;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static io.jans.as.model.uma.UmaErrorResponseType.*;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 /**
  * @author Yuriy Zabrovarnyy

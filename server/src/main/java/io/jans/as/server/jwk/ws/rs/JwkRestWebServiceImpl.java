@@ -6,17 +6,19 @@
 
 package io.jans.as.server.jwk.ws.rs;
 
-import io.jans.as.model.config.WebKeysConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.jwk.JSONWebKey;
-import org.slf4j.Logger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.util.List;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwk.JSONWebKey;
 
 /**
  * Provides interface for JWK REST web services

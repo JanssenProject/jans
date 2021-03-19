@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
 import com.google.common.collect.Sets;
+
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.model.SimpleCustomProperty;
@@ -14,11 +25,6 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
 import io.jans.service.custom.script.ExternalScriptService;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * Provides factory methods needed to create dynamic scope extension

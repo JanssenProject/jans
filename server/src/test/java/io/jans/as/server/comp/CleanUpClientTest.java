@@ -6,18 +6,20 @@
 
 package io.jans.as.server.comp;
 
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.service.ClientService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Yuriy Movchan

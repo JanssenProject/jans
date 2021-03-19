@@ -6,6 +6,33 @@
 
 package io.jans.as.server.auth;
 
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -16,7 +43,11 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.ClientFilterService;
@@ -27,26 +58,6 @@ import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.security.Identity;
 import io.jans.util.StringHelper;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Javier Rojas Blum

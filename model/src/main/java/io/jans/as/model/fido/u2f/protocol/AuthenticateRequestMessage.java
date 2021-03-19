@@ -6,13 +6,14 @@
 
 package io.jans.as.model.fido.u2f.protocol;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.util.Util;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.jans.as.model.util.Util;
 
 /**
  * FIDO U2F authentication request message

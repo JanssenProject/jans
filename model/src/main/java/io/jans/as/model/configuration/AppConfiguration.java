@@ -6,17 +6,22 @@
 
 package io.jans.as.model.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.jans.as.model.common.*;
-import io.jans.as.model.error.ErrorHandlingMethod;
-import io.jans.as.model.jwk.KeySelectionStrategy;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.error.ErrorHandlingMethod;
+import io.jans.as.model.jwk.KeySelectionStrategy;
 
 /**
  * Represents the configuration JSON file.

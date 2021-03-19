@@ -6,12 +6,17 @@
 
 package io.jans.as.server.filter;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.CorsConfigurationFilter;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import java.util.*;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.CorsConfigurationFilter;
 
 /**
  * @author Javier Rojas Blum

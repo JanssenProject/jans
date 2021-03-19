@@ -6,9 +6,10 @@
 
 package io.jans.as.client.ciba.ping;
 
-import io.jans.as.client.BaseResponse;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
+
+import io.jans.as.client.BaseResponse;
 
 /**
  * @author Javier Rojas Blum

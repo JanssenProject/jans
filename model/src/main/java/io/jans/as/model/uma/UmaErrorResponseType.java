@@ -6,10 +6,10 @@
 
 package io.jans.as.model.uma;
 
-import io.jans.as.model.error.IErrorType;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import io.jans.as.model.error.IErrorType;
 
 /**
  * Error codes for UMA error responses.

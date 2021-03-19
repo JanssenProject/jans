@@ -6,14 +6,15 @@
 
 package io.jans.as.model.crypto.signature;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.nimbusds.jose.JWSAlgorithm;
+
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum

@@ -6,18 +6,19 @@
 
 package io.jans.as.server.dev;
 
+import java.io.File;
+import java.util.Properties;
+
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.io.File;
-import java.util.Properties;
 
 /**
  * Test for manual run. Used for development purpose ONLY. Must not be run in

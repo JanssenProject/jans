@@ -6,23 +6,32 @@
 
 package io.jans.as.model.jws;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.impl.ECDSA;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
 
-import java.io.UnsupportedEncodingException;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.impl.ECDSA;
+
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

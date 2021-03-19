@@ -6,14 +6,16 @@
 
 package io.jans.as.rp.action;
 
-import io.jans.as.client.EndSessionRequest;
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serializable;
+
+import org.slf4j.Logger;
+
+import io.jans.as.client.EndSessionRequest;
 
 /**
  * @author Javier Rojas Blum

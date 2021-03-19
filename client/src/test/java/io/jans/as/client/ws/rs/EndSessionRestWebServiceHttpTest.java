@@ -6,23 +6,33 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.*;
-import io.jans.as.client.BaseTest;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.session.EndSessionErrorResponseType;
-import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.core.Response.Status;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import javax.ws.rs.core.Response.Status;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.EndSessionClient;
+import io.jans.as.client.EndSessionRequest;
+import io.jans.as.client.EndSessionResponse;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.util.StringUtils;
 
 /**
  * Functional tests for End Session Web Services (HTTP)

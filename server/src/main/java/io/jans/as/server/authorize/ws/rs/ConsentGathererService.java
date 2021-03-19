@@ -6,6 +6,23 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.i18n.LanguageBean;
@@ -18,17 +35,6 @@ import io.jans.as.server.service.external.context.ConsentGatheringContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017

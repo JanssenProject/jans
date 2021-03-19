@@ -6,16 +6,17 @@
 
 package io.jans.as.server.comp;
 
-import io.jans.as.server.BaseTest;
-import io.jans.util.ilocale.LocaleUtil;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import org.testng.annotations.Test;
+
+import io.jans.as.server.BaseTest;
+import io.jans.util.ilocale.LocaleUtil;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013

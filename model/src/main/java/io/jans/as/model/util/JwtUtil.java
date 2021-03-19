@@ -6,33 +6,48 @@
 
 package io.jans.as.model.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
+import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.Set;
+
+import javax.ws.rs.HttpMethod;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.X509Certificate;
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
-import static io.jans.as.model.jwk.JWKParameter.*;
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum

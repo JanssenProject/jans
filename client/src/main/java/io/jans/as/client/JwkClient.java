@@ -6,18 +6,19 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.crypto.PublicKey;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.json.JSONObject;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
-import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.json.JSONObject;
+
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
 
 /**
  * Encapsulates functionality to make JWK request calls to an authorization

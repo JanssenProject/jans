@@ -6,14 +6,15 @@
 
 package io.jans.as.client.fido.u2f;
 
-import io.jans.as.client.service.ClientFactory;
-import io.jans.as.model.fido.u2f.U2fConfiguration;
+import javax.ws.rs.core.UriBuilder;
+
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
-import javax.ws.rs.core.UriBuilder;
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.model.fido.u2f.U2fConfiguration;
 
 /**
  * Helper class which creates proxy FIDO U2F services

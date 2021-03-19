@@ -6,11 +6,12 @@
 
 package io.jans.as.server;
 
-import org.testng.Assert;
-
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.ws.rs.core.Response;
+
+import org.testng.Assert;
 
 /**
  * @author Javier Rojas

@@ -6,12 +6,15 @@
 
 package io.jans.as.server.servlet;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import static io.jans.as.model.discovery.WebFingerParam.HREF;
+import static io.jans.as.model.discovery.WebFingerParam.LINKS;
+import static io.jans.as.model.discovery.WebFingerParam.REL;
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
+import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
+import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -19,10 +22,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 
-import static io.jans.as.model.discovery.WebFingerParam.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013
