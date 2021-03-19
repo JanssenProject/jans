@@ -6,24 +6,28 @@
 
 package io.jans.as.server.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.uma.UmaTestUtil;
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.as.server.model.uma.TUma;
-import io.jans.as.server.util.ServerUtil;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.net.URI;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 
-import static org.testng.Assert.*;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.model.uma.TUma;
+import io.jans.as.server.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,11 +6,12 @@
 
 package io.jans.as.model.uma;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import java.util.ArrayList;
 import java.util.Collections;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author yuriyz on 05/25/2017.

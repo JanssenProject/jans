@@ -11,6 +11,9 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -20,8 +23,6 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * OC5:FeatureTest-Enables Dynamic Registration

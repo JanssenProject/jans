@@ -6,15 +6,16 @@
 
 package io.jans.as.model.jws;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.util.HashUtil;
+import java.security.SignatureException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-
-import java.security.SignatureException;
+import io.jans.as.model.util.HashUtil;
 
 /**
  * @author Javier Rojas Blum

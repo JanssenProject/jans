@@ -6,23 +6,32 @@
 
 package io.jans.as.client.ws.rs.deviceauthz;
 
-import io.jans.as.client.*;
+import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
+import io.jans.as.client.DeviceAuthzClient;
+import io.jans.as.client.DeviceAuthzRequest;
+import io.jans.as.client.DeviceAuthzResponse;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
-import static org.testng.Assert.*;
 
 /**
  * Tests for WS used to register device authz requests.

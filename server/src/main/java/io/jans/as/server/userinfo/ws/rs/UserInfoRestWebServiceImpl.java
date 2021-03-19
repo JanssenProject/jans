@@ -6,6 +6,28 @@
 
 package io.jans.as.server.userinfo.ws.rs;
 
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -40,7 +62,12 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.DefaultScope;
+import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
@@ -54,20 +81,6 @@ import io.jans.model.GluuAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.util.*;
 
 /**
  * Provides interface for User Info REST web services

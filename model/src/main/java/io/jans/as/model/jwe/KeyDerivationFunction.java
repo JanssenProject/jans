@@ -6,17 +6,18 @@
 
 package io.jans.as.model.jwe;
 
-import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
-import io.jans.as.model.exception.InvalidParameterException;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
-import org.apache.commons.lang.ArrayUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
+
+import org.apache.commons.lang.ArrayUtils;
+
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.exception.InvalidParameterException;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

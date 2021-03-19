@@ -6,12 +6,13 @@
 
 package io.jans.as.rp.action;
 
-import org.slf4j.Logger;
+import java.io.Serializable;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serializable;
+
+import org.slf4j.Logger;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2012

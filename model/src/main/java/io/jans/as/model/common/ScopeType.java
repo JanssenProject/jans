@@ -9,10 +9,10 @@ package io.jans.as.model.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.jans.orm.annotation.AttributeEnum;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * Scope types

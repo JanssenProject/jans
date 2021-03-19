@@ -6,13 +6,15 @@
 
 package io.jans.as.client.client;
 
-import com.google.common.collect.Lists;
-import io.jans.as.client.RegisterRequest;
+import static org.testng.Assert.assertEquals;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import com.google.common.collect.Lists;
+
+import io.jans.as.client.RegisterRequest;
 
 /**
  * @author Yuriy Zabrovarnyy

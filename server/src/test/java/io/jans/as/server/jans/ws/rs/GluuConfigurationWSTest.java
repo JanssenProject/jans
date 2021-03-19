@@ -6,9 +6,18 @@
 
 package io.jans.as.server.jans.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.gluu.GluuConfiguration;
-import io.jans.as.server.util.ServerUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.net.URI;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.extension.rest.client.ArquillianResteasyResource;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -16,14 +25,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URI;
-
-import static org.testng.Assert.*;
+import io.jans.as.model.gluu.GluuConfiguration;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ServerUtil;
 
 /**
  * Created by eugeniuparvan on 8/12/16.

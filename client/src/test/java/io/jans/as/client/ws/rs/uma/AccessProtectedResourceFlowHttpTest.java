@@ -6,6 +6,22 @@
 
 package io.jans.as.client.ws.rs.uma;
 
+import static io.jans.as.model.uma.UmaTestUtil.assert_;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.openqa.selenium.By;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
@@ -17,20 +33,6 @@ import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.openqa.selenium.By;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-
-import static io.jans.as.model.uma.UmaTestUtil.assert_;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Test flow for the accessing protected resource (HTTP)

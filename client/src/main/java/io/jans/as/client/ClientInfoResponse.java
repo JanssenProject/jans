@@ -6,11 +6,11 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 
 /**
  * Represents an client info response received from the authorization server.

@@ -6,18 +6,20 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Map;
 
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication

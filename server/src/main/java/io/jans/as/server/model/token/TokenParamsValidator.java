@@ -6,12 +6,12 @@
 
 package io.jans.as.server.model.token;
 
-import io.jans.as.model.common.GrantType;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import io.jans.as.model.common.GrantType;
 
 /**
  * Validates the parameters received for the token web service.

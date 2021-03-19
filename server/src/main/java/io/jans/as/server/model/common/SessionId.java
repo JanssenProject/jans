@@ -6,21 +6,29 @@
 
 package io.jans.as.server.model.common;
 
-import com.google.common.collect.Maps;
-import io.jans.as.common.model.common.User;
-import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.Deletable;
-import org.apache.commons.lang.StringUtils;
+import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
 
-import javax.annotation.Nonnull;
-import javax.inject.Named;
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
+import javax.annotation.Nonnull;
+import javax.inject.Named;
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.google.common.collect.Maps;
+
+import io.jans.as.common.model.common.User;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.Deletable;
 
 /**
  * @author Yuriy Zabrovarnyy

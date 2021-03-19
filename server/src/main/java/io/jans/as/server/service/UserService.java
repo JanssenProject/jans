@@ -6,6 +6,13 @@
 
 package io.jans.as.server.service;
 
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -17,11 +24,6 @@ import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
 
 /**
  * Provides operations with users.

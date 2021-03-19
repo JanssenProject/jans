@@ -6,19 +6,21 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONException;
-
-import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.Util;
 
 /**
  * Represents a device authorization request to send to the authorization server.

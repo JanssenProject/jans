@@ -6,6 +6,28 @@
 
 package io.jans.as.server.uma.ws.rs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;
@@ -22,18 +44,6 @@ import io.jans.as.server.uma.service.UmaScopeService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.

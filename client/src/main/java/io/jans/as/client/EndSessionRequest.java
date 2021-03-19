@@ -6,12 +6,13 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.session.EndSessionRequestParam;
-import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+
+import org.apache.commons.lang.StringUtils;
+
+import io.jans.as.model.session.EndSessionRequestParam;
+import io.jans.as.model.util.Util;
 
 /**
  * Represents an end session request to send to the authorization server.

@@ -6,17 +6,18 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.util.Util;
-import org.apache.commons.codec.binary.Base64;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

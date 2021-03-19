@@ -6,20 +6,32 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.*;
-import io.jans.as.client.BaseTest;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.*;
-import static org.testng.Assert.*;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 
 /**
  * Functional tests for checking Sessions in Authorize Web Services workflow (HTTP)

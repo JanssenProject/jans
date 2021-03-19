@@ -6,6 +6,12 @@
 
 package io.jans.as.server.service;
 
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.model.config.StaticConfiguration;
@@ -14,12 +20,6 @@ import io.jans.model.ApplicationType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Store and retrieve metric

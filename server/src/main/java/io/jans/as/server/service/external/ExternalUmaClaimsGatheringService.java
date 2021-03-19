@@ -6,6 +6,21 @@
 
 package io.jans.as.server.service.external;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -14,13 +29,6 @@ import io.jans.service.LookupService;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * @author yuriyz on 06/18/2017.

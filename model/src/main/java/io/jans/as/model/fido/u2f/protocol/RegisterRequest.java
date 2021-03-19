@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.jans.as.model.fido.u2f.U2fConstants;
 
 /**

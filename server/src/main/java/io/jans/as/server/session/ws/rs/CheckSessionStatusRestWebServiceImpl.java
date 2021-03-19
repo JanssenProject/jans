@@ -6,13 +6,8 @@
 
 package io.jans.as.server.session.ws.rs;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.util.ServerUtil;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import java.io.IOException;
+import java.util.Date;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -24,8 +19,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.io.IOException;
-import java.util.Date;
+
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.util.ServerUtil;
+import io.jans.util.StringHelper;
 
 /**
  * @author Yuriy Movchan

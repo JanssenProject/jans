@@ -6,11 +6,10 @@
 
 package io.jans.as.model.uma;
 
-import io.jans.as.model.uma.JsonLogic;
+import javax.script.ScriptException;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import javax.script.ScriptException;
 
 /**
  * @author yuriyz

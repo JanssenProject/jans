@@ -6,6 +6,12 @@
 
 package io.jans.as.server.service;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.authorize.ws.rs.DeviceAuthorizationRestWebServiceImpl;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelAuthorizeRestWebServiceImpl;
@@ -20,17 +26,18 @@ import io.jans.as.server.revoke.RevokeSessionRestWebService;
 import io.jans.as.server.session.ws.rs.CheckSessionStatusRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
-import io.jans.as.server.uma.ws.rs.*;
+import io.jans.as.server.uma.ws.rs.UmaGatheringWS;
+import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
+import io.jans.as.server.uma.ws.rs.UmaPermissionRegistrationWS;
+import io.jans.as.server.uma.ws.rs.UmaResourceRegistrationWS;
+import io.jans.as.server.uma.ws.rs.UmaRptIntrospectionWS;
+import io.jans.as.server.uma.ws.rs.UmaScopeIconWS;
+import io.jans.as.server.uma.ws.rs.UmaScopeWS;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
 import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fConfigurationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fRegistrationWS;
 import io.jans.as.server.ws.rs.stat.StatWS;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Integration with Resteasy

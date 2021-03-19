@@ -6,12 +6,13 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.server.BaseTest;
+import java.net.URI;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.net.URI;
+import io.jans.as.server.BaseTest;
 
 /**
  * @author Yuriy Zabrovarnyy

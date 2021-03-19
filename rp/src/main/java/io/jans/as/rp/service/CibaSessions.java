@@ -6,13 +6,14 @@
 
 package io.jans.as.rp.service;
 
-import io.jans.as.rp.ciba.CibaRequestSession;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
+import io.jans.as.rp.ciba.CibaRequestSession;
 
 @Named
 @ApplicationScoped

@@ -6,7 +6,18 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.discovery.WebFingerLink;
+import static io.jans.as.model.discovery.WebFingerParam.HREF;
+import static io.jans.as.model.discovery.WebFingerParam.LINKS;
+import static io.jans.as.model.discovery.WebFingerParam.REL;
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
+import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
+import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
+
+import java.net.URISyntaxException;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -16,11 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.net.URISyntaxException;
-
-import static io.jans.as.model.discovery.WebFingerParam.*;
+import io.jans.as.model.discovery.WebFingerLink;
 
 /**
  * @author Javier Rojas Blum

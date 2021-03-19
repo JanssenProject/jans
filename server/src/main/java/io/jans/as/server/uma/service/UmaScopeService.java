@@ -6,6 +6,19 @@
 
 package io.jans.as.server.uma.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.ScopeType;
@@ -17,17 +30,6 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy

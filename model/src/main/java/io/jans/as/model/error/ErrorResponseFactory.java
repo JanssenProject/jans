@@ -6,29 +6,32 @@
 
 package io.jans.as.model.error;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.register.RegisterErrorResponseType;
-import io.jans.as.model.session.EndSessionErrorResponseType;
-import io.jans.as.model.token.TokenErrorResponseType;
-import io.jans.as.model.token.TokenRevocationErrorResponseType;
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
-import io.jans.as.model.util.Util;
-import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
-import io.jans.as.model.fido.u2f.U2fErrorResponseType;
-import io.jans.as.model.uma.UmaErrorResponseType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.Configuration;
+import io.jans.as.model.fido.u2f.U2fErrorResponseType;
+import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRevocationErrorResponseType;
+import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.util.Util;
 
 /**
  * Provides an easy way to get Error responses based in an error response type

@@ -6,13 +6,14 @@
 
 package io.jans.as.model.jwk;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.util.StringUtils;
 
 /**
  * Identifies the cryptographic algorithm used with the key.
