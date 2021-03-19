@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0bcee00d656b4533ab1e32c36e32a17d)](https://www.codacy.com/gh/JanssenProject/docker-jans-auth-server/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-auth-server&amp;utm_campaign=Badge_Grade)
+
 ## Overview
 
 Docker image packaging for Janssen Authorization Server.
