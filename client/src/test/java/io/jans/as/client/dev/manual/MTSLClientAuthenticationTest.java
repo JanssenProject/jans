@@ -6,28 +6,26 @@
 
 package io.jans.as.client.dev.manual;
 
-import static io.jans.as.client.BaseTest.showClient;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.GrantType;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+
+import static io.jans.as.client.BaseTest.showClient;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,12 +36,12 @@ public class MTSLClientAuthenticationTest {
 
         File jdkJks = new File("u:\\tmp\\ce-ob\\clientkeystore");
         if (!jdkJks.exists()) {
-            throw new RuntimeException("Failed to find jks trust store");
+            throw new Error("Failed to find jks trust store");
         }
 
         File certificate = new File("u:\\tmp\\ce-ob\\fullchain.p12");
         if (!certificate.exists()) {
-            throw new RuntimeException("Failed to find certificate");
+            throw new Error("Failed to find certificate");
         }
 
         HttpClient httpclient = new DefaultHttpClient();
