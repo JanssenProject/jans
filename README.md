@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/5626781f25f14897b27753ec4eb8f4d5)](https://www.codacy.com/gh/JanssenProject/docker-jans-scim/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-scim&amp;utm_campaign=Badge_Grade)
+
 # Overview
 
 Docker image packaging for SCIM.
