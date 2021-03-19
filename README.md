@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/fd081124d7f548bbbccc2610fee8e636)](https://www.codacy.com/gh/JanssenProject/docker-jans-client-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-client-api&amp;utm_campaign=Badge_Grade)
+
 # Overview
 
 Docker image packaging for client-api.
