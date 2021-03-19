@@ -3,7 +3,7 @@
  Using a Universal Module Loader that should be browser, require, and AMD friendly
  http://ricostacruz.com/cheatsheets/umdjs.html
  */
-;(function(root, factory) {
+(function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define(factory);
     } else if (typeof exports === "object") {
