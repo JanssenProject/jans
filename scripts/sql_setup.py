@@ -60,8 +60,8 @@ class SQLBackend:
             self.sql_indexes = json.loads(f.read())
 
         with open("/app/static/couchbase/index.json") as f:
-            prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            txt = f.read().replace("!bucket_prefix!", prefix)
+            # prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            txt = f.read()  # .replace("!bucket_prefix!", prefix)
             self.cb_indexes = json.loads(txt)
 
         # cached schemas that holds table's column and its type
@@ -83,7 +83,7 @@ class SQLBackend:
         type_def = self.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def[self.db_dialect]
+            type_ = type_def.get(self.db_dialect) or type_def["mysql"]
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -95,7 +95,8 @@ class SQLBackend:
 
         # data type is undefined, hence check from syntax
         syntax = self.get_attr_syntax(attr)
-        type_ = self.sql_data_types_mapping[syntax][self.db_dialect]
+        syntax_def = self.sql_data_types_mapping[syntax]
+        type_ = syntax_def.get(self.db_dialect) or syntax_def["mysql"]
 
         if type_["type"] != "VARCHAR":
             return type_["type"]
@@ -103,7 +104,7 @@ class SQLBackend:
         if type_["size"] <= 127:
             data_type = f"VARCHAR({type_['size']})"
         elif type_["size"] <= 255:
-            data_type = "TINYTEXT"
+            data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
         else:
             data_type = "TEXT"
         return data_type
@@ -156,30 +157,20 @@ class SQLBackend:
                 data_type = self.get_data_type(attr, table)
                 col_def = f"{attr} {data_type}"
                 table_cols.append(col_def)
-
-                # if data_type.lower() == "json":
-                #     self.json_columns[table].add(attr)
                 self.table_columns[table].update({attr: data_type})
 
-            # if self.table_exists(conn, table):
-            #     # TODO: do we need to check existing table?
-            #     table_cols_fmt = ", ".join([f"ADD COLUMN {col}" for col in table_cols])
-            #     sql_cmd = f"ALTER TABLE {table} {table_cols_fmt};"
-            # else:
             doc_id_type = self.get_data_type("doc_id", table)
             mandatory_cols = [
-                "id INT NOT NULL auto_increment",
                 f"doc_id {doc_id_type} NOT NULL UNIQUE",
                 "objectClass VARCHAR(48)",
                 "dn VARCHAR(128)",
             ]
-            pk_cols = ["PRIMARY KEY (id, doc_id)"]
+            pk_cols = ["PRIMARY KEY (doc_id)"]
             table_cols = mandatory_cols + table_cols + pk_cols
             table_cols_fmt = ", ".join(table_cols)
-            sql_cmd = f"CREATE TABLE {table} ({table_cols_fmt});"
+            sql_cmd = f"CREATE TABLE {table} ({table_cols_fmt})"
 
             self.table_columns[table].update({
-                "id": "INT",
                 "doc_id": doc_id_type,
                 "objectClass": "VARCHAR(48)",
                 "dn": "VARCHAR(128)",
@@ -200,61 +191,91 @@ class SQLBackend:
         #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
         #     logger.info(sql_cmd)
 
-    def create_indexes(self, conn):
-        logger.info("Creating table indexes (if not exist)")
-
-        cb_fields = []
+    def _fields_from_cb_indexes(self):
+        fields = []
 
         for _, data in self.cb_indexes.items():
             # extract and flatten
             attrs = list(itertools.chain.from_iterable(data["attributes"]))
-            cb_fields += attrs
+            fields += attrs
 
             for static in data["static"]:
                 attrs = [
                     attr for attr in static[0]
                     if "(" not in attr
                 ]
-                cb_fields += attrs
+                fields += attrs
 
-        # make unique fields
-        cb_fields = list(set(cb_fields))
+        fields = list(set(fields))
+        # exclude objectClass
+        if "objectClass" in fields:
+            fields.remove("objectClass")
+        return fields
 
-        for table, data in self.sql_indexes[self.db_dialect].items():
-            fields = data["fields"] + self.sql_indexes["__common__"]["fields"] + cb_fields
+    def create_mysql_indexes(self, conn, table, column, column_type, json_common):
+        indexes = []
+        idx_name = FIELD_RE.sub("_", column)
 
-            index_cols = []
-            for col, type_ in self.table_columns[table].items():
-                if col in ("doc_id", "id",):
+        if column_type.lower() != "json":
+            indexes.append(f"{table}_{idx_name} ({column})")
+        else:
+            for i, index_str in enumerate(json_common, start=1):
+                index_str_fmt = Template(index_str).safe_substitute({
+                    "field": column, "data_type": column_type,
+                })
+                indexes.append(f"{idx_name}_json_{i} (({index_str_fmt}))")
+
+        for idx in indexes:
+            query = f"ALTER TABLE {self.db_name}.{table} ADD INDEX {idx}"
+            self._exec_query(conn, query)
+
+    def create_pgsql_indexes(self, conn, table, column, column_type, json_common):
+        indexes = []
+
+        if column_type.lower() != "json":
+            indexes.append(f"{column}")
+        else:
+            for index_str in json_common:
+                index_str_fmt = Template(index_str).safe_substitute({
+                    "field": column, "data_type": column_type,
+                })
+                indexes.append(f"({index_str_fmt})")
+
+        for idx in indexes:
+            query = f"CREATE INDEX ON {table} ({idx})"
+            self._exec_query(conn, query)
+
+    def create_indexes(self, conn):
+        cb_fields = self._fields_from_cb_indexes()
+        index_def = self.sql_indexes[self.db_dialect]
+
+        for table, col_map in self.table_columns.items():
+            fields = index_def.get(table, {}).get("fields", [])
+            fields += index_def["__common__"]["fields"]
+            fields += cb_fields
+
+            # make unique fields
+            fields = list(set(fields))
+
+            for col, type_ in col_map.items():
+                if col == "doc_id":
                     continue
 
                 if col in fields:
-                    index_name = FIELD_RE.sub("_", col)
-
-                    if type_.lower() == "json":
-                        # FIXME: CAST-ing data to JSON Array may not be supported by mysql version
-                        for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
-                            index_str_fmt = Template(index_str).safe_substitute({
-                                "field": col, "data_type": type_,
-                            })
-                            index_cols.append(f"{index_name}_json_{i} (({index_str_fmt}))")
-
+                    if self.db_dialect == "mysql":
+                        index_func = self.create_mysql_indexes
                     else:
-                        index_cols.append(f"{table}_{index_name} ({col})")
+                        index_func = self.create_pgsql_indexes
+                    index_func(conn, table, col, type_, index_def["__common__"]["JSON"])
 
-            index_cols_fmt = ", ".join([f"ADD INDEX {col}" for col in index_cols])
-            sql_cmd = f"ALTER TABLE {self.db_name}.{table} {index_cols_fmt};"
+        #     index_cols = [
+        #         f"`{table}_{i}`(({custom}))"
+        #         for i, custom in enumerate(data["custom"])
+        #     ]
+        #     index_cols_fmt = ", ".join([f"ADD INDEX {col}" for col in index_cols])
 
-            self._exec_query(conn, sql_cmd)
-
-            index_cols = [
-                f"`{table}_{i}`(({custom}))"
-                for i, custom in enumerate(data["custom"])
-            ]
-            index_cols_fmt = ", ".join([f"ADD INDEX {col}" for col in index_cols])
-
-            sql_cmd = f"ALTER TABLE {self.db_name}.{table} {index_cols_fmt};"
-            self._exec_query(conn, sql_cmd)
+        #     sql_cmd = f"ALTER TABLE {self.db_name}.{table} {index_cols_fmt};"
+        #     self._exec_query(conn, sql_cmd)
 
     def import_ldif(self, conn):
         ldif_mappings = get_ldif_mappings()
@@ -280,7 +301,7 @@ class SQLBackend:
             with self.client.engine.connect() as conn:
                 try:
                     result = conn.execute(
-                        text("SELECT COUNT(id) FROM jansClnt WHERE doc_id = :doc_id"),
+                        text("SELECT COUNT(doc_id) FROM jansClnt WHERE doc_id = :doc_id"),
                         **{"doc_id": self.manager.config.get("jca_client_id")}
                     )
                     return as_boolean(result.fetchone()[0])
@@ -303,7 +324,9 @@ class SQLBackend:
             logger.info("Creating tables (if not exist)")
             self.create_tables(conn)
 
+            logger.info("Creating table indexes (if not exist)")
             self.create_indexes(conn)
+
             self.import_ldif(conn)
 
     def transform_value(self, key, values):
