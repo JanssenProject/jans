@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1694ddea481146ab979fcfb66b9e8522)](https://www.codacy.com/gh/JanssenProject/docker-jans-config-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-config-api&amp;utm_campaign=Badge_Grade)
+
 # Overview
 
 Docker image packaging for config-api.
