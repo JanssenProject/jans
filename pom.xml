@@ -257,6 +257,7 @@
 				<includes>
 					<include>karate.properties</include>
 					<include>test.properties</include>
+					<include>*.*</include>
 				</includes>
 			</testResource>
 		</testResources>
@@ -267,6 +268,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>application.properties</include>
+					<include>*.json</include>
 				</includes>
 			</resource>
 		</resources>
