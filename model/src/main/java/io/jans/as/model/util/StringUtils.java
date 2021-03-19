@@ -6,23 +6,17 @@
 
 package io.jans.as.model.util;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import io.jans.as.model.common.HasParamName;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import io.jans.as.model.common.HasParamName;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Javier Rojas Blum
@@ -162,7 +156,7 @@ public class StringUtils {
 
     public static void addQueryStringParam(StringBuilder p_queryStringBuilder, String key, Object value) throws UnsupportedEncodingException {
         if (p_queryStringBuilder != null && isNotBlank(key) && value != null) {
-            if (p_queryStringBuilder.toString().length() > 0) {
+            if (p_queryStringBuilder.length() > 0) {
                 p_queryStringBuilder.append("&");
             }
             p_queryStringBuilder.append(key).append("=")
