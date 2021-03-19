@@ -6,6 +6,7 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.ciba.BackchannelAuthenticationRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
@@ -14,7 +15,6 @@ import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.*;
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
@@ -76,40 +76,40 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         final String acrValuesAsString = Util.listAsString(getRequest().getAcrValues());
 
         if (StringUtils.isNotBlank(scopesAsString)) {
-            clientRequest.formParameter(SCOPE, scopesAsString);
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.SCOPE, scopesAsString);
         }
         if (StringUtils.isNotBlank(getRequest().getClientNotificationToken())) {
-            clientRequest.formParameter(CLIENT_NOTIFICATION_TOKEN, getRequest().getClientNotificationToken());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.CLIENT_NOTIFICATION_TOKEN, getRequest().getClientNotificationToken());
         }
         if (StringUtils.isNotBlank(acrValuesAsString)) {
-            clientRequest.formParameter(ACR_VALUES, acrValuesAsString);
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.ACR_VALUES, acrValuesAsString);
         }
         if (StringUtils.isNotBlank(getRequest().getLoginHintToken())) {
-            clientRequest.formParameter(LOGIN_HINT_TOKEN, getRequest().getLoginHintToken());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.LOGIN_HINT_TOKEN, getRequest().getLoginHintToken());
         }
         if (StringUtils.isNotBlank(getRequest().getIdTokenHint())) {
-            clientRequest.formParameter(ID_TOKEN_HINT, getRequest().getIdTokenHint());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.ID_TOKEN_HINT, getRequest().getIdTokenHint());
         }
         if (StringUtils.isNotBlank(getRequest().getLoginHint())) {
-            clientRequest.formParameter(LOGIN_HINT, getRequest().getLoginHint());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.LOGIN_HINT, getRequest().getLoginHint());
         }
         if (StringUtils.isNotBlank(getRequest().getBindingMessage())) {
-            clientRequest.formParameter(BINDING_MESSAGE, getRequest().getBindingMessage());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.BINDING_MESSAGE, getRequest().getBindingMessage());
         }
         if (StringUtils.isNotBlank(getRequest().getUserCode())) {
-            clientRequest.formParameter(USER_CODE, getRequest().getUserCode());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.USER_CODE, getRequest().getUserCode());
         }
         if (getRequest().getRequestedExpiry() != null) {
-            clientRequest.formParameter(REQUESTED_EXPIRY, getRequest().getRequestedExpiry());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUESTED_EXPIRY, getRequest().getRequestedExpiry());
         }
         if (StringUtils.isNotBlank(getRequest().getClientId())) {
-            clientRequest.formParameter(CLIENT_ID, getRequest().getClientId());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.CLIENT_ID, getRequest().getClientId());
         }
         if (StringUtils.isNotBlank(getRequest().getRequest())) {
-            clientRequest.formParameter(REQUEST, getRequest().getRequest());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUEST, getRequest().getRequest());
         }
         if (StringUtils.isNotBlank(getRequest().getRequestUri())) {
-            clientRequest.formParameter(REQUEST_URI, getRequest().getRequestUri());
+            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUEST_URI, getRequest().getRequestUri());
         }
         new ClientAuthnEnabler(clientRequest).exec(getRequest());
 

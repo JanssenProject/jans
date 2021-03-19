@@ -15,6 +15,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
@@ -70,7 +71,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -196,24 +196,24 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         PublicKey publicKey = keyPair.getPublic();
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(KEY_TYPE, algorithm.getFamily());
-        jsonObject.put(KEY_ID, alias);
-        jsonObject.put(KEY_USE, use.getParamName());
-        jsonObject.put(ALGORITHM, algorithm.getParamName());
-        jsonObject.put(EXPIRATION_TIME, expirationTime);
+        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
+        jsonObject.put(JWKParameter.KEY_ID, alias);
+        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
+        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
+        jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
-            jsonObject.put(MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
-            jsonObject.put(EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
+            jsonObject.put(JWKParameter.MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
+            jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            jsonObject.put(CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
-            jsonObject.put(Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
+            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
         }
         JSONArray x5c = new JSONArray();
         x5c.put(Base64.encodeBase64String(cert.getEncoded()));
-        jsonObject.put(CERTIFICATE_CHAIN, x5c);
+        jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
 
         return jsonObject;
     }
