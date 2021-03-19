@@ -6,23 +6,6 @@
 
 package io.jans.as.server.auth;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -34,11 +17,7 @@ import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.ErrorHandlerService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
@@ -46,6 +25,22 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Authenticator component
@@ -156,6 +151,7 @@ public class Authenticator {
 		lastResult = authenticateImpl(servletRequest, true, false, false);
 
 		if (Constants.RESULT_SUCCESS.equals(lastResult)) {
+            return lastResult;
 		} else if (Constants.RESULT_FAILURE.equals(lastResult)) {
 			authenticationFailed();
 		} else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
@@ -574,6 +570,7 @@ public class Authenticator {
 		lastResult = prepareAuthenticationForStep(sessionId);
 
 		if (Constants.RESULT_SUCCESS.equals(lastResult)) {
+            return lastResult;
 		} else if (Constants.RESULT_FAILURE.equals(lastResult)) {
 			handleScriptError();
 		} else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
@@ -680,9 +677,9 @@ public class Authenticator {
 			}
 		}
 
-		Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
+		boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
 				externalContext.getRequestParameterValuesMap(), this.authStep);
-		if ((result != null) && result) {
+		if (result) {
 			// Store/Update extra parameters in session attributes map
 			updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
 
@@ -720,8 +717,7 @@ public class Authenticator {
 
 		logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId,
 				sessionId.getState());
-		// IMPORTANT : authenticate by session id only if state of session is
-		// authenticated!
+		// IMPORTANT : authenticate by session id only if state of session is authenticated!
 		if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
 			final User user = authenticationService.getUserOrRemoveSession(sessionId);
 			if (user != null) {
@@ -763,12 +759,8 @@ public class Authenticator {
 
 	private boolean isAuthStepPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
 		String key = String.format("auth_step_passed_%d", authStep);
-		if (sessionIdAttributes.containsKey(key) && Boolean.parseBoolean(sessionIdAttributes.get(key))) {
-			return true;
-		}
-
-		return false;
-	}
+        return sessionIdAttributes.containsKey(key) && Boolean.parseBoolean(sessionIdAttributes.get(key));
+    }
 
 	private boolean isPassedPreviousAuthSteps(Map<String, String> sessionIdAttributes, Integer authStep) {
 		for (int i = 1; i < authStep; i++) {
@@ -809,24 +801,24 @@ public class Authenticator {
 
 	public String getMaskedNumber() {
 		String result = getFullNumber();
-		if (result != null && result.length() > 7) {
+		if (result.length() > 7) {
 			String sub = result.substring(4, 6);
 			result = result.replace(sub, "XX");
 		}
 		return result;
 	}
 
+	@NotNull
 	private String getFullNumber() {
 		String phone = null;
 		SessionId sessionId = sessionIdService.getSessionId();
 		if (sessionId != null) {
-			if (phone == null || phone.isEmpty()) {
-				phone = sessionId.getSessionAttributes().get("mobile_number");
-			}
-			if (phone == null || phone.isEmpty()) {
+		    phone = sessionId.getSessionAttributes().get("mobile_number");
+
+			if (StringUtils.isBlank(phone)) {
 				phone = sessionId.getSessionAttributes().get("mobile");
 			}
 		}
-		return phone == null ? "UNKNOW USER PHONE." : phone;
+		return StringUtils.isBlank(phone) ? "UNKNOWN USER PHONE." : phone;
 	}
 }
