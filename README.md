@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/e281afb5da83460ab34584ef80477d2a)](https://www.codacy.com/gh/JanssenProject/docker-jans-fido2/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-fido2&amp;utm_campaign=Badge_Grade)
+
 # Overview
 
 Docker image packaging for Fido2.
