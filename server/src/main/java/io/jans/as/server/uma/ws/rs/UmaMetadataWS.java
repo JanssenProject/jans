@@ -6,6 +6,14 @@
 
 package io.jans.as.server.uma.ws.rs;
 
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -14,13 +22,6 @@ import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.server.util.ServerUtil;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
 
 /**
  * The endpoint at which the requester can obtain UMA2 metadata.

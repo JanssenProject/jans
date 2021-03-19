@@ -6,13 +6,13 @@
 
 package io.jans.as.server.service.external.context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.common.IAuthorizationGrant;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Holds object required in dynamic scope custom scripts 

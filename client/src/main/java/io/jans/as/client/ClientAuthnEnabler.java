@@ -6,10 +6,11 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.token.ClientAssertionType;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientRequest;
+
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.token.ClientAssertionType;
 
 
 /**

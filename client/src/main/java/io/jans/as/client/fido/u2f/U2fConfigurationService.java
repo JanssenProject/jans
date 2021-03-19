@@ -6,11 +6,11 @@
 
 package io.jans.as.client.fido.u2f;
 
-import io.jans.as.model.fido.u2f.U2fConfiguration;
-import io.jans.as.model.uma.UmaConstants;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+
+import io.jans.as.model.fido.u2f.U2fConfiguration;
+import io.jans.as.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the requester can obtain FIDO U2F metadata configuration

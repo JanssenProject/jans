@@ -6,13 +6,14 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
-import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 
 /**
  * Represents a device authz response received from the authorization server.

@@ -6,13 +6,15 @@
 
 package io.jans.as.common.service.common;
 
-import io.jans.as.model.util.Pair;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.UUID;
+
+import org.slf4j.Logger;
+
+import io.jans.as.model.util.Pair;
+import io.jans.util.StringHelper;
 
 /**
  * Provides operations with clients.

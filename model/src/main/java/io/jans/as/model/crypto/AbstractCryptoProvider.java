@@ -6,12 +6,46 @@
 
 package io.jans.as.model.crypto;
 
+import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
+import static io.jans.as.model.jwk.JWKParameter.CURVE;
+import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.KEY_TYPE;
+import static io.jans.as.model.jwk.JWKParameter.KEY_USE;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
+
+import java.math.BigInteger;
+import java.security.AlgorithmParameters;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECEllipticCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.apache.log4j.Logger;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -19,20 +53,6 @@ import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
 import io.jans.eleven.model.JwksRequestParam;
 import io.jans.eleven.model.KeyRequestParam;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.math.BigInteger;
-import java.security.AlgorithmParameters;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum

@@ -6,7 +6,24 @@
 
 package io.jans.as.client.ws.rs.uma;
 
+import static io.jans.as.model.uma.UmaTestUtil.assert_;
+import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -22,21 +39,6 @@ import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.as.model.uma.wrapper.Token;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.util.Arrays;
-import java.util.List;
-
-import static io.jans.as.model.uma.UmaTestUtil.assert_;
-import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,12 +6,14 @@
 
 package io.jans.as.server.service.external.context;
 
-import com.google.common.collect.Sets;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Set;
+
+import com.google.common.collect.Sets;
+
+import io.jans.as.server.model.common.SessionId;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

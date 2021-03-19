@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import io.jans.as.client.QueryStringDecoder;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.session.EndSessionErrorResponseType;
-import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.SessionId;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -23,15 +24,17 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import io.jans.as.client.QueryStringDecoder;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.util.Util;
+import io.jans.as.server.model.common.SessionId;
 
 /**
  * @author Javier Rojas Blum

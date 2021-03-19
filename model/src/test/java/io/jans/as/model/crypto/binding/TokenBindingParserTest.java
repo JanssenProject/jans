@@ -6,10 +6,6 @@
 
 package io.jans.as.model.crypto.binding;
 
-import io.jans.as.model.crypto.binding.TokenBinding;
-import io.jans.as.model.crypto.binding.TokenBindingMessage;
-import io.jans.as.model.crypto.binding.TokenBindingParseException;
-import io.jans.as.model.crypto.binding.TokenBindingType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

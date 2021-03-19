@@ -6,11 +6,11 @@
 
 package io.jans.as.server.util;
 
+import java.io.File;
+
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
-import java.io.File;
 
 /**
  * Creates a deployment from a build Web Archive using ShrinkWrap ZipImporter

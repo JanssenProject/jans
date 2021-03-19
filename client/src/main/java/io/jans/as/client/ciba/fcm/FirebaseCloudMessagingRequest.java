@@ -6,14 +6,19 @@
 
 package io.jans.as.client.ciba.fcm;
 
-import io.jans.as.client.BaseRequest;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.BODY;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.CLICK_ACTION;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.NOTIFICATION;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.TITLE;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.TO;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.MediaType;
-
-import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.*;
+import io.jans.as.client.BaseRequest;
 
 /**
  * @author Javier Rojas Blum

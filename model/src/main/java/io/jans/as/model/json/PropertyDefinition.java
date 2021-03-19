@@ -6,11 +6,11 @@
 
 package io.jans.as.model.json;
 
-import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Yuriy Zabrovarnyy

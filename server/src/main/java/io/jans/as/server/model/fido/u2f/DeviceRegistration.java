@@ -6,14 +6,6 @@
 
 package io.jans.as.server.model.fido.u2f;
 
-import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
-import io.jans.as.model.fido.u2f.exception.BadInputException;
-import io.jans.as.model.fido.u2f.protocol.DeviceData;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.server.exception.fido.u2f.InvalidDeviceCounterException;
-import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.BaseEntry;
-
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -21,6 +13,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.protocol.DeviceData;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.exception.fido.u2f.InvalidDeviceCounterException;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * U2F Device registration

@@ -33,11 +33,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.jans.as.common.cert.validation.model.ValidationStatus;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import io.jans.as.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 /**
  * Chain certificate verifier

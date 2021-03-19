@@ -6,8 +6,8 @@
 
 package io.jans.as.model.crypto;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.common.JSONable;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * The Private Key for Cryptography algorithms

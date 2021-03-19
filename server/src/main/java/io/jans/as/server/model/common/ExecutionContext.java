@@ -6,10 +6,10 @@
 
 package io.jans.as.server.model.common;
 
-import io.jans.as.common.model.registration.Client;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import io.jans.as.common.model.registration.Client;
 
 /**
  * @author Yuriy Zabrovarnyy

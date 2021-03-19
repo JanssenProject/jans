@@ -1,9 +1,9 @@
 package io.jans.as.server.ws.rs.stat;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy

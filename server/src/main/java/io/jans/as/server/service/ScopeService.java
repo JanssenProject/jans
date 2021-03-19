@@ -6,7 +6,17 @@
 
 package io.jans.as.server.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
@@ -16,14 +26,6 @@ import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -218,7 +220,7 @@ public class ScopeService {
     }
 
     private static String getClaimDnCacheKey(String claimDn) {
-        return "claim_dn" + StringHelper.toLowerCase(claimDn);
+        return "cdn_" + StringHelper.toLowerCase(claimDn);
     }
 
     public void persist(Scope scope) {

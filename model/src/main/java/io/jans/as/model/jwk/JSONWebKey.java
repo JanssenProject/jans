@@ -6,13 +6,14 @@
 
 package io.jans.as.model.jwk;
 
-import io.jans.as.model.crypto.signature.ECEllipticCurve;
-import io.jans.as.model.util.StringUtils;
-import io.jans.as.model.util.Util;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
+import io.jans.as.model.crypto.signature.ECEllipticCurve;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

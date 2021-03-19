@@ -6,17 +6,18 @@
 
 package io.jans.as.model.common;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import io.jans.as.model.common.converter.ListConverter;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import io.jans.as.model.common.converter.ListConverter;
 
 /**
  * @author Yuriy Zabrovarnyy

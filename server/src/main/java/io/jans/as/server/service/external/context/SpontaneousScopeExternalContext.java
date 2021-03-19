@@ -6,10 +6,10 @@
 
 package io.jans.as.server.service.external.context;
 
+import java.util.Set;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.SpontaneousScopeService;
-
-import java.util.Set;
 
 public class SpontaneousScopeExternalContext extends ExternalScriptContext {
 

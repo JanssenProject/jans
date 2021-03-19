@@ -6,6 +6,13 @@
 
 package io.jans.as.server.uma.authorization;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.UserService;
@@ -17,12 +24,6 @@ import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author yuriyz on 06/06/2017.

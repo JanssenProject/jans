@@ -8,8 +8,9 @@ package io.jans.as.client.interop;
 
 import static org.testng.Assert.assertEquals;
 
-import io.jans.as.client.OpenIdConnectDiscoveryRequest;
 import org.testng.annotations.Test;
+
+import io.jans.as.client.OpenIdConnectDiscoveryRequest;
 
 /**
  * OC5:FeatureTest-Can Discover Identifiers using URL Syntax

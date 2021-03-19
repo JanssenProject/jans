@@ -6,6 +6,17 @@
 
 package io.jans.as.rp.action;
 
+import java.io.Serializable;
+import java.util.List;
+
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.model.authorize.Claim;
@@ -22,15 +33,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.SessionScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum

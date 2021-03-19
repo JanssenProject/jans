@@ -6,18 +6,27 @@
 
 package io.jans.as.model.jwt;
 
-import com.google.common.collect.Lists;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.json.JsonApplier;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.util.*;
+import com.google.common.collect.Lists;
+
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.json.JsonApplier;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

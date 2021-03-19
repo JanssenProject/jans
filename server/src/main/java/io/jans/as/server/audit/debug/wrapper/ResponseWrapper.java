@@ -6,10 +6,11 @@
 
 package io.jans.as.server.audit.debug.wrapper;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * Created by eugeniuparvan on 5/10/17.

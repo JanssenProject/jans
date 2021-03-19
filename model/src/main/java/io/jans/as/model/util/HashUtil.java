@@ -6,8 +6,9 @@
 
 package io.jans.as.model.util;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.apache.log4j.Logger;
+
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Yuriy Zabrovarnyy

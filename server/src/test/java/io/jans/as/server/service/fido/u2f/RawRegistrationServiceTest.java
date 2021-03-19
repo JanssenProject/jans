@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service.fido.u2f;
 
-import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.server.BaseComponentTest;
-import org.python.bouncycastle.util.encoders.Hex;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import javax.inject.Inject;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.python.bouncycastle.util.encoders.Hex;
+import org.testng.annotations.Test;
+
+import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.BaseComponentTest;
 
 public class RawRegistrationServiceTest extends BaseComponentTest {
 

@@ -6,10 +6,14 @@
 
 package io.jans.as.client.fido.u2f;
 
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
 import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateStatus;
-
-import javax.ws.rs.*;
 
 /**
  * The endpoint allows to start and finish U2F authentication process

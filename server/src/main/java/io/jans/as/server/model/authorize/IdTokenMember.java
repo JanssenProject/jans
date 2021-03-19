@@ -6,15 +6,16 @@
 
 package io.jans.as.server.model.authorize;
 
-import io.jans.as.model.util.Util;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012

@@ -6,10 +6,19 @@
 
 package io.jans.as.model.crypto;
 
-import static io.jans.as.model.jwk.JWKParameter.*;
+import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
+import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static io.jans.as.model.jwk.JWKParameter.CURVE;
+import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.KEY_TYPE;
+import static io.jans.as.model.jwk.JWKParameter.KEY_USE;
+import static io.jans.as.model.jwk.JWKParameter.PRIVATE_KEY;
+import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import io.jans.as.model.common.JSONable;
 import io.jans.as.model.util.StringUtils;
 

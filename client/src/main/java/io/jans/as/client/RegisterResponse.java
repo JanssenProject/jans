@@ -6,11 +6,20 @@
 
 package io.jans.as.client;
 
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.RegisterErrorResponseType;
-import io.jans.as.model.register.RegisterResponseParam;
-import io.jans.as.model.util.Util;
+import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
@@ -18,12 +27,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterResponseParam.*;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.Util;
 
 /**
  * Represents a register response received from the authorization server.
