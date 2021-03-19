@@ -6,12 +6,15 @@
 
 package io.jans.as.server.ws.rs;
 
+import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -84,20 +87,17 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String sectorIdentifierUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.CODE, io.jans.as.model.common.ResponseType.TOKEN, io.jans.as.model.common.ResponseType.ID_TOKEN);
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
-        io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(io.jans.as.model.common.SubjectType.PAIRWISE);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
-        registerRequest.setClaims(Arrays.asList(
-                "o"));
+        registerRequest.setClaims(Arrays.asList("o"));
 
-        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
-                io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
+        List<GrantType> grantTypes = Arrays.asList(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         registerRequest.setGrantTypes(grantTypes);
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
@@ -426,7 +426,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
@@ -490,8 +490,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-        io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(accessToken3);
-        userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
+        UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken3);
+        userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<>(userInfoRequest.getParameters())));
@@ -532,17 +532,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-        io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "jans test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
-        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
-                io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
-        );
+        List<GrantType> grantTypes = Arrays.asList(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         registerRequest.setGrantTypes(grantTypes);
 
         String registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());

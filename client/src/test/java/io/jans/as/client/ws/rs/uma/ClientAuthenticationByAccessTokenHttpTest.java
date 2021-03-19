@@ -6,24 +6,6 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
-
-import io.jans.as.model.uma.UmaTestUtil;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -50,6 +32,21 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author yuriyz
@@ -76,10 +73,10 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-        UmaTestUtil.assertIt(this.metadata);
+        assertIt(metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
-        UmaTestUtil.assertIt(pat);
+        assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
