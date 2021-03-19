@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/97d928c24e2d4a93bbe7c6c6d7592c54)](https://www.codacy.com/gh/JanssenProject/jans-client-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-client-api&amp;utm_campaign=Badge_Grade)
+
 # jans-client-api
 
 ## Introduction
