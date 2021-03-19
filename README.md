@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/a0f9313eeef046c8810e153a6b7b4ff5)](https://www.codacy.com/gh/JanssenProject/jans-cli/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-cli&amp;utm_campaign=Badge_Grade)
+
 # _Janssen Command Line Interface_
 `jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
 
