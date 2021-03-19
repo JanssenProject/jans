@@ -6,16 +6,17 @@
 
 package io.jans.as.server.service.external;
 
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+
 import io.jans.as.server.service.external.context.EndSessionContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.logout.EndSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
-import org.apache.commons.lang.StringUtils;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
 
 /**
  * @author Yuriy Zabrovarnyy

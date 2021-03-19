@@ -6,12 +6,12 @@
 
 package io.jans.as.server.model.common;
 
+import java.io.Serializable;
+import java.util.List;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.util.StringUtils;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Class used to keep all data about a CIBA request that should be processed and saved in Cache.

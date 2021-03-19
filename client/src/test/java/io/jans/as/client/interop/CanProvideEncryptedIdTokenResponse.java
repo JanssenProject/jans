@@ -6,8 +6,25 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -18,15 +35,6 @@ import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.testng.Assert.*;
 
 /**
  * OC5:FeatureTest-Can Provide Encrypted ID Token Response

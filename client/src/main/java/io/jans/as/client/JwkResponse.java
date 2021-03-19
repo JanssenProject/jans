@@ -6,6 +6,10 @@
 
 package io.jans.as.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -14,10 +18,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Represents a JSON Web Key (JWK) received from the authorization server.

@@ -6,21 +6,25 @@
 
 package io.jans.as.server.comp;
 
+import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+import javax.inject.Inject;
+
+import org.json.JSONObject;
+import org.testng.annotations.Test;
+
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.server.ConfigurableTest;
 import io.jans.as.server.model.config.ConfigurationFactory;
-import org.json.JSONObject;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
-import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum

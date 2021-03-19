@@ -6,18 +6,20 @@
 
 package io.jans.as.server.dev.duo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jans.as.persistence.model.configuration.CustomProperty;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
-import org.apache.commons.io.IOUtils;
-import org.testng.annotations.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.as.persistence.model.configuration.CustomProperty;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
 
 /**
  * @author Yuriy Zabrovarnyy

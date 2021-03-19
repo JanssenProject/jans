@@ -6,6 +6,17 @@
 
 package io.jans.as.server.clientinfo.ws.rs;
 
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
@@ -20,15 +31,6 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services

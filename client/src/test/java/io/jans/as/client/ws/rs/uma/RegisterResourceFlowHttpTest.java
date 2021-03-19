@@ -17,6 +17,11 @@ import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaResourceService;
@@ -27,10 +32,6 @@ import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaResourceWithId;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * Test cases for the registering UMA resources

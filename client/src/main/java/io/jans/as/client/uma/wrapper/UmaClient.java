@@ -6,7 +6,19 @@
 
 package io.jans.as.client.uma.wrapper;
 
-import io.jans.as.client.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.jboss.resteasy.client.ClientExecutor;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.uma.exception.UmaException;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -18,12 +30,6 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy

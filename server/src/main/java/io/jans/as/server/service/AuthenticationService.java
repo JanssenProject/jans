@@ -6,6 +6,30 @@
 
 package io.jans.as.server.service;
 
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
 import io.jans.as.common.model.common.SimpleUser;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -29,26 +53,12 @@ import io.jans.model.security.SimplePrincipal;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.ArrayHelper;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.*;
 
 /**
  * Authentication service methods

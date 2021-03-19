@@ -6,9 +6,19 @@
 
 package io.jans.as.server.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.jwt.JwtClaims;
-import io.jans.as.model.util.Base64Util;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.net.URI;
+import java.util.Arrays;
+
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;
@@ -18,14 +28,9 @@ import org.python.core.util.StringUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.Arrays;
-
-import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static org.testng.Assert.*;
+import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.BaseTest;
 
 /**
  * Functional tests for JWK Web Services (embedded)

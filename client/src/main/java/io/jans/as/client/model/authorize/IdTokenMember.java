@@ -6,11 +6,11 @@
 
 package io.jans.as.client.model.authorize;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Javier Rojas Blum Date: 03.07.2012

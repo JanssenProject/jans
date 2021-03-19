@@ -6,8 +6,29 @@
 
 package io.jans.as.server.session.ws.rs;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
@@ -29,7 +50,11 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.config.Constants;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.GrantService;
+import io.jans.as.server.service.RedirectionUriService;
+import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalEndSessionService;
 import io.jans.as.server.service.external.context.EndSessionContext;
@@ -37,24 +62,6 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.model.security.Identity;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Javier Rojas Blum

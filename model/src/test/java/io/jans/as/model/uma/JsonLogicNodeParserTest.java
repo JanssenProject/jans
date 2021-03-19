@@ -6,13 +6,13 @@
 
 package io.jans.as.model.uma;
 
-import org.apache.commons.io.IOUtils;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.apache.commons.io.IOUtils;
+import org.testng.annotations.Test;
 
 /**
  * @author yuriyz

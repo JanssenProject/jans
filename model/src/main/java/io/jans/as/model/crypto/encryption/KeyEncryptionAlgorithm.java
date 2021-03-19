@@ -8,6 +8,7 @@ package io.jans.as.model.crypto.encryption;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import io.jans.as.model.jwk.Algorithm;
 
 /**

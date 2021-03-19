@@ -6,11 +6,11 @@
 
 package io.jans.as.server.service.external.session;
 
-import io.jans.as.server.model.common.SessionId;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import io.jans.as.server.model.common.SessionId;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

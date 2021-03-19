@@ -6,7 +6,15 @@
 
 package io.jans.as.client.ciba.fcm;
 
-import io.jans.as.client.BaseResponse;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.FAILURE;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MESSAGE_ID;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MULTICAST_ID;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.RESULTS;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.SUCCESS;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
@@ -14,10 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.*;
+import io.jans.as.client.BaseResponse;
 
 /**
  * @author Javier Rojas Blum

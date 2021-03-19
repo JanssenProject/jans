@@ -6,20 +6,27 @@
 
 package io.jans.as.client.dev;
 
-import io.jans.as.client.*;
-import junit.framework.Assert;
+import java.util.Arrays;
+
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import junit.framework.Assert;
 
 /**
  * @version August 9, 2017

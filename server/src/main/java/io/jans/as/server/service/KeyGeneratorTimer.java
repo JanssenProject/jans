@@ -6,6 +6,25 @@
 
 package io.jans.as.server.service;
 
+import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -20,21 +39,6 @@ import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum

@@ -6,6 +6,19 @@
 
 package io.jans.as.server.session.ws.rs;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.msgpack.core.Preconditions;
+import org.slf4j.Logger;
+
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -13,17 +26,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.service.SectorIdentifierService;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.msgpack.core.Preconditions;
-import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy

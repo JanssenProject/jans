@@ -6,10 +6,10 @@
 
 package io.jans.as.persistence.model.configuration;
 
+import io.jans.as.persistence.model.base.Entry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.as.persistence.model.base.Entry;
 
 /**
  * Provides global inum search ability.

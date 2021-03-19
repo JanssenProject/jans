@@ -15,6 +15,12 @@ import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaPermissionService;
@@ -23,11 +29,6 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.UmaTestUtil;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * Test cases for the registering UMA permissions flow (HTTP)

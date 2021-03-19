@@ -1,9 +1,13 @@
 package io.jans.as.common.model.stat;
 
 
-import io.jans.orm.annotation.*;
-
 import java.io.Serializable;
+
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy

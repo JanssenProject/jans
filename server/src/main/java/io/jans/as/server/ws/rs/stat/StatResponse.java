@@ -1,11 +1,12 @@
 package io.jans.as.server.ws.rs.stat;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @IgnoreMediaTypes("application/*+json")
 @JsonIgnoreProperties(ignoreUnknown = true)

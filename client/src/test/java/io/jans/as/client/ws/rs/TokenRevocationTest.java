@@ -6,9 +6,38 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.*;
-import io.jans.as.model.common.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
+import io.jans.as.client.JwkClient;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.client.TokenRevocationClient;
+import io.jans.as.client.TokenRevocationRequest;
+import io.jans.as.client.TokenRevocationResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.RSASigner;
@@ -17,14 +46,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.testng.Assert.*;
 
 /**
  * The Jans Auth authorization server's revocation policy acts as follows:

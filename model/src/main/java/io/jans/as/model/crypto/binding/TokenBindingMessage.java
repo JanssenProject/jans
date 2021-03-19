@@ -6,15 +6,17 @@
 
 package io.jans.as.model.crypto.binding;
 
-import com.google.common.base.Function;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.jans.as.model.token.JsonWebResponse;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Function;
+
+import io.jans.as.model.token.JsonWebResponse;
 
 /**
  * <pre>

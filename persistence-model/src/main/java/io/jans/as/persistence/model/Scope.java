@@ -6,12 +6,16 @@
 
 package io.jans.as.persistence.model;
 
-import io.jans.as.model.common.ScopeType;
-import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.DeletableEntity;
-
 import java.io.Serializable;
 import java.util.List;
+
+import io.jans.as.model.common.ScopeType;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.DeletableEntity;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

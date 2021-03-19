@@ -6,10 +6,10 @@
 
 package io.jans.as.server.model.net;
 
+import java.io.Serializable;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
-
-import java.io.Serializable;
 
 /**
  * @author Yuriy Movchan Date: 07/14/2015
