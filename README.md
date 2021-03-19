@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b6e9b72a8c484d13a22b315de52a68c5)](https://www.codacy.com/gh/JanssenProject/docker-jans-certmanager/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-certmanager&amp;utm_campaign=Badge_Grade)
+
 ## Overview
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
