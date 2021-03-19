@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 
 import static io.jans.as.client.BaseTest.showClient;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,14 +36,10 @@ public class MTSLClientAuthenticationTest {
     public static void main(String[] args) throws Exception {
 
         File jdkJks = new File("u:\\tmp\\ce-ob\\clientkeystore");
-        if (!jdkJks.exists()) {
-            throw new Error("Failed to find jks trust store");
-        }
+        assertTrue(jdkJks.exists(), "Failed to find jks trust store");
 
         File certificate = new File("u:\\tmp\\ce-ob\\fullchain.p12");
-        if (!certificate.exists()) {
-            throw new Error("Failed to find certificate");
-        }
+        assertTrue(certificate.exists(), "Failed to find certificate");
 
         HttpClient httpclient = new DefaultHttpClient();
 // truststore
