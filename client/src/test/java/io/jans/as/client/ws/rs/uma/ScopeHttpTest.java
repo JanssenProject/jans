@@ -28,6 +28,6 @@ public class ScopeHttpTest {
         final UmaMetadata metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
         final UmaScopeService scopeService = UmaClientFactory.instance().createScopeService(metadata.getScopeEndpoint());
         final UmaScopeDescription modifyScope = scopeService.getScope("modify");
-        UmaTestUtil.assert_(modifyScope);
+        UmaTestUtil.assertIt(modifyScope);
     }
 }

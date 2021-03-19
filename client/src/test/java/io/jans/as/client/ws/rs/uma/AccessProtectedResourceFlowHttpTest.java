@@ -6,7 +6,7 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static io.jans.as.model.uma.UmaTestUtil.assert_;
+import static io.jans.as.model.uma.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
+import io.jans.as.model.uma.UmaTestUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.openqa.selenium.By;
@@ -59,10 +60,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-        assert_(this.metadata);
+        UmaTestUtil.assertIt(this.metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
-        assert_(pat);
+        UmaTestUtil.assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
@@ -115,7 +116,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
             assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");
 
             needInfo = Util.createJsonMapper().readValue(entity, UmaNeedInfoResponse.class);
-            assert_(needInfo);
+            assertIt(needInfo);
             return;
         }
 
@@ -166,7 +167,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 claimsGatheringTicket,
                 null, null, null, null, null);
-        assert_(response);
+        UmaTestUtil.assertIt(response);
 
         this.rpt = response.getAccessToken();
     }
@@ -186,7 +187,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 claimsGatheringTicket,
                 null, null, null, this.rpt, "oxd");
-        assert_(response);
+        UmaTestUtil.assertIt(response);
         assertTrue(response.getUpgraded());
 
         this.rpt = response.getAccessToken();
@@ -199,7 +200,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters()
     public void rptStatus() {
         showTitle("rptStatus");
-        assert_(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
+        UmaTestUtil.assertIt(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
     }
 
     public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {

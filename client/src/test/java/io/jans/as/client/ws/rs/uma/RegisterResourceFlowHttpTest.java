@@ -65,11 +65,11 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
             this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-            UmaTestUtil.assert_(this.metadata);
+            UmaTestUtil.assertIt(this.metadata);
         }
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
-        UmaTestUtil.assert_(pat);
+        UmaTestUtil.assertIt(pat);
     }
 
     public UmaResourceService getResourceService() throws Exception {
@@ -98,7 +98,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setType("myType");
 
             UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
-            UmaTestUtil.assert_(resourceStatus);
+            UmaTestUtil.assertIt(resourceStatus);
 
             this.resourceId = resourceStatus.getId();
             return this.resourceId;
@@ -117,7 +117,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setType("myType");
 
             UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
-            UmaTestUtil.assert_(resourceStatus);
+            UmaTestUtil.assertIt(resourceStatus);
 
             this.resourceIdWithScopeExpression = resourceStatus.getId();
             return this.resourceIdWithScopeExpression;

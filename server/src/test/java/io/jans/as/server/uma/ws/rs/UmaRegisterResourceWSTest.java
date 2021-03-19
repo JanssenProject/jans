@@ -51,7 +51,7 @@ public class UmaRegisterResourceWSTest extends BaseTest {
 	public void testRegisterResource() throws Exception {
 		resourceStatus = TUma.registerResource(url, pat, umaRegisterResourcePath,
 				UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resourceStatus);
+		UmaTestUtil.assertIt(resourceStatus);
 	}
 
 	@Test(dependsOnMethods = {"testRegisterResource"})
@@ -64,7 +64,7 @@ public class UmaRegisterResourceWSTest extends BaseTest {
 
 		final UmaResourceResponse status = TUma.modifyResource(url, pat, umaRegisterResourcePath,
 				resourceStatus.getId(), resource);
-		UmaTestUtil.assert_(status);
+		UmaTestUtil.assertIt(status);
 	}
 
 	/**
