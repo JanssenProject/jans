@@ -1,4 +1,5 @@
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/50c5d12c3c0c4601a276cfe4f39955c9)](https://www.codacy.com/gh/JanssenProject/jans-cloud-native/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-cloud-native&amp;utm_campaign=Badge_Grade)
 ![couchbase](https://github.com/JanssenProject/jans-cloud-native/workflows/couchbase/badge.svg)
 ![opendj](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj/badge.svg)
 ![opendj-istio](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj-istio/badge.svg)
