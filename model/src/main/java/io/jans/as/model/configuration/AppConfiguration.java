@@ -6,15 +6,9 @@
 
 package io.jans.as.model.configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -22,6 +16,11 @@ import io.jans.as.model.common.SoftwareStatementValidationType;
 import io.jans.as.model.common.WebKeyStorage;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the configuration JSON file.
@@ -268,6 +267,11 @@ public class AppConfiguration implements Configuration {
     private Boolean cibaEnabled;
 
     private int discoveryCacheLifetimeInMinutes = 60;
+
+    private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
+    private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+    private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+
 
     public Boolean getUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
@@ -538,21 +542,6 @@ public class AppConfiguration implements Configuration {
     public void setDisableJdkLogger(Boolean disableJdkLogger) {
         this.disableJdkLogger = disableJdkLogger;
     }
-
-    /**
-     * Used in ServletLoggingFilter to enable http request/response logging.
-     */
-    private Boolean httpLoggingEnabled;
-
-    /**
-     * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
-     */
-    private Set<String> httpLoggingExludePaths;
-
-    /**
-     * Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
-     */
-    private String externalLoggerConfiguration;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
