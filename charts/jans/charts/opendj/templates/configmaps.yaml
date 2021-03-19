@@ -7,5 +7,6 @@ metadata:
   name:  {{ .Release.Name }}-serf-peers
   namespace: {{ .Release.Namespace }}
 data:
-  serf-peers-static.json: {{ .Values.multiCluster.serfPeers | toJson }}
+  serf-peers-static.json: |
+    {{ .Values.multiCluster.serfPeers | toJson }}
 {{- end }}
