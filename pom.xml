@@ -256,6 +256,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>karate.properties</include>
+					<include>karate_jenkins.properties</include>
 					<include>test.properties</include>
 					<include>*.*</include>
 				</includes>
