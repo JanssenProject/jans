@@ -6,25 +6,7 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
-import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.util.Arrays;
-import java.util.List;
-
-import io.jans.as.model.uma.UmaTestUtil;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -40,6 +22,21 @@ import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.as.model.uma.wrapper.Token;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
+import java.util.List;
+
+import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -90,12 +87,12 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl"})
     public void init(final String umaMetaDataUrl) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
-        UmaTestUtil.assertIt(this.metadata);
+        assertIt(this.metadata);
 
         registerClient();
 
         pat = UmaClient.requestPat(tokenEndpoint, clientResponse.getClientId(), clientResponse.getClientSecret(), clientExecutor(true));
-        UmaTestUtil.assertIt(pat);
+        assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
@@ -129,7 +126,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 permissionFlowTest.ticket,
                 null, null, null, null, null);
-        UmaTestUtil.assertIt(response);
+        assertIt(response);
 
         this.rpt = response.getAccessToken();
     }
@@ -139,7 +136,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     public void rptStatus() {
         showTitle("rptStatus");
         final RptIntrospectionResponse status = this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, "");
-        UmaTestUtil.assertIt(status);
+        assertIt(status);
 
         // at the end scope registered by permission must be present in RPT permission with scope allowed by spontaneous scope check
         assertTrue(status.getPermissions().get(0).getScopes().contains(USER_2_SCOPE));
