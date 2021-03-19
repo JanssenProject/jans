@@ -6,15 +6,15 @@
 
 package io.jans.as.server.security;
 
-import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.session.SessionClient;
-
 import javax.annotation.Priority;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Named;
 import javax.interceptor.Interceptor;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.session.SessionClient;
 
 /**
  * @version August 9, 2017

@@ -6,18 +6,10 @@
 
 package io.jans.as.server.auth;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.jsf2.service.FacesService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -26,10 +18,21 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.jsf2.service.FacesService;
 
 /**
  * @author Yuriy Zabrovarnyy

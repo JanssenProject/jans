@@ -6,12 +6,13 @@
 
 package io.jans.as.client.client;
 
-import com.google.common.base.Preconditions;
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
+import com.google.common.base.Preconditions;
 
 /**
  * @author yuriyz

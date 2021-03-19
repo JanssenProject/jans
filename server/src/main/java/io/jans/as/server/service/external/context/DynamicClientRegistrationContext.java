@@ -6,11 +6,12 @@
 
 package io.jans.as.server.service.external.context;
 
-import io.jans.as.model.jwt.Jwt;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy

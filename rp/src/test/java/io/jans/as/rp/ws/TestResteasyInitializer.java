@@ -6,10 +6,11 @@
 
 package io.jans.as.rp.ws;
 
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.ext.Provider;
 
 /**
  * Integration with Resteasy

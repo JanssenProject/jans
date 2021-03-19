@@ -9,11 +9,11 @@ package io.jans.as.model.fido.u2f.protocol;
 import java.io.IOException;
 import java.io.Serializable;
 
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.fido.u2f.exception.BadInputException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.util.Base64Util;
 
 /**
  * FIDO U2F client data

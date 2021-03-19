@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import io.jans.as.client.BaseTest;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
 import io.jans.as.client.ClientUtils;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -32,8 +35,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.

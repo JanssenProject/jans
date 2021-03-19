@@ -6,21 +6,23 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaScopeDescription;
-import io.jans.as.model.uma.UmaTestUtil;
-import io.jans.as.server.model.uma.TUma;
+import static org.testng.Assert.assertEquals;
+
+import java.net.URI;
+
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-
-import static org.testng.Assert.assertEquals;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaScopeDescription;
+import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.model.uma.TUma;
 
 /**
  * @author Yuriy Zabrovarnyy

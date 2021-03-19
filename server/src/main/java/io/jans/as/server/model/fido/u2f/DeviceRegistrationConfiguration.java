@@ -6,13 +6,14 @@
 
 package io.jans.as.server.model.fido.u2f;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.server.crypto.cert.CertificateParser;
-
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.crypto.cert.CertificateParser;
 
 /**
  * U2F Device registration key

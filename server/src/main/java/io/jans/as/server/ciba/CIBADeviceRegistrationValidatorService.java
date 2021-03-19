@@ -6,15 +6,16 @@
 
 package io.jans.as.server.ciba;
 
-import io.jans.as.model.error.DefaultErrorResponse;
-import org.apache.logging.log4j.util.Strings;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
+import org.apache.logging.log4j.util.Strings;
+
+import io.jans.as.model.error.DefaultErrorResponse;
 
 /**
  * @author Javier Rojas Blum

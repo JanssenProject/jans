@@ -6,19 +6,21 @@
 
 package io.jans.as.persistence.model.configuration;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.model.ldap.GluuLdapConfiguration;
-import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
-import io.jans.as.model.util.Util;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jans.as.model.util.Util;
+import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 
 /**
  * oxIDPAuthConf

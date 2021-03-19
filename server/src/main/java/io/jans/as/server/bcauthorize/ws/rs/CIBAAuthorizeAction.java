@@ -6,16 +6,23 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
-import io.jans.as.common.util.RedirectUri;
-import io.jans.as.model.configuration.AppConfiguration;
-import org.slf4j.Logger;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.NONCE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.REDIRECT_URI;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
+
+import java.util.UUID;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.UUID;
 
-import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
+import org.slf4j.Logger;
+
+import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.configuration.AppConfiguration;
 
 /**
  * @author Javier Rojas Blum

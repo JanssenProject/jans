@@ -6,26 +6,32 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.server.BaseTest;
-import io.jans.as.model.uma.*;
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.as.server.model.uma.TUma;
-import io.jans.as.server.util.ServerUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import io.jans.as.model.uma.PermissionTicket;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaPermission;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.model.uma.TUma;
+import io.jans.as.server.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

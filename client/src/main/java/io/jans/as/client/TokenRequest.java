@@ -6,15 +6,16 @@
 
 package io.jans.as.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
-
-import javax.ws.rs.core.MediaType;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents a token request to send to the authorization server.

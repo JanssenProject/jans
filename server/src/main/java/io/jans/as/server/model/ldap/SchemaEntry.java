@@ -6,12 +6,12 @@
 
 package io.jans.as.server.model.ldap;
 
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.model.base.BaseEntry;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * Schema attribute

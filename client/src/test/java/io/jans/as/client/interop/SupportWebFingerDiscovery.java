@@ -9,8 +9,9 @@ package io.jans.as.client.interop;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.client.BaseTest;
 import org.testng.annotations.Test;
+
+import io.jans.as.client.BaseTest;
 
 /**
  * OC5:FeatureTest-Support WebFinger Discovery

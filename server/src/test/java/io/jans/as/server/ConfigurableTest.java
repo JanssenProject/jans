@@ -6,9 +6,14 @@
 
 package io.jans.as.server;
 
-import io.jans.as.server.util.Deployments;
-import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -19,13 +24,9 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
+import io.jans.as.server.util.Deployments;
+import io.jans.util.StringHelper;
+import io.jans.util.properties.FileConfiguration;
 
 /**
  * Base class for all seam test which requre external configuration
@@ -36,6 +37,7 @@ import java.util.Properties;
 public abstract class ConfigurableTest extends Arquillian {
 
 	public static FileConfiguration testData;
+	public boolean initialized = false;
 
 	@Deployment
 	@OverProtocol("Servlet 3.0")
@@ -45,7 +47,11 @@ public abstract class ConfigurableTest extends Arquillian {
 
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-        Reporter.log("Invoked init test suite method", true);
+		if (initialized) {
+			return;
+		}
+
+		Reporter.log("Invoked init test suite method", true);
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {
@@ -75,6 +81,8 @@ public abstract class ConfigurableTest extends Arquillian {
 
 		// Override test parameters
 		context.getSuite().getXmlSuite().setParameters(parameters);
+		
+		initialized = true;
 	}
 
 }

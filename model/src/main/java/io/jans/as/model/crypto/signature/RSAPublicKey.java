@@ -6,15 +6,19 @@
 
 package io.jans.as.model.crypto.signature;
 
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
+
+import java.math.BigInteger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.StringUtils;
-
-import static io.jans.as.model.jwk.JWKParameter.*;
-
-import java.math.BigInteger;
 
 /**
  * The Public Key for the RSA Algorithm
