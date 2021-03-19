@@ -166,7 +166,7 @@ public class StringUtils {
 
     public static void addQueryStringParam(StringBuilder p_queryStringBuilder, String key, Collection value) throws UnsupportedEncodingException {
         if (p_queryStringBuilder != null && isNotBlank(key) && value != null && !value.isEmpty()) {
-            if (p_queryStringBuilder.toString().length() > 0) {
+            if (p_queryStringBuilder.length() > 0) {
                 p_queryStringBuilder.append("&");
             }
             p_queryStringBuilder.append(key).append("=")
