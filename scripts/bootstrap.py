@@ -11,6 +11,7 @@ from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
+from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
@@ -120,12 +121,7 @@ def render_client_api_config():
         data = safe_load(f.read())
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-
-    if persistence_type in ("ldap", "hybrid"):
-        conn = "jans-ldap.properties"
-    else:
-        # likely "couchbase"
-        conn = "jans-couchbase.properties"
+    conn = f"jans-{persistence_type}.properties"
 
     data["storage"] = "jans_server_configuration"
     data["storage_configuration"] = {
@@ -181,6 +177,13 @@ def main():
 
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if persistence_type == "sql":
+        render_sql_properties(
+            manager,
+            "/app/templates/jans-sql.properties.tmpl",
+            "/etc/jans/conf/jans-sql.properties",
+        )
 
     get_web_cert()
 
