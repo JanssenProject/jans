@@ -9,6 +9,7 @@ from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
+from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.utils import cert_to_truststore
 
 manager = get_manager()
@@ -80,6 +81,13 @@ def main():
 
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if persistence_type == "sql":
+        render_sql_properties(
+            manager,
+            "/app/templates/jans-sql.properties.tmpl",
+            "/etc/jans/conf/jans-sql.properties",
+        )
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
