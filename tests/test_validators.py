@@ -37,3 +37,20 @@ def test_validate_persistence_ldap_mapping_invalid():
 
     with pytest.raises(ValueError):
         validate_persistence_ldap_mapping("hybrid", "random")
+
+
+@pytest.mark.parametrize("dialect", [
+    "mysql",
+    # "pgsql",
+])
+def test_validate_persistence_sql_dialect(dialect):
+    from jans.pycloudlib.validators import validate_persistence_sql_dialect
+
+    assert validate_persistence_sql_dialect(dialect) is None
+
+
+def test_validate_persistence_sql_dialect_invalid():
+    from jans.pycloudlib.validators import validate_persistence_sql_dialect
+
+    with pytest.raises(ValueError):
+        validate_persistence_sql_dialect("random")

@@ -20,3 +20,9 @@ PERSISTENCE_LDAP_MAPPINGS = (
     "token",
     "session",
 )
+
+# Supported SQL dialects
+PERSISTENCE_SQL_DIALECTS = (
+    "mysql",
+    # "pgsql",
+)
