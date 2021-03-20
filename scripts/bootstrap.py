@@ -1,4 +1,3 @@
-import base64
 import os
 import re
 
@@ -10,6 +9,7 @@ from jans.pycloudlib.persistence import render_ldap_properties
 from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
+from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.utils import cert_to_truststore
 
 manager = get_manager()
@@ -82,6 +82,13 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
+    if persistence_type == "sql":
+        render_sql_properties(
+            manager,
+            "/app/templates/jans-sql.properties.tmpl",
+            "/etc/jans/conf/jans-sql.properties",
+        )
+
     if not os.path.isfile("/etc/certs/web_https.crt"):
         manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
 
@@ -91,20 +98,6 @@ def main():
         "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
         "changeit",
     )
-
-    # manager.secret.to_file("scim_rs_jks_base64", "/etc/certs/scim-rs.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("scim_rs_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("scim_rs_client_base64_jwks")).decode()
-    #     )
-
-    # manager.secret.to_file("scim_rp_jks_base64", "/etc/certs/scim-rp.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("scim_rp_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("scim_rp_client_base64_jwks")).decode()
-    #     )
 
     modify_jetty_xml()
     modify_webdefault_xml()
