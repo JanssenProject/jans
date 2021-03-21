@@ -10,10 +10,12 @@ from ldap3 import Connection
 from ldap3 import Server
 from ldap3 import BASE
 from ldap3 import MODIFY_REPLACE
+from sqlalchemy.sql import text
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
+from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
@@ -167,6 +169,41 @@ class CouchbasePersistence(BasePersistence):
         return True
 
 
+class SqlPersistence(BasePersistence):
+    def __init__(self, host="", user="", password=""):
+        self.backend = SQLClient()
+
+    def get_auth_config(self):
+        with self.backend.engine.connect() as conn:
+            query = "SELECT jansRevision, jansConfDyn, jansConfWebKeys FROM jansAppConf WHERE doc_id = :doc_id"
+            result = conn.execute(
+                text(query),
+                **{"doc_id": "jans-auth"}
+            )
+            row = result.fetchone()
+
+            if not row:
+                return {}
+
+            config = dict(row)
+            config["id"] = "jans-auth"
+            return config
+
+    def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
+        with self.backend.engine.connect() as conn:
+            query = "UPDATE jansAppConf SET jansRevision = :rev, jansConfDyn = :conf_dynamic, jansConfWebKeys = :conf_webkeys WHERE doc_id = :doc_id"
+            result = conn.execute(
+                text(query),
+                **{
+                    "doc_id": id_,
+                    "rev": rev,
+                    "conf_dynamic": json.dumps(conf_dynamic),
+                    "conf_webkeys": json.dumps(conf_webkeys),
+                }
+            )
+            return bool(result.rowcount)
+
+
 class AuthHandler(BaseHandler):
     def __init__(self, manager, dry_run, **opts):
         super().__init__(manager, dry_run, **opts)
@@ -174,7 +211,7 @@ class AuthHandler(BaseHandler):
         persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
         ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
-        if persistence_type in ("ldap", "couchbase"):
+        if persistence_type in ("ldap", "couchbase", "sql"):
             backend_type = persistence_type
         else:
             # persistence_type is hybrid
@@ -192,11 +229,16 @@ class AuthHandler(BaseHandler):
                 manager.secret.get("encoded_salt"),
             )
             backend_cls = LdapPersistence
-        else:
+        elif backend_type == "couchbase":
             host = os.environ.get("CN_COUCHBASE_URL", "localhost")
             user = get_couchbase_user(manager)
             password = get_couchbase_password(manager)
             backend_cls = CouchbasePersistence
+        else:
+            host = ""
+            user = ""
+            password = ""
+            backend_cls = SqlPersistence
 
         self.backend = backend_cls(host, user, password)
         self.rotation_interval = opts.get("interval", 48)
@@ -330,11 +372,11 @@ class AuthHandler(BaseHandler):
         auth_containers = []
 
         if self.push_keys:
-            auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
+            auth_containers = self.meta_client.get_containers("APP_NAME=jans-auth")
             if not auth_containers:
                 logger.warning(
                     "Unable to find any jans-auth container; make sure "
-                    "to deploy jans-auth and set APP_NAME=auth-server "
+                    "to deploy jans-auth and set APP_NAME=jans-auth "
                     "label on container level"
                 )
                 # exit immediately to avoid persistence/secrets being modified
