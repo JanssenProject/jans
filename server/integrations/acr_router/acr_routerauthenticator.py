@@ -3,7 +3,7 @@
 #
 # Author: Yuriy Movchan
 #
-
+from __future__ import print_function
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 
 
@@ -13,19 +13,19 @@ class PersonAuthentication(PersonAuthenticationType):
 
     @classmethod
     def init(cls, customScript, configurationAttributes):
-        print "ACR Router. Initialization"
+        print("ACR Router. Initialization")
         if not configurationAttributes.containsKey("new_acr_value"):
-            print "ACR Router. Initialization. Property acr_router_value is mandatory"
+            print("ACR Router. Initialization. Property acr_router_value is mandatory")
             return False
-        print "ACR Router. Initialized successfully"
-        return True   
+        print("ACR Router. Initialized successfully")
+        return True
 
     def destroy(self, configurationAttributes):
-        print "ACR Router. Destroy"
-        print "ACR Router. Destroyed successfully"
+        print("ACR Router. Destroy")
+        print("ACR Router. Destroyed successfully")
 
         return True
-        
+
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
 
@@ -39,7 +39,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     @classmethod
     def getAlternativeAuthenticationMethod(cls, usageType, configurationAttributes):
-        print "ACR Router. get new acr value"
+        print("ACR Router. get new acr value")
         new_acr_value = configurationAttributes.get("new_acr_value").getValue2()
         # Put your custom logic to determine if routing required here...
         return new_acr_value
@@ -70,7 +70,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     @classmethod
     def getLogoutExternalUrl(cls, configurationAttributes, requestParameters):
-        print "Get external logout URL call"
+        print("Get external logout URL call")
         return None
 
     @classmethod
