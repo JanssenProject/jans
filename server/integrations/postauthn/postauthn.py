@@ -9,7 +9,12 @@ from __future__ import print_function
 from io.jans.model.custom.script.type.postauthn import PostAuthnType
 
 class PostAuthn(PostAuthnType):
+
     def __init__(self, currentTimeMillis):
+        """
+        Args:
+            currentTimeMillis (int): current time in miliseconds
+        """
         self.currentTimeMillis = currentTimeMillis
 
     @classmethod
