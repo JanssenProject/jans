@@ -24,6 +24,7 @@ def update_json_file(settings, file):
 
 def exec_cmd(cmd, output_file=None):
     """
+
     Execute command cmd
     :param cmd:
     :param output_file:
@@ -47,6 +48,7 @@ def exec_cmd(cmd, output_file=None):
 
 def get_logger(name):
     """
+
     Set logger configs with name.
     :param name:
     :return:
@@ -68,6 +70,7 @@ logger = get_logger("cn-helpers   ")
 
 def copy(src, dest):
     """
+    
     Copy from source to destination
     :param src:
     :param dest:
