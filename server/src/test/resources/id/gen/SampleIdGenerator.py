@@ -1,6 +1,5 @@
 from io.jans.model.custom.script.type.id import IdGeneratorType
 from io.jans.util import StringHelper
-from java.util import ArrayList
 from java.util import UUID
 
 class IdGenerator(IdGeneratorType):
@@ -12,13 +11,13 @@ class IdGenerator(IdGeneratorType):
         print "Id generator. Initialization"
         print "Id generator. Initialized successfully"
 
-        return True   
+        return True
 
     @classmethod
     def destroy(cls, configurationAttributes):
         print "Id generator. Destroy"
         print "Id generator. Destroyed successfully"
-        return True   
+        return True
 
     @classmethod
     def getApiVersion(cls):
