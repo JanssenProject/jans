@@ -160,7 +160,7 @@
   },
   "jansDbAuth": {
     "mysql": {
-      "type": "TEXT"
+      "type": "JSON"
     }
   },
   "jansDocStoreConf": {
