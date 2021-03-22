@@ -18,7 +18,8 @@ from java.util import HashSet
 class UmaRptPolicy(UmaRptPolicyType):
 
     def __init__(self, currentTimeMillis):
-        """
+        """Construct class.
+
         Args:
             currentTimeMillis (int): current time in miliseconds
         """
