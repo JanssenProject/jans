@@ -18,8 +18,17 @@ from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):
+
     def __init__(self, currentTimeMillis):
+        """Construct class.
+
+        Args:
+            currentTimeMillis (int): current time in miliseconds
+        """
+
+
         self.currentTimeMillis = currentTimeMillis
+
 
     def init(self, configurationAttributes):
         print "OneId. Initialization"
