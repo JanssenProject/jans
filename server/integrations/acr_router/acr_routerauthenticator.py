@@ -20,7 +20,8 @@ class PersonAuthentication(PersonAuthenticationType):
         print("ACR Router. Initialized successfully")
         return True
 
-    def destroy(self, configurationAttributes):
+    @classmethod
+    def destroy(cls, configurationAttributes):
         print("ACR Router. Destroy")
         print("ACR Router. Destroyed successfully")
 
