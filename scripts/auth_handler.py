@@ -257,7 +257,7 @@ class AuthHandler(BaseHandler):
 
     @property
     def allowed_key_algs(self):
-        algs = self.sig_keys.split(" ") + self.enc_keys.split(" ")
+        algs = self.sig_keys.split() + self.enc_keys.split()
         return algs
 
     def get_merged_keys(self, exp_hours):
@@ -446,6 +446,8 @@ class AuthHandler(BaseHandler):
             self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
             self.manager.config.set("auth_key_rotated_at", int(time.time()))
             self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+            self.manager.config.set("auth_sig_keys", self.sig_keys)
+            self.manager.config.set("auth_enc_keys", self.enc_keys)
             # jwks
             self.manager.secret.set(
                 "auth_openid_key_base64",
@@ -604,6 +606,8 @@ class AuthHandler(BaseHandler):
             self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
             self.manager.config.set("auth_key_rotated_at", int(time.time()))
             self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+            self.manager.config.set("auth_sig_keys", self.sig_keys)
+            self.manager.config.set("auth_enc_keys", self.enc_keys)
             # jwks
             self.manager.secret.set(
                 "auth_openid_key_base64",
@@ -621,10 +625,10 @@ def resolve_sig_keys(keys: str) -> str:
     :returns: Space-separated allowed signing keys.
     """
 
-    default_sig_keys = SIG_KEYS.split(" ")
+    default_sig_keys = SIG_KEYS.split()
     sig_keys = []
 
-    for k in keys.split(" "):
+    for k in keys.split():
         k = k.strip()
 
         if k not in default_sig_keys:
@@ -645,10 +649,10 @@ def resolve_enc_keys(keys: str) -> str:
     :returns: Space-separated allowed encryption keys.
     """
 
-    default_enc_keys = ENC_KEYS.split(" ")
+    default_enc_keys = ENC_KEYS.split()
     enc_keys = []
 
-    for k in keys.split(" "):
+    for k in keys.split():
         k = k.strip()
 
         if k not in default_enc_keys:
