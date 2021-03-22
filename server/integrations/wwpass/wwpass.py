@@ -73,14 +73,18 @@ class WWPassException(IOError):
     pass
 
 class WWPassConnection(object):
+
     def __init__(self, key_file, cert_file, timeout=10, spfe_addr='https://spfe.wwpass.com', cafile=None):
-        """Args:
+        """Construct class.
+
+        Args:
             key_file (str): ???
             cert_file (str): ??
             timeout (int): ??
             spfe_addr (str): ??
             cafile (str): ??
         """
+
         self.context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1)
         self.context.load_cert_chain(certfile=cert_file, keyfile=key_file)
         if cafile is None:

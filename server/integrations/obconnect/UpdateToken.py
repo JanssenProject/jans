@@ -9,10 +9,12 @@ import sys
 class UpdateToken(UpdateTokenType):
 
     def __init__(self, currentTimeMillis):
-        """
+        """Construct class.
+
         Args:
             currentTimeMillis (int): current time in miliseconds
         """
+
         self.currentTimeMillis = currentTimeMillis
 
     @classmethod
@@ -50,22 +52,21 @@ class UpdateToken(UpdateTokenType):
             else:
                 print("session id -%s " % sessionId.getId())
 
-                        
             print("session id -%s " % sessionId.getSessionAttributes())
             openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
             acr = sessionId.getSessionAttributes().get("acr_ob")
 
             #jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
-            
+
             #custom claims
             jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id)
             jsonWebResponse.getClaims().setClaim("acr", acr)
-            
-            #regular claims        
+
+            #regular claims
             jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
 
             print("Update token script. After modify idToken: %s" % jsonWebResponse)
-        
+
             return True
         except:
             print("update token failure" , sys.exc_info()[1])
