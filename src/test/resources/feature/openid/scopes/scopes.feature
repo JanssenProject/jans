@@ -97,13 +97,11 @@ And print response
 Scenario: Get an openid connect scopes by inum
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 200
 And print response
 Given url mainUrl + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 200
 And print response
