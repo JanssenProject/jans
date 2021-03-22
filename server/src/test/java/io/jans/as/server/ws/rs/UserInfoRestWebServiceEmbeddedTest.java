@@ -283,7 +283,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
         assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
                 "Unexpected result: " + response.getHeaderString("Pragma"));
-        assertNull(entity, "Unexpected result: " + entity);
+        assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
