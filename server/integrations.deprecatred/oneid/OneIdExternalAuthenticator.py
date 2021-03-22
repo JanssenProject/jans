@@ -25,7 +25,6 @@ class PersonAuthentication(PersonAuthenticationType):
         Args:
             currentTimeMillis (int): current time in miliseconds
         """
-
         self.currentTimeMillis = currentTimeMillis
 
 
