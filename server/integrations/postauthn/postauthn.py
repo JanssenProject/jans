@@ -4,6 +4,7 @@
 # Author: Yuriy Zabrovarnyy
 #
 #
+from __future__ import print_function
 
 from io.jans.model.custom.script.type.postauthn import PostAuthnType
 
@@ -13,15 +14,15 @@ class PostAuthn(PostAuthnType):
 
     @classmethod
     def init(cls, customScript, configurationAttributes):
-        print "Post Authn script. Initializing ..."
-        print "Post Authn script. Initialized successfully"
+        print("Post Authn script. Initializing ...")
+        print("Post Authn script. Initialized successfully")
 
         return True
 
     @classmethod
     def destroy(cls, configurationAttributes):
-        print "Post Authn script. Destroying ..."
-        print "Post Authn script. Destroyed successfully"
+        print("Post Authn script. Destroying ...")
+        print("Post Authn script. Destroyed successfully")
         return True
 
     @classmethod
