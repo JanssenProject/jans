@@ -7,10 +7,12 @@ from java.util import UUID
 class IdGenerator(IdGeneratorType):
 
     def __init__(self, currentTimeMillis):
-        """
+        """Construct class.
+        
         Args:
             currentTimeMillis (int): current time in miliseconds
         """
+
         self.currentTimeMillis = currentTimeMillis
 
     @classmethod
