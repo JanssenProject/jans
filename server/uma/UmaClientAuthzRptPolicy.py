@@ -70,7 +70,7 @@ class UmaRptPolicy(UmaRptPolicyType):
         allowedClientsList = configurationAttributes.get("allowed_clients").getValue2()
         if (StringHelper.isEmpty(allowedClientsList)):
             print("UmaRptPolicy. The property allowed_clients is empty")
-            return clientsSet    
+            return clientsSet
 
         allowedClientsListArray = StringHelper.split(allowedClientsList, ",")
         if (ArrayHelper.isEmpty(allowedClientsListArray)):
