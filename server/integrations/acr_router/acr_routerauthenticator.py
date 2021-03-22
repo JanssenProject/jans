@@ -11,7 +11,8 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, customScript, configurationAttributes):
+    @classmethod
+    def init(cls, customScript, configurationAttributes):
         print "ACR Router. Initialization"
         if not configurationAttributes.containsKey("new_acr_value"):
             print "ACR Router. Initialization. Property acr_router_value is mandatory"
@@ -28,41 +29,50 @@ class PersonAuthentication(PersonAuthenticationType):
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
 
-    def getApiVersion(self):
+    @classmethod
+    def getApiVersion(cls):
         return 11
 
-    def isValidAuthenticationMethod(self, usageType, configurationAttributes):
+    @classmethod
+    def isValidAuthenticationMethod(cls, usageType, configurationAttributes):
         return False
 
-    def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
+    @classmethod
+    def getAlternativeAuthenticationMethod(cls, usageType, configurationAttributes):
         print "ACR Router. get new acr value"
         new_acr_value = configurationAttributes.get("new_acr_value").getValue2()
         # Put your custom logic to determine if routing required here...
         return new_acr_value
 
-
-    def authenticate(self, configurationAttributes, requestParameters, step):
+    @classmethod
+    def authenticate(cls, configurationAttributes, requestParameters, step):
         return False
 
-    def prepareForStep(self, configurationAttributes, requestParameters, step):
+    @classmethod
+    def prepareForStep(cls, configurationAttributes, requestParameters, step):
         return True
 
-    def getExtraParametersForStep(self, configurationAttributes, step):
+    @classmethod
+    def getExtraParametersForStep(cls, configurationAttributes, step):
         return None
 
-    def getCountAuthenticationSteps(self, configurationAttributes):
+    @classmethod
+    def getCountAuthenticationSteps(cls, configurationAttributes):
         return 1
 
-    def getPageForStep(self, configurationAttributes, step):
+    @classmethod
+    def getPageForStep(cls, configurationAttributes, step):
         return ""
 
-    def getNextStep(self, configurationAttributes, requestParameters, step):
+    @classmethod
+    def getNextStep(cls, configurationAttributes, requestParameters, step):
         return -1
 
-    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+    @classmethod
+    def getLogoutExternalUrl(cls, configurationAttributes, requestParameters):
         print "Get external logout URL call"
         return None
 
-
-    def logout(self, configurationAttributes, requestParameters):
+    @classmethod
+    def logout(cls, configurationAttributes, requestParameters):
         return True
