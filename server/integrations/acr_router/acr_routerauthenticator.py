@@ -26,7 +26,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return True
 
-    def getAuthenticationMethodClaims(self, requestParameters):
+    @classmethod
+    def getAuthenticationMethodClaims(cls, requestParameters):
         return None
 
     @classmethod
