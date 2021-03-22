@@ -200,7 +200,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     @classmethod
-    def buildSessionIdObject(cls, hostname, intent_id_value,unique_identifier_for_session_object, 
+    def buildSessionIdObject(cls, hostname, intent_id_value,unique_identifier_for_session_object,
                              tpp_client_id, client_name,organisation_name, expiry) :
 
         sessionIdObject = "{\"returnTo\": \"" + hostname + "/oxauth/postlogin.htm" + \
@@ -241,6 +241,6 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Redirect URL -->"+self.consent_app_server_name+"/?sessionData="+jweString)
             return self.consent_app_server_name+"/?sessionData="+jweString
 
-        except:
-            print("Obconnect. Failed to build redirect URL -", sys.exc_info()[1])
+        except Exception as e:
+            print("Obconnect. Failed to build redirect URL -", e, sys.exc_info()[1])
             return None
