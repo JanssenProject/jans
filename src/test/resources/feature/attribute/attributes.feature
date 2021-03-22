@@ -36,8 +36,13 @@ Scenario: Fetch the first three attributes
 Scenario: Search attributes given a search pattern 
 	Given url mainUrl
 	And header Authorization = 'Bearer ' + accessToken 
-	And param pattern = 'city' 
 	When method GET 
+    Then status 200 
+    And print response 
+    Given url mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And param pattern = response[0].displayName
+  	When method GET 
 	Then status 200
 	And print response 
 	And assert response.length != 0 
