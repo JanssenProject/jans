@@ -7,7 +7,7 @@ temp_chart_folder="/home/runner/work/test/pygluu/kubernetes/templates/helm/gluu/
 
 services="casa cr-rotate jackrabbit oxpassport oxshibboleth oxtrust radius"
 for service in $services; do
-  rm -rf $temp_chart_folder/$service
+  rm -rf "${temp_chart_folder:?}/""$service"
 done
 
 remove_all() {

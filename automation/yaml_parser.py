@@ -1,4 +1,5 @@
 """
+
  License terms and conditions for Janssen Cloud Native Edition:
  https://www.apache.org/licenses/LICENSE-2.0
  Yaml parser
@@ -15,6 +16,13 @@ logger = get_logger("cn-yaml-parser   ")
 
 class Parser(dict):
     def __init__(self, filename, check_value=None, check_value_name=None, check_key='kind'):
+        """
+
+        :param filename:
+        :param check_value:
+        :param check_value_name:
+        :param check_key:
+        """
         super().__init__()
         self.filename = Path(filename)
         self.yaml = YAML()
@@ -50,6 +58,10 @@ class Parser(dict):
 
     @property
     def return_manifests_dict(self):
+        """
+
+        :return:
+        """
         if self.filename.exists():
             with open(self.filename) as file:
                 manifests_dicts = self.yaml.load_all(file)
@@ -59,9 +71,17 @@ class Parser(dict):
             return self.manifests_dict_list
 
     def __setitem__(self, key, value):
+        """
+
+        :param key:
+        :param value:
+        """
         super(Parser, self).__setitem__(key, value)
 
     def dump_it(self):
+        """
+
+        """
         d = self.analyze_ordered_dict_object(self)
         final_manifest_dict_list = self.manifests_dict_list + [d]
         with open(self.filename, "w+") as f:
