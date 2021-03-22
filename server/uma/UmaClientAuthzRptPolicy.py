@@ -8,12 +8,12 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
+from __future__ import print_function
+
 from io.jans.model.custom.script.type.uma import UmaRptPolicyType
-from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.uma import ClaimDefinitionBuilder
 from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashSet
-from java.lang import String
+from java.util import HashSet
 
 class UmaRptPolicy(UmaRptPolicyType):
 
@@ -21,57 +21,62 @@ class UmaRptPolicy(UmaRptPolicyType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "RPT Policy. Initializing ..."
+        print("RPT Policy. Initializing ...")
         self.clientsSet = self.prepareClientsSet(configurationAttributes)
-        print "RPT Policy. Initialized successfully"
+        print("RPT Policy. Initialized successfully")
         return True
 
-    def destroy(self, configurationAttributes):
-        print "RPT Policy. Destroyed successfully"
+    @classmethod
+    def destroy(cls, configurationAttributes):
+        print("RPT Policy. Destroyed successfully")
         return True
 
-    def getApiVersion(self):
+    @classmethod
+    def getApiVersion(cls):
         return 11
 
-    def getRequiredClaims(self, context):
+    @classmethod
+    def getRequiredClaims(cls, context):
         json = """[
         ]"""
         return ClaimDefinitionBuilder.build(json)
 
     def authorize(self, context): # context is reference of org.gluu.oxauth.uma.authorization.UmaAuthorizationContext
-        print "RPT Policy. Authorizing ..."
+        print("RPT Policy. Authorizing ...")
 
         client_id=context.getClient().getClientId()
-        print "UmaRptPolicy. client_id = %s" % client_id
+        print("UmaRptPolicy. client_id = %s" % client_id)
 
         if (StringHelper.isEmpty(client_id)):
             return False
-     
+
         if (self.clientsSet.contains(client_id)):
-            print "UmaRptPolicy. Authorizing client"
+            print("UmaRptPolicy. Authorizing client")
             return True
         else:
-            print "UmaRptPolicy. Client isn't authorized"
+            print("UmaRptPolicy. Client isn't authorized")
             return False
 
-    def getClaimsGatheringScriptName(self, context):
+    @classmethod
+    def getClaimsGatheringScriptName(cls, context):
         return ""
 
-    def prepareClientsSet(self, configurationAttributes):
+    @classmethod
+    def prepareClientsSet(cls, configurationAttributes):
         clientsSet = HashSet()
         if (not configurationAttributes.containsKey("allowed_clients")):
             return clientsSet
 
         allowedClientsList = configurationAttributes.get("allowed_clients").getValue2()
         if (StringHelper.isEmpty(allowedClientsList)):
-            print "UmaRptPolicy. The property allowed_clients is empty"
+            print("UmaRptPolicy. The property allowed_clients is empty")
             return clientsSet    
 
         allowedClientsListArray = StringHelper.split(allowedClientsList, ",")
         if (ArrayHelper.isEmpty(allowedClientsListArray)):
-            print "UmaRptPolicy. No clients specified in allowed_clients property"
+            print("UmaRptPolicy. No clients specified in allowed_clients property")
             return clientsSet
-        
+
         # Convert to HashSet to quick search
         i = 0
         count = len(allowedClientsListArray)
