@@ -68,6 +68,6 @@ class UpdateToken(UpdateTokenType):
             print("Update token script. After modify idToken: %s" % jsonWebResponse)
 
             return True
-        except:
-            print("update token failure" , sys.exc_info()[1])
+        except Exception as e:
+            print("update token failure" , e, sys.exc_info()[1])
             return None
