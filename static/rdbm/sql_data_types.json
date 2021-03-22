@@ -165,8 +165,7 @@
   },
   "jansDocStoreConf": {
     "mysql": {
-      "size": 256,
-      "type": "VARCHAR"
+      "type": "TEXT"
     }
   },
   "jansGrantTyp": {
