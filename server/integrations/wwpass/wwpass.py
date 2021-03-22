@@ -199,6 +199,7 @@ class WWPassConnection(object):
         return res_dict
 
 class WWPassConnectionMT(WWPassConnection):
+
     def __init__(self, key_file, cert_file, timeout=10, spfe_addr='https://spfe.wwpass.com', ca_file=None, initial_connections=2):
         self.Pool = []
         self.key_file = key_file
@@ -206,7 +207,7 @@ class WWPassConnectionMT(WWPassConnection):
         self.ca_file = ca_file
         self.timeout = timeout
         self.spfe_addr = spfe_addr
-        for _ in xrange(initial_connections):
+        for _ in range(initial_connections):
             self.addConnection()
 
     def addConnection(self, acquired = False):
