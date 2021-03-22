@@ -121,6 +121,9 @@ Supported services:
     - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
     - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
     - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
+    - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
+    - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+    - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
 1.  `ldap`
 
@@ -183,6 +186,8 @@ Supported services:
     Options:
 
     - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth containers (default to `true`)
+    - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+    - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
 ### Examples
 
