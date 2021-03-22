@@ -23,6 +23,12 @@ import sys
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
+        """Construct class.
+
+        Args:
+            currentTimeMillis (int): current time in miliseconds
+        """
+
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
