@@ -66,7 +66,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Obconnect. Initialization. Property expiry is not specified")
             return False
         else:
-            self.expiry = configurationAttributes.get("expiry").getValue2() 
+            self.expiry = configurationAttributes.get("expiry").getValue2()
 
         if (not configurationAttributes.containsKey("consent_app_server_name")):
             print("Obconnect. Initialization. Property consent_app_server_name is not specified")
