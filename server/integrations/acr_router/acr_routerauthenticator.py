@@ -9,6 +9,10 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
+        """
+        Args:
+            currentTimeMillis (int): current time in miliseconds
+        """
         self.currentTimeMillis = currentTimeMillis
 
     @classmethod
