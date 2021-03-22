@@ -96,14 +96,15 @@ class WWPassConnection(object):
                     raise WWPassException('SPFE returned error: %s: %s' %(res['code'], res['data']))
                 raise WWPassException('SPFE returned error: %s' % res['data'])
             return res
-        except URLError as e:
+        except URLError:
             if attempts>0:
                 attempts -= 1
             else:
                 raise
         return self.makeRequest(method, command, attempts,**params)
 
-    def makeAuthTypeString(self, auth_types):
+    @classmethod
+    def makeAuthTypeString(cls, auth_types):
         valid_auth_types = (PIN, SESSION_KEY, CLIENT_KEY)
         return ''.join(x for x in auth_types if x in valid_auth_types)
 
