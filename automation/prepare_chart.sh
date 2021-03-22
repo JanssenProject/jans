@@ -24,12 +24,12 @@ remove_all() {
   | sed '/oxshibboleth/d'
 }
 
-cat $temp_chart_folder/auth-server/templates/deployment.yml | remove_all > tmpfile && mv tmpfile \
+remove_all < $temp_chart_folder/auth-server/templates/deployment.yml > tmpfile && mv tmpfile \
 $temp_chart_folder/auth-server/templates/deployment.yml
 
-cat $temp_chart_folder/config/templates/configmaps.yaml | remove_all > tmpfile && mv tmpfile \
+remove_all < $temp_chart_folder/config/templates/configmaps.yaml > tmpfile && mv tmpfile \
 $temp_chart_folder/config/templates/configmaps.yaml
 
-cat $temp_chart_folder/config/values.yaml | remove_all > tmpfile && mv tmpfile \
+remove_all <  $temp_chart_folder/config/values.yaml > tmpfile && mv tmpfile \
 $temp_chart_folder/config/values.yaml
 
