@@ -77,6 +77,11 @@ The load command can be used either to generate or restore config and secret for
     }
     ```
 
+    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
+
+    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+
 1. Mount the volume into container:
 
     ```sh
@@ -110,12 +115,16 @@ The load command can be used either to generate or restore config and secret for
     }
     ```
 
+    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
+
+    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+
 1. Create config map `config-generate-params`
 
    ```sh
    kubectl create cm config-generate-params --from-file=generate.json
    ```
-
 
 1. Mount the configmap into container and apply the yaml:
 

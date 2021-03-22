@@ -23,8 +23,8 @@ from jans.pycloudlib.utils import generate_ssl_certkey
 from parameter import params_from_file
 from settings import LOGGING_CONFIG
 
-DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512"
-DEFAULT_ENC_KEYS = DEFAULT_SIG_KEYS
+DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
+DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP"
 
 DEFAULT_CONFIG_FILE = "/app/db/config.json"
 DEFAULT_SECRET_FILE = "/app/db/secret.json"
@@ -255,6 +255,36 @@ class CtxGenerator:
         self.set_config("auth_legacyIdTokenClaims", "false")
         self.set_config("auth_openidScopeBackwardCompatibility", "false")
 
+        # get user-input signing keys
+        allowed_sig_keys = DEFAULT_SIG_KEYS.split()
+        sig_keys = []
+
+        for k in self.params.get("auth_sig_keys", "").split():
+            k = k.strip()
+            if k not in allowed_sig_keys:
+                continue
+            sig_keys.append(k)
+
+        # if empty, fallback to default
+        sig_keys = sig_keys or allowed_sig_keys
+        sig_keys = " ".join(sig_keys)
+        self.set_config("auth_sig_keys", sig_keys)
+
+        # get user-input encryption keys
+        allowed_enc_keys = DEFAULT_ENC_KEYS.split()
+        enc_keys = []
+
+        for k in self.params.get("auth_enc_keys", "").split():
+            k = k.strip()
+            if k not in allowed_enc_keys:
+                continue
+            enc_keys.append(k)
+
+        # if empty, fallback to default
+        enc_keys = enc_keys or allowed_enc_keys
+        enc_keys = " ".join(enc_keys)
+        self.set_config("auth_enc_keys", enc_keys)
+
         # default exp = 2 hours + token lifetime (in hour)
         exp = int(2 + (3600 / 3600))
 
@@ -264,8 +294,8 @@ class CtxGenerator:
             auth_openid_jwks_fn,
             self.get_config("default_openid_jks_dn_name"),
             exp=exp,
-            sig_keys="RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512",
-            enc_keys="RSA1_5 RSA-OAEP",
+            sig_keys=sig_keys,
+            enc_keys=enc_keys,
         )
         if retcode != 0:
             logger.error(f"Unable to generate auth keys; reason={err}")
