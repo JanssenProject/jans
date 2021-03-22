@@ -12,7 +12,6 @@ class IdGenerator(IdGeneratorType):
         Args:
             currentTimeMillis (int): current time in miliseconds
         """
-
         self.currentTimeMillis = currentTimeMillis
 
     @classmethod
