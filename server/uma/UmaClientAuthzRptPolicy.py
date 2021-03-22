@@ -18,6 +18,10 @@ from java.util import HashSet
 class UmaRptPolicy(UmaRptPolicyType):
 
     def __init__(self, currentTimeMillis):
+        """
+        Args:
+            currentTimeMillis (int): current time in miliseconds
+        """
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
