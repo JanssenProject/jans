@@ -3,20 +3,14 @@
 # OneID Python API Library
 # Copyright 2013 by OneID
 
-import urllib
-import urllib2
-import datetime
 try:
     import json
 except ImportError:
     import simplejson as json
 
-#import requests
-import StringIO
+import requests
 import os
 import random
-
-
 
 class OneID:
 
@@ -137,7 +131,7 @@ class OneID:
         os.remove(sessionfile)
         return json.loads(data)
 
-     @classmethod
+    @classmethod
     def _getnonce(cls, response):
         """Extract base64-encoded nonce from JWT in a response"""
         return response["nonces"]["repo"]["nonce"].split('.')[1]

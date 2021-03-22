@@ -42,53 +42,58 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Obconnect. Initialization. Property tpp_client_id is not specified")
             return False
         else:
-            self.tpp_client_id = configurationAttributes.get("tpp_client_id").getValue2() 
+            self.tpp_client_id = configurationAttributes.get("tpp_client_id").getValue2()
 
         if (not configurationAttributes.containsKey("client_name")):
             print("Obconnect. Initialization. Property client_name is not specified")
             return False
         else:
-            self.client_name = configurationAttributes.get("client_name").getValue2() 
+            self.client_name = configurationAttributes.get("client_name").getValue2()
 
         if (not configurationAttributes.containsKey("organisation_name")):
             print("Obconnect. Initialization. Property organisation_name is not specified")
             return False
         else:
-            self.organisation_name = configurationAttributes.get("organisation_name").getValue2() 
+            self.organisation_name = configurationAttributes.get("organisation_name").getValue2()
 
         if (not configurationAttributes.containsKey("expiry")):
             print("Obconnect. Initialization. Property expiry is not specified")
             return False
-        else: 
+        else:
             self.expiry = configurationAttributes.get("expiry").getValue2() 
 
         if (not configurationAttributes.containsKey("consent_app_server_name")):
             print("Obconnect. Initialization. Property consent_app_server_name is not specified")
             return False
-        else: 
-            self.consent_app_server_name = configurationAttributes.get("consent_app_server_name").getValue2() 
+        else:
+            self.consent_app_server_name = configurationAttributes.get("consent_app_server_name").getValue2()
 
         return True
 
-    def destroy(self, configurationAttributes):
+    @classmethod
+    def destroy(cls, configurationAttributes):
         return True
 
-    def getApiVersion(self):
+    @classmethod
+    def getApiVersion(cls):
         return 11
 
-    def getAuthenticationMethodClaims(self, requestParameters):
+    @classmethod
+    def getAuthenticationMethodClaims(cls, requestParameters):
         return None
-    
-    def isValidAuthenticationMethod(self, usageType, configurationAttributes):
+
+    @classmethod
+    def isValidAuthenticationMethod(cls, usageType, configurationAttributes):
         return True
 
-    def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
+    @classmethod
+    def getAlternativeAuthenticationMethod(cls, usageType, configurationAttributes):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         print("Obconnect. Authenticate. Step %s " % step)
 
-        sessionData =  ServerUtil.getFirstValue(requestParameters, "sessionData") 
+        sessionData =  ServerUtil.getFirstValue(requestParameters, "sessionData")
 
         jweObject = JWEObject.parse(sessionData)
         #Decrypt
@@ -100,7 +105,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # A successful authorization will always return the `result` claim with login and consent details
         if payload.toJSONObject().get("result") is not None :
             resultObject =   payload.toJSONObject().get("result")
-            if resultObject.get("login") is not None and resultObject.get("consent") is not None:  
+            if resultObject.get("login") is not None and resultObject.get("consent") is not None:
                print("Obconnect .successful Authentication")
                # question: What is the purpose of the following line?
                #authenticationService = CdiUtil.bean(AuthenticationService)
@@ -110,7 +115,7 @@ class PersonAuthentication(PersonAuthenticationType):
                uid = "obconnect_"+str(int(time.time()*1000.0))
                newUser.setAttribute("uid",uid)
 
-               #TODO: add a new parameter called expiry and set expiry time 
+               #TODO: add a new parameter called expiry and set expiry time
                # TODO:  A clean up task should be written which will delete this record
                userService = CdiUtil.bean(UserService)
                userService.addUser(newUser, True)
@@ -123,7 +128,7 @@ class PersonAuthentication(PersonAuthenticationType):
                # add a few things in session
                sessionIdService = CdiUtil.bean(SessionIdService)
                sessionId = sessionIdService.getSessionId() # fetch from persistence
-               sessionId.getSessionAttributes().put("openbanking_intent_id",openbanking_intent_id )
+               sessionId.getSessionAttributes().put("openbanking_intent_id", openbanking_intent_id)
                sessionId.getSessionAttributes().put("acr_ob", acr_ob )
 
                return True
@@ -165,24 +170,45 @@ class PersonAuthentication(PersonAuthenticationType):
         print("Obconnect. Call to Gluu's /authorize endpoint should contain openbanking_intent_id as an encoded JWT")
         return False
 
-    def getCountAuthenticationSteps(self, configurationAttributes):
+    @classmethod
+    def getCountAuthenticationSteps(cls, configurationAttributes):
         return 1
-    def getNextStep(self, configurationAttributes, requestParameters, step):
+
+    @classmethod
+    def getNextStep(cls, configurationAttributes, requestParameters, step):
         return -1
-    def getPageForStep(self, configurationAttributes, step):
+
+    @classmethod
+    def getPageForStep(cls, configurationAttributes, step):
         print("Obconnect. getPageForStep... %s" % step)
         if step == 1:
             return "/auth/redirect.xhtml"
 
         return ""
-    def getExtraParametersForStep(self, configurationAttributes, step):
+
+    @classmethod
+    def getExtraParametersForStep(cls, configurationAttributes, step):
           return Arrays.asList("openbanking_intent_id", "acr_ob")
 
-    def logout(self, configurationAttributes, requestParameters):
+    @classmethod
+    def logout(cls, configurationAttributes, requestParameters):
         return True
 
-    def buildSessionIdObject(self,hostname, intent_id_value,unique_identifier_for_session_object, tpp_client_id, client_name,organisation_name, expiry) :
-        sessionIdObject = "{\"returnTo\": \"" + hostname + "/oxauth/postlogin.htm"+ "\",\"prompt\": {\"name\": \"login\", \"details\" : { \"openbanking_intent_id\" : {"+ "\"value\":  \"" + intent_id_value + "\", \"essential\" : \"true\"}}}, "+ " \"uid\" : \"" + unique_identifier_for_session_object + "\" , \"params\" : { \"client_id\": \""+ tpp_client_id+ "\", \"scope\": \"openid accounts\", \"claims\": "+ "\"{\\\"userinfo\\\":{\\\"openbanking_intent_id\\\":{\\\"value\\\":\\\""+intent_id_value+"\\\",\\\"essential\\\":true}},\\\"id_token\\\":{\\\"openbanking_intent_id\\\":{\\\"value\\\":\\\""+intent_id_value+"\\\",\\\"essential\\\":true},\\\"acr\\\":{\\\"values\\\":[\\\"urn:openbanking:psd2:sca\\\",\\\"urn:openbanking:psd2:ca\\\"],\\\"essential\\\":true}}}\""+ "}, \"exp\" : " + expiry + ", \"client\": { \"client_name\": \"" + client_name + "\",\"org_name\" : \""+ organisation_name + "\"}}"
+    @classmethod
+    def buildSessionIdObject(cls, hostname, intent_id_value,unique_identifier_for_session_object, 
+                             tpp_client_id, client_name,organisation_name, expiry) :
+
+        sessionIdObject = "{\"returnTo\": \"" + hostname + "/oxauth/postlogin.htm" + \
+            "\",\"prompt\": {\"name\": \"login\", \"details\" : { \"openbanking_intent_id\" : {" + \
+            "\"value\":  \"" + intent_id_value + "\", \"essential\" : \"true\"}}}, "+ " \"uid\" : \"" + \
+            unique_identifier_for_session_object + "\" , \"params\" : { \"client_id\": \"" + \
+            tpp_client_id+ "\", \"scope\": \"openid accounts\", \"claims\": " +\
+            "\"{\\\"userinfo\\\":{\\\"openbanking_intent_id\\\":{\\\"value\\\":\\\"" + intent_id_value + \
+            "\\\",\\\"essential\\\":true}},\\\"id_token\\\":{\\\"openbanking_intent_id\\\":{\\\"value\\\":\\\"" + \
+            intent_id_value + "\\\",\\\"essential\\\":true},\\\"acr\\\":{\\\"values\\\":[\\\"urn:openbanking:psd2:sca\\\"\
+            ,\\\"urn:openbanking:psd2:ca\\\"],\\\"essential\\\":true}}}\""+ "}, \"exp\" : " + expiry + \
+            ", \"client\": { \"client_name\": \"" + client_name + "\",\"org_name\" : \""+ organisation_name + "\"}}"
+
         print("Obconnect. sessionIdObject: %s " % sessionIdObject)
         return sessionIdObject
 
@@ -193,10 +219,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try :
             # Create the header
-            header =  JWEHeader(JWEAlgorithm.DIR, EncryptionMethod.A256GCM) 
+            header =  JWEHeader(JWEAlgorithm.DIR, EncryptionMethod.A256GCM)
 
             # Create the payload
-            payloadString = self.buildSessionIdObject(self.hostname, openbanking_intent_id,				unique_identifier_for_session_object, self.tpp_client_id, self.client_name, self.organisation_name, self.expiry)
+            payloadString = self.buildSessionIdObject(self.hostname, openbanking_intent_id, unique_identifier_for_session_object,
+                                                      self.tpp_client_id, self.client_name, self.organisation_name, self.expiry)
             print("Payload String "+ payloadString)
             payload =  Payload(payloadString )
 
