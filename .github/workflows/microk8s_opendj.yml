@@ -39,8 +39,8 @@ jobs:
     - name: Test Janssen authorization server with LDAP backend
       id: test_kubernetes
       run: |
-          sudo microk8s.config > config
-          sudo mv config ~/.kube/config
+          sudo microk8s.config > config || echo ""
+          sudo mv config ~/.kube/config || echo ""
           sudo microk8s.kubectl create ns jans
           sudo helm install jans -f charts/jans/values.yaml charts/jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap"
           sleep 30
