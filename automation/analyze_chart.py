@@ -9,7 +9,7 @@ logger = get_logger("cn-analyze-chart   ")
 
 
 def find_replace(directory, find, replace, filepatterm):
-    for path, dirs, files in os.walk(os.path.abspath(directory)):
+    for path, _dirs, files in os.walk(os.path.abspath(directory)):
         for filename in fnmatch.filter(files, filepatterm):
             filepath = os.path.join(path, filename)
             with open(filepath) as f:

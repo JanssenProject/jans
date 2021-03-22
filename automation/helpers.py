@@ -1,4 +1,5 @@
 """
+
  License terms and conditions for Janssen Cloud Native Edition:
  https://www.apache.org/licenses/LICENSE-2.0
 """
@@ -12,7 +13,9 @@ from pathlib import Path
 
 
 def update_json_file(settings, file):
-    """Write settings out to a json file
+    """
+
+    Write settings out to a json file
     :param settings:
     """
     with open(Path(file), 'w+') as file:
