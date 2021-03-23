@@ -53,7 +53,7 @@ public class ClientService implements Serializable {
     }
 
     public void removeClient(Client client) {
-        persistenceEntryManager.removeRecursively(client.getDn());
+        persistenceEntryManager.removeRecursively(client.getDn(), Client.class);
     }
 
     public void updateClient(Client client) {
