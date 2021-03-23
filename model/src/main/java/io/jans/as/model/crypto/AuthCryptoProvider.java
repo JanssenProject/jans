@@ -267,7 +267,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                         ", signatureAlgorithm: " + signatureAlgorithm +
                         "(check whether web keys JSON in persistence corresponds to keystore file), keySelectionStrategy: " + keySelectionStrategy;
                 LOG.error(error);
-                throw new RuntimeException(error);
+                throw new IllegalStateException(error);
             }
 
             Signature signer = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
