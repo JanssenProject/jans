@@ -176,6 +176,17 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.check_clients([('jca_test_client_id', '1802.')])
 
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
+        scopes = []
+        scopes_id_list = []
+
+        for scope in result:
+            scopes.append('jansScope: ' + (scope['dn'] if isinstance(scope, dict) else scope[1]['dn']))
+            scopes_id_list.append(scope['jansId'] if isinstance(scope, dict) else scope[1]['jansId'])
+
+        Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
+        Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+
         if not Config.get('jca_test_client_pw'):
             Config.jca_test_client_pw = self.getPW()
             Config.jca_test_client_encoded_pw = self.obscure(Config.jca_test_client_pw)
@@ -189,14 +200,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
         self.logIt("Loding Jans Config Api test data")
 
-        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
-        scopes = []
-        scopes_id_list = []
-        for scope in result:
-            scopes.append('jansScope: ' + (scope['dn'] if isinstance(scope, dict) else scope[1]['dn']))
-            scopes_id_list.append(scope['jansId'] if isinstance(scope, dict) else scope[1]['jansId'])
-        Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
-        Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+
 
         if not base.argsp.t:
             self.render_templates_folder(os.path.join(Config.templateFolder, 'test/jans-config-api'))
