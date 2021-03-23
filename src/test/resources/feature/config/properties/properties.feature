@@ -47,7 +47,7 @@ Feature: Verify Auth configuration endpoint
     And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And def request_body = (response.dcrSignatureValidationSoftwareStatementJwksURIClaim == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksURIClaim\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksURIClaim\", \"value\":\"+response.dcrSignatureValidationSoftwareStatementJwksURIClaim+\" } ]")
+    And def request_body = (response.dcrSignatureValidationSoftwareStatementJwksURIClaim == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksURIClaim\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSoftwareStatementJwksURIClaim\", \"value\":\""+response.dcrSignatureValidationSoftwareStatementJwksURIClaim+"\" } ]")
     And print 'request_body ='+request_body
     And request request_body
     Then print request
@@ -69,7 +69,7 @@ Feature: Verify Auth configuration endpoint
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     #And request "[ {\"op\":\"replace\", \"path\": \"/softwareStatementValidationType\", \"value\": +(response.softwareStatementValidationType == null ? null : response.softwareStatementValidationType)+ } ,{\"op\":\"replace\", \"path\": \"/softwareStatementValidationClaimName\", \"value\": +(response.softwareStatementValidationClaimName == null ? null : response.softwareStatementValidationClaimName)+ } ]"
-    And def request_body = (response.softwareStatementValidationType == null ? "[ {\"op\":\"add\", \"path\": \"/softwareStatementValidationType\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/softwareStatementValidationType\", \"value\":\"+response.softwareStatementValidationType+\" } ]")
+    And def request_body = (response.softwareStatementValidationType == null ? "[ {\"op\":\"add\", \"path\": \"/softwareStatementValidationType\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/softwareStatementValidationType\", \"value\":\""+response.softwareStatementValidationType+"\" } ]")
     And print 'request_body ='+request_body
     And request request_body
     Then print request
@@ -132,7 +132,7 @@ Feature: Verify Auth configuration endpoint
     And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request "[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"+response.loggingLevel+\" } ]"
+    And request "[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\"  } ]"
     Then print request
     When method PATCH
     Then status 200
@@ -223,3 +223,24 @@ Feature: Verify Auth configuration endpoint
     And print response
     
    
+   @auth-config-patch
+    Scenario: Patch keyAlgsAllowedForGeneration Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    #And def request_body = (response.keyAlgsAllowedForGeneration == null ? "[ {\"op\":\"add\", \"path\": \"/keyAlgsAllowedForGeneration\", \"value\":[\"RS256\"\,\"PS256\"] } ]" : "[ {\"op\":\"replace\", \"path\": \"/keyAlgsAllowedForGeneration\", \"value\":"+response.keyAlgsAllowedForGeneration+"} ]")
+    And def request_body = (response.keyAlgsAllowedForGeneration == null ? "[ {\"op\":\"add\", \"path\": \"/keyAlgsAllowedForGeneration\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/keyAlgsAllowedForGeneration\", \"value\":"+response.keyAlgsAllowedForGeneration+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
