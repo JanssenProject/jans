@@ -12,6 +12,7 @@ import traceback
 import code
 
 from queue import Queue
+
 queue = Queue()
 
 os.environ['LC_ALL'] = 'C'
@@ -19,11 +20,11 @@ from setup_app.utils.arg_parser import arg_parser
 
 argsp = arg_parser()
 
-#first import paths and make changes if necassary
+# first import paths and make changes if necassary
 from setup_app import paths
 
-#for example change log file location:
-#paths.LOG_FILE = '/tmp/my.log'
+# for example change log file location:
+# paths.LOG_FILE = '/tmp/my.log'
 
 from setup_app import static
 
@@ -34,12 +35,12 @@ from setup_app.utils import base
 base.argsp = argsp
 
 from setup_app.utils.package_utils import packageUtils
+
 packageUtils.check_and_install_packages()
 
 from setup_app.messages import msg
 from setup_app.config import Config
 from setup_app.utils.progress import jansProgress
-
 
 from setup_app.setup_options import get_setup_options
 from setup_app.utils import printVersion
@@ -64,13 +65,14 @@ from setup_app.installers.eleven import ElevenInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 
-#from setup_app.installers.oxd import OxdInstaller
+# from setup_app.installers.oxd import OxdInstaller
 
 if base.snap:
     try:
         open('/proc/mounts').close()
     except:
-        print("Please execute the following command\n  sudo snap connect jans-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
+        print(
+            "Please execute the following command\n  sudo snap connect jans-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
         sys.exit()
 
 # initialize config object
@@ -84,7 +86,7 @@ SetupUtils.init()
 setupOptions = get_setup_options()
 
 terminal_size = shutil.get_terminal_size()
-tty_rows=terminal_size.lines 
+tty_rows = terminal_size.lines
 tty_columns = terminal_size.columns
 
 # check if we are running in terminal
@@ -96,10 +98,8 @@ except:
 if not argsp.n:
     base.check_resources()
 
-
 # pass progress indicator to Config object
 Config.pbar = jansProgress
-
 
 for key in setupOptions:
     setattr(Config, key, setupOptions[key])
@@ -122,10 +122,9 @@ if setupOptions['setup_properties']:
 elif os.path.isfile(Config.setup_properties_fn):
     base.logIt('%s Properties found!\n' % Config.setup_properties_fn)
     setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn)
-elif os.path.isfile(Config.setup_properties_fn+'.enc'):
-    base.logIt('%s Properties found!\n' % Config.setup_properties_fn+'.enc')
-    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn+'.enc')
-
+elif os.path.isfile(Config.setup_properties_fn + '.enc'):
+    base.logIt('%s Properties found!\n' % Config.setup_properties_fn + '.enc')
+    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn + '.enc')
 
 collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
@@ -137,7 +136,6 @@ if os.path.exists(Config.jans_properties_fn):
         print("Saving collected properties")
         collectProperties.save()
         sys.exit()
-
 
 if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
@@ -158,20 +156,18 @@ fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
 elevenInstaller = ElevenInstaller()
 jansCliInstaller = JansCliInstaller()
-#oxdInstaller = OxdInstaller()
+# oxdInstaller = OxdInstaller()
 
 
 rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
-    for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller, 
-                        jansAuthInstaller, scimInstaller, fidoInstaller,
-                        elevenInstaller, jansCliInstaller
-                        #oxdInstaller
-                        ):
-
+    for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller,
+                      jansAuthInstaller, scimInstaller, fidoInstaller,
+                      elevenInstaller, jansCliInstaller
+            # oxdInstaller
+                      ):
         setattr(Config, installer.install_var, installer.installed())
-
 
     if not argsp.shell:
         propertiesUtils.promptForProperties()
@@ -184,9 +180,9 @@ if Config.installed_instance:
 def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
+
 if argsp.t:
     testDataLoader = TestDataLoader()
-
 
 if argsp.t and argsp.x:
     print_or_log("Loading test data")
@@ -210,7 +206,6 @@ Config.installJansCli = Config.installConfigApi or Config.installScimServer
 
 app_vars = locals().copy()
 
-
 if argsp.shell:
     code.interact(local=locals())
     sys.exit()
@@ -224,15 +219,17 @@ print(jansInstaller)
 proceed = True
 if not Config.noPrompt:
     proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
-    if proceed_prompt and proceed_prompt[0] !='y':
+    if proceed_prompt and proceed_prompt[0] != 'y':
         proceed = False
 
-#register post setup progress
+
+# register post setup progress
 class PostSetup:
     service_name = 'post-setup'
     install_var = 'installPostSetup'
     app_type = static.AppType.APPLICATION
     install_type = static.InstallOption.MONDATORY
+
 
 jansProgress.register(PostSetup)
 
@@ -241,7 +238,6 @@ if not argsp.no_progress:
 
 
 def do_installation():
-
     jansProgress.before_start()
     jansProgress.start()
 
@@ -287,31 +283,37 @@ def do_installation():
             if Config.rdbm_install:
                 rdbmInstaller.start_installation()
 
-        if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installHttpd):
+        if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.installHttpd):
             httpdinstaller.configure()
 
-        if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuth):
+        if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.installOxAuth):
             jansAuthInstaller.start_installation()
 
-        if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(configApiInstaller.install_var)):
+        if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.get(configApiInstaller.install_var)):
             configApiInstaller.start_installation()
             if argsp.t or argsp.load_config_api_test:
                 configApiInstaller.load_test_data()
 
-        if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
+        if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.installFido2):
             fidoInstaller.start_installation()
 
-        if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
+        if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
 
-        if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (not Config.installed_instance and Config.get(elevenInstaller.install_var)):
+        if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
+                not Config.installed_instance and Config.get(elevenInstaller.install_var)):
             elevenInstaller.start_installation()
-        
+
         if Config.installJansCli:
             jansCliInstaller.start_installation()
             jansCliInstaller.configure()
 
-        #if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
+        # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
         #    oxdInstaller.start_installation()
 
         jansProgress.progress(PostSetup.service_name, "Saving properties")
@@ -322,10 +324,11 @@ def do_installation():
             openDjInstaller.restart()
 
         jansInstaller.post_install_tasks()
-        
+
         for service in jansProgress.services:
             if service['app_type'] == static.AppType.SERVICE:
-                jansProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
+                jansProgress.progress(PostSetup.service_name,
+                                      "Starting {}".format(service['name'].replace('-', ' ').replace('_', ' ').title()))
                 time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
@@ -344,6 +347,7 @@ def do_installation():
 
         base.logIt("FATAL", True, True)
 
+
 if proceed:
     do_installation()
     print('\n', static.colors.OKGREEN)
@@ -354,9 +358,9 @@ if proceed:
         if Config.installScimServer:
             msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
-    msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
+    msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
+        Config.hostname)
     print(msg_text)
     print('\n', static.colors.ENDC)
     # we need this for progress write last line
     time.sleep(2)
-

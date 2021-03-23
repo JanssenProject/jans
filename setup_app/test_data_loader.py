@@ -336,16 +336,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             self.dbUtils.ldap_conn.bind()
 
-        result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
-
-        if isinstance(result['jansDbAuth'], str):
-            oxIDPAuthentication = json.loads(result['jansDbAuth'])
-        else:
+            result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
             oxIDPAuthentication = result['jansDbAuth']
-
-        oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
-        oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-        self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
+            oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
+            oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
+            self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
 
