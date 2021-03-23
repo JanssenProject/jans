@@ -6,12 +6,11 @@
 
 package io.jans.as.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import io.jans.as.model.common.AuthorizationMethod;
 import org.apache.commons.lang.StringUtils;
 
-import io.jans.as.model.common.AuthorizationMethod;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a User Info request to send to the authorization server.
@@ -61,9 +60,11 @@ public class UserInfoRequest extends BaseRequest {
         StringBuilder queryStringBuilder = new StringBuilder();
 
         if (StringUtils.isNotBlank(accessToken)) {
-            if (getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER
-                    || getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
-                queryStringBuilder.append("access_token=").append(accessToken);
+            switch (getAuthorizationMethod()) {
+                case FORM_ENCODED_BODY_PARAMETER:
+                case URL_QUERY_PARAMETER:
+                    queryStringBuilder.append("access_token=").append(accessToken);
+                    break;
             }
         }
 
@@ -77,12 +78,14 @@ public class UserInfoRequest extends BaseRequest {
      * @return A collection of parameters.
      */
     public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<>();
 
         if (accessToken != null && !accessToken.isEmpty()) {
-            if (getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER
-                    || getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
-                parameters.put("access_token", accessToken);
+            switch (getAuthorizationMethod()) {
+                case FORM_ENCODED_BODY_PARAMETER:
+                case URL_QUERY_PARAMETER:
+                    parameters.put("access_token", accessToken);
+                    break;
             }
         }
 
