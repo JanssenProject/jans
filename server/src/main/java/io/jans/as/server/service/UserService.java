@@ -47,7 +47,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
     @Override
 	public List<String> getPersonCustomObjectClassList() {
-		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType())) {
+		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType(getPeopleBaseDn()))) {
 			return appConfiguration.getPersonCustomObjectClassList();
 		}
 		
