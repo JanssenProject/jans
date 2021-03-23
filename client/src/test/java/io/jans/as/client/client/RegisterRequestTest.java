@@ -6,15 +6,13 @@
 
 package io.jans.as.client.client;
 
-import static org.testng.Assert.assertEquals;
-
+import com.google.common.collect.Lists;
+import io.jans.as.client.RegisterRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
-
-import io.jans.as.client.RegisterRequest;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -22,7 +20,7 @@ import io.jans.as.client.RegisterRequest;
 public class RegisterRequestTest {
 
     @Test
-    public void getParameters_forAdditionalAudience_shouldReturnCorrectValue() {
+    public void getParametersForAdditionalAudienceShouldReturnCorrectValue() {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));
 
@@ -30,7 +28,7 @@ public class RegisterRequestTest {
     }
 
     @Test
-    public void fromJson_forAdditionalAudience_shouldReturnCorrectValue() {
+    public void fromJsonForAdditionalAudienceShouldReturnCorrectValue() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("additional_audience", new JSONArray(Lists.newArrayList("aud1", "aud2")));
 
@@ -40,7 +38,7 @@ public class RegisterRequestTest {
     }
 
     @Test
-    public void getJSONParameters_forAdditionalAudience_shouldReturnCorrectValue() {
+    public void getJSONParametersForAdditionalAudienceShouldReturnCorrectValue() {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));
 
