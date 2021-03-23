@@ -6,18 +6,21 @@
 
 package io.jans.service.custom.script;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
 import com.google.common.base.Optional;
+
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.OxConstants;
-import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Operations with custom scripts
@@ -171,26 +174,41 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
     public List<CustomScript> findScriptByPatternAndType(String pattern, CustomScriptType type, int sizeLimit) {
-        String[] targetArray = new String[]{pattern};
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
-        Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-        Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+    	String baseDn = baseDn();
+        Filter filter = buildFindByPatterAndTypeFilter(baseDn, pattern, type);
 
-        return persistenceEntryManager.findEntries(baseDn(), CustomScript.class,
-                Filter.createANDFilter(searchFilter, typeFilter), sizeLimit);
+        return persistenceEntryManager.findEntries(baseDn(), CustomScript.class, filter, sizeLimit);
     }
 
     public List<CustomScript> findScriptByPatternAndType(String pattern, CustomScriptType type) {
-        String[] targetArray = new String[]{pattern};
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
-        Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-        Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+    	String baseDn = baseDn();
+        Filter filter = buildFindByPatterAndTypeFilter(baseDn, pattern, type);
 
-        return persistenceEntryManager.findEntries(baseDn(), CustomScript.class,
-                Filter.createANDFilter(searchFilter, typeFilter), null);
+        return persistenceEntryManager.findEntries(baseDn, CustomScript.class, filter, null);
     }
+
+	private Filter buildFindByPatterAndTypeFilter(String baseDn, String pattern, CustomScriptType type) {
+        boolean useLowercaseFilter = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+
+        Filter filter;
+		if (useLowercaseFilter) {
+			String[] targetArray = new String[] { pattern };
+			Filter descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null, targetArray, null);
+			Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null, targetArray, null);
+			Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
+			Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+	        filter = Filter.createANDFilter(searchFilter, typeFilter);
+		} else {
+			String[] targetArray = new String[] { pattern };
+			Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
+			Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
+			Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
+			Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+	        filter = Filter.createANDFilter(searchFilter, typeFilter);
+		}
+        
+		return filter;
+	}
 
     public List<CustomScript> findOtherCustomScripts(int sizeLimit) {
         Filter searchFilter = Filter.createNOTFilter(
