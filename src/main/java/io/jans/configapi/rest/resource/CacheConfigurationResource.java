@@ -42,7 +42,7 @@ public class CacheConfigurationResource extends BaseResource {
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-    Instance<PersistenceEntryManager> persistenceManager;
+    PersistenceEntryManager persistenceManager;
 
     private CacheConfiguration loadCacheConfiguration() {
         return configurationService.findGluuConfiguration().getCacheConfiguration();
@@ -54,7 +54,7 @@ public class CacheConfigurationResource extends BaseResource {
         final CacheConfiguration modifiedCache = function.apply(gluuConfiguration.getCacheConfiguration());
         gluuConfiguration.setCacheConfiguration(modifiedCache);
 
-        persistenceManager.get().merge(gluuConfiguration);
+        persistenceManager.merge(gluuConfiguration);
         return modifiedCache;
     }
 
