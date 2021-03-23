@@ -3444,6 +3444,12 @@ components:
         statWebServiceIntervalLimitInSeconds:
           type: integer		
           description: Statistical data capture time interval limit.
+        keyAlgsAllowedForGeneration:
+          type: array
+          description: List of algorithm allowed to be used for key generation.
+          items:
+            type: string
+          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
  
     GluuAttribute:
       title: GluuAttribute
