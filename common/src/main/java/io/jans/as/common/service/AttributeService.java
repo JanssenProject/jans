@@ -134,7 +134,7 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
 
     	String[] targetArray = new String[]{pattern};
         
-        boolean useLowercaseFilter = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
         Filter searchFilter;
 		if (useLowercaseFilter) {
 	        Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.displayName), null, targetArray, null);
