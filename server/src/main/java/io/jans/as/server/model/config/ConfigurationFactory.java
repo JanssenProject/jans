@@ -6,31 +6,6 @@
 
 package io.jans.as.server.model.config;
 
-import static io.jans.as.model.config.Constants.BASE_PROPERTIES_FILE_NAME;
-import static io.jans.as.model.config.Constants.CERTS_DIR;
-import static io.jans.as.model.config.Constants.LDAP_PROPERTIES_FILE_NAME;
-import static io.jans.as.model.config.Constants.SALT_FILE_NAME;
-import static io.jans.as.model.config.Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY;
-
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.event.CryptoProviderEvent;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.BaseDnConfiguration;
@@ -62,6 +37,29 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static io.jans.as.model.config.Constants.BASE_PROPERTIES_FILE_NAME;
+import static io.jans.as.model.config.Constants.CERTS_DIR;
+import static io.jans.as.model.config.Constants.LDAP_PROPERTIES_FILE_NAME;
+import static io.jans.as.model.config.Constants.SALT_FILE_NAME;
+import static io.jans.as.model.config.Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -510,7 +508,7 @@ public class ConfigurationFactory {
 
 			// Generate new JWKS
 			JSONObject jsonObject = AbstractCryptoProvider.generateJwks(cryptoProvider, getAppConfiguration().getKeyRegenerationInterval(),
-                    getAppConfiguration().getIdTokenLifetime(),	getAppConfiguration());
+                    getAppConfiguration().getIdTokenLifetime());
 			newWebKeys = jsonObject.toString();
 
 			// Attempt to load new JWKS
