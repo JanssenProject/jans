@@ -6,6 +6,10 @@
 
 package io.jans.as.client.client;
 
+import io.jans.as.model.register.RegisterResponseParam;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
@@ -13,11 +17,6 @@ import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCES
 import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.jans.as.model.register.RegisterResponseParam;
 
 /**
  * @author yuriyz
@@ -53,7 +52,7 @@ public class ResponseAsserter {
             return JSONObjectAsserter.of(new JSONObject(entity));
         } catch (JSONException e) {
             fail(e.getMessage() + "\nResponse was: " + entity, e);
-            throw new RuntimeException(e);
+            throw new AssertionError(e);
         }
     }
 
