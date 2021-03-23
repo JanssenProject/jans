@@ -6,16 +6,6 @@
 
 package io.jans.as.client.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
@@ -25,6 +15,15 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Support token Response Type
@@ -38,7 +37,7 @@ public class SupportTokenResponseType extends BaseTest {
     @Test
     public void supportTokenResponseType(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) {
         showTitle("OC5:FeatureTest-Support token Response Type");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -62,7 +61,6 @@ public class SupportTokenResponseType extends BaseTest {
         assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         String clientId = registerResponse.getClientId();
-        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
 
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
