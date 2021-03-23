@@ -111,11 +111,21 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
     public List<CustomScript> findCustomAuthScripts(String pattern, int sizeLimit) {
+    	String baseDn = baseDn();
+        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+
         String[] targetArray = new String[]{pattern};
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
-        Filter scriptTypeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE,
-                CustomScriptType.PERSON_AUTHENTICATION);
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
+
+        Filter descriptionFilter, displayNameFilter;
+        if (useLowercaseFilter) {
+        	descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null, targetArray, null);
+            displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null, targetArray, null);
+        } else {
+        	descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
+            displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
+        }
+
+        Filter scriptTypeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, CustomScriptType.PERSON_AUTHENTICATION);
         Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
 
         return persistenceEntryManager.findEntries(baseDn(), CustomScript.class,
@@ -149,14 +159,25 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
     public List<CustomScript> findOtherCustomScripts(String pattern, int sizeLimit) {
+    	String baseDn = baseDn();
+        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+
         String[] targetArray = new String[]{pattern};
-        Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
+
+        Filter descriptionFilter, displayNameFilter;
+        if (useLowercaseFilter) {
+	        descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null, targetArray, null);
+	        displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null, targetArray, null);
+        } else {
+	        descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
+	        displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
+        }
+
         Filter scriptTypeFilter = Filter.createNOTFilter(
                 Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, CustomScriptType.PERSON_AUTHENTICATION));
-        Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
 
-        return persistenceEntryManager.findEntries(baseDn(), CustomScript.class,
+        return persistenceEntryManager.findEntries(baseDn, CustomScript.class,
                 Filter.createANDFilter(searchFilter, scriptTypeFilter), sizeLimit);
     }
 
@@ -188,24 +209,22 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
 	private Filter buildFindByPatterAndTypeFilter(String baseDn, String pattern, CustomScriptType type) {
-        boolean useLowercaseFilter = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
 
-        Filter filter;
+        String[] targetArray = new String[] { pattern };
+
+        Filter descriptionFilter, displayNameFilter;
 		if (useLowercaseFilter) {
-			String[] targetArray = new String[] { pattern };
-			Filter descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null, targetArray, null);
-			Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null, targetArray, null);
-			Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-			Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
-	        filter = Filter.createANDFilter(searchFilter, typeFilter);
+			descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DESCRIPTION), null, targetArray, null);
+			displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(OxConstants.DISPLAY_NAME), null, targetArray, null);
 		} else {
-			String[] targetArray = new String[] { pattern };
-			Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
-			Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
-			Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-			Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
-	        filter = Filter.createANDFilter(searchFilter, typeFilter);
+			descriptionFilter = Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null);
+			displayNameFilter = Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null);
 		}
+
+		Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
+		Filter typeFilter = Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, type);
+        Filter filter = Filter.createANDFilter(searchFilter, typeFilter);
         
 		return filter;
 	}
