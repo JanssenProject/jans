@@ -7,6 +7,7 @@
 package io.jans.as.model.crypto;
 
 import com.google.common.collect.Lists;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECEllipticCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -105,87 +106,32 @@ public abstract class AbstractCryptoProvider {
         return jwks;
     }
 
-    public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, int keyRegenerationInterval, int idTokenLifeTime) {
+    public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, AppConfiguration configuration) {
+        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        expirationTime.add(GregorianCalendar.HOUR, configuration.getKeyRegenerationInterval());
+        expirationTime.add(GregorianCalendar.SECOND, configuration.getIdTokenLifetime());
+
+        long expiration = expirationTime.getTimeInMillis();
+
+        final List<String> allowedAlgs = configuration.getKeyAlgsAllowedForGeneration();
         JSONArray keys = new JSONArray();
-        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, Use.SIGNATURE);
-        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, Use.ENCRYPTION);
+
+        for (Algorithm alg : Algorithm.values()) {
+            try {
+                if (!allowedAlgs.isEmpty() && !allowedAlgs.contains(alg.getParamName())) {
+                    LOG.debug("Key generation for " + alg + " is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.");
+                    continue;
+                }
+                keys.put(cryptoProvider.generateKey(alg, expiration, alg.getUse()));
+            } catch (Exception ex) {
+                LOG.error("Algorithm: " + alg + ex.getMessage(), ex);
+            }
+        }
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JWKParameter.JSON_WEB_KEY_SET, keys);
 
         return jsonObject;
-    }
-
-    public static void generateJwks(AbstractCryptoProvider cryptoProvider, JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, Use use) {
-        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
-        expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.RS256, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.RS384, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.RS512, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.ES256, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.ES384, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.ES512, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.PS256, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.PS384, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.PS512, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.RSA1_5, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(Algorithm.RSA_OAEP, expirationTime.getTimeInMillis(), use));
-        } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
     }
 
     public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws Exception {
