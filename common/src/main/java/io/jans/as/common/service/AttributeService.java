@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.model.GluuAttribute;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
@@ -133,19 +134,18 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
 
     	String[] targetArray = new String[]{pattern};
         
-        boolean ignoreCase = LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
         Filter searchFilter;
-		if (ignoreCase) {
-	        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
-	        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
-	        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
-	        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-		} else {
+		if (useLowercaseFilter) {
 	        Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.displayName), null, targetArray, null);
 	        Filter descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.description), null, targetArray, null);
 	        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.attributeName), null, targetArray, null);
 	        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-			
+		} else {
+	        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+	        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
+	        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
+	        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
 		}
 
 		return persistenceEntryManager.findEntries(baseDn, GluuAttribute.class,
