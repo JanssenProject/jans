@@ -6,6 +6,12 @@
 
 package io.jans.as.common.cert.validation;
 
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.model.util.SecurityProviderUtility;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -15,7 +21,6 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
@@ -23,7 +28,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.PKIXCertPathBuilderResult;
-import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
@@ -32,13 +36,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
 
 /**
  * Chain certificate verifier
@@ -50,7 +47,7 @@ public class PathCertificateVerifier implements CertificateVerifier {
 
 	private static final Logger log = LoggerFactory.getLogger(PathCertificateVerifier.class);
 
-	private boolean verifySelfSignedCertificate;
+	private final boolean verifySelfSignedCertificate;
 
 	public PathCertificateVerifier(boolean verifySelfSignedCert) {
 		SecurityProviderUtility.installBCProvider(true);
@@ -64,7 +61,7 @@ public class PathCertificateVerifier implements CertificateVerifier {
 		ValidationStatus status = new ValidationStatus(certificate, issuer, validationDate, ValidationStatus.ValidatorSourceType.CHAIN, ValidationStatus.CertificateValidity.UNKNOWN);
 
 		try {
-			ArrayList<X509Certificate> chains = new ArrayList<X509Certificate>();
+			ArrayList<X509Certificate> chains = new ArrayList<>();
 			chains.add(certificate);
 			chains.addAll(issuers);
 
@@ -97,8 +94,8 @@ public class PathCertificateVerifier implements CertificateVerifier {
 
 			// Prepare a set of trusted root CA certificates and a set of
 			// intermediate certificates
-			Set<X509Certificate> trustedRootCerts = new HashSet<X509Certificate>();
-			Set<X509Certificate> intermediateCerts = new HashSet<X509Certificate>();
+			Set<X509Certificate> trustedRootCerts = new HashSet<>();
+			Set<X509Certificate> intermediateCerts = new HashSet<>();
 			for (X509Certificate additionalCert : additionalCerts) {
 				if (isSelfSigned(additionalCert)) {
 					trustedRootCerts.add(additionalCert);
@@ -122,13 +119,11 @@ public class PathCertificateVerifier implements CertificateVerifier {
 
 			// The chain is verified. Return it as a result
 			return certPathBuilderResult;
-		} catch (CertPathBuilderException ex) {
-			log.error("Failed to build certificate path", ex);
 		} catch (GeneralSecurityException ex) {
 			log.error("Failed to build certificate path", ex);
 		}
 
-		return null;
+        return null;
 	}
 
 	public static boolean isSelfSigned(X509Certificate certificate) throws CertificateException, NoSuchAlgorithmException, NoSuchProviderException {
@@ -138,14 +133,11 @@ public class PathCertificateVerifier implements CertificateVerifier {
 			certificate.verify(key);
 
 			return true;
-		} catch (SignatureException ex) {
-			// Not self-signed
-			return false;
-		} catch (InvalidKeyException ex) {
+		} catch (SignatureException | InvalidKeyException ex) {
 			// Not self-signed
 			return false;
 		}
-	}
+    }
 
 	/**
 	 * Attempts to build a certification chain for given certificate to verify
@@ -161,7 +153,7 @@ public class PathCertificateVerifier implements CertificateVerifier {
 		selector.setCertificate(certificate);
 
 		// Create the trust anchors (set of root CA certificates)
-		Set<TrustAnchor> trustAnchors = new HashSet<TrustAnchor>();
+		Set<TrustAnchor> trustAnchors = new HashSet<>();
 		for (X509Certificate trustedRootCert : trustedRootCerts) {
 			trustAnchors.add(new TrustAnchor(trustedRootCert, null));
 		}
@@ -182,7 +174,7 @@ public class PathCertificateVerifier implements CertificateVerifier {
 
 		// Additional check to Verify cert path
 		CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
-		PKIXCertPathValidatorResult certPathValidationResult = (PKIXCertPathValidatorResult) certPathValidator.validate(certPathBuilderResult.getCertPath(), pkixParams);
+        certPathValidator.validate(certPathBuilderResult.getCertPath(), pkixParams);
 
 		return certPathBuilderResult;
 	}
