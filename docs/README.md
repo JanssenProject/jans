@@ -1,4 +1,5 @@
 # Using jans-cli
+
 `jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation
 1. Menu-driven Interactive Mode
 2. Command Line Argument Mode
@@ -2671,7 +2672,8 @@ Selection:
 - __id__ number of an attribute to identify which one you want to update
 
 
-- **__Get OpenID client by its inum__**
+
+**__Get OpenID client by its inum__**
 
 `inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
 
@@ -2776,6 +2778,10 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
 
 Selection: 
 ```
+
+### OpenD Connect - Sector Identifier
+
+
 
 ### User Managed Access (UMA)
 
@@ -5137,7 +5143,8 @@ Server Response:
 }
 ```
 
-- **_put-config-smtp_**
+**_put-config-smtp_**
+
 To update smtp server, simply change any information on `/tmp/smtp.json` file and run the following command:
 
 ```commandline
@@ -5940,6 +5947,3 @@ Calling with params limit=2
   }
 ]
 ```
-
-
-
