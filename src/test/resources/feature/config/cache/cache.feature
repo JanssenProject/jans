@@ -97,7 +97,7 @@ Feature: Verify Cache configuration endpoint
     Then status 200
     And print response
     And assert response.length != null
-    And print response.redisConfiguration
+    And print response.memcachedConfiguration
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'

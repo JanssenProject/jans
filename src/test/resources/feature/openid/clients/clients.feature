@@ -102,8 +102,9 @@ Given url openidclients_url + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
 And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
-And print "response[0].displayName = "+response[0].displayName
-And request "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":\"+response[0].displayName+\" } ]"
+And def newName = response[0].displayName
+And print " newName = "+newName
+And request "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":\""+newName+"\"} ]"
 When method PATCH
 Then status 200
 And print response
