@@ -27,23 +27,23 @@ public class ConfigurationService {
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-    Instance<PersistenceEntryManager> persistenceManager;
+    PersistenceEntryManager persistenceManager;
 
     @Inject
     ConfigurationFactory configurationFactory;
 
     public Conf findConf() {
         final String dn = configurationFactory.getConfigurationDn();
-        return persistenceManager.get().find(dn, Conf.class, null);
+        return persistenceManager.find(dn, Conf.class, null);
     }
 
     public void merge(Conf conf) {
         conf.setRevision(conf.getRevision() + 1);
-        persistenceManager.get().merge(conf);
+        persistenceManager.merge(conf);
     }
 
     public void merge(GluuConfiguration conf) {
-        persistenceManager.get().merge(conf);
+        persistenceManager.merge(conf);
     }
 
     public AppConfiguration find() {
@@ -56,6 +56,6 @@ public class ConfigurationService {
         if (StringHelper.isEmpty(configurationDn)) {
             return null;
         }
-        return persistenceManager.get().find(GluuConfiguration.class, configurationDn);
+        return persistenceManager.find(GluuConfiguration.class, configurationDn);
     }
 }
