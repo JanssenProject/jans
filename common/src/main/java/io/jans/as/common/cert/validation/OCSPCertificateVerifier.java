@@ -6,18 +6,8 @@
 
 package io.jans.as.common.cert.validation;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.Principal;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.List;
-
+import io.jans.as.common.cert.validation.model.ValidationStatus;
+import io.jans.as.model.util.SecurityProviderUtility;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -46,8 +36,17 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.Principal;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Certificate verifier based on OCSP
@@ -207,9 +206,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 			}
 
 			byte[] responseBytes = IOUtils.toByteArray(con.getInputStream());
-			OCSPResp ocspResp = new OCSPResp(responseBytes);
-
-			return ocspResp;
+			return new OCSPResp(responseBytes);
 		} finally {
 			if (con != null) {
 				con.disconnect();
@@ -238,6 +235,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 	@Override
 	public void destroy() {
+	    // nothing to destroy
 	}
 
 }
