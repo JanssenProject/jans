@@ -22,14 +22,20 @@ jobs:
     name: Check Commit Message
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: |
+          npm install --save-dev @commitlint/{config-conventional,cli}
+          echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
       - name: Check Commit Standard
         id: conventionalcommit
-        uses: gsactions/commit-message-checker@v1
+        run: |
+          git log -1 --pretty=format:"%s" | npx commitlint |& tee -a output.txt
+          echo "::set-output name=errormsg::$(tr -d "\n\r" < output.txt)"
+          git log -1 --pretty=format:"%s" | npx commitlint
         continue-on-error: true
-        with:
-          pattern: '^(feat|fix|ci|chore|docs|test|style|refactor)(\(.+?\))?: .{1,}$'
-          flags: 'gm'
-          error: 'Your commit message is invalid. Please follow the conventional commit standard.'
         
       - name: Check Line Length
         id: linelength
@@ -41,7 +47,7 @@ jobs:
           excludeDescription: 'true' # optional: this excludes the description body of a pull request
           excludeTitle: 'true' # optional: this excludes the title of a pull request
           checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
-          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true          
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true       
 #      - name: Check for Resolves / Fixes
 #        uses: gsactions/commit-message-checker@v1
 #        with:
@@ -52,14 +58,13 @@ jobs:
       - name: Check Commit Standard Status
         if: steps.conventionalcommit.outcome != 'success'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: from [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Perhaps you forgot about the conventional commit standard.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
-          echo "Your commit message is invalid. Please follow the conventional commit standard."
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by :thinking_face: [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Here is why : ${{ steps.conventionalcommit.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
           
       - name: Check Commit length 
         if: steps.linelength.outcome != 'success'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: from [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Limit your commits to <50 chars. Place additional information in the description body of the commit.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: by [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Limit your commits to <50 chars. Place additional information in the description body of the commit.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           echo "The maximum line length of 50 characters is exceeded."
           exit 1          
 
