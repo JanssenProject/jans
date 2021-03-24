@@ -43,7 +43,7 @@ And params ({ limit: 3,pattern:'fido2'})
 When method GET
 And print response
 Then status 200
-And assert response.length == 1
+And assert response.length <= 3
 And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
 
 
