@@ -52,11 +52,10 @@ Scenario: Create new Person Script
 Given url mainUrl + '/type'
 And header Authorization = 'Bearer ' + accessToken
 And path 'person_authentication'
-And params ({ limit: 3,pattern:'fido2'})
 When method GET
 And print response
 Then status 200
-And assert response.length == 1
+And assert response.length != 0
 And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
