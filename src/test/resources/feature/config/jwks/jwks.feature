@@ -1,8 +1,15 @@
-@ignore
+
 Feature: JWKS endpoint
 
 	Background:
   	* def mainUrl = jwksUrl
+  	
+  Scenario: Retrieve JWKS without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
+
 
   Scenario: Retrieve JWKS
     Given url  mainUrl
@@ -11,6 +18,7 @@ Feature: JWKS endpoint
     Then status 200
     And print response
     And assert response.length != null
+
 
    Scenario: Patch JWKS with new key
     Given url  mainUrl

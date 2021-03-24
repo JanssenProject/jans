@@ -3,6 +3,14 @@ Feature: Verify Auth configuration endpoint
 
   	Background:
   	* def mainUrl = authConfigurationUrl
+  	
+  	@auth-config-get-error
+    Scenario: Retrieve Auth configuration without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
+    
 
  	@auth-config-get
   	Scenario: Retrieve Auth configuration

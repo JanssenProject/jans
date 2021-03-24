@@ -72,6 +72,17 @@ And assert response.displayName == 'UpdatedQAAddedScope'
 And assert response.inum == inum_before
 Given url mainUrl + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
+And header Content-Type = 'application/json-patch+json'
+And header Accept = 'application/json'
+And def newDisplayName = response.displayName
+And print " newDisplayName = "+newDisplayName
+And request "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":\""+newDisplayName+"\"} ]"
+When method PATCH
+Then status 200
+And print response
+And assert response.length !=0
+Given url mainUrl + '/' +response.inum
+And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
 
