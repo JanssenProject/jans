@@ -4,6 +4,14 @@ Feature: Verify Custom Script configuration endpoint
   	* def mainUrl = scriptsUrl
   	
   	
+  	@scripts-get
+    Scenario: Retrieve Custom Script configuration without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
+  	
+  	
  	@scripts-get
   	Scenario: Retrieve Custom Script configuration
     Given url  mainUrl
@@ -34,3 +42,6 @@ Feature: Verify Custom Script configuration endpoint
 	Then status 200
 	And print response
 	And assert response.length != null
+	
+	
+	

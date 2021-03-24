@@ -3,6 +3,13 @@ Feature: Verify Default ACRS configuration endpoint
 
   	Background:
   	* def mainUrl = acrsUrl
+  	
+    @acrs-get-error
+    Scenario: Retrieve ACRS configuration without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
 
  	@acrs-get
   	Scenario: Retrieve Default ACRS configuration

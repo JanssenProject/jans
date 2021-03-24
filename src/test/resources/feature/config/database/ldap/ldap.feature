@@ -1,4 +1,4 @@
-@ignore
+
 @parallel=false
 Feature: Verify LDAP configuration endpoint
 
@@ -22,6 +22,13 @@ return temp;
 }
 """
   	
+  	@ldap-config-get-without-bearer-token
+    Scenario: Get LDAP configuration By Name without bearer token    
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
+    
  	    
     @ldap-config-get-by-name
   	Scenario: Get LDAP configuration By Name    
@@ -34,6 +41,7 @@ return temp;
     Then status 200
     And print response
     And assert response.length != null 
+    
     
     @ldap-config-get-by-name-invalid
   	Scenario: Get Non-existing LDAP configuration By Name
@@ -53,27 +61,7 @@ return temp;
     And print response
     And assert response.length != null        
 
-    @ldap-config-post
-  	Scenario: Add LDAP configuration
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request read('ldap.json')
-    When method POST
-    Then status 201
-    And print response
-    And assert response.length != null
-    And print response.configId
-    And print response.version
-    
-    @ldap-config-post-same-name-ldap-error
-  	Scenario: Add LDAP configuration with same name as existing
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request read('ldap.json')
-    When method POST
-    Then status 406
-    And print response
-    
+
     @ldap-config-put
   	Scenario: Update LDAP configuration
   	And print result
@@ -81,7 +69,6 @@ return temp;
     And print first_response
     And assert first_response.length != null
     Then def result = first_response[0] 
-    Then set result.maxConnections = 2500
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -90,7 +77,9 @@ return temp;
     And print response
     And print response.configId
     And print response.version
-       
+    
+    
+    @ignore   
     @ldap-config-delete-by-name-valid
     Scenario: Delete LDAP configuration
 	And print result
@@ -106,7 +95,8 @@ return temp;
     When method DELETE
     Then status 204
     And print response
-    And assert response.length != null       
+    And assert response.length != null    
+       
     
     @ldap-config-patch
 	Scenario: Patch LDAP configuration
@@ -119,12 +109,13 @@ return temp;
     And  header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request "[ {\"op\":\"replace\", \"path\": \"/maxConnections\", \"value\": 9} ]"
+    And request "[ {\"op\":\"replace\", \"path\": \"/maxConnections\", \"value\": "+first_response[0].maxConnections+"} ]"
 	Then print request
     When method PATCH
     Then status 200
     And print response
     
+    @ignore
     @ldap-config-test
     Scenario: Test LDAP configuration
     #Given url  mainUrl
