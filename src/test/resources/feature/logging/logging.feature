@@ -1,8 +1,16 @@
-@ignore
+
 Feature: Logging connection configuration
 
   Background:
     * def mainUrl = logging_url
+    
+    
+  Scenario: Retrieve logging configuration without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
+
 
   Scenario: Retrieve logging configuration
     Given url  mainUrl
@@ -26,3 +34,4 @@ Feature: Logging connection configuration
     When method PUT
     Then status 200
     And print response
+    

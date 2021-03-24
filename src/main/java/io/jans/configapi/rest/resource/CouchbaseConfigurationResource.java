@@ -47,6 +47,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response getWithName(@PathParam(ApiConstants.NAME) String name) {
+        log.debug("CouchbaseConfigurationResource::getWithName() -  name = "+name+"\n\n");
         return Response.ok(findByName(name)).build();
     }
 

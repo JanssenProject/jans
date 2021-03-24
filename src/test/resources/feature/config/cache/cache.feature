@@ -3,6 +3,13 @@ Feature: Verify Cache configuration endpoint
 
   	Background:
   	* def mainUrl = cacheUrl
+  	
+    @cache-get-error
+    Scenario: Retrieve Cache configuration without bearer token
+    Given url  mainUrl
+    When method GET
+    Then status 401
+    And print response
   
  	@cache-get
   	Scenario: Retrieve Cache configuration
