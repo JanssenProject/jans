@@ -1,3 +1,5 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
 name: triggerdevbuild
 on: [workflow_dispatch]
 jobs:
@@ -34,7 +36,7 @@ jobs:
           commit_message: 'feat(Dockerfile): Updated build date'
           # Optional local file path to the repository
           repository: .
-          # commit_message: 'feat(helm): Update Helm Chart'
+          commit-message: 'feat(helm): Update Helm Chart'
           # Optional commit user and author settings
           commit_user_name: ${{ github.actor }}
           commit_user_email: ${{ github.actor }}@users.noreply.github.com
