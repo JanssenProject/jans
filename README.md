@@ -1,6 +1,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50c5d12c3c0c4601a276cfe4f39955c9)](https://www.codacy.com/gh/JanssenProject/jans-cloud-native/dashboard?utm_source=github.com&utm_medium=referral&utm_content=JanssenProject/jans-cloud-native&utm_campaign=Badge_Grade)
 ![couchbase](https://github.com/JanssenProject/jans-cloud-native/workflows/couchbase/badge.svg)
 ![opendj](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj/badge.svg)
+![mysql](https://github.com/JanssenProject/jans-cloud-native/workflows/mysql/badge.svg)
 ![opendj-istio](https://github.com/JanssenProject/jans-cloud-native/workflows/opendj-istio/badge.svg)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 
