@@ -37,15 +37,12 @@ jobs:
 
     - name: Install mysql
       run: |
-        sudo microk8s.config > config || echo ""
-        sudo mkdir -p ~/.kube || echo ""
-        sudo mv config ~/.kube/config || echo ""
+        wget https://raw.githubusercontent.com/mo-auto/scripts/main/set_microk8s_kube_config.py && chmod u+x set_microk8s_kube_config.py && sudo python3 ./set_microk8s_kube_config.py
         sudo helm repo add bitnami https://charts.bitnami.com/bitnami
         sudo kubectl get po
         sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql
         sudo kubectl get po
-
-
+        sudo kubectl wait -n default --for=condition=ready pod --timeout=300s -l statefulset.kubernetes.io/pod-name=my-release-mysql-0 || echo "Not Found"
 
     - name: Test Janssen authorization server with mysql backend
       id: test_kubernetes
