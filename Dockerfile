@@ -45,7 +45,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-03-25 05:10'
+ENV CN_BUILD_DATE='2021-03-25 05:17'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
