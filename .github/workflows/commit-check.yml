@@ -1,4 +1,5 @@
-# Contact the DevOps team before editing or adding a new flow.
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
 name: 'Commit Message Check'
 on:
   pull_request:
