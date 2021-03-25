@@ -78,7 +78,6 @@ jobs:
 
           ## [${{ steps.get_version.outputs.version }}](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/tree/${{ steps.get_version.outputs.version }}) (${{ steps.get_version.outputs.releasedate }})
 
-
           [Full Changelog](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/compare/${{ steps.get_version.outputs.pversion }}...v${{ steps.get_version.outputs.version }})
 
           ## Please find release notes below :
