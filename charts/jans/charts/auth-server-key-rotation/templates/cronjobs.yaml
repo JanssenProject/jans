@@ -20,11 +20,16 @@ spec:
             sidecar.istio.io/inject: "false"
         spec:
           containers:
-            - name: {{ .Chart.Name }}
+            - name: {{ include "auth-server-key-rotation.name" . }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
-              {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
               volumeMounts:
+              {{- if eq .Values.global.cnPersistenceType "sql" }}
+              - name: sql-pass
+                mountPath: "/etc/jans/conf/sql_password"
+                subPath: sql_password
+              {{- end }}
+              {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
                 - name: cb-pass
                   mountPath: "/etc/jans/conf/couchbase_password"
                   subPath: couchbase_password
@@ -46,8 +51,13 @@ spec:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
               args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
-          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
           volumes:
+          {{- if eq .Values.global.cnPersistenceType "sql" }}
+            - name: sql-pass
+              secret:
+                secretName: {{ .Release.Name }}-sql-pass
+          {{- end }}
+          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: cb-pass
               secret:
                 secretName: {{ .Release.Name }}-cb-pass

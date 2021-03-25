@@ -25,7 +25,7 @@ spec:
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
       containers:
-      - name: {{ include "config.name" . }}-load
+      - name: {{ include "config.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         securityContext:
           runAsUser: 1000

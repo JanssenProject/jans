@@ -45,6 +45,14 @@ config:
   adminPassword: Test1234#
   city: Austin
   configmap:
+    cnSqlDbDialect: mysql
+    cnSqlDbHost: my-release-mysql.default.svc.cluster.local
+    cnSqlDbPort: 3306
+    cnSqlDbName: jans
+    cnSqlDbUser: jans
+    cnSqlDbTimezone: UTC
+    cnSqlPasswordFile: /etc/jans/conf/sql_password
+    cnSqldbUserPassword: Test1234#
     cnAuthServerBackend: "auth-server:8080"
     cnCacheType: NATIVE_PERSISTENCE
     cnClientApiAdminCertCn: client-api
@@ -166,7 +174,8 @@ global:
     allowedTopologies: []
     mountOptions:
     - debug
-    parameters:
+    parameters: {}
+    #parameters:
       #fsType: ""
       #kind: ""
       #pool: ""
