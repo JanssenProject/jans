@@ -1,3 +1,5 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
 name: Scan Image
 on: [push]
 jobs:
@@ -11,7 +13,7 @@ jobs:
       id: scan
       with:
         image: "localbuild/scanimage:latest"
-        acs-report-enable: true    
+        acs-report-enable: true
     - name: upload Anchore scan SARIF report
       uses: github/codeql-action/upload-sarif@v1
       with:
