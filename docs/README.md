@@ -3178,7 +3178,7 @@ Selection:
 
 
 ## Command Line Argument Mode
-We will refer to this mode as **CL** Using this mode is difficult compared to IM. The first is to get help, so type:
+We will refer to this mode as **CL**. Using this mode is difficult compared to IM. The first is to get help, so type:
 ```
 /opt/jans/jans-cli/config-cli.py --help
 ```
@@ -6066,3 +6066,22 @@ Calling with params limit=2
   }
 ]
 ```
+
+## SCIM-CLI
+
+SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema and the patterns for exchanging such schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving interoperability, security, and scalability in the context of identity management.
+Introducing SCIM-CLI which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity . 
+
+Let's start with below command line:
+
+```
+/opt/jans/jans-cli/scim-cli.py
+```
+
+It will show a following menu:
+
+
+![scim-menu](img/im-scim-menu.png)
+
+### user
+
