@@ -40,6 +40,7 @@ jobs:
       id: test_kubernetes
       run: |
           sudo microk8s.config > config || echo ""
+          sudo mkdir -p ~/.kube || echo ""
           sudo mv config ~/.kube/config || echo ""
           sudo kubectl create ns jans
           sudo kubectl get po
