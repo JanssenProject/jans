@@ -24,7 +24,7 @@ spec:
       {{- end }}
     spec:
       containers:
-      - name: {{ template "cn.fullname" . }}
+      - name: {{ include "fido2.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         securityContext:
@@ -44,6 +44,11 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+        {{- if eq .Values.global.cnPersistenceType "sql" }}
+        - name: sql-pass
+          mountPath: "/etc/jans/conf/sql_password"
+          subPath: sql_password
+        {{- end }}
         {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
           - name: {{ include "fido2.fullname" .}}-updatelbip
             mountPath: "/scripts"
@@ -87,6 +92,11 @@ spec:
         - {{ .Values.global.fqdn }}
       {{- end }}
       volumes:
+      {{- if eq .Values.global.cnPersistenceType "sql" }}
+        - name: sql-pass
+          secret:
+            secretName: {{ .Release.Name }}-sql-pass
+      {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
         - name: cb-pass
           secret:
