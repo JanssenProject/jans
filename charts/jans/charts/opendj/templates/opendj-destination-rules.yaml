@@ -1,3 +1,4 @@
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
 {{- if .Values.global.istio.enabled }}
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
@@ -11,4 +12,5 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+{{- end }}
 {{- end }}

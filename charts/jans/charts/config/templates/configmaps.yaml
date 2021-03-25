@@ -6,6 +6,13 @@ metadata:
   name: {{ .Release.Name }}-config-cm
   namespace: {{ .Release.Namespace }}
 data:
+  CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}
+  CN_SQL_DB_HOST: {{ .Values.configmap.cnSqlDbHost }}
+  CN_SQL_DB_PORT: {{ .Values.configmap.cnSqlDbPort | quote }}
+  CN_SQL_DB_NAME: {{ .Values.configmap.cnSqlDbName }}
+  CN_SQL_DB_USER: {{ .Values.configmap.cnSqlDbUser }}
+  CN_SQL_DB_TIMEZONE: {{ .Values.configmap.cnSqlDbTimezone }}
+  CN_SQL_PASSWORD_FILE: {{ .Values.configmap.cnSqlPasswordFile }}
   CN_CONFIG_ADAPTER: {{ .Values.configmap.configAdapterName }}
   CN_SECRET_ADAPTER: {{ .Values.configmap.configSecretAdapter }}
   CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
