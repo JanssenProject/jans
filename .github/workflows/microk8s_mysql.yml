@@ -39,25 +39,25 @@ jobs:
       run: |
         wget https://raw.githubusercontent.com/mo-auto/scripts/main/set_microk8s_kube_config.py && chmod u+x set_microk8s_kube_config.py && sudo python3 ./set_microk8s_kube_config.py
         sudo helm repo add bitnami https://charts.bitnami.com/bitnami
-        sudo kubectl get po
+        sudo microk8s.kubectl get po
         sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql
-        sudo kubectl get po
-        sudo kubectl wait -n default --for=condition=ready pod --timeout=300s -l statefulset.kubernetes.io/pod-name=my-release-mysql-0 || echo "Not Found"
+        sudo microk8s. kubectl get po
+        sudo microk8s.kubectl wait -n default --for=condition=ready pod --timeout=300s -l statefulset.kubernetes.io/pod-name=my-release-mysql-0 || echo "Not Found"
 
     - name: Test Janssen authorization server with mysql backend
       id: test_kubernetes
       run: |
-          sudo kubectl create ns jans
-          sudo kubectl get po
+          sudo microk8s.kubectl create ns jans
+          sudo microk8s.kubectl get po
           sudo helm install jans -f charts/jans/values.yaml charts/jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="sql" --set global.cnPersistenceType="sql" --set config.configmap.cnSqlDbUser="root"
           sleep 30
-          sudo kubectl get po -n jans
-          sudo kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server || sudo kubectl logs -l APP_NAME=auth-server -c jans-auth-server -n jans || echo "Not Found"
-          sudo kubectl get po -n jans
-          sudo kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-client-api || sudo kubectl logs -l APP_NAME=client-api -c jans-client-api -n jans || echo "Not Found"
-          sudo kubectl get po -n jans
-          sudo kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-fido2 || sudo kubectl logs -l APP_NAME=fido2 -c jans-fido2 -n jans || echo "Not Found"
-          sudo kubectl get po -n jans
-          sudo kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-scim || sudo kubectl logs -l APP_NAME=scim -c jans-scim -n jans || echo "Not Found"
-          sudo kubectl get po -n jans
+          sudo microk8s.kubectl get po -n jans
+          sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server || sudo kubectl logs -l APP_NAME=auth-server -c jans-auth-server -n jans || echo "Not Found"
+          sudo microk8s.kubectl get po -n jans
+          sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-client-api || sudo kubectl logs -l APP_NAME=client-api -c jans-client-api -n jans || echo "Not Found"
+          sudo microk8s.kubectl get po -n jans
+          sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-fido2 || sudo kubectl logs -l APP_NAME=fido2 -c jans-fido2 -n jans || echo "Not Found"
+          sudo microk8s.kubectl get po -n jans
+          sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=300s deploy/jans-scim || sudo kubectl logs -l APP_NAME=scim -c jans-scim -n jans || echo "Not Found"
+          sudo microk8s.kubectl get po -n jans
 
