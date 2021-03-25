@@ -69,9 +69,9 @@ jobs:
         JanssenProject/docker-jans-scim
 
       WORKFLOW_FILES: |
-        .github/workflows/central_docker_imagescan.yml=.github/workflows/imagescan.yml
-        .github/workflows/central_docker_release.yml=.github/workflows/release.yml
-        .github/workflows/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
+        .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
+        .github/docker/central_docker_release.yml=.github/workflows/release.yml
+        .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
       COMMIT_MESSAGE: 'ci(workflows): sync workflows'
     steps:
       - name: Fetching Local Repository
