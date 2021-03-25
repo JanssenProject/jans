@@ -1,3 +1,4 @@
+# Contact the DevOps team before editing or adding a new flow.
 name: 'Commit Message Check'
 on:
   pull_request:
@@ -13,9 +14,6 @@ on:
       - reopened
       - synchronize
   push:
-    branches:
-      - master
-      - main
 
 jobs:
   check-commit-message:
