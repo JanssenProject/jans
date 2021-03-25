@@ -39,9 +39,7 @@ jobs:
     - name: Test Janssen authorization server with LDAP backend
       id: test_kubernetes
       run: |
-          sudo microk8s.config > config || echo ""
-          sudo mkdir -p ~/.kube || echo ""
-          sudo mv config ~/.kube/config || echo ""
+          wget https://raw.githubusercontent.com/mo-auto/scripts/main/set_microk8s_kube_config.py && chmod u+x set_microk8s_kube_config.py && sudo python3 ./set_microk8s_kube_config.py
           sudo kubectl create ns jans
           sudo kubectl get po
           sudo helm install jans -f charts/jans/values.yaml charts/jans -n jans --set global.lbIp=${{ steps.microk8s.outputs.ip }} --set global.provisioner="microk8s.io/hostpath" --set global.cnPersistenceType="ldap"
