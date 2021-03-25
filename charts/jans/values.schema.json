@@ -35,6 +35,32 @@
 							"type": "string",
 							"pattern": "^[a-z0-9-:]+$"
 						},
+						"cnSqlDbDialect": {
+							"type": "string",
+							"pattern": "^(mysql)$"
+						},
+						"cnSqlDbHost": {
+							"$ref": "#/definitions/url-pattern"
+						},
+						"cnSqlDbPort": {
+							"type": "integer"
+						},
+						"cnSqlDbName": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnSqlDbUser": {
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnSqlDbTimezone": {
+							"type": "string",
+							"pattern": "^(GMT|UTC|ECT|EET|ART|EAT|MET|NET|PLT|IST|BST|VST|CTT|JST|ACT|AET|SST|NST|MIT|HST|AST|PST|PNT|MST|CST|EST|IET|PRT|CNT|AGT|BET|CAT)$"
+						},
+						"cnSqlPasswordFile": {
+							"type": "string",
+							"pattern": ".*sql_password\\b.*"
+						},
 						"cnCacheType": {
 							"type": "string",
 							"pattern": "^(NATIVE_PERSISTENCE|REDIS|IN_MEMORY)$"
@@ -355,7 +381,7 @@
 				},
 				"cnPersistenceType": {
 					"type": "string",
-					"pattern": "^(ldap|couchbase|hybrid)$"
+					"pattern": "^(ldap|couchbase|hybrid|sql)$"
 				},
 				"config": {
 					"type": "object",
