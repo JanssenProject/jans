@@ -252,3 +252,24 @@ Feature: Verify Auth configuration endpoint
     And print response
     
     
+    @auth-config-patch-discoveryAllowedKeys
+    Scenario: Patch discoveryAllowedKeys Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And def request_body = (response.discoveryAllowedKeys == null ? "[ {\"op\":\"add\", \"path\": \"/discoveryAllowedKeys\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/discoveryAllowedKeys\", \"value\":"+response.discoveryAllowedKeys+"} ]")
+    #And def request_body = (response.discoveryAllowedKeys == null ? "[ {\"op\":\"add\", \"path\": \"/discoveryAllowedKeys\", \"value\":[\"authorization_endpoint\",\"claims_parameter_supported\"] } ]" : "[ {\"op\":\"replace\", \"path\": \"/discoveryAllowedKeys\", \"value\":"+response.discoveryAllowedKeys+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
