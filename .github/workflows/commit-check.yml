@@ -57,13 +57,13 @@ jobs:
       - name: Check Commit Standard Status
         if: steps.conventionalcommit.outcome != 'success'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by :thinking_face: [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Here is why : ${{ steps.conventionalcommit.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by :thinking_face: @[${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Here is why : ${{ steps.conventionalcommit.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
           
       - name: Check Commit length 
         if: steps.linelength.outcome != 'success'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: by [${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Limit your commits to <50 chars. Place additional information in the description body of the commit.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: by @[${{github.actor}}](https://github.com/${{github.actor}}) :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Limit your commits to <50 chars. Place additional information in the description body of the commit.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           echo "The maximum line length of 50 characters is exceeded."
           exit 1          
 
