@@ -267,11 +267,20 @@ public class AppConfiguration implements Configuration {
     private Boolean cibaEnabled;
 
     private int discoveryCacheLifetimeInMinutes = 60;
+    private List<String> discoveryAllowedKeys;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
 
+    public List<String> getDiscoveryAllowedKeys() {
+        if (discoveryAllowedKeys == null) discoveryAllowedKeys = new ArrayList<>();
+        return discoveryAllowedKeys;
+    }
+
+    public void setDiscoveryAllowedKeys(List<String> discoveryAllowedKeys) {
+        this.discoveryAllowedKeys = discoveryAllowedKeys;
+    }
 
     public Boolean getUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
