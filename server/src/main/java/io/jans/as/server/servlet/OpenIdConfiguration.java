@@ -375,6 +375,7 @@ public class OpenIdConfiguration extends HttpServlet {
 			// CIBA Configuration
 			cibaConfigurationService.processConfiguration(jsonObj);
 
+			filterOutKeys(jsonObj);
             localResponseCache.putDiscoveryResponse(jsonObj);
 
 			out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
@@ -383,7 +384,22 @@ public class OpenIdConfiguration extends HttpServlet {
 		}
 	}
 
-	private String endpointUrl(String path) {
+    private void filterOutKeys(JSONObject jsonObj) {
+        final List<String> allowedKeys = appConfiguration.getDiscoveryAllowedKeys();
+        if (allowedKeys == null || allowedKeys.isEmpty()) {
+            return; // nothing to filter
+        }
+
+        for (String key : jsonObj.keySet()) {
+            if (allowedKeys.contains(key)) {
+                continue;
+            }
+
+            jsonObj.remove(key);
+        }
+    }
+
+    private String endpointUrl(String path) {
 		return StringUtils.replace(appConfiguration.getEndSessionEndpoint(), "/end_session", path);
 	}
 
