@@ -75,7 +75,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Javier Rojas Blum
@@ -502,7 +505,7 @@ public abstract class BaseTest {
             System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionStateCookie.getValue());
         }
         if (sessionIdCookie != null) {
-            System.out.println("authenticateResourceOwnerAndGrantAccess: sessionId:" + sessionIdCookie.getValue()); ;
+            System.out.println("authenticateResourceOwnerAndGrantAccess: sessionId:" + sessionIdCookie.getValue());
         }
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
@@ -910,14 +913,10 @@ public abstract class BaseTest {
     }
 
 	public static CloseableHttpClient createHttpClient(HostnameVerifierType p_verifierType) {
-        if (p_verifierType != null && p_verifierType != HostnameVerifierType.DEFAULT) {
-            switch (p_verifierType) {
-                case ALLOW_ALL:
-					return HttpClients.custom()
-							.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-							.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-
-            }
+        if (p_verifierType == HostnameVerifierType.ALLOW_ALL) {
+            return HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         }
 
         return HttpClients.custom()
