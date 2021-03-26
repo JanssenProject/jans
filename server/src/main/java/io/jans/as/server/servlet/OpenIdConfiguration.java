@@ -390,7 +390,7 @@ public class OpenIdConfiguration extends HttpServlet {
             return; // nothing to filter
         }
 
-        for (String key : jsonObj.keySet()) {
+        for (String key : new HashSet<>(jsonObj.keySet())) {
             if (allowedKeys.contains(key)) {
                 continue;
             }
