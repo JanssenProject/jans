@@ -44,7 +44,7 @@ public class JwtUtil {
     AuthUtil authUtil;
 
     public boolean isJwt(String token) throws Exception {
-        log.debug("\n\n JwtUtil::isJwt()  token = " + token);
+        log.trace("\n\n JwtUtil::isJwt()  token = " + token);
         boolean isJwt = false;
         try {
             this.parse(token);
@@ -56,16 +56,14 @@ public class JwtUtil {
     }
 
     public Jwt parse(String encodedJwt) throws InvalidJwtException {
-        log.debug("\n\n JwtUtil::parse()  encodedJwt = " + encodedJwt);
+        log.trace("\n\n JwtUtil::parse()  encodedJwt = " + encodedJwt);
         if (StringHelper.isNotEmpty(encodedJwt)) {
             return Jwt.parse(encodedJwt);
         }
         return null;
     }
 
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
-        System.out
-                .println("JwtUtil::validateToken() - token = " + token + " , resourceScopes =" + resourceScopes + "\n");
+    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {     
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -146,7 +144,7 @@ public class JwtUtil {
     }
 
     public boolean validateSignature(Jwt jwt, JSONWebKeySet jsonWebKeySet) {
-        log.debug("\n\n JwtUtil::validateSignature() - jwt = " + jwt + " , jsonWebKeySet =" + jsonWebKeySet + "\n");
+        log.trace("\n\n JwtUtil::validateSignature() - jwt = " + jwt + " , jsonWebKeySet =" + jsonWebKeySet + "\n");
         try {
 
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
@@ -210,7 +208,7 @@ public class JwtUtil {
     }
 
     public JSONObject fromJson(String json) throws IOException {
-        log.debug("\n\n JwtUtil::fromJson() - json = " + json + " \n");
+        log.trace("\n\n JwtUtil::fromJson() - json = " + json + " \n");
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JsonOrgModule());
         return mapper.readValue(json, JSONObject.class);
