@@ -32,45 +32,45 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def delete_oauth_openid_sectors_by_id(self, inum, **kwargs):  # noqa: E501
+    def delete_oauth_openid_sectors_by_id(self, id, **kwargs):  # noqa: E501
         """Delete OpenID Connect Sector.  # noqa: E501
 
         Delete OpenID Connect Sector.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_oauth_openid_sectors_by_id(inum, async_req=True)
+        >>> thread = api.delete_oauth_openid_sectors_by_id(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.delete_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            return self.delete_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
         else:
-            (data) = self.delete_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            (data) = self.delete_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
             return data
 
-    def delete_oauth_openid_sectors_by_id_with_http_info(self, inum, **kwargs):  # noqa: E501
+    def delete_oauth_openid_sectors_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
         """Delete OpenID Connect Sector.  # noqa: E501
 
         Delete OpenID Connect Sector.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.delete_oauth_openid_sectors_by_id_with_http_info(inum, async_req=True)
+        >>> thread = api.delete_oauth_openid_sectors_by_id_with_http_info(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :return: None
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['inum']  # noqa: E501
+        all_params = ['id']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -85,16 +85,16 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
                 )
             params[key] = val
         del params['kwargs']
-        # verify the required parameter 'inum' is set
-        if ('inum' not in params or
-                params['inum'] is None):
-            raise ValueError("Missing the required parameter `inum` when calling `delete_oauth_openid_sectors_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `delete_oauth_openid_sectors_by_id`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'inum' in params:
-            path_params['inum'] = params['inum']  # noqa: E501
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
 
         query_params = []
 
@@ -112,7 +112,7 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
         auth_settings = ['jans-auth']  # noqa: E501
 
         return self.api_client.call_api(
-            '/jans-config-api/api/v1/openid/sectoridentifiers/{inum}', 'DELETE',
+            '/jans-config-api/api/v1/openid/sectoridentifiers/{id}', 'DELETE',
             path_params,
             query_params,
             header_params,
@@ -214,45 +214,45 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_oauth_openid_sectors_by_id(self, inum, **kwargs):  # noqa: E501
+    def get_oauth_openid_sectors_by_id(self, id, **kwargs):  # noqa: E501
         """Get OpenID Connect Sector by Inum.  # noqa: E501
 
         Get OpenID Connect Sector by Inum.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_oauth_openid_sectors_by_id(inum, async_req=True)
+        >>> thread = api.get_oauth_openid_sectors_by_id(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :return: SectorIdentifier
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.get_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            return self.get_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
         else:
-            (data) = self.get_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            (data) = self.get_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
             return data
 
-    def get_oauth_openid_sectors_by_id_with_http_info(self, inum, **kwargs):  # noqa: E501
+    def get_oauth_openid_sectors_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
         """Get OpenID Connect Sector by Inum.  # noqa: E501
 
         Get OpenID Connect Sector by Inum.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_oauth_openid_sectors_by_id_with_http_info(inum, async_req=True)
+        >>> thread = api.get_oauth_openid_sectors_by_id_with_http_info(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :return: SectorIdentifier
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['inum']  # noqa: E501
+        all_params = ['id']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -267,16 +267,16 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
                 )
             params[key] = val
         del params['kwargs']
-        # verify the required parameter 'inum' is set
-        if ('inum' not in params or
-                params['inum'] is None):
-            raise ValueError("Missing the required parameter `inum` when calling `get_oauth_openid_sectors_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `get_oauth_openid_sectors_by_id`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'inum' in params:
-            path_params['inum'] = params['inum']  # noqa: E501
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
 
         query_params = []
 
@@ -294,7 +294,7 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
         auth_settings = ['jans-auth']  # noqa: E501
 
         return self.api_client.call_api(
-            '/jans-config-api/api/v1/openid/sectoridentifiers/{inum}', 'GET',
+            '/jans-config-api/api/v1/openid/sectoridentifiers/{id}', 'GET',
             path_params,
             query_params,
             header_params,
@@ -309,17 +309,17 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def patch_oauth_openid_sectors_by_id(self, inum, **kwargs):  # noqa: E501
+    def patch_oauth_openid_sectors_by_id(self, id, **kwargs):  # noqa: E501
         """Partially update OpenId Connect Sector by Inum.  # noqa: E501
 
         Partially update OpenId Connect Sector by Inum.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_oauth_openid_sectors_by_id(inum, async_req=True)
+        >>> thread = api.patch_oauth_openid_sectors_by_id(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :param list[PatchRequest] body:
         :return: SectorIdentifier
                  If the method is called asynchronously,
@@ -327,29 +327,29 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.patch_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            return self.patch_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
         else:
-            (data) = self.patch_oauth_openid_sectors_by_id_with_http_info(inum, **kwargs)  # noqa: E501
+            (data) = self.patch_oauth_openid_sectors_by_id_with_http_info(id, **kwargs)  # noqa: E501
             return data
 
-    def patch_oauth_openid_sectors_by_id_with_http_info(self, inum, **kwargs):  # noqa: E501
+    def patch_oauth_openid_sectors_by_id_with_http_info(self, id, **kwargs):  # noqa: E501
         """Partially update OpenId Connect Sector by Inum.  # noqa: E501
 
         Partially update OpenId Connect Sector by Inum.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.patch_oauth_openid_sectors_by_id_with_http_info(inum, async_req=True)
+        >>> thread = api.patch_oauth_openid_sectors_by_id_with_http_info(id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :param str inum: Scope ID. (required)
+        :param str id: Scope ID. (required)
         :param list[PatchRequest] body:
         :return: SectorIdentifier
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['inum', 'body']  # noqa: E501
+        all_params = ['id', 'body']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -364,16 +364,16 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
                 )
             params[key] = val
         del params['kwargs']
-        # verify the required parameter 'inum' is set
-        if ('inum' not in params or
-                params['inum'] is None):
-            raise ValueError("Missing the required parameter `inum` when calling `patch_oauth_openid_sectors_by_id`")  # noqa: E501
+        # verify the required parameter 'id' is set
+        if ('id' not in params or
+                params['id'] is None):
+            raise ValueError("Missing the required parameter `id` when calling `patch_oauth_openid_sectors_by_id`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'inum' in params:
-            path_params['inum'] = params['inum']  # noqa: E501
+        if 'id' in params:
+            path_params['id'] = params['id']  # noqa: E501
 
         query_params = []
 
@@ -397,7 +397,7 @@ class OAuthOpenIDConnectSectorIdentifiersApi(object):
         auth_settings = ['jans-auth']  # noqa: E501
 
         return self.api_client.call_api(
-            '/jans-config-api/api/v1/openid/sectoridentifiers/{inum}', 'PATCH',
+            '/jans-config-api/api/v1/openid/sectoridentifiers/{id}', 'PATCH',
             path_params,
             query_params,
             header_params,

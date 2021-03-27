@@ -1688,9 +1688,9 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
-  /jans-config-api/api/v1/openid/sectoridentifiers/{inum}:
+  /jans-config-api/api/v1/openid/sectoridentifiers/{id}:
     parameters:
-      - name: inum
+      - name: id
         in: path
         required: true
         description: Scope ID.
