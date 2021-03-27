@@ -3444,6 +3444,18 @@ components:
         statWebServiceIntervalLimitInSeconds:
           type: integer		
           description: Statistical data capture time interval limit.
+        keyAlgsAllowedForGeneration:
+          type: array
+          description: List of algorithm allowed to be used for key generation.
+          items:
+            type: string
+          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        discoveryAllowedKeys:
+          type: array
+          description: List of configuration response claim allowed to be displayed in discovery endpoint.
+          items:
+            type: string
+          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
  
     GluuAttribute:
       title: GluuAttribute

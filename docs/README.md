@@ -1,4 +1,5 @@
 # Using jans-cli
+
 `jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation
 1. Menu-driven Interactive Mode
 2. Command Line Argument Mode
@@ -2671,7 +2672,8 @@ Selection:
 - __id__ number of an attribute to identify which one you want to update
 
 
-- **__Get OpenID client by its inum__**
+
+**__Get OpenID client by its inum__**
 
 `inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
 
@@ -2775,6 +2777,129 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
 }
 
 Selection: 
+```
+
+### OpenD Connect - Sector Identifier
+
+Sector identifiers provide a way to group clients from the same adminstrative domain using pairwise subject identifiers. In this case, each client needs to be given the same pairwise ID for the person to maintain continuity across all the related websites
+
+With `jans-cli` you can do such operations:
+
+```
+OAuth - OpenID Connect - Sector Identifiers
+-------------------------------------------
+1 Gets list of OpenID Connect Sectors
+2 Create new OpenID Connect Sector
+3 Update OpenId Connect Sector
+4 Get OpenID Connect Sector by Inum
+5 Delete OpenID Connect Sector
+6 Partially update OpenId Connect Sector by Inum
+```
+
+**Get list of OpenID Connect Sectors**
+
+To get list of OpenID Connect sectors, go with the first option. It will display all the connect sectors available in your janssen server.
+
+```
+Gets list of OpenID Connect Sectors
+-----------------------------------
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/sectoridentifiers.readonly
+[
+  {
+    "id": "1102af41-6b2e-4d65-b2fd-620675e1efe3",
+    "description": "Testing sector identifier",
+    "redirectUris": [
+      "https://test.gluu.com/back"
+    ],
+    "clientIds": null
+  },
+  {
+    "id": "13c4ae18-5214-4e64-8ba9-c298927be06d",
+    "description": "testing sector identifier",
+    "redirectUris": null,
+    "clientIds": null
+  }
+]
+```
+
+**Create new OpenID Sector Identifier**
+
+There are some specific follow-up method to create an OpenID sector identifier.
+
+1. It will ask to enter an Unique ID (ex; 'test')
+2. It will ask to update optional fields. `enter` 'y' to confirm or 'n' to skip.
+3. If you enter 'y', It will show some optional fields as below:
+  - 1 description
+  - 2 redirectUris
+  - 3 clientIds
+4. After completing 3rd steps enter `c` to continue. It will show all the data you provided.
+5. At the end it will ask for the confirmation to save it. enter `y` to continue. Please, see below results to better understand.
+
+
+- description: Add some information related to the sector identifier
+- redirectUris: Add redirect url here
+- clientIds: add list of client ID that uses sector Identifier
+
+
+
+```
+Selection: 2
+
+«XRI i-number. Sector Identifier to uniquely identify the sector. Type: string»
+id: test
+
+Populate optional fields? y
+Optiaonal Fields:
+1 description
+2 redirectUris
+3 clientIds
+
+«c: continue, #: populate filed. »
+Selection: 1
+
+«A human-readable string describing the sector. Type: string»
+description: Testing sector identifier
+
+«c: continue, #: populate filed. »
+Selection: 2
+
+«Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request. Type: array of string separated by _,»
+Example: https://client.example.org/cb
+redirectUris: https://test.gluu.com/back
+
+«c: continue, #: populate filed. »
+Selection: 3
+
+«List of OAuth 2.0 Client Identifier valid at the Authorization Server. Type: array of string separated by _,»
+clientIds: 
+
+«c: continue, #: populate filed. »
+Selection: c
+Obtained Data:
+
+{
+  "id": "test",
+  "description": "Testing sector identifier",
+  "redirectUris": [
+    "https://test.gluu.com/back"
+  ],
+  "clientIds": []
+}
+
+Continue? y
+Getting access token for scope https://jans.io/oauth/config/openid/sectoridentifiers.write
+Please wait while posting data ...
+
+{
+  "id": "1102af41-6b2e-4d65-b2fd-620675e1efe3",
+  "description": "Testing sector identifier",
+  "redirectUris": [
+    "https://test.gluu.com/back"
+  ],
+  "clientIds": null
+}
 ```
 
 ### User Managed Access (UMA)
@@ -3053,7 +3178,7 @@ Selection:
 
 
 ## Command Line Argument Mode
-We will refer to this mode as **CL** Using this mode is difficult compared to IM. The first is to get help, so type:
+We will refer to this mode as **CL**. Using this mode is difficult compared to IM. The first is to get help, so type:
 ```
 /opt/jans/jans-cli/config-cli.py --help
 ```
@@ -5137,7 +5262,8 @@ Server Response:
 }
 ```
 
-- **_put-config-smtp_**
+**_put-config-smtp_**
+
 To update smtp server, simply change any information on `/tmp/smtp.json` file and run the following command:
 
 ```commandline
@@ -5941,5 +6067,21 @@ Calling with params limit=2
 ]
 ```
 
+## SCIM-CLI
 
+SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema and the patterns for exchanging such schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving interoperability, security, and scalability in the context of identity management.
+Introducing SCIM-CLI which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity . 
+
+Let's start with below command line:
+
+```
+/opt/jans/jans-cli/scim-cli.py
+```
+
+It will show a following menu:
+
+
+![scim-menu](img/im-scim-menu.png)
+
+### user
 
