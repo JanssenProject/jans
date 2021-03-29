@@ -6070,7 +6070,7 @@ Calling with params limit=2
 ## SCIM-CLI
 
 SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema and the patterns for exchanging such schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving interoperability, security, and scalability in the context of identity management.
-Introducing SCIM-CLI which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity . 
+**SCIM-CLI** which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity. 
 
 Let's start with below command line:
 
@@ -6078,10 +6078,300 @@ Let's start with below command line:
 /opt/jans/jans-cli/scim-cli.py
 ```
 
-It will show a following menu:
+It will show the following menu:
 
 
 ![scim-menu](img/im-scim-menu.png)
 
-### user
+### User
+
+This option can be used to perform such operations to modfiy user resources. If you select the first option from the SCIM Menu, You will get a list of sub-menu as same as below.
+
+```
+
+user
+----
+1 Query User resources (see section 3.4.2 of RFC 7644)
+2 Allows creating a User resource via POST (see section 3.3 of RFC 7644)
+3 Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+4 Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
+attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
+not passed in the payload will be left intact.
+
+5 Deletes a user resource
+6 Updates one or more attributes of a User resource using a sequence of additions, removals, and 
+replacements operations. See section 3.5.2 of RFC 7644
+
+7 Query User resources (see section 3.4.2 of RFC 7644)
+
+Selection: 
+
+```
+
+1. Query User Resources: Query User Resources presents all the user information and its attributes.  It supprts query with filter by a list of attributes:
+  - **attributes**: Use comma (,) for multiple attributes
+  - **excludeAttributes**: Use comma (,) for multiple attributes
+  - **filter**: an attribute with value to return as same type of resources
+  - **startIndex**: an integer value indicate a starting position
+  - **count**: an integer value define the maximum search results
+  - **sortBy**: sort list of search results by an attribute
+  - **sortOrder**: ['ascending', 'descending']
+
+A simple query where everything is skipped for default value. 
+
+```
+
+Query User resources (see section 3.4.2 of RFC 7644)
+----------------------------------------------------
+
+«A comma-separated list of attribute names to return in the response. Type: string»
+attributes: 
+
+«When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list). Type: string»
+excludedAttributes: 
+
+«An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644. Type: string»
+filter: 
+
+«The 1-based index of the first query result. Type: integer»
+startIndex: 
+
+«Specifies the desired maximum number of query results per page. Type: integer»
+count: 1
+
+«The attribute whose value will be used to order the returned responses. Type: string»
+sortBy: 
+
+«Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". Type: string»
+sortOrder: 
+Calling Api with parameters: {'count': 1}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/scim/users.read
+{
+  "Resources": [
+    {
+      "externalId": null,
+      "userName": "admin",
+      "name": {
+        "familyName": "User",
+        "givenName": "Admin",
+        "middleName": "Admin",
+        "honorificPrefix": null,
+        "honorificSuffix": null,
+        "formatted": "Admin Admin User"
+      },
+      "displayName": "Default Admin User",
+      "nickName": "Admin",
+      "profileUrl": null,
+      "title": null,
+      "userType": null,
+      "preferredLanguage": null,
+      "locale": null,
+      "timezone": null,
+      "active": true,
+      "password": null,
+      "emails": [
+        {
+          "value": "admin@testjans.gluu.com",
+          "display": null,
+          "type": null,
+          "primary": false
+        }
+      ],
+      "phoneNumbers": null,
+      "ims": null,
+      "photos": null,
+      "addresses": null,
+      "groups": [
+        {
+          "value": "60B7",
+          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
+          "display": "Jannsen Manager Group",
+          "type": "direct"
+        }
+      ],
+      "entitlements": null,
+      "roles": null,
+      "x509Certificates": null,
+      "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+      "meta": {
+        "resourceType": "User",
+        "created": null,
+        "lastModified": null,
+        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+      }
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1
+}
+
+Selection: 
+
+```
+
+2. Creating an User: With this option, An adminstration can easilty 
+can create an user resources. 
+
+```
+
+Selection: 2
+
+«Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users). Type: string»
+userName: shakil
+
+Data for object name. See section 4.1.1 of RFC 7643
+
+   «Type: string»
+   familyName: shakil
+
+   «Type: string»
+   givenName: shakil
+
+   «Type: string»
+   middleName: shakil
+
+   «A "title" like "Ms.", "Mrs.". Type: string»
+   honorificPrefix: Mr.
+
+   «Name suffix, like "Junior", "The great", "III". Type: string»
+   honorificSuffix: Miah
+
+   «Full name, including all middle names, titles, and suffixes as appropriate. Type: string»
+   formatted: 
+
+«Name of the user suitable for display to end-users. Type: string»
+displayName: shakil
+
+«Type: string»
+password: password
+
+«See section 4.1.2 of RFC 7643. »
+Add Email? shakil@gluu.org
+Please enter one of y, n
+Add Email? n
+
+Populate optional fields? y
+Optiaonal Fields:
+1 schemas
+2 id
+3 meta
+4 externalId
+5 nickName
+6 profileUrl
+7 title
+8 userType
+9 preferredLanguage
+10 locale
+11 timezone
+12 active
+13 phoneNumbers
+14 ims
+15 photos
+16 addresses
+17 groups
+18 entitlements
+19 roles
+20 x509Certificates
+21 urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+
+«c: continue, #: populate filed. »
+Selection: c
+Obtained Data:
+
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": null
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": null,
+  "password": "12345678",
+  "emails": [],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": null,
+  "id": null,
+  "meta": null
+}
+
+Continue? y
+Getting access token for scope https://jans.io/scim/users.write
+Please wait while posting data ...
+
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": "Mr. shakil shakil shakil Miah"
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": null,
+  "password": null,
+  "emails": [],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "7881ed5c-1dad-4265-9b74-ee6c3932c11f",
+  "meta": {
+    "resourceType": "User",
+    "created": "2021-03-29T19:04:52.353Z",
+    "lastModified": "2021-03-29T19:04:52.353Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/7881ed5c-1dad-4265-9b74-ee6c3932c11f"
+  }
+}
+
+Selection: 
+
+```
 
