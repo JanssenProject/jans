@@ -59,6 +59,11 @@ spec:
             periodSeconds: 25
             timeoutSeconds: 5
           volumeMounts:
+          {{ if eq .Values.global.configSecretAdapter "google" }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-secret-manager-sa
+            subPath: google-credentials.json
+          {{- end }}
           {{- if eq .Values.global.cnPersistenceType "sql" }}
           - name: sql-pass
             mountPath: "/etc/jans/conf/sql_password"
@@ -87,6 +92,11 @@ spec:
 {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
       volumes:
+      {{- if eq .Values.global.cnPersistenceType "sql" }}
+        - name: sql-pass
+          secret:
+            secretName: {{ .Release.Name }}-sql-pass
+      {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass
           secret:
