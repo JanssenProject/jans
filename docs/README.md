@@ -6117,6 +6117,7 @@ Selection:
   - **sortBy**: sort list of search results by an attribute
   - **sortOrder**: ['ascending', 'descending']
 
+A simple query where everything is skipped for default value. 
 
 ```
 
@@ -6212,6 +6213,162 @@ Getting access token for scope https://jans.io/scim/users.read
   "totalResults": 1,
   "startIndex": 1,
   "itemsPerPage": 1
+}
+
+Selection: 
+
+```
+
+2. Creating an User: With this option, An adminstration can easilty 
+can create an user resources. 
+
+```
+
+Selection: 2
+
+«Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users). Type: string»
+userName: shakil
+
+Data for object name. See section 4.1.1 of RFC 7643
+
+   «Type: string»
+   familyName: shakil
+
+   «Type: string»
+   givenName: shakil
+
+   «Type: string»
+   middleName: shakil
+
+   «A "title" like "Ms.", "Mrs.". Type: string»
+   honorificPrefix: Mr.
+
+   «Name suffix, like "Junior", "The great", "III". Type: string»
+   honorificSuffix: Miah
+
+   «Full name, including all middle names, titles, and suffixes as appropriate. Type: string»
+   formatted: 
+
+«Name of the user suitable for display to end-users. Type: string»
+displayName: shakil
+
+«Type: string»
+password: password
+
+«See section 4.1.2 of RFC 7643. »
+Add Email? shakil@gluu.org
+Please enter one of y, n
+Add Email? n
+
+Populate optional fields? y
+Optiaonal Fields:
+1 schemas
+2 id
+3 meta
+4 externalId
+5 nickName
+6 profileUrl
+7 title
+8 userType
+9 preferredLanguage
+10 locale
+11 timezone
+12 active
+13 phoneNumbers
+14 ims
+15 photos
+16 addresses
+17 groups
+18 entitlements
+19 roles
+20 x509Certificates
+21 urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+
+«c: continue, #: populate filed. »
+Selection: c
+Obtained Data:
+
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": null
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": null,
+  "password": "12345678",
+  "emails": [],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": null,
+  "id": null,
+  "meta": null
+}
+
+Continue? y
+Getting access token for scope https://jans.io/scim/users.write
+Please wait while posting data ...
+
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": "Mr. shakil shakil shakil Miah"
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": null,
+  "password": null,
+  "emails": [],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "7881ed5c-1dad-4265-9b74-ee6c3932c11f",
+  "meta": {
+    "resourceType": "User",
+    "created": "2021-03-29T19:04:52.353Z",
+    "lastModified": "2021-03-29T19:04:52.353Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/7881ed5c-1dad-4265-9b74-ee6c3932c11f"
+  }
 }
 
 Selection: 
