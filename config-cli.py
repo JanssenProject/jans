@@ -85,6 +85,11 @@ parser.add_argument("--info", choices=op_list, help="Help for operation")
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get', help="Operation mode to be done")
 parser.add_argument("--endpoint-args", help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
 parser.add_argument("--schema", help="Get sample json schema")
+
+parser.add_argument("--username", help="Auth username")
+parser.add_argument("--password", help="Auth password")
+parser.add_argument("-j", help="Auth password file")
+
 #parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -119,10 +124,13 @@ if not (host and client_id and client_secret):
         print("Pelase fill config.ini or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run")
         sys.exit()
 
-if str(debug).lower() in ('yes', 'true', '1', 'on'):
-    debug = True
-else:
-    debug = False
+def get_bool(val):
+    if str(val).lower() in ('yes', 'true', '1', 'on'):
+        return True
+    return False
+
+
+debug = get_bool(debug)
 
 class Menu(object):
 
@@ -135,10 +143,11 @@ class Menu(object):
         self.parent = None
         self.ignore = False
 
+
     def __iter__(self):
         self.current_index = 0
         return self
-    
+
     def __repr__(self):
         return self.name
         self.__print_child(self)
@@ -193,6 +202,24 @@ class JCA_CLI:
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
+        self.auth_username = None
+        self.auth_password = None
+        self.askuser = get_bool(config['DEFAULT'].get('askuser'))
+        if self.askuser:
+            if args.username:
+                self.auth_username = args.username
+            if args.password:
+                self.auth_password = args.password
+            elif args.j:
+                if os.path.isfile(args.j):
+                    with open(args.j) as reader:
+                        self.auth_password = reader.read()
+                else:
+                   print(args.j, "does not exist. Exiting ...")
+                   sys.exit()
+            if not (self.auth_username and self.auth_password):
+                print("I need username and password. Exiting ...")
+                sys.exit()
 
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
@@ -252,7 +279,7 @@ class JCA_CLI:
                                     info=self.cfg_yml['paths'][path][method],
                                     path=path,
                                     )
-                            
+
                             m.add_child(sm)
 
         self.menu = menu
@@ -264,14 +291,17 @@ class JCA_CLI:
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        if self.askuser:
+             post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username, "password": self.auth_password}
+        else:
+             post_params = {"grant_type": "client_credentials", "scope": scope}
+
 
         response = rest.POST(
                     url, 
                     headers=headers,
-                    post_params={
-                        "grant_type": "client_credentials",
-                        "scope": scope,
-                    })
+                    post_params=post_params
+                   )
 
         try:
             data = json.loads(response.data)
