@@ -126,7 +126,7 @@ class ConsulConfig(BaseConfig):
         """
         return key[len(self.prefix):]
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.

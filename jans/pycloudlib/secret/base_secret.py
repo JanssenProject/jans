@@ -16,7 +16,7 @@ class BaseSecret:
 
     type = "secret"
 
-    def get(self, key: str, default: Any = None) -> NoReturn:
+    def get(self, key: str, default: Any = "") -> NoReturn:
         """Get specific secret.
 
         Subclass **MUST** implement this method.

@@ -41,7 +41,7 @@ class ConfigManager:
         else:
             self.adapter = None
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.
@@ -102,7 +102,7 @@ class SecretManager:
         else:
             self.adapter = None
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.

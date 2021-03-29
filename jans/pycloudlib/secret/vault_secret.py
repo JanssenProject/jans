@@ -127,7 +127,7 @@ class VaultSecret(BaseSecret):
         creds = self.client.auth.approle.login(self.role_id, self.secret_id, use_token=False)
         self.client.token = creds["auth"]["client_token"]
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.

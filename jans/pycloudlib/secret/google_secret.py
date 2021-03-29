@@ -125,7 +125,7 @@ class GoogleSecret(BaseSecret):
                            " set to jans.")
         return data
 
-    def get(self, key, default: Any = None) -> Any:
+    def get(self, key, default: Any = "") -> Any:
         """Get value based on given key.
         :params key: Key name.
         :params default: Default value if key is not exist.

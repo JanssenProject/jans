@@ -47,7 +47,7 @@ class KubernetesConfig(BaseConfig):
         self.name_exists = False
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.

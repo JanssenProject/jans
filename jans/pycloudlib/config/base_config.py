@@ -16,7 +16,7 @@ class BaseConfig:
 
     type = "config"
 
-    def get(self, key: str, default: Any = None) -> NoReturn:
+    def get(self, key: str, default: Any = "") -> NoReturn:
         """Get specific config.
 
         Subclass **MUST** implement this method.

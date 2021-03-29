@@ -58,7 +58,7 @@ class KubernetesSecret(BaseSecret):
             self._client = kubernetes.client.CoreV1Api()
         return self._client
 
-    def get(self, key, default: Any = None) -> Any:
+    def get(self, key, default: Any = "") -> Any:
         """Get value based on given key.
 
         :params key: Key name.
