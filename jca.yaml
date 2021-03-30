@@ -29,7 +29,6 @@ tags:
   - name: Database - LDAP configuration
   - name: Database - Couchbase configuration
   - name: OAuth - OpenID Connect - Clients
-  - name: OAuth - OpenID Connect - Sector Identifiers
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
 paths:
@@ -1615,155 +1614,6 @@ paths:
           description: Internal Server Error
       security:
         - jans-auth: [https://jans.io/oauth/config/openid/clients.write]
-  /jans-config-api/api/v1/openid/sectoridentifiers:
-    get:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Gets list of OpenID Connect Sectors.
-      description: Gets list of OpenID Connect Sectors.
-      operationId: get-oauth-openid-sectors
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: SectorIdentifier list.
-                description: List of SectorIdentifier.
-                items:
-                 $ref: '#/components/schemas/SectorIdentifier'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.readonly]
-    post:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Create new OpenID Connect Sector.
-      description: Create new OpenID Connect Sector.
-      operationId: post-oauth-openid-sectors
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SectorIdentifier'
-      responses:
-        '201':
-          description: Created
-          content:
-           application/json:
-            schema:
-              $ref: '#/components/schemas/SectorIdentifier'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
-    put:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Update OpenId Connect Sector.
-      description: Update OpenId Connect Sector.
-      operationId: put-oauth-openid-sectors
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SectorIdentifier'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SectorIdentifier'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
-  /jans-config-api/api/v1/openid/sectoridentifiers/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Scope ID.
-        schema:
-          type: string
-    get:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Get OpenID Connect Sector by Inum.
-      description: Get OpenID Connect Sector by Inum.
-      operationId: get-oauth-openid-sectors-by-id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SectorIdentifier'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.readonly]
-    delete:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Delete OpenID Connect Sector.
-      description: Delete OpenID Connect Sector.
-      operationId: delete-oauth-openid-sectors-by-id
-      responses:
-        '204':
-          description: No Content
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.delete]
-    patch:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Partially update OpenId Connect Sector by Inum.
-      description: Partially update OpenId Connect Sector by Inum.
-      operationId: patch-oauth-openid-sectors-by-id
-      requestBody:
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items: 
-                $ref: '#/components/schemas/PatchRequest'
-                description: String representing patch-document.ss
-                example: '[ {op:replace, path: redirect_uris/2, value: https://client.example.org/cb/new } ]'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SectorIdentifier'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - jans-auth: [https://jans.io/oauth/config/openid/sectoridentifiers.write]
   /jans-config-api/api/v1/uma/resources:
     get:
       tags:
@@ -2133,9 +1983,6 @@ components:
             https://jans.io/oauth/config/openid/clients.readonly: View clients related information
             https://jans.io/oauth/config/openid/clients.write: Manage clients related information
             https://jans.io/oauth/config/openid/clients.delete: Delete clients related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.readonly: View sector related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.write: Manage sector related information
-            https://jans.io/oauth/config/openid/sectoridentifiers.delete: Delete sector related information
             https://jans.io/oauth/config/scopes.readonly: View scope related information
             https://jans.io/oauth/config/scopes.write: Manage scope related information
             https://jans.io/oauth/config/scopes.delete: Delete scope related information
@@ -3444,6 +3291,18 @@ components:
         statWebServiceIntervalLimitInSeconds:
           type: integer		
           description: Statistical data capture time interval limit.
+        keyAlgsAllowedForGeneration:
+          type: array
+          description: List of algorithm allowed to be used for key generation.
+          items:
+            type: string
+          example: '\"RS256\", \"RS512\", \"ES384\", \"PS256\"'
+        discoveryAllowedKeys:
+          type: array
+          description: List of configuration response claim allowed to be displayed in discovery endpoint.
+          items:
+            type: string
+          example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
  
     GluuAttribute:
       title: GluuAttribute
