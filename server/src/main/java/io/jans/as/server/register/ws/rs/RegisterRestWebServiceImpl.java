@@ -172,7 +172,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
             if (appConfiguration.getDcrSignatureValidationEnabled()) {
-                validateRequestObject(requestParams, softwareStatement);
+                validateRequestObject(requestParams, softwareStatement, httpRequest);
             }
 
             final RegisterRequest r = RegisterRequest.fromJson(requestObject);
@@ -359,7 +359,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private void validateRequestObject(String requestParams, JSONObject softwareStatement) {
+    private void validateRequestObject(String requestParams, JSONObject softwareStatement, HttpServletRequest httpRequest) {
         try {
             if (!appConfiguration.getDcrSignatureValidationEnabled()) {
                 return;
@@ -368,30 +368,63 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final Jwt jwt = Jwt.parse(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
 
-            String jwksUriClaim = null;
+            final boolean isHmac = AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily());
+            if (isHmac) {
+                String hmacSecret = appConfiguration.getDcrSignatureValidationSharedSecret();
+                if (StringUtils.isBlank(hmacSecret)) {
+                    hmacSecret = externalDynamicClientRegistrationService.getDcrHmacSecret(httpRequest, jwt);
+                }
+                if (StringUtils.isBlank(hmacSecret)) {
+                    log.error("No hmacSecret provided in Dynamic Client Registration script (method getDcrHmacSecret didn't return actual secret). ");
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
+                }
+
+                boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm);
+                log.trace("Request object validation result: " + validSignature);
+                if (!validSignature) {
+                    throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
+                }
+            }
+
+            String jwksUri = null;
             if (StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim())) {
-                jwksUriClaim = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim());
+                jwksUri = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim());
             }
-            if (StringUtils.isBlank(jwksUriClaim) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwksUri())) {
-                jwksUriClaim = appConfiguration.getDcrSignatureValidationJwksUri();
+            if (StringUtils.isBlank(jwksUri) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwksUri())) {
+                jwksUri = appConfiguration.getDcrSignatureValidationJwksUri();
             }
 
-            String jwksClaim = null;
+            String jwksStr = null;
             if (StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksClaim())) {
-                jwksClaim = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksClaim());
+                jwksStr = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksClaim());
             }
-            if (StringUtils.isBlank(jwksClaim) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwks())) {
-                jwksClaim = appConfiguration.getDcrSignatureValidationJwks();
+            if (StringUtils.isBlank(jwksStr) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwks())) {
+                jwksStr = appConfiguration.getDcrSignatureValidationJwks();
             }
 
-            log.trace("Validating request object jwksUriClaim: " + jwksUriClaim + ", jwksClaim: " + jwksClaim + " ...");
+            JSONObject jwks = null;
+            if (StringUtils.isNotBlank(jwksUri)) {
+                jwks = JwtUtil.getJSONWebKeys(jwksUri);
+            }
 
-            JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
-                    new JSONObject(jwksClaim) :
-                    JwtUtil.getJSONWebKeys(jwksUriClaim);
+            if (jwks == null && StringUtils.isNotBlank(jwksStr)) {
+                jwks = new JSONObject(jwksStr);
+            }
+
+            if (jwks == null && externalDynamicClientRegistrationService.isEnabled()) {
+                log.trace("No values are set for dcrSignatureValidationJwksUri and dcrSignatureValidationJwks, invoking script ...");
+
+                jwks = externalDynamicClientRegistrationService.getDcrJwks(httpRequest, jwt);
+                if (jwks == null) {
+                    log.error("No jwks provided in Dynamic Client Registration script (method getDcrJwks didn't return actual jwks). ");
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
+                }
+            }
+
+            log.trace("Validating request object with jwks: " + jwks + " ...");
 
             boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(),
-                    jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, appConfiguration.getDcrSignatureValidationSharedSecret(), signatureAlgorithm);
+                    jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
 
             log.trace("Request object validation result: " + validSignature);
             if (!validSignature) {
@@ -794,7 +827,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     }
                 }
                 if (appConfiguration.getDcrSignatureValidationEnabled()) {
-                    validateRequestObject(requestParams, softwareStatement);
+                    validateRequestObject(requestParams, softwareStatement, httpRequest);
                 }
 
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams);
