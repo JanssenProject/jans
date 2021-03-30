@@ -217,6 +217,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableU2fEndpoint = false;
 
     private Boolean dcrSignatureValidationEnabled = false;
+    private String dcrSignatureValidationSharedSecret;
     private String dcrSignatureValidationSoftwareStatementJwksURIClaim;
     private String dcrSignatureValidationSoftwareStatementJwksClaim;
     private String dcrSignatureValidationJwks;
@@ -483,6 +484,14 @@ public class AppConfiguration implements Configuration {
 
     public void setDcrAuthorizationWithClientCredentials(Boolean dcrAuthorizationWithClientCredentials) {
         this.dcrAuthorizationWithClientCredentials = dcrAuthorizationWithClientCredentials;
+    }
+
+    public String getDcrSignatureValidationSharedSecret() {
+        return dcrSignatureValidationSharedSecret;
+    }
+
+    public void setDcrSignatureValidationSharedSecret(String dcrSignatureValidationSharedSecret) {
+        this.dcrSignatureValidationSharedSecret = dcrSignatureValidationSharedSecret;
     }
 
     public Boolean getDcrSignatureValidationEnabled() {
