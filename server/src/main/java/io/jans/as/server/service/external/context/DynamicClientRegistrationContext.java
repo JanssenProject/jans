@@ -6,12 +6,11 @@
 
 package io.jans.as.server.service.external.context;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.json.JSONObject;
-
 import io.jans.as.model.jwt.Jwt;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.json.JSONObject;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,11 +20,20 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     private CustomScriptConfiguration script;
     private JSONObject registerRequest;
     private Jwt softwareStatement;
+    private Jwt dcr;
 
     public DynamicClientRegistrationContext(HttpServletRequest httpRequest, JSONObject registerRequest, CustomScriptConfiguration script) {
         super(httpRequest);
         this.script = script;
         this.registerRequest = registerRequest;
+    }
+
+    public Jwt getDcr() {
+        return dcr;
+    }
+
+    public void setDcr(Jwt dcr) {
+        this.dcr = dcr;
     }
 
     public Jwt getSoftwareStatement() {
