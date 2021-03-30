@@ -364,6 +364,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (!appConfiguration.getDcrSignatureValidationEnabled()) {
                 return;
             }
+            if (ServerUtil.isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
+                return;
+            }
 
             final Jwt jwt = Jwt.parse(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
