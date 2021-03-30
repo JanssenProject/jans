@@ -1,8 +1,0 @@
-{
-	"clientIds": [],
-	"description": "QAAdded Sector",
-	"redirectUris": [
-		"https://server.qa.com/uri1",
-		"https://server.qa.com/uri2"
-	]
-}

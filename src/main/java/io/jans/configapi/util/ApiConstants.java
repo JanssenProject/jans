@@ -27,7 +27,6 @@ public class ApiConstants {
     public static final String CLIENTS = "/clients";
     public static final String OPENID = "/openid";
     public static final String SCOPES = "/scopes";
-    public static final String SECTORS = "/sectoridentifiers";
     public static final String PAIRWISE = "/pairwise";
     public static final String FIDO2 = "/fido2";
     public static final String CIBA = "/ciba";
