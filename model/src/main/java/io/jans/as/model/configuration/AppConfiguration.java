@@ -223,6 +223,7 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationJwks;
     private String dcrSignatureValidationJwksUri;
     private Boolean dcrAuthorizationWithClientCredentials = false;
+    private Boolean dcrSkipSignatureValidation = false;
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
@@ -475,6 +476,15 @@ public class AppConfiguration implements Configuration {
 
     public void setFapiCompatibility(Boolean fapiCompatibility) {
         this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getDcrSkipSignatureValidation() {
+        if (dcrSkipSignatureValidation == null) dcrSkipSignatureValidation = false;
+        return dcrSkipSignatureValidation;
+    }
+
+    public void setDcrSkipSignatureValidation(Boolean dcrSkipSignatureValidation) {
+        this.dcrSkipSignatureValidation = dcrSkipSignatureValidation;
     }
 
     public Boolean getDcrAuthorizationWithClientCredentials() {
