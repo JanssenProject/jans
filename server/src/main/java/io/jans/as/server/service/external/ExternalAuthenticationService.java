@@ -113,7 +113,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	@Override
 	protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
 		if ((ldapAuthConfigs == null) || (ldapAuthConfigs.size() == 0)) {
-			newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration());
+			// Add internal type only if there is no enabled scripts and external authentication configurations
+			if (newCustomScriptConfigurations.size() == 0) {
+				newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration());
+			}
 		} else {
 			for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
 				newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration(ldapAuthConfig));
