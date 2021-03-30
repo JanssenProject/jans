@@ -26,4 +26,8 @@ public interface ClientRegistrationType extends BaseExternalType {
 
     String getSoftwareStatementJwks(Object context);
 
+    String getDcrHmacSecret(Object context);
+
+    String getDcrJwks(Object context);
+
 }

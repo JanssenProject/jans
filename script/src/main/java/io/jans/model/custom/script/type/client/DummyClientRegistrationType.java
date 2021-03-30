@@ -54,4 +54,14 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
     public String getSoftwareStatementJwks(Object context) {
         return "";
     }
+
+    @Override
+    public String getDcrHmacSecret(Object context) {
+        return "";
+    }
+
+    @Override
+    public String getDcrJwks(Object context) {
+        return "";
+    }
 }
