@@ -410,46 +410,6 @@
         ]
     },
      {
-        "path":"/jans-config-api/api/v1/openid/sectoridentifiers",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/openid/sectoridentifiers.readonly"
-                ]
-            },
-            {
-                "httpMethods":["POST","PUT"],
-                "scopes":[
-                    "https://jans.io/oauth/config/openid/sectoridentifiers.write"
-                ]
-            }
-        ]
-    },
-     {
-        "path":"/jans-config-api/api/v1/openid/sectoridentifiers/{inum}",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/openid/sectoridentifiers.readonly"
-                ]
-            },
-            {
-                "httpMethods":["PATCH"],
-                "scopes":[
-                    "https://jans.io/oauth/config/openid/sectoridentifiers.write"
-                ]
-            },
-            {
-                "httpMethods":["DELETE"],
-                "scopes":[
-                    "https://jans.io/oauth/config/openid/sectoridentifiers.delete"
-                ]
-            }
-        ]
-    },
-     {
         "path":"/jans-config-api/api/v1/scopes",
         "conditions":[
             {

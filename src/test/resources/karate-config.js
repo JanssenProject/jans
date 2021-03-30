@@ -53,7 +53,6 @@ function() {
         couchbaseUrl: baseUrl + '/jans-config-api/api/v1/config/database/couchbase',
         openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
         scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
-        openidsectors_url: baseUrl + '/jans-config-api/api/v1/openid/sectoridentifiers',
         umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
         attributes_url: baseUrl + '/jans-config-api/api/v1/attributes',
         smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp', 
