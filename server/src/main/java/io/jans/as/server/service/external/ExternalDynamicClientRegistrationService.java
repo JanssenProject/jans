@@ -6,15 +6,6 @@
 
 package io.jans.as.server.service.external;
 
-import java.util.Map;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
-import org.json.JSONObject;
-
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.jwt.Jwt;
@@ -24,6 +15,13 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.json.JSONObject;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external dynamic client registration extension
@@ -123,6 +121,42 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementHmacSecret(context);
             log.trace("Result of python 'getSoftwareStatementHmacSecret' method: " + result);
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
+            return "";
+        }
+    }
+
+    public JSONObject getDcrJwks(HttpServletRequest httpRequest, Jwt dcr) {
+        try {
+            log.trace("Executing python 'getDcrJwks' method");
+
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, defaultExternalCustomScript);
+            context.setDcr(dcr);
+
+            ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
+            final String result = externalType.getDcrJwks(context);
+            log.trace("Result of python 'getDcrJwks' method: " + result);
+            return new JSONObject(result);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
+            return null;
+        }
+    }
+
+    public String getDcrHmacSecret(HttpServletRequest httpRequest, Jwt dcr) {
+        try {
+            log.trace("Executing python 'getDcrHmacSecret' method");
+
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, defaultExternalCustomScript);
+            context.setDcr(dcr);
+
+            ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
+            final String result = externalType.getDcrHmacSecret(context);
+            log.trace("Result of python 'getDcrHmacSecret' method: " + result);
             return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
