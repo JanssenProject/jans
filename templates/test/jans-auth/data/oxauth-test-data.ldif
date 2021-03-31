@@ -260,3 +260,7 @@ changetype: modify
 jansEnabled: true
 replace: jansEnabled
 
+dn: ou=configuration,o=jans
+changetype: modify
+jansAuthMode: basic
+replace: jansAuthMode
