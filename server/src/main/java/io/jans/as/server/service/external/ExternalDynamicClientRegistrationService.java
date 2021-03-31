@@ -95,14 +95,14 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
     public JSONObject getSoftwareStatementJwks(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
         try {
-            log.trace("Executing python 'getSoftwareStatementJwks' method");
+            log.info("Executing python 'getSoftwareStatementJwks' method, script name:" + defaultExternalCustomScript.getName());
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
             context.setSoftwareStatement(softwareStatement);
 
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementJwks(context);
-            log.trace("Result of python 'getSoftwareStatementJwks' method: " + result);
+            log.info("Result of python 'getSoftwareStatementJwks' method: " + result);
             return new JSONObject(result);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
