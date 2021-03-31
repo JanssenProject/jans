@@ -1468,27 +1468,27 @@ public class RegisterRequest extends BaseRequest {
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
         result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.getString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.optString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+                KeyEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseEnc(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
+                BlockEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setUserInfoSignedResponseAlg(requestObject.has(USERINFO_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setUserInfoEncryptedResponseAlg(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+                KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
         result.setUserInfoEncryptedResponseEnc(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
+                BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
         result.setRequestObjectEncryptionAlg(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())) : null);
+                KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())) : null);
         result.setRequestObjectEncryptionEnc(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())) : null);
+                BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())) : null);
         result.setTokenEndpointAuthMethod(requestObject.has(TOKEN_ENDPOINT_AUTH_METHOD.toString()) ?
-                AuthenticationMethod.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : null);
+                AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : null);
         result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
         result.setScope(scope);
         result.setClaims(claims);
