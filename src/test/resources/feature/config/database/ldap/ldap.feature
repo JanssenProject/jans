@@ -116,6 +116,29 @@ return temp;
     And print response
     
     @ignore
+    @ldap-config-post
+  	Scenario: Add LDAP configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request read('ldap.json')
+    When method POST
+    Then status 201
+    And print response
+    And assert response.length != null
+    And print response.configId
+    And print response.version
+ 
+    @ignore 
+    @ldap-config-post-same-name-ldap-error
+  	Scenario: Add LDAP configuration with same name as existing
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request read('ldap.json')
+    When method POST
+    Then status 406
+    And print response
+    
+    @ignore
     @ldap-config-test
     Scenario: Test LDAP configuration
     #Given url  mainUrl

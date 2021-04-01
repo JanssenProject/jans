@@ -54,6 +54,23 @@ public class LdapConfigurationResource extends BaseResource {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         return Response.ok(ldapConfiguration).build();
     }
+    
+    @POST
+    @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
+    public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
+        log.debug("LDAP configuration to be added - ldapConfiguration = "+ldapConfiguration);
+        // Ensure that an LDAP server with same name does not exists.
+        try {
+            ldapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
+            log.error("Ldap Configuration with same name '" + ldapConfiguration.getConfigId() + "' already exists!");
+            throw new NotAcceptableException(getNotAcceptableException(
+                    "Ldap Configuration with same name - '" + ldapConfiguration.getConfigId() + "' already exists!"));
+        } catch (NotFoundException ne) {
+            this.ldapConfigurationService.save(ldapConfiguration);
+            ldapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
+            return Response.status(Response.Status.CREATED).entity(ldapConfiguration).build();
+        }
+    }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
