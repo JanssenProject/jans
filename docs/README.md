@@ -6196,14 +6196,14 @@ Selection:
 
 ```
 
-1. Query User Resources: Query User Resources presents all the user information and its attributes.  It supprts query with filter by a list of attributes:
-  - **attributes**: Use comma (,) for multiple attributes
-  - **excludeAttributes**: Use comma (,) for multiple attributes
-  - **filter**: an attribute with value to return as same type of resources
-  - **startIndex**: an integer value indicate a starting position
-  - **count**: an integer value define the maximum search results
-  - **sortBy**: sort list of search results by an attribute
-  - **sortOrder**: ['ascending', 'descending']
+1. **Query User Resources**: Query User Resources presents all the user information and its attributes.  It supprts query with filter by a list of attributes:
+    - **attributes**: Use comma (,) for multiple attributes
+    - **excludeAttributes**: Use comma (,) for multiple attributes
+    - **filter**: an attribute with value to return as same type of resources
+    - **startIndex**: an integer value indicate a starting position
+    - **count**: an integer value define the maximum search results
+    - **sortBy**: sort list of search results by an attribute
+    - **sortOrder**: ['ascending', 'descending']
 
 A simple query where everything is skipped for default value. 
 
@@ -6307,8 +6307,43 @@ Selection:
 
 ```
 
-2. Creating an User: With this option, An adminstration can easilty 
-can create an user resources. 
+2. **Creating an User**: With this option, An adminstration can create  user resources easily. To create an user, you need to provide user value for its attributes. List of attributes are given below:
+
+    1. familyName
+    2. givenName
+    3. middleName
+    4. honorificPrefix
+    5. honorificSuffix
+    6. displayName
+    7. password
+    8. Email
+
+    
+  Optiaonal Fields:
+
+      1 schemas
+      2 id
+      3 meta
+      4 externalId
+      5 nickName
+      6 profileUrl
+      7 title
+      8 userType
+      9 preferredLanguage
+      10 locale
+      11 timezone
+      12 active
+      13 phoneNumbers
+      14 ims
+      15 photos
+      16 addresses
+      17 groups
+      18 entitlements
+      19 roles
+      20 x509Certificates
+      21 urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+
+You can skip less important attributes if you want. Please see below to create an user. Please see below follow-up method to create an user.
 
 ```
 
@@ -6458,6 +6493,204 @@ Please wait while posting data ...
     "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/7881ed5c-1dad-4265-9b74-ee6c3932c11f"
   }
 }
+
+Selection: 
+
+```
+
+3. **Retrives an User Resources by its ID**: You can retrieve an user resources by its ID. Also it supports filter in searching means you can choose list of attributes you want to retrieve and exclude list of attributes that you don't want to retrieve. Here, I have skipped for each property to retrieve all its attributes.
+
+```
+Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+---------------------------------------------------------------
+
+«id. Type: string»
+id: 7881ed5c-1dad-4265-9b74-ee6c3932c11f
+
+«A comma-separated list of attribute names to return in the response. Type: string»
+attributes: 
+
+«When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list). Type: string»
+excludedAttributes: 
+Calling Api with parameters: {'id': '7881ed5c-1dad-4265-9b74-ee6c3932c11f'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/scim/users.read
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": "Mr. shakil shakil shakil Miah"
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": false,
+  "password": null,
+  "emails": null,
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "7881ed5c-1dad-4265-9b74-ee6c3932c11f",
+  "meta": {
+    "resourceType": "User",
+    "created": "2021-03-29T19:04:52.353Z",
+    "lastModified": "2021-03-29T19:04:52.353Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/7881ed5c-1dad-4265-9b74-ee6c3932c11f"
+  }
+}
+
+Selection: 
+```
+
+4. **Update an User resource**: You can update an user resources by its ID also. If you enter an ID of an user resource, It will show a list of attributes. You can select any of theme one by one to update each value of its property. 
+
+```
+
+Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+---------------------------------------------------------------
+
+«id. Type: string»
+id: 7881ed5c-1dad-4265-9b74-ee6c3932c11f
+Calling Api with parameters: {'id': '7881ed5c-1dad-4265-9b74-ee6c3932c11f'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/scim/users.read
+Fields:
+ 1 active
+ 2 addresses
+ 3 displayName
+ 4 emails
+ 5 entitlements
+ 6 externalId
+ 7 groups
+ 8 id
+ 9 ims
+10 locale
+11 meta
+12 name
+13 nickName
+14 password
+15 phoneNumbers
+16 photos
+17 preferredLanguage
+18 profileUrl
+19 roles
+20 schemas
+21 timezone
+22 title
+23 urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+24 userName
+25 userType
+26 x509Certificates
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: 
+
+```
+Let's say we are going to change the user `active` status, there is a follow-up process: 
+
+```
+Selection: 1
+
+«Type: boolean»
+active  [false]: true
+Please enter a(n) boolean value: _true, _false
+active  [false]: _true
+
+«q: quit, v: view, s: save, l: list fields #: update filed. »
+Selection: s
+Changes:
+active: True
+
+Continue? y
+Please wait while posting data ...
+
+Getting access token for scope https://jans.io/scim/users.write
+{
+  "externalId": null,
+  "userName": "shakil",
+  "name": {
+    "familyName": "shakil",
+    "givenName": "shakil",
+    "middleName": "shakil",
+    "honorificPrefix": "Mr.",
+    "honorificSuffix": "Miah",
+    "formatted": "Mr. shakil shakil shakil Miah"
+  },
+  "displayName": "shakil",
+  "nickName": null,
+  "profileUrl": null,
+  "title": null,
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": true,
+  "password": null,
+  "emails": null,
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "7881ed5c-1dad-4265-9b74-ee6c3932c11f",
+  "meta": {
+    "resourceType": "User",
+    "created": "2021-03-29T19:04:52.353Z",
+    "lastModified": "2021-04-01T22:45:15.804Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/7881ed5c-1dad-4265-9b74-ee6c3932c11f"
+  }
+}
+
+Selection: 
+
+```
+
+This is how you can update each of its attributes.
+
+
+5. **Delete an user resource**: If you want to delete an entry from user resources, you can do that thing easily using the Interatice Mode of Janssen CLI. To delete an user entry, you need to provide its `inum`. In our case: It's `id=7881ed5c-1dad-4265-9b74-ee6c3932c11f` which one are going to be deleted. After than it will ask for the confirmation, just enter 'y' to delete. Please see below result to better understand.
+
+```
+Selection: 5
+
+«Entry to be deleted. »
+id: 7881ed5c-1dad-4265-9b74-ee6c3932c11f
+
+Are you sure want to delete 7881ed5c-1dad-4265-9b74-ee6c3932c11f ? y
+Getting access token for scope https://jans.io/scim/users.write
+Please wait while deleting 7881ed5c-1dad-4265-9b74-ee6c3932c11f ...
+
+
+Entry 7881ed5c-1dad-4265-9b74-ee6c3932c11f was deleted successfully
+
 
 Selection: 
 
