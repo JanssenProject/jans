@@ -1737,78 +1737,81 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
 |    | scriptType                          | name                                                      | enabled   | inum      |
 +====+=====================================+===========================================================+===========+===========+
-|  0 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_example               | False     | 2DAF-AA91 |
+|  1 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_example               | False     | 2DAF-AA91 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  1 | INTROSPECTION                       | introspection_custom_params                               | False     | 2DAF-BA90 |
+|  2 | INTROSPECTION                       | introspection_custom_params                               | False     | 2DAF-BA90 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  2 | UMA_CLAIMS_GATHERING                | sampleClaimsGathering                                     | False     | 2DAF-F996 |
+|  3 | UMA_CLAIMS_GATHERING                | sampleClaimsGathering                                     | False     | 2DAF-F996 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  3 | END_SESSION                         | frontchannel_logout_sample                                | False     | 2DAF-CA90 |
+|  4 | END_SESSION                         | frontchannel_logout_sample                                | False     | 2DAF-CA90 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  4 | INTROSPECTION                       | introspection_sample                                      | False     | 2DAF-AA90 |
+|  5 | UPDATE_TOKEN                        | update_token_sample                                       | False     | 2D3E.5A03 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  5 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_custom_params_example | False     | 2DAF-BA91 |
+|  6 | INTROSPECTION                       | introspection_sample                                      | False     | 2DAF-AA90 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  6 | CIBA_END_USER_NOTIFICATION          | firebase_ciba_end_user_notification                       | False     | C1BA-C1BA |
+|  7 | RESOURCE_OWNER_PASSWORD_CREDENTIALS | resource_owner_password_credentials_custom_params_example | False     | 2DAF-BA91 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  7 | PERSON_AUTHENTICATION               | basic                                                     | False     | A51E-76DA |
+|  8 | CIBA_END_USER_NOTIFICATION          | firebase_ciba_end_user_notification                       | False     | C1BA-C1BA |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  8 | CONSENT_GATHERING                   | consent_gathering                                         | False     | DAA9-BA60 |
+|  9 | PERSON_AUTHENTICATION               | basic                                                     | False     | A51E-76DA |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-|  9 | PERSON_AUTHENTICATION               | basic_lock                                                | False     | 4BBE-C6A8 |
+| 10 | CONSENT_GATHERING                   | consent_gathering                                         | False     | DAA9-BA60 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 10 | PERSON_AUTHENTICATION               | cert                                                      | False     | 2124-0CF1 |
+| 11 | PERSON_AUTHENTICATION               | basic_lock                                                | False     | 4BBE-C6A8 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 11 | PERSON_AUTHENTICATION               | yubicloud                                                 | False     | 24FD-B96E |
+| 12 | PERSON_AUTHENTICATION               | cert                                                      | False     | 2124-0CF1 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 12 | PERSON_AUTHENTICATION               | otp                                                       | False     | 5018-D4BF |
+| 13 | PERSON_AUTHENTICATION               | yubicloud                                                 | False     | 24FD-B96E |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 13 | PERSON_AUTHENTICATION               | smpp                                                      | False     | 09A0-93D7 |
+| 14 | PERSON_AUTHENTICATION               | otp                                                       | False     | 5018-D4BF |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 14 | PERSON_AUTHENTICATION               | twilio_sms                                                | False     | 09A0-93D6 |
+| 15 | PERSON_AUTHENTICATION               | smpp                                                      | False     | 09A0-93D7 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 15 | PERSON_AUTHENTICATION               | thumb_sign_in                                             | False     | 92F0-759E |
+| 16 | PERSON_AUTHENTICATION               | twilio_sms                                                | False     | 09A0-93D6 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 16 | PERSON_AUTHENTICATION               | u2f                                                       | False     | 8BAF-80D6 |
+| 17 | PERSON_AUTHENTICATION               | thumb_sign_in                                             | False     | 92F0-759E |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 17 | PERSON_AUTHENTICATION               | duo                                                       | False     | 5018-F9CF |
+| 18 | PERSON_AUTHENTICATION               | u2f                                                       | False     | 8BAF-80D6 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 18 | PERSON_AUTHENTICATION               | super_gluu                                                | False     | 92F0-BF9E |
+| 19 | PERSON_AUTHENTICATION               | duo                                                       | False     | 5018-F9CF |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 19 | PERSON_AUTHENTICATION               | fido2                                                     | False     | 8BAF-80D7 |
+| 20 | PERSON_AUTHENTICATION               | super_gluu                                                | False     | 92F0-BF9E |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 20 | PERSON_AUTHENTICATION               | uaf                                                       | False     | 5018-AF9C |
+| 21 | PERSON_AUTHENTICATION               | fido2                                                     | False     | 8BAF-80D7 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 21 | USER_REGISTRATION                   | user_registration                                         | False     | 6EA0-8F0C |
+| 22 | PERSON_AUTHENTICATION               | uaf                                                       | False     | 5018-AF9C |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 22 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
+| 23 | USER_REGISTRATION                   | user_registration                                         | False     | 6EA0-8F0C |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 23 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
+| 24 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 24 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
+| 25 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 25 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
+| 26 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 26 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
+| 27 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 27 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
+| 28 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 28 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
+| 29 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 29 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
+| 30 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 30 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
+| 31 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 31 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
+| 32 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 32 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
+| 33 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 33 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
+| 34 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 34 | USER_REGISTRATION                   | user_confirm_registration                                 | False     | 6EA0-8F0D |
+| 35 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 35 | UPDATE_USER                         | update_user                                               | False     | 522F-CDC5 |
+| 36 | USER_REGISTRATION                   | user_confirm_registration                                 | False     | 6EA0-8F0D |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+| 37 | UPDATE_USER                         | update_user                                               | False     | 522F-CDC5 |
++----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
+
 
 ```
 
@@ -2808,20 +2811,26 @@ Please wait while retreiving data ...
 Getting access token for scope https://jans.io/oauth/config/openid/sectoridentifiers.readonly
 [
   {
-    "id": "1102af41-6b2e-4d65-b2fd-620675e1efe3",
-    "description": "Testing sector identifier",
+    "id": "26fba854-7adf-4a81-99d2-b772aa053b93",
+    "description": "Testing OpenID Connect Sector",
     "redirectUris": [
-      "https://test.gluu.com/back"
+      "https://test.gluu.org"
     ],
-    "clientIds": null
+    "clientIds": [
+      "1801.86c324cc-621f-477f-836d-09fcd720353e"
+    ]
   },
   {
-    "id": "13c4ae18-5214-4e64-8ba9-c298927be06d",
-    "description": "testing sector identifier",
-    "redirectUris": null,
+    "id": "53337668-f721-4bc0-9d04-a249f38d0def",
+    "description": "Testing sector identifier",
+    "redirectUris": [
+      "https://test.gluu.com"
+    ],
     "clientIds": null
   }
 ]
+
+
 ```
 
 **Create new OpenID Sector Identifier**
@@ -2831,18 +2840,22 @@ There are some specific follow-up method to create an OpenID sector identifier.
 1. It will ask to enter an Unique ID (ex; 'test')
 2. It will ask to update optional fields. `enter` 'y' to confirm or 'n' to skip.
 3. If you enter 'y', It will show some optional fields as below:
-  - 1 description
-  - 2 redirectUris
-  - 3 clientIds
+
+    - 1 description
+    - 2 redirectUris
+    - 3 clientIds
+
 4. After completing 3rd steps enter `c` to continue. It will show all the data you provided.
-5. At the end it will ask for the confirmation to save it. enter `y` to continue. Please, see below results to better understand.
+5. At the end it will ask for the confirmation to save it. enter `y` to continue. 
 
 
-- description: Add some information related to the sector identifier
-- redirectUris: Add redirect url here
-- clientIds: add list of client ID that uses sector Identifier
+> description: Add some information related to the sector identifier
 
+> redirectUris: Add redirect url here
 
+> clientIds: add list of the client ID linked with sector identifier
+
+Please, see below results to better understand.
 
 ```
 Selection: 2
@@ -2901,6 +2914,81 @@ Please wait while posting data ...
   "clientIds": null
 }
 ```
+
+**Update OpenID Connect Sector**
+
+To update an OpenID Connect sector identifier, you need an `inum` of a sector identifier which one you want to update. Let's say, We are going to update the 2nd identifier from the above list of OpenID connect sector identifer, its id: `53337668-f721-4bc0-9d04-a249f38d0def`.
+
+Choosing the 3rd option from the Sector Identifier Menu:
+- It will ask to enter the id of a Sector Identifier
+- After then, It comes with some fields
+
+    Fields:
+    
+      1. clientIds
+      2. description
+      3. id
+      4. redirectUris
+
+- select each of the field to update it. Here, We are going to update `clientIds` with this value: `1801.86c324cc-621f-477f-836d-09fcd720353e`
+
+- If update is done, then enter `s` to save the changes.
+- Finally, It will ask to enter `y` for the confirmation. 
+- and at the end, it will show all updated result as below:
+
+```
+Continue? y
+Please wait while posting data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/sectoridentifiers.write
+{
+  "id": "53337668-f721-4bc0-9d04-a249f38d0def",
+  "description": "Testing sector identifier",
+  "redirectUris": [
+    "https://test.gluu.com"
+  ],
+  "clientIds": [
+    "1801.86c324cc-621f-477f-836d-09fcd720353e"
+  ]
+}
+
+Selection: 
+
+```
+
+**Get OpenID Connect Sector Identifier by inum**
+
+Simply enter an `id` of a Sector Identifier, It will retrieve data and display on the monitor.
+
+
+```
+Get OpenID Connect Sector by Inum
+---------------------------------
+
+«id. Type: string»
+id: 53337668-f721-4bc0-9d04-a249f38d0def
+Calling Api with parameters: {'id': '53337668-f721-4bc0-9d04-a249f38d0def'}
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/oauth/config/openid/sectoridentifiers.readonly
+{
+  "id": "53337668-f721-4bc0-9d04-a249f38d0def",
+  "description": "Testing sector identifier",
+  "redirectUris": [
+    "https://test.gluu.com"
+  ],
+  "clientIds": [
+    "1801.86c324cc-621f-477f-836d-09fcd720353e"
+  ]
+}
+
+Selection: 
+```
+
+**Delete OpenID Connect Sector**
+
+To delete an OpenID Connect Sector by its id, choose option 5 from the Sector Identifier Menu. Then enter `id` which one you are going to delete. Here, We are going to delete a Sector Identifier with `id:53337668-f721-4bc0-9d04-a249f38d0def`. press `y` for the confirmation. It will delete entry from the server.
+
 
 ### User Managed Access (UMA)
 
