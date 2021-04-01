@@ -66,6 +66,8 @@ public class UpdatedUsersTest extends UserBaseTest {
             }
         }
         
+        Thread.sleep(1500);	//See #7
+        
         logger.info("Querying created users after '{}'", isoDate);
         Response response = client.usersChangedAfter(isoDate, 0, N);
         assertEquals(response.getStatus(), OK.getStatusCode());
