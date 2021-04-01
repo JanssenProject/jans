@@ -62,7 +62,11 @@ public class RawAuthenticationService {
 		byte[] signedBytes = packBytesToSign(signatureVerification.hash(appId), rawAuthenticateResponse.getUserPresence(),
 				rawAuthenticateResponse.getCounter(), signatureVerification.hash(rawClientData));
 		try {
-			signatureVerification.checkSignature(signatureVerification.decodePublicKey(publicKey), signedBytes, rawAuthenticateResponse.getSignature());
+			boolean isValid = signatureVerification.checkSignature(signatureVerification.decodePublicKey(publicKey),
+					signedBytes, rawAuthenticateResponse.getSignature());
+			if (!isValid) {
+				throw new BadInputException("Signature is not valid");
+			}
 		} catch (SignatureException ex) {
 			throw new BadInputException("Failed to checkSignature", ex);
 		}
