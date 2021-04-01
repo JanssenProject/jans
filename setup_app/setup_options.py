@@ -40,6 +40,7 @@ def get_setup_options():
             setupOptions['rdbm_install'] = True
             setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
             setupOptions['rdbm_type'] = base.argsp.remote_rdbm
+            setupOptions['rdbm_host'] = base.argsp.rdbm_host
 
         if base.argsp.local_rdbm:
             setupOptions['rdbm_install'] = True
