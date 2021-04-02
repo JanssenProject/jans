@@ -166,7 +166,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final JSONObject requestObject = parseRequestObjectWithoutValidation(requestParams);
             final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
             if (softwareStatement != null) {
-                log.info("Override request parameters by software_statement");
+                log.trace("Override request parameters by software_statement");
                 for (String key : softwareStatement.keySet()) {
                     requestObject.putOpt(key, softwareStatement.get(key));
                 }
@@ -182,7 +182,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
-            log.info("Registration request = {}", requestParams);
+            log.trace("Registration request = {}", requestParams);
 
             if (!appConfiguration.getDynamicRegistrationEnabled()) {
                 log.info("Dynamic client registration is disabled.");
