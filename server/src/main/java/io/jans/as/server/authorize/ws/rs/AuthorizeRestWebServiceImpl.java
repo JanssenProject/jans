@@ -202,13 +202,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         // ATTENTION : please do not add more parameter in this debug method because it will not work with Seam 2.2.2.Final ,
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
-        log.info("Attempting to request authorization: "
+        log.debug("Attempting to request authorization: "
                         + "responseType = {}, clientId = {}, scope = {}, redirectUri = {}, nonce = {}, "
                         + "state = {}, request = {}, isSecure = {}, requestSessionId = {}, sessionId = {}",
                 responseType, clientId, scope, redirectUri, nonce,
                 state, request, securityContext.isSecure(), requestSessionId, sessionId);
 
-        log.info("Attempting to request authorization: "
+        log.debug("Attempting to request authorization: "
                         + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}, "
                         + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims, tokenBindingHeader);
