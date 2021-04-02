@@ -6,27 +6,7 @@
 
 package io.jans.as.server.auth;
 
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import com.google.common.base.Strings;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -41,6 +21,23 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -66,18 +63,18 @@ public class MTLSService {
     private ErrorResponseFactory errorResponseFactory;
 
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain, Client client) throws Exception {
-        log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
+        log.info("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
 
         final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
         if (StringUtils.isBlank(clientCertAsPem)) {
-            log.debug("Client certificate is missed in `X-ClientCert` header, client_id: {}.", client.getClientId());
+            log.info("Client certificate is missed in `X-ClientCert` header, client_id: {}.", client.getClientId());
             return false;
         }
 
         X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
         if (cert == null) {
-            log.debug("Failed to parse client certificate, client_id: {}.", client.getClientId());
+            log.info("Failed to parse client certificate, client_id: {}.", client.getClientId());
             return false;
         }
         final String cn = CertUtils.getCN(cert);
@@ -90,7 +87,7 @@ public class MTLSService {
 
             final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
             if (StringUtils.isBlank(subjectDn)) {
-                log.debug(
+                log.info(
                         "SubjectDN is not set for client {} which is required to authenticate it via `tls_client_auth`.",
                         client.getClientId());
                 return false;
@@ -99,7 +96,7 @@ public class MTLSService {
             // we check only `subjectDn`, the PKI certificate validation is performed by
             // apache/httpd
             if (subjectDn.equals(cert.getSubjectDN().getName())) {
-                log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
+                log.info("Client {} authenticated via `tls_client_auth`.", client.getClientId());
                 authenticatedSuccessfully(client, httpRequest);
 
                 filterChain.doFilter(httpRequest, httpResponse);
@@ -116,7 +113,7 @@ public class MTLSService {
                     : new JSONObject(client.getJwks());
 
             if (jsonWebKeys == null) {
-                log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(),
+                log.info("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(),
                         client.getJwksUri(), client.getJwks());
                 return false;
             }
@@ -125,7 +122,7 @@ public class MTLSService {
             for (JSONWebKey key : keySet.getKeys()) {
                 if (ArrayUtils.isEquals(encodedKey,
                         cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
-                    log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
+                    log.info("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
                             client.getClientId(), key.getKid());
                     authenticatedSuccessfully(client, httpRequest);
 
