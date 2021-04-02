@@ -179,6 +179,26 @@ public abstract class LoggerService {
     }
 
     private void updateAppendersAndLogLevel(LoggingLayoutType loggingLayout, Level level) {
+        if (loggingLayout == LoggingLayoutType.TEXT) {
+            final LoggerContext ctx = LoggerContext.getContext(false);
+            ctx.reconfigure();
+            LoggerContext loggerContext = LoggerContext.getContext(false);
+
+            int count = 0;
+            for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
+                String loggerName = logger.getName();
+                if (loggerName.startsWith("org.gluu")) {
+                    if (logger.getLevel() != level) {
+                        count++;
+                        logger.setLevel(level);
+                    }
+                }
+            }
+
+            if (count > 0) {
+                log.info("Updated log level of '{}' loggers to {}", count, level.toString());
+            }
+        }
 //    	boolean runLoggersUpdate = false;
 //    	int loggerConfigUpdates = 0;
 //    	int appenderConfigUpdates = 0;
