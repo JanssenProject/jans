@@ -187,7 +187,7 @@ public abstract class LoggerService {
             int count = 0;
             for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
                 String loggerName = logger.getName();
-                if (loggerName.startsWith("org.gluu")) {
+                if (loggerName.startsWith("io.jans")) {
                     if (logger.getLevel() != level) {
                         count++;
                         logger.setLevel(level);
