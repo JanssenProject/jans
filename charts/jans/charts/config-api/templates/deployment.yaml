@@ -92,10 +92,10 @@ spec:
 {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
       volumes:
-      {{- if eq .Values.global.cnPersistenceType "sql" }}
-        - name: sql-pass
+      {{ if eq .Values.global.configSecretAdapter "google" }}
+        - name: google-secret-manager-sa
           secret:
-            secretName: {{ .Release.Name }}-sql-pass
+            secretName: {{ .Release.Name }}-google-secret-manager-sa
       {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass
