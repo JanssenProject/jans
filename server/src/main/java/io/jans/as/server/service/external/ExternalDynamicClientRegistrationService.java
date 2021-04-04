@@ -15,12 +15,14 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,11 +41,24 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		super(CustomScriptType.CLIENT_REGISTRATION);
 	}
 
-    public boolean executeExternalCreateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
+    public boolean executeExternalCreateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client, HttpServletRequest httpRequest) {
         try {
             log.trace("Executing python 'createClient' method");
             ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+            if (configurationAttributes != null)
+                configurationAttributes = new HashMap<>(configurationAttributes);
+            else
+                configurationAttributes = new HashMap<>();
+
+            final String cert = httpRequest.getHeader("X-ClientCert");
+
+            if (StringUtils.isNotBlank(cert)) {
+                SimpleCustomProperty certProperty = new SimpleCustomProperty();
+                certProperty.setValue1(cert);
+                configurationAttributes.put("certProperty", certProperty);
+            }
+
             return externalClientRegistrationType.createClient(registerRequest, client, configurationAttributes);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -53,11 +68,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         return false;
     }
 
-    public boolean executeExternalCreateClientMethods(RegisterRequest registerRequest, Client client) {
+    public boolean executeExternalCreateClientMethods(RegisterRequest registerRequest, Client client, HttpServletRequest httpRequest) {
         boolean result = true;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             if (customScriptConfiguration.getExternalType().getApiVersion() > 1) {
-                result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client);
+                result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client, httpRequest);
                 if (!result) {
                     return result;
                 }
