@@ -84,6 +84,7 @@ public class MTLSService {
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
+            log.debug("Authenticating with tls_client_auth ...");
 
             final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
             if (StringUtils.isBlank(subjectDn)) {
@@ -105,6 +106,7 @@ public class MTLSService {
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
+            log.debug("Authenticating with self_signed_tls_client_auth ...");
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();
 
@@ -131,6 +133,7 @@ public class MTLSService {
                 }
             }
         }
+        log.debug("MTLS authentication failed.");
         return false;
     }
 
