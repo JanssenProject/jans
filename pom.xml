@@ -193,7 +193,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
-			<version>8.20</version>
+			<version>8.21</version>
 		</dependency>
 
 		<!-- Karate -->
