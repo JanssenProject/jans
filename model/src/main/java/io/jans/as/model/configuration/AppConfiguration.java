@@ -18,6 +18,7 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -892,6 +893,16 @@ public class AppConfiguration implements Configuration {
 
     public Set<Set<ResponseType>> getResponseTypesSupported() {
         return responseTypesSupported;
+    }
+
+    public Set<ResponseType> getAllResponseTypesSupported() {
+        Set<ResponseType> types = new HashSet<>();
+        if (responseTypesSupported != null) {
+            for (Set<ResponseType> set : responseTypesSupported) {
+                types.addAll(set);
+            }
+        }
+        return types;
     }
 
     public void setResponseTypesSupported(Set<Set<ResponseType>> responseTypesSupported) {
