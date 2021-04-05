@@ -48,6 +48,12 @@ public class StringUtils {
         }
     }
 
+    public static boolean equalsIgnoringSpaces(String a, String b) {
+        if (a == null || b == null)
+            return false;
+        return a.replaceAll("\\s+","").equalsIgnoreCase(b.replaceAll("\\s+",""));
+    }
+
     /**
      * Method to join array elements of type string
      *
