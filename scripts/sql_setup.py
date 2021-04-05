@@ -125,6 +125,13 @@ class SQLBackend:
                 logger.warning(f"Failed to execute query; reason={exc.orig.args}")
         return result
 
+    def safe_quote(self, val):
+        if self.db_dialect == "mysql":
+            quote_char = '`'
+        else:
+            quote_char = '"'
+        return f"{quote_char}{val}{quote_char}"
+
     def create_tables(self, conn):
         schemas = {}
         attrs = {}
@@ -155,20 +162,20 @@ class SQLBackend:
             # make sure ``oc["may"]`` doesn't have duplicate attribute
             for attr in set(oc["may"]):
                 data_type = self.get_data_type(attr, table)
-                col_def = f"{attr} {data_type}"
+                col_def = f"{self.safe_quote(attr)} {data_type}"
                 table_cols.append(col_def)
                 self.table_columns[table].update({attr: data_type})
 
             doc_id_type = self.get_data_type("doc_id", table)
             mandatory_cols = [
-                f"doc_id {doc_id_type} NOT NULL UNIQUE",
-                "objectClass VARCHAR(48)",
-                "dn VARCHAR(128)",
+                f"{self.safe_quote('doc_id')} {doc_id_type} NOT NULL UNIQUE",
+                f"{self.safe_quote('objectClass')} VARCHAR(48)",
+                f"{self.safe_quote('dn')} VARCHAR(128)",
             ]
-            pk_cols = ["PRIMARY KEY (doc_id)"]
+            pk_cols = [f"PRIMARY KEY ({self.safe_quote('doc_id')})"]
             table_cols = mandatory_cols + table_cols + pk_cols
             table_cols_fmt = ", ".join(table_cols)
-            sql_cmd = f"CREATE TABLE {table} ({table_cols_fmt})"
+            sql_cmd = f"CREATE TABLE {self.safe_quote(table)} ({table_cols_fmt})"
 
             self.table_columns[table].update({
                 "doc_id": doc_id_type,
