@@ -6702,5 +6702,196 @@ Selection:
 
 ```
 
-6. **Updates user resources using operation mode**: This is an alternative option to update user resources. 
+6. **Updates user resources using operation mode**: This is an alternative option to update user resources. To use this option, you need to consider the following things: 
+
+    - **id**: an unique id of user resources
+    - **op**: one operation to be done from [add, remove, replace] 
+    - **path**: an attribute path where this operation to be done.
+    - **value**: any string type value to `add` or `replace`.
+
+This is an example to add `title` which `id: 18ca6089-42fb-410a-a5b5-c2631d75dc7d` 
+
+```
+Selection: 6
+
+«Entry to be patched. »
+id: 18ca6089-42fb-410a-a5b5-c2631d75dc7d
+
+«The kind of operation to perform. Type: string»
+op: add
+
+«Required when op is remove, optional otherwise. Type: string»
+path: title
+
+«Only required when op is add or replace. Type: string»
+value: Admin
+
+Patch another param? n
+[
+  {
+    "op": "add",
+    "path": "title",
+    "value": "Admin"
+  }
+]
+
+Continue? y
+Getting access token for scope https://jans.io/scim/users.write
+Please wait patching...
+
+{
+  "externalId": null,
+  "userName": "admin",
+  "name": {
+    "familyName": "User",
+    "givenName": "Admin",
+    "middleName": "Admin",
+    "honorificPrefix": null,
+    "honorificSuffix": null,
+    "formatted": "Admin Admin User"
+  },
+  "displayName": "Default Admin User",
+  "nickName": "Admin",
+  "profileUrl": null,
+  "title": "Admin",
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": true,
+  "password": null,
+  "emails": [
+    {
+      "value": "admin@testjans.gluu.com",
+      "display": null,
+      "type": null,
+      "primary": false
+    }
+  ],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": [
+    {
+      "value": "60B7",
+      "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
+      "display": "Jannsen Manager Group",
+      "type": "direct"
+    }
+  ],
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+  "meta": {
+    "resourceType": "User",
+    "created": null,
+    "lastModified": "2021-04-05T17:56:40.502Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+  }
+}
+
+Selection: 
+
+```
+
+### Group
+
+Group resources are used to organize user resources. These are the following options:
+
+```
+group
+-----
+1 Query Group resources (see section 3.4.2 of RFC 7644)
+2 Allows creating a Group resource via POST (see section 3.3 of RFC 7644)
+3 Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
+4 Updates a Group resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
+attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
+not passed in the payload will be left intact.
+
+5 Deletes a group resource (see section 3.6 of RFC 7644)
+6 Updates one or more attributes of a Group resource using a sequence of additions, removals, and 
+replacements operations. See section 3.5.2 of RFC 7644
+
+7 Query Group resources (see section 3.4.2 of RFC 7644)
+
+```
+
+  1. **Query Group Resources**: It shows all the group resources and its perspective user resources. To find list of resources with custom filter, it supports advanced search with few properties:
+
+    1. attributes
+    2. excludeattributes
+    3. filter
+    4. startindex
+    5. count
+
+This is an demo example where each of this properties skipped for default value:
+
+```
+Query Group resources (see section 3.4.2 of RFC 7644)
+-----------------------------------------------------
+
+«A comma-separated list of attribute names to return in the response. Type: string»
+attributes: 
+
+«When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list). Type: string»
+excludedAttributes: 
+
+«An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644. Type: string»
+filter: 
+
+«The 1-based index of the first query result. Type: integer»
+startIndex: 
+
+«Specifies the desired maximum number of query results per page. Type: integer»
+count: 
+
+«The attribute whose value will be used to order the returned responses. Type: string»
+sortBy: 
+
+«Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". Type: string»
+sortOrder: 
+Please wait while retreiving data ...
+
+Getting access token for scope https://jans.io/scim/groups.read
+{
+  "Resources": [
+    {
+      "displayName": "Jannsen Manager Group",
+      "members": [
+        {
+          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+          "type": "User",
+          "display": "Default Admin User",
+          "value": "18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+        }
+      ],
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Group"
+      ],
+      "id": "60B7",
+      "meta": {
+        "resourceType": "Group",
+        "created": null,
+        "lastModified": null,
+        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7"
+      }
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1
+}
+
+Selection: 
+
+```
 
