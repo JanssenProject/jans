@@ -17,10 +17,10 @@ Using IM is very simple and intuitive. Just make a selection and answer question
 
 ### Tips
 1. `_` is an escape character for IM mode. For example, you can create a list `["me", "you"]` by entering `me_,you`
-1. `_true` means boolean **True** instead of string `"true"`, similarly `_false` is boolean **False** instead of string `"false"`
-1. `_null` is comprehended as **None** (or in json **null**)
-1. `_x` exits the current process and go back to the parent menu
-1. `_q` refers to `quit`
+2. `_true` means boolean **True** instead of string `"true"`, similarly `_false` is boolean **False** instead of string `"false"`
+3. `_null` is comprehended as **None** (or in json **null**)
+4. `_x` exits the current process and go back to the parent menu
+5. `_q` refers to `quit`
 
 
 ### Attribute
@@ -2782,6 +2782,10 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
 Selection: 
 ```
 
+<!-- 
+
+(removed since sector identifier is depcreated and does not include in Janssen Server anymore)
+
 ### OpenD Connect - Sector Identifier
 
 Sector identifiers provide a way to group clients from the same adminstrative domain using pairwise subject identifiers. In this case, each client needs to be given the same pairwise ID for the person to maintain continuity across all the related websites
@@ -2989,6 +2993,7 @@ Selection:
 
 To delete an OpenID Connect Sector by its id, choose option 5 from the Sector Identifier Menu. Then enter `id` which one you are going to delete. Here, We are going to delete a Sector Identifier with `id:53337668-f721-4bc0-9d04-a249f38d0def`. press `y` for the confirmation. It will delete entry from the server.
 
+-->
 
 ### User Managed Access (UMA)
 
@@ -6197,13 +6202,14 @@ Selection:
 ```
 
 1. **Query User Resources**: Query User Resources presents all the user information and its attributes.  It supprts query with filter by a list of attributes:
-    - **attributes**: Use comma (,) for multiple attributes
-    - **excludeAttributes**: Use comma (,) for multiple attributes
-    - **filter**: an attribute with value to return as same type of resources
-    - **startIndex**: an integer value indicate a starting position
-    - **count**: an integer value define the maximum search results
-    - **sortBy**: sort list of search results by an attribute
-    - **sortOrder**: ['ascending', 'descending']
+
+    1. **attributes**: Use comma (,) for multiple attributes
+    2. **excludeAttributes**: Use comma (,) for multiple attributes
+    3. **filter**: an attribute with value to return as same type of resources
+    4. **startIndex**: an integer value indicate a starting position
+    5. **count**: an integer value define the maximum search results
+    6. **sortBy**: sort list of search results by an attribute
+    7. **sortOrder**: ['ascending', 'descending']
 
 A simple query where everything is skipped for default value. 
 
@@ -6343,7 +6349,7 @@ Selection:
       20 x509Certificates
       21 urn:ietf:params:scim:schemas:extension:gluu:2.0:User
 
-You can skip less important attributes if you want. Please see below to create an user. Please see below follow-up method to create an user.
+You can skip less important attributes if you want. Please see below follow-up method to create an user.
 
 ```
 
@@ -6676,7 +6682,7 @@ Selection:
 This is how you can update each of its attributes.
 
 
-5. **Delete an user resource**: If you want to delete an entry from user resources, you can do that thing easily using the Interatice Mode of Janssen CLI. To delete an user entry, you need to provide its `inum`. In our case: It's `id=7881ed5c-1dad-4265-9b74-ee6c3932c11f` which one are going to be deleted. After than it will ask for the confirmation, just enter 'y' to delete. Please see below result to better understand.
+5. **Delete an user resource**: If you want to delete an entry from user resources, you can do that thing easily using the Interatice Mode of Janssen CLI. To delete an user entry, you need to provide its `inum`. In our case: It's `id=7881ed5c-1dad-4265-9b74-ee6c3932c11f` which one are going to be deleted. After then, it will ask for the confirmation, just enter 'y' to delete. Please see below result to better understand.
 
 ```
 Selection: 5
@@ -6695,4 +6701,6 @@ Entry 7881ed5c-1dad-4265-9b74-ee6c3932c11f was deleted successfully
 Selection: 
 
 ```
+
+6. **Updates user resources using operation mode**: This is an alternative option to update user resources. 
 
