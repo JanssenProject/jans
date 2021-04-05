@@ -103,6 +103,8 @@ public class MTLSService {
                 filterChain.doFilter(httpRequest, httpResponse);
                 return true;
             }
+
+            log.debug("Client's subject dn: {}, cert subject dn: {}", subjectDn, cert.getSubjectDN().getName());
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
