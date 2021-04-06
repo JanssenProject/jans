@@ -3409,7 +3409,7 @@ To get all the attributes without any arguments, run the following command:
 To get attributes with passing the arguments, let's retrieve randomly limit:5:
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --enpoint-args limit:5
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
 ```
 
 It will return any 5 attributes randomly:
@@ -6160,10 +6160,24 @@ Calling with params limit=2
 ]
 ```
 
-## SCIM-CLI
+# SCIM-CLI
 
 SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema and the patterns for exchanging such schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving interoperability, security, and scalability in the context of identity management.
-**SCIM-CLI** which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity. 
+
+**SCIM-CLI** which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity. It supports both of the **_Interaction Mode_** and **_Command Line Mode_**.
+
+## Interaction Mode
+
+There are few things you should know before using the **_Menu-driven Interactive Mode_** of SCIM cli. 
+
+### Tips
+
+  1. _ is an escape character for IM mode. For example, you can create  a list ["me", "you"] by entering me_,you
+  2. _true means boolean True instead of string "true", similarly _false is boolean False instead of string "false"
+  3. _null is comprehended as None (or in json null)
+  4. _x exits the current process and go back to the parent menu
+  5. _q refers to quit
+
 
 Let's start with below command line:
 
@@ -6894,4 +6908,230 @@ Getting access token for scope https://jans.io/scim/groups.read
 Selection: 
 
 ```
+
+
+## Command Line Mode
+
+We will refer to this mode as **_CL_**. Using this mode is difficult compared to **_IM_**. There are few informations may help you to perform such operations using this mode.
+
+### Tips (CL)
+
+  1. `-h` or `--help` to get all the informtations of scim-cli (ex; `/opt/jans/jans-cli/scim-cli.py -h`)
+  2. `--info` to get some operations id for a specific taks (ex; `opt/jans/jans-cli/scim-cli.py --info User`)
+  3. `--operation-id` usage to operate each of the sub-task
+  4. `--endpoint-args` advanced usage for operation-id
+  5. `--data` usage to share data in operations
+
+These are the following task of SCIM Management. To get information for each of these task use the command line with task name:
+`/opt/jans/jans-cli/scim-cli.py --info [taks name]`
+
+  - Default
+  - Discovery
+  - Fido2Devices
+  - FidoDevices
+  - Group
+  - Search
+  - User
+
+### User
+
+The first thing is to do, Let's get some information for the following task:
+
+```
+/opt/jans/jans-cli/scim-cli.py --info User
+```
+
+In retrun,
+
+```
+root@testjans:~# /opt/jans/jans-cli/scim-cli.py --info User
+
+Operation ID: get-users
+  Description: Query User resources (see section 3.4.2 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  filter: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644 [string]
+  startIndex: The 1-based index of the first query result [integer]
+  count: Specifies the desired maximum number of query results per page [integer]
+  sortBy: The attribute whose value will be used to order the returned responses [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+Operation ID: create-user
+  Description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  Schema: /components/schemas/UserResource
+  Schema: /components/schemas/UserResource
+Operation ID: get-user-by-id
+  Description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+  url-suffix: id
+```
+
+  1. **_get-users_**: This operation is used to get list of the users and its properties. The command line is: `/opt/jans/jans-cli/scim-cli.py --operation-id get-users`. By default, This will return all of the users and their properties. 
+
+  ```
+  root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
+
+Getting access token for scope https://jans.io/scim/users.read
+{
+  "Resources": [
+    {
+      "externalId": null,
+      "userName": "admin",
+      "name": {
+        "familyName": "User",
+        "givenName": "Admin",
+        "middleName": "Admin",
+        "honorificPrefix": null,
+        "honorificSuffix": null,
+        "formatted": "Admin Admin User"
+      },
+      "displayName": "Default Admin User",
+      "nickName": "Admin",
+      "profileUrl": null,
+      "title": "MH Shakil",
+      "userType": null,
+      "preferredLanguage": null,
+      "locale": null,
+      "timezone": null,
+      "active": true,
+      "password": null,
+      "emails": [
+        {
+          "value": "admin@testjans.gluu.com",
+          "display": null,
+          "type": null,
+          "primary": false
+        }
+      ],
+      "phoneNumbers": null,
+      "ims": null,
+      "photos": null,
+      "addresses": null,
+      "groups": [
+        {
+          "value": "60B7",
+          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
+          "display": "Jannsen Manager Group",
+          "type": "direct"
+        }
+      ],
+      "entitlements": null,
+      "roles": null,
+      "x509Certificates": null,
+      "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+      "meta": {
+        "resourceType": "User",
+        "created": null,
+        "lastModified": "2021-04-06T18:39:54.087Z",
+        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+      }
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1
+}
+
+  ```
+
+It also supports parameters for the advanced search. Those parameters are:
+
+    1. attributes
+    2. excludeAttributes
+    3. filter
+    4. count
+    5. sortBy
+    6. sortOrder
+
+This is an example with `endpoint-args`:
+
+```
+/opt/jans/jans-cli/scim-cli.py --operation-id get-users --endpoint-args count:1
+```
+
+It returns as below:
+
+```
+Getting access token for scope https://jans.io/scim/users.read
+Calling with params count=1
+{
+  "Resources": [
+    {
+      "externalId": null,
+      "userName": "admin",
+      "name": {
+        "familyName": "User",
+        "givenName": "Admin",
+        "middleName": "Admin",
+        "honorificPrefix": null,
+        "honorificSuffix": null,
+        "formatted": "Admin Admin User"
+      },
+      "displayName": "Default Admin User",
+      "nickName": "Admin",
+      "profileUrl": null,
+      "title": "MH Shakil",
+      "userType": null,
+      "preferredLanguage": null,
+      "locale": null,
+      "timezone": null,
+      "active": true,
+      "password": null,
+      "emails": [
+        {
+          "value": "admin@testjans.gluu.com",
+          "display": null,
+          "type": null,
+          "primary": false
+        }
+      ],
+      "phoneNumbers": null,
+      "ims": null,
+      "photos": null,
+      "addresses": null,
+      "groups": [
+        {
+          "value": "60B7",
+          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
+          "display": "Jannsen Manager Group",
+          "type": "direct"
+        }
+      ],
+      "entitlements": null,
+      "roles": null,
+      "x509Certificates": null,
+      "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+      "meta": {
+        "resourceType": "User",
+        "created": null,
+        "lastModified": "2021-04-06T18:39:54.087Z",
+        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+      }
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1
+}
+
+```
+
+
+### Group
 
