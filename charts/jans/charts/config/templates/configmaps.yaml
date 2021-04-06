@@ -78,95 +78,94 @@ data:
 apiVersion: v1
 data:
   tls_generator.py: |-
-    from pprint import pprint
     from kubernetes import config, client
     import logging
 
-    #use the serviceAccount k8s gives to pods
+    log_format = '%(asctime)s - %(name)8s - %(levelname)5s - %(message)s'
+    logging.basicConfig(format=log_format, level=logging.INFO)
+    logger = logging.getLogger("tls-generator")
+
+    # use the serviceAccount k8s gives to pods
     config.load_incluster_config()
-    v1 = client.CoreV1Api()
+    core_cli = client.CoreV1Api()
 
-    #global vars
-    name = "tls-certificate"
-    namespace = {{ .Release.Namespace | quote }}
-
-    # if istio is enabled
-    istio_ns = {{ .Values.global.istio.namespace | quote }}
-
-    # create cert in istio-system
-    def create_tls_in_istio(cert, key):
-
-        v1 = client.CoreV1Api()
+    def patch_or_create_namespaced_secret(name, literal, value_of_literal, namespace="default",
+                                          secret_type="Opaque", second_literal=None, value_of_second_literal=None,
+                                          data=None):
+        """Patch secret and if not exist create
+        :param name:
+        :param literal:
+        :param value_of_literal:
+        :param namespace:
+        :param secret_type:
+        :param second_literal:
+        :param value_of_second_literal:
+        :param data:
+        :return:
+        """
+        # Instantiate the Secret object
+        body = client.V1Secret()
+        metadata = client.V1ObjectMeta(name=name)
+        body.data = data
+        if not data:
+            body.data = {literal: value_of_literal}
+        body.metadata = metadata
+        body.type = secret_type
+        if second_literal:
+            body.data = {literal: value_of_literal, second_literal: value_of_second_literal}
         try:
-            secret = v1.read_namespaced_secret(name, istio_ns)
+            core_cli.patch_namespaced_secret(name, namespace, body)
+            logger.info('Secret  {} in namespace {} has been patched'.format(name, namespace))
+            return
         except client.rest.ApiException as e:
-            if e.status == 404:
-                print('secret/{} in ns/{} does not exist. Creating...'.format(
-                    name, istio_ns))
-                metadata = {
-                    'name': name,
-                    'namespace': istio_ns
-                }
-                data = {
-                    'tls.crt': cert,
-                    'tls.key' : key,
-                }
-                api_version = 'v1'
-                kind = 'Secret'
-                body = client.V1Secret(api_version, data , kind, metadata,
-                    type='kubernetes.io/tls')
-                api_response = v1.create_namespaced_secret(istio_ns, body )
-            else:
-                logging.exception(e)
+            if e.status == 404 or not e.status:
+                try:
+                    core_cli.create_namespaced_secret(namespace=namespace, body=body)
+                    logger.info('Created secret {} of type {} in namespace {}'.format(name, secret_type, namespace))
+                    return True
+                except client.rest.ApiException as e:
+                    logger.exception(e)
+                    return False
+            logger.exception(e)
             return False
-        else:
-            print('tls-certificate already exists.')
 
+    # check if gluu secret exists
+    def get_certs(namespace):
+        """
 
-    # check if cn secret exists
-    def get_certs():
-        if ( v1.read_namespaced_secret( 'cn', namespace ) ):
-            ssl_cert = v1.read_namespaced_secret( 'cn', namespace ).data['ssl_cert']
-            ssl_key = v1.read_namespaced_secret( "cn", namespace ).data['ssl_key']
+        :param namespace:
+        :return:  ssl cert and key from gluu secrets
+        """
+        ssl_cert = None
+        ssl_key = None
+        if core_cli.read_namespaced_secret('gluu', namespace):
+            ssl_cert = core_cli.read_namespaced_secret('gluu', namespace).data['ssl_cert']
+            ssl_key = core_cli.read_namespaced_secret("gluu", namespace).data['ssl_key']
 
         return ssl_cert, ssl_key
 
-    def create_tls(cert, key):
-
-        v1 = client.CoreV1Api()
-        try:
-            secret = v1.read_namespaced_secret(name, namespace)
-        except client.rest.ApiException as e:
-            if e.status == 404:
-                print('secret/{} in ns/{} does not exist. Creating...'.format(
-                    name, namespace))
-                metadata = {
-                    'name': name,
-                    'namespace': namespace
-                }
-                data = {
-                    'tls.crt': cert,
-                    'tls.key' : key,
-                }
-                api_version = 'v1'
-                kind = 'Secret'
-                body = client.V1Secret(api_version, data , kind, metadata,
-                    type='kubernetes.io/tls')
-                api_response = v1.create_namespaced_secret(namespace, body )
-            else:
-                logging.exception(e)
-            return False
-        else:
-            print('tls-certificate already exists.')
 
     def main():
-        cert, key = get_certs()
-        create_tls(cert, key)
+        namespace = {{.Release.Namespace | quote}}
+        cert, key = get_certs(namespace)
+        # global vars
+        name = "tls-certificate"
 
-        # create or check cert if istio is enabled
-        {{- if .Values.global.istio.ingress }}
-        create_tls_in_istio(cert, key)
-        {{- end }}
+        # if istio is enabled
+        {{- if.Values.global.istio.ingress}}
+        namespace = {{.Values.global.istio.namespace | quote}}
+        {{- end}}
+
+        if cert and key:
+            patch_or_create_namespaced_secret(name=name,
+                                              namespace=namespace,
+                                              literal="tls.crt",
+                                              value_of_literal=cert,
+                                              secret_type="kubernetes.io/tls",
+                                              second_literal="tls.key",
+                                              value_of_second_literal=key)
+        else:
+            logger.error("No certificate or key was found in secrets.")
 
     if __name__ == "__main__":
         main()
