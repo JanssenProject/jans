@@ -93,17 +93,19 @@ public class ConfigSmtpResource extends BaseResource {
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS })
     public Response testSmtpConfiguration() throws EncryptionException {
-        log.debug("testSmtpConfiguration() - 1 - \n\n");
+        log.debug("\n ConfigSmtpResource::testSmtpConfiguration() - 1 - \n\n");
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
-        log.debug("testSmtpConfiguration() - 1 - smtpConfiguration = "+smtpConfiguration+"\n\n");
+        log.debug("\n ConfigSmtpResource::testSmtpConfiguration() - 1 - smtpConfiguration = "+smtpConfiguration+"\n\n");
         smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
         boolean result = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
                 smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                 "SMTP Configuration verification", "Mail to test smtp configuration",
                 "Mail to test smtp configuration");
+        log.debug("\n ConfigSmtpResource::testSmtpConfiguration() - 2 - result = "+result+"\n\n");
         JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add("service", "SMTP SERVER CONFIGURATION TEST");
         builder.add("status", result ? "OKAY" : "FAILED");
+        log.debug("\n ConfigSmtpResource::testSmtpConfiguration() - 3 - builder="+builder+"\n\n");
         return Response.ok(builder.build()).build();
     }
 
