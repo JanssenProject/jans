@@ -269,12 +269,23 @@ public class AppConfiguration implements Configuration {
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
 
+    private Boolean allowIdTokenWithoutImplicitGrantType;
+
     private int discoveryCacheLifetimeInMinutes = 60;
     private List<String> discoveryAllowedKeys;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+
+    public Boolean getAllowIdTokenWithoutImplicitGrantType() {
+        if (allowIdTokenWithoutImplicitGrantType == null) allowIdTokenWithoutImplicitGrantType = false;
+        return allowIdTokenWithoutImplicitGrantType;
+    }
+
+    public void setAllowIdTokenWithoutImplicitGrantType(Boolean allowIdTokenWithoutImplicitGrantType) {
+        this.allowIdTokenWithoutImplicitGrantType = allowIdTokenWithoutImplicitGrantType;
+    }
 
     public List<String> getDiscoveryAllowedKeys() {
         if (discoveryAllowedKeys == null) discoveryAllowedKeys = new ArrayList<>();
