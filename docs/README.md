@@ -3354,6 +3354,15 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 
 This is how we can execute single line command to get information about the Janssen Server. As we discussed on a specific task in the Interactive Mode, similarly we will discuss here using single line command to perform such operation.
 
+### Tips (CL)
+
+  1. `-h` or `--help` to get all the informtations of config-cli (ex; `/opt/jans/jans-cli/config-cli.py -h`)
+  2. `--info` to get some operations id for a specific taks (ex; `opt/jans/jans-cli/config-cli.py --info User`)
+  3. `--operation-id` usage to operate each of the sub-task
+  4. `--endpoint-args` advanced usage for operation-id
+  5. `--data` usage to share data in operations
+
+
 ### Attribute
 
 First thing, let's get the information for `Attribute`:
@@ -6164,9 +6173,9 @@ Calling with params limit=2
 
 SCIM is a specification designed to reduce the complexity of user management operations by providing a common user schema and the patterns for exchanging such schema using HTTP in a platform-neutral fashion. The aim of SCIM is achieving interoperability, security, and scalability in the context of identity management.
 
-**SCIM-CLI** which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity. It supports both of the **_Interaction Mode_** and **_Command Line Mode_**.
+**SCIM-CLI** which is going to help on performing such SCIM operations on the Janssen Server with ease and more readablity. It supports both of the **_Menu-driven Interactive Mode_** and **_Command Line Mode_**.
 
-## Interaction Mode
+## Menu-driven Interactive Mode
 
 There are few things you should know before using the **_Menu-driven Interactive Mode_** of SCIM cli. 
 
@@ -6814,6 +6823,100 @@ Selection:
 
 ```
 
+There is another example to update user resource on a sub-path:
+
+```
+Selection: 6
+
+«Entry to be patch
+id: 18ca6089-42fb-410a-a5b5-c2631d75dc7d
+
+«The kind of operation to perform. Type: string»
+op: replace
+
+«Required when op is remove, optional otherwise. Type: string»
+path: name/familyName
+
+«Only required when op is add or replace. Type: string»
+value: MH Shakil
+
+Patch another param? n
+[
+  {
+    "op": "replace",
+    "path": "name.familyName",
+    "value": "MH Shakil"
+  }
+]
+
+Continue? y
+Getting access token for scope https://jans.io/scim/users.write
+Please wait patching...
+
+{
+  "externalId": null,
+  "userName": "admin",
+  "name": {
+    "familyName": "MH Shakil",
+    "givenName": "Admin",
+    "middleName": "Admin",
+    "honorificPrefix": null,
+    "honorificSuffix": null,
+    "formatted": "Admin Admin User"
+  },
+  "displayName": "Default Admin User",
+  "nickName": "Admin",
+  "profileUrl": null,
+  "title": "MH Shakil",
+  "userType": null,
+  "preferredLanguage": null,
+  "locale": null,
+  "timezone": null,
+  "active": true,
+  "password": null,
+  "emails": [
+    {
+      "value": "admin@testjans.gluu.com",
+      "display": null,
+      "type": null,
+      "primary": false
+    }
+  ],
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": [
+    {
+      "value": "60B7",
+      "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
+      "display": "Jannsen Manager Group",
+      "type": "direct"
+    }
+  ],
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
+  "meta": {
+    "resourceType": "User",
+    "created": null,
+    "lastModified": "2021-04-07T17:57:11.250Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
+  }
+}
+
+Selection: 
+
+```
+
+**_Please note_**: you can use any of them between dot (.) and slash (/) to add a sub-path in the operation.
+
+
 ### Group
 
 Group resources are used to organize user resources. These are the following options:
@@ -6941,7 +7044,7 @@ The first thing is to do, Let's get some information for the following task:
 /opt/jans/jans-cli/scim-cli.py --info User
 ```
 
-In retrun,
+In retrun we get,
 
 ```
 root@testjans:~# /opt/jans/jans-cli/scim-cli.py --info User
@@ -6966,6 +7069,44 @@ Operation ID: create-user
 Operation ID: get-user-by-id
   Description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
   url-suffix: id
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+Operation ID: update-user-by-id
+  Description: Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
+attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
+not passed in the payload will be left intact.
+
+  url-suffix: id
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: /components/schemas/UserResource
+  Schema: /components/schemas/UserResource
+Operation ID: delete-user-by-id
+  Description: Deletes a user resource
+  url-suffix: id
+  Parameters:
+  id: Identifier of the resource to delete [string]
+Operation ID: patch-user-by-id
+  Description: Updates one or more attributes of a User resource using a sequence of additions, removals, and 
+replacements operations. See section 3.5.2 of RFC 7644
+
+  url-suffix: id
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: /components/schemas/PatchRequest
+  Schema: /components/schemas/PatchRequest
+Operation ID: search-user
+  Description: Query User resources (see section 3.4.2 of RFC 7644)
+  Schema: /components/schemas/SearchRequest
+  Schema: /components/schemas/SearchRequest
+
+To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema <schma>, for example /opt/jans/jans-cli/scim-cli.py 
 ```
 
   1. **_get-users_**: This operation is used to get list of the users and its properties. The command line is: `/opt/jans/jans-cli/scim-cli.py --operation-id get-users`. By default, This will return all of the users and their properties. 
@@ -7041,16 +7182,16 @@ Getting access token for scope https://jans.io/scim/users.read
   "itemsPerPage": 1
 }
 
-  ```
+```
 
 It also supports parameters for the advanced search. Those parameters are:
 
     1. attributes
     2. excludeAttributes
     3. filter
-    4. count
-    5. sortBy
-    6. sortOrder
+    4. count [define maximum number of query]
+    5. sortBy [attribute]
+    6. sortOrder ['ascending', 'descending']
 
 This is an example with `endpoint-args`:
 
@@ -7132,6 +7273,133 @@ Calling with params count=1
 
 ```
 
+2. **_`create_user`_**: This operation can be performed to create user resources. 
+
+```
+Operation ID: create-user
+  Description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  Schema: /components/schemas/UserResource
+```
+
+As we see, to perform this operation we need to define the schema. So, let's get the schema of this operation.
+
+```
+/opt/jans/jans-cli/scim-cli.py --schema /components/schemas/UserResource > /tmp/create-user.json
+```
+
+```
+root@testjans:~# cat /tmp/create-user.json
+
+
+{
+  "externalId": null,
+  "userName": null,
+  "name": {
+    "familyName": null,
+    "givenName": null,
+    "middleName": null,
+    "honorificPrefix": null,
+    "honorificSuffix": null,
+    "formatted": null
+  },
+  "displayName": null,
+  "nickName": null,
+  "profileUrl": null,
+  "title": "Vice President",
+  "userType": "Contractor",
+  "preferredLanguage": "en",
+  "locale": "en-US",
+  "timezone": "America/Los_Angeles",
+  "active": false,
+  "password": null,
+  "emails": {
+    "value": "gossow@nsfw.com",
+    "display": null,
+    "type": "work",
+    "primary": true
+  },
+  "phoneNumbers": {
+    "value": "+1-555-555-8377",
+    "display": null,
+    "type": "fax",
+    "primary": true
+  },
+  "ims": {
+    "value": null,
+    "display": null,
+    "type": "gtalk",
+    "primary": true
+  },
+  "photos": {
+    "value": "https://pics.nsfw.com/gossow.png",
+    "display": null,
+    "type": "thumbnail",
+    "primary": true
+  },
+  "addresses": {
+    "formatted": null,
+    "streetAddress": "56 Acacia Avenue",
+    "locality": null,
+    "region": null,
+    "postalCode": null,
+    "country": "UK",
+    "type": "home",
+    "primary": false
+  },
+  "groups": {
+    "value": "180ee84f0671b1",
+    "$ref": "https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1",
+    "display": "Cult managers",
+    "type": "direct"
+  },
+  "entitlements": {
+    "value": "Stakeholder",
+    "display": null,
+    "type": null,
+    "primary": false
+  },
+  "roles": {
+    "value": "Project manager",
+    "display": null,
+    "type": null,
+    "primary": false
+  },
+  "x509Certificates": {
+    "value": null,
+    "display": null,
+    "type": null,
+    "primary": true
+  },
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {},
+  "schemas": [],
+  "id": null,
+  "meta": {
+    "resourceType": null,
+    "created": null,
+    "lastModified": null,
+    "location": null
+  }
+}
+```
+Now it's pretty simple. Fill each of this information, you may skip some of this properties as well. If you look at the schema, some of the properties are already filled with some random value. You can modify them as well or ignore them.
+
+let's modify this schema:
+
+```
+nano /tmp/create-user.json
+```
+
+![](img/cl-scim-create-user.png)
+
+Finally use below command line, to create an user resources.
+
+```
+/opt/jans/jans-cli/scim-cli.py --operation-id create-user --data /tmp/create-user.json
+
+```
 
 ### Group
 
