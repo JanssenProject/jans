@@ -6,16 +6,16 @@
 
 package io.jans.as.server.model.authorize;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the authorize web service.
@@ -64,8 +64,9 @@ public class AuthorizeParamsValidator {
         return clientSupportedResponseTypes.containsAll(responseTypes);
     }
 
-    public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
+    public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, AppConfiguration appConfiguration) {
         List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+        final Set<GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
 
         if (responseTypes == null || grantTypesSupported == null) {
             return false;
@@ -76,7 +77,7 @@ public class AuthorizeParamsValidator {
                 return false;
             }
         }
-        if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
+        if (responseTypes.contains(ResponseType.TOKEN) || (responseTypes.contains(ResponseType.ID_TOKEN) && !appConfiguration.getAllowIdTokenWithoutImplicitGrantType())) {
             GrantType requestedGrantType = GrantType.IMPLICIT;
             if (!clientGrantTypes.contains(requestedGrantType) || !grantTypesSupported.contains(requestedGrantType)) {
                 return false;
