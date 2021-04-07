@@ -356,7 +356,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
+                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration);
 
             if (!isResponseTypeValid) {
                 throw new WebApplicationException(Response
