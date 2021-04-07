@@ -605,14 +605,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             responseTypeSet.add(io.jans.as.model.common.ResponseType.TOKEN);
         }
 
-        Set<Set<io.jans.as.model.common.ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
-        Set<io.jans.as.model.common.GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
-
-        if (!responseTypesSupported.contains(responseTypeSet)) {
-            responseTypeSet.clear();
-        }
-
-        grantTypeSet.retainAll(grantTypesSupported);
+        responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
+        grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
 
         Set<io.jans.as.model.common.GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
