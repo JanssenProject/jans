@@ -84,6 +84,7 @@ public class MTLSService {
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
+            log.debug("Authenticating with tls_client_auth ...");
 
             final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
             if (StringUtils.isBlank(subjectDn)) {
@@ -95,16 +96,19 @@ public class MTLSService {
 
             // we check only `subjectDn`, the PKI certificate validation is performed by
             // apache/httpd
-            if (subjectDn.equals(cert.getSubjectDN().getName())) {
+            if (io.jans.as.model.util.StringUtils.equalsIgnoringSpaces(subjectDn, cert.getSubjectDN().getName())) {
                 log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
                 authenticatedSuccessfully(client, httpRequest);
 
                 filterChain.doFilter(httpRequest, httpResponse);
                 return true;
             }
+
+            log.debug("Client's subject dn: {}, cert subject dn: {}", subjectDn, cert.getSubjectDN().getName());
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
+            log.debug("Authenticating with self_signed_tls_client_auth ...");
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();
 
@@ -131,6 +135,7 @@ public class MTLSService {
                 }
             }
         }
+        log.debug("MTLS authentication failed.");
         return false;
     }
 
