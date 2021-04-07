@@ -1340,7 +1340,7 @@ class JCA_CLI:
                 if 'parameters' in path:
                     param_names = []
                     for param in path['parameters']:
-                        desc = param['description']
+                        desc = param.get('description', 'No description is provided for this parameter')
                         param_type = param.get('schema', {}).get('type')
                         if param_type:
                             desc += ' [{}]'.format(param_type)
