@@ -1088,6 +1088,10 @@ class JCA_CLI:
             data = self.get_input_for_schema_(schema, model)
             if my_op_mode != 'scim' and not data.path.startswith('/'):
                 data.path = '/'+data.path
+
+            if my_op_mode == 'scim':
+                data.path = data.path.replace('/', '.')
+
             body.append(data)
             selection = self.get_input(text='Patch another param?', values=['y', 'n'])
             if selection == 'n':
