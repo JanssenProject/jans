@@ -34,8 +34,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-
-
 from ldap3.utils import hashed
 
 # Default charset
@@ -386,3 +384,51 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
 
     # paths to cert and key respectively
     return cert_file, key_file
+
+
+def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias=""):
+    """Generate Java keystore (JKS)."""
+
+    in_key = in_key or f"/etc/certs/{suffix}.key"
+    in_cert = in_cert or f"/etc/certs/{suffix}.crt"
+    jks_fn = jks_fn or f"/etc/certs/{suffix}.jks"
+    pkcs_fn = f"/etc/certs/{suffix}.pkcs12"
+    name = alias or hostname
+
+    # converts key to pkcs12
+    cmd = " ".join([
+        "openssl",
+        "pkcs12",
+        "-export",
+        f"-inkey {in_key}",
+        f"-in {in_cert}",
+        f"-out {pkcs_fn}",
+        f"-name {name}",
+        f"-passout pass:{keypasswd}",
+    ])
+    out, err, retcode = exec_cmd(cmd)
+    if retcode != 0:
+        err = err or out
+        raise RuntimeError(f"Failed to generate PKCS12 keystore {pkcs_fn}; reason={err.decode()}")
+
+    # imports p12 to keystore
+    cmd = [
+        "keytool",
+        "-importkeystore",
+        f"-srckeystore {pkcs_fn}",
+        f"-srcstorepass {keypasswd}",
+        "-srcstoretype PKCS12",
+        f"-destkeystore {jks_fn}",
+        f"-deststorepass {keypasswd}",
+        "-deststoretype JKS",
+        "-keyalg RSA",
+        "-noprompt",
+    ]
+    if alias:
+        cmd.append(f"-alias {alias}")
+    cmd = " ".join(cmd)
+
+    out, err, retcode = exec_cmd(cmd)
+    if retcode != 0:
+        err = err or out
+        raise RuntimeError(f"Failed to generate JKS keystore {jks_fn}; reason={err.decode()}")
