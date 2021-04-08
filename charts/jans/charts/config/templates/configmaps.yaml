@@ -6,6 +6,15 @@ metadata:
   name: {{ .Release.Name }}-config-cm
   namespace: {{ .Release.Namespace }}
 data:
+  # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
+  GOOGLE_APPLICATION_CREDENTIALS: {{ .Values.global.cnGoogleApplicationCredentials | quote }}
+  GOOGLE_PROJECT_ID: {{ .Values.configmap.cnGoogleProjectId | quote }}
+  CN_SECRET_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnSecretGoogleSecretVersionId | quote }}
+  CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE: {{ .Values.configmap.cnGoogleSecretManagerPassPhrase | quote }}
+  CN_SECRET_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnSecretGoogleSecretNamePrefix | quote }}
+  CN_CONFIG_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnConfigGoogleSecretVersionId | quote }}
+  CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnConfigGoogleSecretNamePrefix | quote }}
+  # [google_secret_manager_envs] END
   CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}
   CN_SQL_DB_HOST: {{ .Values.configmap.cnSqlDbHost }}
   CN_SQL_DB_PORT: {{ .Values.configmap.cnSqlDbPort | quote }}
@@ -13,8 +22,8 @@ data:
   CN_SQL_DB_USER: {{ .Values.configmap.cnSqlDbUser }}
   CN_SQL_DB_TIMEZONE: {{ .Values.configmap.cnSqlDbTimezone }}
   CN_SQL_PASSWORD_FILE: {{ .Values.configmap.cnSqlPasswordFile }}
-  CN_CONFIG_ADAPTER: {{ .Values.configmap.configAdapterName }}
-  CN_SECRET_ADAPTER: {{ .Values.configmap.configSecretAdapter }}
+  CN_CONFIG_ADAPTER: {{ .Values.global.configAdapterName }}
+  CN_SECRET_ADAPTER: {{ .Values.global.configSecretAdapter }}
   CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
   CN_SECRET_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
   CN_CONFIG_KUBERNETES_CONFIGMAP: {{ .Values.configmap.cnConfigKubernetesConfigMap }}
