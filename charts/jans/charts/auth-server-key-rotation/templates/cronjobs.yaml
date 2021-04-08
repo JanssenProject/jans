@@ -24,6 +24,11 @@ spec:
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               volumeMounts:
+              {{ if eq .Values.global.configSecretAdapter "google" }}
+              - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+                name: google-secret-manager-sa
+                subPath: google-credentials.json
+              {{- end }}
               {{- if eq .Values.global.cnPersistenceType "sql" }}
               - name: sql-pass
                 mountPath: "/etc/jans/conf/sql_password"
@@ -52,6 +57,11 @@ spec:
               {{- end }}
               args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
           volumes:
+          {{ if eq .Values.global.configSecretAdapter "google" }}
+            - name: google-secret-manager-sa
+              secret:
+                secretName: {{ .Release.Name }}-google-secret-manager-sa
+          {{- end }}
           {{- if eq .Values.global.cnPersistenceType "sql" }}
             - name: sql-pass
               secret:

@@ -24,6 +24,11 @@ spec:
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
+        {{ if eq .Values.global.configSecretAdapter "google" }}
+        - name: google-secret-manager-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-secret-manager-sa
+        {{- end }}
       containers:
       - name: {{ include "config.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -37,6 +42,11 @@ spec:
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py
+          {{ if eq .Values.global.configSecretAdapter "google" }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-secret-manager-sa
+            subPath: google-credentials.json
+          {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
