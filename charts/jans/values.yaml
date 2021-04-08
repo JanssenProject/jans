@@ -45,6 +45,7 @@ config:
   adminPassword: Test1234#
   city: Austin
   configmap:
+    cnAuthServerBackend: "auth-server:8080"
     cnSqlDbDialect: mysql
     cnSqlDbHost: my-release-mysql.default.svc.cluster.local
     cnSqlDbPort: 3306
@@ -53,7 +54,6 @@ config:
     cnSqlDbTimezone: UTC
     cnSqlPasswordFile: /etc/jans/conf/sql_password
     cnSqldbUserPassword: Test1234#
-    cnAuthServerBackend: "auth-server:8080"
     cnCacheType: NATIVE_PERSISTENCE
     cnClientApiAdminCertCn: client-api
     cnClientApiApplicationCertCn: client-api
@@ -71,6 +71,16 @@ config:
     cnCouchbaseSuperUserPasswordFile: /etc/jans/conf/couchbase_superuser_password
     cnCouchbaseUrl: cbjans.default.svc.cluster.local
     cnCouchbaseUser: jans
+    # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
+    # Base64 encode service account. The sa must have roles/secretmanager.admin
+    cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+    cnGoogleProjectId: google-project-to-save-config-and-secrets-to
+    cnSecretGoogleSecretVersionId: "latest"
+    cnSecretGoogleSecretNamePrefix: jans
+    cnGoogleSecretManagerPassPhrase: Test1234#
+    cnConfigGoogleSecretVersionId: "latest"
+    cnConfigGoogleSecretNamePrefix: jans
+    # [google_secret_manager_envs] END
     cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
     cnLdapUrl: "opendj:1636"
     cnMaxRamPercent: "75.0"
@@ -81,8 +91,6 @@ config:
     cnRedisUrl: "redis.redis.svc.cluster.local:6379"
     cnRedisUseSsl: false
     cnSecretKubernetesSecret: cn
-    configAdapterName: kubernetes
-    configSecretAdapter: kubernetes
     containerMetadataName: kubernetes
     lbAddr: ""
     ldapServiceName: opendj
@@ -149,6 +157,14 @@ global:
   cnPersistenceType: ldap
   config:
     enabled: true
+  #google/kubernetes
+  configAdapterName: kubernetes
+  #google/kubernetes
+  configSecretAdapter: kubernetes
+  # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
+  # Base64 encode service account. The sa must have roles/secretmanager.admin
+  cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
+  # [google_secret_manager_envs] END
   config-api:
     enabled: true
   fqdn: demoexample.jans.io

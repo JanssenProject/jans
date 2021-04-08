@@ -38,6 +38,11 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+        {{ if eq .Values.global.configSecretAdapter "google" }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-secret-manager-sa
+            subPath: google-credentials.json
+        {{- end }}
         {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
           - name: cb-pass
             mountPath: "/etc/jans/conf/couchbase_password"
@@ -57,6 +62,11 @@ spec:
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
       volumes:
+      {{ if eq .Values.global.configSecretAdapter "google" }}
+        - name: google-secret-manager-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-secret-manager-sa
+      {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
         - name: cb-pass
           secret:
