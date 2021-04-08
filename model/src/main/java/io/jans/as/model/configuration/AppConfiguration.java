@@ -185,6 +185,7 @@ public class AppConfiguration implements Configuration {
     private String keyStoreSecret;
     private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
     private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
+    private Boolean keySignWithSameKeyButDiffAlg; // https://github.com/JanssenProject/jans-auth-server/issues/95
 
     //oxEleven
     private String oxElevenTestModeToken;
@@ -312,6 +313,15 @@ public class AppConfiguration implements Configuration {
 
     public void setKeySelectionStrategy(KeySelectionStrategy keySelectionStrategy) {
         this.keySelectionStrategy = keySelectionStrategy;
+    }
+
+    public Boolean getKeySignWithSameKeyButDiffAlg() {
+        if (keySignWithSameKeyButDiffAlg == null) keySignWithSameKeyButDiffAlg = false;
+        return keySignWithSameKeyButDiffAlg;
+    }
+
+    public void setKeySignWithSameKeyButDiffAlg(Boolean keySignWithSameKeyButDiffAlg) {
+        this.keySignWithSameKeyButDiffAlg = keySignWithSameKeyButDiffAlg;
     }
 
     public List<String> getKeyAlgsAllowedForGeneration() {
