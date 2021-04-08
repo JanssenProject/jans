@@ -24,6 +24,11 @@ spec:
       {{- end }}
     spec:
       volumes:
+      {{ if eq .Values.global.configSecretAdapter "google" }}
+        - name: google-secret-manager-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-secret-manager-sa
+      {{- end }}
       {{- if .Values.multiCluster.enabled }}
         - name: serfkey
           secret:
@@ -63,6 +68,11 @@ spec:
             name: {{ $key }}
         {{- end }}
         volumeMounts:
+        {{ if eq .Values.global.configSecretAdapter "google" }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-secret-manager-sa
+            subPath: google-credentials.json
+        {{- end }}
         {{- range $key, $values := .Values.volumeMounts }}
           - mountPath: {{$values.mountPath}}
             name: {{$values.name}}

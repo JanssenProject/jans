@@ -44,6 +44,11 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+        {{ if eq .Values.global.configSecretAdapter "google" }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-secret-manager-sa
+            subPath: google-credentials.json
+        {{- end }}
         {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
           - name: {{ include "auth-server.fullname" .}}-updatelbip
             mountPath: "/scripts"
@@ -94,6 +99,11 @@ spec:
         - {{ .Values.global.fqdn }}
       {{- end }}
       volumes:
+      {{ if eq .Values.global.configSecretAdapter "google" }}
+        - name: google-secret-manager-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-secret-manager-sa
+      {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass
           secret:
