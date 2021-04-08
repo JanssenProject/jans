@@ -49,9 +49,7 @@ configmap:
   # options REDIS/NATIVE_PERSISTENCE
   cnCacheType: NATIVE_PERSISTENCE
   cnMaxRamPercent: "75.0"
-  configAdapterName: kubernetes
   containerMetadataName: kubernetes
-  configSecretAdapter: kubernetes
   # If REDIS is the Cache Type or if going to be used with clientApi
   cnRedisUrl: redis:6379
   cnRedisUseSsl: "false"

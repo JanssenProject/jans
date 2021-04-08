@@ -3,135 +3,212 @@
 	"type": "object",
 	"properties": {
 		"auth-server": {
+			"description": "OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.",
 			"type": "object",
 			"properties": {}
 		},
 		"auth-server-key-rotation": {
+			"description": "Responsible for regenerating auth-keys per x hours",
 			"type": "object",
 			"properties": {}
 		},
 		"casa": {
+			"description": "Gluu Casa (\"Casa\") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server.",
 			"type": "object",
 			"properties": {}
 		},
 		"client-api": {
+			"description": "Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.",
 			"type": "object",
 			"properties": {}
 		},
 		"config": {
+			"description": "Configuration parameters for setup",
 			"type": "object",
 			"properties": {
 				"adminPass": {
+					"description": "Admin password to login to the UI",
 					"$ref": "#/definitions/password"
 				},
 				"city": {
+					"description": "City of the company or individual. Used in generating the self-signed certificate",
 					"type": "string",
 					"pattern": "^[a-zA-Z]+$"
 				},
 				"configmap": {
+					"description": "Configuration parameters mapped to envs in a ConfigMap",
 					"type": "object",
 					"properties": {
 						"cnAuthServerBackend": {
+							"description": "Auth Server backend address",
 							"type": "string",
 							"pattern": "^[a-z0-9-:]+$"
 						},
 						"cnSqlDbDialect": {
+							"description": "SQL dialect",
 							"type": "string",
 							"pattern": "^(mysql)$"
 						},
 						"cnSqlDbHost": {
-							"$ref": "#/definitions/url-pattern"
+							"description": "SQL server address or ip",
+							"anyOf": [
+								{"$ref": "#/definitions/url-pattern"},
+								{"$ref": "#/definitions/ip-pattern"}
+							]
 						},
 						"cnSqlDbPort": {
+							"description": "SQL server port",
 							"type": "integer"
 						},
 						"cnSqlDbName": {
+							"description": "SQL server database name for Jans",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnSqlDbUser": {
+							"description": "SQL server Jans username",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnSqlDbTimezone": {
+							"description": "SQL server timezone",
 							"type": "string",
 							"pattern": "^(GMT|UTC|ECT|EET|ART|EAT|MET|NET|PLT|IST|BST|VST|CTT|JST|ACT|AET|SST|NST|MIT|HST|AST|PST|PNT|MST|CST|EST|IET|PRT|CNT|AGT|BET|CAT)$"
 						},
 						"cnSqlPasswordFile": {
+							"description": "SQL server password file location. This file path must end with sql_password",
 							"type": "string",
 							"pattern": ".*sql_password\\b.*"
 						},
+						"cnSqldbUserPassword": {
+							"description": "Password for user config.configmap.cnSqlDbUser.",
+							"$ref": "#/definitions/password"
+						},
 						"cnCacheType": {
+							"description": "Cache type. NATIVE_PERSISTENCE, REDIS. or IN_MEMORY. Defaults to NATIVE_PERSISTENCE",
 							"type": "string",
 							"pattern": "^(NATIVE_PERSISTENCE|REDIS|IN_MEMORY)$"
 						},
 						"cnCasaEnabled": {
+							"description": "Enable Casa. Gluu Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server.",
 							"type": "boolean"
 						},
 						"cnClientApiAdminCertCn": {
+							"description": "Client-api OAuth client admin certificate common name. This should be left to the default value client-api",
 							"type": "string",
 							"pattern": "^[a-z-]+$"
 						},
 						"cnClientApiApplicationCertCn": {
+							"description": "client-api OAuth client application certificate common name. This should be left to the default value client-api",
 							"type": "string",
 							"pattern": "^[a-z-]+$"
 						},
 						"cnClientApiBindIpAddresses": {
+							"description": "client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy",
 							"$ref": "#/definitions/ip-pattern"
 						},
 						"cnClientApiServerUrl": {
+							"description": "client-api Oauth client address. This should be left intact in kubernetes as it uses the internal address format. ",
 							"type": "string",
 							"pattern": "^[a-z0-9-:]+$"
 						},
 						"cnConfigKubernetesConfigMap": {
+							"description": "The name of the ConfigMap that will hold the configuration layer",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnCouchbaseBucketPrefix": {
+							"description": "The prefix of couchbase buckets. This helps with seperation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnCouchbaseCertFile": {
+							"description": "Location of `couchbase.crt` used by Couchbase SDK for tls termination. The file path must end with couchbase.crt. In mTLS setups this is not required.",
 							"type": "string",
 							"pattern": ".*couchbase.crt\\b.*"
 						},
 						"cnCouchbaseCrt": {
+							"description": "Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.",
 							"type": "string",
 							"pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
 						},
 						"cnCouchbaseIndexNumReplica": {
+							"description": "The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.",
 							"type": "integer"
 						},
 						"cnCouchbasePass": {
+							"description": "Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol ",
 							"$ref": "#/definitions/password"
 						},
-						"cnCouchbasePassFile": {
+						"cnCouchbasePasswordFile": {
+							"description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseUser password. The file path must end with couchbase_password",
 							"type": "string",
 							"pattern": ".*couchbase_password\\b.*"
 						},
 						"cnCouchbaseSuperUser": {
+							"description": "The Couchbase super user (admin) user name. This user is used during initialization only.",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnCouchbaseSuperUserPass": {
+							"description": "Couchbase password for the super user config.configmap.cnCouchbaseSuperUser  that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol ",
 							"$ref": "#/definitions/password"
 						},
 						"cnCouchbaseSuperUserPassFile": {
+							"description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password",
 							"type": "string",
 							"pattern": ".*couchbase_superuser_password\\b.*"
 						},
 						"cnCouchbaseUrl": {
+							"description": "Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster",
 							"$ref": "#/definitions/fqdn-pattern"
 						},
 						"cnCouchbaseUser": {
+							"description": "Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.",
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnGoogleSecretManagerServiceAccount": {
+							"description": "Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"type": "string",
+							"pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+						},
+						"cnGoogleProjectId": {
+							"description": "project id of the google project the secret manager belongs to. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"type": "string",
+							"pattern": ""
+						},
+						"cnSecretGoogleSecretVersionId": {
+							"description": "Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"type": "string",
+							"pattern": "^([0-9]|latest)*$"
+						},
+						"cnSecretGoogleSecretNamePrefix": {
+							"description": "Prefix for Janssen secret in Google Secret Manager. Defaults to jans. If left jans-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"type": "string",
+							"pattern": "^[a-z]+$"
+						},
+						"cnGoogleSecretManagerPassPhrase": {
+							"description": "Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"$ref": "#/definitions/password"
+						},
+						"cnConfigGoogleSecretVersionId": {
+							"description": "Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
+							"type": "string",
+							"pattern": "^([0-9]|latest)*$"
+						},
+						"cnConfigGoogleSecretNamePrefix": {
+							"description": "Prefix for Janssen configuration secret in Google Secret Manager. Defaults to jans. If left intact jans-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
 						"cnDocumentStoreType": {
+							"description": "Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily.",
 							"type": "string",
 							"pattern": "^(LOCAL|JCA)$"
 						},
 						"cnJackrabbitAdminId": {
+							"description": "",
 							"type": "string",
 							"pattern": "^[a-z]+$"
 						},
@@ -224,14 +301,6 @@
 						},
 						"cnSyncShibManifests": {
 							"type": "boolean"
-						},
-						"configAdapterName": {
-							"type": "string",
-							"pattern": "^(kubernetes)$"
-						},
-						"configSecretAdapter": {
-							"type": "string",
-							"pattern": "^(kubernetes)$"
 						},
 						"containerMetadataName": {
 							"type": "string",
@@ -390,6 +459,18 @@
 							"type": "boolean"
 						}
 					}
+				},
+				"configAdapterName": {
+					"type": "string",
+					"pattern": "^(kubernetes|google)$"
+				},
+				"configSecretAdapter": {
+					"type": "string",
+					"pattern": "^(kubernetes|google)$"
+				},
+				"cnGoogleApplicationCredentials": {
+					"type": "string",
+					"pattern": ".*google-credentials.json\\b.*"
 				},
 				"config-api": {
 					"type": "object",
@@ -699,7 +780,7 @@
 					"type": "string",
 					"pattern": "^(\\*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$",
 					"errors": {
-						"pattern": "Not a valid IP. You may place "
+						"pattern": "Not a valid IP."
 					}
 				},
 				{
