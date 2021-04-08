@@ -6,21 +6,21 @@
 
 package io.jans.as.server.service;
 
-import java.security.KeyStoreException;
-import java.security.PrivateKey;
-
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
-import org.msgpack.core.Preconditions;
-
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.msgpack.core.Preconditions;
+
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -45,6 +45,17 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
             if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
                 return null;
             }
+
+            if (configurationFactory.getAppConfiguration().getKeySignWithSameKeyButDiffAlg()) { // open banking: same key with different algorithms
+                LOG.trace("Getting key by use: " + use);
+                for (JSONWebKey key : jsonWebKeySet.getKeys()) {
+                    if (use != null && use == key.getUse()) {
+                        LOG.trace("Found " + key.getKid() + ", use: " + use);
+                        return key.getKid();
+                    }
+                }
+            }
+
             final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
             if (!cryptoProvider.getKeys().contains(kid) && configurationFactory.reloadConfFromLdap()) {
                 return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
