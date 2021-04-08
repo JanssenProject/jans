@@ -12,7 +12,8 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import as_boolean
+# from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import generate_keystore
 
 manager = get_manager()
 
@@ -126,8 +127,32 @@ def main():
     modify_jetty_xml()
     modify_webdefault_xml()
 
-    sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
-    if not sync_enabled:
+    ext_jwks_uri = os.environ.get("CN_EXT_SIGNING_JWKS_URI", "")
+
+    if ext_jwks_uri:
+        ext_cert = "/etc/certs/ext-signing.crt"
+        ext_key = "/etc/certs/ext-signing.key"
+        alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "")
+
+        cert_to_truststore(
+            alias,
+            ext_cert,
+            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "changeit",
+        )
+
+        generate_keystore(
+            "ext-signing",
+            manager.config.get("hostname"),
+            manager.secret.get("auth_openid_jks_pass"),
+            jks_fn="/etc/certs/ext-signing.jks",
+            in_key=ext_key,
+            in_cert=ext_cert,
+            alias=alias,
+        )
+    else:
+        # sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
+        # if not sync_enabled:
         manager.secret.to_file(
             "auth_jks_base64",
             "/etc/certs/auth-keys.jks",
