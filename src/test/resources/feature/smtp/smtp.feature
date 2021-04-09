@@ -42,8 +42,7 @@ Feature: Configure SMTP server
 	Then status 204
 	And print response
 	
-    
-    @ignore
+       
     @test-smtp-config
     Scenario: Get SMTP server details    
     Given url  mainUrl +'/test'
