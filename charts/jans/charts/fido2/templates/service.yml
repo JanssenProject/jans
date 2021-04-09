@@ -12,7 +12,7 @@ spec:
   type: NodePort
   {{- end }}
   ports:
-  - port: {{ .Values.ports.containerPort }}
+  - port: {{ .Values.service.port }}
     name: {{ .Values.service.name }}
   selector:
     app: {{ include "fido2.name" . }} #fido2

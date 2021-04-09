@@ -556,6 +556,10 @@
 						}
 					}
 				},
+				"distribution": {
+					"type": "string",
+					"pattern": "^(default|openbanking)$"
+				},
 				"persistence": {
 					"type": "object",
 					"properties": {
@@ -815,6 +819,13 @@
 				"service"
 			],
 				"properties": {
+				"dnsPolicy": {
+					"type": "string",
+					"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+				},
+				"dnsConfig": {
+					"type": "object"
+				},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -899,6 +910,13 @@
 				"properties": {
 					"auth-server-key-rotation": {
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 							"image": {
 								"type": "object",
 								"properties": {
@@ -988,6 +1006,13 @@
 							"service"
 						],
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 							"image": {
 					"type": "object",
 					"properties": {
@@ -1080,6 +1105,13 @@
 							"service"
 						],
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 							"image": {
 								"type": "object",
 								"properties": {
@@ -1173,6 +1205,13 @@
 						],
 			"type": "object",
 			"properties": {
+				"dnsPolicy": {
+					"type": "string",
+					"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+				},
+				"dnsConfig": {
+					"type": "object"
+				},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1259,6 +1298,13 @@
 				"properties": {
 					"cr-rotate": {
 			"properties": {
+				"dnsPolicy": {
+					"type": "string",
+					"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+				},
+				"dnsConfig": {
+					"type": "object"
+				},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1347,6 +1393,13 @@
 						],
 						"type": "object",
 						"properties": {
+				"dnsPolicy": {
+					"type": "string",
+					"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+				},
+				"dnsConfig": {
+					"type": "object"
+				},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1440,6 +1493,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1662,6 +1722,13 @@
 						],
 						"type": "object",
 						"properties": {
+				"dnsPolicy": {
+					"type": "string",
+					"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+				},
+				"dnsConfig": {
+					"type": "object"
+				},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1888,6 +1955,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -1982,6 +2056,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -2074,6 +2155,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -2156,6 +2244,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {
@@ -2250,6 +2345,13 @@
 						],
 						"type": "object",
 						"properties": {
+							"dnsPolicy": {
+								"type": "string",
+								"pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
+							},
+							"dnsConfig": {
+								"type": "object"
+							},
 				"image": {
 					"type": "object",
 					"properties": {

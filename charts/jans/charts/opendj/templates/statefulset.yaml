@@ -23,6 +23,11 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       volumes:
       {{ if eq .Values.global.configSecretAdapter "google" }}
         - name: google-secret-manager-sa
@@ -87,23 +92,9 @@ spec:
             subPath: serf-peers-static.json
         {{- end }}
         livenessProbe:
-          exec:
-            command:
-            - python3
-            - /app/scripts/healthcheck.py
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 5
-          failureThreshold: 20
+{{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
-          exec:
-            command:
-            - python3
-            - /app/scripts/healthcheck.py
-          initialDelaySeconds: 25
-          timeoutSeconds: 5
-          periodSeconds: 25
-          failureThreshold: 20
+{{- toYaml .Values.readinessProbe | nindent 10 }}
         {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
         resources: {}
         {{- else if .Values.global.cloud.testEnviroment }}

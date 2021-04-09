@@ -1,4 +1,6 @@
 auth-server:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/auth-server
@@ -14,6 +16,8 @@ auth-server:
   service:
     authServerServiceName: auth-server
 auth-server-key-rotation:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/certmanager
@@ -27,6 +31,8 @@ auth-server-key-rotation:
       cpu: 300m
       memory: 300Mi
 client-api:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/client-api
@@ -111,6 +117,8 @@ config:
       memory: 300Mi
   state: TX
 config-api:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/config-api
@@ -126,6 +134,8 @@ config-api:
   service:
     configApiServerServiceName: config-api
 fido2:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/fido2
@@ -169,9 +179,9 @@ global:
     enabled: true
   fqdn: demoexample.jans.io
   fido2:
-    enabled: true
+    enabled: false
   gcePdStorageType: pd-standard
-  isFqdnRegistered: "false"
+  isFqdnRegistered: false
   istio:
     enabled: false
     ingress: false
@@ -181,10 +191,11 @@ global:
     enabled: true
   opendj:
     enabled: true
+  distribution: default
   persistence:
     enabled: true
   scim:
-    enabled: true
+    enabled: false
   storageClass:
     allowVolumeExpansion: true
     allowedTopologies: []
@@ -223,6 +234,8 @@ nginx-ingress:
       hosts:
       - demoexample.jans.io
 opendj:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: gluufederation/opendj
@@ -278,6 +291,8 @@ opendj:
   service:
     ldapServiceName: opendj
 persistence:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/persistence-loader
@@ -290,6 +305,8 @@ persistence:
       cpu: 300m
       memory: 300Mi
 scim:
+  dnsPolicy: ""
+  dnsConfig: {}
   image:
     pullPolicy: Always
     repository: janssenproject/scim
