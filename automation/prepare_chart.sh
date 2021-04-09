@@ -2,7 +2,7 @@
 set -e
 
 mkdir -p /home/runner/work/test
-git clone https://github.com/GluuFederation/cloud-native-edition.git /home/runner/work/test/
+git clone --recursive --depth 1 --branch master https://github.com/GluuFederation/cloud-native-edition.git /home/runner/work/test/
 temp_chart_folder="/home/runner/work/test/pygluu/kubernetes/templates/helm/gluu/charts"
 
 services="casa cr-rotate jackrabbit oxpassport oxshibboleth oxtrust radius"
