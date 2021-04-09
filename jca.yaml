@@ -1336,19 +1336,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: SMTP configuration test status.
-                properties:
-                  service:
-                    description: Service name.
-                    type: string
-                    example: SMTP SERVER CONFIGURATION TEST
-                  status:
-                    description: Status of SMTP server connection test.
-                    type: string
-                    enum: 
-                    - OKAY
-                    - FAILED
+                type: boolean
+                description: SMTP test status true if email sent is successful.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
