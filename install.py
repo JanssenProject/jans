@@ -36,11 +36,11 @@ for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
         os.makedirs(d)
 
 parser = argparse.ArgumentParser(description="This script downloads Janssen Server components and fires setup")
-parser.add_argument('-u', help="Use downloaded components", action='store_true')
+parser.add_argument('-u', help="Use already downloaded components", action='store_true')
 parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
 parser.add_argument('-uninstall', help="Uninstall Jans server and removes all files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
-parser.add_argument('--keep-downloads', help="Keep downloaded files", action='store_true')
+parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 
 argsp = parser.parse_args()
 
