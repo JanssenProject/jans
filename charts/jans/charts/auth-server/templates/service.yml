@@ -12,8 +12,8 @@ spec:
   type: NodePort
   {{- end }}
   ports:
-  - port: {{ .Values.ports.containerPort }}
-    name: http-auth-server
+  - port: {{ .Values.service.port }}
+    name: {{ .Values.service.name }}
   selector:
     app: {{ include "auth-server.name" . }} #auth-server
     

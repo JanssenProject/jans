@@ -1,15 +1,6 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 # Required environment variables for generating Janssen server initial config
-
-cnSqlDbDialect: mysql
-cnSqlDbHost: my-release-mysql.default.svc.cluster.local
-cnSqlDbPort: 3306
-cnSqlDbName: jans
-cnSqlDbUser: root
-cnSqlDbTimezone: UTC
-cnSqlPasswordFile: /etc/jans/conf/sql_password
-cnSqldbUserPassword: Test1234#
 #values for environment variables
 orgName: Janssen
 # email address of the administrator usually. Used for certificate creation
@@ -28,6 +19,14 @@ city: SLC
 cnLdapInit: true
 cnLdapInitPort: 1636
 configmap:
+  cnSqlDbDialect: mysql
+  cnSqlDbHost: my-release-mysql.default.svc.cluster.local
+  cnSqlDbPort: 3306
+  cnSqlDbName: jans
+  cnSqlDbUser: root
+  cnSqlDbTimezone: UTC
+  cnSqlPasswordFile: /etc/jans/conf/sql_password
+  cnSqldbUserPassword: Test1234#
   cnConfigKubernetesConfigMap: cn
   cnSecretKubernetesSecret: cn
   cnClientApiApplicationCertCn: client-api
