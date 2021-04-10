@@ -1093,7 +1093,7 @@ class JCA_CLI:
                 data.path = data.path.replace('/', '.')
 
             body.append(data)
-            selection = self.get_input(text='Patch another param?', values=['y', 'n'])
+            selection = self.get_input(text='Another patch operation?', values=['y', 'n'])
             if selection == 'n':
                 break
 
