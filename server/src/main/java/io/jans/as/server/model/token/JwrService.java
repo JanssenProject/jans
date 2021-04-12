@@ -6,21 +6,7 @@
 
 package io.jans.as.server.model.token;
 
-import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
-
-import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import com.google.common.base.Function;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -42,6 +28,17 @@ import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.ServerCryptoProvider;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+
+import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -130,14 +127,13 @@ public class JwrService {
 
     public io.jans.as.model.token.JsonWebResponse createJwr(Client client) {
         try {
-            if (client.getIdTokenEncryptedResponseAlg() != null
-                    && client.getIdTokenEncryptedResponseEnc() != null) {
+            KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseAlg());
+            BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseEnc());
+
+            if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
                 Jwe jwe = new Jwe();
 
-                // Header
-                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseAlg());
-                BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseEnc());
-                jwe.getHeader().setType(JwtType.JWT);
+                jwe.getHeader().setType(JwtType.JWT); // Header
                 jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
                 jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
                 return jwe;
@@ -146,7 +142,7 @@ public class JwrService {
                 return jwtSigner.newJwt();
             }
         } catch (Exception e) {
-            log.error("Failed to create logout_token.", e);
+            log.error("Failed to create token.", e);
             return null;
         }
     }
