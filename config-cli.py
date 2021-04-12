@@ -1002,7 +1002,7 @@ class JCA_CLI:
                     fields_numbers.append(str(i+1))
 
                 while True:
-                    optional_selection = self.get_input(values=['q','c']+fields_numbers, help_text="c: continue, #: populate filed")
+                    optional_selection = self.get_input(values=['q','c']+fields_numbers, help_text="c: continue, #: populate field")
                     if optional_selection == 'c':
                         break
                     if optional_selection in fields_numbers:
@@ -1204,23 +1204,23 @@ class JCA_CLI:
 
             attr_name_list.sort()
             item_numbers = []
-            def print_fileds():
+            def print_fields():
                 print("Fields:")
                 for i, attr_name in enumerate(attr_name_list):
                     print(str(i+1).rjust(2), attr_name)
                     item_numbers.append(str(i+1))
 
-            print_fileds()
+            print_fields()
             changed_items = []
             selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
-            help_text = 'q: quit, v: view, s: save, l: list fields #: update filed'
+            help_text = 'q: quit, v: view, s: save, l: list fields #: update fieled'
 
             while True:
                 selection = self.get_input(values=selection_list, help_text=help_text)
                 if selection == 'v':
                     self.pretty_print(self.unmap_model(cur_model))
                 elif selection == 'l':
-                    print_fileds()
+                    print_fields()
                 elif selection in item_numbers:
                     item = attr_name_list[int(selection)-1]
                     item_unmapped = self.get_model_key_map(cur_model, item)
