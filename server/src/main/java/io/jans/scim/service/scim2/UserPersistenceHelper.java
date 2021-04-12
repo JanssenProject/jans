@@ -88,6 +88,7 @@ public class UserPersistenceHelper {
             person.setAttribute("jansMetaLastMod",
                     ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
         }
+        attributeService.applyMultiValued(person.getTypedCustomAttributes());
         persistenceEntryManager.merge(person);
 
     }
