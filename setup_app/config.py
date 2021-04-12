@@ -158,6 +158,11 @@ class Config:
         self.rdbm_password = None
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
+        #spanner
+        self.spanner_project = 'jans-project'
+        self.spanner_instance = 'jans-instance'
+        self.spanner_database = 'jansdb' 
+        self.spanner_host = 'localhost'
 
         # Jans components installation status
         self.loadData = True
