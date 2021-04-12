@@ -21,7 +21,7 @@ app_versions = {
   "JETTY_VERSION": "9.4.31.v20200723", 
   "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
   "JYTHON_VERSION": "2.7.2",
-  "OPENDJ_VERSION": "4.0.0.gluu",
+  "OPENDJ_VERSION": "4.4.10",
   "SETUP_BRANCH": "master",
 }
 
