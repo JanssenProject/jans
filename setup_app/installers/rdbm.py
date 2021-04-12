@@ -166,34 +166,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         indexes = []
 
-        sql_indexes_fn = os.path.join(Config.static_rdbm_dir, 'sql_index.json')
+        sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
-
-        cb_indexes = base.readJsonFile(base.current_app.CouchbaseInstaller.couchbaseIndexJson)
-
-        cb_fields = []
-
-        for bucket in cb_indexes:
-            bucket_indexes = cb_indexes[bucket]
-            if 'attributes' in bucket_indexes:
-                for atr_list in bucket_indexes['attributes']:
-                    for field in atr_list: 
-                        if not field in cb_fields:
-                            cb_fields.append(field)
-
-
-            if 'static' in bucket_indexes:
-                for atr_list in bucket_indexes['static']:
-                    for field in atr_list[0]: 
-                        if not field in cb_fields and not '(' in field:
-                            cb_fields.append(field)
-
-        if 'objectClass' in cb_fields:
-            cb_fields.remove('objectClass')
 
         for tblCls in self.dbUtils.Base.classes.keys():
             tblObj = self.dbUtils.Base.classes[tblCls]()
-            tbl_fields = sql_indexes[Config.rdbm_type].get(tblCls, {}).get('fields', []) +  sql_indexes[Config.rdbm_type]['__common__']['fields'] + cb_fields
+            tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
 
             for attr in tblObj.__table__.columns:
                 if attr.name == 'doc_id':
@@ -205,7 +183,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if isinstance(attr.type, self.dbUtils.json_dialects_instance):
 
                     if attr.name in tbl_fields:
-                        for i, ind_str in enumerate(sql_indexes[Config.rdbm_type]['__common__']['JSON']):
+                        for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
                             tmp_str = Template(ind_str)
                             if Config.rdbm_type == 'mysql':
                                 sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
@@ -238,7 +216,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
-            for i, custom_index in enumerate(sql_indexes[Config.rdbm_type]['__common__'].get(tblCls, {}).get('custom', [])):
+            for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
                 if Config.rdbm_type == 'mysql':
                     sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
                                     Config.rdbm_db,
