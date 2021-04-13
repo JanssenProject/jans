@@ -32,7 +32,7 @@ readinessProbe:
 # service
 service:
   authServerServiceName: auth-server
-  name: http-auth-server
+  name: http-auth
   port: 8080
 dnsPolicy: ""
 dnsConfig: {}
