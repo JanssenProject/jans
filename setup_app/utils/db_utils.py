@@ -274,7 +274,10 @@ class DBUtils:
 
         elif mapping_location == BackendTypes.LDAP:
             base.logIt("Querying LDAP for dn {}".format(dn))
-            return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
+            result = self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
+            if result:
+                key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
+                return document
 
         else:
             bucket = self.get_bucket_for_dn(dn)
