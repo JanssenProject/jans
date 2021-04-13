@@ -162,7 +162,8 @@ class Config:
         self.spanner_project = 'jans-project'
         self.spanner_instance = 'jans-instance'
         self.spanner_database = 'jansdb' 
-        self.spanner_host = 'localhost'
+        self.spanner_host = 'spanner.googleapis.com'
+        self.spanner_emulator = False
 
         # Jans components installation status
         self.loadData = True
