@@ -28,7 +28,7 @@ def arg_parser():
     #ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
 
     rdbm_group = parser.add_mutually_exclusive_group()
-    rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql'], help="Enables using remote RDBM server")
+    rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
     rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
 
     parser.add_argument('-rdbm-user', help="RDBM username")
@@ -69,6 +69,14 @@ def arg_parser():
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")
     parser.add_argument('--dump-config-on-error', help="Dump configuration on error", action='store_true')
     parser.add_argument('--no-progress', help="Use simple progress", action='store_true')
+
+    # spanner options
+    parser.add_argument('-spanner-project', help="Spanner project name")
+    parser.add_argument('-spanner-instance', help="Spanner instance name")
+    parser.add_argument('-spanner-database', help="Spanner database name")
+    parser.add_argument('-spanner-host', help="Spanner hostname name")
+    parser.add_argument('--spanner-emulator', help="Use Spanner emulator", action='store_true')
+
 
     parser.add_argument('--install-admin-ui', help="Install Gluu Admin UI", action='store_true')
 
