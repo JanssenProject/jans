@@ -271,5 +271,87 @@ Feature: Verify Auth configuration endpoint
     When method PATCH
     Then status 200
     And print response
+        
+
+    @auth-config-patch-dcrSignatureValidationSharedSecret -field
+    Scenario: Patch dcrSignatureValidationSharedSecret  Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And def request_body = (response.dcrSignatureValidationSharedSecret  == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":"+response.dcrSignatureValidationSharedSecret+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+
+    @auth-config-patch-dcrSkipSignatureValidation -field
+    Scenario: Patch dcrSkipSignatureValidation  Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And def request_body = (response.dcrSkipSignatureValidation  == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSkipSignatureValidation\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSkipSignatureValidation\", \"value\":"+response.dcrSkipSignatureValidation+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
+    @auth-config-patch-allowIdTokenWithoutImplicitGrantType
+    Scenario: Patch allowIdTokenWithoutImplicitGrantType Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+    And def request_body = (response.allowIdTokenWithoutImplicitGrantType == null ? "[ {\"op\":\"add\", \"path\": \"/allowIdTokenWithoutImplicitGrantType\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/allowIdTokenWithoutImplicitGrantType\", \"value\":"+response.allowIdTokenWithoutImplicitGrantType+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
+    @auth-config-patch-keySignWithSameKeyButDiffAlg
+    Scenario: Patch keySignWithSameKeyButDiffAlg Auth configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
+    And header Accept = 'application/json'
+     And def request_body = (response.keySignWithSameKeyButDiffAlg == null ? "[ {\"op\":\"add\", \"path\": \"/keySignWithSameKeyButDiffAlg\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/keySignWithSameKeyButDiffAlg\", \"value\":"+response.keySignWithSameKeyButDiffAlg+"} ]")
+    And print 'request_body ='+request_body
+    And request request_body
+    When method PATCH
+    Then status 200
+    And print response
+    
+    
     
     
