@@ -186,7 +186,7 @@ global:
     enabled: false
     ingress: false
     namespace: istio-system
-  lbIp: ""
+  lbIp: "22.22.22.22"
   nginx-ingress:
     enabled: true
   opendj:

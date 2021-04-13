@@ -11,7 +11,7 @@ multiCluster:
   #The key size must be a 16, 24, or 32 bytes encoded as base64 string.
   serfKey: Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk=
   # Json for serf Peers
-  serfPeers: ["firstldap.jans.org:30946", "secondldap.jans.org:31946"]
+  serfPeers: ["firstldap.jans.io:30946", "secondldap.jans.io:31946"]
 replicas: 1
 service:
   ldapServiceName: opendj
