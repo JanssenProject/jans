@@ -187,6 +187,7 @@ class Config:
         self.installJansCli = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
+        self.installAdminUI = False
 
         # backward compatibility
         self.os_type = base.os_type
