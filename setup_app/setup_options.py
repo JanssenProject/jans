@@ -40,7 +40,8 @@ def get_setup_options():
             setupOptions['rdbm_install'] = True
             setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
             setupOptions['rdbm_type'] = base.argsp.remote_rdbm
-            setupOptions['rdbm_host'] = base.argsp.rdbm_host
+            if not base.argsp.remote_rdbm == 'spanner':
+                setupOptions['rdbm_host'] = base.argsp.rdbm_host
 
         if base.argsp.local_rdbm:
             setupOptions['rdbm_install'] = True
@@ -61,6 +62,15 @@ def get_setup_options():
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
+        if base.argsp.spanner_project:
+            setupOptions['spanner_project'] = base.argsp.spanner_project
+        if base.argsp.spanner_instance:
+            setupOptions['spanner_instance'] = base.argsp.spanner_instance
+        if base.argsp.spanner_database:
+            setupOptions['spanner_database'] = base.argsp.spanner_database
+        if base.argsp.spanner_host:
+            setupOptions['spanner_host'] = base.argsp.spanner_host
+        setupOptions['spanner_emulator'] = base.argsp.spanner_emulator
 
     if base.argsp.disable_local_ldap:
         setupOptions['wrends_install'] = InstallTypes.NONE
@@ -151,8 +161,7 @@ def get_setup_options():
     if base.argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
 
-    #if base.argsp.oxd_use_jans_storage:
-    #    setupOptions['oxd_use_jans_storage'] = True
+
 
     if base.argsp.import_ldif:
         if os.path.isdir(base.argsp.import_ldif):
