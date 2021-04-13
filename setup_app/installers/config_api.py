@@ -162,6 +162,9 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             self.load_ldif_files.append(self.clients_ldif_fn)
 
     def render_import_templates(self):
+
+        Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or Config.hostname
+
         oxauth_config_str = base64.decodestring(Config.templateRenderingDict['oxauth_config_base64'].encode())
         oxauth_config = json.loads(oxauth_config_str.decode())
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
