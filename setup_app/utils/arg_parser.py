@@ -77,6 +77,7 @@ def arg_parser():
     parser.add_argument('-spanner-host', help="Spanner hostname name")
     parser.add_argument('--spanner-emulator', help="Use Spanner emulator", action='store_true')
 
+    parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 
     parser.add_argument('--install-admin-ui', help="Install Gluu Admin UI", action='store_true')
 
