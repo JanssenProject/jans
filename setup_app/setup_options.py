@@ -114,6 +114,9 @@ def get_setup_options():
     if base.argsp.ldap_admin_password:
         setupOptions['ldapPass'] = base.argsp.ldap_admin_password
 
+    if base.argsp.install_admin_ui:
+        setupOptions['installAdminUI'] = True
+
     if base.argsp.admin_password:
         setupOptions['admin_password'] = base.argsp.admin_password
     elif base.argsp.ldap_admin_password:

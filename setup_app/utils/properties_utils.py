@@ -559,6 +559,22 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installConfigApi:
             Config.addPostSetupService.append('installConfigApi')
 
+
+
+    def promptAdminUI(self):
+        if Config.installed_instance and Config.installAdminUI:
+            return
+
+        promptForAdminUI = self.getPrompt("Install Gluu Admin UI?", 
+                            self.getDefaultOption(Config.installAdminUI)
+                            )[0].lower()
+
+        Config.installAdminUI = True if promptForAdminUI == 'y' else False
+
+        if Config.installed_instance and Config.promptForAdminUI:
+            Config.addPostSetupService.append('installAdminUI')
+
+
     def prompt_for_rdbm(self):
         if Config.rdbm_install_type == InstallTypes.REMOTE and  Config.rdbm_type in ('mysql', 'pgsql'):
             while True:
@@ -775,6 +791,7 @@ class PropertiesUtils(SetupUtils):
                     sys.exit(False)
 
         self.promptForConfigApi()
+        self.promptAdminUI()
         self.promptForScimServer()
         self.promptForFido2Server()
         self.promptForEleven()

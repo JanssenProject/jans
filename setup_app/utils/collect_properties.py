@@ -147,6 +147,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jca_client_id', '1801.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'}),
                     ('jca_test_client_id', '1802.', {'pw': 'jca_test_client_pw', 'encoded':'jca_test_client_encoded_pw'}),
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
+                    ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ]
         self.check_clients(client_var_id_list)
 
@@ -232,6 +233,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
         Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
+
+        result = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))')
+        if result:
+            Config.admin_inum = result['inum']
+            if 'mail' in result:
+                Config.admin_email = result['mail']
+
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):
