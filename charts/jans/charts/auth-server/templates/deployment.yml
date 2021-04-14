@@ -50,6 +50,14 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+        {{ if .Values.global.cnExtSigningJwksUri }}
+          - name: cn-ext-signing-jwks-key
+            mountPath: /etc/certs/ext-signing.key
+            subPath: ext-signing.key
+          - name: cn-ext-signing-jwks-crt
+            mountPath: /etc/certs/ext-signing.crt
+            subPath: ext-signing.crt
+        {{- end }}
         {{ if eq .Values.global.configSecretAdapter "google" }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-secret-manager-sa
@@ -93,6 +101,14 @@ spec:
         - {{ .Values.global.fqdn }}
       {{- end }}
       volumes:
+      {{ if .Values.global.cnExtSigningJwksUri }}
+        - name: cn-ext-signing-jwks-crt
+          secret:
+            secretName: {{ .Release.Name }}-ext-signing-jwks-crt
+        - name: cn-ext-signing-jwks-key
+          secret:
+            secretName: {{ .Release.Name }}-ext-signing-jwks-key
+      {{- end }}
       {{ if eq .Values.global.configSecretAdapter "google" }}
         - name: google-secret-manager-sa
           secret:
