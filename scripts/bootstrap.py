@@ -134,6 +134,9 @@ def main():
         ext_key = "/etc/certs/ext-signing.key"
         alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "")
 
+        if not alias:
+            raise ValueError("missing or empty CN_EXT_SIGNING_ALIAS environment variable")
+
         cert_to_truststore(
             alias,
             ext_cert,
