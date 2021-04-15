@@ -3,16 +3,25 @@
 # _Janssen Command Line Interface_
 `jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
 
-# _Quick Start_
+# _Installation_
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during installation 
-of [Janssen Server](https://github.com/JanssenProject/home).
+of the [Janssen Server](https://github.com/JanssenProject/home).
 
-After successfully installed Janssen Server, run the following command.
+![](docs/img/jans-config-api.png)
+
+After successfully installed Janssen Server, you will get two command line arguments as below:
+
+![](docs/img/installed.png)
+
+# _Quick Start_
+
+As you have seen, CLI supports both of `config-cli` and `scim-cli`. For a quick start, let's run the following command.
+
 ```
 /opt/jans/jans-cli/config-cli.py
 ```
-If you get any error then try this one:
+If you get any error then you can try this way:
 ```
 python3 /opt/jans/jans-cli/config-cli.py
 ```
@@ -32,7 +41,7 @@ to get **Default Authentication Method**.
 
 That returns another two options as below:
 
-![option-2-option.png](docs/img/im-default-auth-o2.png)
+![option-2-option.png](docs/img/im-default-auth-02.png)
 
 Now selecting 1 and it returns our desired result as below image:
 
