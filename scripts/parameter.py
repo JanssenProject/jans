@@ -1,35 +1,97 @@
 import json
 import re
 
-import cerberus
 from fqdn import FQDN
+from marshmallow import EXCLUDE
+from marshmallow import Schema
+from marshmallow import validates
+from marshmallow import validates_schema
+from marshmallow import ValidationError
+from marshmallow.fields import Email
+from marshmallow.fields import List
+from marshmallow.fields import Str
+from marshmallow.validate import ContainsOnly
+from marshmallow.validate import Length
+from marshmallow.validate import Predicate
 
-EMAIL_RGX = re.compile(
-    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-)
 PASSWD_RGX = re.compile(
     r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$"
 )
 
+DEFAULT_SCOPES = (
+    "auth",
+    "config-api",
+)
 
-def validate_hostname(field, value, error):
-    fqdn = FQDN(value)
-    if not fqdn.is_valid:
-        error(field, "Invalid FQDN for hostname.")
+OPTIONAL_SCOPES = (
+    "ldap",
+    "scim",
+    "fido2",
+    "client-api",
+    "couchbase",
+    "redis",
+)
 
 
-def validate_email(field, value, error):
-    if not EMAIL_RGX.match(value):
-        error(field, "invalid email address")
+class ParamSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
 
+    admin_pw = Str(required=True)
 
-def validate_admin_pw(field, value, error):
-    msg = "Password must be at least 6 characters and include " \
-          "one uppercase letter, one lowercase letter, one digit, " \
-          " and one special character."
+    city = Str(required=True)
 
-    if not PASSWD_RGX.search(value):
-        error(field, msg)
+    country_code = Str(
+        validate=[
+            Length(2, 2),
+            Predicate(
+                "isupper",
+                error="Non-uppercased characters aren't allowed",
+            ),
+        ],
+        required=True,
+    )
+
+    email = Email(required=True)
+
+    # see validate_fqdn for validation
+    hostname = Str(required=True)
+
+    org_name = Str(required=True)
+
+    state = Str(required=True)
+
+    optional_scopes = List(
+        Str(),
+        validate=ContainsOnly(OPTIONAL_SCOPES),
+        missing=[],
+    )
+
+    # see validate_ldap_pw for validation
+    ldap_pw = Str(missing="", default="")
+
+    @validates("hostname")
+    def validate_fqdn(self, value):
+        fqdn = FQDN(value)
+        if not fqdn.is_valid:
+            raise ValidationError("Invalid FQDN format.")
+
+    @validates("admin_pw")
+    def validate_password(self, value, **kwargs):
+        if not PASSWD_RGX.search(value):
+            raise ValidationError(
+                "Must be at least 6 characters and include "
+                "one uppercase letter, one lowercase letter, one digit, "
+                " and one special character."
+            )
+
+    @validates_schema
+    def validate_ldap_pw(self, data, **kwargs):
+        if "ldap" in data["optional_scopes"]:
+            try:
+                self.validate_password(data["ldap_pw"])
+            except ValidationError as exc:
+                raise ValidationError({"ldap_pw": exc.messages})
 
 
 def params_from_file(path):
@@ -45,56 +107,9 @@ def params_from_file(path):
         code = 1
         return out, err, code
 
-    schema = {
-        "hostname": {
-            "type": "string",
-            "required": True,
-            "check_with": validate_hostname,
-        },
-        "email": {
-            "type": "string",
-            "required": True,
-            "check_with": validate_email,
-        },
-        "admin_pw": {
-            "type": "string",
-            "required": True,
-            "check_with": validate_admin_pw,
-        },
-        "ldap_pw": {
-            "type": "string",
-            "required": True,
-            "check_with": validate_admin_pw,
-        },
-        "org_name": {
-            "type": "string",
-            "required": True,
-            "empty": False,
-        },
-        "country_code": {
-            "type": "string",
-            "required": True,
-            "minlength": 2,
-            "maxlength": 2,
-        },
-        "state": {
-            "type": "string",
-            "required": True,
-            "empty": False,
-        },
-        "city": {
-            "type": "string",
-            "required": True,
-            "empty": False,
-        },
-    }
-
-    validator = cerberus.Validator(schema)
-    validator.allow_unknown = True
-
-    if not validator.validate(docs):
-        err = validator.errors
+    try:
+        out = ParamSchema().load(docs)
+    except ValidationError as exc:
+        err = exc.messages
         code = 1
-    else:
-        out = docs
     return out, err, code

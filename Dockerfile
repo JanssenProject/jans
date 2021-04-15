@@ -104,7 +104,8 @@ ENV CN_SECRET_ADAPTER=vault \
 ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_CONFIGURATION_SKIP_INITIALIZED=false
 
 # ====
 # misc
