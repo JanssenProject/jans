@@ -80,67 +80,9 @@ class Spanner:
             if table_name_re:
                 table_name = table_name_re.groups()[0]
             tables.append(table_name)
-        
-        return tables
 
+        return tables
 
     def get_databases(self):
         req = requests.get(self.spanner_instance_url)
         return req
-
-
-s=Spanner()
-
-#result = s.exec_sql('SELECT * from Class WHERE RoomNumber > "B"')
-#print(result.json())
-"""
-print(s.create_table("CREATE TABLE MyClass ( ClassId INT64 NOT NULL, ClassName STRING(50), RoomNumber STRING(10)) PRIMARY KEY (ClassId)"))
-
-
-#print(result.json())
-s.put_data({
-          "singleUseTransaction": {
-            "readWrite": {}
-          },
-          "mutations": [
-            {
-              "insertOrUpdate": {
-                "table": "MyClass",
-                "columns": [
-                  "ClassId",
-                  "ClassName",
-                  "RoomNumber"
-                ],
-                "values": [
-                  [
-                    "8",
-                    "2BX",
-                    "XA001"
-                  ],
-                  [
-                    "11",
-                    "3BY",
-                    "YB002"
-                  ]
-                ]
-              }
-            }
-          ]
-        })
-
-result = s.get_data({
-                  "table": "MyClass",
-                  "columns": [
-                    "ClassId",
-                    "ClassName",
-                    "RoomNumber"
-                  ],
-                  "keySet": {
-                    "all": True
-                  }
-                })
-print(result.json())
-"""
-
-req = s.get_schema()
-print(req)
