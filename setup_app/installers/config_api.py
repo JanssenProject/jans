@@ -122,12 +122,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
             createClient = False
 
-        jansUmaScopes_all += [
-                        'inum=F0C4,ou=scopes,o=jans',
-                        'inum=764C,ou=scopes,o=jans',
-                        'inum=10B2,ou=scopes,o=jans'
-                        ]
-
         if createClient:
             clients_ldif_fd = open(self.clients_ldif_fn, 'wb')
             ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
@@ -202,8 +196,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             return
 
         self.logIt("Loding Jans Config Api test data")
-
-
 
         if not base.argsp.t:
             self.render_templates_folder(os.path.join(Config.templateFolder, 'test/jans-config-api'))
