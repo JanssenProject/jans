@@ -3281,6 +3281,9 @@ components:
         dcrSignatureValidationEnabled:
           type: boolean
           description: Boolean value enables DCR signature validation. Default is false.
+        dcrSignatureValidationSharedSecret:
+          type: string
+          description: Specifies shared secret for Dynamic Client Registration.
         dcrSignatureValidationSoftwareStatementJwksURIClaim:
           type: string
           description: Specifies claim name inside software statement. Value of claim should point to JWKS URI.
@@ -3296,6 +3299,9 @@ components:
         dcrAuthorizationWithClientCredentials:
           type: boolean	
           description: Boolean value indicating if DCR authorization to be performed using client credentials.	
+        dcrSkipSignatureValidation:
+          type: boolean	
+          description: Boolean value indicating if signature validation is to be skipped.	
         statEnabled:
           type: boolean	
           description: Boolean value indicating if statistical service is enabled.	  
@@ -3317,6 +3323,12 @@ components:
           items:
             type: string
           example: 'authorization_endpoint, token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..'
+        allowIdTokenWithoutImplicitGrantTypes:
+          type: boolean
+          description: Specifies if a token without implicit grant types is allowed.
+        keySignWithSameKeyButDiffAlg:
+          type: boolean
+          description: Specifies if signing to be done with same key but apply different algorithms.
  
     GluuAttribute:
       title: GluuAttribute
