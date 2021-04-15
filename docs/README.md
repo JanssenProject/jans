@@ -7198,7 +7198,13 @@ Operation ID: search-user
 To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema <schma>, for example /opt/jans/jans-cli/scim-cli.py 
 ```
 
-  1. **_get-users_**: This operation is used to get list of the users and its properties. The command line is: `/opt/jans/jans-cli/scim-cli.py --operation-id get-users`. By default, This will return all of the users and their properties. 
+  1. **_get-users_**: 
+  
+  This operation is used to get list of the users and its properties. The command line is: 
+  
+  ```/opt/jans/jans-cli/scim-cli.py --operation-id get-users```
+  
+  By default, This will return all of the users and their properties. 
 
   ```
   root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
@@ -7662,7 +7668,7 @@ root@testjans:~#
   As you see, I have removed `members` from the schema. We will add members in this group later. Let's use the command to create the group with this data.
 
   ```
-  root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id create-group --data group.json
+  /opt/jans/jans-cli/scim-cli.py --operation-id create-group --data group.json
   ```
 
   ```
