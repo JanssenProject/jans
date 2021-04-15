@@ -18,8 +18,10 @@ from setup_app.config import Config
 from setup_app.static import InstallTypes, BackendTypes, colors
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
+from setup_app.utils.spanner import Spanner
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
+
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
@@ -51,6 +53,9 @@ class DBUtils:
                 self.moddb = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
                 self.moddb = BackendTypes.PGSQL
+            elif Config.rdbm_type == 'spanner':
+                self.moddb = BackendTypes.SPANNER
+                self.spanner = Spanner()
         else:
             self.moddb = BackendTypes.COUCHBASE
 
@@ -80,7 +85,7 @@ class DBUtils:
 
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
-
+        
 
     def sqlconnection(self, log=True):
         base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
@@ -149,7 +154,9 @@ class DBUtils:
                     return qresult.first()
                 elif getresult:
                     return qresult.fetchall()
-
+        elif Config.rdbm_type == 'spanner':
+            if query.startswith('CREATE TABLE'):
+                self.spanner.create_table(query)
 
     def set_cbm(self):
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
@@ -551,13 +558,16 @@ class DBUtils:
                 return result
 
     def table_exists(self, table):
-        metadata = sqlalchemy.MetaData()
-        try:
-            metadata.reflect(self.engine, only=[table])
-        except:
-            pass
+        if Config.rdbm_type == 'spanner':
+            return table in spanner.get_tables()
+        else:
+            metadata = sqlalchemy.MetaData()
+            try:
+                metadata.reflect(self.engine, only=[table])
+            except:
+                pass
 
-        return table in metadata
+            return table in metadata
 
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
