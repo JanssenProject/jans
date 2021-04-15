@@ -1,6 +1,7 @@
 import base64
 import os
 import re
+from urllib.parse import urlparse
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -12,6 +13,7 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import get_server_certificate
 # from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_keystore
 
@@ -132,10 +134,20 @@ def main():
     if ext_jwks_uri:
         ext_cert = "/etc/certs/ext-signing.crt"
         ext_key = "/etc/certs/ext-signing.key"
-        alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "")
+        alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "OpenBanking")
 
-        if not alias:
-            raise ValueError("missing or empty CN_EXT_SIGNING_ALIAS environment variable")
+        get_server_certificate(
+            urlparse(ext_jwks_uri).netloc,
+            443,
+            "/etc/certs/extjwksuri.crt"
+        )
+
+        cert_to_truststore(
+            "ObenBankingJwksUri",
+            "/etc/certs/extjwksuri.crt",
+            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "changeit",
+        )
 
         cert_to_truststore(
             alias,
