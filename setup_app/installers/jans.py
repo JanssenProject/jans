@@ -156,13 +156,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
             # Read source file
             currentSystemProfile = self.readFile(Config.sysemProfile)
 
-            # Write merged file
-            self.backupFile(Config.sysemProfile)
-            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-            self.writeFile(Config.sysemProfile, resultSystemProfile)
+            if not 'Added by Jans' in currentSystemProfile:
 
-            # Fix new file permissions
-            self.run([paths.cmd_chmod, '644', Config.sysemProfile])
+                # Write merged file
+                self.backupFile(Config.sysemProfile)
+                resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+                self.writeFile(Config.sysemProfile, resultSystemProfile)
+
+                # Fix new file permissions
+                self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
         if not Config.encode_salt:
