@@ -25,92 +25,65 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "discoveryAllowedKeys": [
+        "issuer",
+        "authorization_endpoint",
+        "token_endpoint",
+        "registration_endpoint",
+        "token_endpoint_auth_methods_supported",
+        "jwks_uri",
+        "scopes_supported",
+        "response_types_supported",
+        "response_modes_supported",
+        "acr_values_supported",
+        "subject_types_supported",
+        "id_token_signing_alg_values_supported",
+        "request_object_signing_alg_values_supported",
+        "display_values_supported",
+        "claim_types_supported",
+        "claims_supported",
+        "claims_parameter_supported",
+        "grant_types_supported",
+        "request_parameter_supported",
+        "request_uri_parameter_supported",
+        "token_endpoint_auth_signing_alg_values_supported",
+        "tls_client_certificate_bound_access_tokens"
+    ],
     "responseTypesSupported":[
-        ["code"],
-        ["code", "id_token"],
-        ["token"],
-        ["token", "id_token"],
-        ["code", "token"],
-        ["code", "token", "id_token"],
-        ["id_token"]
+        ["code", "id_token"]
     ],
     "responseModesSupported":[
-        "query",
-        "fragment",
-        "form_post"
+        "fragment"
     ],
     "grantTypesSupported":[
-        "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
-        "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "authorization_code",
+        "refresh_token"
     ],
+    "allowIdTokenWithoutImplicitGrantType": true,
     "subjectTypesSupported":[
-        "public",
         "pairwise"
     ],
     "defaultSubjectType": "pairwise",
+    "keySignWithSameKeyButDiffAlg": true,
     "userInfoSigningAlgValuesSupported":[
-        "HS256",
-        "HS384",
-        "HS512",
-        "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512"
     ],
     "userInfoEncryptionAlgValuesSupported":[
-        "RSA1_5",
-        "RSA-OAEP",
-        "A128KW",
-        "A256KW"
     ],
     "userInfoEncryptionEncValuesSupported":[
-        "A128CBC+HS256",
-        "A256CBC+HS512",
-        "A128GCM",
-        "A256GCM"
     ],
     "idTokenSigningAlgValuesSupported":[
-        "none",
-        "HS256",
-        "HS384",
-        "HS512",
-        "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512"
+        "PS256",
+        "RS256"
     ],
     "idTokenEncryptionAlgValuesSupported":[
-        "RSA1_5",
-        "RSA-OAEP",
-        "A128KW",
-        "A256KW"
     ],
     "idTokenEncryptionEncValuesSupported":[
-        "A128CBC+HS256",
-        "A256CBC+HS512",
-        "A128GCM",
-        "A256GCM"
     ],
     "requestObjectSigningAlgValuesSupported":[
-        "none",
         "HS256",
-        "HS384",
-        "HS512",
         "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512"
+        "PS256"
     ],
     "jwksAlgorithmsSupported":[
         "RS256",
@@ -126,41 +99,21 @@
         "RSA-OAEP"
     ],
     "requestObjectEncryptionAlgValuesSupported":[
-        "RSA1_5",
-        "RSA-OAEP",
-        "A128KW",
-        "A256KW"
     ],
     "requestObjectEncryptionEncValuesSupported":[
-        "A128CBC+HS256",
-        "A256CBC+HS512",
-        "A128GCM",
-        "A256GCM"
     ],
     "tokenEndpointAuthMethodsSupported":[
-        "client_secret_basic",
         "client_secret_post",
-        "client_secret_jwt",
-        "private_key_jwt",
-        "tls_client_auth",
-        "self_signed_tls_client_auth"
+        "tls_client_auth"
     ],
     "tokenEndpointAuthSigningAlgValuesSupported":[
-        "HS256",
-        "HS384",
-        "HS512",
-        "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512"
+        "PS256",
+        "RS256"
     ],
     "dynamicRegistrationCustomAttributes":[
     ],
     "displayValuesSupported":[
-        "page",
-        "popup"
+        "page"
     ],
     "claimTypesSupported":[
         "normal"
@@ -183,14 +136,11 @@
         "tr"
     ],
     "dynamicGrantTypeDefault":[
-        "authorization_code",
-        "implicit",
         "client_credentials",
-        "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "authorization_code",
+        "refresh_token"
     ],
-    "claimsParameterSupported":false,
+    "claimsParameterSupported":true,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
@@ -216,22 +166,30 @@
     "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
-    "cleanServiceInterval":60,
+    "cleanServiceInterval":86400,
     "cleanServiceBatchChunkSize": 10000,
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
     "oxId":"https://%(hostname)s/oxid/service/jans/inum",
+    "dcrSignatureValidationEnabled": true,
+    "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
+    "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+    "dcrSignatureValidationJwks": null,
+    "dcrSignatureValidationJwksUri": null,
+    "dcrAuthorizationWithClientCredentials": false,
+    "dcrSkipSignatureValidation": true,
+    "softwareStatementValidationType": "script",
+    "softwareStatementValidationClaimName": "jwks_uri",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":-1,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
-    "dynamicRegistrationScopesParamEnabled":true,
+    "dynamicRegistrationScopesParamEnabled":false,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList":[
-        "jansCustomPerson",
         "jansPerson"
     ],
     "persistIdTokenInLdap":false,
@@ -241,26 +199,8 @@
     "clientAuthenticationFiltersEnabled":false,
     "clientRegDefaultToCodeFlowWithRefresh": true,
     "authenticationFilters":[
-        {
-            "filter":"(&(mail=*{0}*)(inum={1}))",
-            "bind":false,
-            "bindPasswordAttribute":"",
-            "baseDn":"ou=people,o=jans"
-        },
-        {
-            "filter":"uid={0}",
-            "bind":true,
-            "bindPasswordAttribute":"pwd",
-            "baseDn":"ou=people,o=jans"
-        }
     ],
     "clientAuthenticationFilters":[
-        {
-            "filter":"myCustomAttr1={0}",
-            "bind":"",
-            "bindPasswordAttribute":"",
-            "baseDn":"ou=clients,o=jans"
-        }
     ],
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":120,

@@ -285,7 +285,8 @@ class SQLBackend:
         #     self._exec_query(conn, sql_cmd)
 
     def import_ldif(self, conn):
-        ldif_mappings = get_ldif_mappings()
+        optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
+        ldif_mappings = get_ldif_mappings(optional_scopes)
 
         ctx = prepare_template_ctx(self.manager)
 
@@ -320,7 +321,7 @@ class SQLBackend:
             return initialized
 
         should_skip = as_boolean(
-            os.environ.get("CN_PERSISTENCE_SKIP_EXISTING", True),
+            os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False),
         )
 
         if should_skip and is_initialized():

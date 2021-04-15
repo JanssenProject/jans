@@ -23,7 +23,7 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
 
 
-def get_bucket_mappings():
+def get_bucket_mappings(manager):
     prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
     bucket_mappings = {
         "default": {
@@ -58,7 +58,10 @@ def get_bucket_mappings():
         },
     }
 
-    for name, files in get_ldif_mappings().items():
+    optional_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
+    ldif_mappings = get_ldif_mappings(optional_scopes)
+
+    for name, files in ldif_mappings.items():
         bucket_mappings[name]["files"] = files
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
@@ -406,7 +409,7 @@ class CouchbaseBackend:
 
         self.index_num_replica = num_replica
 
-        bucket_mappings = get_bucket_mappings()
+        bucket_mappings = get_bucket_mappings(self.manager)
 
         time.sleep(5)
         self.create_buckets(bucket_mappings)
@@ -415,7 +418,7 @@ class CouchbaseBackend:
         self.create_indexes(bucket_mappings)
 
         should_skip = as_boolean(
-            os.environ.get("CN_PERSISTENCE_SKIP_EXISTING", True),
+            os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False),
         )
         if should_skip and is_initialized():
             logger.info("Couchbase backend already initialized")
