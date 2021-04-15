@@ -159,6 +159,7 @@ class Config:
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
         #spanner
+        self.spanner_emulator = False
         self.spanner_project = 'jans-project'
         self.spanner_instance = 'jans-instance'
         self.spanner_database = 'jansdb' 
