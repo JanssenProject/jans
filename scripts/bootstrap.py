@@ -136,14 +136,21 @@ def main():
         ext_key = "/etc/certs/ext-signing.key"
         alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "OpenBanking")
 
+        parsed_url = urlparse(ext_jwks_uri)
+        # uses hostname instead of netloc as netloc may have host:port format
+        hostname = parsed_url.hostname
+
+        # get port listed in netloc or fallback to port 443
+        port = parsed_url.port or 443
+
         get_server_certificate(
-            urlparse(ext_jwks_uri).netloc,
-            443,
+            hostname,
+            port,
             "/etc/certs/extjwksuri.crt"
         )
 
         cert_to_truststore(
-            "ObenBankingJwksUri",
+            "OpenBankingJwksUri",
             "/etc/certs/extjwksuri.crt",
             "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
             "changeit",
