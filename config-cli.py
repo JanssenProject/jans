@@ -25,7 +25,7 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
-
+from pylib import jwt
 
 tabulate_endpoints = {
         'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
@@ -1461,8 +1461,21 @@ class JCA_CLI:
 
         model = getattr(swagger_client.models, model_name)
 
-        data = self.get_json_from_file(data_fn)
-        
+        if data_fn.endswith('jwt'):
+            with open(data_fn) as reader:
+                data_org = jwt.decode(reader.read(), options={"verify_signature": False,"verify_exp": False,"verify_aud":False})
+        else:
+            data_org = self.get_json_from_file(data_fn)
+
+        data = {}
+
+        for k in data_org:
+            if k in model.attribute_map:
+                mapped_key = model.attribute_map[k]
+                data[mapped_key] = data_org[k]
+            else:
+                data[k] = data_org[k]
+
         try:
             body = myapi._ApiClient__deserialize_model(data, model)
         except Exception as e:
