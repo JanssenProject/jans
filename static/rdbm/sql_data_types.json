@@ -818,7 +818,7 @@
       "tables": {
         "jansClntAuthz": {
           "size": 100,
-          "type": "VARCHAR"
+          "type": "STRING"
         }
       }
     }

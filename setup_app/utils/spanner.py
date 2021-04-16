@@ -25,7 +25,9 @@ class Spanner:
         self.spanner_instance_url = os.path.join(self.spanner_base_url, 'projects/{}/instances/{}/databases'.format(Config.spanner_project, Config.spanner_instance))
         self.spanner_dbase_url = os.path.join(self.spanner_instance_url, Config.spanner_database)
 
-        base.logit("Spanner Api is constructed with base url {}".format(self.spanner_dbase_url))
+        base.logIt("Spanner Api is constructed with base url {}".format(self.spanner_dbase_url))
+        self.c = 1
+
 
     def set_sessioned_url(self):
         session_url = os.path.join(self.spanner_dbase_url, 'sessions')
@@ -62,8 +64,13 @@ class Spanner:
 
     def create_table(self, cmd):
         data = {"statements": [cmd]}
+        #print(data)
+        print("CREATE TABLE", self.c)
+        self.c += 1
         query_url = os.path.join(self.spanner_dbase_url, 'ddl')
         req = requests.patch(query_url, data=json.dumps(data))
+        if 'error' in req.json():
+            print(req.json())
         return req
 
 
@@ -75,11 +82,13 @@ class Spanner:
         tables = []
 
         result = req.json()
-        for statement in result['statements']:
-            table_name_re = re.search('CREATE TABLE (.+) \(', statement)
-            if table_name_re:
-                table_name = table_name_re.groups()[0]
-            tables.append(table_name)
+
+        if 'statements' in result:
+            for statement in result['statements']:
+                table_name_re = re.search('CREATE TABLE (.+) \(', statement)
+                if table_name_re:
+                    table_name = table_name_re.groups()[0]
+                tables.append(table_name)
 
         return tables
 
