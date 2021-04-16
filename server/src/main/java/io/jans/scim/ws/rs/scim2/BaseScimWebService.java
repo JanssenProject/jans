@@ -19,6 +19,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.Path;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.ISODateTimeFormat;
@@ -83,6 +84,8 @@ public class BaseScimWebService {
     ExternalScimService externalScimService;
 
     public static final String SEARCH_SUFFIX = ".search";
+    
+    private static final String CN_ENV_VAR = "CN_VERSION";
 
     String endpointUrl;
 
@@ -137,7 +140,17 @@ public class BaseScimWebService {
         List<String> values=headers.getRequestHeaders().get(name);
         return (values==null || values.size()==0) ? null : values.get(0);
     }
+    
+    protected void init(Class<? extends BaseScimWebService> cls) {
 
+    	if (endpointUrl == null) {
+			String base = appConfiguration.getBaseEndpoint(); 
+			base = System.getenv(CN_ENV_VAR) == null ? base : base.replaceFirst("/identity", "/scim");
+			endpointUrl = base + cls.getAnnotation(Path.class).value();
+    	}
+
+    }
+    
     protected void assignMetaInformation(BaseScimResource resource){
 
         //Generate some meta information (this replaces the info client passed in the request)
