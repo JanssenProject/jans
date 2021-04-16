@@ -559,7 +559,7 @@ class DBUtils:
 
     def table_exists(self, table):
         if Config.rdbm_type == 'spanner':
-            return table in spanner.get_tables()
+            return table in self.spanner.get_tables()
         else:
             metadata = sqlalchemy.MetaData()
             try:
