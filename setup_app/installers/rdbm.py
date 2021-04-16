@@ -84,10 +84,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         else:
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
+
+            char_type = 'STRING' if Config.rdbm_type == 'spanner' else 'VARCHAR'
             
-            if type_['type'] == 'VARCHAR':
+            if type_['type'] in char_type:
                 if type_['size'] <= 127:
-                    data_type = 'VARCHAR({})'.format(type_['size'])
+                    data_type = '{}({})'.format(char_type, type_['size'])
                 elif type_['size'] <= 255:
                     data_type = 'TINYTEXT' if Config.rdbm_type == 'mysql' else 'TEXT'
                 else:
@@ -95,10 +97,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 data_type = type_['type']
 
+        if data_type == 'TEXT' and Config.rdbm_type == 'spanner':
+            data_type = 'STRING(MAX)'
+
         return data_type
 
     def create_tables(self, jans_schema_files):
-        qchar = '`' if Config.rdbm_type == 'mysql' else '"'
+        qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
         tables = []
         all_schema = {}
         all_attribs = {}
