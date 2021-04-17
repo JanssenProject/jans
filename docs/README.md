@@ -1,6 +1,7 @@
 # Using jans-cli
 
-`jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation
+`jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation:
+
 1. Menu-driven Interactive Mode
 2. Command Line Argument Mode
 
@@ -7496,6 +7497,57 @@ Finally use below command line, to create an user resources.
 
 ```
 
+It will generate user `inum` value, metadata and will be added in user resources:
+
+```
+Getting access token for scope https://jans.io/scim/users.write
+Server Response:
+{
+  "externalId": null,
+  "userName": "mhosen",
+  "name": {
+    "familyName": "mobarak",
+    "givenName": "mobarak",
+    "middleName": null,
+    "honorificPrefix": null,
+    "honorificSuffix": null,
+    "formatted": "mobarak mobarak"
+  },
+  "displayName": "mobarak",
+  "nickName": null,
+  "profileUrl": null,
+  "title": "Vice President",
+  "userType": "Contractor",
+  "preferredLanguage": "en",
+  "locale": "en-US",
+  "timezone": "America/Los_Angeles",
+  "active": true,
+  "password": null,
+  "emails": null,
+  "phoneNumbers": null,
+  "ims": null,
+  "photos": null,
+  "addresses": null,
+  "groups": null,
+  "entitlements": null,
+  "roles": null,
+  "x509Certificates": null,
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "7034663f-dc43-4f8c-8074-e8e75cae9c96",
+  "meta": {
+    "resourceType": "User",
+    "created": "2021-04-17T14:54:30.430Z",
+    "lastModified": "2021-04-17T14:54:30.430Z",
+    "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Users/7034663f-dc43-4f8c-8074-e8e75cae9c96"
+  }
+}
+
+root@testjans:~# 
+```
+
 ### Group
   
 Group resources are used to manage user resources easily with some operations. 
@@ -7781,3 +7833,24 @@ root@testjans:~#
     }
   }
   ```
+  4. **_update-group-by-id_**:
+
+  If we look at the description
+
+  ```
+    Operation ID: update-group-by-id
+    Description: Updates a Group resource (see section 3.5.1 of RFC 7644). 
+    Update works in a replacement fashion&amp;#58; every attribute 
+    value found in the payload sent will replace the one in
+    the existing resource representation. Attributes not passed in the
+    payload will be left intact.
+
+    url-suffix: id
+    Parameters:
+    attributes: A comma-separated list of attribute names to return in the response [string]
+    excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+    id: No description is provided for this parameter [string]
+    Schema: /components/schemas/GroupResource
+  ```
+  
+
