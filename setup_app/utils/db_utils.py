@@ -85,7 +85,7 @@ class DBUtils:
 
         self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
-        
+
 
     def sqlconnection(self, log=True):
         base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
@@ -123,7 +123,7 @@ class DBUtils:
     @property
     def json_dialects_instance(self):
         return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
-        
+
     def mysqlconnection(self, log=True):
         return self.sqlconnection(log)
 
@@ -300,6 +300,15 @@ class DBUtils:
 
     def dn_exists_rdbm(self, dn, table):
         base.logIt("Checking dn {} exists in table {}".format(dn, table))
+        backend_location = self.get_backend_location_for_dn(dn)
+
+        if backend_location == BackendTypes.SPANNER:
+            result = self.spanner.exec_sql('SELECT * from {} WHERE dn="{}"'.format(table, dn))
+            if result.ok:
+                data = result.json()
+                if 'rows' in data:
+                    return data
+            return
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
@@ -372,7 +381,7 @@ class DBUtils:
             if fetchmany:
                 result = sqlalchemyQueryObject.all()
                 return [ item.__dict__ for item in result ]
-                    
+
             else:
                 result = sqlalchemyQueryObject.first()
                 if result:
@@ -466,8 +475,42 @@ class DBUtils:
                 else:
                     jansConfProperty['v'].append({'value1': 'allowed_clients', 'value2': client_id})
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty                
+                sqlalchemyObj.jansConfProperty = jansConfProperty
                 self.session.commit()
+
+
+        elif backend_location == BackendTypes.SPANNER:
+            result = self.spanner.exec_sql('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
+            jansConfProperty = []
+            if result.ok:
+                data = result.json()
+                added = False
+                if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
+                    jansConfProperty = data['rows'][0][0]
+                    for i, oxconfigprop in enumerate(jansConfProperty[:]):
+                        oxconfigpropjs = json.loads(oxconfigprop)
+                        if oxconfigpropjs.get('value1') == 'allowed_clients' and not client_id in oxconfigpropjs['value2']:
+                            oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
+                            jansConfProperty[i] = json.dumps(oxconfigpropjs)
+                            added = True
+                            break
+            if not added:
+                jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
+
+            update_data = {
+                            "singleUseTransaction": {
+                            "readWrite": {}
+                            },
+                            "mutations": [{
+                                "update": {
+                                    "table": "jansCustomScr",
+                                    "columns": ["doc_id", "jansConfProperty"],
+                                    "values": [[script_inum,  jansConfProperty]]
+                                    }
+                            }]
+                        }
+
+            self.spanner.put_data(update_data)
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
@@ -486,7 +529,7 @@ class DBUtils:
                 return
 
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `jansConfProperty`={}'.format(bucket, script_inum, json.dumps(oxConfigurationProperties))
-            self.cbm.exec_query(n1ql)            
+            self.cbm.exec_query(n1ql)
 
     def get_key_prefix(self, key):
         n = key.find('_')
@@ -575,26 +618,29 @@ class DBUtils:
         else:
             attr_syntax = self.get_attr_syntax(key)
             data_type = self.ldap_sql_data_type_mapping[attr_syntax]
-    
+
         data_type = (data_type.get(Config.rdbm_type) or data_type['mysql'])['type']
 
         return data_type
 
-    def get_rdbm_val(self, key, val):
-        
+    def get_rdbm_val(self, key, val, rdbm_type=None):
+
         data_type = self.get_attr_sql_data_type(key)
 
-        if data_type in ('SMALLINT',):
+        if data_type in ('SMALLINT', 'BOOL'):
             if val[0].lower() in ('1', 'on', 'true', 'yes', 'ok'):
-                return 1
-            return 0
+                return 1 if data_type == 'SMALLINT' else True
+            return 0 if data_type == 'SMALLINT' else False
 
         if data_type == 'INT':
             return int(val[0])
 
         if data_type in ('DATETIME(3)', 'TIMESTAMP'):
             dval = val[0].strip('Z')
-            return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
+            sep1= 'T' if rdbm_type == 'spanner' else ' '
+            sep2 = '.' if rdbm_type == 'spanner' else ''
+            postfix = 'Z' if rdbm_type == 'spanner' else ''
+            return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], sep1, dval[10:12], dval[12:14], sep2, dval[14:17], postfix)
 
         if data_type == 'JSON':
             json_data = {'v':[]}
@@ -603,7 +649,21 @@ class DBUtils:
 
             return json_data
 
+        if data_type == 'ARRAY<STRING(MAX)>':
+            return val
+
         return val[0]
+
+    def get_clean_objcet_class(self, entry):
+
+        objectClass = entry.get('objectClass') or entry.get('objectclass')
+
+        if objectClass:
+            if 'top' in objectClass:
+                objectClass.remove('top')
+            objectClass = objectClass[-1]
+
+        return objectClass
 
 
     def import_ldif(self, ldif_files, bucket=None, force=None):
@@ -677,14 +737,9 @@ class DBUtils:
                         vals = {}
                         dn_parsed = dnutils.parse_dn(dn)
                         rdn_name = dn_parsed[0][0]
-                        objectClass = entry.get('objectClass') or entry.get('objectclass')
-
-                        if objectClass:
-                            if 'top' in objectClass:
-                                objectClass.remove('top')
-                            if  len(objectClass) == 1 and objectClass[0].lower() == 'organizationalunit':
-                                continue
-                            objectClass = objectClass[-1]
+                        objectClass = self.get_clean_objcet_class(entry)
+                        if objectClass.lower() == 'organizationalunit':
+                            continue
 
                         vals['doc_id'] = dn_parsed[0][1]
                         vals['dn'] = dn
@@ -720,6 +775,57 @@ class DBUtils:
                         self.session.add(sqlalchObj)
                         self.session.commit()
 
+
+                elif backend_location == BackendTypes.SPANNER:
+
+                    vals = {}
+                    dn_parsed = dnutils.parse_dn(dn)
+                    rdn_name = dn_parsed[0][0]
+                    objectClass = objectClass = self.get_clean_objcet_class(entry)
+                    if objectClass.lower() == 'organizationalunit':
+                        continue
+
+                    vals['doc_id'] = dn_parsed[0][1]
+                    vals['dn'] = dn
+                    vals['objectClass'] = objectClass
+
+                    if 'objectClass' in entry:
+                        entry.pop('objectClass')
+                    elif 'objectclass' in entry:
+                        entry.pop('objectclass')
+
+                    table_name = objectClass
+
+
+
+
+                    #if self.dn_exists_rdbm(dn, table_name):
+                    #    base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
+                    #    continue
+
+                    for lkey in entry:
+                        vals[lkey] = self.get_rdbm_val(lkey, entry[lkey], rdbm_type='spanner')
+
+
+                    columns = [ *vals.keys() ]
+                    values = [ vals[lkey] for lkey in columns ]
+
+                    data = {
+                      "singleUseTransaction": {
+                        "readWrite": {}
+                      },
+                      "mutations": [
+                        {
+                          "insertOrUpdate": {
+                            "table": table_name,
+                            "columns": columns,
+                            "values": [values]
+                          }
+                        }
+                      ]
+                    }
+
+                    self.spanner.put_data(data)
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
@@ -813,22 +919,24 @@ class DBUtils:
                 return static.BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
                 return static.BackendTypes.PGSQL
-        
+            elif Config.rdbm_type == 'spanner':
+                return static.BackendTypes.SPANNER
+
         if Config.mappingLocations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
 
 
     def checkCBRoles(self, buckets=[]):
-        
+
         self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
                             'query_update', 'query_insert',
                             'query_manage_index']
-        
+
         result = self.cbm.whoami()
         bc = buckets[:]
         bucket_roles = {}
         if 'roles' in result:
-            
+
             for role in result['roles']:
                 if role['role'] == 'admin':
                     Config.isCouchbaseUserAdmin = True
