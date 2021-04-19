@@ -247,7 +247,6 @@ def do_installation():
     try:
         jettyInstaller.calculate_selected_aplications_memory()
 
-        
         if not Config.installed_instance:
             jansInstaller.configureSystem()
             jansInstaller.make_salt()

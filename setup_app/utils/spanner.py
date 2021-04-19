@@ -14,6 +14,8 @@ class FakeResult:
     def json(self):
         return {'error': True}
 
+# TODO: add logging to all functions
+
 class Spanner:
 
     def __init__(self):
@@ -64,19 +66,15 @@ class Spanner:
 
     def create_table(self, cmd):
         data = {"statements": [cmd]}
-        #print(data)
-        print("CREATE TABLE", self.c)
+        base.logIt("CREATEING TABLE", cmd)
         self.c += 1
         query_url = os.path.join(self.spanner_dbase_url, 'ddl')
         req = requests.patch(query_url, data=json.dumps(data))
-        if 'error' in req.json():
-            print(req.json())
         return req
-
 
     def get_tables(self):
         query_url = os.path.join(self.spanner_dbase_url, 'ddl')
-        print(query_url)
+
         req = requests.get(query_url)
 
         tables = []

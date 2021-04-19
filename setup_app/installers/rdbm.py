@@ -32,7 +32,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def install(self):
         self.local_install()
         jans_schema_files = []
-        
+
         for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
             jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
 
@@ -40,7 +40,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
-        
 
     def local_install(self):
         if not Config.rdbm_password:
@@ -60,7 +59,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         ]
                     for cmd in sql_cmd_list:
                         self.run("echo \"{}\" | mysql".format(cmd), shell=True)
-        
+
             elif Config.rdbm_type == 'pgsql':
                 cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
                 cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
@@ -86,7 +85,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
 
             char_type = 'STRING' if Config.rdbm_type == 'spanner' else 'VARCHAR'
-            
+
             if type_['type'] in char_type:
                 if type_['size'] <= 127:
                     data_type = '{}({})'.format(char_type, type_['size'])
@@ -138,7 +137,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 cols_.append(attrname)
                 data_type = self.get_sql_col_type(attrname, sql_tbl_name)
-                
+
                 col_def = '{0}{1}{0} {2}'.format(qchar, attrname, data_type)
                 sql_tbl_cols.append(col_def)
 
@@ -262,7 +261,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 force = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
                 force = BackendTypes.PGSQL
+            elif Config.rdbm_type == 'spanner':
+                force = BackendTypes.SPANNER
             self.dbUtils.import_ldif([Config.ldif_base], force=force)
+
 
         self.dbUtils.import_ldif(ldif_files)
 
