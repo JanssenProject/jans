@@ -114,7 +114,7 @@ public class ConfigApiResourceProtectionService {
 
                     // Check in DB
                     log.trace("Verify Scope in DB - '" + scopeName);
-                    List<Scope> scopes = scopeService.searchScopesById(scopeName, 2);
+                    List<Scope> scopes = scopeService.searchScopesById(scopeName);
                     log.trace("Scopes from DB - '" + scopes);
 
                     if (scopes != null && !scopes.isEmpty()) {
