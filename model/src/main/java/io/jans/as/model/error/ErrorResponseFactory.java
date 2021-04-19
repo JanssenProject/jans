@@ -6,22 +6,12 @@
 
 package io.jans.as.model.error;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -32,6 +22,15 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides an easy way to get Error responses based in an error response type
@@ -43,7 +42,7 @@ import io.jans.as.model.util.Util;
  */
 public class ErrorResponseFactory implements Configuration {
 
-    private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
     private ErrorMessages messages;
     private AppConfiguration appConfiguration;
@@ -95,6 +94,25 @@ public class ErrorResponseFactory implements Configuration {
         final DefaultErrorResponse error = getErrorResponse(p_type);
         error.setReason(appConfiguration.getErrorReasonEnabled() ? reason : "");
         return error.toJSonString();
+    }
+
+    public void validateComponentEnabled(ComponentType componentType) {
+        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
+        if (enabledComponents.isEmpty()) { // no restrictions
+            return;
+        }
+
+        if (enabledComponents.contains(componentType)) { // component is enabled
+            return;
+        }
+
+        log.info("Component is disabled, type:" + componentType);
+
+        throw new WebApplicationException(Response
+                .status(Response.Status.FORBIDDEN)
+                .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Component is disabled on server."))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     public WebApplicationException createWebApplicationException(Response.Status status, IErrorType type, String reason) throws WebApplicationException {
