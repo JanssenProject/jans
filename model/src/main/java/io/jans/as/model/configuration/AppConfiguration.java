@@ -9,11 +9,7 @@ package io.jans.as.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
@@ -275,6 +271,8 @@ public class AppConfiguration implements Configuration {
     private int discoveryCacheLifetimeInMinutes = 60;
     private List<String> discoveryAllowedKeys;
 
+    private List<String> enabledComponents;
+
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
@@ -295,6 +293,19 @@ public class AppConfiguration implements Configuration {
 
     public void setDiscoveryAllowedKeys(List<String> discoveryAllowedKeys) {
         this.discoveryAllowedKeys = discoveryAllowedKeys;
+    }
+
+    public Set<ComponentType> getEnabledComponentTypes() {
+        return ComponentType.fromValues(getEnabledComponents());
+    }
+
+    public List<String> getEnabledComponents() {
+        if (enabledComponents == null) enabledComponents = new ArrayList<>();
+        return enabledComponents;
+    }
+
+    public void setEnabledComponents(List<String> enabledComponents) {
+        this.enabledComponents = enabledComponents;
     }
 
     public Boolean getUseNestedJwtDuringEncryption() {
