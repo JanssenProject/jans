@@ -48,4 +48,4 @@ Now selecting 1 and it returns our desired result as below image:
 
 ![default-authentication-method.png](docs/img/im-cur-default-auth.png)
 
-So, That was a quick start to view how this `_jans-cli_` Interactive Mode works. Please, follow this [link](docs) to read the `_jans-cli_` docs for a better understanding of the Janssen Command-Line.
+So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](docs) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
