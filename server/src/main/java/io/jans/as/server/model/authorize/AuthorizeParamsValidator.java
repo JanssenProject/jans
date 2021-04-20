@@ -9,9 +9,12 @@ package io.jans.as.server.model.authorize;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.Set;
  */
 public class AuthorizeParamsValidator {
 
+    private final static Logger log = LoggerFactory.getLogger(AuthorizeParamsValidator.class);
+
     /**
      * Validates the parameters for an authorization request.
      *
@@ -32,9 +37,15 @@ public class AuthorizeParamsValidator {
      * @return Returns <code>true</code> when all the parameters are valid.
      */
     public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
-                                         boolean fapiCompatibility) {
-        if (fapiCompatibility && responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
-            return false;
+                                         boolean fapiCompatibility, ResponseMode responseMode) {
+        if (fapiCompatibility) {
+            if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
+                return false;
+            }
+            if (responseMode == ResponseMode.QUERY) {
+                log.trace("ResponseMode=query is not allowed for FAPI.");
+                return false;
+            }
         }
 
         boolean existsNonce = StringUtils.isNotBlank(nonce);
