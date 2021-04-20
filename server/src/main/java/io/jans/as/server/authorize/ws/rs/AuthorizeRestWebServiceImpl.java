@@ -294,6 +294,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     }
                     if (jwtRequest.getResponseMode() != null) {
                         redirectUriResponse.getRedirectUri().setResponseMode(jwtRequest.getResponseMode());
+                        responseMode = jwtRequest.getResponseMode();
                     }
 
                     final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
