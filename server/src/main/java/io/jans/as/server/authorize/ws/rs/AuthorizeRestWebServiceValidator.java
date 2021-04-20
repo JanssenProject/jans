@@ -6,27 +6,6 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -44,6 +23,25 @@ import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -132,7 +130,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validate(List<io.jans.as.model.common.ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, io.jans.as.model.common.ResponseMode responseMode) {
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility())) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility(), responseMode)) {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
