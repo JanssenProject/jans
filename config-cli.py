@@ -1482,7 +1482,10 @@ class JCA_CLI:
             self.exit_with_error(str(e))
 
         try:
-            api_response = api_caller(body=body)
+            if suffix_param:
+                api_response = api_caller(body=body, **suffix_param)
+            else:
+                api_response = api_caller(body=body)
         except Exception as e:
             self.print_exception(e)
             sys.exit()
