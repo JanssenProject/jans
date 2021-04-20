@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
 
-<suite name="SCIM-Client v2.0" parallel="false">
+<suite name="SCIM-Client" parallel="false">
 
     <parameter name="propertiesFile" value="target/test-classes/testng2.properties" />
 
@@ -77,7 +77,7 @@
         </classes>
     </test>
 
-    <test name="Fido Devices Test" enabled="false">
+    <test name="Fido Devices Test" enabled="true">
         <classes>
             <class name="io.jans.scim2.client.singleresource.FidoU2fDeviceTest" />
             <class name="io.jans.scim2.client.singleresource.Fido2DeviceTest" />
