@@ -227,6 +227,7 @@ class PersonAuthentication(PersonAuthenticationType):
         ldapExtendedEntryManagers = []
         for ldapExtendedConfiguration in ldapExtendedConfigurations:
             connectionConfiguration = ldapExtendedConfiguration["connectionConfiguration"]
+            ldapConfiguration = ldapExtendedConfiguration["ldapConfiguration"]
 
             ldapProperties = Properties()
             for key, value in connectionConfiguration.items():
@@ -238,9 +239,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 ldapProperties.setProperty(persistenceType + "." + key, value_string)
 
+            if StringHelper.isNotEmptyString(ldapConfiguration.getBindPassword()):
+                ldapProperties.setProperty(persistenceType + ".bindPassword", ldapConfiguration.getBindPassword())
+
             ldapEntryManager = ldapEntryManagerFactory.createEntryManager(ldapProperties)
 
-            ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapExtendedConfiguration["ldapConfiguration"], "ldapProperties" : ldapProperties, "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
+            ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapConfiguration, "ldapProperties" : ldapProperties, "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
         
         return ldapExtendedEntryManagers
 
