@@ -42,7 +42,7 @@ class Spanner:
         requests.delete(self.sessioned_url)
 
     def exec_sql(self, cmd):
-        base.logit("Executing SQL query: {}".format(cmd))
+        base.logIt("Executing SQL query: {}".format(cmd))
         self.set_sessioned_url()
         data = {"sql": cmd}
         query_url = self.sessioned_url + ':executeSql'
@@ -57,9 +57,17 @@ class Spanner:
         self.del_sessioned_url()
         return req
 
-    def put_data(self, data):
+    def put_data(self, mutations):
         self.set_sessioned_url()
         query_url = self.sessioned_url + ':commit'
+
+        data = {
+                "singleUseTransaction": {
+                "readWrite": {}
+                },
+                "mutations": mutations
+                }
+        
         req = requests.post(query_url, data=json.dumps(data))
         self.del_sessioned_url()
         return req

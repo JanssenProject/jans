@@ -173,7 +173,7 @@ class DBUtils:
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
 
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
             dn = result['dn'] 
             oxAuthConfDynamic = json.loads(result['jansConfDyn'])
@@ -206,6 +206,22 @@ class DBUtils:
             sqlalchemyObj.jansConfDyn = json.dumps(oxAuthConfDynamic, indent=2)
             self.session.commit()
 
+        elif self.moddb in (BackendTypes.SPANNER):
+            dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
+            oxAuthConfDynamic.update(entries)
+            doc_id = self.get_doc_id_from_dn(dn)
+
+            mutations =  [{
+                        "update": {
+                            "table": "jansAppConf",
+                            "columns": ["doc_id", "jansConfDyn"],
+                            "values": [[doc_id,  oxAuthConfDynamic]]
+                            }
+                        }]
+
+
+            self.spanner.put_data(mutations)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
                 n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET jansConfDyn.{}={}'.format(self.default_bucket, k, json.dumps(entries[k]))
@@ -226,6 +242,21 @@ class DBUtils:
             sqlalchemyObj.jansEnabled = 1
             self.session.commit()
 
+        elif self.moddb == BackendTypes.SPANNER:
+            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+            table = self.get_spanner_table_for_dn(dn)
+            if table:
+                mutations =  [{
+                            "update": {
+                                "table": table,
+                                "columns": ["doc_id", "jansEnabled"],
+                                "values": [[inum, True]]
+                            }
+                        }]
+
+
+            self.spanner.put_data(mutations)
+
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
             self.cbm.exec_query(n1ql)
@@ -242,6 +273,20 @@ class DBUtils:
             sqlalchemyObj = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
             setattr(sqlalchemyObj, service, 1)
             self.session.commit()
+
+        elif self.moddb == BackendTypes.SPANNER:
+
+            mutations =  [{
+                            "update": {
+                                "table": "jansAppConf",
+                                "columns": ["doc_id", service],
+                                "values": [["jans-auth", True]]
+                                }
+                        }]
+
+
+            self.spanner.put_data(mutations)
+
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
@@ -263,6 +308,19 @@ class DBUtils:
             cur_val = getattr(sqlalchemyObj, component)
             setattr(sqlalchemyObj, component, value)
             self.session.commit()
+
+        elif self.moddb == BackendTypes.SPANNER:
+
+            mutations =  [{
+                            "update": {
+                                "table": "jansAppConf",
+                                "columns": ["doc_id", component],
+                                "values": [["jans-auth", value]]
+                            }
+                        }]
+
+            self.spanner.put_data(mutations)
+
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
@@ -328,8 +386,8 @@ class DBUtils:
                     documents.append((key, document))
                 return documents
 
-        if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            if self.Base is None:
+        if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
+            if backend_location != BackendTypes.SPANNER and self.Base is None:
                 self.rdm_automapper()
 
             s_table = None
@@ -357,6 +415,51 @@ class DBUtils:
 
             if not s_table:
                 return
+
+            if backend_location == BackendTypes.SPANNER:
+
+                for col, val in search_list:
+                    if val == '*':
+                        continue
+                    
+                    if col.lower() == 'objectclass':
+                        s_table = val
+                    else:
+                        val = val.replace('*', '%')
+                        q_operator = 'LIKE' if '%' in val else '='
+                        where_clause = 'AND {} {} "{}"'.format(col, q_operator, val)
+
+                if not s_table:
+                    return
+
+                if search_scope == ldap3.BASE:
+                    dn_clause = 'dn = "{}"'.format(search_base)
+                else:
+                    dn_clause = 'dn LIKE "%{}"'.format(search_base)
+
+                sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
+
+                req = self.spanner.exec_sql(sql_cmd)
+
+                data_dict = {}
+                if not req.ok:
+                    return data_dict
+
+                data = req.json()
+
+                if not 'rows' in data:
+                     return data_dict
+
+                for i, field in enumerate(data['metadata']['rowType']['fields']):
+                    val = data['rows'][0][i]
+                    if val:
+                        if field['type']['code'] == 'INT64':
+                            val = int(val)
+
+                    data_dict[field['name']] = val
+
+                return data_dict
+
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
@@ -497,20 +600,16 @@ class DBUtils:
             if not added:
                 jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-            update_data = {
-                            "singleUseTransaction": {
-                            "readWrite": {}
-                            },
-                            "mutations": [{
-                                "update": {
-                                    "table": "jansCustomScr",
-                                    "columns": ["doc_id", "jansConfProperty"],
-                                    "values": [[script_inum,  jansConfProperty]]
-                                    }
-                            }]
-                        }
+            mutations =  [{
+                            "update": {
+                                "table": "jansCustomScr",
+                                "columns": ["doc_id", "jansConfProperty"],
+                                "values": [[script_inum,  jansConfProperty]]
+                            }
+                        }]
 
-            self.spanner.put_data(update_data)
+
+            self.spanner.put_data(mutations)
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
@@ -665,6 +764,20 @@ class DBUtils:
 
         return objectClass
 
+    def get_doc_id_from_dn(self, dn):
+        dn_parsed = dnutils.parse_dn(dn)
+        return dn_parsed[0][1]
+
+    def get_spanner_table_for_dn(self, dn):
+        tables = self.spanner.get_tables()
+
+        for table in tables:
+            sql_cmd = 'SELECT doc_id FROM {} WHERE dn="{}"'.format(table, dn)
+            result = self.spanner.exec_sql(sql_cmd)
+            if result.ok:
+                data = result.json()
+                if 'rows' in data:
+                    return table
 
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
@@ -778,54 +891,82 @@ class DBUtils:
 
                 elif backend_location == BackendTypes.SPANNER:
 
-                    vals = {}
-                    dn_parsed = dnutils.parse_dn(dn)
-                    rdn_name = dn_parsed[0][0]
-                    objectClass = objectClass = self.get_clean_objcet_class(entry)
-                    if objectClass.lower() == 'organizationalunit':
-                        continue
+                    if 'add' in  entry and 'changetype' in entry:
+                        table = self.get_spanner_table_for_dn(dn)
+                        doc_id = self.get_doc_id_from_dn(dn)
+                        change_attr = entry['add'][0]
+                        if table:
+                            doc_id = self.get_doc_id_from_dn(dn)
+                            req = self.spanner.exec_sql('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
+                            if req.ok:
+                                data = req.json()
+                                cur_data = []
+                                
+                                if 'rows' in data and data['rows'] and data['rows'][0]:
+                                    cur_data = data['rows'][0][0]
+                                cur_data += entry[change_attr]
+    
+                            mutations =  [{
+                              "insertOrUpdate": {
+                                "table": table,
+                                "columns": ["doc_id", change_attr],
+                                "values": [[doc_id, cur_data]]
+                              }
+                            }]
 
-                    vals['doc_id'] = dn_parsed[0][1]
-                    vals['dn'] = dn
-                    vals['objectClass'] = objectClass
+                        self.spanner.put_data(mutations)
 
-                    if 'objectClass' in entry:
-                        entry.pop('objectClass')
-                    elif 'objectclass' in entry:
-                        entry.pop('objectclass')
+                    elif 'replace' in entry and 'changetype' in entry:
+                        table = self.get_spanner_table_for_dn(dn)
+                        doc_id = self.get_doc_id_from_dn(dn)
+                        replace_attr = entry['replace'][0]
+                        replace_val = entry[replace_attr][0]
 
-                    table_name = objectClass
+                        if table:
+                            mutations =  [{
+                              "insertOrUpdate": {
+                                "table": table,
+                                "columns": ["doc_id", replace_attr],
+                                "values": [[doc_id, replace_val]]
+                              }
+                            }]
 
+                        self.spanner.put_data(mutations)
 
+                    else:
+                        vals = {}
+                        dn_parsed = dnutils.parse_dn(dn)
+                        rdn_name = dn_parsed[0][0]
+                        objectClass = objectClass = self.get_clean_objcet_class(entry)
+                        if objectClass.lower() == 'organizationalunit':
+                            continue
 
+                        vals['doc_id'] = dn_parsed[0][1]
+                        vals['dn'] = dn
+                        vals['objectClass'] = objectClass
 
-                    #if self.dn_exists_rdbm(dn, table_name):
-                    #    base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
-                    #    continue
+                        if 'objectClass' in entry:
+                            entry.pop('objectClass')
+                        elif 'objectclass' in entry:
+                            entry.pop('objectclass')
 
-                    for lkey in entry:
-                        vals[lkey] = self.get_rdbm_val(lkey, entry[lkey], rdbm_type='spanner')
+                        table_name = objectClass
 
+                        for lkey in entry:
+                            vals[lkey] = self.get_rdbm_val(lkey, entry[lkey], rdbm_type='spanner')
 
-                    columns = [ *vals.keys() ]
-                    values = [ vals[lkey] for lkey in columns ]
+                        columns = [ *vals.keys() ]
+                        values = [ vals[lkey] for lkey in columns ]
 
-                    data = {
-                      "singleUseTransaction": {
-                        "readWrite": {}
-                      },
-                      "mutations": [
-                        {
-                          "insertOrUpdate": {
-                            "table": table_name,
-                            "columns": columns,
-                            "values": [values]
-                          }
-                        }
-                      ]
-                    }
+                        mutations =  [{
+                              "insertOrUpdate": {
+                                "table": table_name,
+                                "columns": columns,
+                                "values": [values]
+                              }
+                            }]
 
-                    self.spanner.put_data(data)
+                        self.spanner.put_data(mutations)
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
