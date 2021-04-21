@@ -1,4 +1,4 @@
-# Using jans-cli
+# jans-cli
 
 `jans-cli` is automatically installed if you choose to install **jans-config-api** during the installation of the Janssen Server. `jans-cli` has two modes of operation:
 
@@ -7899,5 +7899,20 @@ Server Response:
 root@testjans:~# 
   ```
 
-That's hwo we can update a grou using this operation method.
+That's hwo we can update a group using this operation method.
+Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try `patch-group-by-id`.
+
+5. **_delete-group-by-id_**
+
+You can delete a group by its ID. The command line looks like:
+```
+/opt/jans/jans-cli/scim-cli.py --operation-id delete-group-by-id --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
+```
+It will delete the group and all of its data matched with the unique ID.
+
+```
+root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id delete-group-by-id --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
+
+Getting access token for scope https://jans.io/scim/groups.write
+```
 
