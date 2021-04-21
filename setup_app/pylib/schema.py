@@ -80,7 +80,7 @@ AttributeUsage = {
 
 class AttributeType:
 
-    def __init__(self, s):
+    def __init__(self, s=''):
         token_defaults = {
             'NAME':(()),
             'DESC':(None,),
@@ -99,30 +99,32 @@ class AttributeType:
             'X-RDBM-ADD': (None,),
           }
 
-        l = split_tokens(s)
-        self.oid = l[1]
-        self.tokens = extract_tokens(l, token_defaults)
+        if s:
 
-        try:
-          syntax = self.tokens['SYNTAX'][0]
-        except IndexError:
-          self.syntax = None
-          self.syntax_len = None
-        else:
-          if syntax is None:
-            self.syntax = None
-            self.syntax_len = None
-          else:
+            l = split_tokens(s)
+            self.oid = l[1]
+            self.tokens = extract_tokens(l, token_defaults)
+
             try:
-              self.syntax,syntax_len = self.tokens['SYNTAX'][0].split("{")
-            except ValueError:
-              self.syntax = self.tokens['SYNTAX'][0]
+              syntax = self.tokens['SYNTAX'][0]
+            except IndexError:
+              self.syntax = None
               self.syntax_len = None
-              for i in l:
-                if i.startswith("{") and i.endswith("}"):
-                  self.syntax_len=long(i[1:-1])
             else:
-              self.syntax_len = long(syntax_len[:-1])
+              if syntax is None:
+                self.syntax = None
+                self.syntax_len = None
+              else:
+                try:
+                  self.syntax,syntax_len = self.tokens['SYNTAX'][0].split("{")
+                except ValueError:
+                  self.syntax = self.tokens['SYNTAX'][0]
+                  self.syntax_len = None
+                  for i in l:
+                    if i.startswith("{") and i.endswith("}"):
+                      self.syntax_len=int(i[1:-1])
+                else:
+                  self.syntax_len = int(syntax_len[:-1])
 
 
     def key_attr(self, key, value, quoted=0):
