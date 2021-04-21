@@ -8,7 +8,6 @@ This module contains various helpers.
 import base64
 import contextlib
 import json
-import os
 import pathlib
 import random
 import re
@@ -17,24 +16,23 @@ import socket
 import ssl
 import string
 import subprocess
-from datetime import datetime
-from datetime import timedelta
-from ipaddress import IPv4Address
 from typing import Any
 from typing import AnyStr
 from typing import Tuple
 
+from cryptography import x509
 from cryptography.hazmat.primitives.ciphers import Cipher
 from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import NameOID
 from ldap3.utils import hashed
+
+from jans.pycloudlib.pki import generate_private_key
+from jans.pycloudlib.pki import generate_public_key
+from jans.pycloudlib.pki import generate_csr
+from jans.pycloudlib.pki import sign_csr
 
 # Default charset
 _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
@@ -295,95 +293,25 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
 def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
                          state, city, base_dir="/etc/certs",
                          extra_dns=None, extra_ips=None):
-    backend = default_backend()
+    key_fn = f"{base_dir}/{suffix}.key"
+    priv_key = generate_private_key(key_fn)
 
-    # generate key
-    key = rsa.generate_private_key(
-        public_exponent=65537, key_size=2048, backend=backend,
+    cert_fn = f"{base_dir}/{suffix}.crt"
+    generate_public_key(
+        cert_fn,
+        priv_key,
+        add_san=True,
+        add_key_usage=True,
+        hostname=hostname,
+        country_code=country_code,
+        state=state,
+        city=city,
+        email=email,
+        org_name=org_name,
+        extra_dns=extra_dns,
+        extra_ips=extra_ips,
     )
-
-    # generate cert
-    subject = issuer = x509.Name([
-        x509.NameAttribute(NameOID.COUNTRY_NAME, country_code),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, city),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org_name),
-        x509.NameAttribute(NameOID.COMMON_NAME, hostname),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
-    ])
-
-    # SANs
-    extra_dns = extra_dns or []
-    extra_ips = extra_ips or []
-
-    sans = [
-        x509.DNSName(hostname),  # added to SAN due to issue in Golang
-        x509.DNSName(suffix),
-    ]
-
-    # add Domains to SAN
-    for dn in extra_dns:
-        sans.append(x509.DNSName(dn))
-
-    # add IPs to SAN
-    for ip in extra_ips:
-        sans.append(x509.IPAddress(IPv4Address(ip)))
-
-    # make SANs unique
-    sans = list(set(sans))
-
-    now = datetime.utcnow()
-
-    cert = x509.CertificateBuilder().subject_name(
-        subject
-    ).issuer_name(
-        issuer
-    ).public_key(
-        key.public_key()
-    ).serial_number(
-        x509.random_serial_number()
-    ).not_valid_before(
-        now
-    ).not_valid_after(
-        now + timedelta(days=365)
-    ).add_extension(
-        x509.BasicConstraints(ca=False, path_length=None),
-        critical=False,
-    ).add_extension(
-        x509.SubjectAlternativeName(sans),
-        critical=False,
-    ).add_extension(
-        x509.KeyUsage(
-            digital_signature=True,
-            content_commitment=True,
-            key_encipherment=True,
-            data_encipherment=False,
-            key_agreement=False,
-            key_cert_sign=False,
-            crl_sign=False,
-            encipher_only=False,
-            decipher_only=False,
-        ),
-        critical=False,
-    ).sign(key, hashes.SHA256(), backend=backend)
-
-    # write cert and key to file
-    cert_file = os.path.join(base_dir, f"{suffix}.crt")
-    with open(cert_file, "wb") as f:
-        cert_pem = cert.public_bytes(serialization.Encoding.PEM)
-        f.write(cert_pem)
-
-    key_file = os.path.join(base_dir, f"{suffix}.key")
-    with open(key_file, "wb") as f:
-        key_pem = key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption(),
-        )
-        f.write(key_pem)
-
-    # paths to cert and key respectively
-    return cert_file, key_file
+    return cert_fn, key_fn
 
 
 def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias=""):
@@ -432,3 +360,62 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
     if retcode != 0:
         err = err or out
         raise RuntimeError(f"Failed to generate JKS keystore {jks_fn}; reason={err.decode()}")
+
+
+def generate_ssl_ca_certkey(suffix, email, hostname, org_name, country_code,
+                            state, city, base_dir="/etc/certs"):
+
+    key_fn = f"{base_dir}/{suffix}.key"
+    priv_key = generate_private_key(key_fn)
+
+    cert_fn = f"{base_dir}/{suffix}.crt"
+    generate_public_key(
+        cert_fn,
+        priv_key,
+        is_ca=True,
+        hostname=hostname,
+        country_code=country_code,
+        state=state,
+        city=city,
+        email=email,
+        org_name=org_name,
+    )
+    return cert_fn, key_fn
+
+
+def generate_signed_ssl_certkey(suffix, ca_key_fn, ca_cert_fn, email, hostname, org_name,
+                                country_code, state, city, base_dir="/etc/certs",
+                                extra_dns=None, extra_ips=None):
+    key_fn = f"{base_dir}/{suffix}.key"
+    priv_key = generate_private_key(key_fn)
+
+    csr_fn = f"{base_dir}/{suffix}.csr"
+    csr = generate_csr(
+        csr_fn,
+        priv_key,
+        add_san=True,
+        add_key_usage=True,
+        hostname=hostname,
+        country_code=country_code,
+        state=state,
+        city=city,
+        email=email,
+        org_name=org_name,
+        extra_dns=extra_dns,
+        extra_ips=extra_ips,
+    )
+
+    cert_fn = f"{base_dir}/{suffix}.crt"
+
+    with open(ca_key_fn, "rb") as f:
+        ca_key = serialization.load_pem_private_key(
+            f.read(),
+            None,
+            default_backend(),
+        )
+
+    with open(ca_cert_fn, "rb") as f:
+        ca_cert = x509.load_pem_x509_certificate(f.read())
+
+    sign_csr(cert_fn, csr, ca_key, ca_cert)
+    return cert_fn, key_fn

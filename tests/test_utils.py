@@ -198,3 +198,58 @@ def test_generate_ssl_certkey(tmpdir):
     )
     assert os.path.isfile(str(base_dir.join("my-suffix.crt")))
     assert os.path.isfile(str(base_dir.join("my-suffix.key")))
+
+
+def test_generate_ssl_ca_certkey(tmpdir):
+    from jans.pycloudlib.utils import generate_ssl_ca_certkey
+
+    base_dir = tmpdir.mkdir("certs")
+    cert, key = generate_ssl_ca_certkey(
+        "cert-auth",
+        "email@org.local",
+        "my.org.local",
+        "org",
+        "US",
+        "TX",
+        "Austin",
+        base_dir=str(base_dir),
+    )
+    assert os.path.isfile(str(base_dir.join("cert-auth.crt")))
+    assert os.path.isfile(str(base_dir.join("cert-auth.key")))
+
+
+def test_generate_signed_ssl_certkey(tmpdir):
+    from jans.pycloudlib.utils import generate_ssl_ca_certkey
+    from jans.pycloudlib.utils import generate_signed_ssl_certkey
+
+    base_dir = tmpdir.mkdir("certs")
+
+    ca_cert, ca_key = generate_ssl_ca_certkey(
+        "cert-auth",
+        "email@org.local",
+        "my.org.local",
+        "org",
+        "US",
+        "TX",
+        "Austin",
+        base_dir=str(base_dir),
+    )
+
+    cert, key = generate_signed_ssl_certkey(
+        "my-suffix",
+        ca_key,
+        ca_cert,
+        "email@org.local",
+        "my.org.local",
+        "org",
+        "US",
+        "TX",
+        "Austin",
+        base_dir=str(base_dir),
+        extra_dns=["custom.org.local"],
+        extra_ips=["127.0.0.1"],
+    )
+
+    assert os.path.isfile(str(base_dir.join("my-suffix.crt")))
+    assert os.path.isfile(str(base_dir.join("my-suffix.csr")))
+    assert os.path.isfile(str(base_dir.join("my-suffix.key")))
