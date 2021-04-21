@@ -41,13 +41,14 @@ class UpdateToken(UpdateTokenType):
 			openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
 			acr = sessionId.getSessionAttributes().get("acr_ob")
 
+            # header claims
 			#jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
 			
 			#custom claims
 			jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id)
 			
 			#regular claims        
-			jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
+			#jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
 
 			print "Update token script. After modify idToken: %s" % jsonWebResponse
 		
