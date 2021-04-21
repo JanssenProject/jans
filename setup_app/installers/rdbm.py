@@ -106,7 +106,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         tables = []
         all_schema = {}
         all_attribs = {}
-        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD {};' % (qchar, qchar)
+        column_add = 'COLUMN ' if Config.rdbm_type == 'spanner' else ''
+        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD %s{};' % (qchar, qchar, column_add)
 
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
@@ -164,7 +165,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 data_type = self.get_sql_col_type(attrname, sql_tbl_name)
                 col_def = '{0}{1}{0} {2}'.format(qchar, attrname, data_type)
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
-                self.dbUtils.exec_rdbm_query(sql_cmd)
+
+                if Config.rdbm_type == 'spanner':
+                    req = self.dbUtils.spanner.create_table(sql_cmd.strip(';'))
+                else:
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
