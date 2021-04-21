@@ -18,11 +18,15 @@ from utils import get_injected_urls
 def render_app_properties(manager):
     client_id = manager.config.get("jca_client_id")
     client_encoded_pw = manager.secret.get("jca_client_encoded_pw")
+    hostname = manager.config.get("hostname")
+
+    approved_issuer = os.environ.get("CN_APPROVED_ISSUER") or f"https://{hostname}"
 
     ctx = {
         "jca_log_level": os.environ.get("CN_CONFIG_API_LOG_LEVEL", "INFO"),
         "jca_client_id": client_id,
         "jca_client_encoded_pw": client_encoded_pw,
+        "approved_issuer": approved_issuer,
     }
     ctx.update(get_injected_urls())
 
