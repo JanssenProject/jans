@@ -74,8 +74,7 @@ class Spanner:
 
     def create_table(self, cmd):
         data = {"statements": [cmd]}
-        base.logIt("CREATEING TABLE", cmd)
-        self.c += 1
+        base.logIt("TABLE OPERATION: {}".format(cmd))
         query_url = os.path.join(self.spanner_dbase_url, 'ddl')
         req = requests.patch(query_url, data=json.dumps(data))
         return req
