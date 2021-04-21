@@ -4,15 +4,18 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.SecurityProviderUtility;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 
 import static org.testng.Assert.assertEquals;
 
@@ -41,5 +44,22 @@ public class DcrDemo extends BaseTest {
         SecurityProviderUtility.installBCProvider(true);
         final JSONObject keys = JwtUtil.getJSONWebKeys("https://keystore.openbankingtest.org.uk/keystore/openbanking.jwks");
         System.out.println(keys);
+    }
+
+    @Test
+    public void certParse() throws UnsupportedEncodingException {
+        SecurityProviderUtility.installBCProvider(true);
+        String cert = "-----BEGIN%20CERTIFICATE-----%0AMIIDJzCCAg8CCQCp6GMQxw8GgzANBgkqhkiG9w0BAQsFADB3MQswCQYDVQQGEwJV%0AUzELMAkGA1UECAwCVFgxDzANBgNVBAcMBkF1c3RpbjEYMBYGA1UECgwPSmFuc3Nl%0Ab" +
+                "iBQcm9qZWN0MRMwEQYDVQQDDApKYW5zc2VuIENBMRswGQYJKoZIhvcNAQkBFgxz%0AQGphbnMubG9jYWwwHhcNMjEwNDIwMTg1NjM4WhcNMjIwNDIwMTg1NjM4WjA0MTIw%0AMAYDVQQDDCkxODAxL" +
+                "jdmNzM0OGQ4LWFjOWUtNDk1MS1hYmRmLWYyMjUzNzhmMzJm%0AZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdQcPocZ3rmmly1LLxQ%0AdUk0VcKq3uuR3qYd1%2BtISpWVOMVTuIh" +
+                "z8j9286WfcFMyzQKDRHJCsYiCCKsenuBs%0ABE98nYmIqVOnJxYMBue9IDIYi9I5njzPy9pWnisCG5fKjHmnP288ifrEtwXESzw2%0AeQViZL0sgdo1ziPXyV5kaYjOgApWY56PE%2Fvuv3%2BXxJ2" +
+                "iMzdEz6yOtOmJMHE3ZZCu%0AruhW5AGIwg6KazgaNoKWil8%2Bu8%2FZqruUdErvN21oXWFJWFrh%2FrSQq96V7S8e0nPF%0AgLLpeH%2FYGWHmVGS77XPz2c6XhQM0uRCIBcuvnvJeQyvZxrlHetU" +
+                "WBYG8n7d1ZSer%0AYEkCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAbtaPcipL7GpLtQqY47DpV6jsQl9n%0Aws9url8SpKThIuATRw77Cj4XjL2DkNxANDTaueobQkt4vFw1edfbwExvavUpmsnR%0A" +
+                "WeBtKMHDNEN%2BfCyBbhBi67K1ArZHkx5OWLERd4qL64T5CiAwWXVbE3gCaXMV9%2FA3%0A8%2FVvly5b4YRojK5UrpPIyG5gnE8YGVS7p3n4aIZ5r3%2FynPvFwwTCIIlPdctOABQU%0AfIctm8i8" +
+                "%2FCHhdqFVvVxa0oZ9sTr4VJ3%2FKw41M9pI%2BzY754tjrnadGBSO%2FtIibjjI%0AScr80QwkiP7Cq6LRDT3VUok2OighFFAmyAfZQg9qR5udbMd%2BDynAyvJjBQ%3D%3D%0A-----END%20CER" +
+                "TIFICATE-----%0A";
+
+        final X509Certificate x509Certificate = CertUtils.x509CertificateFromPem(cert);
+        System.out.println(x509Certificate);
     }
 }
