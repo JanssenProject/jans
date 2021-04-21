@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
+import static org.junit.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -60,6 +61,6 @@ public class DcrDemo extends BaseTest {
                 "TIFICATE-----%0A";
 
         final X509Certificate x509Certificate = CertUtils.x509CertificateFromPem(cert);
-        System.out.println(x509Certificate);
+        assertNotNull(x509Certificate);
     }
 }
