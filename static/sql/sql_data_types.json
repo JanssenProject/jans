@@ -160,13 +160,12 @@
   },
   "jansDbAuth": {
     "mysql": {
-      "type": "TEXT"
+      "type": "JSON"
     }
   },
   "jansDocStoreConf": {
     "mysql": {
-      "size": 256,
-      "type": "VARCHAR"
+      "type": "TEXT"
     }
   },
   "jansGrantTyp": {
@@ -426,7 +425,7 @@
   },
   "nnc": {
     "mysql": {
-      "type": "TINYTEXT"
+      "type": "TEXT"
     },
     "pgsql": {
       "type": "TEXT"
