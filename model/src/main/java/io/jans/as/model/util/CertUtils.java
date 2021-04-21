@@ -6,12 +6,6 @@
 
 package io.jans.as.model.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,6 +17,13 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -53,6 +54,23 @@ public class CertUtils {
      * @return x509 certificate
      */
     public static X509Certificate x509CertificateFromPem(String pem) {
+        try {
+            final X509Certificate result = x509CertificateFromPemInternal(pem);
+            if (result != null) {
+                return result;
+            }
+        } catch (Exception e) {
+            log.trace("Failed to parse pem. " + e.getMessage() + ", trying to url decode it.");
+        }
+        try {
+            return x509CertificateFromPemInternal(URLDecoder.decode(pem, Util.UTF8_STRING_ENCODING));
+        } catch (Exception e) {
+            log.error("Failed to parse pem", e);
+            return null;
+        }
+    }
+
+    private static X509Certificate x509CertificateFromPemInternal(String pem) {
         pem = StringUtils.remove(pem, "-----BEGIN CERTIFICATE-----");
         pem = StringUtils.remove(pem, "-----END CERTIFICATE-----");
         return x509CertificateFromBytes(Base64.decode(pem));
@@ -63,14 +81,22 @@ public class CertUtils {
             return "";
         }
         try {
-            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
-            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
-            certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
-            return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+            return confirmationMethodHashS256Internal(certificateAsPem);
         } catch (Exception e) {
-            log.error("Failed to hash certificate: " + certificateAsPem, e);
-            return "";
+            try {
+                return confirmationMethodHashS256Internal(URLDecoder.decode(certificateAsPem, Util.UTF8_STRING_ENCODING));
+            } catch (Exception ex) {
+                log.error("Failed to hash certificate: " + certificateAsPem, ex);
+                return "";
+            }
         }
+    }
+
+    private static String confirmationMethodHashS256Internal(String certificateAsPem) {
+        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
+        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
+        certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
+        return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
     }
 
     @NotNull
