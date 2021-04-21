@@ -7835,7 +7835,7 @@ root@testjans:~#
   ```
   4. **_update-group-by-id_**:
 
-  If we look at the description
+  If we look at the description, We see this op-mode needs `url-suffix` as `id` and `schema` definition for data. 
 
   ```
     Operation ID: update-group-by-id
@@ -7852,5 +7852,52 @@ root@testjans:~#
     id: No description is provided for this parameter [string]
     Schema: /components/schemas/GroupResource
   ```
-  
+
+  Let's get the schema first:
+
+  ```
+  /opt/jans/jans-cli/scim-cli.py --schema /components/schemas/GroupResource > /tmp/group.json
+  ```
+
+  let's modify this schema to add members into a selected group:
+
+  ![](img/cl-scim-group-update.png)
+
+  - displayName: It should be a group name
+  - id: Selected group id which one you want to updae
+  - meta: Meta data of the selected group
+
+  Now let's add this member into the group we are going to update.
+
+  ```
+  root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id update-group-by-id --data /tmp/group.json --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
+
+Getting access token for scope https://jans.io/scim/groups.write
+Server Response:
+{
+  "displayName": "Test Janssen Server",
+  "members": [
+    {
+      "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/null",
+      "type": "User",
+      "display": null,
+      "value": null
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Group"
+  ],
+  "id": "56030854-2784-408e-8fa7-e11835804ac7",
+  "meta": {
+    "resourceType": "Group",
+    "created": "2021-04-19T22:15:15.151Z",
+    "lastModified": "2021-04-21T16:22:24.085Z",
+    "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/56030854-2784-408e-8fa7-e11835804ac7"
+  }
+}
+
+root@testjans:~# 
+  ```
+
+That's hwo we can update a grou using this operation method.
 
