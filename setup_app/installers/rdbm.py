@@ -157,6 +157,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
+        # TODO: Implement for spanner
         for attrname in all_attribs:
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
