@@ -41,7 +41,7 @@ jobs:
         sudo helm repo add bitnami https://charts.bitnami.com/bitnami
         sudo microk8s.kubectl get po
         sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$PWD/config"
-        sudo microk8s kubectl get po --kubeconfig="$PWD/config" -n jans|| echo "Not Found"
+        sudo microk8s kubectl get po --kubeconfig="$PWD/config" -n jans || echo "Not Found"
         sleep 30
         sudo microk8s kubectl get po --kubeconfig="$PWD/config" -n jans || echo "Not Found"
         sleep 30

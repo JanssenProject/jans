@@ -1,17 +1,39 @@
+kubeVersion: ">=v1.17.0-0"
+annotations:
+  artifacthub.io/changes: |
+    - Janssen 1.0 under dev charts
+  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/images: |
+    - name: auth-server
+      image: janssenproject/auth-server:1.0.0_dev
+    - name: auth-server-key-rotation
+      image: janssenproject/certmanager:1.0.0_dev
+    - name:  client-api
+      image: janssenproject/client-api:1.0.0_dev
+    - name: configuration-manager
+      image: janssenproject/configuration-manager:1.0.0_dev
+    - name:  config-api
+      image: janssenproject/config-api:1.0.0_dev
+    - name: fido2
+      image: janssenproject/fido2:1.0.0_dev
+    - name: opendj
+      image: janssenproject/opendj:5.0.0_dev
+    - name: persistence
+      image: janssenproject/persistence-loader:1.0.0_dev
+    - name: scim
+      image: janssenproject/scim:1.0.0_dev
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/prerelease: "true"
 apiVersion: v2
 appVersion: "1.0.0-a4"
-maintainers:
-- name: moabu
-  email: mo@gluu.org
 icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
 home: https://github.com/JanssenProject/jans-cloud-native
 sources:
   - https://github.com/JanssenProject/jans-cloud-native/charts
+maintainers:
+- name: moabu
+  email: mo@gluu.org
 description: Janssen Authorization server
-kubeVersion: ">=v1.17.0-0"
-annotations:
-  artifacthub.io/license: Apache-2.0
-  artifacthub.io/prerelease: "true"
 name: jans
 version: 1.0.0-a4
 dependencies:

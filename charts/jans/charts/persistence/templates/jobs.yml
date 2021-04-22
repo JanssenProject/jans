@@ -16,6 +16,11 @@ spec:
         APP_NAME: persistence-loader
         app: {{ include "persistence.name" . }}
     spec:
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       restartPolicy: Never
       containers:
       - name: {{ include "persistence.name" . }}
