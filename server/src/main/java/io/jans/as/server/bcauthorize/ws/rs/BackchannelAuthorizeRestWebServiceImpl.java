@@ -6,39 +6,12 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNAUTHORIZED_END_USER_DEVICE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import io.jans.as.client.JwkClient;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
@@ -68,6 +41,27 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.*;
 
 /**
  * Implementation for request backchannel authorization through REST web services.
@@ -140,14 +134,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         log.debug("Attempting to request backchannel authorization: "
                 + "isSecure = {}", securityContext.isSecure());
 
-        Response.ResponseBuilder builder = Response.ok();
+        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
 
-        if (!appConfiguration.getCibaEnabled()) {
-            log.warn("Trying to register a CIBA request, however CIBA config is disabled.");
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            return builder.build();
-        }
+        Response.ResponseBuilder builder = Response.ok();
 
         SessionClient sessionClient = identity.getSessionClient();
         Client client = null;
