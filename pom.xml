@@ -1,118 +1,195 @@
-<?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>io.jans</groupId>
-	<artifactId>jans-config-api-parent</artifactId>
-	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
-	<name>jans-config-api-parent</name>
-
-	<properties>
-		<maven.min.version>3.3.9</maven.min.version>
-		<maven.assembly.version>3.3.0</maven.assembly.version>
-		<maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-		<maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
-		<maven.compiler.parameters>true</maven.compiler.parameters>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  	
+  <modelVersion>4.0.0</modelVersion>
+  	
+  <groupId>io.jans</groupId>
+  	
+  <artifactId>jans-config-api-parent</artifactId>
+  	
+  <packaging>pom</packaging>
+  	
+  <version>1.0.0-SNAPSHOT</version>
+  	
+  <name>jans-config-api-parent</name>
+  	
+  <properties>
+    		
+    <maven.min.version>3.3.9</maven.min.version>
+    		
+    <maven.assembly.version>3.3.0</maven.assembly.version>
+    		
+    <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+    		
+    <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
+    		
+    <maven.compiler.parameters>true</maven.compiler.parameters>
+    		
+    <maven.compiler.source>11</maven.compiler.source>
+    		
+    <maven.compiler.target>11</maven.compiler.target>
+    		
+    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+    		
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    		
+    <project.reporting.outputEncoding>UTF-8
 		</project.reporting.outputEncoding>
-
-		<jans.version>1.0.0-SNAPSHOT</jans.version>
-		<weld.version>3.1.2.Final</weld.version>
-		<jackson.version>2.10.1</jackson.version>
-		<jackson.databind.version>2.10.1</jackson.databind.version>
-		<jettison.version>1.3.2</jettison.version>
-
+    		
+    <jans.version>1.0.0-SNAPSHOT</jans.version>
+    		
+    <weld.version>3.1.2.Final</weld.version>
+    		
+    <jackson.version>2.10.1</jackson.version>
+    		
+    <jackson.databind.version>2.10.1</jackson.databind.version>
+    		
+    <jettison.version>1.3.2</jettison.version>
+    	
+		
+    <resteasy.version>3.0.21.Final</resteasy.version>
+    		
+    <jettison.version>1.3.8</jettison.version>
+    		
+    <jacoco.version>0.8.5</jacoco.version>
+    		
+    <karate.version>0.9.5</karate.version>
+    		
+    <json-patch-version>1.12</json-patch-version>
+    	
+  </properties>
+  	
+  <prerequisites>
+    		
+    <maven>${maven.min.version}</maven>
+    	
+  </prerequisites>
+  	
+  <scm>
+    		
+    <url>https://github.com/JanssenProject/jans-config-api</url>
+    		
+    <connection>scm:git:git://github.com/JanssenProject/jans-config-api.git</connection>
+    		
+    <developerConnection>scm:git:git@github.com:JanssenProject/jans-config-api.git</developerConnection>
+    	
+  </scm>
+  	
 
 	
-		<resteasy.version>3.0.21.Final</resteasy.version>
-		<jettison.version>1.3.8</jettison.version>
-		<jacoco.version>0.8.5</jacoco.version>
-		<karate.version>0.9.5</karate.version>
-		<json-patch-version>1.12</json-patch-version>
-	</properties>
-
-	<prerequisites>
-		<maven>${maven.min.version}</maven>
-	</prerequisites>
-
-	<scm>
-		<url>https://github.com/JanssenProject/jans-config-api</url>
-		<connection>scm:git:git://github.com/JanssenProject/jans-config-api.git</connection>
-		<developerConnection>scm:git:git@github.com:JanssenProject/jans-config-api.git</developerConnection>
-	</scm>
-
-	<modules>
-		<module>app</module>
-		<module>auth</module>
-	</modules>
-
-	<repositories>
-		<repository>
-			<id>mavencentral</id>
-			<name>maven central</name>
-			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
-		</repository>
-		<repository>
-			<id>bouncycastle</id>
-			<name>Bouncy Castle</name>
-			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
-		</repository>
-	</repositories>
-
-	<dependencyManagement>
-		<dependencies>
-		
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-bom</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
+  <repositories>
+    		
+    <repository>
+      			
+      <id>mavencentral</id>
+      			
+      <name>maven central</name>
+      			
+      <url>https://repo1.maven.org/maven2</url>
+      		
+    </repository>
+    		
+    <repository>
+      			
+      <id>jans</id>
+      			
+      <name>Janssen project repository</name>
+      			
+      <url>https://maven.jans.io/maven</url>
+      		
+    </repository>
+    		
+    <repository>
+      			
+      <id>bouncycastle</id>
+      			
+      <name>Bouncy Castle</name>
+      			
+      <url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+      		
+    </repository>
+    	
+  </repositories>
+  	
+  <dependencyManagement>
+    		
+    <dependencies>
+      		
 			
-			  <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-           </dependencies>
-     </dependencyManagement>       
+      <dependency>
+        				
+        <groupId>io.jans</groupId>
+        				
+        <artifactId>jans-bom</artifactId>
+        				
+        <version>1.0.0-SNAPSHOT</version>
+        				
+        <scope>import</scope>
+        				
+        <type>pom</type>
+        			
+      </dependency>
+      			
+			  
+      <dependency>
+                        
+        <groupId>com.fasterxml.jackson</groupId>
+                        
+        <artifactId>jackson-bom</artifactId>
+                        
+        <version>${jackson.version}</version>
+                        
+        <scope>import</scope>
+                        
+        <type>pom</type>
+                    
+      </dependency>
+                 
+    </dependencies>
+         
+  </dependencyManagement>
+         
          
 
 
-	<build>
-		<pluginManagement>
-			<plugins>
-			<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.8</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>${maven.assembly.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+	
+  <build>
+    		
+    <pluginManagement>
+      			
+      <plugins>
+        			
+        <plugin>
+          					
+          <groupId>org.apache.maven.plugins</groupId>
+          					
+          <artifactId>maven-dependency-plugin</artifactId>
+          					
+          <version>2.8</version>
+          				
+        </plugin>
+        				
+        <plugin>
+          					
+          <artifactId>maven-assembly-plugin</artifactId>
+          					
+          <version>${maven.assembly.version}</version>
+          				
+        </plugin>
+        				
+        <plugin>
+          					
+          <groupId>org.apache.maven.plugins</groupId>
+          					
+          <artifactId>maven-jar-plugin</artifactId>
+          				
+        </plugin>
+        			
+      </plugins>
+      		
+    </pluginManagement>
+    	
+  </build>
+  
 
 </project>
