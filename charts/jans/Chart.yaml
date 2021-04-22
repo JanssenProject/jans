@@ -67,7 +67,7 @@ dependencies:
   version: 1.0.0-a4
   repository: ""
 
-- name: nginx
+- name: nginx-ingress
   condition: global.nginx-ingress.enabled
   version: 1.0.0-a4
   repository: ""
