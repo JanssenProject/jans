@@ -3,7 +3,7 @@
 apiVersion: v1
 appVersion: "1.0.0-a4"
 description: nginx-ingress chart
-name: nginx
+name: nginx-ingress
 version: 1.0.0-a4
 maintainers:
 - name: moabu
