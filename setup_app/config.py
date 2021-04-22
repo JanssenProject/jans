@@ -268,12 +268,13 @@ class Config:
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        
+
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'jans-ldap.properties')
         self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
-        
+        self.jansSpannerProperties = os.path.join(self.configFolder, 'jans-spanner.properties')
+
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
