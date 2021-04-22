@@ -6,6 +6,7 @@ description: nginx-ingress chart
 name: nginx
 version: 1.0.0-a4
 maintainers:
-- name: Janssen
+- name: moabu
+  email: mo@gluu.org
 
 home: https://jans.io
