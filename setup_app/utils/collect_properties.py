@@ -40,15 +40,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
         oxauth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
-
-        if Config.persistence_type in ('couchbase', 'sql'):
-            ptype = 'rdbm' if Config.persistence_type == 'sql' else 'couchbase'
+        if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
+            ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else 'couchbase'
             Config.mappingLocations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
 
 
-        if not Config.persistence_type in ('ldap', 'sql') and os.path.exists(Config.jansCouchebaseProperties):
-
+        if not Config.persistence_type in ('ldap', 'sql', 'spanner') and os.path.exists(Config.jansCouchebaseProperties):
             jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
 
             Config.couchebaseClusterAdmin = jans_cb_prop['auth.userName']
@@ -81,7 +79,20 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password_enc = jans_sql_prop['auth.userPassword']
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             Config.rdbm_db = jans_sql_prop['db.schema.name']
+
+        if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansSpannerProperties):
+            jans_spanner_prop = base.read_properties_file(Config.jansSpannerProperties)
             
+            Config.spanner_project = jans_spanner_prop['spanner.project']
+            Config.spanner_instance = jans_spanner_prop['spanner.instance']
+            Config.spanner_database = jans_spanner_prop['spanner.db']
+
+            if 'spanner.host' in jans_spanner_prop:
+                Config.spanner_host = jans_spanner_prop['spanner.host']
+                Config.spanner_emulator = True
+
+            #print(Config.rdbm_type, Config.spanner_project, Config.spanner_instance, Config.spanner_database, Config.spanner_host, Config.spanner_emulator)
+
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
              Config.mappingLocations = {'default': jans_hybrid_properties['storage.default']}
@@ -97,7 +108,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         # It is time to bind database
         dbUtils.bind()
-        
+
         if dbUtils.session:
             dbUtils.rdm_automapper()
 
@@ -136,7 +147,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             oxCacheConfiguration = json.loads(oxConfiguration['jansCacheConf'])
         else:
             oxCacheConfiguration = oxConfiguration['jansCacheConf']
-        
+
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
 
         Config.scim_rp_client_jks_pass = 'secret' # this is static
@@ -178,6 +189,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
 
         ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
+
         Config.countryCode = ssl_subj['C']
         Config.state = ssl_subj['ST']
         Config.city = ssl_subj['L']
