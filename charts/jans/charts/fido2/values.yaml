@@ -12,10 +12,28 @@ requests:
 limits:
   memory: 1536Mi
 
-#ports for the deployment
-ports:
-  containerPort: 8080
+livenessProbe:
+  httpGet:
+    path: /jans-fido2/sys/health-check
+    port: http-fido2
+  initialDelaySeconds: 25
+  periodSeconds: 25
+  timeoutSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /jans-fido2/sys/health-check
+    port: http-fido2
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
 
 service:
   fido2ServiceName: fido2
   name: http-fido2
+  port: 8080
+
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"
