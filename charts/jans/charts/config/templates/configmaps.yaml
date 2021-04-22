@@ -36,7 +36,6 @@ data:
   CN_CONTAINER_METADATA: {{ .Values.configmap.containerMetadataName | quote }}
   CN_MAX_RAM_PERCENTAGE: {{ .Values.configmap.cnMaxRamPercent | quote }}
   CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
-  CN_DOCUMENT_STORE_TYPE: {{ .Values.configmap.cnDocumentStoreType | quote }}
   DOMAIN: {{ .Values.global.fqdn | quote }}
   CN_AUTH_SERVER_BACKEND: {{ .Values.configmap.cnAuthServerBackend | quote }}
   CN_CLIENT_API_SERVER_URL: {{ .Values.configmap.cnClientApiServerUrl | quote }}
@@ -68,9 +67,6 @@ data:
   {{- if or (eq .Values.global.cnPersistenceType "hybrid") (eq .Values.global.cnPersistenceType "ldap") }}
   CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceLdapMapping | quote }}
   {{- end }}
-  CN_LDAP_INIT_HOST: {{ .Values.configmap.ldapServiceName }} #{{ template "cn.fullname" . }}-service
-  CN_LDAP_INIT: {{ .Values.cnLdapInit | quote }} # TODO: To be removed
-  CN_LDAP_INIT_PORT: {{ .Values.cnLdapInitPort | quote }}
   # must the same as the opendj service name
   CN_CERT_ALT_NAME: {{ .Values.configmap.ldapServiceName }} #{{ template "cn.fullname" . }}-service
   # Auto enable installation of some services
