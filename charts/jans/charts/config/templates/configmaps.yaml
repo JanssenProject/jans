@@ -85,6 +85,7 @@ data:
   {{- end }}
   {{- if .Values.global.istio.enabled }}
   CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
+  CN_LDAP_USE_SSL: "false"
   {{- end }}
 
 ---

@@ -17,7 +17,15 @@ spec:
         APP_NAME: configuration-manager
         app: {{ include "config.name" . }}-init-load
     spec:
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: {{ include "config.fullname" . }}-mount-gen-file
           secret:
             secretName: {{ include "config.fullname" . }}-gen-json-file
@@ -36,6 +44,9 @@ spec:
           runAsUser: 1000
           runAsNonRoot: true
         volumeMounts:
+          {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
           - mountPath: /app/db/generate.json
             name: {{ include "config.fullname" . }}-mount-gen-file
             subPath: generate.json

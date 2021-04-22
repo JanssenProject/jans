@@ -29,6 +29,9 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
       {{ if eq .Values.global.configSecretAdapter "google" }}
         - name: google-secret-manager-sa
           secret:
@@ -73,12 +76,15 @@ spec:
             name: {{ $key }}
         {{- end }}
         volumeMounts:
+        {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
         {{ if eq .Values.global.configSecretAdapter "google" }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-secret-manager-sa
             subPath: google-credentials.json
         {{- end }}
-        {{- range $key, $values := .Values.volumeMounts }}
+        {{- range $key, $values := .Values.openDjVolumeMounts }}
           - mountPath: {{$values.mountPath}}
             name: {{$values.name}}
             subPath: {{$key}}
