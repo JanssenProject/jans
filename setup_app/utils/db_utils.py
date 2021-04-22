@@ -206,7 +206,7 @@ class DBUtils:
             sqlalchemyObj.jansConfDyn = json.dumps(oxAuthConfDynamic, indent=2)
             self.session.commit()
 
-        elif self.moddb in (BackendTypes.SPANNER):
+        elif self.moddb in (BackendTypes.SPANNER,):
             dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
             oxAuthConfDynamic.update(entries)
             doc_id = self.get_doc_id_from_dn(dn)
@@ -218,7 +218,6 @@ class DBUtils:
                             "values": [[doc_id,  oxAuthConfDynamic]]
                             }
                         }]
-
 
             self.spanner.put_data(mutations)
 
@@ -418,6 +417,11 @@ class DBUtils:
 
             if backend_location == BackendTypes.SPANNER:
 
+                if fetchmany:
+                    retVal = []
+                else:
+                    retVal = {}
+
                 for col, val in search_list:
                     if val == '*':
                         continue
@@ -430,7 +434,7 @@ class DBUtils:
                         where_clause = 'AND {} {} "{}"'.format(col, q_operator, val)
 
                 if not s_table:
-                    return
+                    return retVal
 
                 if search_scope == ldap3.BASE:
                     dn_clause = 'dn = "{}"'.format(search_base)
@@ -440,26 +444,33 @@ class DBUtils:
                 sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
 
                 req = self.spanner.exec_sql(sql_cmd)
-
-                data_dict = {}
+    
                 if not req.ok:
-                    return data_dict
+                    return retVal
 
                 data = req.json()
 
                 if not 'rows' in data:
-                     return data_dict
+                    return retVal
 
-                for i, field in enumerate(data['metadata']['rowType']['fields']):
-                    val = data['rows'][0][i]
-                    if val:
-                        if field['type']['code'] == 'INT64':
-                            val = int(val)
+                n = len(data['rows']) if fetchmany else 1
+                for j in range(n):
+                    row = data['rows'][j]
+                    row_dict = {}
 
-                    data_dict[field['name']] = val
+                    for i, field in enumerate(data['metadata']['rowType']['fields']):
+                        val = row[i]
+                        if val:
+                            if field['type']['code'] == 'INT64':
+                                val = int(val)
+                            row_dict[field['name']] = val
+                    if fetchmany:
+                        retVal.append(row_dict)
+                    else:
+                        retVal = row_dict
+                        break
 
-                return data_dict
-
+                return retVal
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
@@ -901,8 +912,8 @@ class DBUtils:
                             if req.ok:
                                 data = req.json()
                                 cur_data = []
-                                
-                                if 'rows' in data and data['rows'] and data['rows'][0]:
+
+                                if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
                                     cur_data = data['rows'][0][0]
                                 cur_data += entry[change_attr]
     
