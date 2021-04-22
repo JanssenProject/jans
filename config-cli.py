@@ -1377,6 +1377,15 @@ class JCA_CLI:
             print()
             print("To get sample schema type {0} --schema <schma>, for example {0} --schema {1}".format(sys.argv[0], schema_path[1:]))
 
+    def render_json_entry(self, val):
+        if isinstance(val, str) and val.startswith('_file '):
+            file_path = val[6:].strip()
+            if os.path.exists(file_path):
+                with open(file_path) as f:
+                    val = f.read()
+            else:
+                raise ValueError("File '{}' not found".format(file_path))
+        return val
 
     def get_json_from_file(self, data_fn):
     
@@ -1388,6 +1397,16 @@ class JCA_CLI:
                 data = json.load(f)
         except:
             self.exit_with_error("Error parsing json file {}".format(data_fn))
+
+        if isinstance(data, list):
+            for entry in data:
+                if isinstance(entry, dict):
+                    for k in entry:
+                        entry[k] = self.render_json_entry(entry[k])
+
+        if isinstance(data, dict):
+            for k in data:
+                data[k] = self.render_json_entry(data[k])
 
         return data
 
@@ -1465,7 +1484,10 @@ class JCA_CLI:
             with open(data_fn) as reader:
                 data_org = jwt.decode(reader.read(), options={"verify_signature": False,"verify_exp": False,"verify_aud":False})
         else:
-            data_org = self.get_json_from_file(data_fn)
+            try:
+                data_org = self.get_json_from_file(data_fn)
+            except ValueError as ve:
+                self.exit_with_error(str(ve))
 
         data = {}
 
@@ -1501,7 +1523,10 @@ class JCA_CLI:
 
     def process_command_patch(self, path, suffix_param, endpoint_params, data_fn):
 
-        data = self.get_json_from_file(data_fn)
+        try:
+            data = self.get_json_from_file(data_fn)
+        except ValueError as ve:
+            self.exit_with_error(str(ve))
 
         if not isinstance(data, list):
             self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
