@@ -6,21 +6,10 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static io.jans.as.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -31,6 +20,16 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.util.ServerUtil;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import static io.jans.as.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
 
 /**
  * Implementation for request backchannel device registration through REST web services.
@@ -75,14 +74,9 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
                         + "idTokenHint = {}, deviceRegistrationToken = {}, isSecure = {}",
                 idTokenHint, deviceRegistrationToken, securityContext.isSecure());
 
-        Response.ResponseBuilder builder = Response.ok();
+        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
 
-        if (!appConfiguration.getCibaEnabled()) {
-            log.warn("Trying to register a CIBA device, however CIBA config is disabled.");
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            return builder.build();
-        }
+        Response.ResponseBuilder builder = Response.ok();
 
         DefaultErrorResponse cibaDeviceRegistrationValidation = cibaDeviceRegistrationValidatorService.validateParams(
                 idTokenHint, deviceRegistrationToken);
