@@ -50,6 +50,9 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+        {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
         {{ if .Values.global.cnExtSigningJwksUri }}
           - name: cn-ext-signing-jwks-key
             mountPath: /etc/certs/ext-signing.key
@@ -101,6 +104,9 @@ spec:
         - {{ .Values.global.fqdn }}
       {{- end }}
       volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
       {{ if .Values.global.cnExtSigningJwksUri }}
         - name: cn-ext-signing-jwks-crt
           secret:

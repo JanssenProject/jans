@@ -43,6 +43,9 @@ spec:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
         volumeMounts:
+          {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
         {{ if eq .Values.global.configSecretAdapter "google" }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-secret-manager-sa
@@ -67,6 +70,9 @@ spec:
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
       volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
       {{ if eq .Values.global.configSecretAdapter "google" }}
         - name: google-secret-manager-sa
           secret:

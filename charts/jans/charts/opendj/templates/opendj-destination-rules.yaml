@@ -5,7 +5,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ .Release.Name }}-opendj-mtls
+  name: {{ .Release.Name }}-ldap-mtls
   namespace: {{.Release.Namespace}}
 spec:
   host: {{ .Values.service.ldapServiceName }}.{{ .Release.Namespace }}.svc.cluster.local

@@ -16,8 +16,6 @@ redisPassword: P@assw0rd
 countryCode: US
 state: TX
 city: SLC
-cnLdapInit: true
-cnLdapInitPort: 1636
 configmap:
   cnSqlDbDialect: mysql
   cnSqlDbHost: my-release-mysql.default.svc.cluster.local
@@ -33,7 +31,7 @@ configmap:
   cnClientApiAdminCertCn: client-api
   # used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   # NOTE: For the CB instalation please check the documentation
-  cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo==
+  cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   cnCouchbasePassword: P@ssw0rd
   # cnCouchbaseUrl is the couchbase service name
   cnCouchbaseUrl: cbjans.default.svc.cluster.local
@@ -44,7 +42,8 @@ configmap:
   cnCouchbaseCertFile: /etc/certs/couchbase.crt
   # base64 string for the external signing jwks crt and key
   cnExtSigningJwksCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-  cnExtSigningJwksKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=  # options: default/user/site/cache/statistic
+  cnExtSigningJwksKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # options: default/user/site/cache/statistic
   # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
   cnPersistenceLdapMapping: default
   # options REDIS/NATIVE_PERSISTENCE
@@ -61,21 +60,8 @@ configmap:
   cnClientApiServerUrl: client-api:8443
   cnClientApiBindIpAddresses: "*"
   cnLdapUrl: opendj:1636
-  # Jackrabbit content repository
-  cnJackrabbitPostgresUser: jackrabbit
-  cnJackrabbitPostgresPasswordFile: /etc/jans/conf/postgres_password
-  cnJackrabbitPostgresDatabaseName: jackrabbit
-  cnJackrabbitPostgresHost: postgres.postgres.svc.cluster.local
-  cnJackrabbitPostgresPort: 5432
-  cnJackrabbitSyncInterval: 300
-  cnJackrabbitUrl: http://jackrabbit:8080
-  cnJackrabbitAdminId: admin
-  cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
-  # Options LOCAL / JCA (jackrabbit)
-  cnDocumentStoreType: JCA
   lbAddr: "" # axx-109xx52.us-west-2.elb.amazonaws.com
   ldapServiceName: opendj
-  cnSamlEnabled: true
 
 nameOverride: ""
 fullNameOverride: ""
@@ -83,3 +69,21 @@ fullNameOverride: ""
 image:
   repository: janssenproject/configuration-manager
   tag: 1.0.0_dev
+
+volumes: []
+  # Configure any additional volumes that need to be attached to the pod
+  # - name: mycustomcert
+  #   secret:
+  #     secretName: mycustomsecret
+
+
+volumeMounts: []
+  # Configure any additional volumesMounts that need to be attached to the containers
+  # - name: mycustomcert
+  #   mountPath: /etc/certs
+
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"
