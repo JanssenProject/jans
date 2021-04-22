@@ -25,8 +25,32 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
+livenessProbe:
+  exec:
+    command:
+      - curl
+      - -k
+      - https://localhost:8443/health-check
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+readinessProbe:
+  exec:
+    command:
+      - curl
+      - -k
+      - https://localhost:8443/health-check
+  initialDelaySeconds: 25
+  periodSeconds: 25
+  timeoutSeconds: 5
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"

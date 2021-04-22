@@ -13,6 +13,21 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+livenessProbe:
+  httpGet:
+    path: /health-check/live
+    port: 8074
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /health-check/ready
+    port: 8074
+  initialDelaySeconds: 25
+  periodSeconds: 25
+  timeoutSeconds: 5
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little

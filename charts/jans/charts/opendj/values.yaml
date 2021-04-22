@@ -18,7 +18,26 @@ service:
 image:
   repository: gluufederation/opendj
   tag: 5.0.0_dev
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
+
+livenessProbe:
+  exec:
+    command:
+    - python3
+    - /app/scripts/healthcheck.py
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 20
+readinessProbe:
+  exec:
+    command:
+    - python3
+    - /app/scripts/healthcheck.py
+  initialDelaySeconds: 25
+  timeoutSeconds: 5
+  periodSeconds: 25
+  failureThreshold: 20
 
 persistence:
   size: 5Gi
@@ -81,3 +100,8 @@ volumeMounts:
   flag: 
     mountPath: /flag
     name: opendj-volume
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"

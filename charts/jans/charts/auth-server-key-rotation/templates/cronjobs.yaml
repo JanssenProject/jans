@@ -19,20 +19,25 @@ spec:
           annotations:
             sidecar.istio.io/inject: "false"
         spec:
+          dnsPolicy: {{ .Values.dnsPolicy | quote }}
+        {{- with .Values.dnsConfig }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
           containers:
             - name: {{ include "auth-server-key-rotation.name" . }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               volumeMounts:
               {{ if eq .Values.global.configSecretAdapter "google" }}
-              - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-                name: google-secret-manager-sa
-                subPath: google-credentials.json
-              {{- end }}
-              {{- if eq .Values.global.cnPersistenceType "sql" }}
-              - name: sql-pass
-                mountPath: "/etc/jans/conf/sql_password"
-                subPath: sql_password
+                - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+                  name: google-secret-manager-sa
+                  subPath: google-credentials.json
+                {{- end }}
+                {{- if eq .Values.global.cnPersistenceType "sql" }}
+                - name: sql-pass
+                  mountPath: "/etc/jans/conf/sql_password"
+                  subPath: sql_password
               {{- end }}
               {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
                 - name: cb-pass
