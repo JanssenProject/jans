@@ -83,6 +83,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.logIt("Rendering test templates")
 
+        if Config.rdbm_type == 'spanner':
+            Config.rdbm_password_enc = ''
+
         Config.templateRenderingDict['config_oxauth_test_ldap'] = '# Not available'
         Config.templateRenderingDict['config_oxauth_test_couchbase'] = '# Not available'
 
@@ -148,7 +151,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
 
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
-            self.dbUtils.rdm_automapper()
+            if Config.rdbm_type != 'spanner': 
+                self.dbUtils.rdm_automapper()
 
         self.writeFile(
             os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
