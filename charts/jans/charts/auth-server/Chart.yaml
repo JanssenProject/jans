@@ -6,6 +6,7 @@ home: https://jans.io
 maintainers:
 - name: moabu
   email: mo@gluu.org
+
 description: Helm chart for auth-server service
 name: auth-server
 version: 1.0.0-a4

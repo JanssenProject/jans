@@ -1,7 +1,7 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 kind: CronJob
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 metadata:
   name: {{ include "auth-server-key-rotation.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -39,6 +39,9 @@ spec:
                   mountPath: "/etc/jans/conf/sql_password"
                   subPath: sql_password
               {{- end }}
+              {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
               {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
                 - name: cb-pass
                   mountPath: "/etc/jans/conf/couchbase_password"
@@ -62,6 +65,9 @@ spec:
               {{- end }}
               args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
           volumes:
+          {{- with .Values.volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
           {{ if eq .Values.global.configSecretAdapter "google" }}
             - name: google-secret-manager-sa
               secret:

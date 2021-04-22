@@ -430,4 +430,94 @@ spec:
               serviceName: auth-server
               servicePort: 8080
   {{- end }}
-{{- end -}}
+{{- end }}
+
+---
+
+{{ if .Values.ingress.authServerProtectedToken -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-auth-server-protected-token
+  labels:
+    app: auth-server
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "auth-server"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+            if ($ssl_client_verify != SUCCESS) {return 403;}
+            proxy_set_header X-ClientCert $ssl_client_escaped_cert;
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: /jans-auth/restv1/token
+            pathType: Exact
+            backend:
+              serviceName: auth-server
+              servicePort: 8080
+  {{- end }}
+{{- end }}
+
+---
+
+{{ if .Values.ingress.authServerProtectedRegister -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-auth-server-protected-register
+  labels:
+    app: auth-server
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "auth-server"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+            if ($ssl_client_verify != SUCCESS) {return 403;}
+            proxy_set_header X-ClientCert $ssl_client_escaped_cert;
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: /jans-auth/restv1/register
+            pathType: Exact
+            backend:
+              serviceName: auth-server
+              servicePort: 8080
+  {{- end }}
+{{- end }}

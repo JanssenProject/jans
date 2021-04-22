@@ -37,10 +37,10 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          APP_NAME: jans-gateway-ui
+          APP_NAME: gluu-gateway-ui
     - podSelector:
         matchLabels:
-          APP_NAME: jans-gateway-ui
+          APP_NAME: gluu-gateway-ui
     ports:
     - protocol: TCP
       port: 8443
