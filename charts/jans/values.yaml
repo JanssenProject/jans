@@ -289,9 +289,9 @@ nginx-ingress:
     # /jans-auth
     authServerEnabled: true
     #/jans-auth/restv1/token
-    authServerProtectedToken: true
+    authServerProtectedToken: false
     #/jans-auth/restv1/register
-    authServerProtectedRegister: true
+    authServerProtectedRegister: false
     # in the format of {cert-manager.io/cluster-issuer: nameOfClusterIssuer, kubernetes.io/tls-acme: "true"}
     additionalAnnotations: {}
     path: /
