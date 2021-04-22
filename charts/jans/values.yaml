@@ -15,6 +15,14 @@ auth-server:
       memory: 2500Mi
   service:
     authServerServiceName: auth-server
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 auth-server-key-rotation:
   dnsPolicy: ""
   dnsConfig: {}
@@ -30,6 +38,14 @@ auth-server-key-rotation:
     requests:
       cpu: 300m
       memory: 300Mi
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 client-api:
   dnsPolicy: ""
   dnsConfig: {}
@@ -47,6 +63,14 @@ client-api:
       memory: 400Mi
   service:
     clientApiServerServiceName: client-api
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 config:
   adminPassword: Test1234#
   city: Austin
@@ -90,7 +114,6 @@ config:
     cnConfigGoogleSecretVersionId: "latest"
     cnConfigGoogleSecretNamePrefix: jans
     # [google_secret_manager_envs] END
-    cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
     cnLdapUrl: "opendj:1636"
     cnMaxRamPercent: "75.0"
     cnPersistenceLdapMapping: default
@@ -119,6 +142,16 @@ config:
       cpu: 300m
       memory: 300Mi
   state: TX
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
+  dnsPolicy: ""
+  dnsConfig: {}
 config-api:
   dnsPolicy: ""
   dnsConfig: {}
@@ -136,6 +169,14 @@ config-api:
       memory: 400Mi
   service:
     configApiServerServiceName: config-api
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 fido2:
   dnsPolicy: ""
   dnsConfig: {}
@@ -153,6 +194,14 @@ fido2:
       memory: 500Mi
   service:
     fido2ServiceName: fido2
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 global:
   alb:
     ingress: false
@@ -219,16 +268,31 @@ global:
     enabled: false
 nginx-ingress:
   ingress:
+    # /.well-known/openid-configuration
     openidConfigEnabled: true
+    # /.well-known/uma2-configuration
     uma2ConfigEnabled: true
+    # /.well-known/webfinger
     webfingerEnabled: true
+    # /.well-known/simple-web-discovery
     webdiscoveryEnabled: true
-    scimConfigEnabled: true
-    scimEnabled: true
+    # /.well-known/scim-configuration
+    scimConfigEnabled: false
+    # /jans-scim
+    scimEnabled: false
+    # /jans-config-api
     configApiEnabled: true
+    # /.well-known/fido-configuration
     u2fConfigEnabled: true
-    fido2ConfigEnabled: true
+    # /.well-known/fido2-configuration
+    fido2ConfigEnabled: false
+    # /jans-auth
     authServerEnabled: true
+    #/jans-auth/restv1/token
+    authServerProtectedToken: true
+    #/jans-auth/restv1/register
+    authServerProtectedRegister: true
+    # in the format of {cert-manager.io/cluster-issuer: nameOfClusterIssuer, kubernetes.io/tls-acme: "true"}
     additionalAnnotations: {}
     path: /
     hosts:
@@ -294,6 +358,14 @@ opendj:
       memory: 2000Mi
   service:
     ldapServiceName: opendj
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 persistence:
   dnsPolicy: ""
   dnsConfig: {}
@@ -308,6 +380,10 @@ persistence:
     requests:
       cpu: 300m
       memory: 300Mi
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers
 scim:
   dnsPolicy: ""
   dnsConfig: {}
@@ -325,3 +401,11 @@ scim:
       memory: 1000Mi
   service:
     scimServiceName: scim
+#  livenessProbe:
+#    initialDelaySeconds: 25
+#  readinessProbe:
+#    initialDelaySeconds: 30
+  volumes: []
+    # Configure any additional volumes that need to be attached to the pod
+  volumeMounts: []
+    # Configure any additional volumesMounts that need to be attached to the containers

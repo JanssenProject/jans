@@ -1,4 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
+# License terms and conditions for Jannsen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 # Default values for nginx-ingress.
 nameOverride: ""
@@ -15,19 +15,23 @@ ingress:
   # /.well-known/webfinger
   webfingerEnabled: true
   # /.well-known/simple-web-discovery
-  webdiscoveryEnabled: true
+  webdiscoveryEnabled: false
   # /.well-known/scim-configuration
-  scimConfigEnabled: true
+  scimConfigEnabled: false
   # /jans-scim
-  scimEnabled: true
+  scimEnabled: false
   # /jans-config-api
   configApiEnabled: true
   # /.well-known/fido-configuration
   u2fConfigEnabled: true
   # /.well-known/fido2-configuration
-  fido2ConfigEnabled: true
+  fido2ConfigEnabled: false
   # /jans-auth
   authServerEnabled: true
+  #/jans-auth/restv1/token
+  authServerProtectedToken: false
+  #/jans-auth/restv1/register
+  authServerProtectedRegister: false
   # in the format of {cert-manager.io/cluster-issuer: nameOfClusterIssuer, kubernetes.io/tls-acme: "true"}
   additionalAnnotations: {}
   annotations: {}
