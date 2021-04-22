@@ -30,7 +30,7 @@ spec:
             runAsUser: 1000
             runAsNonRoot: true
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+          {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
           command:
             - /bin/sh
             - -c 
@@ -45,29 +45,19 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-config-cm
           livenessProbe:
-            httpGet:
-              path: /health-check/live
-              port: 8074
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 5
+{{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
-            httpGet:
-              path: /health-check/ready
-              port: 8074
-            initialDelaySeconds: 25
-            periodSeconds: 25
-            timeoutSeconds: 5
+{{- toYaml .Values.readinessProbe | nindent 12 }}
           volumeMounts:
           {{ if eq .Values.global.configSecretAdapter "google" }}
-          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-secret-manager-sa
-            subPath: google-credentials.json
+            - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+              name: google-secret-manager-sa
+              subPath: google-credentials.json
           {{- end }}
           {{- if eq .Values.global.cnPersistenceType "sql" }}
-          - name: sql-pass
-            mountPath: "/etc/jans/conf/sql_password"
-            subPath: sql_password
+            - name: sql-pass
+              mountPath: "/etc/jans/conf/sql_password"
+              subPath: sql_password
           {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: cb-pass
@@ -79,7 +69,7 @@ spec:
               subPath: couchbase.crt
             {{- end }}
           {{- end }}
-            {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+            {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
             - name: {{ include "config-api.name" . }}-updatelbip
               mountPath: /scripts
             {{- end }}
@@ -112,12 +102,12 @@ spec:
             secretName: {{ .Release.Name }}-cb-crt
         {{- end }}
       {{- end }}
-        {{- if and (eq .Values.global.isFqdnRegistered "false") (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+        {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
         - name: {{ include "config-api.name" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip
         {{- end }}
-      {{- if eq .Values.global.isFqdnRegistered "false" }}
+      {{- if not .Values.global.isFqdnRegistered  }}
       hostAliases:
       - ip: {{ .Values.global.lbIp }}
         hostnames:
