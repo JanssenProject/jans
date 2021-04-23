@@ -1,0 +1,16 @@
+{
+    "baseDN":"o=jans",
+    "applicationUrl":"https://%(hostname)s",
+    "baseEndpoint":"https://%(hostname)s/jans-scim/restv1",
+    "personCustomObjectClass":"jansCustomPerson",
+    "oxAuthIssuer":"https://%(hostname)s",
+    "maxCount": 200,
+    "useLocalCache":true,
+    "disableJdkLogger":true,
+    "loggingLevel":"INFO",
+    "loggingLayout":"text",
+    "externalLoggerConfiguration":"",
+    "metricReporterInterval":300,
+    "metricReporterKeepDataDays":15,
+    "metricReporterEnabled":true
+}
