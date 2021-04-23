@@ -1,3 +1,4 @@
+# User Resources
 
 This option can be used to perform such operations to modfiy user resources. If you select the first option from the SCIM Menu, You will get a list of sub-menu as same as below.
 

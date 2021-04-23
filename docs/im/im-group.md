@@ -1,3 +1,4 @@
+# Group Resources
 
 Group resources are used to organize user resources. These are the following options:
 

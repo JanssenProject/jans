@@ -1,3 +1,5 @@
+# OAuth Scopes
+
 Let's get information for a task **OAuthScopes**
 
 ```

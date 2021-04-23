@@ -1,3 +1,5 @@
+# Cache Configuration
+
 In the following Main Menu, Options `3, 4, 5, 6 & 7` are for **Cache Configuration**. 
 - Cache Configuration
 - Cache Configuration – Memcached
@@ -125,7 +127,7 @@ Please wait patching...
 }
 ```
 
-#### Cache Configuration - Memcached
+## Cache Configuration - Memcached
 
 Do You want to update _Memcached_ only? you can go with this option. _Memcached_ have two options:
 
@@ -198,7 +200,7 @@ Please wait while posting data ...
 }
 ```
 
-#### Cache Configuration - Redis
+## Cache Configuration - Redis
 
 To `get/update` **redis** configuration, select option 5 to enter the menu.
 ```text
@@ -319,7 +321,7 @@ Please wait while posting data ...
 }
 ```
 
-#### Cache Configuration - In-Memory
+## Cache Configuration - In-Memory
 
 To enter `In-Memory` menu select option 6, you will get two options as below:
 ```text
@@ -365,7 +367,7 @@ Obtained Data:
 }
 ```
 
-#### Cache Configuration - Native-Persistence
+## Cache Configuration - Native-Persistence
 
 ```text
 Cache Configuration – Native-Persistence

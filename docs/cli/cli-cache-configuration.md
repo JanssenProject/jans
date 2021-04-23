@@ -1,3 +1,4 @@
+# Cache Configuration
 
 Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
 Let's get the information for Cache Configuration.

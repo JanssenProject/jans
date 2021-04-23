@@ -1,3 +1,4 @@
+# Couchbase Configuration
 
 From the main menu, select option 15 to enter into Couchbase configuration menu. You will get the following menu like LDAP configuration.
 
