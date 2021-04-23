@@ -6,8 +6,15 @@
 
 package io.jans.as.server.session.ws.rs;
 
-import java.io.IOException;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.util.ServerUtil;
+import io.jans.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -19,16 +26,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.util.ServerUtil;
-import io.jans.util.StringHelper;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * @author Yuriy Movchan
@@ -46,11 +45,15 @@ public class CheckSessionStatusRestWebServiceImpl {
     @Inject
     private CookieService cookieService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     @GET
     @Path("/session_status")
     @Produces({MediaType.APPLICATION_JSON})
     public Response requestCheckSessionStatus(@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse,
                                               @Context SecurityContext securityContext) throws IOException {
+        errorResponseFactory.validateComponentEnabled(ComponentType.STATUS_SESSION);
         String sessionIdCookie = cookieService.getSessionIdFromCookie(httpRequest);
         log.debug("Found session '{}' cookie: '{}'", CookieService.SESSION_ID_COOKIE_NAME, sessionIdCookie);
 
