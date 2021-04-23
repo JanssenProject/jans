@@ -26,7 +26,7 @@
 		<guava.version>29.0-jre</guava.version>
 		<jackson.version>2.10.1</jackson.version>
 		<jackson.databind.version>2.10.1</jackson.databind.version>
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<jans.version>1.0.0-SNAPSHOT</jans.version>
 		<jacoco.version>0.8.5</jacoco.version>
 		<json-patch-version>1.12</json-patch-version>
 		<karate.version>0.9.5</karate.version>
@@ -35,6 +35,7 @@
 		<weld.version>3.1.2.Final</weld.version>
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
+		<resteasy.version>4.5.8.Final</resteasy.version>
 	</properties>
 
 	<prerequisites>
@@ -78,68 +79,79 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-bom</artifactId>
-				<version>${janssen.version}</version>
+				<version>${jans.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
 		
 			<!-- jans dependencies -->
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-core-util</artifactId>
-				<version>${janssen.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-core</artifactId>	
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-core-model</artifactId>
-				<version>${janssen.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-auth-common</artifactId>
-				<version>${janssen.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-core-service</artifactId>
-				<version>${janssen.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-client-api</artifactId>
-				<version>${janssen.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jboss.resteasy</groupId>
-						<artifactId>resteasy-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+			<version>${jans.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.jackrabbit</groupId>
+					<artifactId>jackrabbit-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+			<version>${jans.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.jackrabbit</groupId>
+					<artifactId>jackrabbit-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-common</artifactId>
+			<version>${jans.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.jackrabbit</groupId>
+					<artifactId>jackrabbit-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-service</artifactId>
+			<version>${jans.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-client-api</artifactId>
+			<version>${jans.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
@@ -270,7 +282,53 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-core</artifactId>
-			<version>4.5.8.Final</version>
+			<version>${resteasy.version}</version>
+		</dependency>
+		
+		<!-- RestEasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-cdi</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-servlet-initializer</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxb-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+
+		<!-- Jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
         
         
