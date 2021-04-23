@@ -12,7 +12,7 @@ on:
       - "images/persistence-loader/__version__.py"
       - "images/scim/__version__.py"            
     branches:
-      - refractor-images
+      - master
 
 jobs:
   changelog:
