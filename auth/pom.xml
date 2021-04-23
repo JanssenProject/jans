@@ -64,10 +64,13 @@
 		</dependency>
 		
 		<!-- RestEasy -->
-		<dependency>
+	<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-core</artifactId>
-    	</dependency>
+			<version>4.5.8.Final</version>
+		</dependency>
+		
+		
 		
 	</dependencies>
 </project>
