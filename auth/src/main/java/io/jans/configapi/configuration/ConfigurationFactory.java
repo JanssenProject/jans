@@ -6,6 +6,7 @@
 
 package io.jans.configapi.configuration;
 
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.Constants;
@@ -17,6 +18,7 @@ import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.configapi.api.ApiProtectionService;
 import io.jans.configapi.auth.service.AuthorizationService;
 import io.jans.configapi.auth.service.OpenIdAuthorizationService;
+import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
@@ -27,6 +29,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -35,17 +38,13 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.naming.ConfigurationException;
-
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
 
-
-
 @ApplicationScoped
-@Alternative(1)
+@Alternative
 public class ConfigurationFactory {
 
    
@@ -93,8 +92,12 @@ public class ConfigurationFactory {
     private String saltFilePath;
    
     private String API_PROTECTION_TYPE;
-    private static String API_CLIENT_ID;
-    private static String API_CLIENT_PASSWORD;
+    private String API_CLIENT_ID;
+    private String API_CLIENT_PASSWORD;
+   // private static List<String> API_APPROVED_ISSUER;
+    
+    @Inject
+    @ConfigProperty(name = "api.approved.issuer")
     private static List<String> API_APPROVED_ISSUER;
 
     
@@ -103,7 +106,8 @@ public class ConfigurationFactory {
 
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
-
+    
+   
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -129,24 +133,24 @@ public class ConfigurationFactory {
     }
 
     public String getApiProtectionType() {
-        return this.getAplicationProperties.getString("api.protection.type");
+        return this.getAplicationProperties().getString("api.protection.type");
         //return API_PROTECTION_TYPE;
     }
 
     public String getApiClientId() {
-        return this.getAplicationProperties.getString("api.client.id");
+        return this.getAplicationProperties().getString("api.client.id");
         //return API_CLIENT_ID;
     }
 
     public String getApiClientPassword() {
-        return this.getAplicationProperties.getString("api.client.password");
+        return this.getAplicationProperties().getString("api.client.password");
         //return API_CLIENT_PASSWORD;
     }
 
-    public List<String> getApiApprovedIssuer() {
-        return this.getAplicationProperties.getString("api.approved.issuer");
-        //return API_APPROVED_ISSUER;
+    public static List<String> getApiApprovedIssuer() {
+        return API_APPROVED_ISSUER;
     }
+
 
     public void create() {
         loadBaseConfiguration();
@@ -315,14 +319,14 @@ public class ConfigurationFactory {
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
         log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
-                + ConfigurationFactory.getApiProtectionType());
-        if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
+                + getApiProtectionType());
+        if (StringHelper.isEmpty(getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
             // Verify resources available
-            apiProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType(),
-                    ConfigurationFactory.getApiClientId());
+            apiProtectionService.verifyResources(getApiProtectionType(),
+                    getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);

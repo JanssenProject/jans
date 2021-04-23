@@ -8,6 +8,7 @@ package io.jans.configapi.auth.service;
 
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.JwkResponse;
+import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.IntrospectionService;
@@ -50,7 +51,7 @@ public class AuthClientService {
     private static Logger log = LoggerFactory.getLogger(AuthClientService.class);
     
     public static String getIntrospectionEndpoint(String issuer) throws Exception {
-        log.trace("\n\n AuthClientService::getIntrospectionEndpoint() - issuer = " + issuer);
+        log.debug("\n\n AuthClientService::getIntrospectionEndpoint() - issuer = " + issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
         log.trace("\n\n AuthClientService::getIntrospectionEndpoint() - configurationEndpoint = "
                 + configurationEndpoint);
@@ -58,7 +59,7 @@ public class AuthClientService {
         Builder request = ResteasyClientBuilder.newClient().target(configurationEndpoint).request();
         request.header("Content-Type", MediaType.APPLICATION_JSON);
         Response response = request.get();
-        log.trace("\n\n AuthClientService::getIntrospectionEndpoint() - response = " + response);
+        log.debug("\n\n AuthClientService::getIntrospectionEndpoint() - response = " + response);
 
         if (response.getStatus() == 200) {
             String entity = response.readEntity(String.class);
@@ -71,26 +72,26 @@ public class AuthClientService {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        log.info("\n\n AuthClientService:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects);
+        log.debug("\n\n AuthClientService:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects);
         
         final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(url);
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken(header, token);
-        log.info("\n\n AuthClientService:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects+" , introspectionResponse = "+introspectionResponse);
+        log.debug("\n\n AuthClientService:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects+" , introspectionResponse = "+introspectionResponse);
 
-        return proxy.introspectToken(header, token);
+        return introspectionResponse;
 
     }
 
 
     public static String getJwksUri(String issuer) throws Exception {
-        log.trace("\n\n AuthClientService::getJwksUri() - issuer = " + issuer);
+        log.debug("\n\n AuthClientService::getJwksUri() - issuer = " + issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
         log.trace("\n\n AuthClientService::getJwksUri() - configurationEndpoint = " + configurationEndpoint);
 
         Builder request = ResteasyClientBuilder.newClient().target(configurationEndpoint).request();
         request.header("Content-Type", MediaType.APPLICATION_JSON);
         Response response = request.get();
-        log.trace("\n\n AuthClientService::getJwksUri() - response = " + response);
+        log.debug("\n\n AuthClientService::getJwksUri() - response = " + response);
 
         if (response.getStatus() == 200) {
             String entity = response.readEntity(String.class);
@@ -127,6 +128,37 @@ public class AuthClientService {
         }
         return null;
     }
+    
+    public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
+            final String clientSecret, final String scope) {
+        
+        log.debug("\n\n AuthClientService::requestAccessToken() - tokenUrl = " + tokenUrl+" , clientId = "+clientId+" , clientSecret = "+clientSecret+" , scope = "+scope);
+
+        Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        
+        
+        TokenClient tokenClient = new TokenClient(tokenUrl);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        
+        log.debug("\n\n AuthClientService::requestAccessToken() - tokenResponse = " + tokenResponse);
+        
+
+        if (tokenResponse.getStatus() == 200) {
+           
+
+            return tokenResponse;
+        }
+
+        return null;
+
+    }
+
     
     /*
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {

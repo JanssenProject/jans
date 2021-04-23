@@ -9,7 +9,6 @@ package io.jans.configapi.auth.service;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.configapi.auth.service.OpenIdService;
 import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.auth.util.JwtUtil;
 import org.apache.commons.lang.StringUtils;
