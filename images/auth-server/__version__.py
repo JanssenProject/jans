@@ -5,3 +5,4 @@
 """
 __version__ = "auth-server:1.0.0_a5"
 __previous_version__ = "1.0.0-a4"
+
