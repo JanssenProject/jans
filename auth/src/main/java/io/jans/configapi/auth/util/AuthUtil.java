@@ -14,7 +14,7 @@ import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.api.ApiProtectionCache;
-//import io.jans.configapi.auth.client.AuthClientFactory;
+import io.jans.configapi.auth.service.AuthClientService;
 //import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
@@ -113,7 +113,7 @@ public class AuthUtil {
         log.trace(" AuthUtil::getResourceScopeList() method = " + method + " , path = " + path + "\n");
 
         // Verify in cache
-        Map<String, List<Scope>> resources = ConfigApiProtectionCache.getAllResources();
+        Map<String, List<Scope>> resources = ApiProtectionCache.getAllResources();
 
         // Filter paths based on resource name
         Set<String> keys = resources.keySet();
@@ -139,7 +139,7 @@ public class AuthUtil {
 
                     // Verify Method
                     if (httpmethod.contains(method)) {
-                        scopeList = ConfigApiProtectionCache.getResourceScopes(key);
+                        scopeList = ApiProtectionCache.getResourceScopes(key);
                         log.trace(" AuthUtil::getResourceScopeList() - Matching scopeList =" + scopeList);
                         break;
                     }
@@ -154,7 +154,7 @@ public class AuthUtil {
     }
 
     public List<String> getAllResourceScopes() {
-        Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+        Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
         log.trace("getAllResourceScopes() - scopeMap = " + scopeMap);
 
         List<String> scopeStrList = null;
@@ -167,7 +167,7 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(String path) {
-        List<Scope> scopeList = ConfigApiProtectionCache.getResourceScopes(path);
+        List<Scope> scopeList = ApiProtectionCache.getResourceScopes(path);
         log.trace("getRequestedScopes() - scopeList = " + scopeList);
 
         List<String> scopeStrList = new ArrayList();
@@ -241,7 +241,7 @@ public class AuthUtil {
         }
         log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
 
-        TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+        TokenResponse tokenResponse = AuthClientService.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
             log.trace("RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());
@@ -253,7 +253,7 @@ public class AuthUtil {
         }
         return null;
     }
-
+    /*
     public Token requestPat(final String tokenUrl, final String clientId, final ScopeType scopeType,
             final List<String> scopes) throws Exception {
         return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopeType, scopes);
@@ -269,7 +269,7 @@ public class AuthUtil {
             }
         }
 
-        TokenResponse tokenResponse = AuthClientFactory.patRequest(tokenUrl, clientId, clientSecret, scope);
+        TokenResponse tokenResponse = AuthClientService.patRequest(tokenUrl, clientId, clientSecret, scope);
 
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
@@ -281,7 +281,7 @@ public class AuthUtil {
         }
         return null;
     }
-
+*/
     
 
     public void assignAllScope(final String clientId) {
@@ -311,11 +311,11 @@ public class AuthUtil {
         List<String> scopes = new ArrayList<String>();
 
         // Verify in cache
-        Map<String, Scope> scopeMap = ConfigApiProtectionCache.getAllScopes();
+        Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
         Set<String> keys = scopeMap.keySet();
 
         for (String id : keys) {
-            Scope scope = ConfigApiProtectionCache.getScope(id);
+            Scope scope = ApiProtectionCache.getScope(id);
             scopes.add(scope.getInum());
         }
         return scopes;

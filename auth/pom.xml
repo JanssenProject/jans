@@ -56,5 +56,18 @@
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 		
+		
+		 <!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.config/microprofile-config-api -->
+		<dependency>
+		    <groupId>org.eclipse.microprofile.config</groupId>
+		    <artifactId>microprofile-config-api</artifactId>
+		</dependency>
+		
+		<!-- RestEasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-core</artifactId>
+    	</dependency>
+		
 	</dependencies>
 </project>
