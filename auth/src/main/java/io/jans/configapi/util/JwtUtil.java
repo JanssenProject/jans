@@ -14,7 +14,7 @@ import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.jws.AbstractJwsSigner;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
-import io.jans.configapi.auth.client.AuthClientFactory;
+import io.jans.configapi.auth.service.AuthClientService;
 import io.jans.configapi.service.ConfigurationService;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -219,13 +219,13 @@ public class JwtUtil {
         if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
             return configurationService.find().getJwksUri();
         }
-        return AuthClientFactory.getJwksUri(issuer);
+        return AuthClientService.getJwksUri(issuer);
 
     }
 
     public JSONWebKeySet getJSONWebKeys(String jwksUri) throws Exception {
         log.debug("\n\n JwtUtil::getJSONWebKeys() - jwksUri = " + jwksUri + " \n");
-        JSONWebKeySet jsonWebKeySet = AuthClientFactory.getJSONWebKeys(jwksUri);
+        JSONWebKeySet jsonWebKeySet = AuthClientService.getJSONWebKeys(jwksUri);
         log.trace("\n\n JwtUtil::getJSONWebKeys() - jsonWebKeySet = " + jsonWebKeySet + " \n");
         return jsonWebKeySet;
     }
