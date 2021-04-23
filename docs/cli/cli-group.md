@@ -1,4 +1,5 @@
-  
+# Group Resources
+ 
 Group resources are used to manage user resources easily with some operations. 
 If you run the below command, then you will get a list of operations as below:
 

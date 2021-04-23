@@ -1,3 +1,5 @@
+# OAuth Scopes
+
 
 In OAuth, scopes are used to specify the extent of access. For an OpenID Connect sign-in flow, scopes correspond to the release of user claims.
 `jans-cli` supports the following operations through Interactive Mode.

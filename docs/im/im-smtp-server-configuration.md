@@ -1,3 +1,6 @@
+# SMTP Condifuration
+
+
 Janssen CLI also supports SMTP configuration. You can do the following things as stated below:
 - `View/Get`
 - `Add/Delete`

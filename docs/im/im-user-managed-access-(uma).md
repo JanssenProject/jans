@@ -1,3 +1,4 @@
+# UMA
 
 UMA helps to manage user authorization. Using IM, you can easily maintain UMA resources. If you select `16` option on the IM Menu, you will get a list as below:
 

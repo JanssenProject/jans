@@ -1,3 +1,5 @@
+# SMTP Configuration
+
 Let's get the information of **SMTP Configuration** using Janssen CLI.
 
 ```commandline

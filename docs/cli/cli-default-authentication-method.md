@@ -1,3 +1,4 @@
+# Default AUthentication Method
 
 Let's get the information of **Default Authentication Method**:
 

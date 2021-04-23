@@ -1,3 +1,5 @@
+# Default Authentication Method
+
 Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot. 
 
 ![default-auth](img/im-default-auth.png)
