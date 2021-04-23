@@ -14,10 +14,9 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.configapi.service.AuthorizationService;
-import io.jans.configapi.service.OpenIdAuthorizationService;
 import io.jans.configapi.api.ApiProtectionService;
-import io.jans.exception.ConfigurationException;
+import io.jans.configapi.auth.service.AuthorizationService;
+import io.jans.configapi.auth.service.OpenIdAuthorizationService;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
@@ -27,11 +26,8 @@ import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
-//import io.quarkus.arc.AlternativePriority;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
-
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -39,14 +35,21 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.naming.ConfigurationException;
+
 import java.io.File;
 import java.util.List;
 import java.util.Properties;
+
+
+
 
 @ApplicationScoped
 @Alternative(1)
 public class ConfigurationFactory {
 
+   
+   
     static {
         if (System.getProperty("jans.base") != null) {
             BASE_DIR = System.getProperty("jans.base");
@@ -62,9 +65,9 @@ public class ConfigurationFactory {
         }
     }
 
+    private static final String APPLICATION_PROPERTIES_FILE = "application.properties";
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
-
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
@@ -85,25 +88,16 @@ public class ConfigurationFactory {
     private ErrorResponseFactory errorResponseFactory;
     private PersistenceConfiguration persistenceConfiguration;
     private FileConfiguration baseConfiguration;
+    private FileConfiguration applicationProperties;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
-
-    @Inject
-    @ConfigProperty(name = "api.protection.type")
-    private static String API_PROTECTION_TYPE;
-
-    @Inject
-    @ConfigProperty(name = "api.client.id")
+   
+    private String API_PROTECTION_TYPE;
     private static String API_CLIENT_ID;
-
-    @Inject
-    @ConfigProperty(name = "api.client.password")
     private static String API_CLIENT_PASSWORD;
-
-    @Inject
-    @ConfigProperty(name = "api.approved.issuer")
     private static List<String> API_APPROVED_ISSUER;
 
+    
     @Inject
     ApiProtectionService apiProtectionService;
 
@@ -126,28 +120,37 @@ public class ConfigurationFactory {
         return baseConfiguration;
     }
 
+    public FileConfiguration getAplicationProperties() {
+        return applicationProperties;
+    }
+    
     public static String getAppPropertiesFile() {
         return APP_PROPERTIES_FILE;
     }
 
-    public static String getApiProtectionType() {
-        return API_PROTECTION_TYPE;
+    public String getApiProtectionType() {
+        return this.getAplicationProperties.getString("api.protection.type");
+        //return API_PROTECTION_TYPE;
     }
 
-    public static String getApiClientId() {
-        return API_CLIENT_ID;
+    public String getApiClientId() {
+        return this.getAplicationProperties.getString("api.client.id");
+        //return API_CLIENT_ID;
     }
 
-    public static String getApiClientPassword() {
-        return API_CLIENT_PASSWORD;
+    public String getApiClientPassword() {
+        return this.getAplicationProperties.getString("api.client.password");
+        //return API_CLIENT_PASSWORD;
     }
 
-    public static List<String> getApiApprovedIssuer() {
-        return API_APPROVED_ISSUER;
+    public List<String> getApiApprovedIssuer() {
+        return this.getAplicationProperties.getString("api.approved.issuer");
+        //return API_APPROVED_ISSUER;
     }
 
     public void create() {
         loadBaseConfiguration();
+        loadApplicationProperties();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
@@ -194,12 +197,19 @@ public class ConfigurationFactory {
         }
     }
 
+
     private void loadBaseConfiguration() {
         log.info("Loading base configuration " + BASE_PROPERTIES_FILE);
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
         log.info("Loaded base configuration:" + baseConfiguration.getProperties());
     }
 
+    private void loadApplicationProperties() {
+        log.info("loadApplicationProperties " + APPLICATION_PROPERTIES_FILE);
+        this.applicationProperties = createFileConfiguration(APPLICATION_PROPERTIES_FILE);
+        log.info("loadApplicationProperties() - loaded :" + applicationProperties.getProperties());
+    }
+    
     private String confDir() {
         final String confDir = this.baseConfiguration.getString("confDir", null);
         if (StringUtils.isNotBlank(confDir)) {

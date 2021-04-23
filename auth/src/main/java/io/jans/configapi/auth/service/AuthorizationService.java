@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.service;
+package io.jans.configapi.auth.service;
 
 import io.jans.configapi.auth.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;

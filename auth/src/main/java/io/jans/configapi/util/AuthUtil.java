@@ -13,7 +13,7 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.auth.api.ApiProtectionCache;
+import io.jans.configapi.api.ApiProtectionCache;
 //import io.jans.configapi.auth.client.AuthClientFactory;
 //import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -58,10 +58,7 @@ public class AuthUtil {
     @Inject
     ScopeService scopeService;
 
-    @Inject
-    UmaService umaService;
-
-    @Inject
+        @Inject
     EncryptionService encryptionService;
 
     public String getClientId() {
@@ -285,55 +282,7 @@ public class AuthUtil {
         return null;
     }
 
-    public TokenResponse requestRpt(final String clientId, final String resourceId, final List<String> scopes,
-            Token patToken) throws Exception {
-        log.trace(" RPT request parameters, clientId: {}, resourceId: {}, scopes: {}, patToken: {} ", clientId,
-                resourceId, scopes, patToken);
-
-        // Get client
-        // Client client = getClient(clientId);
-
-        // Generate Token with required scope for testing
-        String scope = UmaScopeType.PROTECTION.getValue();
-        if (scopes != null && scopes.size() > 0) {
-            for (String s : scopes) {
-                scope = scope + " " + s;
-            }
-        }
-
-        // Register Permission
-        UmaPermission umaPermission = new UmaPermission();
-        umaPermission.setResourceId(resourceId);
-        umaPermission.setScopes(scopes);
-
-        PermissionTicket permissionTicket = umaService.getUmaPermissionService()
-                .registerPermission("Bearer " + patToken.getAccessToken(), UmaPermissionList.instance(umaPermission));
-
-        if (permissionTicket == null) {
-            return null;
-        }
-        log.debug(" permissionTicket: {} = ", permissionTicket.toString());
-
-        // Register RPT token
-        TokenResponse tokenResponse = null;
-        try {
-
-            tokenResponse = AuthClientFactory.requestRpt(this.getTokenUrl(), clientId,
-                    this.getClientDecryptPassword(clientId), scopes, permissionTicket.getTicket(),
-                    GrantType.OXAUTH_UMA_TICKET, AuthenticationMethod.CLIENT_SECRET_BASIC);
-
-            log.trace(" Rpt Token Response  = " + tokenResponse);
-            if (tokenResponse != null) {
-                log.debug(" Rpt Token Response Scope(): {} = ", tokenResponse.getScope());
-            }
-
-        } catch (Exception ex) {
-            log.error("Failed to determine RPT status", ex);
-            ex.printStackTrace();
-        }
-
-        return tokenResponse;
-    }
+    
 
     public void assignAllScope(final String clientId) {
         log.trace(" AssignAllScope to clientId = " + clientId + "\n");
