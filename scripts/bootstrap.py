@@ -20,6 +20,8 @@ from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import ldap_encode
 from jans.pycloudlib.utils import get_server_certificate
 from jans.pycloudlib.utils import generate_ssl_certkey
+from jans.pycloudlib.utils import generate_ssl_ca_certkey
+from jans.pycloudlib.utils import generate_signed_ssl_certkey
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_keystore
 
@@ -493,14 +495,16 @@ class CtxGenerator:
     def web_ctx(self):
         ssl_cert = "/etc/certs/web_https.crt"
         ssl_key = "/etc/certs/web_https.key"
+        ssl_csr = "/etc/certs/web_https.csr"
+
+        ssl_ca_cert = "/etc/certs/ca.crt"
+        ssl_ca_key = "/etc/certs/ca.key"
 
         # get cert and key (if available) with priorities below:
         #
         # 1. from mounted files
         # 2. from fronted (key file is an empty file)
         # 3. self-generate files
-
-        hostname = self.get_config("hostname")
 
         logger.info(f"Resolving {ssl_cert} and {ssl_key}")
 
@@ -532,16 +536,55 @@ class CtxGenerator:
 
         # no mounted nor downloaded files, hence we need to create self-generated files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
-            logger.info(f"Creating self-generated {ssl_cert} and {ssl_key}")
-            generate_ssl_certkey(
-                "web_https",
-                self.get_config("admin_email"),
-                hostname,
-                self.get_config("orgName"),
-                self.get_config("country_code"),
-                self.get_config("state"),
-                self.get_config("city"),
+            hostname = self.get_config("hostname")
+            email = self.get_config("admin_email")
+            org_name = self.get_config("orgName")
+            country_code = self.get_config("country_code")
+            state = self.get_config("state")
+            city = self.get_config("city")
+
+            logger.info(f"Creating self-generated {ssl_ca_cert} and {ssl_ca_key}")
+
+            ca_cert, ca_key = generate_ssl_ca_certkey(
+                "ca",
+                email,
+                "Janssen CA",
+                org_name,
+                country_code,
+                state,
+                city,
             )
+
+            logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
+            generate_signed_ssl_certkey(
+                "web_https",
+                ca_key,
+                ca_cert,
+                email,
+                hostname,
+                org_name,
+                country_code,
+                state,
+                city,
+            )
+
+        try:
+            with open(ssl_ca_cert) as f:
+                self.set_secret("ssl_ca_cert", f.read)
+        except FileNotFoundError:
+            self.set_secret("ssl_ca_cert", "")
+
+        try:
+            with open(ssl_ca_key) as f:
+                self.set_secret("ssl_ca_key", f.read)
+        except FileNotFoundError:
+            self.set_secret("ssl_ca_key", "")
+
+        try:
+            with open(ssl_csr) as f:
+                self.set_secret("ssl_csr", f.read)
+        except FileNotFoundError:
+            self.set_secret("ssl_csr", "")
 
         with open(ssl_cert) as f:
             self.set_secret("ssl_cert", f.read)
