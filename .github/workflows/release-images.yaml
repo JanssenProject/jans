@@ -29,7 +29,7 @@ jobs:
 
       - name: Changelog
         id: changelog
-        uses: actions/changelog-generator@v1.2.1
+        uses: actions/changelog-generator@master
         with:
           previousReleaseTagNameOrSha: ${{ env.PREVIOUS_TAG_NAME }}
           nextReleaseTagName: ${{ env.NEXT_TAG_NAME }}
