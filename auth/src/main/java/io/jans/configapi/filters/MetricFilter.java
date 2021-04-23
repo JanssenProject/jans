@@ -33,12 +33,18 @@ public class MetricFilter implements Filter {
     @RegistryType(type = MetricRegistry.Type.APPLICATION)
     MetricRegistry registry;
 
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException{
+        
+    }
+   
     private Metadata createMetaData(HttpServletRequest request, MetricType type, String prefix) {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         return new MetadataBuilder().withName(prefix + path).withDisplayName(prefix + path).withType(type)
                 .withUnit(MetricUnits.SECONDS).build();
     }
 
+    @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
             throws IOException, ServletException {
         registry.counter(createMetaData((HttpServletRequest) servletRequest, MetricType.COUNTER, COUNTER)).inc();
@@ -50,4 +56,7 @@ public class MetricFilter implements Filter {
         meter.mark();
         timer.time().stop();
     }
+    
+    @Override
+    public void destroy() {}
 }

@@ -17,8 +17,20 @@ import javax.ws.rs.ext.ContextResolver;
 
 @Singleton
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
+    
+    final ObjectMapper defaultObjectMapper;
 
-    public void customize(ObjectMapper mapper) {
+    public ObjectMapperContextResolver() {
+        defaultObjectMapper = createDefaultMapper();
+    }
+
+    @Override
+    public ObjectMapper getContext(Class<?> type) {
+        return defaultObjectMapper;
+    }
+
+    public static ObjectMapper createDefaultMapper() {
+        ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -27,6 +39,7 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        return mapper;
     }
 
 }
