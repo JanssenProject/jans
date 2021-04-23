@@ -1,6 +1,9 @@
 import logging.config
 import os
 
+from jans.pycloudlib.utils import generate_ssl_ca_certkey
+from jans.pycloudlib.utils import generate_signed_ssl_certkey
+
 from base_handler import BaseHandler
 from settings import LOGGING_CONFIG
 
@@ -12,19 +15,60 @@ class WebHandler(BaseHandler):
     def patch(self):
         source = self.opts.get("source", "")
 
-        if source == "from-files":
-            cert_fn = "/etc/certs/web_https.crt"
-            key_fn = "/etc/certs/web_https.key"
+        ssl_cert = "/etc/certs/web_https.crt"
+        ssl_key = "/etc/certs/web_https.key"
+        ssl_csr = "/etc/certs/web_https.csr"
 
-            if not any([os.path.isfile(cert_fn), os.path.isfile(key_fn)]):
-                logger.warning(f"Unable to find existing {cert_fn} or {key_fn}")
+        ssl_ca_cert = "/etc/certs/ca.crt"
+        ssl_ca_key = "/etc/certs/ca.key"
+
+        if source == "from-files":
+            if not any([os.path.isfile(ssl_cert), os.path.isfile(ssl_key)]):
+                logger.warning(f"Unable to find existing {ssl_cert} or {ssl_key}")
             else:
-                logger.info(f"Using existing {cert_fn} and {key_fn}")
+                logger.info(f"Using existing {ssl_cert} and {ssl_key}")
         else:
-            cert_fn, key_fn = self._patch_cert_key("web_https")
+            email = self.manager.config.get("admin_email")
+            hostname = self.manager.config.get("hostname")
+            org_name = self.manager.config.get("orgName")
+            country_code = self.manager.config.get("country_code")
+            state = self.manager.config.get("state")
+            city = self.manager.config.get("city")
+
+            logger.info(f"Creating self-generated {ssl_ca_cert} and {ssl_ca_key}")
+
+            ca_cert, ca_key = generate_ssl_ca_certkey(
+                "ca",
+                email,
+                "Janssen CA",
+                org_name,
+                country_code,
+                state,
+                city,
+            )
+
+            logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
+            generate_signed_ssl_certkey(
+                "web_https",
+                ca_key,
+                ca_cert,
+                email,
+                hostname,
+                org_name,
+                country_code,
+                state,
+                city,
+            )
 
         if not self.dry_run:
-            if cert_fn:
-                self.manager.secret.from_file("ssl_cert", cert_fn)
-            if key_fn:
-                self.manager.secret.from_file("ssl_key", key_fn)
+            if os.path.isfile(ssl_ca_key):
+                self.manager.secret.from_file("ssl_ca_key", ssl_ca_key)
+            if os.path.isfile(ssl_ca_cert):
+                self.manager.secret.from_file("ssl_ca_cert", ssl_ca_cert)
+
+            if os.path.isfile(ssl_cert):
+                self.manager.secret.from_file("ssl_cert", ssl_cert)
+            if os.path.isfile(ssl_key):
+                self.manager.secret.from_file("ssl_key", ssl_key)
+            if os.path.isfile(ssl_csr):
+                self.manager.secret.from_file("ssl_csr", ssl_csr)
