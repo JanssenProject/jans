@@ -1,0 +1,89 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+# Required environment variables for generating Janssen server initial config
+#values for environment variables
+orgName: Janssen
+# email address of the administrator usually. Used for certificate creation
+email: support@jans.com
+# adminPass is administrator password for oxTrust
+adminPassword: P@ssw0rd
+# ldapPass is the password for LDAP
+ldapPassword: P@ssw0rd
+#redisPass is the password for redis admin if used
+redisPassword: P@assw0rd
+
+# organisation location details
+countryCode: US
+state: TX
+city: SLC
+configmap:
+  cnSqlDbDialect: mysql
+  cnSqlDbHost: my-release-mysql.default.svc.cluster.local
+  cnSqlDbPort: 3306
+  cnSqlDbName: jans
+  cnSqlDbUser: root
+  cnSqlDbTimezone: UTC
+  cnSqlPasswordFile: /etc/jans/conf/sql_password
+  cnSqldbUserPassword: Test1234#
+  cnConfigKubernetesConfigMap: cn
+  cnSecretKubernetesSecret: cn
+  cnClientApiApplicationCertCn: client-api
+  cnClientApiAdminCertCn: client-api
+  # used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
+  # NOTE: For the CB instalation please check the documentation
+  cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  cnCouchbasePassword: P@ssw0rd
+  # cnCouchbaseUrl is the couchbase service name
+  cnCouchbaseUrl: cbjans.default.svc.cluster.local
+  cnCouchbaseUser: admin
+  # cnCouchbasePassFile is the location of password file. Should be named `couchbase_password` containing only password file
+  cnCouchbasePasswordFile:  /etc/jans/conf/couchbase_password
+  # cnCouchbaseCertFile location of
+  cnCouchbaseCertFile: /etc/certs/couchbase.crt
+  # base64 string for the external signing jwks crt and key
+  cnExtSigningJwksCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  cnExtSigningJwksKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # options: default/user/site/cache/statistic
+  # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
+  cnPersistenceLdapMapping: default
+  # options REDIS/NATIVE_PERSISTENCE
+  cnCacheType: NATIVE_PERSISTENCE
+  cnMaxRamPercent: "75.0"
+  containerMetadataName: kubernetes
+  # If REDIS is the Cache Type or if going to be used with clientApi
+  cnRedisUrl: redis:6379
+  cnRedisUseSsl: "false"
+  cnRedisType: STANDALONE
+  cnRedisSslTruststore: ""
+  cnRedisSentinelGroup: ""
+  cnAuthServerBackend: auth-server:8080
+  cnClientApiServerUrl: client-api:8443
+  cnClientApiBindIpAddresses: "*"
+  cnLdapUrl: opendj:1636
+  lbAddr: "" # axx-109xx52.us-west-2.elb.amazonaws.com
+  ldapServiceName: opendj
+
+nameOverride: ""
+fullNameOverride: ""
+
+image:
+  repository: janssenproject/configuration-manager
+  tag: 1.0.0_dev
+
+volumes: []
+  # Configure any additional volumes that need to be attached to the pod
+  # - name: mycustomcert
+  #   secret:
+  #     secretName: mycustomsecret
+
+
+volumeMounts: []
+  # Configure any additional volumesMounts that need to be attached to the containers
+  # - name: mycustomcert
+  #   mountPath: /etc/certs
+
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"

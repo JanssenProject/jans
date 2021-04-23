@@ -1,0 +1,99 @@
+name: release
+on:
+  push:
+    paths:
+      - __version__.py
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        sudo apt-get update
+        sudo apt-get install ruby
+
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    # Package chart as tgz file
+    - name: Package Helm chart
+      run: helm package jans
+      working-directory: ./charts
+
+    # Update the index
+    - name: Update chart index
+      run: helm repo index .
+      working-directory: ./charts
+
+    # Push updated index and packaged tgz back into git repo
+    - name: Update repo with output
+      uses: mikeal/publish-to-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare directory
+      run: |
+        mkdir /home/runner/work/test
+        cp -r . /home/runner/work/test/
+        cd /home/runner/work/test/charts
+
+    - name: Get version
+      id: get_version
+      run: |
+        echo "::set-output name=version::$(python3 -c 'import __version__ ; print(__version__.__version__)')"
+        echo "::set-output name=pversion::$(python3 -c 'import __version__ ; print(__version__.__previous_version__)')"
+        echo "::set-output name=gituser::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[0])')"
+        echo "::set-output name=gitproject::$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[1])')"
+        echo "::set-output name=gitbranch::$(python3 -c 'import os ; BRANCH = os.environ.get("GITHUB_REF") ; print(str(BRANCH).split("/")[2])')"
+        echo "::set-output name=releasedate::$(date +'%d-%m-%Y')"
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ steps.get_version.outputs.version }}
+        release_name: ${{ steps.get_version.outputs.version }}
+        body: |
+          # Release Notes
+
+          ## [${{ steps.get_version.outputs.version }}](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/tree/${{ steps.get_version.outputs.version }}) (${{ steps.get_version.outputs.releasedate }})
+
+          [Full Changelog](https://github.com/${{ steps.get_version.outputs.gituser }}/${{ steps.get_version.outputs.gitproject }}/compare/${{ steps.get_version.outputs.pversion }}...v${{ steps.get_version.outputs.version }})
+
+          ## Please find release notes below :
+
+          https://github.com/GluuFederation/cloud-native-edition/releases/tag/v${{ steps.get_version.outputs.version }}
+
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./charts/jans-${{ steps.get_version.outputs.version }}.tgz
+        asset_name: jans-${{ steps.get_version.outputs.version }}.tgz
+        asset_content_type: application/octet-stream

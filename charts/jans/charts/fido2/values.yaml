@@ -1,0 +1,49 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+
+image:
+  repository: janssenproject/fido2
+  tag: 1.0.0_dev
+  pullPolicy: Always
+replicas: 1
+#Resources for the deployment
+requests:
+  memory: 1000Mi
+limits:
+  memory: 1536Mi
+
+livenessProbe:
+  httpGet:
+    path: /jans-fido2/sys/health-check
+    port: http-fido2
+  initialDelaySeconds: 25
+  periodSeconds: 25
+  timeoutSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /jans-fido2/sys/health-check
+    port: http-fido2
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+
+service:
+  fido2ServiceName: fido2
+  name: http-fido2
+  port: 8080
+
+volumes: []
+  # Configure any additional volumes need to be attached to the pod
+  # - name: mycustomcert
+  #   secret:
+  #     secretName: mycustomsecret
+volumeMounts: []
+  # Configure any additional volumesMounts that need to be attached to the containers
+  # - name: mycustomcert
+  #   mountPath: /etc/certs
+
+dnsPolicy: ""
+dnsConfig: {}
+  # options:
+  #   - name: ndots
+  #     value: "5"

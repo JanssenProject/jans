@@ -1,0 +1,19 @@
+{{- if ( .Values.global.istio.enabled) }}
+# License terms and conditions:
+# https://www.apache.org/licenses/LICENSE-2.0
+# Used with Istio
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ include "config.fullname" . }}
+    labels:
+{{ include "config.labels" . | indent 6 }}
+spec:
+    ports:
+        - name: http
+          port: 80
+          targetPort: 8080
+    selector:
+        app: {{ include "config.name" . }}-init-load
+    type: ClusterIP
+{{- end }}
