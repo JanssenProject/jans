@@ -6,7 +6,7 @@
 
 package io.jans.configapi.filters;
 
-import io.jans.configapi.auth.AuthorizationService;
+import io.jans.configapi.auth.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
 import org.slf4j.Logger;
 

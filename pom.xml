@@ -86,14 +86,7 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.eclipse.microprofile/microprofile -->
-			<dependency>
-    <groupId>org.eclipse.microprofile</groupId>
-    <artifactId>microprofile</artifactId>
-    <version>4.0.1</version>
-    <type>pom</type>
-    <scope>provided</scope>
-	</dependency>
+		
 			<!-- jans dependencies -->
 			<dependency>
 				<groupId>io.jans</groupId>
@@ -237,7 +230,11 @@
         </dependency>
         
         
-
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 
         
         
