@@ -2,33 +2,11 @@ apiVersion: v1
 entries:
   jans:
   - annotations:
-      artifacthub.io/changes: |
-        - Janssen 1.0 under dev charts
-      artifacthub.io/containsSecurityUpdates: "true"
-      artifacthub.io/images: |
-        - name: auth-server
-          image: janssenproject/auth-server:1.0.0_dev
-        - name: auth-server-key-rotation
-          image: janssenproject/certmanager:1.0.0_dev
-        - name:  client-api
-          image: janssenproject/client-api:1.0.0_dev
-        - name: configuration-manager
-          image: janssenproject/configuration-manager:1.0.0_dev
-        - name:  config-api
-          image: janssenproject/config-api:1.0.0_dev
-        - name: fido2
-          image: janssenproject/fido2:1.0.0_dev
-        - name: opendj
-          image: gluufedration/opendj:5.0.0_dev
-        - name: persistence
-          image: janssenproject/persistence-loader:1.0.0_dev
-        - name: scim
-          image: janssenproject/scim:1.0.0_dev
       artifacthub.io/license: Apache-2.0
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-04-23T08:52:18.064375833Z"
+    created: "2021-03-22T16:06:51.511821946Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -55,7 +33,7 @@ entries:
       repository: ""
       version: 1.0.0-a4
     - condition: global.nginx-ingress.enabled
-      name: nginx-ingress
+      name: nginx
       repository: ""
       version: 1.0.0-a4
     - condition: global.auth-server-key-rotation.enabled
@@ -75,7 +53,7 @@ entries:
       repository: ""
       version: 1.0.0-a4
     description: Janssen Authorization server
-    digest: 65f2cfdc05a1cf4e63d3c5e883fe2309c2991fd1c9f187021d6f63694646c83b
+    digest: b6190025bf248cdb9befbc027b6161905931020159fe756e7a2fcf470deff6b1
     home: https://github.com/JanssenProject/jans-cloud-native
     icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
     kubeVersion: '>=v1.17.0-0'
@@ -88,4 +66,4 @@ entries:
     urls:
     - jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-04-23T08:52:18.055950424Z"
+generated: "2021-03-22T16:06:51.505404703Z"
