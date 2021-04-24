@@ -57,7 +57,7 @@ If you chose the first option, You will get some details of fido2 configuration 
 If you want to update the fido2 configuration, you can choose the 2nd option. It will ask to fill each property, skip for default values. 
 For example, if you want to change **_logginglevel_** `INFO` to `DEBUG`, simply enter **DEBUG** when it will ask to enter a value.
 
-![update fido2 configuration](img/im-update-fido2.png)
+![update fido2 configuration](../img/im-update-fido2.png)
 
 > **__Add RequestedParties?__**; If you want to add any requested domains then enter `y`, it will ask `name` and `domains` information of requested parties. Otherwise, enter `n` to skip.
 

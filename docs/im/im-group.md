@@ -182,7 +182,3 @@ members: [{'display': 'Default Admin User',
   }
  ```
 Finally it will make changes in the group resource.
-
-
-We will refer to this mode as **_CL_**. Using this mode is difficult compared to **_IM_**. There are few informations may help you to perform such operations using this mode.
-

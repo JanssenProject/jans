@@ -370,7 +370,7 @@ Modify it to update attribute `name`, `display name`, `view type`:
 nano /tmp/attribute.json
 ```
 
-![post-attribute.png](img/cl-post-attribute.png)
+![post-attribute.png](../img/cl-post-attribute.png)
 
 Now, let's add this attribute using `post-attributes`:
 ```commandline

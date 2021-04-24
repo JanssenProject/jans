@@ -2,7 +2,7 @@
 
 Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot. 
 
-![default-auth](img/im-default-auth.png)
+![default-auth](../img/im-default-auth.png)
 
 - `View` Default Authentication Method.
 - `Update` Default Authentication Method.
@@ -11,11 +11,11 @@ Select option 2 from Main Menu to chose Authentication Method. You can see such 
 
 To `View` default authentication method select '1' from Authentication Menu, It will show you the current default authentication method of the Janssen server.
 
-![current-default-auth](img/im-cur-default-auth.png)
+![current-default-auth](../img/im-cur-default-auth.png)
 
 
 To `update` the default authentication method select '2', then enter the default authentication method that you want to update with it. It will ask for the confirmation, `y` to confirm. 
 
-![update-auth](img/im-update-default-auth.png)
+![update-auth](../img/im-update-default-auth.png)
 
 
