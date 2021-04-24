@@ -51,7 +51,7 @@ we have seen that our Default Authentication Method is `simple_password_auth`. W
 ```commandline
 nano /tmp/patch-default-auth.json
 ```
-![update default authentication method](img/cl-update-default-auth.png)
+![update default authentication method](../img/cl-update-default-auth.png)
 
 Now let's do the operation:
 ```commandline
@@ -60,5 +60,5 @@ Now let's do the operation:
 
 It will show the updated result.
 
-![updated result](img/cl-update-default-auth-result.png)
+![updated result](../img/cl-update-default-auth-result.png)
 

@@ -465,7 +465,7 @@ Select 1 to get all the details about Jans authorization server configuration. I
 ```
 By selecting the 2nd option, you can modify its properties partially. 
 
-![update jans authorization server](img/im-update-jans-auth.png)
+![update jans authorization server](../img/im-update-jans-auth.png)
 
 At the end, it will show the updated result.
 

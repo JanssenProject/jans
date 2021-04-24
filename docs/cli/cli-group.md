@@ -165,7 +165,7 @@ root@testjans:~#
   ```
   The schema defines the properties of an attribute.Just Create a json file with each properties in schema filling by a value.
 
-  ![](img/cl-scim-create-group.png)
+  ![](../img/cl-scim-create-group.png)
 
   As you see, I have removed `members` from the schema. We will add members in this group later. Let's use the command to create the group with this data.
 
@@ -311,7 +311,7 @@ root@testjans:~#
 
   let's modify this schema to add members into a selected group:
 
-  ![](img/cl-scim-group-update.png)
+  ![](../img/cl-scim-group-update.png)
 
   - displayName: It should be a group name
   - id: Selected group id which one you want to updae

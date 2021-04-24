@@ -360,7 +360,7 @@ let's modify this schema:
 nano /tmp/create-user.json
 ```
 
-![](img/cl-scim-create-user.png)
+![](../img/cl-scim-create-user.png)
 
 Finally use below command line, to create an user resources.
 

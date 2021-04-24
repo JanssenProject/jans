@@ -151,7 +151,7 @@ Now edit file `tmp/scope.json` with an editor (like **nano**). As an example we 
 "description": "Test Scope created by jans-cli",
 ```
 
-![jans-cl Edit scope.json](img/cl-oauthscope-json.png) 
+![jans-cl Edit scope.json](../img/cl-oauthscope-json.png) 
 
 It is time to post the data:
 
@@ -204,7 +204,7 @@ When you examine this JSON, you will see three properties in an object: op, path
 
 We can edit this json as follows (remember to make it an array):
 
-![jans-cl Edit patch.json](img/cl-oauthscope-patch-json.png)
+![jans-cl Edit patch.json](../img/cl-oauthscope-patch-json.png)
 
 Let's do the operation:
 
