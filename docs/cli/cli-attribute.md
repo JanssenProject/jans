@@ -33,7 +33,7 @@ Operation ID: patch-attributes-by-inum
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
 
-- **get-attributes**
+## get-attributes
 
 ```text
 Operation ID: get-attributes
@@ -317,7 +317,7 @@ Calling with params limit=5&pattern=profile&status=ACTIVE
 ]
 ```
 
-- **post-attributes**
+## post-attributes
 
 ```text
 Operation ID: post-attributes
@@ -420,4 +420,143 @@ Server Response:
 }
 ```
 
+## put-attributes
+
+This operation-id can be used to update an existing attribute information. Let's look at the schema:
+
+```
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/GluuAttribute > /tmp/attrib.json
+```
+
+You must see the similar schema while performed in `post-attributes` operation.
+
+To update an existing attribute, we have to ensure following properties in the schema file.
+
+In our case, I have modified the schema file as below:
+
+```
+{
+  "dn": "inum=b691f2ab-a7db-4725-b85b-9961575b441f,ou=attributes,o=jans",
+  "inum": "b691f2ab-a7db-4725-b85b-9961575b441f",
+  "selected": true,
+  "name": "testAttribute",
+  "display_name": "testAttribute",
+  "description": "testing put-attribute",
+  "data_type": "STRING",
+  "status": "ACTIVE",
+  "edit_type": ["ADMIN", "OWNER"],
+  "view_type": ["ADMIN", "OWNER", "USER"]
+}
+```
+
+Now if we run the below command line:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id put-attributes --data /tmp/attrb.json
+```
+
+```
+Getting access token for scope https://jans.io/oauth/config/attributes.write
+Server Response:
+{
+  "dn": "inum=b691f2ab-a7db-4725-b85b-9961575b441f,ou=attributes,o=jans",
+  "inum": "b691f2ab-a7db-4725-b85b-9961575b441f",
+  "selected": false,
+  "name": "testAttribute",
+  "displayName": "testAttribute",
+  "description": "testing put-attribute",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": null,
+  "editType": [
+    "ADMIN",
+    "OWNER"
+  ],
+  "viewType": [
+    "ADMIN",
+    "OWNER",
+    "USER"
+  ],
+  "usageType": null,
+  "claimName": null,
+  "seeAlso": null,
+  "saml1Uri": null,
+  "saml2Uri": null,
+  "urn": null,
+  "scimCustomAttr": null,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": null,
+  "tooltip": null,
+  "jansHideOnDiscovery": null
+}
+```
+
+It just replace the previous value with new one. 
+
+## get-attributes-by-inum
+
+Getting an attribute information by using its `inum` is pretty simple.
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+```
+
+It will show all details information of the selected Attribute.
+
+```
+Getting access token for scope https://jans.io/oauth/config/attributes.readonly
+{
+  "dn": "inum=b691f2ab-a7db-4725-b85b-9961575b441f,ou=attributes,o=jans",
+  "inum": "b691f2ab-a7db-4725-b85b-9961575b441f",
+  "selected": false,
+  "name": "testAttribute",
+  "displayName": "testAttribute",
+  "description": "testing put-attribute",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": null,
+  "editType": [
+    "ADMIN",
+    "OWNER"
+  ],
+  "viewType": [
+    "ADMIN",
+    "OWNER",
+    "USER"
+  ],
+  "usageType": null,
+  "claimName": null,
+  "seeAlso": null,
+  "saml1Uri": null,
+  "saml2Uri": null,
+  "urn": null,
+  "scimCustomAttr": null,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": null,
+  "tooltip": null,
+  "jansHideOnDiscovery": null
+}
+```
+
+## delete-attribute-by-inum
+
+Deleting an attribute by its `inum` is also pretty simple:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+```
+
+## patch-attribute-by-inum
 
