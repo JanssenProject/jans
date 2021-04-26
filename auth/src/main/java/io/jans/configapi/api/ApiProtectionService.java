@@ -77,9 +77,8 @@ public class ApiProtectionService {
         createScopeIfNeeded(apiProtectionType);
         log.trace("ApiProtectionService:::verifyResources() - apiProtectionCache.getAllScopes() = "
                 + apiProtectionCache.getAllScopes() + "\n\n");
-        log.trace(
-                "ApiProtectionService:::verifyResources() - apiProtectionCache.getAllResources() = "
-                        + apiProtectionCache.getAllResources() + "\n\n");
+        log.trace("ApiProtectionService:::verifyResources() - apiProtectionCache.getAllResources() = "
+                + apiProtectionCache.getAllResources() + "\n\n");
 
         updateScopeForClientIfNeeded(clientId);
 
@@ -102,9 +101,8 @@ public class ApiProtectionService {
                     log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName = " + scopeName);
                     // Check in cache
                     Scope scope = apiProtectionCache.getScope(scopeName);
-                    log.trace(
-                            "ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName) = "
-                                    + apiProtectionCache.getScope(scopeName));
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName) = "
+                            + apiProtectionCache.getScope(scopeName));
 
                     if (scope != null) {
                         log.trace("Scope - '" + scopeName + "' exists in cache.");

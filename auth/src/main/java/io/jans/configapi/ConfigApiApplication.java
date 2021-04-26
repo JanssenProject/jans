@@ -44,7 +44,7 @@ public class ConfigApiApplication {
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
-    void onStart(/*@Observes StartupEvent ev*/) {
+    void onStart(/* @Observes StartupEvent ev */) {
         logger.info("=================================================================");
         logger.info("=============  STARTING API APPLICATION  ========================");
         logger.info("=================================================================");
@@ -56,7 +56,7 @@ public class ConfigApiApplication {
         logger.info("=================================================================");
     }
 
-    void onStop(/*@Observes ShutdownEvent ev*/) {
+    void onStop(/* @Observes ShutdownEvent ev */) {
         logger.info("================================================================");
         logger.info("===========  API APPLICATION STOPPED  ==========================");
         logger.info("================================================================");

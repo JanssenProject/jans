@@ -51,24 +51,23 @@ public class TestUtil {
         return ConfigurationFactory.getApiProtectionType();
     }
 
-    public String createTestToken(String method , String path)
-            throws Exception {
-        log.trace("\n\n\n *******************  TestUtil:::createTestToken() - Entry - method = "+method+" ,path = "+path+" ******************* ");
-        //log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
+    public String createTestToken(String method, String path) throws Exception {
+        log.trace("\n\n\n *******************  TestUtil:::createTestToken() - Entry - method = " + method + " ,path = "
+                + path + " ******************* ");
+        // log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
         Preconditions.checkNotNull(method, "Method cannot be null !!!");
         Preconditions.checkNotNull(path, "Path cannot be null !!!");
-        
-                
+
         Token token = null;
         String clientId = this.getTestClientId();
         Client client = this.clientService.getClientByInum(clientId);
-        log.trace("\n\n\n TestUtil:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
-        
+        log.trace("\n\n\n TestUtil:::createTestToken() - client = " + Arrays.toString(client.getScopes()) + "\n\n\n");
+
         // Get all scopes
-        List<String> scopes = this.authUtil.getRequestedScopes(method,path);
-        log.trace("\n\n\n TestUtil:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        List<String> scopes = this.authUtil.getRequestedScopes(method, path);
+        log.trace("\n\n\n TestUtil:::createTestToken() - scopes = " + scopes + "\n\n\n");
         token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
-        
+
         log.trace("Generated token: {} ", token);
 
         if (token != null) {
@@ -76,22 +75,21 @@ public class TestUtil {
         }
         return null;
     }
-    
-    public String createTestToken()
-            throws Exception {
+
+    public String createTestToken() throws Exception {
         log.trace("\n\n\n *******************  TestUtil:::createTestToken() - Entry  ******************* ");
-        //log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
-               
+        // log.trace(" Creating Test Token, path: {}, method: {} ", path, method);
+
         Token token = null;
         String clientId = this.getTestClientId();
         Client client = this.clientService.getClientByInum(clientId);
-        log.trace("\n\n\n TestUtil:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
-        
+        log.trace("\n\n\n TestUtil:::createTestToken() - client = " + Arrays.toString(client.getScopes()) + "\n\n\n");
+
         // Get all scopes
         List<String> scopes = this.authUtil.getAllResourceScopes();
-        log.trace("\n\n\n TestUtil:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        log.trace("\n\n\n TestUtil:::createTestToken() - scopes = " + scopes + "\n\n\n");
         token = this.authUtil.requestAccessToken(this.authUtil.getTokenUrl(), clientId, scopes);
-        
+
         log.trace("Generated token: {} ", token);
 
         if (token != null) {
@@ -99,13 +97,13 @@ public class TestUtil {
         }
         return null;
     }
-    
+
     private Client createTestClient() {
-        
+
         String inum = testClientId;
         Client client = clientService.getClientByInum(inum);
-        log.trace("\n\n\n\n :::createTestClient() - client_1 = "+client+"\n\n\n");
-        if(client==null) {            
+        log.trace("\n\n\n\n :::createTestClient() - client_1 = " + client + "\n\n\n");
+        if (client == null) {
             String clientPassword = RandomStringUtils.randomAlphanumeric(8);
             client = new Client();
             client.setClientSecret(authUtil.encryptPassword(clientPassword));
@@ -117,14 +115,14 @@ public class TestUtil {
             client.setResponseTypes(new ResponseType[] { ResponseType.CODE });
             client.setSubjectType(SubjectType.PAIRWISE);
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-                          
+
             client.setClientId(inum);
             client.setDn(clientService.getDnForClient(inum));
             clientService.addClient(client);
         }
-        
+
         client = clientService.getClientByInum(inum);
-        log.trace("\n\n\n\n :::createTestClient() - client_2 = "+client+"\n\n\n");
+        log.trace("\n\n\n\n :::createTestClient() - client_2 = " + client + "\n\n\n");
         testClientId = client.getClientId();
         return client;
     }

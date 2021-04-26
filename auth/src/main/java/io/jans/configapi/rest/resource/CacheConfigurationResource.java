@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CacheConfigurationResource extends BaseResource {
-    
+
     @Inject
     Logger log;
 
@@ -68,7 +68,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchCacheConfiguration(@NotNull String requestString) {
-        log.debug(" CACHE details to patch - requestString = "+requestString);
+        log.debug(" CACHE details to patch - requestString = " + requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
@@ -90,7 +90,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.REDIS)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
-        log.debug("REDIS CACHE details to update - redisConfiguration = "+redisConfiguration);
+        log.debug("REDIS CACHE details to update - redisConfiguration = " + redisConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setRedisConfiguration(redisConfiguration);
             return cache;
@@ -103,7 +103,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
-        log.debug("REDIS CACHE details to patch - requestString = "+requestString);
+        log.debug("REDIS CACHE details to patch - requestString = " + requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
@@ -125,7 +125,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.IN_MEMORY)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
-        log.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration = "+inMemoryConfiguration);
+        log.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration = " + inMemoryConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setInMemoryConfiguration(inMemoryConfiguration);
             return cache;
@@ -139,7 +139,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchInMemoryConfiguration(@NotNull String requestString) {
-        log.debug("IN_MEMORY CACHE details to patch - requestString = "+requestString);
+        log.debug("IN_MEMORY CACHE details to patch - requestString = " + requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
@@ -162,7 +162,8 @@ public class CacheConfigurationResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateNativePersistenceConfiguration(
             @NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
-        log.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration = "+nativePersistenceConfiguration);
+        log.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration = "
+                + nativePersistenceConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
             return cache;
@@ -175,7 +176,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
-        log.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString = "+requestString);
+        log.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString = " + requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
@@ -197,7 +198,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
-        log.debug("MEMCACHED CACHE details to update - memcachedConfiguration = "+memcachedConfiguration);
+        log.debug("MEMCACHED CACHE details to update - memcachedConfiguration = " + memcachedConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setMemcachedConfiguration(memcachedConfiguration);
             return cache;
@@ -210,7 +211,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchMemcachedConfiguration(@NotNull String requestString) {
-        log.debug("MEMCACHED CACHE details to patch - requestString = "+requestString);
+        log.debug("MEMCACHED CACHE details to patch - requestString = " + requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
