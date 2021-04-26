@@ -90,8 +90,9 @@ parser.add_argument("--username", help="Auth username")
 parser.add_argument("--password", help="Auth password")
 parser.add_argument("-j", help="Auth password file")
 
-parser.add_argument("-cert-file", help="Path to SSL Certificate file")
-parser.add_argument("-key-file", help="Path to SSL Key file")
+parser.add_argument("--cert-file", help="Path to SSL Certificate file")
+parser.add_argument("--key-file", help="Path to SSL Key file")
+parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true')
 
 #parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -229,10 +230,14 @@ class JCA_CLI:
         if my_op_mode == 'scim':
             self.swagger_configuration.host += '/jans-scim/restv1/v2'
  
+        if args.noverify:
+            self.swagger_configuration.verify_ssl = False
+        else:
+            self.swagger_configuration.verify_ssl = True
+ 
         if args.cert_file:
             self.swagger_configuration.cert_file = args.cert_file
-        else:
-            self.swagger_configuration.verify_ssl = False
+
         if args.key_file:
             self.swagger_configuration.key_file = args.key_file
 
