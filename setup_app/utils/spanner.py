@@ -1,10 +1,18 @@
 import os
-import requests
 import json
-import re
+import sys
 
+
+from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
+
+sys.path.append(os.path.join(paths.PYLIB_DIR, 'gcs/google'))
+sys.path.append(os.path.join(paths.PYLIB_DIR, 'gcs'))
+
+from google.cloud import spanner
+from google.cloud.spanner_v1 import session
+from google.auth.credentials import AnonymousCredentials
 
 class FakeResult:
     ok = False
@@ -19,84 +27,86 @@ class FakeResult:
 class Spanner:
 
     def __init__(self):
-        if Config.spanner_emulator:
-            self.spanner_base_url = 'http://{}:9020/v1/'.format(Config.spanner_host)
+        if Config.spanner_emulator_host:
+            base.logIt("Using spanner emulator at {}".format(Config.spanner_emulator_host))
+            self.client = spanner.Client(
+                        project=Config.spanner_project,
+                        client_options={'api_endpoint': '{}:9010'.format(Config.spanner_emulator_host)},
+                        credentials=AnonymousCredentials()
+                        )
         else:
-            self.spanner_base_url = 'https://{}/v1/'.format(Config.spanner_host)
+            base.logIt("Using spanner with credidentals".format(Config.google_application_credentials))
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = Config.google_application_credentials
+            self.client = spanner.Client()
 
-        self.spanner_instance_url = os.path.join(self.spanner_base_url, 'projects/{}/instances/{}/databases'.format(Config.spanner_project, Config.spanner_instance))
-        self.spanner_dbase_url = os.path.join(self.spanner_instance_url, Config.spanner_database)
+        self.instance = self.client.instance(Config.spanner_instance)
+        self.database = self.instance.database(Config.spanner_database)
 
-        base.logIt("Spanner Api is constructed with base url {}".format(self.spanner_dbase_url))
-        self.c = 1
+    def get_session(self):
+        ses = session.Session(self.database)
+        ses.create()
+        return ses
 
-
-    def set_sessioned_url(self):
-        session_url = os.path.join(self.spanner_dbase_url, 'sessions')
-        req = requests.post(session_url)
-        result = req.json()
-        session = result['name']
-        self.sessioned_url = os.path.join(self.spanner_base_url, session)
-
-    def del_sessioned_url(self):
-        requests.delete(self.sessioned_url)
+    def get_transaction(self):
+        ses = self.get_session()
+        tr = ses.transaction()
+        tr.begin()
+        return tr
 
     def exec_sql(self, cmd):
         base.logIt("Executing SQL query: {}".format(cmd))
-        self.set_sessioned_url()
-        data = {"sql": cmd}
-        query_url = self.sessioned_url + ':executeSql'
-        req = requests.post(query_url, data=json.dumps(data))
-        self.del_sessioned_url()
-        return req
+        ses = self.get_session()
+        data = {'fields': [], 'rows':[]}
+        with ses.transaction() as tr:
+            try:
+                result = tr.execute_sql(cmd)
+                data['rows'] = list(result)
+                for f in result.fields:
+                    data['fields'].append({'name': f.name, 'type': f.type_.code.name})
+            except:
+                pass
 
-    def get_data(self, data):
-        self.set_sessioned_url()
-        query_url = self.sessioned_url + ':read'
-        req = requests.post(query_url, data=json.dumps(data))
-        self.del_sessioned_url()
-        return req
+        return data
 
-    def put_data(self, mutations):
-        self.set_sessioned_url()
-        query_url = self.sessioned_url + ':commit'
 
-        data = {
-                "singleUseTransaction": {
-                "readWrite": {}
-                },
-                "mutations": mutations
-                }
-        
-        req = requests.post(query_url, data=json.dumps(data))
-        self.del_sessioned_url()
-        return req
+    def insert_data(self, table, columns, values):
+        ses = self.get_session()
+        with ses.transaction() as tr:
+            tr.insert(table, columns=columns, values=values)
+
+    def update_data(self, table, columns, values):
+        ses = self.get_session()
+        with ses.transaction() as tr:
+            tr.update(table, columns=columns, values=values)
 
     def create_table(self, cmd):
-        data = {"statements": [cmd]}
-        base.logIt("TABLE OPERATION: {}".format(cmd))
-        query_url = os.path.join(self.spanner_dbase_url, 'ddl')
-        req = requests.patch(query_url, data=json.dumps(data))
-        return req
+        operation = self.database.update_ddl([cmd])
+        operation.result()
 
     def get_tables(self):
-        query_url = os.path.join(self.spanner_dbase_url, 'ddl')
-
-        req = requests.get(query_url)
-
         tables = []
-
-        result = req.json()
-
-        if 'statements' in result:
-            for statement in result['statements']:
-                table_name_re = re.search('CREATE TABLE (.+) \(', statement)
-                if table_name_re:
-                    table_name = table_name_re.groups()[0]
-                tables.append(table_name)
-
-        return tables
+        for tbl in self.database.list_tables():
+            tables.append(tbl.table_id)
+        return list(tables)
 
     def get_databases(self):
-        req = requests.get(self.spanner_instance_url)
-        return req
+        databases = []
+        for db in self.instance.list_databases():
+            databases.append(os.path.split(db.name)[1])
+        return databases
+
+"""
+gcspanner = Spanner()
+
+#gcspanner.create_table('create table car (car_id INT64, make STRING(20), model STRING(20)) PRIMARY KEY(car_id)')
+
+gcspanner.create_table('create table ailem (doc_id INT64, name STRING(50)) PRIMARY KEY(doc_id)')
+print(gcspanner.get_tables())
+#print(gcspanner.get_databases())
+
+gcspanner.insert_data('ailem', ['doc_id', 'name'], [[1, 'Fatih'], [2, 'Melike'], [3, 'Dilek']])
+
+#gcspanner.update_data('ailem', ['doc_id', 'name'], [[4, 'Devrim']])
+
+print(gcspanner.exec_sql('select * from ailem'))
+"""
