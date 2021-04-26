@@ -35,6 +35,9 @@
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<resteasy.version>4.5.8.Final</resteasy.version>
+		
+		<uel-api.version>2.2.1-b04</uel-api.version>
+		<uel-impl.version>2.2.1-b05</uel-impl.version>
 	</properties>
 
 	<prerequisites>
@@ -82,6 +85,20 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.interceptor</groupId>
+				<artifactId>javax.interceptor-api</artifactId>
+				<version>1.2</version>
+			</dependency>
+
 
 			<!-- jans dependencies -->
 			<dependency>
@@ -193,45 +210,51 @@
 				<type>pom</type>
 			</dependency>
 
-
-			<!-- Logging -->
 			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-api</artifactId>
-				<version>${log4j.version}</version>
+				<groupId>javax.el</groupId>
+				<artifactId>el-api</artifactId>
+				<version>2.2.1-b04</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-1.2-api</artifactId>
-				<version>${log4j.version}</version>
+				<groupId>javax.websocket</groupId>
+				<artifactId>javax.websocket-api</artifactId>
+				<version>1.1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-core</artifactId>
-				<version>${log4j.version}</version>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>el-impl</artifactId>
+				<version>${uel-impl.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-jul</artifactId>
-				<version>${log4j.version}</version>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator-cdi</artifactId>
+				<version>5.4.1.Final</version>
 			</dependency>
 
+			<!-- logging-adapters -->
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>commons-logging-jboss-logging</artifactId>
+				<version>1.0.0.Final</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>${slf4j.version}</version>
+				<groupId>org.jboss.logmanager</groupId>
+				<artifactId>log4j-jboss-logmanager</artifactId>
+				<version>1.2.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.logmanager</groupId>
+				<artifactId>log4j2-jboss-logmanager</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.slf4j</groupId>
+				<artifactId>slf4j-jboss-logging</artifactId>
+				<version>1.2.0.Final</version>
 			</dependency>
 
+			<!-- Jetty -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
@@ -336,6 +359,15 @@
 			</dependency>
 
 
+			<!-- Security -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
