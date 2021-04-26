@@ -63,7 +63,7 @@ public class JwtUtil {
         return null;
     }
 
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {     
+    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer

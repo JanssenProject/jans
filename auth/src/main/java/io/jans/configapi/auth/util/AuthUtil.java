@@ -58,7 +58,7 @@ public class AuthUtil {
     @Inject
     ScopeService scopeService;
 
-        @Inject
+    @Inject
     EncryptionService encryptionService;
 
     public String getClientId() {
@@ -254,35 +254,28 @@ public class AuthUtil {
         return null;
     }
     /*
-    public Token requestPat(final String tokenUrl, final String clientId, final ScopeType scopeType,
-            final List<String> scopes) throws Exception {
-        return request(tokenUrl, clientId, this.getClientDecryptPassword(clientId), scopeType, scopes);
-    }
-
-    public Token request(final String tokenUrl, final String clientId, final String clientSecret, ScopeType scopeType,
-            List<String> scopes) throws Exception {
-
-        String scope = scopeType.getValue();
-        if (scopes != null && scopes.size() > 0) {
-            for (String s : scopes) {
-                scope = scope.trim() + " " + s;
-            }
-        }
-
-        TokenResponse tokenResponse = AuthClientService.patRequest(tokenUrl, clientId, clientSecret, scope);
-
-        if (tokenResponse != null) {
-            log.debug(" tokenScope: {} = ", tokenResponse.getScope());
-            final String patToken = tokenResponse.getAccessToken();
-            final Integer expiresIn = tokenResponse.getExpiresIn();
-            if (Util.allNotBlank(patToken)) {
-                return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
-            }
-        }
-        return null;
-    }
-*/
-    
+     * public Token requestPat(final String tokenUrl, final String clientId, final
+     * ScopeType scopeType, final List<String> scopes) throws Exception { return
+     * request(tokenUrl, clientId, this.getClientDecryptPassword(clientId),
+     * scopeType, scopes); }
+     * 
+     * public Token request(final String tokenUrl, final String clientId, final
+     * String clientSecret, ScopeType scopeType, List<String> scopes) throws
+     * Exception {
+     * 
+     * String scope = scopeType.getValue(); if (scopes != null && scopes.size() > 0)
+     * { for (String s : scopes) { scope = scope.trim() + " " + s; } }
+     * 
+     * TokenResponse tokenResponse = AuthClientService.patRequest(tokenUrl,
+     * clientId, clientSecret, scope);
+     * 
+     * if (tokenResponse != null) { log.debug(" tokenScope: {} = ",
+     * tokenResponse.getScope()); final String patToken =
+     * tokenResponse.getAccessToken(); final Integer expiresIn =
+     * tokenResponse.getExpiresIn(); if (Util.allNotBlank(patToken)) { return new
+     * Token(null, null, patToken, scopeType.getValue(), expiresIn); } } return
+     * null; }
+     */
 
     public void assignAllScope(final String clientId) {
         log.trace(" AssignAllScope to clientId = " + clientId + "\n");

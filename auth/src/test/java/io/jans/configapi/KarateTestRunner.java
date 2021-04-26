@@ -6,18 +6,15 @@
 
 package io.jans.configapi;
 
-
 import com.intuit.karate.junit5.Karate;
 import io.quarkus.test.junit.QuarkusTest;
-
 
 @QuarkusTest
 public class KarateTestRunner {
 
     @Karate.Test
-    Karate testFullPath() throws Exception{     
+    Karate testFullPath() throws Exception {
         return Karate.run("src/test/resources/feature");
     }
-    
-   
+
 }

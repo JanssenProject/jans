@@ -3,30 +3,28 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-config-api-auth</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>auth</name>
 	<packaging>jar</packaging>
-	
+
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	
-
 
 	<dependencies>
 
-	<dependency>
-	  <groupId>org.eclipse.microprofile</groupId>
-	  <artifactId>microprofile</artifactId>
-	  <version>4.0.1</version>
-	  <type>pom</type>
-	  <scope>provided</scope>
-	</dependency>
+		<dependency>
+			<groupId>org.eclipse.microprofile</groupId>
+			<artifactId>microprofile</artifactId>
+			<version>4.0.1</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- jans dependencies -->
 		<dependency>
@@ -54,27 +52,27 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
-		
-		
-		 <!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.config/microprofile-config-api -->
+
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.config/microprofile-config-api -->
 		<dependency>
-		    <groupId>org.eclipse.microprofile.config</groupId>
-		    <artifactId>microprofile-config-api</artifactId>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
 		</dependency>
-		
+
 		<!-- RestEasy -->
-	<dependency>
+		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-core</artifactId>
 			<version>4.5.8.Final</version>
 		</dependency>
-		
-		
-		
+
+
+
 	</dependencies>
 </project>

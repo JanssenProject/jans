@@ -23,7 +23,7 @@ import java.util.List;
 
 public class Util {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Util.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
     private static AuthUtil authUtil = new AuthUtil();
     private static ConfigurationFactory configurationFactory = new ConfigurationFactory();
     private static ClientService clientService = new ClientService();
@@ -36,18 +36,17 @@ public class Util {
     public static String getApiClientId() {
         return ConfigurationFactory.getApiClientId();
     }
-    
+
     public static String getApiClientPassword() {
         return ConfigurationFactory.getApiClientPassword();
     }
-    
-    
+
     public static Client createTestClient() {
-        
+
         String inum = testClientId;
         Client client = clientService.getClientByInum(inum);
-        LOG.trace("\n\n\n\n :::createTestClient() - client_1 = "+client+"\n\n\n");
-        if(client==null) {            
+        LOG.trace("\n\n\n\n :::createTestClient() - client_1 = " + client + "\n\n\n");
+        if (client == null) {
             String clientPassword = RandomStringUtils.randomAlphanumeric(8);
             client = new Client();
             client.setClientSecret(authUtil.encryptPassword(clientPassword));
@@ -59,33 +58,32 @@ public class Util {
             client.setResponseTypes(new ResponseType[] { ResponseType.CODE });
             client.setSubjectType(SubjectType.PAIRWISE);
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-                          
+
             client.setClientId(inum);
             client.setDn(clientService.getDnForClient(inum));
             clientService.addClient(client);
         }
-        
+
         client = clientService.getClientByInum(inum);
-        LOG.trace("\n\n\n\n :::createTestClient() - client_2 = "+client+"\n\n\n");
+        LOG.trace("\n\n\n\n :::createTestClient() - client_2 = " + client + "\n\n\n");
         testClientId = client.getClientId();
         return client;
     }
-    
-    public static String createTestToken()
-            throws Exception {
+
+    public static String createTestToken() throws Exception {
         LOG.trace("\n\n\n *******************  TestUtil:::createTestToken() - Entry  ******************* ");
-        //LOG.trace(" Creating Test Token, path: {}, method: {} ", path, method);
-               
+        // LOG.trace(" Creating Test Token, path: {}, method: {} ", path, method);
+
         Token token = null;
         String clientId = getTestClientId();
         Client client = clientService.getClientByInum(clientId);
-        LOG.trace("\n\n\n TestUtil:::createTestToken() - client = "+Arrays.toString(client.getScopes())+"\n\n\n");
-        
+        LOG.trace("\n\n\n TestUtil:::createTestToken() - client = " + Arrays.toString(client.getScopes()) + "\n\n\n");
+
         // Get all scopes
         List<String> scopes = authUtil.getAllResourceScopes();
-        LOG.trace("\n\n\n TestUtil:::createTestToken() - scopes = "+scopes+"\n\n\n");
+        LOG.trace("\n\n\n TestUtil:::createTestToken() - scopes = " + scopes + "\n\n\n");
         token = authUtil.requestAccessToken(authUtil.getTokenUrl(), clientId, scopes);
-        
+
         LOG.trace("Generated token: {} ", token);
 
         if (token != null) {

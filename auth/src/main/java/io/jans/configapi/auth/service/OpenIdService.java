@@ -50,7 +50,7 @@ public class OpenIdService implements Serializable {
             introspectionUrl = AuthClientService.getIntrospectionEndpoint(issuer);
             log.trace("\n\n oAuth Issuer's introspectionUrl = " + introspectionUrl);
         }
-        
+
         log.info("\n\n oAuth Final introspectionUrl = " + introspectionUrl);
         return AuthClientService.getIntrospectionResponse(introspectionUrl, header, token, false);
     }
