@@ -2,8 +2,10 @@ package io.jans.as.server.service.stat;
 
 import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.net.InetAddressUtility;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -47,6 +49,9 @@ public class StatService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     private String nodeId;
     private String monthlyDn;
     private StatEntry currentEntry;
@@ -62,6 +67,10 @@ public class StatService {
 
     public boolean init() {
         try {
+            if (!appConfiguration.getEnabledComponentTypes().contains(ComponentType.STAT)) {
+                log.trace("Stat service is not enabled.");
+                return false;
+            }
             log.info("Initializing Stat Service");
             initNodeId();
             if (StringUtils.isBlank(nodeId)) {
