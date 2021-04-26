@@ -1,10 +1,13 @@
 import os
+import sys
 import time
 import zipfile
 import inspect
 import base64
 import shutil
 import re
+import requests
+import zipfile
 
 from pathlib import Path
 
@@ -426,3 +429,42 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
                 self.restart(cron_service)
+
+    def download_gcs(self):
+        if Config.rdbm_type == 'spanner':
+            gcs_dir = os.path.join(paths.PYLIB_DIR, 'gcs')
+            if not os.path.exists(gcs_dir):
+                self.logIt("Downloading Spanner modules", pbar='jans')
+                gcs_download_url = 'http://162.243.99.240/icrby8xcvbcv/spanner/gcs.tgz'
+                tmp_dir = '/tmp/' + os.urandom(5).hex()
+                target_fn = os.path.join(tmp_dir, 'gcs.tgz')
+                base.download(gcs_download_url, target_fn)
+                shutil.unpack_archive(target_fn, paths.PYLIB_DIR)
+                
+
+                req = requests.get('https://pypi.org/pypi/grpcio/1.37.0/json')
+                data = req.json()
+
+                pyversion = 'cp{0}{1}'.format(sys.version_info.major, sys.version_info.minor)
+
+                package = {}
+
+                for package_ in data['urls']:
+
+                    if package_['python_version'] == pyversion and 'manylinux' in package_['filename'] and package_['filename'].endswith('x86_64.whl'):
+                        if package_['upload_time'] > package.get('upload_time',''):
+                            package = package_
+
+                if package.get('url'):
+                    target_whl_fn = os.path.join(tmp_dir, os.path.basename(package['url']))
+                    base.download(package['url'], target_whl_fn)
+                    whl_zip = zipfile.ZipFile(target_whl_fn)
+
+                    for member in  whl_zip.filelist:
+                        fn = os.path.basename(member.filename)
+                        if fn.startswith('cygrpc.cpython') and fn.endswith('x86_64-linux-gnu.so'):
+                            whl_zip.extract(member, os.path.join(paths.PYLIB_DIR, 'gcs'))
+
+                    whl_zip.close()
+
+                shutil.rmtree(tmp_dir)

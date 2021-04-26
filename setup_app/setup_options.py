@@ -68,9 +68,11 @@ def get_setup_options():
             setupOptions['spanner_instance'] = base.argsp.spanner_instance
         if base.argsp.spanner_database:
             setupOptions['spanner_database'] = base.argsp.spanner_database
-        if base.argsp.spanner_host:
-            setupOptions['spanner_host'] = base.argsp.spanner_host
-        setupOptions['spanner_emulator'] = base.argsp.spanner_emulator
+        if base.argsp.spanner_emulator_host:
+            setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
+        if base.argsp.google_application_credentials:
+            setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
+
 
     if base.argsp.disable_local_ldap:
         setupOptions['wrends_install'] = InstallTypes.NONE

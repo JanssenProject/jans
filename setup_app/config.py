@@ -159,11 +159,11 @@ class Config:
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
         #spanner
-        self.spanner_emulator = False
         self.spanner_project = 'jans-project'
         self.spanner_instance = 'jans-instance'
         self.spanner_database = 'jansdb' 
-        self.spanner_host = 'spanner.googleapis.com'
+        self.spanner_emulator_host = None
+        self.google_application_credentials = None
 
         # Jans components installation status
         self.loadData = True
