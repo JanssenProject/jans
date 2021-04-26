@@ -215,7 +215,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'spontaneousScopeLifetime': 0,
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
-                                    'skipRefreshTokenDuringRefreshing': False
+                                    'skipRefreshTokenDuringRefreshing': False,
+                                    'enabledComponents': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat']
                                     }
 
         if Config.get('config_patch_creds'):
