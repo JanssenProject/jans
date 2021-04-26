@@ -1,0 +1,28 @@
+{
+    "adminCanAccess": true,
+    "adminCanEdit": true,
+    "adminCanView": true,
+    "custom": false,
+    "dataType": "STRING",
+    "description": "Test Attribute",
+    "displayName": "Test Attribute",
+    "editType": [
+        "ADMIN",
+        "USER"
+    ],
+    "name": "testAttribute",
+    "origin": "jansPerson",
+    "jansMultivaluedAttr": false,
+    "requred": false,
+    "status": "ACTIVE",
+    "urn": "urn:mace:dir:attribute-def:testAttribute",
+    "userCanAccess": true,
+    "userCanEdit": true,
+    "userCanView": true,
+    "viewType": [
+        "ADMIN",
+        "USER"
+    ],
+    "whitePagesCanView": false,
+    "jansHideOnDiscovery": true
+}

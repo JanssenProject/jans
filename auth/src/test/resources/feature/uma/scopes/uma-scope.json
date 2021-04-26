@@ -1,0 +1,10 @@
+{
+	"attributes": {
+		"notShowInDiscovery": true
+	},
+	"displayName": "QAAddedUmaScope",
+	"id": "https://gluu.qa.com/jans-auth/restv1/uma/scopes/qa-scope",
+	"scopeType": "UMA",
+	"umaAuthorizationPolicies": [],
+	"umaType": true
+}
