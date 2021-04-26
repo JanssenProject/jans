@@ -4,6 +4,7 @@ import shutil
 
 APP_ROOT = pathlib.Path(__file__).parent.as_posix()
 INSTALL_DIR = pathlib.Path(__file__).parent.parent.as_posix()
+PYLIB_DIR = os.path.join(APP_ROOT, 'pylib')
 DATA_DIR = os.path.join(APP_ROOT, 'data')
 LOG_DIR = os.path.join(INSTALL_DIR, 'logs')
 

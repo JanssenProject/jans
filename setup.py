@@ -244,10 +244,13 @@ def do_installation():
     jansProgress.before_start()
     jansProgress.start()
 
+    
+
     try:
         jettyInstaller.calculate_selected_aplications_memory()
 
         if not Config.installed_instance:
+            jansInstaller.download_gcs()
             jansInstaller.configureSystem()
             jansInstaller.make_salt()
             jansAuthInstaller.make_salt()
