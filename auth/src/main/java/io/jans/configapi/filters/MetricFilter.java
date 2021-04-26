@@ -34,10 +34,10 @@ public class MetricFilter implements Filter {
     MetricRegistry registry;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException{
-        
+    public void init(FilterConfig filterConfig) throws ServletException {
+
     }
-   
+
     private Metadata createMetaData(HttpServletRequest request, MetricType type, String prefix) {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         return new MetadataBuilder().withName(prefix + path).withDisplayName(prefix + path).withType(type)
@@ -56,7 +56,8 @@ public class MetricFilter implements Filter {
         meter.mark();
         timer.time().stop();
     }
-    
+
     @Override
-    public void destroy() {}
+    public void destroy() {
+    }
 }

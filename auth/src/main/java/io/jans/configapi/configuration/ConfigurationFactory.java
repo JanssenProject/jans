@@ -6,7 +6,6 @@
 
 package io.jans.configapi.configuration;
 
-
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.Constants;
@@ -42,13 +41,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
-
 @ApplicationScoped
 @Alternative
 public class ConfigurationFactory {
 
-   
-   
     static {
         if (System.getProperty("jans.base") != null) {
             BASE_DIR = System.getProperty("jans.base");
@@ -90,24 +86,22 @@ public class ConfigurationFactory {
     private FileConfiguration applicationProperties;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
-   
+
     private String API_PROTECTION_TYPE;
     private String API_CLIENT_ID;
     private String API_CLIENT_PASSWORD;
-   // private static List<String> API_APPROVED_ISSUER;
-    
+    // private static List<String> API_APPROVED_ISSUER;
+
     @Inject
     @ConfigProperty(name = "api.approved.issuer")
     private static List<String> API_APPROVED_ISSUER;
 
-    
     @Inject
     ApiProtectionService apiProtectionService;
 
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
-    
-   
+
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -127,30 +121,29 @@ public class ConfigurationFactory {
     public FileConfiguration getAplicationProperties() {
         return applicationProperties;
     }
-    
+
     public static String getAppPropertiesFile() {
         return APP_PROPERTIES_FILE;
     }
 
     public String getApiProtectionType() {
         return this.getAplicationProperties().getString("api.protection.type");
-        //return API_PROTECTION_TYPE;
+        // return API_PROTECTION_TYPE;
     }
 
     public String getApiClientId() {
         return this.getAplicationProperties().getString("api.client.id");
-        //return API_CLIENT_ID;
+        // return API_CLIENT_ID;
     }
 
     public String getApiClientPassword() {
         return this.getAplicationProperties().getString("api.client.password");
-        //return API_CLIENT_PASSWORD;
+        // return API_CLIENT_PASSWORD;
     }
 
     public static List<String> getApiApprovedIssuer() {
         return API_APPROVED_ISSUER;
     }
-
 
     public void create() {
         loadBaseConfiguration();
@@ -201,7 +194,6 @@ public class ConfigurationFactory {
         }
     }
 
-
     private void loadBaseConfiguration() {
         log.info("Loading base configuration " + BASE_PROPERTIES_FILE);
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
@@ -213,7 +205,7 @@ public class ConfigurationFactory {
         this.applicationProperties = createFileConfiguration(APPLICATION_PROPERTIES_FILE);
         log.info("loadApplicationProperties() - loaded :" + applicationProperties.getProperties());
     }
-    
+
     private String confDir() {
         final String confDir = this.baseConfiguration.getString("confDir", null);
         if (StringUtils.isNotBlank(confDir)) {
@@ -279,10 +271,10 @@ public class ConfigurationFactory {
         try {
             SecurityProviderUtility.installBCProvider();
         } catch (Exception ex) {
-            log.error("Failed to install BC provider properly",ex);
+            log.error("Failed to install BC provider properly", ex);
         }
     }
-    
+
     @Produces
     @ApplicationScoped
     public StaticConfiguration getStaticConf() {
@@ -325,8 +317,7 @@ public class ConfigurationFactory {
         }
         try {
             // Verify resources available
-            apiProtectionService.verifyResources(getApiProtectionType(),
-                    getApiClientId());
+            apiProtectionService.verifyResources(getApiProtectionType(), getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);

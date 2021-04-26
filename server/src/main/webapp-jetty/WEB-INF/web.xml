@@ -3,7 +3,7 @@
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 
-	<display-name>jans-config-api Server</display-name>
+	<display-name>Jans Config Api Server</display-name>
 
 	<!-- Jetty -->
 	<context-param>
@@ -17,12 +17,65 @@
 		<param-value>${weld.debug}</param-value>
 	</context-param>
 
-	
+	<!-- JSF -->
+	<context-param>
+		<param-name>javax.faces.PROJECT_STAGE</param-name>
+		<param-value>Production</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+		<param-value>.xhtml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
+		<param-value>io.jans.service.ExternalResourceHandler</param-value>
+	</context-param>
+	<!-- Change to -1 when you don't want the compiler should check for changes -->
+	<context-param>
+		<param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+		<param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>client</param-value>
+	</context-param>
+
+	<!-- RichFaces -->
+	<context-param>
+		<param-name>org.richfaces.SKIN</param-name>
+		<param-value>glassX</param-value>
+	</context-param>
+
+	<!-- Suppress spurious stylesheets -->
+	<context-param>
+		<param-name>org.richfaces.CONTROL_SKINNING</param-name>
+		<param-value>disable</param-value>
+	</context-param>
+	<context-param>
+		<param-name>org.richfaces.CONTROL_SKINNING_CLASSES</param-name>
+		<param-value>disable</param-value>
+	</context-param>
 
 	<!-- Weld -->
 	<listener>
 		<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
 	</listener>
+
+	<!-- JSF -->
+	<listener>
+		<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>Faces Servlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Faces Servlet</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
 
 	<session-config>
 		<session-timeout>1</session-timeout>

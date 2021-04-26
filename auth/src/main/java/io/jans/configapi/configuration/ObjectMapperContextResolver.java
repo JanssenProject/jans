@@ -17,7 +17,7 @@ import javax.ws.rs.ext.ContextResolver;
 
 @Singleton
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
-    
+
     final ObjectMapper defaultObjectMapper;
 
     public ObjectMapperContextResolver() {

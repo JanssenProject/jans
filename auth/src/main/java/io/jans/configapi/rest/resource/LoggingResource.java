@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class LoggingResource {
-    
+
     @Inject
     Logger log;
 
@@ -43,7 +43,7 @@ public class LoggingResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
     public Response updateLogConf(@Valid Logging logging) {
-        log.debug("LOGGING configuration to be updated -logging = "+logging);
+        log.debug("LOGGING configuration to be updated -logging = " + logging);
         Conf conf = configurationService.findConf();
 
         if (!StringUtils.isBlank(logging.getLoggingLevel())) {

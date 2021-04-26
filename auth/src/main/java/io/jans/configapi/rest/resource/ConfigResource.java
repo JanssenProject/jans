@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigResource extends BaseResource {
-    
+
     @Inject
     Logger log;
 
@@ -44,7 +44,7 @@ public class ConfigResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
-        log.debug("AUTH CONF details to patch - requestString = "+requestString);
+        log.debug("AUTH CONF details to patch - requestString = " + requestString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
         conf.setDynamic(appConfiguration);
