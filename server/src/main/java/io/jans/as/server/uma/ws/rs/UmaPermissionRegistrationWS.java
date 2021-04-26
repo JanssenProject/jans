@@ -6,36 +6,25 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaErrorResponseType;
-import io.jans.as.model.uma.UmaPermission;
-import io.jans.as.model.uma.UmaPermissionList;
+import io.jans.as.model.uma.*;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.as.server.util.ServerUtil;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -75,6 +64,8 @@ public class UmaPermissionRegistrationWS {
                                        @HeaderParam("Authorization") String authorization,
                                        String requestAsString) {
         try {
+            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
+
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
 
             // UMA2 spec defined 2 possible requests, single permission or list of permission. So here we parse manually
