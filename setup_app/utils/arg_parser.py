@@ -74,8 +74,9 @@ def arg_parser():
     parser.add_argument('-spanner-project', help="Spanner project name")
     parser.add_argument('-spanner-instance', help="Spanner instance name")
     parser.add_argument('-spanner-database', help="Spanner database name")
-    parser.add_argument('-spanner-host', help="Spanner hostname name")
-    parser.add_argument('--spanner-emulator', help="Use Spanner emulator", action='store_true')
+    spanner_cred_group = parser.add_mutually_exclusive_group()
+    spanner_cred_group.add_argument('-spanner-emulator-host', help="Use Spanner emulator host")
+    spanner_cred_group.add_argument('-google-application-credentials', help="Path to Google application credentials json file")
 
     parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 

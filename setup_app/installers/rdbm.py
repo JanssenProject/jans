@@ -3,6 +3,7 @@ import re
 import sys
 import datetime
 import sqlalchemy
+import shutil
 
 from string import Template
 
@@ -30,6 +31,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.output_dir = os.path.join(Config.outputFolder, Config.rdbm_type)
 
     def install(self):
+
         self.local_install()
         jans_schema_files = []
 
@@ -38,7 +40,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.create_tables(jans_schema_files)
         self.import_ldif()
-        self.create_indexes()
+
+        if not Config.rdbm_type == 'spanner':
+            self.create_indexes()
+
         self.rdbmProperties()
 
     def local_install(self):
@@ -281,9 +286,20 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         Config.templateRenderingDict['server_time_zone'] = my_time_zone
 
     def rdbmProperties(self):
-        self.server_time_zone()
-        Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-        self.renderTemplateInOut(Config.jansRDBMProperties, Config.templateFolder, Config.configFolder)
+        if Config.rdbm_type in ('sql', 'mysql'):
+            self.server_time_zone()
+            Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
+            self.renderTemplateInOut(Config.jansRDBMProperties, Config.templateFolder, Config.configFolder)
+
+        elif Config.rdbm_type == 'spanner':
+            if Config.spanner_emulator_host:
+                Config.templateRenderingDict['spanner_creds'] = 'connection.emulator-host={}:9010'.format(Config.spanner_emulator_host)
+            else:
+                auth_cred_target_fn = os.path.join(Config.configFolder, 'google_application_credentials.json')
+                shutil.copy(Config.google_application_credentials, auth_cred_target_fn)
+                Config.templateRenderingDict['spanner_creds'] = 'auth.credentials-file={}'.format(auth_cred_target_fn)
+
+            self.renderTemplateInOut(Config.jansSpannerProperties, Config.templateFolder, Config.configFolder)
 
     def create_folders(self):
         self.createDirs(Config.static_rdbm_dir)
@@ -291,3 +307,4 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def installed(self):
         # to be implemented
         return True
+
