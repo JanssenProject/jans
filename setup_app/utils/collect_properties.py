@@ -83,15 +83,12 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansSpannerProperties):
             jans_spanner_prop = base.read_properties_file(Config.jansSpannerProperties)
             
-            Config.spanner_project = jans_spanner_prop['spanner.project']
-            Config.spanner_instance = jans_spanner_prop['spanner.instance']
-            Config.spanner_database = jans_spanner_prop['spanner.db']
+            Config.spanner_project = jans_spanner_prop['connection.project']
+            Config.spanner_instance = jans_spanner_prop['connection.instance']
+            Config.spanner_database = jans_spanner_prop['connection.database']
 
-            if 'spanner.host' in jans_spanner_prop:
-                Config.spanner_host = jans_spanner_prop['spanner.host']
-                Config.spanner_emulator = True
-
-            #print(Config.rdbm_type, Config.spanner_project, Config.spanner_instance, Config.spanner_database, Config.spanner_host, Config.spanner_emulator)
+            if 'connection.emulator-host' in jans_spanner_prop:
+                Config.spanner_emulator_host = jans_spanner_prop['connection.emulator-host']
 
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
