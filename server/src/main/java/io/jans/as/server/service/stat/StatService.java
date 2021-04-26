@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -67,7 +68,8 @@ public class StatService {
 
     public boolean init() {
         try {
-            if (!appConfiguration.getEnabledComponentTypes().contains(ComponentType.STAT)) {
+            final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
+            if (!enabledComponents.isEmpty() && !enabledComponents.contains(ComponentType.STAT)) {
                 log.trace("Stat service is not enabled.");
                 return false;
             }
