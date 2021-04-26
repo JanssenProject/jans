@@ -6,34 +6,8 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SESSION;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.FOUND;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
@@ -48,6 +22,24 @@ import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SESSION;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.FOUND;
 
 /**
  * Claims-Gathering Endpoint.
@@ -82,6 +74,8 @@ public class UmaGatheringWS {
         try {
             log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, authenticationRedirect: {}, queryString: {}",
                     clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest.getQueryString());
+
+            errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
 
             SessionId session = sessionService.getSession(httpRequest, httpResponse);
 
