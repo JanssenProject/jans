@@ -4,7 +4,7 @@ First thing, let's get the information for `Attribute`:
 ```commandline
 /opt/jans/jans-cli/config-cli.py --info Attribute
 ```
-In return, we get:
+In return, we get a list of Operations ID as below:
 
 ```text
 Operation ID: get-attributes
@@ -33,7 +33,22 @@ Operation ID: patch-attributes-by-inum
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
 
-## get-attributes
+We have discussed here about each of this operations ID with few examples to understand how these really works.
+
+Table of Contents
+=================
+
+* [Attribute](#attribute)
+  * [Get Attributes](#get-attributes)
+  * [Creating an Attribute](#creating-an-attribute)
+  * [Updating an Attribute](#updating-an-attribute)
+  * [Get Attribute by inum](#get-attribute-by-inum)
+  * [Delete Attributes](#delete-attributes)
+  * [Patch Attributes](#patch-attributes)
+
+## Get Attributes
+
+As we know, Attributes are individual pieces of user data, like `uid` or `email`, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:
 
 ```text
 Operation ID: get-attributes
@@ -43,7 +58,6 @@ Operation ID: get-attributes
   pattern: Search pattern. [string]
   status: Status of the attribute [string]
 ```
-Let's do some queries using `get-attributes` operation ID.
 
 To get all the attributes without any arguments, run the following command:
 ```commandline
@@ -235,10 +249,11 @@ Calling with params limit=5
 ```
 
 To get attributes with `pattern & status`:
+
 ```commandline
 /opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5,pattern:profile,status:ACTIVE
 ```
-In return, we get:
+In return, we get a list of attribute that are matched with the given `pattern` and `status`:
 
 ```properties
 Getting access token for scope https://jans.io/oauth/config/attributes.readonly
@@ -317,7 +332,9 @@ Calling with params limit=5&pattern=profile&status=ACTIVE
 ]
 ```
 
-## post-attributes
+## Creating an Attribute
+
+To create SSO for certain applications, you may need to add custom attributes to your Janssen Server. Custom attributes can be added by using this operation-ID. It has a schema file where it's defined: the properties it needs to be filled to create a new custom attribute.
 
 ```text
 Operation ID: post-attributes
@@ -420,9 +437,11 @@ Server Response:
 }
 ```
 
-## put-attributes
+## Updating an Attribute
 
-This operation-id can be used to update an existing attribute information. Let's look at the schema:
+This operation-id can be used to update an existing attribute information.
+The Janssen Server administrator can make changes to attributes, such as changing their status to `active/inactive` by using this operation-ID.
+Let's look at the schema:
 
 ```
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/GluuAttribute > /tmp/attrib.json
@@ -499,8 +518,9 @@ Server Response:
 
 It just replace the previous value with new one. 
 
-## get-attributes-by-inum
+## Get Attribute by `inum`
 
+As we know, There are a lot of attributes available in the Janssen Server including custom attributes as well. You may want to know details information for a single attribute uniquely identified by `inum`.
 Getting an attribute information by using its `inum` is pretty simple.
 
 ```
@@ -550,13 +570,136 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 }
 ```
 
-## delete-attribute-by-inum
+## Delete Attributes
 
-Deleting an attribute by its `inum` is also pretty simple:
+For any reason, If it needs to delete any attribute, you can do that simply using its `inum` value. See below example, just change the `inum` value with one that you want to delete.
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
 ```
 
-## patch-attribute-by-inum
+## Patch Attributes
 
+This operation can also used for updating an existing attribute by using its `inum` value.
+
+```
+Operation ID: patch-attributes-by-inum
+  Description: Partially modify a GluuAttribute.
+  url-suffix: inum
+  Schema: Array of /components/schemas/PatchRequest
+```
+
+If we look at the description, we see that there is a schema file. Let's get the schema file with below command:
+
+```
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
+```
+
+```
+# cat /tmp/patch.json
+
+{
+  "op": "add",
+  "path": "string",
+  "value": {}
+}
+```
+
+Let's modify this schema file to change the status of an attribute as below:
+
+![](../img/cl-attribute-patch.png)
+
+In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](cli-tips.md#patch-request-schema)
+
+Let's update an attribute by its `inum` value. In our case, `inum`: 6EEB. Before patching the selected attribute, you can check its properties using [get-attributes-by-inum](#get-attribute-by-inum) operation.
+
+Before patching the attribute, its properties are:
+
+```
+{
+  "dn": "inum=6EEB,ou=attributes,o=jans",
+  "inum": "6EEB",
+  "selected": false,
+  "name": "l",
+  "displayName": "City",
+  "description": "City",
+  "dataType": "STRING",
+  "status": "INACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": "jansCustomPerson",
+  "editType": [
+    "USER",
+    "ADMIN"
+  ],
+  "viewType": [
+    "USER",
+    "ADMIN"
+  ],
+  "usageType": null,
+  "claimName": "locality",
+  "seeAlso": null,
+  "saml1Uri": "urn:mace:dir:attribute-def:l",
+  "saml2Uri": "urn:oid:2.5.4.7",
+  "urn": "urn:mace:dir:attribute-def:l",
+  "scimCustomAttr": null,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": null,
+  "tooltip": null,
+  "jansHideOnDiscovery": null
+}
+```
+According to the schema file, There should be two changes, `status` and `jansHideOnDiscovery`. Let's perform the operation:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix inum:6EEB --data /tmp/patch.json
+```
+
+The updated attribute looks like:
+
+```
+Getting access token for scope https://jans.io/oauth/config/attributes.write
+Server Response:
+{
+  "dn": "inum=6EEB,ou=attributes,o=jans",
+  "inum": "6EEB",
+  "selected": false,
+  "name": "l",
+  "displayName": "City",
+  "description": "City",
+  "dataType": "STRING",
+  "status": "ACTIVE",
+  "lifetime": null,
+  "sourceAttribute": null,
+  "salt": null,
+  "nameIdType": null,
+  "origin": "jansCustomPerson",
+  "editType": [
+    "USER",
+    "ADMIN"
+  ],
+  "viewType": [
+    "USER",
+    "ADMIN"
+  ],
+  "usageType": null,
+  "claimName": "locality",
+  "seeAlso": null,
+  "saml1Uri": "urn:mace:dir:attribute-def:l",
+  "saml2Uri": "urn:oid:2.5.4.7",
+  "urn": "urn:mace:dir:attribute-def:l",
+  "scimCustomAttr": null,
+  "oxMultiValuedAttribute": false,
+  "custom": false,
+  "requred": false,
+  "attributeValidation": null,
+  "tooltip": null,
+  "jansHideOnDiscovery": true
+}
+```
+
+As you see, there are two changes.
