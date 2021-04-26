@@ -74,6 +74,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -707,7 +708,8 @@ public class AppInitializer {
 	 * should be more than 0 seconds of interval
 	 */
 	private void initCibaRequestsProcessor() {
-		if (appConfiguration.getEnabledComponentTypes().contains(ComponentType.CIBA) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
+        if ((enabledComponents.isEmpty() || enabledComponents.contains(ComponentType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
 			if (cibaRequestsProcessorJob != null) {
 				cibaRequestsProcessorJob.initTimer();
 			}
