@@ -8,21 +8,34 @@ package io.jans.configapi;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter;
+import io.jans.util.security.StringEncrypter.EncryptionException;
 //import io.quarkus.runtime.ShutdownEvent;
 //import io.quarkus.runtime.StartupEvent;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,6 +45,9 @@ public class ConfigApiApplication {
 
     @Inject
     Logger logger;
+    
+    @Inject
+    private Event<ApplicationInitializedEvent> eventApplicationInitialized;
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -39,12 +55,14 @@ public class ConfigApiApplication {
 
     @Inject
     BeanManager beanManager;
+    
     @Inject
     ConfigurationFactory configurationFactory;
+    
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
-    void onStart(/* @Observes StartupEvent ev */) {
+    void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         logger.info("=================================================================");
         logger.info("=============  STARTING API APPLICATION  ========================");
         logger.info("=================================================================");
@@ -66,6 +84,24 @@ public class ConfigApiApplication {
     @ApplicationScoped
     public ConfigurationFactory getConfigurationFactory() {
         return configurationFactory;
+    }
+    
+    @Produces
+    @ApplicationScoped
+    public StringEncrypter getStringEncrypter() {
+        String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
+
+        if (StringHelper.isEmpty(encodeSalt)) {
+            throw new ConfigurationException("Encode salt isn't defined");
+        }
+
+        try {
+            StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
+
+            return stringEncrypter;
+        } catch (EncryptionException ex) {
+            throw new ConfigurationException("Failed to create StringEncrypter instance");
+        }
     }
 
     @Produces

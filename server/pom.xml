@@ -1,34 +1,57 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  
-  <modelVersion>4.0.0</modelVersion>
-  <artifactId>jans-config-api-server</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>server</name>
-  <packaging>war</packaging>
-  
-  <parent>
-    <groupId>io.jans</groupId>
-    <artifactId>jans-config-api-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
-  
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <dependencies>
-	  <dependency>
-	   <groupId>io.jans</groupId>
-	   <artifactId>jans-config-api-auth</artifactId>
-	  </dependency>
-  </dependencies>
-  
-  <build>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-config-api-server</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>server</name>
+	<packaging>war</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-config-api-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-auth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+		</dependency>
+		
+		<!-- logging-adapters -->
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>commons-logging-jboss-logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logmanager</groupId>
+			<artifactId>log4j-jboss-logmanager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logmanager</groupId>
+			<artifactId>log4j2-jboss-logmanager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.slf4j</groupId>
+			<artifactId>slf4j-jboss-logging</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
 		<finalName>${project.artifactId}</finalName>
 
-	<!-- 	<filters>
-			<filter>profiles/${cfg}/config-build.properties</filter>
-			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
-		</filters> -->
+		<!-- <filters> <filter>profiles/${cfg}/config-build.properties</filter> 
+			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter> </filters> -->
 
 		<resources>
 			<resource>
@@ -61,7 +84,8 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<!-- check it : for some reason jar and war are not attached to project automatically, as temp solution install them manually -->
+				<!-- check it : for some reason jar and war are not attached to project 
+					automatically, as temp solution install them manually -->
 				<executions>
 					<execution>
 						<id>install-jar</id>
@@ -135,10 +159,9 @@
 									<filtering>true</filtering>
 								</resource>
 							</resources>
-							<!-- <filters>
-								<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
-								<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
-							</filters> -->
+							<!-- <filters> <filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter> 
+								<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter> 
+								</filters> -->
 						</configuration>
 					</execution>
 				</executions>
@@ -148,12 +171,13 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+DisableExplicitGC
+					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m
+						-XX:+DisableExplicitGC
 						-Djans.base=${project.build.directory}
 						-Dserver.base=${project.build.directory}
 						-Dlog.base=${project.build.directory}
 						-Dgluu.disable.scheduler=true
- 
+
 					</argLine>
 				</configuration>
 			</plugin>
@@ -185,18 +209,7 @@
 							<directory>src/main/webapp</directory>
 							<filtering>false</filtering>
 							<includes>
-								<include>META-INF/navigation/*.navigation.xml</include>
-								<include>**/*.xhtml</include>
-								<include>**/*.jsp</include>
-								<include>**/*.html</include>
-								<include>**/*.pdf</include>
-								<include>**/*.js</include>
-								<include>**/*.css</include>
-								<include>**/*.xcss</include>
-								<include>**/*.png</include>
-								<include>**/*.jpg</include>
-								<include>**/*.gif</include>
-								<include>**/*.ico</include>
+								<include>**/*.*</include>
 							</includes>
 						</resource>
 					</webResources>
@@ -222,23 +235,23 @@
 				</configuration>
 			</plugin>
 
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.6</version>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.2.6</version>
+				<executions>
+					<execution>
+						<id>get-the-git-infos</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<failOnNoGitDirectory>false</failOnNoGitDirectory>
+				</configuration>
+			</plugin>
 
 			<!-- Jetty plugin -->
 			<plugin>
@@ -256,8 +269,8 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	
+
+
 	<profiles>
 		<profile>
 			<id>webapp</id>
@@ -273,8 +286,8 @@
 					<artifactId>cdi-api</artifactId>
 				</dependency>
 				<dependency>
-				    <groupId>org.glassfish</groupId>
-				    <artifactId>jakarta.faces</artifactId>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.faces</artifactId>
 				</dependency>
 
 				<dependency>
@@ -307,12 +320,12 @@
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
 
-		        <dependency>
-		            <groupId>org.jboss.spec.javax.ejb</groupId>
-		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
-		            <scope>provided</scope>
-		        </dependency>
- 
+				<dependency>
+					<groupId>org.jboss.spec.javax.ejb</groupId>
+					<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+					<scope>provided</scope>
+				</dependency>
+
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
@@ -339,14 +352,12 @@
 					<artifactId>jetty-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
-                <dependency>
-                    <groupId>com.nimbusds</groupId>
-                    <artifactId>nimbus-jose-jwt</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bitbucket.b_c</groupId>
-                    <artifactId>jose4j</artifactId>
-                </dependency>
+				<dependency>
+					<groupId>com.nimbusds</groupId>
+					<artifactId>nimbus-jose-jwt</artifactId>
+				</dependency>
+				<!-- <dependency> <groupId>org.bitbucket.b_c</groupId> <artifactId>jose4j</artifactId> 
+					</dependency> -->
 			</dependencies>
 
 			<build>
@@ -361,8 +372,8 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <Build-Branch>${git.branch}</Build-Branch>
+									<!--suppress UnresolvedMavenProperty -->
+									<Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
 
@@ -379,18 +390,7 @@
 									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
 									<includes>
-										<include>META-INF/navigation/*.navigation.xml</include>
-										<include>**/*.xhtml</include>
-										<include>**/*.jsp</include>
-										<include>**/*.html</include>
-										<include>**/*.pdf</include>
-										<include>**/*.js</include>
-										<include>**/*.css</include>
-										<include>**/*.xcss</include>
-										<include>**/*.png</include>
-										<include>**/*.jpg</include>
-										<include>**/*.gif</include>
-										<include>**/*.ico</include>
+										<include>**/*.*</include>
 									</includes>
 								</resource>
 							</webResources>
@@ -428,18 +428,7 @@
 									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
 									<includes>
-										<include>META-INF/navigation/*.navigation.xml</include>
-										<include>**/*.xhtml</include>
-										<include>**/*.jsp</include>
-										<include>**/*.html</include>
-										<include>**/*.pdf</include>
-										<include>**/*.js</include>
-										<include>**/*.css</include>
-										<include>**/*.xcss</include>
-										<include>**/*.png</include>
-										<include>**/*.jpg</include>
-										<include>**/*.gif</include>
-										<include>**/*.ico</include>
+										<include>**/*.*</include>
 									</includes>
 								</resource>
 
@@ -482,18 +471,7 @@
 									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
 									<includes>
-										<include>META-INF/navigation/*.navigation.xml</include>
-										<include>**/*.xhtml</include>
-										<include>**/*.jsp</include>
-										<include>**/*.html</include>
-										<include>**/*.pdf</include>
-										<include>**/*.js</include>
-										<include>**/*.css</include>
-										<include>**/*.xcss</include>
-										<include>**/*.png</include>
-										<include>**/*.jpg</include>
-										<include>**/*.gif</include>
-										<include>**/*.ico</include>
+										<include>**/*.*</include>
 									</includes>
 								</resource>
 
@@ -546,111 +524,7 @@
 			</dependencies>
 		</profile>
 
-		<profile>
-			<id>glassfish</id>
-			<activation>
-				<property>
-					<name>glassfish.enable</name>
-				</property>
-			</activation>
 
-			<dependencies>
-				<!-- Glassfish -->
-				<dependency>
-					<groupId>org.glassfish.main.extras</groupId>
-					<artifactId>glassfish-embedded-all</artifactId>
-					<version>4.1.2</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.arquillian.container</groupId>
-					<artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-					<version>1.0.0.Final</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>saml</id>
-			<activation>
-				<property>
-					<name>!saml-disabled</name>
-				</property>
-			</activation>
-			<properties>
-			</properties>
-			<build>
-				<plugins>
-				</plugins>
-			</build>
-			<dependencies>
-				<dependency>
-					<groupId>io.jans</groupId>
-					<artifactId>jans-core-saml</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>push_sender</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>!disable-push-messages</name>
-				</property>
-			</activation>
-			<repositories>
-				<repository>
-					<id>push_sender-local</id>
-					<url>file://${project.basedir}/integrations/super_gluu/repository</url>
-				</repository>
-			</repositories>
-			<dependencies>
-				<dependency>
-					<groupId>com.notnoop.apns</groupId>
-					<artifactId>apns</artifactId>
-					<version>1.0.0.Beta6</version>
-					<scope>compile</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.google.gcm</groupId>
-					<artifactId>gcm-server</artifactId>
-					<version>1.0.1.gluu</version>
-					<scope>compile</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>otp_auth</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>!disable-otp_auth</name>
-				</property>
-			</activation>
-			<repositories>
-				<repository>
-					<id>otp_auth-local</id>
-					<url>file://${project.basedir}/integrations/otp/repository</url>
-				</repository>
-			</repositories>
-			<dependencies>
-				<dependency>
-					<groupId>com.lochbridge.oath</groupId>
-					<artifactId>oath-otp</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
-					<scope>compile</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.lochbridge.oath</groupId>
-					<artifactId>oath-otp-keyprovisioning</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
-					<scope>compile</scope>
-				</dependency>
-			</dependencies>
-		</profile>
 
 		<profile>
 			<id>test-dependencies</id>
@@ -663,7 +537,7 @@
 			<dependencies>
 				<dependency>
 					<groupId>io.jans</groupId>
-					<artifactId>jans-auth-model</artifactId>
+					<artifactId>jans-config-api-auth</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
@@ -678,37 +552,8 @@
 			</dependencies>
 		</profile>
 
-		<profile>
-			<id>owasp-check</id>
-			<activation>
-				<property>
-					<name>dependency.check</name>
-					<value>true</value>
-				</property>
-			</activation>
 
-			<build>
-				<plugins>
-					<!-- OWASP plugin -->
-					<plugin>
-						<groupId>org.owasp</groupId>
-						<artifactId>dependency-check-maven</artifactId>
-						<configuration>
-							<skipProvidedScope>true</skipProvidedScope>
-							<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 	</profiles>
-  
-  
+
+
 </project>
