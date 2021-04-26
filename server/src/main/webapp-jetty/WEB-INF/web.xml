@@ -17,7 +17,7 @@
 		<param-value>${weld.debug}</param-value>
 	</context-param>
 
-	<!-- JSF -->
+	<!-- JSF 
 	<context-param>
 		<param-name>javax.faces.PROJECT_STAGE</param-name>
 		<param-value>Production</param-value>
@@ -28,9 +28,10 @@
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
-		<param-value>io.jans.service.ExternalResourceHandler</param-value>
+		<param-value>io.jans.service.ExternalResourceHandler</param-value>        
 	</context-param>
-	<!-- Change to -1 when you don't want the compiler should check for changes -->
+    -->
+	<!-- Change to -1 when you don't want the compiler should check for changes 
 	<context-param>
 		<param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
 		<param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
@@ -39,14 +40,14 @@
 		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
 		<param-value>client</param-value>
 	</context-param>
-
-	<!-- RichFaces -->
+-->
+	<!-- RichFaces
 	<context-param>
 		<param-name>org.richfaces.SKIN</param-name>
 		<param-value>glassX</param-value>
 	</context-param>
-
-	<!-- Suppress spurious stylesheets -->
+ -->
+	<!-- Suppress spurious stylesheets 
 	<context-param>
 		<param-name>org.richfaces.CONTROL_SKINNING</param-name>
 		<param-value>disable</param-value>
@@ -55,7 +56,7 @@
 		<param-name>org.richfaces.CONTROL_SKINNING_CLASSES</param-name>
 		<param-value>disable</param-value>
 	</context-param>
-
+-->
 	<!-- Weld -->
 	<listener>
 		<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
@@ -65,7 +66,7 @@
 	<listener>
 		<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
 	</listener>
-
+<!--
 	<servlet>
 		<servlet-name>Faces Servlet</servlet-name>
 		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -75,7 +76,7 @@
 	<servlet-mapping>
 		<servlet-name>Faces Servlet</servlet-name>
 		<url-pattern>*.htm</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 
 	<session-config>
 		<session-timeout>1</session-timeout>
