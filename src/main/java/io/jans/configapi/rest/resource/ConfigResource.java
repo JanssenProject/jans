@@ -37,6 +37,7 @@ public class ConfigResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
+        log.debug("ConfigResource::getAppConfiguration() appConfiguration - "+appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
