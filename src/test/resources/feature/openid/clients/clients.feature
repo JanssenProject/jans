@@ -106,7 +106,10 @@ And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
 And def newName = response[0].displayName
 And print " newName = "+newName
-And request "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":\""+newName+"\"} ]"
+#And request "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":\""+newName+"\"} ]"
+And def request_body = (response.displayName == null ? "[ {\"op\":\"add\", \"path\": \"/displayName\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":"+response.displayName+" } ]")
+And print 'request_body ='+request_body
+And request request_body
 When method PATCH
 Then status 200
 And print response
