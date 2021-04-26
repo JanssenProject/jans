@@ -4,6 +4,10 @@ We will refer _Menu-driven Interactive Mode_ as **IM**. To run IM just simply ex
 ```
 /opt/jans/jans-cli/config-cli.py
 ```
+
+Note: You can supply certificate and key with options `--key-file` and `--cert-file`, to disable ssl verification use `-noverify`.
+For more information `/opt/jans/jans-cli/config-cli.py -h`
+
 You will see the main menu as below:
 
 ![jans-cli Main Menu](../img/im-main.png)
