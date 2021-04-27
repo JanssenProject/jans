@@ -185,6 +185,7 @@ LABEL name="Janssen Authorization Server" \
 RUN mkdir -p /etc/certs /deploy \
     /opt/jans/python/libs \
     ${JETTY_BASE}/jans-auth/custom/pages ${JETTY_BASE}/jans-auth/custom/static \
+    ${JETTY_BASE}/jans-auth/custom/libs \
     ${JETTY_BASE}/jans-auth/custom/i18n \
     /etc/jans/conf \
     /app/templates
