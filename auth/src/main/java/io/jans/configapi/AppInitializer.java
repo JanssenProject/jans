@@ -32,6 +32,7 @@ import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
@@ -42,7 +43,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @ApplicationScoped
-@DependsOn("configurationFactory")
 public class AppInitializer {
 
     @Inject
@@ -87,6 +87,7 @@ public class AppInitializer {
     public ConfigurationFactory getConfigurationFactory() {
         return configurationFactory;
     }
+
 
     @Produces
     @ApplicationScoped

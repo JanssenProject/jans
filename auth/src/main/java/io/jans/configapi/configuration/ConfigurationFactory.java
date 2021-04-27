@@ -46,8 +46,6 @@ import java.util.List;
 import java.util.Properties;
 
 @ApplicationScoped
-@Alternative
-@Named("configurationFactory")
 public class ConfigurationFactory {
 
     static {
@@ -160,6 +158,11 @@ public class ConfigurationFactory {
         loadBaseConfiguration();
         loadApplicationProperties();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
+        try {
+            getStringEncrypter();
+         }catch(Exception ex) {
+             throw new ConfigurationException("Failed to initialize StringEncrypter - "+ex.getMessage());
+         }
         
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
@@ -316,7 +319,7 @@ public class ConfigurationFactory {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
         }
     }
-
+    
     @Produces
     @ApplicationScoped
     @Named("authorizationService")
