@@ -211,7 +211,7 @@ class DBUtils:
             oxAuthConfDynamic.update(entries)
             doc_id = self.get_doc_id_from_dn(dn)
 
-            self.spanner.insert_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[[doc_id,  oxAuthConfDynamic]])
+            self.spanner.update_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[[doc_id, json.dumps(oxAuthConfDynamic)]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
@@ -237,7 +237,7 @@ class DBUtils:
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
-                self.spanner.insert_data(table=table, columns=columns, values=[[inum, True]])
+                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, True]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
@@ -324,10 +324,8 @@ class DBUtils:
 
         if backend_location == BackendTypes.SPANNER:
             result = self.spanner.exec_sql('SELECT * from {} WHERE dn="{}"'.format(table, dn))
-            if result.ok:
-                data = result.json()
-                if 'rows' in data:
-                    return data
+            if result and 'rows' in result and result['rows']:
+                return result
             return
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
@@ -552,20 +550,20 @@ class DBUtils:
 
 
         elif backend_location == BackendTypes.SPANNER:
-            result = self.spanner.exec_sql('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
+            data = self.spanner.exec_sql('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
             jansConfProperty = []
-            if result.ok:
-                data = result.json()
-                added = False
-                if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
-                    jansConfProperty = data['rows'][0][0]
-                    for i, oxconfigprop in enumerate(jansConfProperty[:]):
-                        oxconfigpropjs = json.loads(oxconfigprop)
-                        if oxconfigpropjs.get('value1') == 'allowed_clients' and not client_id in oxconfigpropjs['value2']:
-                            oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
-                            jansConfProperty[i] = json.dumps(oxconfigpropjs)
-                            added = True
-                            break
+            added = False
+
+            if data and 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
+                jansConfProperty = data['rows'][0][0]
+                for i, oxconfigprop in enumerate(jansConfProperty[:]):
+                    oxconfigpropjs = json.loads(oxconfigprop)
+                    if oxconfigpropjs.get('value1') == 'allowed_clients' and not client_id in oxconfigpropjs['value2']:
+                        oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
+                        jansConfProperty[i] = json.dumps(oxconfigpropjs)
+                        added = True
+                        break
+
             if not added:
                 jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
                 self.spanner.update_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[[script_inum,  jansConfProperty]])
@@ -695,10 +693,9 @@ class DBUtils:
 
         if data_type in ('DATETIME(3)', 'TIMESTAMP'):
             dval = val[0].strip('Z')
-            sep1= 'T' if rdbm_type == 'spanner' else ' '
-            sep2 = '.' if rdbm_type == 'spanner' else ''
+            sep= 'T' if rdbm_type == 'spanner' else ' '
             postfix = 'Z' if rdbm_type == 'spanner' else ''
-            return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep1, dval[8:10], dval[10:12], dval[12:14], sep2, dval[14:17], postfix)
+            return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep, dval[8:10], dval[10:12], dval[12:14], dval[14:17], postfix)
 
         if data_type == 'JSON':
             json_data = {'v':[]}
@@ -733,10 +730,8 @@ class DBUtils:
         for table in tables:
             sql_cmd = 'SELECT doc_id FROM {} WHERE dn="{}"'.format(table, dn)
             result = self.spanner.exec_sql(sql_cmd)
-            if result.ok:
-                data = result.json()
-                if 'rows' in data:
-                    return table
+            if result and 'rows' in result and result['rows']:
+                return table
 
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
@@ -862,7 +857,10 @@ class DBUtils:
 
                                 if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
                                     cur_data = data['rows'][0][0]
-                                cur_data += entry[change_attr]
+                                
+                                for cur_val in entry[change_attr]:
+                                    typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
+                                    cur_data.append(typed_val)
     
                             self.spanner.update_data(table=table, columns=['doc_id', change_attr], values=[[doc_id, cur_data]])
 
@@ -870,8 +868,8 @@ class DBUtils:
                         table = self.get_spanner_table_for_dn(dn)
                         doc_id = self.get_doc_id_from_dn(dn)
                         replace_attr = entry['replace'][0]
-                        replace_val = entry[replace_attr][0]
-                        self.spanner.update_data(table=table, columns=['doc_id', replace_attr], values=[[doc_id, replace_val]])
+                        typed_val = self.get_rdbm_val(replace_attr, entry[replace_attr], rdbm_type='spanner')
+                        self.spanner.update_data(table=table, columns=['doc_id', replace_attr], values=[[doc_id, typed_val]])
 
                     else:
                         vals = {}

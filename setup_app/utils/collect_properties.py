@@ -81,6 +81,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_db = jans_sql_prop['db.schema.name']
 
         if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansSpannerProperties):
+            Config.rdbm_type = 'spanner'
             jans_spanner_prop = base.read_properties_file(Config.jansSpannerProperties)
             
             Config.spanner_project = jans_spanner_prop['connection.project']
@@ -88,7 +89,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.spanner_database = jans_spanner_prop['connection.database']
 
             if 'connection.emulator-host' in jans_spanner_prop:
-                Config.spanner_emulator_host = jans_spanner_prop['connection.emulator-host']
+                Config.spanner_emulator_host = jans_spanner_prop['connection.emulator-host'].split(':')[0]
 
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
@@ -102,6 +103,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
+
 
         # It is time to bind database
         dbUtils.bind()

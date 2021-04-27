@@ -45,6 +45,7 @@ class PropertiesUtils(SetupUtils):
             return None
 
     def check_properties(self):
+        print("Checking Properties")
         self.logIt('Checking properties')
         while not Config.hostname:
             testhost = input('Hostname of this server: ').strip()
@@ -457,9 +458,11 @@ class PropertiesUtils(SetupUtils):
     def set_persistence_type(self):
         if Config.wrends_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
-        elif (not Config.wrends_install)  and (not Config.rdbm_install) and Config.cb_install:
+        elif (not Config.wrends_install) and (not Config.rdbm_install) and Config.cb_install:
             Config.persistence_type = 'couchbase'
-        elif (not Config.wrends_install)  and Config.rdbm_install and (not Config.cb_install):
+        elif Config.rdbm_type == 'spanner':
+            Config.persistence_type = 'spanner'
+        elif (not Config.wrends_install) and Config.rdbm_install and (not Config.cb_install):
             Config.persistence_type = 'sql'
         elif Config.wrends_install and Config.cb_install:
             Config.persistence_type = 'hybrid'
