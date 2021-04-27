@@ -163,6 +163,11 @@
             </dependency>
             <dependency>
                 <groupId>io.jans</groupId>
+                <artifactId>jans-orm-spanner</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
                 <artifactId>jans-orm-hybrid</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -603,6 +608,18 @@
 			    <groupId>com.querydsl</groupId>
 			    <artifactId>querydsl-sql</artifactId>
 			    <version>4.4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.jsqlparser</groupId>
+				<artifactId>jsqlparser</artifactId>
+				<version>4.0</version>
+			</dependency>
+
+			<!-- Cloud Spanner -->
+			<dependency>
+			    <groupId>com.google.cloud</groupId>
+			    <artifactId>google-cloud-spanner</artifactId>
+			    <version>6.2.0</version>
 			</dependency>
 
 			<!-- Metrics -->
