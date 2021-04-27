@@ -26,6 +26,7 @@ import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
@@ -41,11 +42,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @ApplicationScoped
+@DependsOn("configurationFactory")
 public class AppInitializer {
 
     @Inject
     Logger logger;
-    
+
     @Inject
     private Event<ApplicationInitializedEvent> eventApplicationInitialized;
 
@@ -55,10 +57,10 @@ public class AppInitializer {
 
     @Inject
     BeanManager beanManager;
-    
+
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
@@ -84,24 +86,6 @@ public class AppInitializer {
     @ApplicationScoped
     public ConfigurationFactory getConfigurationFactory() {
         return configurationFactory;
-    }
-    
-    @Produces
-    @ApplicationScoped
-    public StringEncrypter getStringEncrypter() {
-        String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
-
-        if (StringHelper.isEmpty(encodeSalt)) {
-            throw new ConfigurationException("Encode salt isn't defined");
-        }
-
-        try {
-            StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-
-            return stringEncrypter;
-        } catch (EncryptionException ex) {
-            throw new ConfigurationException("Failed to create StringEncrypter instance");
-        }
     }
 
     @Produces
