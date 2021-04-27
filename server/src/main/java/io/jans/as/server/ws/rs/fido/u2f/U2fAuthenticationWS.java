@@ -6,20 +6,8 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
-import javax.inject.Inject;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -41,6 +29,11 @@ import io.jans.as.server.service.fido.u2f.UserSessionIdService;
 import io.jans.as.server.service.fido.u2f.ValidationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 /**
  * The endpoint allows to start and finish U2F authentication process
@@ -80,11 +73,9 @@ public class U2fAuthenticationWS {
     public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId) {
         // Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
         try {
-            if (appConfiguration.getDisableU2fEndpoint()) {
-                return Response.status(Status.FORBIDDEN).build();
-            }
+            errorResponseFactory.validateComponentEnabled(ComponentType.U2F);
 
-            log.debug("Startig authentication with username '{}', keyhandle '{}' for appId '{}' and session_id '{}'", userName, keyHandle, appId, sessionId);
+            log.debug("Starting authentication with username '{}', keyhandle '{}' for appId '{}' and session_id '{}'", userName, keyHandle, appId, sessionId);
 
             if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
                 throw new BadInputException("The request should contains either username or keyhandle");
@@ -141,9 +132,7 @@ public class U2fAuthenticationWS {
     public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
         String sessionId = null;
         try {
-            if (appConfiguration.getDisableU2fEndpoint()) {
-                return Response.status(Status.FORBIDDEN).build();
-            }
+            errorResponseFactory.validateComponentEnabled(ComponentType.U2F);
 
             log.debug("Finishing authentication for username '{}' with response '{}'", userName, authenticateResponseString);
 
