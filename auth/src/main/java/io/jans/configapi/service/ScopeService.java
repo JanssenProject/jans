@@ -16,6 +16,7 @@ import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class ScopeService {
 
     @Inject

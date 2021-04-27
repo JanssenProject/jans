@@ -13,11 +13,13 @@ import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 import org.eclipse.microprofile.health.Readiness;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 @Readiness
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class DatabaseConnectionHealthCheck implements HealthCheck {
 
     @Inject

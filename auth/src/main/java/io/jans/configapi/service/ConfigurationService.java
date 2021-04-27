@@ -14,6 +14,7 @@ import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -23,6 +24,7 @@ import javax.inject.Named;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class ConfigurationService {
 
     @Inject

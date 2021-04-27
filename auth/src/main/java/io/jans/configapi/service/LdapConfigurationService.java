@@ -16,6 +16,7 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class LdapConfigurationService {
 
     private static final String AUTH = "auth";

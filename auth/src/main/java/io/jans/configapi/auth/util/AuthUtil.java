@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -41,6 +42,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class AuthUtil {
 
     @Inject

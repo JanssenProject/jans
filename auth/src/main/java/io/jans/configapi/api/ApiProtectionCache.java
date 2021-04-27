@@ -7,6 +7,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import io.jans.as.persistence.model.Scope;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
 public class ApiProtectionCache {
 
