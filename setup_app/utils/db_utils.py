@@ -698,7 +698,7 @@ class DBUtils:
             sep1= 'T' if rdbm_type == 'spanner' else ' '
             sep2 = '.' if rdbm_type == 'spanner' else ''
             postfix = 'Z' if rdbm_type == 'spanner' else ''
-            return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], sep1, dval[10:12], dval[12:14], sep2, dval[14:17], postfix)
+            return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep1, dval[8:10], dval[10:12], dval[12:14], sep2, dval[14:17], postfix)
 
         if data_type == 'JSON':
             json_data = {'v':[]}
