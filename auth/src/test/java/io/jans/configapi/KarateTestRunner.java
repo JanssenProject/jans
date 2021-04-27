@@ -7,9 +7,7 @@
 package io.jans.configapi;
 
 import com.intuit.karate.junit5.Karate;
-import io.quarkus.test.junit.QuarkusTest;
 
-@QuarkusTest
 public class KarateTestRunner {
 
     @Karate.Test
