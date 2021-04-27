@@ -12,6 +12,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,6 +20,7 @@ import javax.inject.Inject;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class Fido2Service {
 
     @Inject

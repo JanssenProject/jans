@@ -15,6 +15,7 @@ import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class CouchbaseConfService {
 
     private static final String AUTH = "auth";

@@ -14,6 +14,7 @@ import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class UmaResourceService {
 
     @Inject

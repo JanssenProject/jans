@@ -14,6 +14,7 @@ import io.jans.configapi.auth.util.JwtUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
+@DependsOn("appInitializer")
 public class OpenIdAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;

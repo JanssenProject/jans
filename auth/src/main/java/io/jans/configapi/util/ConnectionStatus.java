@@ -16,6 +16,7 @@ import io.jans.util.security.PropertiesDecrypter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.Properties;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class ConnectionStatus {
 
     @Inject
