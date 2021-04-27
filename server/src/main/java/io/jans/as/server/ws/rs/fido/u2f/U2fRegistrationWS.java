@@ -6,23 +6,9 @@
 
 package io.jans.as.server.ws.rs.fido.u2f;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -45,6 +31,12 @@ import io.jans.as.server.service.fido.u2f.ValidationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * The endpoint allows to start and finish U2F registration process
@@ -90,11 +82,9 @@ public class U2fRegistrationWS {
     public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode) {
         // Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
         try {
-            if (appConfiguration.getDisableU2fEndpoint()) {
-                return Response.status(Status.FORBIDDEN).build();
-            }
+            errorResponseFactory.validateComponentEnabled(ComponentType.U2F);
 
-            log.debug("Startig registration with username '{}' for appId '{}'. session_id '{}', enrollment_code '{}'", userName, appId, sessionId, enrollmentCode);
+            log.debug("Starting registration with username '{}' for appId '{}'. session_id '{}', enrollment_code '{}'", userName, appId, sessionId, enrollmentCode);
 
             String userInum = null;
 
@@ -166,9 +156,7 @@ public class U2fRegistrationWS {
     public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
         String sessionId = null;
         try {
-            if (appConfiguration.getDisableU2fEndpoint()) {
-                return Response.status(Status.FORBIDDEN).build();
-            }
+            errorResponseFactory.validateComponentEnabled(ComponentType.U2F);
 
             log.debug("Finishing registration for username '{}' with response '{}'", userName, registerResponseString);
 
