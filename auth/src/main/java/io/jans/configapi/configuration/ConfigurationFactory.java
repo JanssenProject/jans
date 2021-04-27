@@ -7,6 +7,10 @@
 package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.ConfigurationService;
+import io.jans.service.cache.CacheConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.service.cache.InMemoryConfiguration;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
@@ -76,6 +80,12 @@ public class ConfigurationFactory {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
+    
+    @Inject
+    private ConfigurationService configurationService;
+    
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     private AppConfiguration appConfiguration;
     private StaticConfiguration staticConf;
@@ -324,4 +334,29 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
+    
+    @Produces @ApplicationScoped
+    public CacheConfiguration getCacheConfiguration() {
+        
+        
+        CacheConfiguration cacheConfiguration = configurationService.getConfiguration().getCacheConfiguration();
+        if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
+            log.error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute " +
+                    "that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
+            log.info("Creating fallback IN-MEMORY cache configuration ... ");
+
+            cacheConfiguration = new CacheConfiguration();
+            cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
+
+            log.info("IN-MEMORY cache configuration is created.");
+        }
+        if (cacheConfiguration.getNativePersistenceConfiguration() != null) {
+            if (!StringUtils.isEmpty(staticConfiguration.getBaseDn().getSessions())) {
+                cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(StringUtils.remove(staticConfiguration.getBaseDn().getSessions(), "ou=sessions,").trim());
+            }
+        }
+        log.info("Cache configuration: " + cacheConfiguration);
+        return cacheConfiguration;
+    }
+
 }

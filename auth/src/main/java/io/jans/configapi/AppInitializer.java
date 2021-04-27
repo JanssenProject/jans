@@ -41,7 +41,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @ApplicationScoped
-public class ConfigApiApplication {
+public class AppInitializer {
 
     @Inject
     Logger logger;

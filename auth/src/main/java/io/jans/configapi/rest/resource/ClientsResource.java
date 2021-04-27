@@ -17,6 +17,7 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class ClientsResource extends BaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";

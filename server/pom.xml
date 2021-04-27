@@ -26,7 +26,7 @@
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
 		</dependency>
-		
+
 		<!-- logging-adapters -->
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
@@ -548,7 +548,7 @@
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
-				</dependency>
+				</dependency>			
 			</dependencies>
 		</profile>
 

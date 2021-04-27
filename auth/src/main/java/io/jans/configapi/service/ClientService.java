@@ -18,6 +18,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -28,6 +29,7 @@ import java.util.List;
  *
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 public class ClientService implements Serializable {
 
     private static final long serialVersionUID = 7912416439116338984L;
