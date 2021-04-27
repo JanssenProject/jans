@@ -3,7 +3,9 @@
 Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
 Let's get the information for Cache Configuration.
 
-`/opt/jans/jans-cli/config-cli.py`
+```
+/opt/jans/jans-cli/config-cli.py
+```
 
 It prints below two operations:
 ```text
@@ -18,7 +20,14 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 ```
 
-- **get-config-cache**
+Table of Contents
+=================
+
+* [Cache Configuration](#cache-configuration)
+  * [Get Cache Configuration](#get-cache-configuration)
+  * [Patch Cache Configuration](#patch-cache-configuration)
+
+## Get Cache Configuration
 
 You can get the current Cache Configuration of your Janssen Server by performing this operation.
 
@@ -63,7 +72,7 @@ It will show the Cache configuration with details.
 }
 ```
 
-- **patch-config-cache**
+## Patch Cache Configuration
 
 You may need to update Cache configuration, In that case `patch-config-cache` can be used to modify cache configuration.
 
@@ -86,11 +95,6 @@ Let's see the sample schema of cache configuration.
   "value": {}
 }
 ```
-
-When you examine this sample schema, you will see three properties in an object: op, path, and value.
-* __op__ operation to be done, one of `add`, `remove`, `replace`, `move`, `copy`, `test`
-* __path__ Path of property to be changed. use path separator `/` to change a property inside an object.
-* __value__ New value to be assigned for each property defined in `path`
 
 Let, We want to replace `memcachedConfiguration/bufferSize`:
 
@@ -146,44 +150,6 @@ Server Response:
     "defaultCleanupBatchSize": 10000,
     "deleteExpiredOnGetRequest": false
   }
-root@testjans:/mnt/Academic/Gluu Support/jans-cli# /opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --data /tmp/patch-cache.json
-
-Getting access token for scope https://jans.io/oauth/config/cache.writee.json
-Server Response:
-{
-  "cacheProviderType": "NATIVE_PERSISTENCE",
-  "memcachedConfiguration": {
-    "servers": "localhost:11211",
-    "maxOperationQueueLength": 100000,
-    "bufferSize": 32788,
-    "defaultPutExpiration": 60,
-    "connectionFactoryType": "DEFAULT"
-  },
-  "redisConfiguration": {
-    "redisProviderType": "STANDALONE",
-    "servers": "localhost:6379",
-    "password": null,
-    "defaultPutExpiration": 60,
-    "sentinelMasterGroupName": null,
-    "useSSL": false,
-    "sslTrustStoreFilePath": null,
-    "maxIdleConnections": 10,
-    "maxTotalConnections": 500,
-    "connectionTimeout": 3000,
-    "soTimeout": 3000,
-    "maxRetryAttempts": 5
-  },
-  "inMemoryConfiguration": {
-    "defaultPutExpiration": 60
-  },
-  "nativePersistenceConfiguration": {
-    "defaultPutExpiration": 60,
-    "defaultCleanupBatchSize": 10000,
-    "deleteExpiredOnGetRequest": false
-  }
-}
 ```
 
-You see `bufferSize` has changed.
-That's all for Cache Configuration.
-
+You see `bufferSize` has changed. You may want to know more about patching cache configuration. Please, have a look to [this link](cli-tips.md#patch-request) to know more about how you can modify the schema file.
