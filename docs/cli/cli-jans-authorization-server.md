@@ -18,7 +18,15 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 Jans Authorization server has two operations `id` to `get/modify` its properties.
 
-- **__get-properties__**
+Table of Contents
+=================
+
+* [Janssen Authorization Server](#janssen-authorization-server)
+  * [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
+  * [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
+
+
+## Get All Jans Auth Server Configuration Properties
 
 It returns all the information of the Jans Authorization server.
 
@@ -482,7 +490,7 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
 ```
 
 
-- **__partially modify jans auth server__**
+## Partially Modify Jans Auth Server Configuration Properties
 
 ```text
 Operation ID: patch-properties
