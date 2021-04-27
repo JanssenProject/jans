@@ -45,6 +45,20 @@
 			<artifactId>slf4j-jboss-logging</artifactId>
 		</dependency>
 
+		<!-- Testing Karate -->
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-apache</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
@@ -548,7 +562,19 @@
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
-				</dependency>			
+				</dependency>
+				<!-- Testing Karate -->
+				<dependency>
+					<groupId>com.intuit.karate</groupId>
+					<artifactId>karate-junit5</artifactId>
+					<scope>test</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>com.intuit.karate</groupId>
+					<artifactId>karate-apache</artifactId>
+					<scope>test</scope>
+				</dependency>
 			</dependencies>
 		</profile>
 

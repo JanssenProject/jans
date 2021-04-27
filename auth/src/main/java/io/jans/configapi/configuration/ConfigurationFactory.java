@@ -47,6 +47,7 @@ import java.util.Properties;
 
 @ApplicationScoped
 @Alternative
+@Named("configurationFactory")
 public class ConfigurationFactory {
 
     static {
@@ -80,10 +81,10 @@ public class ConfigurationFactory {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
-    
+
     @Inject
     private ConfigurationService configurationService;
-    
+
     @Inject
     private StaticConfiguration staticConfiguration;
 
@@ -159,7 +160,7 @@ public class ConfigurationFactory {
         loadBaseConfiguration();
         loadApplicationProperties();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-
+        
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
 
@@ -334,15 +335,16 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-    
-    @Produces @ApplicationScoped
+
+    @Produces
+    @ApplicationScoped
     public CacheConfiguration getCacheConfiguration() {
-        
-        
+
         CacheConfiguration cacheConfiguration = configurationService.getConfiguration().getCacheConfiguration();
         if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-            log.error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute " +
-                    "that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
+            log.error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute "
+                    + "that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: "
+                    + configurationService.getConfiguration().getDn());
             log.info("Creating fallback IN-MEMORY cache configuration ... ");
 
             cacheConfiguration = new CacheConfiguration();
@@ -352,7 +354,8 @@ public class ConfigurationFactory {
         }
         if (cacheConfiguration.getNativePersistenceConfiguration() != null) {
             if (!StringUtils.isEmpty(staticConfiguration.getBaseDn().getSessions())) {
-                cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(StringUtils.remove(staticConfiguration.getBaseDn().getSessions(), "ou=sessions,").trim());
+                cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(
+                        StringUtils.remove(staticConfiguration.getBaseDn().getSessions(), "ou=sessions,").trim());
             }
         }
         log.info("Cache configuration: " + cacheConfiguration);
