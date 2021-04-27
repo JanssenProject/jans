@@ -188,7 +188,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if not templates:
             templates = Config.ce_templates
 
-        if Config.persistence_type=='couchbase':
+        if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
             Config.ce_templates[Config.ox_ldap_properties] = False
 
         for fullPath in templates:
