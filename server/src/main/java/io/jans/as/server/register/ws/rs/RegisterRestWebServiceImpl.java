@@ -12,6 +12,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SoftwareStatementValidationType;
 import io.jans.as.model.common.SubjectType;
@@ -160,6 +161,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private Response registerClientImpl(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
+        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
+
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
@@ -805,6 +808,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Override
     public Response requestClientUpdate(String requestParams, String clientId, @HeaderParam("Authorization") String authorization, @Context HttpServletRequest httpRequest, @Context SecurityContext securityContext) {
+        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_UPDATE);
         oAuth2AuditLog.setClientId(clientId);
         try {
@@ -960,6 +964,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         String accessToken = tokenService.getToken(authorization);
         log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
+
+        errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
+
         Response.ResponseBuilder builder = Response.ok();
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_READ);
@@ -1183,6 +1190,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Override
     public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
         try {
+            errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
             String accessToken = tokenService.getToken(authorization);
 
             log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
