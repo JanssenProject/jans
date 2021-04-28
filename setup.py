@@ -250,7 +250,6 @@ def do_installation():
         jettyInstaller.calculate_selected_aplications_memory()
 
         if not Config.installed_instance:
-            jansInstaller.download_gcs()
             jansInstaller.configureSystem()
             jansInstaller.make_salt()
             jansAuthInstaller.make_salt()
