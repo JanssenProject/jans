@@ -14,6 +14,13 @@ Operation ID: put-config-logging
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
 ```
 
+Table of Contents
+=================
+
+* [Log Management](#log-management)
+  * [Find Logging Configuration](#find-logging-configuration)
+  * [Update Logging Configuration](#update-logging-configuration)
+
 ## Find Logging Configuration
 
 ```text
