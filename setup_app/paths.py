@@ -13,8 +13,6 @@ LOG_FILE = os.path.join(LOG_DIR, 'setup.log')
 LOG_ERROR_FILE = os.path.join(LOG_DIR, 'setup_error.log')
 LOG_OS_CHANGES_FILE = os.path.join(LOG_DIR, 'os-changes.log')
 
-site.addsitedir(os.path.join(paths.PYLIB_DIR, 'gcs'))
-
 cmd_ln = '/bin/ln'
 cmd_chmod = '/bin/chmod'
 cmd_chown = '/bin/chown'
