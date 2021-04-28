@@ -7,8 +7,9 @@ import zipfile
 import shutil
 import time
 import ssl
+import json
 
-from urllib.request import urlretrieve
+from urllib import request
 from urllib.parse import urljoin
 
 
@@ -48,13 +49,50 @@ argsp = parser.parse_args()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def download(url, target_fn):
-    
-    dst = os.path.join(app_dir, target_fn)
+    dst = target_fn if target_fn.startswith('/') else os.path.join(app_dir, target_fn)
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         os.makedirs(pardir)
     print("Downloading", url, "to", dst)
-    urlretrieve(url, dst)
+    request.urlretrieve(url, dst)
+
+
+def download_gcs():
+    if not os.path.exists(os.path.join(app_dir, 'gcs')):
+        print("Downloading Spanner modules")
+        gcs_download_url = 'http://162.243.99.240/icrby8xcvbcv/spanner/gcs.tgz'
+        tmp_dir = '/tmp/' + os.urandom(5).hex()
+        target_fn = os.path.join(tmp_dir, 'gcs.tgz')
+        download(gcs_download_url, target_fn)
+        shutil.unpack_archive(target_fn, app_dir)
+
+        req = request.urlopen('https://pypi.org/pypi/grpcio/1.37.0/json')
+        data_s = req.read()
+        data = json.loads(data_s)
+
+        pyversion = 'cp{0}{1}'.format(sys.version_info.major, sys.version_info.minor)
+
+        package = {}
+
+        for package_ in data['urls']:
+
+            if package_['python_version'] == pyversion and 'manylinux' in package_['filename'] and package_['filename'].endswith('x86_64.whl'):
+                if package_['upload_time'] > package.get('upload_time',''):
+                    package = package_
+
+        if package.get('url'):
+            target_whl_fn = os.path.join(tmp_dir, os.path.basename(package['url']))
+            download(package['url'], target_whl_fn)
+            whl_zip = zipfile.ZipFile(target_whl_fn)
+
+            for member in  whl_zip.filelist:
+                fn = os.path.basename(member.filename)
+                if fn.startswith('cygrpc.cpython') and fn.endswith('x86_64-linux-gnu.so'):
+                    whl_zip.extract(member, os.path.join(app_dir, 'gcs'))
+
+            whl_zip.close()
+
+        shutil.rmtree(tmp_dir)
 
 
 setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
@@ -173,6 +211,8 @@ else:
             os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy')
             )
     shutil.rmtree(tmp_dir)
+
+    download_gcs()
 
     download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
     download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
