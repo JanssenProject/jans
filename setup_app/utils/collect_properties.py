@@ -90,6 +90,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
             if 'connection.emulator-host' in jans_spanner_prop:
                 Config.spanner_emulator_host = jans_spanner_prop['connection.emulator-host'].split(':')[0]
+            elif 'auth.credentials-file' in jans_spanner_prop:
+                Config.google_application_credentials = jans_spanner_prop['auth.credentials-file']
 
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
