@@ -15,7 +15,7 @@ Operation ID: put-properties-fido2
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration
 ```
 
-- **__get-properties-fido2__**
+## Find FIDO2 Configuration Properties
 
 To get the properties of Janssen Fido2 Configuration, run below command:
 `/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
@@ -60,7 +60,7 @@ Getting access token for scope https://jans.io/oauth/config/fido2.readonly
 }
 ```
 
-- **__put-properties-fido2__**
+## Update FIDO2 Configuration Properties
 
 To perform this operation, let's check the schema first.
 
