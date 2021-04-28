@@ -6,27 +6,8 @@
 
 package io.jans.as.server.revoke;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.server.model.common.SessionId;
@@ -37,6 +18,20 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
+import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -76,6 +71,7 @@ public class RevokeSessionRestWebService {
             log.debug("Attempting to revoke session: userCriterionKey = {}, userCriterionValue = {}, isSecure = {}",
                     userCriterionKey, userCriterionValue, sec.isSecure());
 
+            errorResponseFactory.validateComponentEnabled(ComponentType.REVOKE_SESSION);
             validateAccess();
 
             final User user = userService.getUserByAttribute(userCriterionKey, userCriterionValue);
