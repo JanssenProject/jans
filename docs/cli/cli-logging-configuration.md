@@ -14,7 +14,7 @@ Operation ID: put-config-logging
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration
 ```
 
-- **_get-config-logging_**
+## Find Logging Configuration
 
 ```text
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
@@ -31,7 +31,7 @@ Getting access token for scope https://jans.io/oauth/config/logging.readonly
 }
 ```
 
-- **_put-config-logging_**
+## Update Logging Configuration
 
 To update logging configuration, get the schema first:
 
