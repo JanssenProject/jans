@@ -2,25 +2,16 @@ import os
 import json
 import sys
 
-
-from setup_app import paths
-from setup_app.config import Config
-from setup_app.utils import base
-
-sys.path.append(os.path.join(paths.PYLIB_DIR, 'gcs/google'))
-sys.path.append(os.path.join(paths.PYLIB_DIR, 'gcs'))
+sys.path.insert(0, '/opt/dist/app/gcs')
+sys.path.insert(0, '/opt/dist/app/gcs/google')
 
 from google.cloud import spanner
 from google.cloud.spanner_v1 import session
 from google.auth.credentials import AnonymousCredentials
 
-class FakeResult:
-    ok = False
-    reason = ''
-    text = ''
-
-    def json(self):
-        return {'error': True}
+from setup_app import paths
+from setup_app.config import Config
+from setup_app.utils import base
 
 # TODO: add logging to all functions
 

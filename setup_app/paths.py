@@ -1,6 +1,7 @@
 import os
 import pathlib
 import shutil
+import site
 
 APP_ROOT = pathlib.Path(__file__).parent.as_posix()
 INSTALL_DIR = pathlib.Path(__file__).parent.parent.as_posix()
@@ -11,6 +12,8 @@ LOG_DIR = os.path.join(INSTALL_DIR, 'logs')
 LOG_FILE = os.path.join(LOG_DIR, 'setup.log')
 LOG_ERROR_FILE = os.path.join(LOG_DIR, 'setup_error.log')
 LOG_OS_CHANGES_FILE = os.path.join(LOG_DIR, 'os-changes.log')
+
+site.addsitedir(os.path.join(paths.PYLIB_DIR, 'gcs'))
 
 cmd_ln = '/bin/ln'
 cmd_chmod = '/bin/chmod'
