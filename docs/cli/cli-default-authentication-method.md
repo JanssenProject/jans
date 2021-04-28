@@ -1,5 +1,6 @@
 # Default AUthentication Method
 
+
 Let's get the information of **Default Authentication Method**:
 
 ```
@@ -18,7 +19,7 @@ There are two types of operation in Default Authentication Method.
 * __get-acrs__ : It returns current default authentication method of janssen server.
 * __put-acrs__ : It's used to update default authentication method.
 
-- **get-acrs**
+## Find Current Authentication Method
   
 To get the default authentication method:
 ```
@@ -31,7 +32,7 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 }
 ```
 
-- **__put-acrs__**
+## Update Default Authentication Method
 
 Let's update the _Default Authentication Method_ using janssen CLI command line. To perform the _put-acrs_ operation, we have to use its schema.
 To get its schema:
