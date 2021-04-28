@@ -122,7 +122,7 @@ LABEL name="Persistence" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b2" \
+    release="b3" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
