@@ -15,9 +15,12 @@ Operation ID: put-acrs
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
 ```
 
-There are two types of operation in Default Authentication Method.
-* __get-acrs__ : It returns current default authentication method of janssen server.
-* __put-acrs__ : It's used to update default authentication method.
+Table of Contents
+=================
+
+* [Default AUthentication Method](#default-authentication-method)
+  * [Find Current Authentication Method](#find-current-authentication-method)
+  * [Update Default Authentication Method](#update-default-authentication-method)
 
 ## Find Current Authentication Method
   
