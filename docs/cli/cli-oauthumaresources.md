@@ -30,7 +30,16 @@ Operation ID: patch-oauth-uma-resources-by-id
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
 
-- **get-oauth-uma-resources**
+Table of Contents
+=================
+
+* [UMA Resources](#uma-resources)
+  * [Get List of UMA Resources](#get-list-of-uma-resources)
+  * [Get Oauth UMA Resource by ID](#get-oauth-uma-resource-by-id)
+  * [Patch OAuth UMA Resource by ID](#patch-oauth-uma-resource-by-id)
+
+
+## Get List of UMA Resources
 
 This operation is used to search UMA Resources.
 
@@ -230,7 +239,7 @@ Calling with params limit=1&pattern=Jans+Cofig+Api+Uma+Resource+%2Fjans-config-a
 ]
 ```
 
-- **get-oauth-uma-resources-by-id**
+## Get Oauth UMA Resource by ID
 
 ```text
 Operation ID: get-oauth-uma-resources-by-id
@@ -271,7 +280,7 @@ Getting access token for scope https://jans.io/oauth/config/uma/resources.readon
 ```
 replace the id with accurate one.
 
-- **patch-oauth-uma-resources-by-id**
+## Patch OAuth UMA Resource by ID
 
 ```text
 Operation ID: patch-oauth-uma-resources-by-id
