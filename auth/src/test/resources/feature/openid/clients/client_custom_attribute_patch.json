@@ -1,0 +1,13 @@
+[
+  {
+    "op": "replace",
+    "path": "/customAttributes",
+    "value":[
+      {
+        "name": "customTest",
+        "multiValued": false,
+        "value": "ABC_Vaue_Patched"
+      }
+    ]
+  }
+]

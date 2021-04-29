@@ -1,0 +1,14 @@
+{
+  "clientAuthenticationFilters": [
+    {
+      "filter": "myCustomAttr1={0}",
+      "bindPasswordAttribute": "",
+      "baseDn": "ou=clients,o=gluu"
+    },
+	{
+      "filter": "myCustomAttr2={0}",
+      "bindNameAttribute": "",
+      "baseDn": "ou=clients,o=gluu,uid=pujavs"
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-config-api-server</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>jans-config-api-server</name>
+	<packaging>war</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-config-api-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-auth</artifactId>
+		</dependency>
+	</dependencies>
+
+
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+
+		<filters>
+			<filter>profiles/${cfg}/config-api-test.properties</filter>
+			<filter>profiles/${cfg}/config-api-server.properties</filter>
+		</filters>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>karate.properties</include>
+					<include>karate_jenkins.properties</include>
+					<include>test.properties</include>
+					<include>*.*</include>
+				</includes>
+			</testResource>
+		</testResources>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>application.properties</include>
+					<include>*.json</include>
+				</includes>
+			</resource>
+		</resources>
+
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<!-- check it : for some reason jar and war are not attached to project 
+					automatically, as temp solution install them manually -->
+				<executions>
+					<execution>
+						<id>install-jar</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<artifactId>${project.artifactId}</artifactId>
+							<groupId>${project.groupId}</groupId>
+							<version>${project.version}</version>
+							<file>
+								${project.build.directory}/${project.build.finalName}.jar
+							</file>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-war</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<packaging>war</packaging>
+							<artifactId>${project.artifactId}</artifactId>
+							<groupId>${project.groupId}</groupId>
+							<version>${project.version}</version>
+							<file>
+								${project.build.directory}/${project.build.finalName}.war
+							</file>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-a-jar</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-resources-plugin</artifactId> 
+				<executions> <execution> <id>prepare-configuration-files</id> <phase>process-test-resources</phase> 
+				<goals> <goal>copy-resources</goal> </goals> <configuration> <outputDirectory>${project.build.directory}/conf</outputDirectory> 
+				<resources> <resource> <directory>${basedir}/conf</directory> <filtering>true</filtering> 
+				</resource> </resources> <filters> <filter>profiles/${cfg}/config-api-test.properties</filter> 
+				<filter>profiles/${cfg}/config-api-server.properties</filter> </filters> 
+				</configuration> </execution> </executions> </plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m
+						-XX:+DisableExplicitGC
+						-Djans.base=${project.build.directory}
+						-Dserver.base=${project.build.directory}
+						-Dlog.base=${project.build.directory}
+						-Dgluu.disable.scheduler=true
+
+					</argLine>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Implementation-Build>${buildNumber}</Implementation-Build>
+						</manifestEntries>
+					</archive>
+
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>true</filtering>
+							<includes>
+								<include>**/*.xml</include>
+								<include>**/*.properties</include>
+							</includes>
+						</resource>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+							<includes>
+								<include>**/*.*</include>
+							</includes>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+
+			<!-- Build number plugin -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<doCheck>false</doCheck>
+					<doUpdate>false</doUpdate>
+				</configuration>
+			</plugin>
+
+
+
+			<!-- Jetty plugin -->
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<webAppConfig>
+						<descriptor>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</descriptor>
+						<contextPath>/jans</contextPath>
+					</webAppConfig>
+
+					<webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+					<scanIntervalSeconds>3</scanIntervalSeconds>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!-- <profile> <id>webapp</id> <activation> <property> <name>!webapp.disable</name> 
+			</property> </activation> <dependencies> <dependency> <groupId>javax.enterprise</groupId> 
+			<artifactId>cdi-api</artifactId> </dependency> <dependency> <groupId>org.glassfish</groupId> 
+			<artifactId>jakarta.faces</artifactId> </dependency> <dependency> <groupId>org.glassfish.web</groupId> 
+			<artifactId>el-impl</artifactId> <exclusions> <exclusion> <groupId>javax.el</groupId> 
+			<artifactId>el-api</artifactId> </exclusion> </exclusions> </dependency> 
+			<dependency> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
+			<scope>test</scope> </dependency> <dependency> <groupId>org.jboss.weld.servlet</groupId> 
+			<artifactId>weld-servlet-core</artifactId> </dependency> <dependency> <groupId>org.jboss.weld</groupId> 
+			<artifactId>weld-core-impl</artifactId> </dependency> <dependency> <groupId>org.jboss.weld.module</groupId> 
+			<artifactId>weld-jsf</artifactId> </dependency> <dependency> <groupId>org.jboss.spec.javax.ejb</groupId> 
+			<artifactId>jboss-ejb-api_3.2_spec</artifactId> <scope>provided</scope> </dependency> 
+			Test: Embedded Jetty <dependency> <groupId>org.jboss.arquillian.container</groupId> 
+			<artifactId>arquillian-jetty-embedded-9</artifactId> <scope>test</scope> 
+			</dependency> <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-webapp</artifactId> 
+			<scope>test</scope> </dependency> <dependency> <groupId>org.eclipse.jetty</groupId> 
+			<artifactId>jetty-deploy</artifactId> <scope>test</scope> </dependency> <dependency> 
+			<groupId>org.eclipse.jetty</groupId> <artifactId>jetty-annotations</artifactId> 
+			<scope>test</scope> </dependency> <dependency> <groupId>org.eclipse.jetty</groupId> 
+			<artifactId>jetty-plus</artifactId> <scope>test</scope> </dependency> <dependency> 
+			<groupId>com.nimbusds</groupId> <artifactId>nimbus-jose-jwt</artifactId> 
+			</dependency> <dependency> <groupId>org.bitbucket.b_c</groupId> <artifactId>jose4j</artifactId> 
+			</dependency> </dependencies> <build> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+			<artifactId>maven-war-plugin</artifactId> <configuration> <archive> <manifest> 
+			<addDefaultImplementationEntries>true</addDefaultImplementationEntries> </manifest> 
+			<manifestEntries> <Implementation-Build>${buildNumber}</Implementation-Build> 
+			suppress UnresolvedMavenProperty <Build-Branch>${git.branch}</Build-Branch> 
+			</manifestEntries> </archive> <webResources> <resource> <directory>src/main/webapp</directory> 
+			<filtering>true</filtering> <includes> <include>**/*.xml</include> <include>**/*.properties</include> 
+			</includes> </resource> <resource> <directory>src/main/webapp</directory> 
+			<filtering>false</filtering> <includes> <include>**/*.*</include> </includes> 
+			</resource> </webResources> </configuration> </plugin> </plugins> </build> 
+			</profile> -->
+		<!-- <profile> <id>webapp-jetty</id> <activation> <property> <name>!jetty.disable</name> 
+			</property> </activation> <build> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+			<artifactId>maven-war-plugin</artifactId> <configuration> <webResources> 
+			Duplicity for m2e-wtp plugin <resource> <directory>src/main/webapp</directory> 
+			<filtering>true</filtering> <includes> <include>**/*.xml</include> <include>**/*.properties</include> 
+			</includes> </resource> <resource> <directory>src/main/webapp</directory> 
+			<filtering>false</filtering> <includes> <include>**/*.*</include> </includes> 
+			</resource> <resource> <directory>src/main/webapp-jetty</directory> <filtering>true</filtering> 
+			</resource> </webResources> </configuration> </plugin> </plugins> </build> 
+			</profile> -->
+
+		<!-- Only this works -->
+		<profile>
+			<id>jetty-embedded</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>jetty.embedded</name>
+				</property>
+			</activation>
+
+			<dependencies>
+				<!-- Remove after jans client update to same version -->
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-jaxrs</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-cdi</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-client</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-servlet-initializer</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+</project>
