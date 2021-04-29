@@ -10,7 +10,6 @@ import com.intuit.karate.Results;
 import com.intuit.karate.Runner;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.configapi.util.Util;
 import net.masterthought.cucumber.Configuration;
 import net.masterthought.cucumber.ReportBuilder;
 import org.apache.commons.io.FileUtils;
