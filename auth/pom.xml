@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-config-api-auth</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>jans-config-api-auth</name>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-config-api-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+
+	<dependencies>
+		<!-- jans dependencies -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-client-api</artifactId>
+		</dependency>
+
+		<!-- CDI -->
+		<dependency>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-core-impl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.spec.javax.ejb</groupId>
+			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.fge</groupId>
+			<artifactId>json-patch</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.glassfish/javax.json -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+		</dependency>
+
+		<!-- RestEasy -->
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-cdi</artifactId> 
+			</dependency> <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-client</artifactId> 
+			</dependency> <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-jaxb-provider</artifactId> 
+			</dependency> <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-jaxrs</artifactId> 
+			</dependency> <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-jackson2-provider</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>com.fasterxml.jackson.dataformat</groupId> <artifactId>jackson-dataformat-cbor</artifactId> 
+			</dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
+			<artifactId>jackson-databind</artifactId> </dependency> -->
+		<!-- Security -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+		</dependency>
+
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-1.2-api</artifactId>
+		</dependency>
+
+		<!-- Microprofile -->
+		<!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.config/microprofile-config-api -->
+		<dependency>
+			<groupId>org.eclipse.microprofile.config</groupId>
+			<artifactId>microprofile-config-api</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.metrics/microprofile-metrics-api -->
+		<dependency>
+			<groupId>org.eclipse.microprofile.metrics</groupId>
+			<artifactId>microprofile-metrics-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.microprofile.health</groupId>
+			<artifactId>microprofile-health-api</artifactId>
+		</dependency>
+
+
+	</dependencies>
+
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.properties</include>
+					<include>**/*.js</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<includes>
+					<include>**/*.json</include>
+					<include>**/*.xml</include>
+				</includes>
+			</testResource>
+		</testResources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>false</skipTests>  <!-- set it to false when test sources appear -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<!-- <version>2.3.2</version> <configuration> <source>1.8</source> <target>1.8</target> 
+					<encoding>UTF-8</encoding> </configuration> -->
+			</plugin>
+		</plugins>
+	</build>
+</project>
