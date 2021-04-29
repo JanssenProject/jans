@@ -286,6 +286,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
                         nonce = jwtRequest.getNonce();
                     }
+                    if (StringUtils.isNotBlank(jwtRequest.getCodeChallenge())) {
+                        codeChallenge = jwtRequest.getCodeChallenge();
+                    }
+                    if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
+                        codeChallengeMethod = jwtRequest.getCodeChallengeMethod();
+                    }
                     if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
                         display = jwtRequest.getDisplay().getParamName();
                     }
