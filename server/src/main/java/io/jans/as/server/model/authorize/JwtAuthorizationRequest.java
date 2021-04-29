@@ -6,30 +6,8 @@
 
 package io.jans.as.server.model.authorize;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-
-import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Display;
@@ -52,6 +30,25 @@ import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.service.cdi.util.CdiUtil;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -91,6 +88,8 @@ public class JwtAuthorizationRequest {
     private String loginHint;
     private String bindingMessage;
     private String userCode;
+    private String codeChallenge;
+    private String codeChallengeMethod;
     private Integer requestedExpiry;
     private ResponseMode responseMode;
 
@@ -286,6 +285,8 @@ public class JwtAuthorizationRequest {
         loginHint = jsonPayload.optString("login_hint", null);
         bindingMessage = jsonPayload.optString("binding_message", null);
         userCode = jsonPayload.optString("user_code", null);
+        codeChallenge = jsonPayload.optString("code_challenge", null);
+        codeChallengeMethod = jsonPayload.optString("code_challenge_method", null);
 
         if (jsonPayload.has("requested_expiry")) {
             // requested_expirity is an exception, it could be String or Number.
@@ -428,6 +429,14 @@ public class JwtAuthorizationRequest {
 
     public ResponseMode getResponseMode() {
         return responseMode;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
     }
 
     @Nullable
