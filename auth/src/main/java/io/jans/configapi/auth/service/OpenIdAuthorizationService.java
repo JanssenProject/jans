@@ -15,7 +15,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
@@ -26,7 +28,9 @@ import java.util.List;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
-//@DependsOn("appInitializer")
+@DependsOn("appInitializer")
+@Alternative
+@Priority(1)
 public class OpenIdAuthorizationService extends AuthorizationService implements Serializable {
 
     private static final long serialVersionUID = 1L;
