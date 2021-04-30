@@ -24,8 +24,8 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-//import io.quarkus.runtime.ShutdownEvent;
-//import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.metrics.*;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
@@ -90,6 +90,8 @@ public class AppInitializer {
         
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
+        this.createAuthorizationService();
+        //this.createMetricRegistry(); //TDB???
         log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
         log.info("=================================================================");
@@ -141,6 +143,28 @@ public class AppInitializer {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
+    
+    /*
+    
+    @Produces
+    @ApplicationScoped
+    @Named("metricRegistry")
+    private MetricRegistry createMetricRegistry() {
+        log.info("=============  AppInitializer::MetricRegistry() - Entry");
+        try {
+            //MetricRegistry metricRegistry = MetricRegistries.get(MetricRegistry.Type.APPLICATION);
+           // MetricRegistry metricRegistry = new MetricRegistry();
+            //Metadata metadata = Metadata.builder()
+            //log.info("=============  AppInitializer::MetricRegistry() - metricRegistry = "+metricRegistry+"\n");
+            return null; 
+        } catch (Exception ex) {
+            log.error("Failed to create MetricRegistry instance", ex);
+            throw new ConfigurationException("Failed to create MetricRegistry instance", ex);
+        }
+    }
+    */
+    
+    
     
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
         closePersistenceEntryManager();

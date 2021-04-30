@@ -31,7 +31,7 @@ public class MetricFilter implements Filter {
 
     @Inject
     @RegistryType(type = MetricRegistry.Type.APPLICATION)
-    MetricRegistry registry;
+    MetricRegistry metricRegistry;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -47,9 +47,9 @@ public class MetricFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
             throws IOException, ServletException {
-        registry.counter(createMetaData((HttpServletRequest) servletRequest, MetricType.COUNTER, COUNTER)).inc();
-        Timer timer = registry.timer(createMetaData((HttpServletRequest) servletRequest, MetricType.TIMER, TIMER));
-        Meter meter = registry.meter(createMetaData((HttpServletRequest) servletRequest, MetricType.METERED, METER));
+        metricRegistry.counter(createMetaData((HttpServletRequest) servletRequest, MetricType.COUNTER, COUNTER)).inc();
+        Timer timer = metricRegistry.timer(createMetaData((HttpServletRequest) servletRequest, MetricType.TIMER, TIMER));
+        Meter meter = metricRegistry.meter(createMetaData((HttpServletRequest) servletRequest, MetricType.METERED, METER));
 
         chain.doFilter(servletRequest, servletResponse);
 

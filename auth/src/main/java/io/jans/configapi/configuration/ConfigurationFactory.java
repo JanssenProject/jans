@@ -171,17 +171,24 @@ public class ConfigurationFactory {
 
     public void create() {
         loadBaseConfiguration();
-
+        System.out.println("\n ****************************  ConfigurationFactory::create() - 1  \n");
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-        try {
+        System.out.println("\n ****************************  ConfigurationFactory::create() - this.saltFilePath = "+this.saltFilePath+"  \n");
+        /*try {
             getStringEncrypter();
         } catch (Exception ex) {
             throw new ConfigurationException("Failed to initialize StringEncrypter - " + ex.getMessage());
-        }
+        }*/
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
+        System.out.println("\n ****************************  ConfigurationFactory::create() - this.persistenceConfiguration = "+this.persistenceConfiguration+"  \n");
         loadCryptoConfigurationSalt();
-
+        System.out.println("\n ****************************  ConfigurationFactory::create() - 2  \n");
+        
+        System.out.println("\n ****************************  ConfigurationFactory::create() - 3 , this.getApiClientId() ="+this.getApiClientId()
+        +" ,this.getApiClientPassword() = "+this.getApiClientPassword()
+        +" ,this.getApiProtectionType() = "+this.getApiProtectionType()
+        );
         if (!createFromDb()) {
             log.error("Failed to load configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from persistence.");
