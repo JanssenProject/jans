@@ -102,6 +102,28 @@ ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
 #     sync_ldap_truststore(gmanager, str(dest))
 #     assert dest.read() == gmanager.secret.get("ldap_pkcs12_base64")
 
+
+@pytest.mark.parametrize("url, host", [
+    ("localhost", "localhost"),
+    ("localhost:1636", "localhost"),
+])
+def test_extract_ldap_host(url, host):
+    from jans.pycloudlib.persistence.ldap import extract_ldap_host
+
+    assert extract_ldap_host(url) == host
+
+
+@pytest.mark.parametrize("use_ssl, port", [
+    ("True", 1636),
+    ("False", 1389),
+])
+def test_resolve_ldap_port(monkeypatch, use_ssl, port):
+    from jans.pycloudlib.persistence.ldap import resolve_ldap_port
+
+    monkeypatch.setenv("CN_LDAP_USE_SSL", use_ssl)
+    assert resolve_ldap_port() == port
+
+
 # =========
 # Couchbase
 # =========

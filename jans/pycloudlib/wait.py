@@ -11,7 +11,6 @@ import os
 import sys
 
 import backoff
-import ldap3
 import requests
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.sql import text
@@ -22,6 +21,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import decode_text
+from jans.pycloudlib.persistence.ldap import LdapClient
 
 
 logger = logging.getLogger(__name__)
@@ -168,15 +168,9 @@ def wait_for_ldap(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
-    user = manager.config.get("ldap_binddn")
-    password = decode_text(
-        manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
-    )
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-    ldap_server = ldap3.Server(host, 1636, use_ssl=True)
 
     # a minimum service stack is having config-api client
     jca_client_id = manager.config.get("jca_client_id")
@@ -199,17 +193,10 @@ def wait_for_ldap(manager, **kwargs):
     else:
         search = default_search
 
-    with ldap3.Connection(ldap_server, user, password) as conn:
-        conn.search(
-            search_base=search[0],
-            search_filter=search[1],
-            search_scope=ldap3.SUBTREE,
-            attributes=["objectClass"],
-            size_limit=1,
-        )
-
-        if not conn.entries:
-            raise WaitError("LDAP is not fully initialized")
+    client = LdapClient(manager)
+    entries = client.search(search[0], search[1], attributes=["objectClass"], limit=1)
+    if not entries:
+        raise WaitError("LDAP is not fully initialized")
 
 
 @retry_on_exception
@@ -218,25 +205,10 @@ def wait_for_ldap_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("CN_LDAP_URL", "localhost:1636")
-    user = manager.config.get("ldap_binddn")
-    password = decode_text(
-        manager.secret.get("encoded_ox_ldap_pw"), manager.secret.get("encoded_salt")
-    )
 
-    ldap_server = ldap3.Server(host, 1636, use_ssl=True)
-    search = ("", "(objectClass=*)")
-
-    with ldap3.Connection(ldap_server, user, password) as conn:
-        conn.search(
-            search_base=search[0],
-            search_filter=search[1],
-            search_scope=ldap3.BASE,
-            attributes=["1.1"],
-            size_limit=1,
-        )
-        if not conn.entries:
-            raise WaitError("LDAP is unreachable")
+    connected = LdapClient(manager).is_connected()
+    if not connected:
+        raise WaitError("LDAP is unreachable")
 
 
 @retry_on_exception
