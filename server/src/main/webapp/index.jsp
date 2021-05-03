@@ -1,1 +1,1 @@
-<% out.print("Jans Config- Api") %>
+<% out.print("Jans Config- Api"); %>

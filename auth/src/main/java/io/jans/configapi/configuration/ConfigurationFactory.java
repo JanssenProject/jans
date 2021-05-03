@@ -28,10 +28,13 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Instance;
@@ -45,6 +48,7 @@ import java.util.Properties;
 @ApplicationScoped
 @Alternative
 @Priority(1)
+//@DependsOn("customConfigSource")
 public class ConfigurationFactory {
 
     public ConfigurationFactory() {
@@ -73,6 +77,13 @@ public class ConfigurationFactory {
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
+    // private static final String FILE_CONFIG =
+    // "src/main/resources/application.properties";
+
+    static {
+        Config config = ConfigProviderResolver.instance().getBuilder().addDefaultSources()
+                .withSources(new CustomConfigSource()).addDiscoveredConverters().build();
+    }
 
     @Inject
     private Logger log;
@@ -93,11 +104,6 @@ public class ConfigurationFactory {
     private String cryptoConfigurationSalt;
     private String saltFilePath;
 
-    // private String API_PROTECTION_TYPE;
-    // private String API_CLIENT_ID;
-    // private String API_CLIENT_PASSWORD;
-    // private static List<String> API_APPROVED_ISSUER;
-
     @Inject
     @ConfigProperty(name = "api.protection.type")
     private static String API_PROTECTION_TYPE;
@@ -113,12 +119,6 @@ public class ConfigurationFactory {
     @Inject
     @ConfigProperty(name = "api.approved.issuer")
     private static List<String> API_APPROVED_ISSUER;
-
-    //@Inject
-    //ApiProtectionService apiProtectionService;
-
-    //@Inject
-    //private Instance<AuthorizationService> authorizationServiceInstance;
 
     @Produces
     @ApplicationScoped
@@ -151,19 +151,6 @@ public class ConfigurationFactory {
     public static String getApiClientPassword() {
         return API_CLIENT_PASSWORD;
     }
-    /*
-     * public String getApiProtectionType() { return
-     * this.getAplicationProperties().getString("api.protection.type"); // return
-     * API_PROTECTION_TYPE; }
-     * 
-     * public String getApiClientId() { return
-     * this.getAplicationProperties().getString("api.client.id"); // return
-     * API_CLIENT_ID; }
-     * 
-     * public String getApiClientPassword() { return
-     * this.getAplicationProperties().getString("api.client.password"); // return
-     * API_CLIENT_PASSWORD; }
-     */
 
     public static List<String> getApiApprovedIssuer() {
         return API_APPROVED_ISSUER;
@@ -173,22 +160,25 @@ public class ConfigurationFactory {
         loadBaseConfiguration();
         System.out.println("\n ****************************  ConfigurationFactory::create() - 1  \n");
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-        System.out.println("\n ****************************  ConfigurationFactory::create() - this.saltFilePath = "+this.saltFilePath+"  \n");
-        /*try {
-            getStringEncrypter();
-        } catch (Exception ex) {
-            throw new ConfigurationException("Failed to initialize StringEncrypter - " + ex.getMessage());
-        }*/
+        System.out.println("\n ****************************  ConfigurationFactory::create() - this.saltFilePath = "
+                + this.saltFilePath + "  \n");
+        /*
+         * try { getStringEncrypter(); } catch (Exception ex) { throw new
+         * ConfigurationException("Failed to initialize StringEncrypter - " +
+         * ex.getMessage()); }
+         */
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
-        System.out.println("\n ****************************  ConfigurationFactory::create() - this.persistenceConfiguration = "+this.persistenceConfiguration+"  \n");
+        System.out.println(
+                "\n ****************************  ConfigurationFactory::create() - this.persistenceConfiguration = "
+                        + this.persistenceConfiguration + "  \n");
         loadCryptoConfigurationSalt();
         System.out.println("\n ****************************  ConfigurationFactory::create() - 2  \n");
-        
-        System.out.println("\n ****************************  ConfigurationFactory::create() - 3 , this.getApiClientId() ="+this.getApiClientId()
-        +" ,this.getApiClientPassword() = "+this.getApiClientPassword()
-        +" ,this.getApiProtectionType() = "+this.getApiProtectionType()
-        );
+
+        System.out
+                .println("\n ****************************  ConfigurationFactory::create() - 3 , this.getApiClientId() ="
+                        + this.getApiClientId() + " ,this.getApiClientPassword() = " + this.getApiClientPassword()
+                        + " ,this.getApiProtectionType() = " + this.getApiProtectionType());
         if (!createFromDb()) {
             log.error("Failed to load configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from persistence.");
@@ -196,7 +186,7 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        //createAuthorizationService(); //TBD???
+        // createAuthorizationService(); //TBD???
         installSecurityProvider();
 
     }
@@ -337,25 +327,24 @@ public class ConfigurationFactory {
     }
 
     /*
-    @Produces
-    @ApplicationScoped
-    @Named("authorizationService")
-    private AuthorizationService createAuthorizationService() {
-        log.info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
-                + getApiProtectionType());
-        if (StringHelper.isEmpty(getApiProtectionType())) {
-            throw new ConfigurationException("API Protection Type not defined");
-        }
-        try {
-            // Verify resources available
-            apiProtectionService.verifyResources(getApiProtectionType(), getApiClientId());
-            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-        } catch (Exception ex) {
-            log.error("Failed to create AuthorizationService instance", ex);
-            throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
-        }
-    }
-    */
+     * @Produces
+     * 
+     * @ApplicationScoped
+     * 
+     * @Named("authorizationService") private AuthorizationService
+     * createAuthorizationService() { log.
+     * info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
+     * + getApiProtectionType()); if (StringHelper.isEmpty(getApiProtectionType()))
+     * { throw new ConfigurationException("API Protection Type not defined"); } try
+     * { // Verify resources available
+     * apiProtectionService.verifyResources(getApiProtectionType(),
+     * getApiClientId()); return
+     * authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+     * } catch (Exception ex) {
+     * log.error("Failed to create AuthorizationService instance", ex); throw new
+     * ConfigurationException("Failed to create AuthorizationService instance", ex);
+     * } }
+     */
 
     /*
      * @Produces
