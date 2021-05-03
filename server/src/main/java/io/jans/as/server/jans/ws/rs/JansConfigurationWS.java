@@ -6,26 +6,10 @@
 
 package io.jans.as.server.jans.ws.rs;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.gluu.GluuConfiguration;
@@ -36,6 +20,16 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * Created by eugeniuparvan on 8/5/16.
@@ -64,6 +58,7 @@ public class JansConfigurationWS {
     @GET
     @Produces({"application/json"})
     public Response getConfiguration() {
+        errorResponseFactory.validateComponentEnabled(ComponentType.JANS_CONFIGURATION);
         try {
             final GluuConfiguration conf = new GluuConfiguration();
 
