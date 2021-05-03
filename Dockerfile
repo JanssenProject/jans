@@ -37,9 +37,14 @@ ARG JYTHON_VERSION=2.7.2
 RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
-    && /opt/jython/bin/pip install --no-cache-dir "pip==19.2" \
-    && /opt/jython/bin/pip install --no-cache-dir "pydevd" \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
+
+# install pydev debugger into Jython
+RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_debugger_2_3_0.tar.gz -P /tmp \
+    && tar xvf /tmp/pydev_debugger_2_3_0.tar.gz -C /tmp \
+    && cd /tmp/PyDev.Debugger-pydev_debugger_2_3_0 \
+    && /opt/jython/bin/pip install . \
+    && rm -rf /tmp/pydev_debugger* /tmp/PyDev.Debugger-*
 
 # ===========
 # Auth server
