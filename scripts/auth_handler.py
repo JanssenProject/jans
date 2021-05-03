@@ -6,17 +6,13 @@ import time
 from collections import Counter
 from collections import deque
 
-from ldap3 import Connection
-from ldap3 import Server
-from ldap3 import BASE
-from ldap3 import MODIFY_REPLACE
 from sqlalchemy.sql import text
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
+from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.sql import SQLClient
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_base64_contents
@@ -72,7 +68,7 @@ def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_ke
     return exec_cmd(cmd)
 
 
-class BasePersistence(object):
+class BasePersistence:
     def get_auth_config(self):
         raise NotImplementedError
 
@@ -81,62 +77,48 @@ class BasePersistence(object):
 
 
 class LdapPersistence(BasePersistence):
-    def __init__(self, host, user, password):
-        ldap_server = Server(host, port=1636, use_ssl=True)
-        self.backend = Connection(ldap_server, user, password)
+    def __init__(self, manager):
+        self.client = LdapClient(manager)
 
     def get_auth_config(self):
-        # base DN for auth config
-        auth_base = ",".join([
-            "ou=jans-auth",
-            "ou=configuration",
-            "o=jans",
-        ])
+        entry = self.client.get(
+            "ou=jans-auth,ou=configuration,o=jans",
+            attributes=["jansRevision", "jansConfWebKeys", "jansConfDyn"],
+        )
 
-        with self.backend as conn:
-            conn.search(
-                search_base=auth_base,
-                search_filter="(objectClass=*)",
-                search_scope=BASE,
-                attributes=[
-                    "jansRevision",
-                    "jansConfWebKeys",
-                    "jansConfDyn",
-                ]
-            )
+        if not entry:
+            return {}
 
-            if not conn.entries:
-                return {}
-
-            entry = conn.entries[0]
-
-            config = {
-                "id": entry.entry_dn,
-                "jansRevision": entry["jansRevision"][0],
-                "jansConfWebKeys": entry["jansConfWebKeys"][0],
-                "jansConfDyn": entry["jansConfDyn"][0],
-            }
-            return config
+        config = {
+            "id": entry.entry_dn,
+            "jansRevision": entry["jansRevision"][0],
+            "jansConfWebKeys": entry["jansConfWebKeys"][0],
+            "jansConfDyn": entry["jansConfDyn"][0],
+        }
+        return config
 
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
-        with self.backend as conn:
-            conn.modify(id_, {
-                'jansRevision': [(MODIFY_REPLACE, [str(rev)])],
-                'jansConfWebKeys': [(MODIFY_REPLACE, [json.dumps(conf_webkeys)])],
-                'jansConfDyn': [(MODIFY_REPLACE, [json.dumps(conf_dynamic)])],
-            })
-
-            result = conn.result["description"]
-            return result == "success"
+        modified, _ = self.client.modify(
+            id_,
+            {
+                'jansRevision': [(self.client.MODIFY_REPLACE, [str(rev)])],
+                'jansConfWebKeys': [(self.client.MODIFY_REPLACE, [json.dumps(conf_webkeys)])],
+                'jansConfDyn': [(self.client.MODIFY_REPLACE, [json.dumps(conf_dynamic)])],
+            }
+        )
+        return modified
 
 
 class CouchbasePersistence(BasePersistence):
-    def __init__(self, host, user, password):
-        self.backend = CouchbaseClient(host, user, password)
+    def __init__(self, manager):
+        host = os.environ.get("CN_COUCHBASE_URL", "localhost")
+        user = get_couchbase_user(manager)
+        password = get_couchbase_password(manager)
+        self.client = CouchbaseClient(host, user, password)
 
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        req = self.backend.exec_query(
+        req = self.client.exec_query(
             "SELECT jansRevision, jansConfDyn, jansConfWebKeys "
             f"FROM `{bucket}` "
             "USE KEYS 'configuration_jans-auth'",
@@ -157,7 +139,7 @@ class CouchbasePersistence(BasePersistence):
         conf_webkeys = json.dumps(conf_webkeys)
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
-        req = self.backend.exec_query(
+        req = self.client.exec_query(
             f"UPDATE `{bucket}` USE KEYS '{id_}' "
             f"SET jansRevision={rev}, jansConfDyn={conf_dynamic}, "
             f"jansConfWebKeys={conf_webkeys} "
@@ -170,11 +152,11 @@ class CouchbasePersistence(BasePersistence):
 
 
 class SqlPersistence(BasePersistence):
-    def __init__(self, host="", user="", password=""):
-        self.backend = SQLClient()
+    def __init__(self, manager):
+        self.client = SQLClient()
 
     def get_auth_config(self):
-        with self.backend.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             query = "SELECT jansRevision, jansConfDyn, jansConfWebKeys FROM jansAppConf WHERE doc_id = :doc_id"
             result = conn.execute(
                 text(query),
@@ -190,7 +172,7 @@ class SqlPersistence(BasePersistence):
             return config
 
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
-        with self.backend.engine.connect() as conn:
+        with self.client.engine.connect() as conn:
             query = "UPDATE jansAppConf SET jansRevision = :rev, jansConfDyn = :conf_dynamic, jansConfWebKeys = :conf_webkeys WHERE doc_id = :doc_id"
             result = conn.execute(
                 text(query),
@@ -222,25 +204,12 @@ class AuthHandler(BaseHandler):
 
         # resolve backend
         if backend_type == "ldap":
-            host = os.environ.get("CN_LDAP_URL", "localhost:1636")
-            user = manager.config.get("ldap_binddn")
-            password = decode_text(
-                manager.secret.get("encoded_ox_ldap_pw"),
-                manager.secret.get("encoded_salt"),
-            )
-            backend_cls = LdapPersistence
+            self.backend = LdapPersistence(manager)
         elif backend_type == "couchbase":
-            host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-            user = get_couchbase_user(manager)
-            password = get_couchbase_password(manager)
-            backend_cls = CouchbasePersistence
+            self.backend = CouchbasePersistence(manager)
         else:
-            host = ""
-            user = ""
-            password = ""
-            backend_cls = SqlPersistence
+            self.backend = SqlPersistence(manager)
 
-        self.backend = backend_cls(host, user, password)
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "OLDER")
@@ -386,7 +355,7 @@ class AuthHandler(BaseHandler):
         auth_containers = []
 
         if self.push_keys:
-            auth_containers = self.meta_client.get_containers("APP_NAME=auth-sever")
+            auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
             if not auth_containers:
                 logger.warning(
                     "Unable to find any jans-auth container; make sure "
