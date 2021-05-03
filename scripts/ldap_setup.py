@@ -3,16 +3,12 @@ import logging.config
 import os
 import time
 
-from ldap3 import BASE
-from ldap3 import Connection
-from ldap3 import Server
-from ldap3 import SUBTREE
 from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 from ldif3 import LDIFParser
 
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.persistence.ldap import LdapClient
 
 from settings import LOGGING_CONFIG
 from utils import render_ldif
@@ -25,15 +21,7 @@ logger = logging.getLogger("entrypoint")
 
 class LDAPBackend:
     def __init__(self, manager):
-        host = os.environ.get("CN_LDAP_URL", "localhost:1636")
-        user = manager.config.get("ldap_binddn")
-        password = decode_text(
-            manager.secret.get("encoded_ox_ldap_pw"),
-            manager.secret.get("encoded_salt"),
-        ).decode()
-
-        server = Server(host, port=1636, use_ssl=True)
-        self.conn = Connection(server, user, password)
+        self.client = LdapClient(manager)
         self.manager = manager
 
     def check_indexes(self, mapping):
@@ -55,17 +43,9 @@ class LDAPBackend:
 
         for _ in range(0, max_wait_time, sleep_duration):
             try:
-                with self.conn as conn:
-                    conn.search(
-                        search_base=dn,
-                        search_filter="(objectClass=*)",
-                        search_scope=BASE,
-                        attributes=["1.1"],
-                        size_limit=1,
-                    )
-                    if conn.result["description"] == "success":
-                        return
-                    reason = conn.result["message"]
+                if self.client.get(dn, attributes=["1.1"]):
+                    return
+                reason = f"Index {dn} is not ready"
             except (LDAPSessionTerminatedByServerError, LDAPSocketOpenError) as exc:
                 reason = exc
 
@@ -115,11 +95,10 @@ class LDAPBackend:
 
         for _ in range(0, max_wait_time, sleep_duration):
             try:
-                with self.conn as conn:
-                    conn.add(dn, attributes=attrs)
-                    if conn.result["result"] != 0:
-                        logger.warning(f"Unable to add entry with DN {dn}; reason={conn.result['message']}")
-                    return
+                added, msg = self.client.add(dn, attributes=attrs)
+                if not added:
+                    logger.warning(f"Unable to add entry with DN {dn}; reason={msg}")
+                break
             except (LDAPSessionTerminatedByServerError, LDAPSocketOpenError) as exc:
                 logger.warning(f"Unable to add entry with DN {dn}; reason={exc}; retrying in {sleep_duration} seconds")
             time.sleep(sleep_duration)
@@ -147,16 +126,7 @@ class LDAPBackend:
                 search = search_mapping[ldap_mapping]
             else:
                 search = default_search
-
-            with self.conn as conn:
-                conn.search(
-                    search_base=search[0],
-                    search_filter=search[1],
-                    search_scope=SUBTREE,
-                    attributes=['objectClass'],
-                    size_limit=1,
-                )
-                return bool(conn.entries)
+            return self.client.search(search[0], search[1], attributes=["objectClass"], limit=1)
 
         should_skip = as_boolean(
             os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False),

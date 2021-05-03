@@ -90,9 +90,10 @@ def get_base_ctx(manager):
         "jca_pw": jca_pw,
         "jca_pw_encoded": jca_pw_encoded,
 
-        'ldap_hostname': manager.config.get('ldap_init_host', "localhost"),
-        'ldaps_port': manager.config.get('ldap_init_port', 1636),
+        'ldap_hostname': manager.config.get('ldap_init_host'),
+        'ldaps_port': manager.config.get('ldap_init_port'),
         'ldap_binddn': manager.config.get('ldap_binddn'),
+        "ldap_use_ssl": str(as_boolean(os.environ.get("CN_LDAP_USE_SSL", True))).lower(),
         'encoded_ox_ldap_pw': manager.secret.get('encoded_ox_ldap_pw'),
         'jetty_base': manager.config.get('jetty_base'),
         'orgName': manager.config.get('orgName'),

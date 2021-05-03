@@ -86,7 +86,8 @@ ENV CN_PERSISTENCE_TYPE=couchbase \
     CN_COUCHBASE_SUPERUSER="" \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_COUCHBASE_INDEX_NUM_REPLICA=0 \
-    CN_LDAP_URL=localhost:1636
+    CN_LDAP_URL=localhost:1636 \
+    CN_LDAP_USE_SSL=true
 
 # ===========
 # Generic ENV
