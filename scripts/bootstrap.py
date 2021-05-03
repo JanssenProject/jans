@@ -72,10 +72,13 @@ class Connector:
         return os.environ.get(f"CN_CLIENT_API_{conn_type}_CERT_CN", "localhost")
 
     def sync_x509(self):
-        try:
+        cert = self.manager.secret.get(f"client_api_{self.type}_cert")
+        key = self.manager.secret.get(f"client_api_{self.type}_key")
+
+        if cert and key:
             self.manager.secret.to_file(f"client_api_{self.type}_cert", self.cert_file)
             self.manager.secret.to_file(f"client_api_{self.type}_key", self.key_file)
-        except TypeError:
+        else:
             generate_ssl_certkey(
                 f"client_api_{self.type}",
                 self.manager.config.get("admin_email"),
@@ -99,12 +102,13 @@ class Connector:
         return password
 
     def sync_keystore(self):
-        # if there are no secrets, ``TypeError`` will be thrown
-        try:
+        jks = self.manager.secret.get(f"client_api_{self.type}_jks_base64")
+
+        if jks:
             self.manager.secret.to_file(
                 f"client_api_{self.type}_jks_base64", self.keystore_file, decode=True, binary_mode=True,
             )
-        except TypeError:
+        else:
             generate_keystore(self.cert_file, self.key_file, self.keystore_file, self.get_keystore_password())
             # save keystore to secrets for later use
             self.manager.secret.from_file(
@@ -141,12 +145,12 @@ def render_client_api_config():
     data["server"]["adminConnectors"][0]["keyStorePassword"] = admin_connector.get_keystore_password()
     data["server"]["adminConnectors"][0]["keyStorePath"] = admin_connector.keystore_file
 
-    # ip_addresses = os.environ.get("CN_CLIENT_API_BIND_IP_ADDRESSES", "*")
-    # data["bind_ip_addresses"] = [
-    #     addr.strip()
-    #     for addr in ip_addresses.split(",")
-    #     if addr
-    # ]
+    ip_addresses = os.environ.get("CN_CLIENT_API_BIND_IP_ADDRESSES", "*")
+    data["bind_ip_addresses"] = [
+        addr.strip()
+        for addr in ip_addresses.split(",")
+        if addr
+    ]
 
     # write config
     with open("/opt/client-api/conf/client-api-server.yml", "w") as f:
