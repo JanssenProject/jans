@@ -2,48 +2,28 @@ import json
 import os
 from urllib.parse import urlparse
 
-from ldap3 import Connection
-from ldap3 import Server
-from ldap3 import BASE
 from sqlalchemy.sql import text
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.ldap import LdapClient
 
 
 class LdapPersistence:
-    def __init__(self, host, user, password):
-        ldap_server = Server(host, port=1636, use_ssl=True)
-        self.backend = Connection(ldap_server, user, password)
+    def __init__(self, manager):
+        self.client = LdapClient(manager)
 
     def get_auth_config(self):
         # base DN for auth config
-        auth_base = ",".join([
-            "ou=jans-auth",
-            "ou=configuration",
-            "o=jans",
-        ])
+        dn = "ou=jans-auth,ou=configuration,o=jans"
+        entry = self.client.get(dn)
 
-        with self.backend as conn:
-            conn.search(
-                search_base=auth_base,
-                search_filter="(objectClass=*)",
-                search_scope=BASE,
-                attributes=[
-                    "jansConfDyn",
-                ]
-            )
-
-            if not conn.entries:
-                return {}
-
-            entry = conn.entries[0]
-            config = entry["jansConfDyn"][0]
-            return config
+        if not entry:
+            return {}
+        return entry["jansConfDyn"][0]
 
 
 class CouchbasePersistence:
@@ -113,13 +93,7 @@ def get_injected_urls():
 
     # resolve backend
     if backend_type == "ldap":
-        host = os.environ.get("CN_LDAP_URL", "localhost:1636")
-        user = manager.config.get("ldap_binddn")
-        password = decode_text(
-            manager.secret.get("encoded_ox_ldap_pw"),
-            manager.secret.get("encoded_salt"),
-        )
-        backend = LdapPersistence(host, user, password)
+        backend = LdapPersistence(manager)
     elif backend_type == "couchbase":
         host = os.environ.get("CN_COUCHBASE_URL", "localhost")
         user = get_couchbase_user(manager)
