@@ -49,9 +49,10 @@ import javax.servlet.ServletContext;
 @ApplicationScoped
 @Named("appInitializer")
 public class AppInitializer {
-    
+
     public AppInitializer() {
-        System.out.println("\n\n\n\n **************************** AppInitializer() ****************************  \n\n\n\n");
+        System.out.println(
+                "\n\n\n\n **************************** AppInitializer() ****************************  \n\n\n\n");
     }
 
     @Inject
@@ -72,7 +73,6 @@ public class AppInitializer {
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
-    
 
     @Inject
     private ApiProtectionService apiProtectionService;
@@ -80,24 +80,25 @@ public class AppInitializer {
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
 
-    //void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    // void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("=================================================================");
-        
-        //System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true"); ???TBD Set in webapp
-        
+
+        // System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED,
+        // "true"); ???TBD Set in webapp
+
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
-        //this.createMetricRegistry(); //TDB???
+        // this.createMetricRegistry(); //TDB???
         log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
         log.info("=================================================================");
     }
 
-    //void onStop(/* @Observes ShutdownEvent ev */) {
+    // void onStop(/* @Observes ShutdownEvent ev */) {
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("================================================================");
         log.info("===========  API APPLICATION STOPPED  ==========================");
@@ -109,7 +110,6 @@ public class AppInitializer {
     public ConfigurationFactory getConfigurationFactory() {
         return configurationFactory;
     }
-
 
     @Produces
     @ApplicationScoped
@@ -128,8 +128,9 @@ public class AppInitializer {
     @ApplicationScoped
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
-        log.info("=============  AppInitializer::createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
-                + ConfigurationFactory.getApiProtectionType());
+        log.info(
+                "=============  AppInitializer::createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
+                        + ConfigurationFactory.getApiProtectionType());
         if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
@@ -143,29 +144,25 @@ public class AppInitializer {
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
-    
+
     /*
-    
-    @Produces
-    @ApplicationScoped
-    @Named("metricRegistry")
-    private MetricRegistry createMetricRegistry() {
-        log.info("=============  AppInitializer::MetricRegistry() - Entry");
-        try {
-            //MetricRegistry metricRegistry = MetricRegistries.get(MetricRegistry.Type.APPLICATION);
-           // MetricRegistry metricRegistry = new MetricRegistry();
-            //Metadata metadata = Metadata.builder()
-            //log.info("=============  AppInitializer::MetricRegistry() - metricRegistry = "+metricRegistry+"\n");
-            return null; 
-        } catch (Exception ex) {
-            log.error("Failed to create MetricRegistry instance", ex);
-            throw new ConfigurationException("Failed to create MetricRegistry instance", ex);
-        }
-    }
-    */
-    
-    
-    
+     * 
+     * @Produces
+     * 
+     * @ApplicationScoped
+     * 
+     * @Named("metricRegistry") private MetricRegistry createMetricRegistry() {
+     * log.info("=============  AppInitializer::MetricRegistry() - Entry"); try {
+     * //MetricRegistry metricRegistry =
+     * MetricRegistries.get(MetricRegistry.Type.APPLICATION); // MetricRegistry
+     * metricRegistry = new MetricRegistry(); //Metadata metadata =
+     * Metadata.builder() //log.
+     * info("=============  AppInitializer::MetricRegistry() - metricRegistry = "
+     * +metricRegistry+"\n"); return null; } catch (Exception ex) {
+     * log.error("Failed to create MetricRegistry instance", ex); throw new
+     * ConfigurationException("Failed to create MetricRegistry instance", ex); } }
+     */
+
     public void recreatePersistanceEntryManager(@Observes @LdapConfigurationReload String event) {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();

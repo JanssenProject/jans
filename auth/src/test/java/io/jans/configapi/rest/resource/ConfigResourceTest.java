@@ -17,13 +17,8 @@ public class ConfigResourceTest {
 
     @Test
     public void patchAppConfigurationProperty() {
-        given()
-                .when()
-                .contentType(MediaType.APPLICATION_JSON_PATCH_JSON)
-                .header("Authorization", "Bearer 12345", null)
+        given().when().contentType(MediaType.APPLICATION_JSON_PATCH_JSON).header("Authorization", "Bearer 12345", null)
                 .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")
-                .patch("/jans-config-api/api/v1/jans-auth-server/config")
-                .then()
-                .statusCode(200);
+                .patch("/jans-config-api/api/v1/jans-auth-server/config").then().statusCode(200);
     }
 }

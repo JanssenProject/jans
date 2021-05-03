@@ -48,8 +48,10 @@ public class MetricFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
             throws IOException, ServletException {
         metricRegistry.counter(createMetaData((HttpServletRequest) servletRequest, MetricType.COUNTER, COUNTER)).inc();
-        Timer timer = metricRegistry.timer(createMetaData((HttpServletRequest) servletRequest, MetricType.TIMER, TIMER));
-        Meter meter = metricRegistry.meter(createMetaData((HttpServletRequest) servletRequest, MetricType.METERED, METER));
+        Timer timer = metricRegistry
+                .timer(createMetaData((HttpServletRequest) servletRequest, MetricType.TIMER, TIMER));
+        Meter meter = metricRegistry
+                .meter(createMetaData((HttpServletRequest) servletRequest, MetricType.METERED, METER));
 
         chain.doFilter(servletRequest, servletResponse);
 
