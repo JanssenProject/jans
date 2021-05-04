@@ -117,7 +117,6 @@ public class AppConfiguration implements Configuration {
     private String defaultSignatureAlgorithm;
     private String oxOpenIdConnectVersion;
     private String oxId;
-    private Boolean dynamicRegistrationEnabled;
     private int dynamicRegistrationExpirationTime = -1;
     private Boolean dynamicRegistrationPersistClientAuthorizations;
     private Boolean trustedClientEnabled;
@@ -1338,15 +1337,6 @@ public class AppConfiguration implements Configuration {
 
     public void setOxId(String oxId) {
         this.oxId = oxId;
-    }
-
-    public Boolean getDynamicRegistrationEnabled() {
-        if (dynamicRegistrationEnabled == null) dynamicRegistrationEnabled = false;
-        return dynamicRegistrationEnabled;
-    }
-
-    public void setDynamicRegistrationEnabled(Boolean dynamicRegistrationEnabled) {
-        this.dynamicRegistrationEnabled = dynamicRegistrationEnabled;
     }
 
     public int getDynamicRegistrationExpirationTime() {
