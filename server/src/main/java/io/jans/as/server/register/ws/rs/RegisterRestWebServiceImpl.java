@@ -187,11 +187,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
             log.trace("Registration request = {}", requestParams);
 
-            if (!appConfiguration.getDynamicRegistrationEnabled()) {
-                log.info("Dynamic client registration is disabled.");
-                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic client registration is disabled.");
-            }
-
             if (!appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled()
                     && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
                 log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
@@ -972,28 +967,24 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_READ);
         oAuth2AuditLog.setClientId(clientId);
         try {
-            if (appConfiguration.getDynamicRegistrationEnabled()) {
-                if (registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
-                    if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
-                        validateAuthorizationAccessToken(accessToken, clientId);
-                    }
+            if (registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
+                if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+                    validateAuthorizationAccessToken(accessToken, clientId);
+                }
 
-                    Client client = clientService.getClient(clientId, accessToken);
-                    if (client != null) {
-                        oAuth2AuditLog.setScope(clientScopesToString(client));
-                        oAuth2AuditLog.setSuccess(true);
-                        builder.entity(clientAsEntity(client));
-                    } else {
-                        log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
-                        builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
-                        builder.entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client"));
-                    }
+                Client client = clientService.getClient(clientId, accessToken);
+                if (client != null) {
+                    oAuth2AuditLog.setScope(clientScopesToString(client));
+                    oAuth2AuditLog.setSuccess(true);
+                    builder.entity(clientAsEntity(client));
                 } else {
-                    log.trace("Client ID or Access Token is not valid.");
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Client ID or Access Token is not valid.");
+                    log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                    builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
+                    builder.entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client"));
                 }
             } else {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic registration is disabled.");
+                log.trace("Client ID or Access Token is not valid.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Client ID or Access Token is not valid.");
             }
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
@@ -1193,12 +1184,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
             String accessToken = tokenService.getToken(authorization);
 
-            log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
-                    clientId, accessToken, securityContext.isSecure());
-
-            if (!appConfiguration.getDynamicRegistrationEnabled()) {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic registration is disabled.");
-            }
+            log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}", clientId, accessToken, securityContext.isSecure());
 
             if (!registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                 log.trace("Client parameters are invalid.");
