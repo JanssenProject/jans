@@ -6,37 +6,9 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.DEVICE_CODE;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.INTERVAL;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.USER_CODE;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI;
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
-import static io.jans.as.model.token.TokenErrorResponseType.INVALID_CLIENT;
-import static io.jans.as.model.token.TokenErrorResponseType.INVALID_GRANT;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.StringUtils;
@@ -52,6 +24,24 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
+import static io.jans.as.model.token.TokenErrorResponseType.INVALID_CLIENT;
+import static io.jans.as.model.token.TokenErrorResponseType.INVALID_GRANT;
 
 /**
  * Implementation for device authorization rest service.
@@ -98,6 +88,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         try {
             log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
+            errorResponseFactory.validateComponentEnabled(ComponentType.DEVICE_AUTHZ);
 
             SessionClient sessionClient = identity.getSessionClient();
             Client client = sessionClient != null ? sessionClient.getClient() : null;
