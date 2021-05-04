@@ -274,6 +274,12 @@ class JCA_CLI:
         return self.cfg_yml
 
 
+    def check_connection(self):
+        rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
+        response = rest.GET('https://{}/jans-auth/restv1/token'.format(self.host))
+        if response.status != 200:
+            raise ValueError(self.colored_text("Unable to connect jans-auth server: {}".format(response.reason), error_color))
+
     def make_menu(self):
 
         menu = Menu('Main Menu')
@@ -1699,7 +1705,10 @@ class JCA_CLI:
         self.display_menu(self.menu)
 
 cliObject = JCA_CLI(host, client_id, client_secret)
+
+
 try:
+    cliObject.check_connection()
     if not (args.operation_id or args.info or args.schema):
         #reset previous color
         print('\033[0m',end='')
