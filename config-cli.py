@@ -15,6 +15,7 @@ import datetime
 import ruamel.yaml
 import importlib
 import code
+import traceback
 
 import pprint
 from functools import partial
@@ -52,6 +53,7 @@ client_id = os.environ.get(my_op_mode+'_client_id')
 client_secret = os.environ.get(my_op_mode+'_client_secret')
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
+error_log_file = os.path.join(cur_dir, 'error.log')
 
 # dummy api class to reach private ApiClient methods
 class MyApiClient(swagger_client.ApiClient):
@@ -1697,17 +1699,22 @@ class JCA_CLI:
         self.display_menu(self.menu)
 
 cliObject = JCA_CLI(host, client_id, client_secret)
-
-if not (args.operation_id or args.info or args.schema):
-    #reset previous color
-    print('\033[0m',end='')
-    cliObject.runApp()
-else:
-    print()
-    if args.info:
-        cliObject.help_for(args.info)
-    elif args.schema:
-        cliObject.get_sample_schema(args.schema)
-    elif args.operation_id:
-        cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-    print()
+try:
+    if not (args.operation_id or args.info or args.schema):
+        #reset previous color
+        print('\033[0m',end='')
+        cliObject.runApp()
+    else:
+        print()
+        if args.info:
+            cliObject.help_for(args.info)
+        elif args.schema:
+            cliObject.get_sample_schema(args.schema)
+        elif args.operation_id:
+            cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+        print()
+except Exception as e:
+    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
+    with open(error_log_file, 'a') as w:
+        traceback.print_exc(file=w)
+    print("Error is logged to {}".format(error_log_file))
