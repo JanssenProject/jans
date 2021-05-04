@@ -94,7 +94,7 @@ parser.add_argument("-j", help="Auth password file")
 
 parser.add_argument("--cert-file", help="Path to SSL Certificate file")
 parser.add_argument("--key-file", help="Path to SSL Key file")
-parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true')
+parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
 #parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
