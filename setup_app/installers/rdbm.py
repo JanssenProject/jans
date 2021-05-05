@@ -111,6 +111,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         column_add = 'COLUMN ' if Config.rdbm_type == 'spanner' else ''
         alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD %s{};' % (qchar, qchar, column_add)
 
+        sub_tables_fn = os.path.join(Config.static_rdbm_dir, 'sub_tables.json')
+        sub_tables = base.readJsonFile(sub_tables_fn)
+
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
             for obj in jans_schema['objectClasses']:
@@ -138,6 +141,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if attrname in cols_:
                     continue
 
+                if attrname in sub_tables.get(Config.rdbm_type).get(sql_tbl_name, []):
+                    continue
+
                 cols_.append(attrname)
                 data_type = self.get_sql_col_type(attrname, sql_tbl_name)
 
@@ -160,7 +166,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
-        # TODO: Implement for spanner
         for attrname in all_attribs:
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
@@ -175,6 +180,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
+
+        for subtable in sub_tables.get(Config.rdbm_type, {}):
+            subtable_columns = []
+            attrname, data_type = sub_tables['spanner'][subtable]
+            sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` INT64, `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, attrname, data_type)
+            self.dbUtils.spanner.create_table(sql_cmd)
+            sql_cmd_index = 'CREATE INDEX `{0}_{1}Idx` ON `{0}_{1}` (`{1}`)'.format(subtable, attrname)
+            self.dbUtils.spanner.create_table(sql_cmd_index)
+
 
     def get_index_name(self, attrname):
         return re.sub(r'[^0-9a-zA-Z\s]+','_', attrname)
