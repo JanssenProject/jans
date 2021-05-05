@@ -856,6 +856,9 @@
     "mysql": {
       "type": "TINYTEXT"
     },
+  "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
