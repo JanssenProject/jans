@@ -8,9 +8,10 @@ package io.jans.configapi.auth.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.configapi.auth.service.AuthorizationService;
+import io.jans.configapi.auth.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.configapi.auth.util.AuthUtil;
-import io.jans.configapi.auth.util.JwtUtil;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -28,7 +29,6 @@ import java.util.List;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
-@DependsOn("appInitializer")
 @Alternative
 @Priority(1)
 public class OpenIdAuthorizationService extends AuthorizationService implements Serializable {

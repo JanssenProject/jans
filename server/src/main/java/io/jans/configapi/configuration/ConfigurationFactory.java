@@ -45,6 +45,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+
 @ApplicationScoped
 @Alternative
 @Priority(1)
@@ -77,16 +78,10 @@ public class ConfigurationFactory {
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
     private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
     private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
-    // private static final String FILE_CONFIG =
-    // "src/main/resources/application.properties";
-
-    static {
-        Config config = ConfigProviderResolver.instance().getBuilder().addDefaultSources()
-                .withSources(new CustomConfigSource()).addDiscoveredConverters().build();
-    }
 
     @Inject
     private Logger log;
+
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -106,19 +101,19 @@ public class ConfigurationFactory {
 
     @Inject
     @ConfigProperty(name = "api.protection.type")
-    private static String API_PROTECTION_TYPE;
+    private String API_PROTECTION_TYPE;
 
     @Inject
     @ConfigProperty(name = "api.client.id")
-    private static String API_CLIENT_ID;
+    private String API_CLIENT_ID;
 
     @Inject
     @ConfigProperty(name = "api.client.password")
-    private static String API_CLIENT_PASSWORD;
+    private String API_CLIENT_PASSWORD;
 
     @Inject
     @ConfigProperty(name = "api.approved.issuer")
-    private static List<String> API_APPROVED_ISSUER;
+    private List<String> API_APPROVED_ISSUER;
 
     @Produces
     @ApplicationScoped
@@ -140,19 +135,19 @@ public class ConfigurationFactory {
         return APP_PROPERTIES_FILE;
     }
 
-    public static String getApiProtectionType() {
+    public String getApiProtectionType() {
         return API_PROTECTION_TYPE;
     }
 
-    public static String getApiClientId() {
+    public String getApiClientId() {
         return API_CLIENT_ID;
     }
 
-    public static String getApiClientPassword() {
+    public String getApiClientPassword() {
         return API_CLIENT_PASSWORD;
     }
 
-    public static List<String> getApiApprovedIssuer() {
+    public List<String> getApiApprovedIssuer() {
         return API_APPROVED_ISSUER;
     }
 
@@ -186,7 +181,8 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        // createAuthorizationService(); //TBD???
+        System.out
+        .println("\n ****************************  ConfigurationFactory::create() - 4 - calling  installSecurityProvider()");
         installSecurityProvider();
 
     }
@@ -288,11 +284,15 @@ public class ConfigurationFactory {
     }
 
     private void installSecurityProvider() {
+        System.out
+        .println("\n ****************************  ConfigurationFactory::installSecurityProvider() - - Entry ");
         try {
             SecurityProviderUtility.installBCProvider();
         } catch (Exception ex) {
             log.error("Failed to install BC provider properly", ex);
         }
+        System.out
+        .println("\n ****************************  ConfigurationFactory::installSecurityProvider() - - Exit ");
     }
 
     @Produces
