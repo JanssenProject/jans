@@ -276,9 +276,19 @@ class JCA_CLI:
 
     def check_connection(self):
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
-        response = rest.GET('https://{}/jans-auth/restv1/token'.format(self.host))
+        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
+        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
+        headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+        response = rest.POST(
+                    url,
+                    headers=headers,
+                    post_params={"grant_type": "client_credentials"}
+                   )
+
         if response.status != 200:
             raise ValueError(self.colored_text("Unable to connect jans-auth server: {}".format(response.reason), error_color))
+
 
     def make_menu(self):
 
