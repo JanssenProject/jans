@@ -85,19 +85,3 @@ class Spanner:
         for db in self.instance.list_databases():
             databases.append(os.path.split(db.name)[1])
         return databases
-
-"""
-gcspanner = Spanner()
-
-#gcspanner.create_table('create table car (car_id INT64, make STRING(20), model STRING(20)) PRIMARY KEY(car_id)')
-
-gcspanner.create_table('create table ailem (doc_id INT64, name STRING(50)) PRIMARY KEY(doc_id)')
-print(gcspanner.get_tables())
-#print(gcspanner.get_databases())
-
-gcspanner.insert_data('ailem', ['doc_id', 'name'], [[1, 'Fatih'], [2, 'Melike'], [3, 'Dilek']])
-
-#gcspanner.update_data('ailem', ['doc_id', 'name'], [[4, 'Devrim']])
-
-print(gcspanner.exec_sql('select * from ailem'))
-"""
