@@ -1,6 +1,13 @@
 package io.jans.as.server.service.stat;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.cdi.event.StatEvent;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
+import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
@@ -8,15 +15,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.service.cdi.event.StatEvent;
-import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.Scheduled;
-import io.jans.service.timer.event.TimerEvent;
-import io.jans.service.timer.schedule.TimerSchedule;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,7 +57,7 @@ public class StatTimer {
 
     @Asynchronous
     public void process(@Observes @Scheduled StatEvent event) {
-        if (!appConfiguration.getStatEnabled()) {
+        if (!appConfiguration.getEnabledComponentTypes().contains(ComponentType.STAT)) {
             return;
         }
 
