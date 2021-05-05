@@ -9,9 +9,7 @@ package io.jans.configapi.configuration;
 import io.jans.configapi.auth.api.ApiProtectionService;
 import io.jans.configapi.auth.service.AuthorizationService;
 import io.jans.configapi.auth.service.OpenIdAuthorizationService;
-
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -85,14 +83,18 @@ public class AppInitializer {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("=================================================================");
-
+        System.out
+        .println("\n ****************************  AppInitializer::applicationInitialized() ");
         // System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED,
         // "true"); ???TBD Set in webapp
 
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
+        System.out
+        .println("\n ****************************  AppInitializer::applicationInitialized() - before calling createAuthorizationService()");
         this.createAuthorizationService();
-        // this.createMetricRegistry(); //TDB???
+        System.out
+        .println("\n ****************************  AppInitializer::applicationInitialized() - after calling createAuthorizationService()");
         log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
         log.info("=================================================================");
@@ -104,6 +106,7 @@ public class AppInitializer {
         log.info("===========  API APPLICATION STOPPED  ==========================");
         log.info("================================================================");
     }
+
 
     @Produces
     @ApplicationScoped
@@ -129,16 +132,24 @@ public class AppInitializer {
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
         log.info(
-                "=============  AppInitializer::createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
-                        + ConfigurationFactory.getApiProtectionType());
-        if (StringHelper.isEmpty(ConfigurationFactory.getApiProtectionType())) {
+                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType() = "
+                        + configurationFactory.getApiProtectionType());
+        System.out
+        .println("\n ****************************  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType() = "+ configurationFactory.getApiProtectionType());
+        if (StringHelper.isEmpty(configurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
         }
         try {
+            System.out
+            .println("\n ****************************  AppInitializer::createAuthorizationService() - 1 ");
             // Verify resources available
-            apiProtectionService.verifyResources(ConfigurationFactory.getApiProtectionType(),
-                    ConfigurationFactory.getApiClientId());
-            return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            apiProtectionService.verifyResources(configurationFactory.getApiProtectionType(),
+                    configurationFactory.getApiClientId());
+            System.out.println("\n ****************************  AppInitializer::createAuthorizationService() - 2 ");
+            //return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            AuthorizationService authorizationService =  authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            System.out.println("\n ****************************  AppInitializer::createAuthorizationService() - 3 - authorizationService  = "+authorizationService);
+            return authorizationService;
         } catch (Exception ex) {
             log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
