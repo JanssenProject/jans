@@ -65,7 +65,6 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
-    private Boolean statEnabled = true;
     private int statTimerIntervalInSeconds;
     private int statWebServiceIntervalLimitInSeconds;
 
@@ -984,15 +983,6 @@ public class AppConfiguration implements Configuration {
 
     public void setUserInfoEncryptionAlgValuesSupported(List<String> userInfoEncryptionAlgValuesSupported) {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
-    }
-
-    public Boolean getStatEnabled() {
-        if (statEnabled == null) statEnabled = true;
-        return statEnabled;
-    }
-
-    public void setStatEnabled(Boolean statEnabled) {
-        this.statEnabled = statEnabled;
     }
 
     public int getStatWebServiceIntervalLimitInSeconds() {
