@@ -54,6 +54,9 @@ public class AppInitializer {
     }
 
     @Inject
+    LoggerProducer logger;
+    
+    @Inject
     Logger log;
 
     @Inject

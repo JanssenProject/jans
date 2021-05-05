@@ -189,16 +189,10 @@
 			<!-- RestEasy -->
 			<!-- <dependency> <groupId>io.rest-assured</groupId> <artifactId>rest-assured</artifactId> 
 				<version>4.3.3</version> </dependency> -->
-<!-- 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-servlet-initializer</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency> -->
-<!-- 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-client</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency> -->
+			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-servlet-initializer</artifactId> 
+				<version>${resteasy.version}</version> </dependency> -->
+			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-client</artifactId> 
+				<version>${resteasy.version}</version> </dependency> -->
 
 
 			<!-- Jackson -->
@@ -370,9 +364,12 @@
 				<artifactId>json-patch</artifactId>
 				<version>1.9</version>
 			</dependency>
+			<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>javax.json</artifactId> 
+				<version>1.1.4</version> </dependency> -->
+
 			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>javax.json</artifactId>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
 				<version>1.1.4</version>
 			</dependency>
 
@@ -385,11 +382,8 @@
 			</dependency>
 
 			<!-- jetty -->
-			<dependency>
-				<groupId>org.glassfish.jersey.bundles</groupId>
-				<artifactId>jaxrs-ri</artifactId>
-				<version>2.29</version>
-			</dependency>
+			<!-- <dependency> <groupId>org.glassfish.jersey.bundles</groupId> <artifactId>jaxrs-ri</artifactId> 
+				<version>2.29</version> </dependency> -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-webapp</artifactId>
