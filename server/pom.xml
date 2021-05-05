@@ -26,11 +26,13 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-common</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.bundles</groupId>
-			<artifactId>jaxrs-ri</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.glassfish.jersey.bundles</groupId> <artifactId>jaxrs-ri</artifactId> 
+			</dependency> -->
 
+		<dependency>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
+		</dependency>
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>org.eclipse.microprofile.config</groupId>
@@ -134,7 +136,7 @@
 			<artifactId>jsr305</artifactId>
 		</dependency>
 
-	
+
 		<!-- Other -->
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
@@ -389,21 +391,12 @@
 					<groupId>javax.enterprise</groupId>
 					<artifactId>cdi-api</artifactId>
 				</dependency>
-				<!-- <dependency>
-				    <groupId>org.glassfish</groupId>
-				    <artifactId>jakarta.faces</artifactId>
-				</dependency> -->
+				<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.faces</artifactId> 
+					</dependency> -->
 
-				<dependency>
-					<groupId>org.glassfish.web</groupId>
-					<artifactId>el-impl</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>javax.el</groupId>
-							<artifactId>el-api</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
+				<!-- <dependency> <groupId>org.glassfish.web</groupId> <artifactId>el-impl</artifactId> 
+					<exclusions> <exclusion> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
+					</exclusion> </exclusions> </dependency> -->
 
 				<dependency>
 					<groupId>javax.el</groupId>
@@ -424,12 +417,12 @@
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
 
-		        <dependency>
-		            <groupId>org.jboss.spec.javax.ejb</groupId>
-		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
-		            <scope>provided</scope>
-		        </dependency>
- 
+				<dependency>
+					<groupId>org.jboss.spec.javax.ejb</groupId>
+					<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+					<scope>provided</scope>
+				</dependency>
+
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
@@ -456,14 +449,14 @@
 					<artifactId>jetty-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
-                <dependency>
-                    <groupId>com.nimbusds</groupId>
-                    <artifactId>nimbus-jose-jwt</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.bitbucket.b_c</groupId>
-                    <artifactId>jose4j</artifactId>
-                </dependency>
+				<dependency>
+					<groupId>com.nimbusds</groupId>
+					<artifactId>nimbus-jose-jwt</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.bitbucket.b_c</groupId>
+					<artifactId>jose4j</artifactId>
+				</dependency>
 			</dependencies>
 
 			<build>
@@ -478,8 +471,8 @@
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
-                                    <!--suppress UnresolvedMavenProperty -->
-                                    <Build-Branch>${git.branch}</Build-Branch>
+									<!--suppress UnresolvedMavenProperty -->
+									<Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
 
@@ -601,59 +594,23 @@
 				</property>
 			</activation>
 
-			<dependencies>
-				<!-- Remove after jans client update to same version -->
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-jaxrs</artifactId>
-					<version>3.0.21.Final</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-cdi</artifactId>
-					<version>3.0.21.Final</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-client</artifactId>
-					<version>3.0.21.Final</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-servlet-initializer</artifactId>
-					<version>3.0.21.Final</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
+			<!-- <dependencies> Remove after jans client update to same version <dependency> 
+				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-jaxrs</artifactId> 
+				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
+				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-cdi</artifactId> 
+				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
+				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-client</artifactId> 
+				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
+				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-servlet-initializer</artifactId> 
+				<version>3.0.21.Final</version> <scope>test</scope> </dependency> </dependencies> -->
 		</profile>
 
-		<profile>
-			<id>glassfish</id>
-			<activation>
-				<property>
-					<name>glassfish.enable</name>
-				</property>
-			</activation>
-
-			<dependencies>
-				<!-- Glassfish -->
-				<dependency>
-					<groupId>org.glassfish.main.extras</groupId>
-					<artifactId>glassfish-embedded-all</artifactId>
-					<version>4.1.2</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.arquillian.container</groupId>
-					<artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-					<version>1.0.0.Final</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
+		<!-- <profile> <id>glassfish</id> <activation> <property> <name>glassfish.enable</name> 
+			</property> </activation> <dependencies> Glassfish <dependency> <groupId>org.glassfish.main.extras</groupId> 
+			<artifactId>glassfish-embedded-all</artifactId> <version>4.1.2</version> 
+			<scope>test</scope> </dependency> <dependency> <groupId>org.jboss.arquillian.container</groupId> 
+			<artifactId>arquillian-glassfish-embedded-3.1</artifactId> <version>1.0.0.Final</version> 
+			<scope>test</scope> </dependency> </dependencies> </profile> -->
 
 	</profiles>
 </project>

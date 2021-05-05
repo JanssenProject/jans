@@ -11,7 +11,6 @@ import io.jans.configapi.util.ApiConstants;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Priorities;
@@ -33,10 +32,10 @@ import javax.ws.rs.ext.Provider;
 public class AuthorizationFilter implements ContainerRequestFilter {
 
     private static final String AUTHENTICATION_SCHEME = "Bearer";
-
+    
     @Inject
     Logger log;
-
+    
     @Context
     UriInfo info;
 
