@@ -39,6 +39,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
 
         self.create_tables(jans_schema_files)
+        self.create_subtables()
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
@@ -180,6 +181,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
+
+    def create_subtables(self):
+
+        sub_tables_fn = os.path.join(Config.static_rdbm_dir, 'sub_tables.json')
+        sub_tables = base.readJsonFile(sub_tables_fn)
 
         for subtable in sub_tables.get(Config.rdbm_type, {}):
             subtable_columns = []
