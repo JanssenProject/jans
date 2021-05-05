@@ -167,7 +167,6 @@ public class AppConfiguration implements Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private Boolean metricReporterEnabled;
     private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
@@ -1560,14 +1559,6 @@ public class AppConfiguration implements Configuration {
 
     public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
-    }
-
-    public Boolean getMetricReporterEnabled() {
-        return metricReporterEnabled;
-    }
-
-    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
-        this.metricReporterEnabled = metricReporterEnabled;
     }
 
     public String getPairwiseIdType() {
