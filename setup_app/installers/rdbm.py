@@ -40,10 +40,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.create_tables(jans_schema_files)
         self.import_ldif()
-
-        if not Config.rdbm_type == 'spanner':
-            self.create_indexes()
-
+        self.create_indexes()
         self.rdbmProperties()
 
     def local_install(self):
@@ -179,6 +176,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
 
+    def get_index_name(self, attrname):
+        return re.sub(r'[^0-9a-zA-Z\s]+','_', attrname)
+
+
     def create_indexes(self):
 
         indexes = []
@@ -186,68 +187,107 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
-        for tblCls in self.dbUtils.Base.classes.keys():
-            tblObj = self.dbUtils.Base.classes[tblCls]()
-            tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
+        if Config.rdbm_type == 'spanner':
+            tables = self.dbUtils.spanner.get_tables()
+            for tblCls in tables:
+                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
 
-            for attr in tblObj.__table__.columns:
-                if attr.name == 'doc_id':
-                    continue
-                ind_name = re.sub(r'[^0-9a-zA-Z\s]+','_', attr.name)
-                data_type = self.get_sql_col_type(attr, tblCls)
-                data_type = data_type.replace('VARCHAR', 'CHAR')
+                tbl_data = self.dbUtils.spanner.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
 
-                if isinstance(attr.type, self.dbUtils.json_dialects_instance):
+                for attr in tbl_data.get('fields', []):
+                    if attr['name'] == 'doc_id':
+                        continue
+                    attr_name = attr['name']
+                    ind_name = self.get_index_name(attr['name'])
+                    data_type = attr['type']
 
-                    if attr.name in tbl_fields:
-                        for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
-                            tmp_str = Template(ind_str)
-                            if Config.rdbm_type == 'mysql':
-                                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
+                    if data_type == 'ARRAY':
+                        #TODO: How to index for ARRAY types in spanner?
+                        pass
+
+                    elif attr_name in tbl_fields:
+                        sql_cmd = 'CREATE INDEX `{1}_{0}Idx` ON `{1}` (`{2}`)'.format(
+                                    ind_name,
+                                    tblCls,
+                                    attr_name
+                                )
+                        self.dbUtils.spanner.create_table(sql_cmd)
+
+                for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
+                    sql_cmd = 'CREATE INDEX `{0}_custom_Idx{1}` ON `{0}` (`{2}`)'.format(
+                                tblCls,
+                                i,
+                                custom_index
+                                )
+                    self.dbUtils.spanner.create_table(sql_cmd)
+
+
+        else:
+            for tblCls in self.dbUtils.Base.classes.keys():
+                tblObj = self.dbUtils.Base.classes[tblCls]()
+                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
+
+                for attr in tblObj.__table__.columns:
+                    if attr.name == 'doc_id':
+                        continue
+                    ind_name = self.get_index_name(attr.name)
+                    data_type = self.get_sql_col_type(attr, tblCls)
+                    data_type = data_type.replace('VARCHAR', 'CHAR')
+
+                    if isinstance(attr.type, self.dbUtils.json_dialects_instance):
+
+                        if attr.name in tbl_fields:
+                            for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                                tmp_str = Template(ind_str)
+                                if Config.rdbm_type == 'mysql':
+                                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
+                                            Config.rdbm_db,
+                                            tblCls,
+                                            ind_name,
+                                            i+1,
+                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            )
+                                    self.dbUtils.exec_rdbm_query(sql_cmd)
+                                elif Config.rdbm_type == 'pgsql':
+                                    sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
+                                            tblCls,
+                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            )
+                                    self.dbUtils.exec_rdbm_query(sql_cmd)
+
+
+                    elif attr.name in tbl_fields:
+                        if Config.rdbm_type == 'mysql':
+                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
                                         Config.rdbm_db,
                                         tblCls,
                                         ind_name,
-                                        i+1,
-                                        tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
-                                        )
-                            elif Config.rdbm_type == 'pgsql':
-                                sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
+                                        attr.name
+                                    )
+                            self.dbUtils.exec_rdbm_query(sql_cmd)
+                        elif Config.rdbm_type == 'pgsql':
+                            sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
                                         tblCls,
-                                        tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
-                                        )
+                                        attr.name
+                                    )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
 
-                elif attr.name in tbl_fields:
+
+                for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
                     if Config.rdbm_type == 'mysql':
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
-                                    Config.rdbm_db,
-                                    tblCls,
-                                    ind_name,
-                                    attr.name
-                                )
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
+                                        Config.rdbm_db,
+                                        tblCls,
+                                        'custom_{}'.format(i+1),
+                                        custom_index
+                                    )
+                        self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
                         sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
                                     tblCls,
-                                    attr.name
-                                )
-
-                    self.dbUtils.exec_rdbm_query(sql_cmd)
-
-            for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
-                if Config.rdbm_type == 'mysql':
-                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
-                                    Config.rdbm_db,
-                                    tblCls,
-                                    'custom_{}'.format(i+1),
                                     custom_index
-                                )
-                elif Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
-                                tblCls,
-                                custom_index
-                                )
-
-                self.dbUtils.exec_rdbm_query(sql_cmd)
+                                    )
+                        self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def import_ldif(self):
         ldif_files = []
