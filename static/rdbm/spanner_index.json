@@ -1,0 +1,17 @@
+{
+  "jansPerson": {
+    "fields": [
+      "givenName",
+      "sn"
+    ],
+    "custom": [
+    ]
+  },
+  "__common__": {
+    "JSON": [
+    ],
+    "fields": [
+      "inum"
+    ]
+  }
+}
