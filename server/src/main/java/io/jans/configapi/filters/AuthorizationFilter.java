@@ -11,6 +11,7 @@ import io.jans.configapi.util.ApiConstants;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Priorities;
@@ -49,8 +50,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private ResourceInfo resourceInfo;
 
     @Inject
-    AuthorizationService authorizationService;
-
+    AuthorizationService authorizationService;    
+    
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = "
