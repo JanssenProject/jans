@@ -6,31 +6,13 @@
 
 package io.jans.as.server.token.ws.rs;
 
-import java.util.Arrays;
-import java.util.Date;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
+import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -41,23 +23,7 @@ import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.AbstractAuthorizationGrant;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCodeGrant;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.ClientCredentialsGrant;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
@@ -79,6 +45,22 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Provides interface for token REST web services
@@ -453,10 +435,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                 }
             } else if (gt == io.jans.as.model.common.GrantType.CIBA) {
-                if (!appConfiguration.getCibaEnabled()) {
-                    log.warn("Trying to get CIBA token, however CIBA config is disabled.");
-                    return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Grant types are invalid."), oAuth2AuditLog);
-                }
+                errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
 
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
