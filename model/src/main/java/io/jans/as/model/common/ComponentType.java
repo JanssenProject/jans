@@ -27,6 +27,7 @@ public enum ComponentType {
     UMA("uma"),
     U2F("u2f"),
     DEVICE_AUTHZ("device_authz"),
+    METRIC("metric"),
     STAT("stat");
 
     private final String value;
