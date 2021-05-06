@@ -1,34 +1,31 @@
 package io.jans.as.server.servlet;
 
-import javax.servlet.http.HttpServlet;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.util.CertUtils;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.token.TokenService;
 
 /**
  * @author Javier Rojas Blum
@@ -44,7 +41,16 @@ public class AccountsServlet extends HttpServlet {
 	@Inject
 	private Logger log;
 
-	@Override 
+	@Inject
+    private TokenService tokenService;
+    
+    @Inject
+    private ClientService clientService;
+    
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+	
+    @Override 
 	public void init() throws ServletException
 	{
 		log.info("Inside init method of get Accounts Servlet  ***********************************************************************");
@@ -73,12 +79,14 @@ public class AccountsServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
 		log.info("Starting processRequest method of get Account Servlet***********************************************************************");
+		String authFromReq = null;
     	String xfapiinteractionid = null;
     	String tempaccess_token = null;
 		try (PrintWriter out = httpResponse.getWriter()) {
         	
         	httpResponse.setContentType("application/json");
-        	    	
+        	httpResponse.setCharacterEncoding("UTF-8");
+
         	xfapiinteractionid = servletRequest.getHeader("x-fapi-interaction-id");
         	tempaccess_token=servletRequest.getParameter("access_token"); 
         	
@@ -93,7 +101,7 @@ public class AccountsServlet extends HttpServlet {
         	if ((tempaccess_token !=null) && (xfapiinteractionid != null) ) {
 	            if (tempaccess_token.startsWith("Bearer")) {
 	            	httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "Bearer token in query is disallowed"); 
-	            	log.info("FAPI: Authorization Bearer Token is not allowed in query*********************************************");
+	            	log.info("FAPI ACcount: Authorization Bearer Token is not allowed in query*********************************************");
 	                //throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "FAPI: access_token in query is disallowed.");
 	            }
 	            else {
@@ -101,15 +109,84 @@ public class AccountsServlet extends HttpServlet {
 	            	log.info("FAPI: Authorization token is non-Bearer is not allowed in query*********************************************");
 	            }
         	}       	
-               	
-        	httpResponse.setCharacterEncoding("UTF-8");
+            
+        	
+        	String clientCertAsPem = servletRequest.getHeader("X-ClientCert");
+        	if (clientCertAsPem!=null) {
+            	log.info("FAPI Account: clientCertAsPem found*****************************************"+clientCertAsPem);
+            }
+            else	
+            	log.info("FAPI Account: Nooooooooo clientCertAsPem *****************************************");
+        	
+        	authFromReq = servletRequest.getHeader("Authorization");
+        	
+        	String clientDn=null;
+            Client cl=null;
+            clientDn=tokenService.getClientDn(authFromReq);
+        	String bearerToken=tokenService.getBearerToken(authFromReq);
+        	X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
+        	
+        	AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
+            if (authorizationGrant == null) {
+                log.error("FAPI Account: Authorization grant is null.*********************************************");
+            	httpResponse.sendError(httpResponse.SC_UNAUTHORIZED, "Authorization grant is null."); 
+
+                //Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Authorization grant is null.")).build();
+            }
+        	
+            if (cert == null) {
+                log.debug("FAPI Account: Failed to parse client certificate, client_id: {}.", cl.getClientId());
+            }
+            PublicKey publicKey = cert.getPublicKey();
+            byte[] encodedKey = publicKey.getEncoded();
+            
+        	
+        	if (clientDn != null) {
+        		log.info("FAPI Account: ClientDn from Authoirization(tokenService) *********************************************"+clientDn);
+        		cl=clientService.getClientByDn(clientDn);
+                JSONObject jsonWebKeys = new JSONObject(cl.getJwks());             
+                if (jsonWebKeys == null) {
+                    log.debug("FAPI Account:********************Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", cl.getClientId(), cl.getJwksUri(), cl.getJwks());
+                }
+
+                int matchctr=0;
+                final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
+                
+                try {  
+                	
+        	        for (JSONWebKey key : keySet.getKeys()) {
+        	            if (ArrayUtils.isEquals(encodedKey,
+        	                    cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
+        	            		matchctr+=1;
+        	                log.debug("FAPI  Account: ********************************Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
+        	                        cl.getClientId(), key.getKid());
+        	            }
+        	        }
+        	
+        	        if (matchctr==0){
+        	            log.error("FAPI Account: Client certificate does not match clientId. clientId: " + cl.getClientId()+"*********************************************");
+        	            
+        	            httpResponse.setStatus(401, "The resource owner or authorization server denied the request");
+        	            return;
+        	            //throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, servletRequest.getParameter("state"), "")).build());
+        	        }
+                }catch(Exception e) {
+                	log.info("FAPI Account: Exception while keymatching****************************************************************");
+                }
+        	}
+        	else
+        		log.info("FAPI Account: ClientDn from Authoirization(tokenService) is NULL*********************************************");
+
+        	
+        	
+        	
         	JSONObject jsonObj = new JSONObject();
         	JSONArray accounts= new JSONArray();
         	
         	jsonObj.put("Links", new JSONObject().put("self","/open-banking/v3.1/aisp/accounts"));
         	jsonObj.put("Meta", new JSONObject().put("TotalPages",1));
-        	accounts.put(getAccount("Account1","GBP", "352413", "05 May 2021", "08 Jun2021", "CurrentAccount", "Enabled","Personal"));
-        	accounts.put(getAccount("Account1","GBP", "4736325", "25 Mar 2021", "23 Apr 2021", "CurrentAccount", "Enabled","Personal"));
+        	accounts.put(getAccount("Account1","GBP", "352413", "05 May 2021", "08 Jun 2021", "CurrentAccount", "Enabled","Personal"));
+        	accounts.put(getAccount("Account2","GBP", "4736325", "25 Mar 2021", "23 Apr 2021", "CurrentAccount", "Enabled","Personal"));
         	
  		   	jsonObj.put("Data", new JSONObject().put("Account",accounts));
         	
