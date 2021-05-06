@@ -33,6 +33,7 @@
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
 		</dependency>
+		
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>org.eclipse.microprofile.config</groupId>
@@ -96,6 +97,12 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+		 <!-- RestEasy -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+        </dependency>
 
 		<!-- Logging -->
 		<dependency>
