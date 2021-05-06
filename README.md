@@ -12,7 +12,48 @@ Table of Contents
 
 # _Installation_
 
-**jans-cli** is automatically installed if you choose `jans-config-api` during installation 
+
+## Build `jans-cli.pyz` manually
+
+## Prerequisites
+
+1.  Python 3.6+.
+1.  Python `pip3` package.
+
+### Standard Python package
+
+1.  Create virtual environment and activate:
+
+    ```sh
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
+
+1.  Install the package:
+
+    ```
+    make install
+    ```
+
+    This command will install executable called `jans-cli` available in virtual environment `PATH`.
+
+### Python zipapp
+
+1.  Install [shiv](https://shiv.readthedocs.io/) using `pip3`:
+
+    ```sh
+    pip3 install shiv
+    ```
+
+1.  Install the package:
+
+    ```sh
+    make zipapp
+    ```
+
+    This command will generate executable called `jans-cli.pyz` under the same directory.
+    
+**jans-cli** is automatically installed if you choose `jans-config-api` during VM installation 
 of the [Janssen Server](https://github.com/JanssenProject/home).
 
 ![](docs/img/jans-config-api.png)
