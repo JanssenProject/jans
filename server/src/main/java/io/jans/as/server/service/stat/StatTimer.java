@@ -57,7 +57,7 @@ public class StatTimer {
 
     @Asynchronous
     public void process(@Observes @Scheduled StatEvent event) {
-        if (!appConfiguration.getEnabledComponentTypes().contains(ComponentType.STAT)) {
+        if (!appConfiguration.isEnabledComponent(ComponentType.STAT)) {
             return;
         }
 
