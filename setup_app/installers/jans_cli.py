@@ -63,7 +63,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         if not 'debug' in config['DEFAULT']:
             config['DEFAULT']['debug'] = 'false'
-        
+
         if not 'jans_host' in config['DEFAULT']:
             config['DEFAULT']['jans_host'] = Config.hostname
 
@@ -74,7 +74,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT']['jca_client_id'] = Config.jca_client_id
             config['DEFAULT']['jca_client_secret_enc'] = Config.jca_client_encoded_pw
 
-        if Config.installScimServer:    
+        if Config.get('installScimServer'):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
