@@ -41,12 +41,23 @@ parser.add_argument('-u', help="Use already downloaded components", action='stor
 parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
 parser.add_argument('-uninstall', help="Uninstall Jans server and removes all files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
+parser.add_argument('-n', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 
 argsp = parser.parse_args()
 
-
 ssl._create_default_https_context = ssl._create_unverified_context
+
+try:
+    from distutils import dist
+except:
+    if not argsp.n:
+        install_dist = input('python3-disutils package is needed. Install now? [Y/n] ')
+        if install_dist.lower().startswith('n'):
+            print("Can't continue...")
+            sys.exit()
+    os.system('apt install -y python3-distutils')
+
 
 def download(url, target_fn):
     dst = target_fn if target_fn.startswith('/') else os.path.join(app_dir, target_fn)
