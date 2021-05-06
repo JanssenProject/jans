@@ -295,6 +295,14 @@ public class AppConfiguration implements Configuration {
         return ComponentType.fromValues(getEnabledComponents());
     }
 
+    public boolean isEnabledComponent(ComponentType componentType) {
+        final Set<ComponentType> enabledComponentTypes = getEnabledComponentTypes();
+        if (enabledComponentTypes.isEmpty())
+            return true;
+
+        return enabledComponentTypes.contains(componentType);
+    }
+
     public List<String> getEnabledComponents() {
         if (enabledComponents == null) enabledComponents = new ArrayList<>();
         return enabledComponents;
