@@ -27,8 +27,8 @@ config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
-from cli.pylib.tabulate.tabulate import tabulate
-from cli.pylib import jwt
+from pylib.tabulate.tabulate import tabulate
+from pylib import jwt
 
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
