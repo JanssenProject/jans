@@ -11,6 +11,8 @@ from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
+from pathlib import Path
+
 
 class JansCliInstaller(BaseInstaller, SetupUtils):
 
@@ -21,8 +23,12 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'installJansCli'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.OPTONAL
+        home_dir = Path.home()
+        config_dir = home_dir.joinpath('.config')
+        config_dir.mkdir(parents=True, exist_ok=True)
+
         self.jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
-        self.config_ini_fn = os.path.join(Config.jansOptFolder, 'jans-cli/config.ini')
+        self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
 
         if not base.snap:
             self.register_progess()
@@ -38,38 +44,39 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         #extract jans-cli tgz archieve
         cli_tar = tarfile.open(self.source_files[0][0])
         par_dir = cli_tar.firstmember.name
-        cli_tar.extractall(Config.jansOptFolder)
-        shutil.move(os.path.join(Config.jansOptFolder, par_dir), self.jans_cli_install_dir)
+        tmp_dir = '/tmp/' + os.urandom(5).hex()
+        cli_tar.extractall(tmp_dir)
+        shutil.move(os.path.join(tmp_dir, par_dir, 'cli'), self.jans_cli_install_dir)
         cli_tar.close()
-
-        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
+        shutil.rmtree(tmp_dir)
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
+        self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
+        self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config_cli.py')])
 
     def configure(self, options={}):
         config = configparser.ConfigParser()
-        if os.path.exists(self.config_ini_fn):
-            config.read(self.config_ini_fn)
-        
+        if self.config_ini_fn.exists():
+            config.read_file(self.config_ini_fn.open())
+
         if not 'DEFAULT' in config:
             config['DEFAULT'] = {}
-        
+
         if not 'debug' in config['DEFAULT']:
             config['DEFAULT']['debug'] = 'false'
         
         if not 'jans_host' in config['DEFAULT']:
             config['DEFAULT']['jans_host'] = Config.hostname
-        
+
         for key_ in options:
             config['DEFAULT'][key_] = options[key_]
 
         if Config.installConfigApi:
             config['DEFAULT']['jca_client_id'] = Config.jca_client_id
             config['DEFAULT']['jca_client_secret_enc'] = Config.jca_client_encoded_pw
-            
+
         if Config.installScimServer:    
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
-        with open(self.config_ini_fn, 'w') as f:
-            config.write(f)
+        config.write(self.config_ini_fn.open('w'))
 
-        
