@@ -47,11 +47,11 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     include_package_data=True,
-    # The below should be removed in favor of entrypoints
-    scripts=['cli/config-cli.py'],
-    #entry_points={
-    #    "console_scripts": [
-    #        "jans-cli=cli.config-cli:",
-    #    ],
-    #},
+
+    entry_points={
+        "console_scripts": [
+            "config-cli=cli.config_cli:main",
+            "scim-cli=cli.config_cli:main",
+        ],
+    },
 )
