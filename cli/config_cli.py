@@ -16,9 +16,14 @@ import code
 import traceback
 
 import pprint
+from pathlib import Path
 from urllib.parse import urlencode
 from collections import OrderedDict
 
+home_dir = Path.home()
+config_dir = home_dir.joinpath('.config')
+config_dir.mkdir(parents=True, exist_ok=True)
+config_ini_fn = config_dir.joinpath('jans-cli.ini')
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
@@ -113,9 +118,8 @@ if not (host and client_id and client_secret):
     debug_log_file = args.debug_log_file
 
 if not (host and client_id and client_secret):
-    config_ini_fn = os.path.join(cur_dir, 'config.ini')
-    if os.path.exists(config_ini_fn):
-        config.read(config_ini_fn)
+    if config_ini_fn.exists():
+        config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
         client_id = config['DEFAULT'][my_op_mode + '_client_id']
         if config['DEFAULT'].get(my_op_mode + '_client_secret'):
@@ -131,11 +135,12 @@ if not (host and client_id and client_secret):
                              'jca_client_secret': 'client secret for your jans config api client',
                              'scim_client_id': 'your jans scim client id',
                              'scim_client_secret': 'client secret for your jans scim client'}
-        with open(config_ini_fn, 'w') as configfile:
-            config.write(configfile)
+
+        config_ini_fn.write_text(configfile)
 
         print(
-            "Pelase fill config.ini or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run")
+            "Pelase fill {} or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run".format(config_ini_fn)
+            )
         sys.exit()
 
 
@@ -1692,25 +1697,31 @@ class JCA_CLI:
         self.display_menu(self.menu)
 
 
-cliObject = JCA_CLI(host, client_id, client_secret)
+def main():
 
-try:
-    cliObject.check_connection()
-    if not (args.operation_id or args.info or args.schema):
-        # reset previous color
-        print('\033[0m', end='')
-        cliObject.runApp()
-    else:
-        print()
-        if args.info:
-            cliObject.help_for(args.info)
-        elif args.schema:
-            cliObject.get_sample_schema(args.schema)
-        elif args.operation_id:
-            cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-        print()
-except Exception as e:
-    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
-    with open(error_log_file, 'a') as w:
-        traceback.print_exc(file=w)
-    print("Error is logged to {}".format(error_log_file))
+    cliObject = JCA_CLI(host, client_id, client_secret)
+
+    try:
+        cliObject.check_connection()
+        if not (args.operation_id or args.info or args.schema):
+            # reset previous color
+            print('\033[0m', end='')
+            cliObject.runApp()
+        else:
+            print()
+            if args.info:
+                cliObject.help_for(args.info)
+            elif args.schema:
+                cliObject.get_sample_schema(args.schema)
+            elif args.operation_id:
+                cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+            print()
+    except Exception as e:
+        print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
+        with open(error_log_file, 'a') as w:
+            traceback.print_exc(file=w)
+        print("Error is logged to {}".format(error_log_file))
+
+
+if __name__ == "__main__":
+    main()
