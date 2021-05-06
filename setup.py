@@ -33,6 +33,7 @@ setup(
     description="",
     long_description=__doc__,
     packages=find_packages(),
+    package_data={'': ['*.yaml']},
     zip_safe=False,
     install_requires=[
         "ruamel.yaml>=0.16.5"
