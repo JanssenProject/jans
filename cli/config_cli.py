@@ -136,7 +136,7 @@ if not (host and client_id and client_secret):
                              'scim_client_id': 'your jans scim client id',
                              'scim_client_secret': 'client secret for your jans scim client'}
 
-        config_ini_fn.write_text(configfile)
+        config.write(config_ini_fn.open('w'))
 
         print(
             "Pelase fill {} or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run".format(config_ini_fn)
