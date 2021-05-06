@@ -81,8 +81,7 @@ public class AccountsServlet extends HttpServlet {
         String tempaccess_token = null;
         try (PrintWriter out = httpResponse.getWriter()) {
 
-            httpResponse.setContentType("application/json");
-            httpResponse.setCharacterEncoding("UTF-8");
+            httpResponse.setContentType("application/json;charset=UTF-8");
 
             xfapiinteractionid = servletRequest.getHeader("x-fapi-interaction-id");
             tempaccess_token = servletRequest.getParameter("access_token");
