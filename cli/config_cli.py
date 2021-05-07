@@ -105,9 +105,8 @@ parser.add_argument("--key-file", help="Path to SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
-parser.add_argument("--patch-remove", help="Colon delimited key:value pair for remove patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
-parser.add_argument("--patch-data", help="Colon delimited key:value pair for patch operation. For example loggingLevel:DEBUG")
+parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
@@ -1620,11 +1619,14 @@ class JCA_CLI:
                 pdata = args.patch_replace
 
             if pop:
-                if pdata.count(':') != 1:
+                if pop != 'remove' and pdata.count(':') != 1:
                     self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
 
-                ppath, pval = pdata.split(':')
-                data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
+                if pop != 'remove':
+                    ppath, pval = pdata.split(':')
+                    data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
+                else:
+                    data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
 
         if (schema and not data_fn) and not data:
             self.exit_with_error("Please provide schema with --data argument")
