@@ -248,7 +248,8 @@ class Client(object):
             self.client_secret = client_secret
         if front_channel_logout_uri is not None:
             self.front_channel_logout_uri = front_channel_logout_uri
-        self.front_channel_logout_session_required = front_channel_logout_session_required
+        if front_channel_logout_session_required is not None:
+            self.front_channel_logout_session_required = front_channel_logout_session_required
         if registration_access_token is not None:
             self.registration_access_token = registration_access_token
         if client_id_issued_at is not None:
@@ -266,7 +267,8 @@ class Client(object):
         self.application_type = application_type
         if contacts is not None:
             self.contacts = contacts
-        self.client_name = client_name
+        if client_name is not None:
+            self.client_name = client_name
         if id_token_token_binding_cnf is not None:
             self.id_token_token_binding_cnf = id_token_token_binding_cnf
         if logo_uri is not None:
@@ -283,7 +285,8 @@ class Client(object):
             self.jwks = jwks
         if sector_identifier_uri is not None:
             self.sector_identifier_uri = sector_identifier_uri
-        self.subject_type = subject_type
+        if subject_type is not None:
+            self.subject_type = subject_type
         if id_token_signed_response_alg is not None:
             self.id_token_signed_response_alg = id_token_signed_response_alg
         if id_token_encrypted_response_alg is not None:
@@ -478,8 +481,6 @@ class Client(object):
         :param front_channel_logout_session_required: The front_channel_logout_session_required of this Client.  # noqa: E501
         :type: bool
         """
-        if front_channel_logout_session_required is None:
-            raise ValueError("Invalid value for `front_channel_logout_session_required`, must not be `None`")  # noqa: E501
 
         self._front_channel_logout_session_required = front_channel_logout_session_required
 
@@ -726,8 +727,6 @@ class Client(object):
         :param client_name: The client_name of this Client.  # noqa: E501
         :type: str
         """
-        if client_name is None:
-            raise ValueError("Invalid value for `client_name`, must not be `None`")  # noqa: E501
 
         self._client_name = client_name
 
@@ -935,8 +934,6 @@ class Client(object):
         :param subject_type: The subject_type of this Client.  # noqa: E501
         :type: str
         """
-        if subject_type is None:
-            raise ValueError("Invalid value for `subject_type`, must not be `None`")  # noqa: E501
         allowed_values = ["pairwise", "public"]  # noqa: E501
         if subject_type not in allowed_values:
             raise ValueError(
@@ -1227,7 +1224,7 @@ class Client(object):
         :param token_endpoint_auth_method: The token_endpoint_auth_method of this Client.  # noqa: E501
         :type: str
         """
-        allowed_values = ["client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "none"]  # noqa: E501
+        allowed_values = ["client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "none"]  # noqa: E501
         if token_endpoint_auth_method not in allowed_values:
             raise ValueError(
                 "Invalid value for `token_endpoint_auth_method` ({0}), must be one of {1}"  # noqa: E501

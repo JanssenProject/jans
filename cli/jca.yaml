@@ -3226,6 +3226,8 @@ components:
               - PS256
               - PS384
               - PS512
+              - RS384
+              - RS256
         backchannelUserCodeParameterSupported:
           type: boolean
           description: Backchannel User Code Parameter Supported

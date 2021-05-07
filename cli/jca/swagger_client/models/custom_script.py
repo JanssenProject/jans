@@ -304,7 +304,7 @@ class CustomScript(object):
         """
         if programming_language is None:
             raise ValueError("Invalid value for `programming_language`, must not be `None`")  # noqa: E501
-        allowed_values = ["PYTHON", "JAVASCRIPT"]  # noqa: E501
+        allowed_values = ["PYTHON", "JAVA_SCRIPT"]  # noqa: E501
         if programming_language not in allowed_values:
             raise ValueError(
                 "Invalid value for `programming_language` ({0}), must be one of {1}"  # noqa: E501

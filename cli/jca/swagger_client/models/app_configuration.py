@@ -224,14 +224,20 @@ class AppConfiguration(object):
         'http_logging_exlude_paths': 'list[str]',
         'external_logger_configuration': 'str',
         'dcr_signature_validation_enabled': 'bool',
+        'dcr_signature_validation_shared_secret': 'str',
         'dcr_signature_validation_software_statement_jwks_uri_claim': 'str',
         'dcr_signature_validation_software_statement_jwks_claim': 'str',
         'dcr_signature_validation_jwks': 'str',
         'dcr_signature_validation_jwks_uri': 'str',
         'dcr_authorization_with_client_credentials': 'bool',
+        'dcr_skip_signature_validation': 'bool',
         'stat_enabled': 'bool',
         'stat_timer_interval_in_seconds': 'int',
-        'stat_web_service_interval_limit_in_seconds': 'int'
+        'stat_web_service_interval_limit_in_seconds': 'int',
+        'key_algs_allowed_for_generation': 'list[str]',
+        'discovery_allowed_keys': 'list[str]',
+        'allow_id_token_without_implicit_grant_types': 'bool',
+        'key_sign_with_same_key_but_diff_alg': 'bool'
     }
 
     attribute_map = {
@@ -431,17 +437,23 @@ class AppConfiguration(object):
         'http_logging_exlude_paths': 'httpLoggingExludePaths',
         'external_logger_configuration': 'externalLoggerConfiguration',
         'dcr_signature_validation_enabled': 'dcrSignatureValidationEnabled',
+        'dcr_signature_validation_shared_secret': 'dcrSignatureValidationSharedSecret',
         'dcr_signature_validation_software_statement_jwks_uri_claim': 'dcrSignatureValidationSoftwareStatementJwksURIClaim',
         'dcr_signature_validation_software_statement_jwks_claim': 'dcrSignatureValidationSoftwareStatementJwksClaim',
         'dcr_signature_validation_jwks': 'dcrSignatureValidationJwks',
         'dcr_signature_validation_jwks_uri': 'dcrSignatureValidationJwksUri',
         'dcr_authorization_with_client_credentials': 'dcrAuthorizationWithClientCredentials',
+        'dcr_skip_signature_validation': 'dcrSkipSignatureValidation',
         'stat_enabled': 'statEnabled',
         'stat_timer_interval_in_seconds': 'statTimerIntervalInSeconds',
-        'stat_web_service_interval_limit_in_seconds': 'statWebServiceIntervalLimitInSeconds'
+        'stat_web_service_interval_limit_in_seconds': 'statWebServiceIntervalLimitInSeconds',
+        'key_algs_allowed_for_generation': 'keyAlgsAllowedForGeneration',
+        'discovery_allowed_keys': 'discoveryAllowedKeys',
+        'allow_id_token_without_implicit_grant_types': 'allowIdTokenWithoutImplicitGrantTypes',
+        'key_sign_with_same_key_but_diff_alg': 'keySignWithSameKeyButDiffAlg'
     }
 
-    def __init__(self, issuer=None, base_endpoint=None, authorization_endpoint=None, token_endpoint=None, token_revocation_endpoint=None, user_info_endpoint=None, client_info_endpoint=None, check_session_i_frame=None, end_session_endpoint=None, jwks_uri=None, registration_endpoint=None, open_id_discovery_endpoint=None, open_id_configuration_endpoint=None, id_generation_endpoint=None, introspection_endpoint=None, device_authz_endpoint=None, session_as_jwt=None, sector_identifier_cache_lifetime_in_minutes=None, uma_configuration_endpoint=None, uma_rpt_as_jwt=None, uma_rpt_lifetime=None, uma_ticket_lifetime=None, uma_pct_lifetime=None, uma_resource_lifetime=None, uma_add_scopes_automatically=None, uma_validate_claim_token=None, uma_grant_access_if_no_policies=None, uma_restrict_resource_to_associated_client=None, spontaneous_scope_lifetime=None, openid_sub_attribute=None, response_types_supported=None, response_modes_supported=None, grant_types_supported=None, subject_types_supported=None, default_subject_type=None, user_info_signing_alg_values_supported=None, user_info_encryption_alg_values_supported=None, user_info_encryption_enc_values_supported=None, id_token_signing_alg_values_supported=None, id_token_encryption_alg_values_supported=None, id_token_encryption_enc_values_supported=None, request_object_signing_alg_values_supported=None, request_object_encryption_alg_values_supported=None, request_object_encryption_enc_values_supported=None, token_endpoint_auth_methods_supported=None, token_endpoint_auth_signing_alg_values_supported=None, dynamic_registration_custom_attributes=None, display_values_supported=None, claim_types_supported=None, jwks_algorithms_supported=None, service_documentation=None, claims_locales_supported=None, id_token_token_binding_cnf_values_supported=None, ui_locales_supported=None, claims_parameter_supported=None, request_parameter_supported=None, request_uri_parameter_supported=None, request_uri_hash_verification_enabled=None, require_request_uri_registration=None, op_policy_uri=None, op_tos_uri=None, authorization_code_lifetime=None, refresh_token_lifetime=None, id_token_lifetime=None, id_token_filter_claims_based_on_access_token=None, access_token_lifetime=None, clean_service_interval=None, clean_service_batch_chunk_size=None, clean_service_base_dns=None, key_regeneration_enabled=None, key_regeneration_interval=None, default_signature_algorithm=None, ox_open_id_connect_version=None, ox_id=None, dynamic_registration_enabled=None, dynamic_registration_expiration_time=None, dynamic_registration_persist_client_authorizations=None, trusted_client_enabled=None, skip_authorization_for_open_id_scope_and_pairwise_id=None, dynamic_registration_scopes_param_enabled=None, dynamic_registration_password_grant_type_enabled=None, dynamic_registration_allowed_password_grant_scopes=None, dynamic_registration_custom_object_class=None, person_custom_object_class_list=None, persist_id_token_in_ldap=None, persist_refresh_token_in_ldap=None, allow_post_logout_redirect_without_validation=None, invalidate_session_cookies_after_authorization_flow=None, return_client_secret_on_read=None, reject_jwt_with_none_alg=None, expiration_notificator_enabled=None, use_nested_jwt_during_encryption=None, expiration_notificator_map_size_limit=None, expiration_notificator_interval_in_seconds=None, authentication_filters_enabled=None, client_authentication_filters_enabled=None, client_reg_default_to_code_flow_with_refresh=None, authentication_filters=None, client_authentication_filters=None, cors_configuration_filters=None, session_id_unused_lifetime=None, session_id_unauthenticated_unused_lifetime=None, session_id_enabled=None, session_id_persist_on_prompt_none=None, session_id_request_parameter_enabled=None, change_session_id_on_authentication=None, session_id_persist_in_cache=None, session_id_lifetime=None, server_session_id_lifetime=None, configuration_update_interval=None, enable_client_grant_type_update=None, dynamic_grant_type_default=None, css_location=None, js_location=None, img_location=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, metric_reporter_enabled=None, pairwise_id_type=None, pairwise_calculation_key=None, pairwise_calculation_salt=None, share_subject_id_between_clients_with_same_sector_id=None, web_keys_storage=None, dn_name=None, key_store_file=None, key_store_secret=None, key_selection_strategy=None, ox_eleven_test_mode_token=None, ox_eleven_generate_key_endpoint=None, ox_eleven_sign_endpoint=None, ox_eleven_verify_signature_endpoint=None, ox_eleven_delete_key_endpoint=None, introspection_access_token_must_have_uma_protection_scope=None, end_session_with_access_token=None, cookie_domain=None, enabled_o_auth_audit_logging=None, jms_broker_uri_set=None, jms_user_name=None, jms_password=None, client_white_list=None, client_black_list=None, legacy_id_token_claims=None, custom_headers_with_authorization_response=None, front_channel_logout_session_supported=None, logging_level=None, logging_layout=None, update_user_last_logon_time=None, update_client_access_time=None, log_client_id_on_client_authentication=None, log_client_name_on_client_authentication=None, disable_jdk_logger=None, authorization_request_custom_allowed_parameters=None, legacy_dynamic_registration_scope_param=None, openid_scope_backward_compatibility=None, disable_u2f_endpoint=None, use_local_cache=None, fapi_compatibility=None, force_id_token_hint_precense=None, force_offline_access_scope_to_enable_refresh_token=None, error_reason_enabled=None, remove_refresh_tokens_for_client_on_logout=None, skip_refresh_token_during_refreshing=None, refresh_token_extend_lifetime_on_rotation=None, consent_gathering_script_backward_compatibility=None, introspection_script_backward_compatibility=None, introspection_response_scopes_backward_compatibility=None, software_statement_validation_type=None, software_statement_validation_claim_name=None, authentication_protection_configuration=None, error_handling_method=None, keep_authenticator_attributes_on_acr_change=None, device_authz_request_expires_in=None, device_authz_token_poll_interval=None, device_authz_response_type_to_process_authz=None, backchannel_client_id=None, backchannel_redirect_uri=None, backchannel_authentication_endpoint=None, backchannel_device_registration_endpoint=None, backchannel_token_delivery_modes_supported=None, backchannel_authentication_request_signing_alg_values_supported=None, backchannel_user_code_parameter_supported=None, backchannel_binding_message_pattern=None, backchannel_authentication_response_expires_in=None, backchannel_authentication_response_interval=None, backchannel_login_hint_claims=None, ciba_end_user_notification_config=None, backchannel_requests_processor_job_interval_sec=None, backchannel_requests_processor_job_chunk_size=None, ciba_grant_life_extra_time_sec=None, ciba_max_expiration_time_allowed_sec=None, ciba_enabled=None, discovery_cache_lifetime_in_minutes=None, http_logging_enabled=None, http_logging_exlude_paths=None, external_logger_configuration=None, dcr_signature_validation_enabled=None, dcr_signature_validation_software_statement_jwks_uri_claim=None, dcr_signature_validation_software_statement_jwks_claim=None, dcr_signature_validation_jwks=None, dcr_signature_validation_jwks_uri=None, dcr_authorization_with_client_credentials=None, stat_enabled=None, stat_timer_interval_in_seconds=None, stat_web_service_interval_limit_in_seconds=None):  # noqa: E501
+    def __init__(self, issuer=None, base_endpoint=None, authorization_endpoint=None, token_endpoint=None, token_revocation_endpoint=None, user_info_endpoint=None, client_info_endpoint=None, check_session_i_frame=None, end_session_endpoint=None, jwks_uri=None, registration_endpoint=None, open_id_discovery_endpoint=None, open_id_configuration_endpoint=None, id_generation_endpoint=None, introspection_endpoint=None, device_authz_endpoint=None, session_as_jwt=None, sector_identifier_cache_lifetime_in_minutes=None, uma_configuration_endpoint=None, uma_rpt_as_jwt=None, uma_rpt_lifetime=None, uma_ticket_lifetime=None, uma_pct_lifetime=None, uma_resource_lifetime=None, uma_add_scopes_automatically=None, uma_validate_claim_token=None, uma_grant_access_if_no_policies=None, uma_restrict_resource_to_associated_client=None, spontaneous_scope_lifetime=None, openid_sub_attribute=None, response_types_supported=None, response_modes_supported=None, grant_types_supported=None, subject_types_supported=None, default_subject_type=None, user_info_signing_alg_values_supported=None, user_info_encryption_alg_values_supported=None, user_info_encryption_enc_values_supported=None, id_token_signing_alg_values_supported=None, id_token_encryption_alg_values_supported=None, id_token_encryption_enc_values_supported=None, request_object_signing_alg_values_supported=None, request_object_encryption_alg_values_supported=None, request_object_encryption_enc_values_supported=None, token_endpoint_auth_methods_supported=None, token_endpoint_auth_signing_alg_values_supported=None, dynamic_registration_custom_attributes=None, display_values_supported=None, claim_types_supported=None, jwks_algorithms_supported=None, service_documentation=None, claims_locales_supported=None, id_token_token_binding_cnf_values_supported=None, ui_locales_supported=None, claims_parameter_supported=None, request_parameter_supported=None, request_uri_parameter_supported=None, request_uri_hash_verification_enabled=None, require_request_uri_registration=None, op_policy_uri=None, op_tos_uri=None, authorization_code_lifetime=None, refresh_token_lifetime=None, id_token_lifetime=None, id_token_filter_claims_based_on_access_token=None, access_token_lifetime=None, clean_service_interval=None, clean_service_batch_chunk_size=None, clean_service_base_dns=None, key_regeneration_enabled=None, key_regeneration_interval=None, default_signature_algorithm=None, ox_open_id_connect_version=None, ox_id=None, dynamic_registration_enabled=None, dynamic_registration_expiration_time=None, dynamic_registration_persist_client_authorizations=None, trusted_client_enabled=None, skip_authorization_for_open_id_scope_and_pairwise_id=None, dynamic_registration_scopes_param_enabled=None, dynamic_registration_password_grant_type_enabled=None, dynamic_registration_allowed_password_grant_scopes=None, dynamic_registration_custom_object_class=None, person_custom_object_class_list=None, persist_id_token_in_ldap=None, persist_refresh_token_in_ldap=None, allow_post_logout_redirect_without_validation=None, invalidate_session_cookies_after_authorization_flow=None, return_client_secret_on_read=None, reject_jwt_with_none_alg=None, expiration_notificator_enabled=None, use_nested_jwt_during_encryption=None, expiration_notificator_map_size_limit=None, expiration_notificator_interval_in_seconds=None, authentication_filters_enabled=None, client_authentication_filters_enabled=None, client_reg_default_to_code_flow_with_refresh=None, authentication_filters=None, client_authentication_filters=None, cors_configuration_filters=None, session_id_unused_lifetime=None, session_id_unauthenticated_unused_lifetime=None, session_id_enabled=None, session_id_persist_on_prompt_none=None, session_id_request_parameter_enabled=None, change_session_id_on_authentication=None, session_id_persist_in_cache=None, session_id_lifetime=None, server_session_id_lifetime=None, configuration_update_interval=None, enable_client_grant_type_update=None, dynamic_grant_type_default=None, css_location=None, js_location=None, img_location=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, metric_reporter_enabled=None, pairwise_id_type=None, pairwise_calculation_key=None, pairwise_calculation_salt=None, share_subject_id_between_clients_with_same_sector_id=None, web_keys_storage=None, dn_name=None, key_store_file=None, key_store_secret=None, key_selection_strategy=None, ox_eleven_test_mode_token=None, ox_eleven_generate_key_endpoint=None, ox_eleven_sign_endpoint=None, ox_eleven_verify_signature_endpoint=None, ox_eleven_delete_key_endpoint=None, introspection_access_token_must_have_uma_protection_scope=None, end_session_with_access_token=None, cookie_domain=None, enabled_o_auth_audit_logging=None, jms_broker_uri_set=None, jms_user_name=None, jms_password=None, client_white_list=None, client_black_list=None, legacy_id_token_claims=None, custom_headers_with_authorization_response=None, front_channel_logout_session_supported=None, logging_level=None, logging_layout=None, update_user_last_logon_time=None, update_client_access_time=None, log_client_id_on_client_authentication=None, log_client_name_on_client_authentication=None, disable_jdk_logger=None, authorization_request_custom_allowed_parameters=None, legacy_dynamic_registration_scope_param=None, openid_scope_backward_compatibility=None, disable_u2f_endpoint=None, use_local_cache=None, fapi_compatibility=None, force_id_token_hint_precense=None, force_offline_access_scope_to_enable_refresh_token=None, error_reason_enabled=None, remove_refresh_tokens_for_client_on_logout=None, skip_refresh_token_during_refreshing=None, refresh_token_extend_lifetime_on_rotation=None, consent_gathering_script_backward_compatibility=None, introspection_script_backward_compatibility=None, introspection_response_scopes_backward_compatibility=None, software_statement_validation_type=None, software_statement_validation_claim_name=None, authentication_protection_configuration=None, error_handling_method=None, keep_authenticator_attributes_on_acr_change=None, device_authz_request_expires_in=None, device_authz_token_poll_interval=None, device_authz_response_type_to_process_authz=None, backchannel_client_id=None, backchannel_redirect_uri=None, backchannel_authentication_endpoint=None, backchannel_device_registration_endpoint=None, backchannel_token_delivery_modes_supported=None, backchannel_authentication_request_signing_alg_values_supported=None, backchannel_user_code_parameter_supported=None, backchannel_binding_message_pattern=None, backchannel_authentication_response_expires_in=None, backchannel_authentication_response_interval=None, backchannel_login_hint_claims=None, ciba_end_user_notification_config=None, backchannel_requests_processor_job_interval_sec=None, backchannel_requests_processor_job_chunk_size=None, ciba_grant_life_extra_time_sec=None, ciba_max_expiration_time_allowed_sec=None, ciba_enabled=None, discovery_cache_lifetime_in_minutes=None, http_logging_enabled=None, http_logging_exlude_paths=None, external_logger_configuration=None, dcr_signature_validation_enabled=None, dcr_signature_validation_shared_secret=None, dcr_signature_validation_software_statement_jwks_uri_claim=None, dcr_signature_validation_software_statement_jwks_claim=None, dcr_signature_validation_jwks=None, dcr_signature_validation_jwks_uri=None, dcr_authorization_with_client_credentials=None, dcr_skip_signature_validation=None, stat_enabled=None, stat_timer_interval_in_seconds=None, stat_web_service_interval_limit_in_seconds=None, key_algs_allowed_for_generation=None, discovery_allowed_keys=None, allow_id_token_without_implicit_grant_types=None, key_sign_with_same_key_but_diff_alg=None):  # noqa: E501
         """AppConfiguration - a model defined in Swagger"""  # noqa: E501
         self._issuer = None
         self._base_endpoint = None
@@ -639,14 +651,20 @@ class AppConfiguration(object):
         self._http_logging_exlude_paths = None
         self._external_logger_configuration = None
         self._dcr_signature_validation_enabled = None
+        self._dcr_signature_validation_shared_secret = None
         self._dcr_signature_validation_software_statement_jwks_uri_claim = None
         self._dcr_signature_validation_software_statement_jwks_claim = None
         self._dcr_signature_validation_jwks = None
         self._dcr_signature_validation_jwks_uri = None
         self._dcr_authorization_with_client_credentials = None
+        self._dcr_skip_signature_validation = None
         self._stat_enabled = None
         self._stat_timer_interval_in_seconds = None
         self._stat_web_service_interval_limit_in_seconds = None
+        self._key_algs_allowed_for_generation = None
+        self._discovery_allowed_keys = None
+        self._allow_id_token_without_implicit_grant_types = None
+        self._key_sign_with_same_key_but_diff_alg = None
         self.discriminator = None
         if issuer is not None:
             self.issuer = issuer
@@ -1040,6 +1058,8 @@ class AppConfiguration(object):
             self.external_logger_configuration = external_logger_configuration
         if dcr_signature_validation_enabled is not None:
             self.dcr_signature_validation_enabled = dcr_signature_validation_enabled
+        if dcr_signature_validation_shared_secret is not None:
+            self.dcr_signature_validation_shared_secret = dcr_signature_validation_shared_secret
         if dcr_signature_validation_software_statement_jwks_uri_claim is not None:
             self.dcr_signature_validation_software_statement_jwks_uri_claim = dcr_signature_validation_software_statement_jwks_uri_claim
         if dcr_signature_validation_software_statement_jwks_claim is not None:
@@ -1050,12 +1070,22 @@ class AppConfiguration(object):
             self.dcr_signature_validation_jwks_uri = dcr_signature_validation_jwks_uri
         if dcr_authorization_with_client_credentials is not None:
             self.dcr_authorization_with_client_credentials = dcr_authorization_with_client_credentials
+        if dcr_skip_signature_validation is not None:
+            self.dcr_skip_signature_validation = dcr_skip_signature_validation
         if stat_enabled is not None:
             self.stat_enabled = stat_enabled
         if stat_timer_interval_in_seconds is not None:
             self.stat_timer_interval_in_seconds = stat_timer_interval_in_seconds
         if stat_web_service_interval_limit_in_seconds is not None:
             self.stat_web_service_interval_limit_in_seconds = stat_web_service_interval_limit_in_seconds
+        if key_algs_allowed_for_generation is not None:
+            self.key_algs_allowed_for_generation = key_algs_allowed_for_generation
+        if discovery_allowed_keys is not None:
+            self.discovery_allowed_keys = discovery_allowed_keys
+        if allow_id_token_without_implicit_grant_types is not None:
+            self.allow_id_token_without_implicit_grant_types = allow_id_token_without_implicit_grant_types
+        if key_sign_with_same_key_but_diff_alg is not None:
+            self.key_sign_with_same_key_but_diff_alg = key_sign_with_same_key_but_diff_alg
 
     @property
     def issuer(self):
@@ -5229,7 +5259,7 @@ class AppConfiguration(object):
         :param backchannel_authentication_request_signing_alg_values_supported: The backchannel_authentication_request_signing_alg_values_supported of this AppConfiguration.  # noqa: E501
         :type: list[str]
         """
-        allowed_values = ["RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"]  # noqa: E501
+        allowed_values = ["RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512", "RS384", "RS256"]  # noqa: E501
         if not set(backchannel_authentication_request_signing_alg_values_supported).issubset(set(allowed_values)):
             raise ValueError(
                 "Invalid values for `backchannel_authentication_request_signing_alg_values_supported` [{0}], must be a subset of [{1}]"  # noqa: E501
@@ -5606,6 +5636,29 @@ class AppConfiguration(object):
         self._dcr_signature_validation_enabled = dcr_signature_validation_enabled
 
     @property
+    def dcr_signature_validation_shared_secret(self):
+        """Gets the dcr_signature_validation_shared_secret of this AppConfiguration.  # noqa: E501
+
+        Specifies shared secret for Dynamic Client Registration.  # noqa: E501
+
+        :return: The dcr_signature_validation_shared_secret of this AppConfiguration.  # noqa: E501
+        :rtype: str
+        """
+        return self._dcr_signature_validation_shared_secret
+
+    @dcr_signature_validation_shared_secret.setter
+    def dcr_signature_validation_shared_secret(self, dcr_signature_validation_shared_secret):
+        """Sets the dcr_signature_validation_shared_secret of this AppConfiguration.
+
+        Specifies shared secret for Dynamic Client Registration.  # noqa: E501
+
+        :param dcr_signature_validation_shared_secret: The dcr_signature_validation_shared_secret of this AppConfiguration.  # noqa: E501
+        :type: str
+        """
+
+        self._dcr_signature_validation_shared_secret = dcr_signature_validation_shared_secret
+
+    @property
     def dcr_signature_validation_software_statement_jwks_uri_claim(self):
         """Gets the dcr_signature_validation_software_statement_jwks_uri_claim of this AppConfiguration.  # noqa: E501
 
@@ -5721,6 +5774,29 @@ class AppConfiguration(object):
         self._dcr_authorization_with_client_credentials = dcr_authorization_with_client_credentials
 
     @property
+    def dcr_skip_signature_validation(self):
+        """Gets the dcr_skip_signature_validation of this AppConfiguration.  # noqa: E501
+
+        Boolean value indicating if signature validation is to be skipped.  # noqa: E501
+
+        :return: The dcr_skip_signature_validation of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._dcr_skip_signature_validation
+
+    @dcr_skip_signature_validation.setter
+    def dcr_skip_signature_validation(self, dcr_skip_signature_validation):
+        """Sets the dcr_skip_signature_validation of this AppConfiguration.
+
+        Boolean value indicating if signature validation is to be skipped.  # noqa: E501
+
+        :param dcr_skip_signature_validation: The dcr_skip_signature_validation of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._dcr_skip_signature_validation = dcr_skip_signature_validation
+
+    @property
     def stat_enabled(self):
         """Gets the stat_enabled of this AppConfiguration.  # noqa: E501
 
@@ -5788,6 +5864,98 @@ class AppConfiguration(object):
         """
 
         self._stat_web_service_interval_limit_in_seconds = stat_web_service_interval_limit_in_seconds
+
+    @property
+    def key_algs_allowed_for_generation(self):
+        """Gets the key_algs_allowed_for_generation of this AppConfiguration.  # noqa: E501
+
+        List of algorithm allowed to be used for key generation.  # noqa: E501
+
+        :return: The key_algs_allowed_for_generation of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._key_algs_allowed_for_generation
+
+    @key_algs_allowed_for_generation.setter
+    def key_algs_allowed_for_generation(self, key_algs_allowed_for_generation):
+        """Sets the key_algs_allowed_for_generation of this AppConfiguration.
+
+        List of algorithm allowed to be used for key generation.  # noqa: E501
+
+        :param key_algs_allowed_for_generation: The key_algs_allowed_for_generation of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._key_algs_allowed_for_generation = key_algs_allowed_for_generation
+
+    @property
+    def discovery_allowed_keys(self):
+        """Gets the discovery_allowed_keys of this AppConfiguration.  # noqa: E501
+
+        List of configuration response claim allowed to be displayed in discovery endpoint.  # noqa: E501
+
+        :return: The discovery_allowed_keys of this AppConfiguration.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._discovery_allowed_keys
+
+    @discovery_allowed_keys.setter
+    def discovery_allowed_keys(self, discovery_allowed_keys):
+        """Sets the discovery_allowed_keys of this AppConfiguration.
+
+        List of configuration response claim allowed to be displayed in discovery endpoint.  # noqa: E501
+
+        :param discovery_allowed_keys: The discovery_allowed_keys of this AppConfiguration.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._discovery_allowed_keys = discovery_allowed_keys
+
+    @property
+    def allow_id_token_without_implicit_grant_types(self):
+        """Gets the allow_id_token_without_implicit_grant_types of this AppConfiguration.  # noqa: E501
+
+        Specifies if a token without implicit grant types is allowed.  # noqa: E501
+
+        :return: The allow_id_token_without_implicit_grant_types of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._allow_id_token_without_implicit_grant_types
+
+    @allow_id_token_without_implicit_grant_types.setter
+    def allow_id_token_without_implicit_grant_types(self, allow_id_token_without_implicit_grant_types):
+        """Sets the allow_id_token_without_implicit_grant_types of this AppConfiguration.
+
+        Specifies if a token without implicit grant types is allowed.  # noqa: E501
+
+        :param allow_id_token_without_implicit_grant_types: The allow_id_token_without_implicit_grant_types of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._allow_id_token_without_implicit_grant_types = allow_id_token_without_implicit_grant_types
+
+    @property
+    def key_sign_with_same_key_but_diff_alg(self):
+        """Gets the key_sign_with_same_key_but_diff_alg of this AppConfiguration.  # noqa: E501
+
+        Specifies if signing to be done with same key but apply different algorithms.  # noqa: E501
+
+        :return: The key_sign_with_same_key_but_diff_alg of this AppConfiguration.  # noqa: E501
+        :rtype: bool
+        """
+        return self._key_sign_with_same_key_but_diff_alg
+
+    @key_sign_with_same_key_but_diff_alg.setter
+    def key_sign_with_same_key_but_diff_alg(self, key_sign_with_same_key_but_diff_alg):
+        """Sets the key_sign_with_same_key_but_diff_alg of this AppConfiguration.
+
+        Specifies if signing to be done with same key but apply different algorithms.  # noqa: E501
+
+        :param key_sign_with_same_key_but_diff_alg: The key_sign_with_same_key_but_diff_alg of this AppConfiguration.  # noqa: E501
+        :type: bool
+        """
+
+        self._key_sign_with_same_key_but_diff_alg = key_sign_with_same_key_but_diff_alg
 
     def to_dict(self):
         """Returns the model properties as a dict"""

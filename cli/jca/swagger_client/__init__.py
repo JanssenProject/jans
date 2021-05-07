@@ -31,7 +31,6 @@ from swagger_client.api.database___couchbase_configuration_api import DatabaseCo
 from swagger_client.api.database___ldap_configuration_api import DatabaseLDAPConfigurationApi
 from swagger_client.api.default_authentication_method_api import DefaultAuthenticationMethodApi
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
-from swagger_client.api.o_auth___open_id_connect___sector_identifiers_api import OAuthOpenIDConnectSectorIdentifiersApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
 from swagger_client.api.o_auth___uma_resources_api import OAuthUMAResourcesApi
 # import ApiClient
@@ -55,7 +54,6 @@ from swagger_client.models.fido2_configuration import Fido2Configuration
 from swagger_client.models.gluu_attribute import GluuAttribute
 from swagger_client.models.gluu_attribute_attribute_validation import GluuAttributeAttributeValidation
 from swagger_client.models.in_memory_configuration import InMemoryConfiguration
-from swagger_client.models.inline_response200 import InlineResponse200
 from swagger_client.models.jans_fido2_dyn_configuration import JansFido2DynConfiguration
 from swagger_client.models.json_web_key import JsonWebKey
 from swagger_client.models.ldap_configuration import LdapConfiguration
