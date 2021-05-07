@@ -314,8 +314,19 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
     return cert_fn, key_fn
 
 
-def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias=""):
-    """Generate Java keystore (JKS)."""
+def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias="", in_passwd=""):
+    """
+    Generate Java keystore (JKS).
+
+    :param suffix: Suffix as basename (i.e. ``auth-server``)
+    :param hostname: Hostname
+    :param keypasswd: Password for generated JKS file
+    :param jks_fn: Path to generated JKS file
+    :param in_key: Path to key file
+    :param in_cert: Path to certificate file
+    :param alias: Alias used in generated JKS file
+    :param in_passwd: Password/passphrase for key file (if any)
+    """
 
     in_key = in_key or f"/etc/certs/{suffix}.key"
     in_cert = in_cert or f"/etc/certs/{suffix}.crt"
@@ -324,7 +335,7 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
     name = alias or hostname
 
     # converts key to pkcs12
-    cmd = " ".join([
+    cmd = [
         "openssl",
         "pkcs12",
         "-export",
@@ -333,7 +344,11 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
         f"-out {pkcs_fn}",
         f"-name {name}",
         f"-passout pass:{keypasswd}",
-    ])
+    ]
+    if in_passwd:
+        cmd.append(f"-passin pass:{in_passwd}")
+
+    cmd = " ".join(cmd)
     out, err, retcode = exec_cmd(cmd)
     if retcode != 0:
         err = err or out
