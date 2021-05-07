@@ -66,10 +66,10 @@ public class AccontAccessConsentServlet extends HttpServlet {
 	 *
 	 * @param servletRequest servlet request
 	 * @param httpResponse servlet response
-	 */
+	 */	
 	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
 		log.info("Starting processRequest method of AccoutAccess Consent ***********************************************************************");
-
+		String authFromReq = null;
         try (PrintWriter out = httpResponse.getWriter()) {
         	
         	String jsonBodyStr= IOUtils.toString(servletRequest.getInputStream());
@@ -86,9 +86,9 @@ public class AccontAccessConsentServlet extends HttpServlet {
         	
         	for (String keyStr : jsonBody.keySet()) {
     	    	Object keyvalue = jsonBody.get(keyStr);
+    	    	jsonObj.put(keyStr, keyvalue);
     		    if (keyStr.equals("Risk"))
         	   	{
-        	   		jsonObj.put(keyStr, keyvalue);
         	   	}
     	    	if (keyStr.equals("Data")) {
     	    		JSONObject keyvalueTemp = (JSONObject)jsonBody.get(keyStr);
@@ -103,15 +103,36 @@ public class AccontAccessConsentServlet extends HttpServlet {
     	    	}
     	    }
     	    	
-        	String ConsentId=UUID.randomUUID().toString();
-        	jsonObj.put("Links", new JSONObject().put("self","/open-banking/v3.1/aisp/account-access-consents/"+ConsentId));
+        	authFromReq = servletRequest.getHeader("Authorization");
+        	
+        	String clientDn=null;
+            Client cl=null;
+            String clientID=null;
+            String ConsentID=null;
+            clientDn=tokenService.getClientDn(authFromReq);
+        	       	
+        	if (clientDn != null) {
+        		log.info("FAPIOBUK: ClientDn from Authoirization(tokenService) *********************************************"+clientDn);
+        		cl=clientService.getClientByDn(clientDn);
+        		clientID=cl.getClientId();
+        	}	
+        	else 
+        		log.info("FAPIOBUK: ClientDn is null");
+        		
+        	if (clientID !=null)	
+        		ConsentID=UUID.randomUUID().toString()+":"+clientID;
+        	else{
+        		ConsentID=UUID.randomUUID().toString();
+        		log.info("FAPIOBUK: ClientID is null");
+        	}
+        	jsonObj.put("Links", new JSONObject().put("self","/open-banking/v3.1/aisp/account-access-consents/"+ConsentID));
         	
         	JSONObject data=new JSONObject();
         	Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         	data.put("CreationDateTime", timestamp.getTime());
         	data.put("Status", "AwaitingAuthorisation");
         	data.put(permissionKey, permissionValue);
-        	data.put("ConsentId",ConsentId);
+        	data.put("ConsentId",ConsentID);
         	data.put("StatusUpdateDateTime", timestamp.getTime());
         	jsonObj.put("Data",data);
         	   	
@@ -124,6 +145,7 @@ public class AccontAccessConsentServlet extends HttpServlet {
             log.error(e.getMessage(), e);
         }
 	}
+
 
 	/**
 	 * Handles the HTTP <code>GET</code> method.
