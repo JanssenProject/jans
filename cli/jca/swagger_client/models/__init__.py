@@ -31,7 +31,6 @@ from swagger_client.models.fido2_configuration import Fido2Configuration
 from swagger_client.models.gluu_attribute import GluuAttribute
 from swagger_client.models.gluu_attribute_attribute_validation import GluuAttributeAttributeValidation
 from swagger_client.models.in_memory_configuration import InMemoryConfiguration
-from swagger_client.models.inline_response200 import InlineResponse200
 from swagger_client.models.jans_fido2_dyn_configuration import JansFido2DynConfiguration
 from swagger_client.models.json_web_key import JsonWebKey
 from swagger_client.models.ldap_configuration import LdapConfiguration
