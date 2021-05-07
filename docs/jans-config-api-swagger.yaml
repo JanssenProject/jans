@@ -2119,7 +2119,7 @@ components:
           type: string
           enum:
             - PYTHON
-            - JAVASCRIPT
+            - JAVA_SCRIPT
           description: Programming language of the custom script.
         moduleProperties:
           type: array
