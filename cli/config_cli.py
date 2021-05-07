@@ -104,6 +104,11 @@ parser.add_argument("--cert-file", help="Path to SSL Certificate file")
 parser.add_argument("--key-file", help="Path to SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
+parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
+parser.add_argument("--patch-remove", help="Colon delimited key:value pair for remove patch operation. For example loggingLevel:DEBUG")
+parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
+parser.add_argument("--patch-data", help="Colon delimited key:value pair for patch operation. For example loggingLevel:DEBUG")
+
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -1533,15 +1538,16 @@ class JCA_CLI:
     def process_command_put(self, path, suffix_param, endpoint_params, data_fn):
         self.process_command_post(path, suffix_param, endpoint_params, data_fn)
 
-    def process_command_patch(self, path, suffix_param, endpoint_params, data_fn):
+    def process_command_patch(self, path, suffix_param, endpoint_params, data_fn, data=None):
 
-        try:
-            data = self.get_json_from_file(data_fn)
-        except ValueError as ve:
-            self.exit_with_error(str(ve))
+        if not data:
+            try:
+                data = self.get_json_from_file(data_fn)
+            except ValueError as ve:
+                self.exit_with_error(str(ve))
 
-        if not isinstance(data, list):
-            self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
+            if not isinstance(data, list):
+                self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
         op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
 
@@ -1598,11 +1604,33 @@ class JCA_CLI:
         endpoint = Menu('', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
 
-        if schema and not data_fn:
+
+        data = None
+        op_path = self.get_path_by_id(operation_id)
+        if op_path['__method__'] == 'patch' and not data_fn:
+            pop, pdata = '', ''
+            if args.patch_add:
+                pop = 'add'
+                pdata = args.patch_add 
+            elif args.patch_remove:
+                pop = 'remove'
+                pdata = args.patch_remove
+            elif args.patch_replace:
+                pop = 'replace'
+                pdata = args.patch_replace
+
+            if pop:
+                if pdata.count(':') != 1:
+                    self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
+
+                ppath, pval = pdata.split(':')
+                data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
+
+        if (schema and not data_fn) and not data:
             self.exit_with_error("Please provide schema with --data argument")
 
         caller_function = getattr(self, 'process_command_' + path['__method__'])
-        caller_function(path, suffix_param, endpoint_params, data_fn)
+        caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 
     def make_schema_val(self, stype):
         if stype == 'object':
@@ -1717,6 +1745,8 @@ def main():
                 cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
             print()
     except Exception as e:
+        if os.environ.get('errstdout'):
+            print(traceback.print_exc())
         print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
         with open(error_log_file, 'a') as w:
             traceback.print_exc(file=w)
