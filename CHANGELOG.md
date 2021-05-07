@@ -1,5 +1,19 @@
 # Changelog
 
+### [0.1.1](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.0...v0.1.1) (2021-05-07)
+
+
+### Bug Fixes
+
+* config path ([2befc3b](https://www.github.com/JanssenProject/jans-cli/commit/2befc3b1aeed3f5dea3646f2a0e32e5b56722c8c))
+* path ([c429d21](https://www.github.com/JanssenProject/jans-cli/commit/c429d21c77d66e8657bb79031ca4bbe795baff9b))
+* **pip:** installation ([b39e49e](https://www.github.com/JanssenProject/jans-cli/commit/b39e49ef43a7eb603fa64f85b63c41c6281b6ecf))
+
+
+### Documentation
+
+* **authconfig:** synched with jans-auth-server AppConfiguration properties jans-config-issue[#19](https://www.github.com/JanssenProject/jans-cli/issues/19) ([a28de85](https://www.github.com/JanssenProject/jans-cli/commit/a28de85eec90d35d2c6d526bb6e1fa7aca1b730d))
+
 ## 0.1.0 (2021-05-06)
 
 
