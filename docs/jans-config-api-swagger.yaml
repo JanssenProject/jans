@@ -2813,9 +2813,6 @@ components:
           description: URL for the Inum generator Service.
           format: url
           example: 'https://server.example.com/oxid/service/jans/inum'
-        dynamicRegistrationEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable Dynamic Registration.
         dynamicRegistrationExpirationTime:
           type: integer
           description: Expiration time in seconds for clients created with dynamic registration, -1 means never expire.
@@ -2970,9 +2967,6 @@ components:
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep metric reported data.
-        metricReporterEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable Metric Reporter.
         pairwiseIdType:
           type: string
           description: The pairwise ID type.
@@ -3251,9 +3245,6 @@ components:
         cibaMaxExpirationTimeAllowedSec:
           type: integer
           description: Specifies the CIBA token expiration time in seconds.
-        cibaEnabled:
-          type: boolean
-          description: Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.
         discoveryCacheLifetimeInMinutes:
           type: integer
           description: Lifetime of discovery cache.
@@ -3294,9 +3285,6 @@ components:
         dcrSkipSignatureValidation:
           type: boolean	
           description: Boolean value indicating if signature validation is to be skipped.	
-        statEnabled:
-          type: boolean	
-          description: Boolean value indicating if statistical service is enabled.	  
         statTimerIntervalInSeconds:
           type: integer				  
           description: Statistical data capture time interval.
@@ -3321,6 +3309,12 @@ components:
         keySignWithSameKeyButDiffAlg:
           type: boolean
           description: Specifies if signing to be done with same key but apply different algorithms.
+        enabledComponents:
+          type: array
+          description: List of auth components enabled
+          items:
+            type: string
+          example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
  
     GluuAttribute:
       title: GluuAttribute
@@ -4349,9 +4343,6 @@ components:
         metricReporterKeepDataDays:
           type: integer
           description: The days to keep report data.
-        metricReporterEnabled:
-          type: boolean
-          description: Boolean value specifying whether to enable Metric Reporter.
         personCustomObjectClassList:
           type: array
           description: Custom object class list for dynamic person enrolment.
