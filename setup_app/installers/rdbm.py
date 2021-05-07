@@ -190,7 +190,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         for subtable in sub_tables.get(Config.rdbm_type, {}):
             subtable_columns = []
             attrname, data_type = sub_tables['spanner'][subtable]
-            sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` INT64, `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, attrname, data_type)
+            sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` STRING(64), `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, attrname, data_type)
             self.dbUtils.spanner.create_table(sql_cmd)
             sql_cmd_index = 'CREATE INDEX `{0}_{1}Idx` ON `{0}_{1}` (`{1}`)'.format(subtable, attrname)
             self.dbUtils.spanner.create_table(sql_cmd_index)
