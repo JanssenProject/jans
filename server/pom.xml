@@ -97,12 +97,12 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
-		 <!-- RestEasy -->
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-servlet-initializer</artifactId>
-        </dependency>
+
+		<!-- RestEasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-servlet-initializer</artifactId>
+		</dependency>
 
 		<!-- Logging -->
 		<dependency>
@@ -165,7 +165,7 @@
 
 
 	<build>
-		<finalName>${project.artifactId}</finalName>
+		<finalName>jans-config-api</finalName>
 
 		<filters>
 			<filter>profiles/${cfg}/config-api-test.properties</filter>
@@ -269,6 +269,7 @@
 									<filtering>true</filtering>
 									<includes>
 										<include>*.properties</include>
+										<include>*.xml</include>
 										<include>*.json</include>
 									</includes>
 								</resource>
@@ -419,10 +420,11 @@
 					<groupId>org.jboss.weld</groupId>
 					<artifactId>weld-core-impl</artifactId>
 				</dependency>
-				<dependency>
+				<!-- <dependency>
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
-				</dependency>
+					<version>${weld.version}</version>
+				</dependency> -->
 
 				<dependency>
 					<groupId>org.jboss.spec.javax.ejb</groupId>
