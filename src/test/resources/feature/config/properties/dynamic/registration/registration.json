@@ -4,7 +4,6 @@
   "dynamicRegistrationPersistClientAuthorizations": true,
   "returnClientSecretOnRead": false,
   "dynamicRegistrationPasswordGrantTypeEnabled": false,
-  "dynamicRegistrationEnabled": true,
   "trustedClientEnabled": true,
   "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject",
   "dynamicGrantTypeDefault": [

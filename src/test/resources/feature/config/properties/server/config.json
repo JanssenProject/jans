@@ -1,5 +1,4 @@
 {
-  "cibaEnabled": false,
   "useLocalCache": true,
   "logClientNameOnClientAuthentication": false,
   "fapiCompatibility": false,
