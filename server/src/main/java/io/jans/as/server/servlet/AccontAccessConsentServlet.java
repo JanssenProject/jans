@@ -29,6 +29,10 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.token.TokenService;
+
 
 /**
  * @author Javier Rojas Blum
@@ -43,6 +47,12 @@ public class AccontAccessConsentServlet extends HttpServlet {
 
 	@Inject
 	private Logger log;
+	
+	@Inject
+        private TokenService tokenService;
+    
+        @Inject
+        private ClientService clientService;
 
 	@Override 
 	public void init() throws ServletException
@@ -103,9 +113,9 @@ public class AccontAccessConsentServlet extends HttpServlet {
     	    	}
     	    }
     	    	
-        	authFromReq = servletRequest.getHeader("Authorization");
+            authFromReq = servletRequest.getHeader("Authorization");
         	
-        	String clientDn=null;
+            String clientDn=null;
             Client cl=null;
             String clientID=null;
             String ConsentID=null;
