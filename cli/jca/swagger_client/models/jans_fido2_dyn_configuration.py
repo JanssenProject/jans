@@ -39,7 +39,6 @@ class JansFido2DynConfiguration(object):
         'external_logger_configuration': 'str',
         'metric_reporter_interval': 'int',
         'metric_reporter_keep_data_days': 'int',
-        'metric_reporter_enabled': 'bool',
         'person_custom_object_class_list': 'list[str]',
         'fido2_configuration': 'Fido2Configuration'
     }
@@ -56,12 +55,11 @@ class JansFido2DynConfiguration(object):
         'external_logger_configuration': 'externalLoggerConfiguration',
         'metric_reporter_interval': 'metricReporterInterval',
         'metric_reporter_keep_data_days': 'metricReporterKeepDataDays',
-        'metric_reporter_enabled': 'metricReporterEnabled',
         'person_custom_object_class_list': 'personCustomObjectClassList',
         'fido2_configuration': 'fido2Configuration'
     }
 
-    def __init__(self, issuer=None, base_endpoint=None, clean_service_interval=None, clean_service_batch_chunk_size=None, use_local_cache=None, disable_jdk_logger=None, logging_level=None, logging_layout=None, external_logger_configuration=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, metric_reporter_enabled=None, person_custom_object_class_list=None, fido2_configuration=None):  # noqa: E501
+    def __init__(self, issuer=None, base_endpoint=None, clean_service_interval=None, clean_service_batch_chunk_size=None, use_local_cache=None, disable_jdk_logger=None, logging_level=None, logging_layout=None, external_logger_configuration=None, metric_reporter_interval=None, metric_reporter_keep_data_days=None, person_custom_object_class_list=None, fido2_configuration=None):  # noqa: E501
         """JansFido2DynConfiguration - a model defined in Swagger"""  # noqa: E501
         self._issuer = None
         self._base_endpoint = None
@@ -74,7 +72,6 @@ class JansFido2DynConfiguration(object):
         self._external_logger_configuration = None
         self._metric_reporter_interval = None
         self._metric_reporter_keep_data_days = None
-        self._metric_reporter_enabled = None
         self._person_custom_object_class_list = None
         self._fido2_configuration = None
         self.discriminator = None
@@ -100,8 +97,6 @@ class JansFido2DynConfiguration(object):
             self.metric_reporter_interval = metric_reporter_interval
         if metric_reporter_keep_data_days is not None:
             self.metric_reporter_keep_data_days = metric_reporter_keep_data_days
-        if metric_reporter_enabled is not None:
-            self.metric_reporter_enabled = metric_reporter_enabled
         if person_custom_object_class_list is not None:
             self.person_custom_object_class_list = person_custom_object_class_list
         if fido2_configuration is not None:
@@ -359,29 +354,6 @@ class JansFido2DynConfiguration(object):
         """
 
         self._metric_reporter_keep_data_days = metric_reporter_keep_data_days
-
-    @property
-    def metric_reporter_enabled(self):
-        """Gets the metric_reporter_enabled of this JansFido2DynConfiguration.  # noqa: E501
-
-        Boolean value specifying whether to enable Metric Reporter.  # noqa: E501
-
-        :return: The metric_reporter_enabled of this JansFido2DynConfiguration.  # noqa: E501
-        :rtype: bool
-        """
-        return self._metric_reporter_enabled
-
-    @metric_reporter_enabled.setter
-    def metric_reporter_enabled(self, metric_reporter_enabled):
-        """Sets the metric_reporter_enabled of this JansFido2DynConfiguration.
-
-        Boolean value specifying whether to enable Metric Reporter.  # noqa: E501
-
-        :param metric_reporter_enabled: The metric_reporter_enabled of this JansFido2DynConfiguration.  # noqa: E501
-        :type: bool
-        """
-
-        self._metric_reporter_enabled = metric_reporter_enabled
 
     @property
     def person_custom_object_class_list(self):
