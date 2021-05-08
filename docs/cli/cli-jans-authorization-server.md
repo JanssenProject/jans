@@ -21,9 +21,10 @@ Jans Authorization server has two operations `id` to `get/modify` its properties
 Table of Contents
 =================
 
-* [Janssen Authorization Server](#janssen-authorization-server)
-  * [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
-  * [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
+- [Janssen Authorization Server](#janssen-authorization-server)
+- [Table of Contents](#table-of-contents)
+  - [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
+  - [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
 
 
 ## Get All Jans Auth Server Configuration Properties
