@@ -75,6 +75,7 @@ Table of Contents
     * [Get Groups](#get-groups)
     * [Create Group](#create-group)
     * [Get Group by ID](#get-group-by-id)
+    * [Update Group by ID](#update-group-by-id)
     * [Delete Group by ID](#delete-group-by-id)
     * [Patch Group](#patch-group)
     * [Search Group](#search-group)
@@ -301,7 +302,7 @@ Getting access token for scope https://jans.io/scim/groups.read
 }
 }
 ```
-4. Update Group by ID
+## Update Group by ID
 
 If we look at the description, We see this op-mode needs `url-suffix` as `id` and `schema` definition for data. 
 
@@ -368,7 +369,7 @@ root@testjans:~#
 ```
 
 That's how we can update a group using this operation method.
-Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try `patch-group-by-id`.
+Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try [patch-group-by-id](#patch-group).
 
 ## Delete Group by ID
 
@@ -388,6 +389,28 @@ Getting access token for scope https://jans.io/scim/groups.write
 
 ## Patch Group
 
+This is also an option to update any existing group resources. The only difference between [update-group-by-id](#update-group-by-id) and [patch-group](#patch-group) is that the first one just replace new data with previous data. It won't add any new data into the group. But Patch-group supports few more operations including replace. Like, You can `test`, `add`, `replace`, `delete`, `copy` any data from a Group resource.
+
+If wee look at the description:
+
+```
+Operation ID: patch-group-by-id
+  Description: Updates one or more attributes of a Group resource using a sequence of additions, removals, and 
+replacements operations. See section 3.5.2 of RFC 7644
+
+  url-suffix: id
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: /components/schemas/PatchRequest
+```
+
+As we see, It has a schema file. So, Let's get the schema:
+
+```
+
+```
 
 ## Search Group
 
