@@ -33,7 +33,7 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 
 ```
 
-- **_get-oauth-openid-clients_**
+## Get List of OpenID Clients
 
 To get the openid clients, run the following command:
 
@@ -701,3 +701,129 @@ Calling with params limit=2
   }
 ]
 ```
+
+
+## Creating a New OpenID Clients
+
+We can create openid clients as well, Let's see the description. It has a schema file where is defined the properties needs to be filled to create a new openid clients.
+
+```
+Operation ID: post-oauth-openid-clients
+  Description: Create new OpenId connect client
+  Schema: /components/schemas/Client
+```
+
+To get the schema file:
+
+```
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Client
+```
+It contains a lot of properties. But, It's not important to fill each of these properties. We are going to fill these properties:
+
+- frontChannelLogoutSessionRequired[false, true]
+- applicationType[web, native]
+- clientName
+- subjectType[pairwise, public]
+- includeClaimsInIdToken[false, true]
+
+```
+{
+  "dn": null,
+  "inum": null,
+  "clientSecret": null,
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": [
+    "https://client.example.org/cb"
+  ],
+  "claimRedirectUris": [],
+  "responseTypes": [],
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": [],
+  "clientName": "testOIDC",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": "{ \"keys\" : [ { \"e\" : \"AQAB\", \"n\" : \"gmlDX_mgMcHX..\" ] }",
+  "sectorIdentifierUri": null,
+  "subjectType": "public",
+  "idTokenSignedResponseAlg": "HS512",
+  "idTokenEncryptedResponseAlg": "RSA1_5",
+  "idTokenEncryptedResponseEnc": "A256GCM",
+  "userInfoSignedResponseAlg": "PS256",
+  "userInfoEncryptedResponseAlg": "RSA1_5",
+  "userInfoEncryptedResponseEnc": "A128GCM",
+  "requestObjectSigningAlg": "PS512",
+  "requestObjectEncryptionAlg": "A128KW",
+  "requestObjectEncryptionEnc": "A256CBC+HS512",
+  "tokenEndpointAuthMethod": "tls_client_auth",
+  "tokenEndpointAuthSigningAlg": "PS384",
+  "defaultMaxAge": 1000000,
+  "requireAuthTime": true,
+  "defaultAcrValues": [],
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": [
+    "https://client.example.org/logout/page1",
+    "https://client.example.org/logout/page2",
+    "https://client.example.org/logout/page3"
+  ],
+  "requestUris": [],
+  "scopes": [
+    "read write dolphin"
+  ],
+  "claims": [],
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": 100000000,
+  "accessTokenLifetime": 100000000,
+  "customAttributes": {
+    "name": "name, displayName, birthdate, email",
+    "multiValued": false,
+    "values": []
+  },
+  "customObjectClasses": [],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": "ES384",
+  "disabled": false,
+  "authorizedOrigins": [],
+  "softwareId": "4NRB1-0XZABZI9E6-5SM3R",
+  "softwareVersion": "2.1",
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": true,
+    "keepClientAuthorizationAfterExpiration": true,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": [],
+    "spontaneousScopeScriptDns": [],
+    "backchannelLogoutUri": [],
+    "backchannelLogoutSessionRequired": true,
+    "additionalAudience": [],
+    "postAuthnScripts": [],
+    "consentGatheringScripts": [],
+    "introspectionScripts": [],
+    "rptClaimsScripts": []
+  },
+  "backchannelTokenDeliveryMode": "ping",
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": "PS384",
+  "backchannelUserCodeParameter": false,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null
+}
+```
+I have changed few things only here to show how to create an OpenID Connect Client. Please make sure that you filled each of the required properties to work the client.
+
+
