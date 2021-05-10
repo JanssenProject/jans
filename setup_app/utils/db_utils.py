@@ -5,6 +5,7 @@ import re
 import json
 import logging
 import copy
+import hashlib
 import ldap3
 import pymysql
 from ldap3.utils import dn as dnutils
@@ -738,6 +739,11 @@ class DBUtils:
             if result and 'rows' in result and result['rows']:
                 return table
 
+    def get_sha_digest(self, val):
+        msha = hashlib.sha256()
+        msha.update(val.encode())
+        return msha.digest().hex()
+
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
@@ -916,7 +922,8 @@ class DBUtils:
                                 sub_table_columns = ['doc_id', 'dict_doc_id', lkey]
                                 sub_table_values = []
                                 for subtableval in spanner_vals:
-                                    sub_table_values.append([doc_id, os.urandom(5).hex(), subtableval]) #TODO: What is dict_doc_id ?
+                                    dict_doc_id = self.get_sha_digest(subtableval)
+                                    sub_table_values.append([doc_id, dict_doc_id, subtableval])
                                 subtable_data.append((sub_table, sub_table_columns, sub_table_values))
 
                         columns = [ *vals.keys() ]
