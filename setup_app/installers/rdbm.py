@@ -112,9 +112,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         column_add = 'COLUMN ' if Config.rdbm_type == 'spanner' else ''
         alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD %s{};' % (qchar, qchar, column_add)
 
-        sub_tables_fn = os.path.join(Config.static_rdbm_dir, 'sub_tables.json')
-        sub_tables = base.readJsonFile(sub_tables_fn)
-
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
             for obj in jans_schema['objectClasses']:
@@ -123,8 +120,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 all_attribs[attr['names'][0]] = attr
 
         subtable_attrs = {}
-        for stbl in sub_tables.get(Config.rdbm_type):
-            subtable_attrs[stbl] = [ scol[0] for scol in sub_tables[Config.rdbm_type][stbl] ]
+        for stbl in self.dbUtils.sub_tables.get(Config.rdbm_type):
+            subtable_attrs[stbl] = [ scol[0] for scol in self.dbUtils.sub_tables[Config.rdbm_type][stbl] ]
 
         for obj_name in all_schema:
             obj = all_schema[obj_name]
@@ -189,11 +186,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def create_subtables(self):
 
-        sub_tables_fn = os.path.join(Config.static_rdbm_dir, 'sub_tables.json')
-        sub_tables = base.readJsonFile(sub_tables_fn)
-
-        for subtable in sub_tables.get(Config.rdbm_type, {}):
-            for sattr, sdt in sub_tables[Config.rdbm_type][subtable]:
+        for subtable in self.dbUtils.sub_tables.get(Config.rdbm_type, {}):
+            for sattr, sdt in self.dbUtils.sub_tables[Config.rdbm_type][subtable]:
                 subtable_columns = []
                 sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` STRING(64), `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, sattr, sdt)
                 self.dbUtils.spanner.create_table(sql_cmd)
