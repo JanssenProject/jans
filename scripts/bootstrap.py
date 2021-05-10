@@ -2,6 +2,7 @@ import base64
 import os
 import re
 from urllib.parse import urlparse
+from contextlib import suppress
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -129,12 +130,25 @@ def main():
     modify_jetty_xml()
     modify_webdefault_xml()
 
-    ext_jwks_uri = os.environ.get("CN_EXT_SIGNING_JWKS_URI", "")
+    ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
 
     if ext_jwks_uri:
-        ext_cert = "/etc/certs/ext-signing.crt"
-        ext_key = "/etc/certs/ext-signing.key"
-        alias = os.environ.get("CN_EXT_SIGNING_ALIAS", "OpenBanking")
+        # Open Banking external signing cert and key. Use for generating the PKCS12 and jks keystore
+        ext_cert = "/etc/certs/ob-ext-signing.crt"
+        ext_key = "/etc/certs/ob-ext-signing.key"
+        ext_key_pin = "/etc/certs/ob-ext-signing.pin"
+
+        # Open Banking transport signing cert and key. Use for generating the PKCS12 file.
+        ob_transport_cert = "/etc/certs/ob-transport.crt"
+        ob_transport_key = "/etc/certs/ob-transport.key"
+        ob_transport_pin = "/etc/certs/ob-transport.pin"
+
+        # Open Banking truststore signing cert and key. Use for generating the PKCS12 file.
+        ob_truststore_cert = "/etc/certs/ob-truststore.crt"
+        ob_truststore_key = "/etc/certs/ob-truststore.key"
+        ob_truststore_pin = "/etc/certs/ob-truststore.pin"
+
+        alias = os.environ.get("CN_OB_EXT_SIGNING_ALIAS", "OpenBanking")
 
         parsed_url = urlparse(ext_jwks_uri)
         # uses hostname instead of netloc as netloc may have host:port format
@@ -146,12 +160,12 @@ def main():
         get_server_certificate(
             hostname,
             port,
-            "/etc/certs/extjwksuri.crt"
+            "/etc/certs/obextjwksuri.crt"
         )
 
         cert_to_truststore(
             "OpenBankingJwksUri",
-            "/etc/certs/extjwksuri.crt",
+            "/etc/certs/obextjwksuri.crt",
             "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
             "changeit",
         )
@@ -163,15 +177,70 @@ def main():
             "changeit",
         )
 
+        ext_key_passphrase = ""
+        with suppress(FileNotFoundError):
+            with open(ext_key_pin) as f:
+                ext_key_passphrase = f.read().strip()
+
         generate_keystore(
-            "ext-signing",
+            "ob-ext-signing",
             manager.config.get("hostname"),
             manager.secret.get("auth_openid_jks_pass"),
-            jks_fn="/etc/certs/ext-signing.jks",
+            jks_fn="/etc/certs/ob-ext-signing.jks",
             in_key=ext_key,
             in_cert=ext_cert,
             alias=alias,
+            in_passwd=ext_key_passphrase,
         )
+
+        if os.path.isfile(ob_transport_cert):
+            cert_to_truststore(
+                alias,
+                ob_transport_cert,
+                "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+                "changeit",
+            )
+
+            ob_transport_passphrase = ""
+            with suppress(FileNotFoundError):
+                with open(ob_transport_pin) as f:
+                    ob_transport_passphrase = f.read().strip()
+
+            generate_keystore(
+                "ob-transport",
+                manager.config.get("hostname"),
+                manager.secret.get("auth_openid_jks_pass"),
+                jks_fn="/etc/certs/ob-transport.jks",
+                in_key=ob_transport_key,
+                in_cert=ob_transport_cert,
+                alias=alias,
+                in_passwd=ob_transport_passphrase,
+            )
+
+        if os.path.isfile(ob_truststore_cert):
+            cert_to_truststore(
+                alias,
+                ob_truststore_cert,
+                "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+                "changeit",
+            )
+
+            ob_truststore_passphrase = ""
+            with suppress(FileNotFoundError):
+                with open(ob_truststore_pin) as f:
+                    ob_truststore_passphrase = f.read().strip()
+
+            generate_keystore(
+                "ob-truststore",
+                manager.config.get("hostname"),
+                manager.secret.get("auth_openid_jks_pass"),
+                jks_fn="/etc/certs/ob-truststore.jks",
+                in_key=ob_truststore_key,
+                in_cert=ob_truststore_cert,
+                alias=alias,
+                in_passwd=ob_truststore_passphrase,
+            )
+
     else:
         # sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
         # if not sync_enabled:
