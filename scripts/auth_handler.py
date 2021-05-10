@@ -286,6 +286,14 @@ class AuthHandler(BaseHandler):
         return jwks_fn, jks_fn
 
     def patch(self):
+        # avoid conflict with external JWKS URI
+        ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
+        if ext_jwks_uri:
+            logger.warning(f"Found external JWKS URI at {ext_jwks_uri}; "
+                           "skipping proccess to avoid conflict with "
+                           "builtin key rotation feature in jans-auth")
+            return
+
         strategies = ", ".join(KEY_STRATEGIES)
 
         if self.key_strategy not in KEY_STRATEGIES:
@@ -334,6 +342,8 @@ class AuthHandler(BaseHandler):
             "keyStoreSecret": jks_pass,
             "keySelectionStrategy": self.key_strategy,
             "keyAlgsAllowedForGeneration": self.allowed_key_algs,
+            "keyStoreFile": self.manager.config.get("auth_openid_jks_fn"),
+            "jwksUri": f"https://{self.manager.config.get('hostname')}/jans-auth/restv1/jwks",
         })
 
         # get old JWKS from persistence
@@ -450,6 +460,14 @@ class AuthHandler(BaseHandler):
             logger.warning(f"Unable to get public keys; reason={exc}")
 
     def prune(self):
+        # avoid conflict with external JWKS URI
+        ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
+        if ext_jwks_uri:
+            logger.warning(f"Found external JWKS URI at {ext_jwks_uri}; "
+                           "skipping proccess to avoid conflict with "
+                           "builtin key rotation feature in jans-auth")
+            return
+
         config = self.backend.get_auth_config()
 
         if not config:
@@ -475,6 +493,8 @@ class AuthHandler(BaseHandler):
             "webKeysStorage": "keystore",
             "keyStoreSecret": jks_pass,
             "keyAlgsAllowedForGeneration": self.allowed_key_algs,
+            "keyStoreFile": self.manager.config.get("auth_openid_jks_fn"),
+            "jwksUri": f"https://{self.manager.config.get('hostname')}/jans-auth/restv1/jwks",
         })
 
         # get old JWKS from persistence
