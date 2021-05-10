@@ -10,7 +10,6 @@
    "externalLoggerConfiguration":"",
    "metricReporterInterval":300,
    "metricReporterKeepDataDays":15,
-   "metricReporterEnabled":true,
    "personCustomObjectClassList":[
       "jansCustomPerson",
       "jansPerson"
