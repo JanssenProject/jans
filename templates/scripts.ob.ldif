@@ -47,6 +47,7 @@ displayName: introspection
 inum: CABA-2222
 jansLevel: 102
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(introspection_introspectionscript)s
 jansScrTyp: introspection

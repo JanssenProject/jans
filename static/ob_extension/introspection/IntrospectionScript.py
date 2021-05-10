@@ -39,53 +39,13 @@ class Introspection(IntrospectionType):
     # context is reference of org.gluu.oxauth.service.external.context.ExternalIntrospectionContext (in https://github.com/GluuFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
         print "modifyResponse invoked"
-
-        #authorizationGrantList = CdiUtil.bean(AuthorizationGrantList)
-        #grantService = CdiUtil.bean(GrantService)
-
+        
         sessionIdService = CdiUtil.bean(SessionIdService)
         print "session id from context - %s" % context.getTokenGrant().getSessionDn()
         sessionId = sessionIdService.getSessionByDn(context.getTokenGrant().getSessionDn()) # fetch from persistence
         openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
         print "openbanking_intent_id from session : "+openbanking_intent_id
-
-        #refreshToken = context.getHttpRequest().getParameter("refresh_token")
-        #if refreshToken is None:
-        #    print "No refresh token parameter. Put original claim - openbanking_intent_id=value1"
-        #    responseAsJsonObject.accumulate("openbanking_intent_id", openbanking_intent_id) # AT1
-
-            # save it also in refresh token
-        #    grants = grantService.getGrantsByGrantId(context.getTokenGrant().getGrantId())
-        #    RT1 = {}
-        #    for grant in grants:
-        #        if (grant.getTokenTypeEnum() == TokenType.REFRESH_TOKEN):
-        #            RT1 = grant
-        #            print "RT1 hashed code: " + RT1.getTokenCode()
-        #            RT1.getAttributes().getAttributes().put("openbanking_intent_id", openbanking_intent_id)
-        #            grantService.mergeSilently(RT1)
-        #            return True
-
-        #responseAsJsonObject.accumulate("refresh_token", refreshToken)
-        #print "Refresh token: " + refreshToken
-
-        #clientId = context.getTokenGrant().getClientId()
-        #print "ClientId: " + clientId
-
-        #grantId = authorizationGrantList.getAuthorizationGrantByRefreshToken(clientId, refreshToken).getGrantId()
-        #print "grantId: " + grantId
-        #responseAsJsonObject.accumulate("grant_id", grantId)
-
-        #grants = grantService.getGrantsByGrantId(grantId)
-
-        #RT = {}
-        #for grant in grants:
-        #    if (grant.getTokenTypeEnum() == TokenType.REFRESH_TOKEN):
-        #        RT = grant
-        #print "RT hashed code: " + RT.getTokenCode()
-
-
-        #valueFromAT = RT.getAttributes().getAttributes().get("openbanking_intent_id")
-        #print "valueFromAT: " + valueFromAT
+       
         responseAsJsonObject.accumulate("openbanking_intent_id", openbanking_intent_id)
 
         return True

@@ -41,8 +41,19 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, customScript, configurationAttributes):
         # TODO: ideally this will come from a configuration
-        self.sharedSecret =  "kXp2s5v8y/B?E(H+MbPeShVmYq3t6w9z"
-        self.tpp_jwks_url = "https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/0014H00001lFE7dQAG.jwks"
+        
+        if (not configurationAttributes.containsKey("tpp_jwks_url")):
+	        print "Person Authentication. Initialization. Property tpp_jwks_url is not specified"
+	        return False
+        else: 
+        	self.tpp_jwks_url = configurationAttributes.get("tpp_jwks_url").getValue2() 
+        
+        if (not configurationAttributes.containsKey("redirect_url")):
+	        print "Person Authentication. Initialization. Property redirect_url is not specified"
+	        return False
+        else: 
+        	self.redirect_url = configurationAttributes.get("redirect_url").getValue2() 
+        
         print "OpenBanking Person authentication script initialized."
         return True   
 
@@ -62,7 +73,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        print "OpenBanking. Authenticate. Step %s " % step
+        print "Person Authentication. Authenticate. Step %s " % step
         identity = CdiUtil.bean(Identity)
         # handle error from the consent app       
         error = ServerUtil.getFirstValue(requestParameters, "error") 
@@ -73,7 +84,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         authenticationService = CdiUtil.bean(AuthenticationService)
                
-               # TODO: create a dummy user and authenticate
+        # TODO: create a dummy user and authenticate
         newUser = User()
         uid = "ob_"+str(int(time.time()*1000.0))
         newUser.setAttribute("displayName",uid)
@@ -93,16 +104,16 @@ class PersonAuthentication(PersonAuthenticationType):
         openbanking_intent_id = identity.getWorkingParameter("openbanking_intent_id")  #resultObject.get("login").get("account")
         acr_ob = "something"#resultObject.get("login").get("acr")
                
-               # add a few things in session
+        # add a few things in session, this will be used by the introspection and update token custom script
         sessionIdService = CdiUtil.bean(SessionIdService)
         sessionId = sessionIdService.getSessionId() # fetch from persistence
         sessionId.getSessionAttributes().put("openbanking_intent_id",openbanking_intent_id )
         sessionId.getSessionAttributes().put("acr_ob", acr_ob )
-        print "OpenBanking. Successful authentication"
+        print "Person Authentication. Successful authentication"
         return True
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        print "OpenBanking. prepare for step... %s" % step 
+        print "Person Authentication. prepare for step... %s" % step 
         
         jwkSet = JWKSet.load( URL(self.tpp_jwks_url));
         signedRequest = ServerUtil.getFirstValue(requestParameters, "request")
@@ -111,11 +122,11 @@ class PersonAuthentication(PersonAuthenticationType):
             if (result == True):
                 signedJWT = SignedJWT.parse(signedRequest)
                 claims = JSONObject(signedJWT.getJWTClaimsSet().getClaims().get("claims"))
-                print "claims : %s " % claims.toString()
+                print "Person Authentication. claims : %s " % claims.toString()
                 id_token = claims.get("id_token");
                 openbanking_intent_id = id_token.getJSONObject("openbanking_intent_id").getString("value")
-                print "openbanking_intent_id %s " % openbanking_intent_id
-                redirectURL = "https://bank-op.gluu.org/oxauth/authorize.htm?scope=openid+profile+email+user_name&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fbank.gluu.org%2Fjans-auth%2Fpostlogin.htm&nonce=72fc1a52-25a7-4293-929d-b61b8a05c9c4&client_id=0c76f3bb-b6de-49c4-8dff-f53d7b768f96&state="+UUID.randomUUID().toString()+"&intent_id="+openbanking_intent_id
+                print "Person Authentication. openbanking_intent_id %s " % openbanking_intent_id
+                redirectURL = self.redirect_url+"&state="+UUID.randomUUID().toString()+"&intent_id="+openbanking_intent_id
                 identity = CdiUtil.bean(Identity)
                 identity.setWorkingParameter("openbanking_intent_id",openbanking_intent_id)
                 print "OpenBanking. Redirecting to ... %s " % redirectURL 
@@ -125,7 +136,7 @@ class PersonAuthentication(PersonAuthenticationType):
       
         
         
-        print "OpenBanking. Call to Jans-auth server's /authorize endpoint should contain openbanking_intent_id as an encoded JWT"
+        print "Person Authentication. Call to Jans-auth server's /authorize endpoint should contain openbanking_intent_id as an encoded JWT"
         return False
 
 
@@ -147,11 +158,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getPageForStep(self, configurationAttributes, step):
-        print "OpenBanking. getPageForStep... %s" % step
+        print "Person Authentication. getPageForStep... %s" % step
         if step == 1:
             return "/redirect.xhtml"
-        
         return ""
+        
     def getExtraParametersForStep(self, configurationAttributes, step):
           return Arrays.asList("openbanking_intent_id", "acr_ob")
 
