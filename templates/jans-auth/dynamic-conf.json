@@ -223,7 +223,6 @@
     "defaultSignatureAlgorithm":"RS256",
     "oxOpenIdConnectVersion":"openidconnect-1.0",
     "oxId":"https://%(hostname)s/oxid/service/jans/inum",
-    "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":-1,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
