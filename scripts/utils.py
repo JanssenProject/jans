@@ -164,10 +164,10 @@ def get_base_ctx(manager):
     jwks_uri = f"https://{ctx['hostname']}/jans-auth/restv1/jwks"
     auth_openid_jks_fn = manager.config.get("auth_openid_jks_fn")
 
-    ext_jwks_uri = os.environ.get("CN_EXT_SIGNING_JWKS_URI", "")
+    ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
     if ext_jwks_uri:
         jwks_uri = ext_jwks_uri
-        auth_openid_jks_fn = "/etc/certs/ext-signing.jks"
+        auth_openid_jks_fn = "/etc/certs/ob-ext-signing.jks"
 
     ctx["jwks_uri"] = jwks_uri
     ctx["auth_openid_jks_fn"] = auth_openid_jks_fn
