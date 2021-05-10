@@ -137,7 +137,13 @@ class DBUtils:
         self.ldap_sql_data_type_mapping = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'ldap_sql_data_type_mapping.json'))
         self.sql_data_types = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sql_data_types.json'))
         self.opendj_attributes_syntax = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_attributes_syntax.json'))
+        self.sub_tables = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'sub_tables.json'))
 
+    def in_subtable(self, table, attr):
+        if table in self.sub_tables[Config.rdbm_type]:
+            for stbl in self.sub_tables[Config.rdbm_type][table]:
+                if stbl[0] == attr:
+                    return True
 
     def exec_rdbm_query(self, query, getresult=False):
         base.logIt("Executing {} Query: {}".format(Config.rdbm_type, query))
@@ -767,6 +773,8 @@ class DBUtils:
                     if self.Base is None:
                         self.rdm_automapper()
 
+                    # TODO: inserting data to sub tables to be implemented for mysql and pgsql
+
                     if 'add' in  entry and 'changetype' in entry:
                         attribute = entry['add'][0]
                         new_val = entry[attribute]
@@ -868,7 +876,14 @@ class DBUtils:
                         doc_id = self.get_doc_id_from_dn(dn)
                         replace_attr = entry['replace'][0]
                         typed_val = self.get_rdbm_val(replace_attr, entry[replace_attr], rdbm_type='spanner')
-                        self.spanner.update_data(table=table, columns=['doc_id', replace_attr], values=[[doc_id, typed_val]])
+                        
+                        if self.in_subtable(table, replace_attr):
+                            sub_table = '{}_{}'.format(table, replace_attr)
+                            # TODO: how to replace ?
+                            #for subval in typed_val:
+                            #    self.spanner.update_data(table=sub_table, columns=['doc_id', replace_attr], values=[[doc_id, subval]])
+                        else:
+                            self.spanner.update_data(table=table, columns=['doc_id', replace_attr], values=[[doc_id, typed_val]])
 
                     else:
                         vals = {}
@@ -878,7 +893,8 @@ class DBUtils:
                         if objectClass.lower() == 'organizationalunit':
                             continue
 
-                        vals['doc_id'] = dn_parsed[0][1]
+                        doc_id = dn_parsed[0][1]
+                        vals['doc_id'] = doc_id
                         vals['dn'] = dn
                         vals['objectClass'] = objectClass
 
@@ -889,13 +905,27 @@ class DBUtils:
 
                         table_name = objectClass
 
+                        subtable_data = []
+
                         for lkey in entry:
-                            vals[lkey] = self.get_rdbm_val(lkey, entry[lkey], rdbm_type='spanner')
+                            spanner_vals = self.get_rdbm_val(lkey, entry[lkey], rdbm_type='spanner')
+                            if not self.in_subtable(table_name, lkey):
+                                vals[lkey] = spanner_vals
+                            else:
+                                sub_table = '{}_{}'.format(table_name, lkey)
+                                sub_table_columns = ['doc_id', 'dict_doc_id', lkey]
+                                sub_table_values = []
+                                for subtableval in spanner_vals:
+                                    sub_table_values.append([doc_id, os.urandom(5).hex(), subtableval]) #TODO: What is dict_doc_id ?
+                                subtable_data.append((sub_table, sub_table_columns, sub_table_values))
 
                         columns = [ *vals.keys() ]
                         values = [ vals[lkey] for lkey in columns ]
 
                         self.spanner.insert_data(table=table_name, columns=columns, values=[values])
+
+                        for sdata in subtable_data:
+                            self.spanner.insert_data(table=sdata[0], columns=sdata[1], values=sdata[2])
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
