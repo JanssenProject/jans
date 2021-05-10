@@ -129,7 +129,7 @@ LABEL name="Config API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b3" \
+    release="b4" \
     summary="Janssen Config API" \
     description=""
 
