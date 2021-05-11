@@ -6,34 +6,8 @@
 
 package io.jans.as.server.model.token;
 
-import static io.jans.as.model.common.ScopeType.DYNAMIC;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -64,6 +38,30 @@ import io.jans.model.GluuAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static io.jans.as.model.common.ScopeType.DYNAMIC;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -82,6 +80,9 @@ import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 @Stateless
 @Named
 public class IdTokenFactory {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
@@ -351,6 +352,8 @@ public class IdTokenFactory {
         JsonWebResponse jwr = jwrService.createJwr(client);
         fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes,
                 includeIdTokenClaims, preProcessing, postProcessing, claims);
+        if (log.isTraceEnabled())
+            log.trace("Created claims for id_token, claims: " + jwr.getClaims().toJsonString());
         return jwrService.encode(jwr, client);
     }
 
