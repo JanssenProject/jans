@@ -23,7 +23,7 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 ```
 As we see, we can perform many operations such as `update`, `delete`, `test`, `post`, etc. Let's do some operations.
 
-- **_get-config-smtp_**
+## Find SMTP Server Configuration
 
 To view the current SMTP server configuration, run the following command line:
 
@@ -48,7 +48,7 @@ Getting access token for scope https://jans.io/oauth/config/smtp.readonly
 }
 ```
 
-- **_post-config-smtp_**
+## Setup New SMTP Server Configuration
 
 This operation can be performed to update/post a new SMTP configuration on your Janssen server.
 Let's see the schema first:
@@ -89,7 +89,7 @@ Server Response:
 }
 ```
 
-**_put-config-smtp_**
+## Update SMTP Server Configuration
 
 To update smtp server, simply change any information on `/tmp/smtp.json` file and run the following command:
 
