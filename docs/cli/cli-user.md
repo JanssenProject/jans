@@ -71,16 +71,18 @@ Operation ID: search-user
 To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema <schma>, for example /opt/jans/jans-cli/scim-cli.py 
 ```
 
-  1. **_get-users_**: 
+## Find Users List 
   
-  This operation is used to get list of the users and its properties. The command line is: 
+This operation is used to get list of the users and its properties. The command line is: 
   
-  ```/opt/jans/jans-cli/scim-cli.py --operation-id get-users```
+```
+/opt/jans/jans-cli/scim-cli.py --operation-id get-users
+```
   
-  By default, This will return all of the users and their properties. 
+By default, This will return all of the users and their properties. 
 
-  ```
-  root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
+```
+root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
 
 Getting access token for scope https://jans.io/scim/users.read
 {
@@ -241,7 +243,9 @@ Calling with params count=1
 
 ```
 
-2. **_`create_user`_**: This operation can be performed to create user resources. 
+## Creating an User Resources
+
+This operation can be performed to create user resources. 
 
 ```
 Operation ID: create-user
