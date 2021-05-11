@@ -258,7 +258,7 @@ def main():
             f.write(base64.b64decode(manager.secret.get("auth_openid_key_base64")).decode())
 
         keystore_path = "/etc/certs/auth-keys.jks"
-        jwks_uri = f"{manager.config.get('hostname')}/jans-auth/restv1/jwks"
+        jwks_uri = f"https://{manager.config.get('hostname')}/jans-auth/restv1/jwks"
 
     # ensure we're using correct JKS file and JWKS uri
     modify_keystore_path(manager, keystore_path, jwks_uri)
