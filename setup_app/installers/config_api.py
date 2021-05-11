@@ -110,7 +110,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
                             'jansDefScope': ['false'],
                             'jansId': [scope],
                             'jansScopeTyp': [scope_type],
-                            'showInConfigurationEndpoint': ['false']
+                            'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
                         })
 
                 jansUmaScopes.append(scopes[scope]['dn'])
