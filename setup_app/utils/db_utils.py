@@ -864,25 +864,34 @@ class DBUtils:
                         change_attr = entry['add'][0]
                         if table:
                             doc_id = self.get_doc_id_from_dn(dn)
-                            data = self.spanner.exec_sql('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
-                            if data.get('rows'):
-                                cur_data = []
 
-                                if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
-                                    cur_data = data['rows'][0][0]
-                                
-                                for cur_val in entry[change_attr]:
-                                    typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
-                                    cur_data.append(typed_val)
-    
-                            self.spanner.update_data(table=table, columns=['doc_id', change_attr], values=[[doc_id, cur_data]])
+                            if self.in_subtable(table, change_attr):
+                                sub_table = '{}_{}'.format(table, change_attr)
+                                for subval in entry[change_attr]:
+                                    typed_val = self.get_rdbm_val(change_attr, subval, rdbm_type='spanner')
+                                    dict_doc_id = self.get_sha_digest(typed_val)
+                                    self.spanner.insert_data(table=sub_table, columns=['doc_id', 'dict_doc_id', change_attr], values=[[doc_id, typed_val, typed_val]])
+
+                            else:
+                                data = self.spanner.exec_sql('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
+                                if data.get('rows'):
+                                    cur_data = []
+
+                                    if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
+                                        cur_data = data['rows'][0][0]
+                                    
+                                    for cur_val in entry[change_attr]:
+                                        typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
+                                        cur_data.append(typed_val)
+
+                                self.spanner.update_data(table=table, columns=['doc_id', change_attr], values=[[doc_id, cur_data]])
 
                     elif 'replace' in entry and 'changetype' in entry:
                         table = self.get_spanner_table_for_dn(dn)
                         doc_id = self.get_doc_id_from_dn(dn)
                         replace_attr = entry['replace'][0]
                         typed_val = self.get_rdbm_val(replace_attr, entry[replace_attr], rdbm_type='spanner')
-                        
+
                         if self.in_subtable(table, replace_attr):
                             sub_table = '{}_{}'.format(table, replace_attr)
                             # TODO: how to replace ?
