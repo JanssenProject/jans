@@ -258,6 +258,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             statService.reportRefreshToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
+            if (log.isTraceEnabled())
+                log.trace("Created refresh token: " + refreshToken.getCode());
+
             return refreshToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -275,10 +278,14 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(asToken(refreshToken));
                 statService.reportRefreshToken(getGrantType());
                 metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
+
+                if (log.isTraceEnabled())
+                    log.trace("Created refresh token: " + refreshToken.getCode());
+
                 return refreshToken;
             }
 
-            log.debug("Token expiration date is in the past. Skip creation.");
+            log.debug("Token expiration date is in the past. Skip refresh_token creation.");
             return null;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
