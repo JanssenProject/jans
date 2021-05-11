@@ -6,20 +6,8 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
@@ -46,6 +34,15 @@ import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.
@@ -109,8 +106,11 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String claims) throws Exception {
         JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, refreshToken,
                 state, scopes, includeIdTokenClaims, preProcessing, postProcessing, claims);
-        return new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
+        final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+        if (log.isTraceEnabled())
+            log.trace("Created id_token:" + idToken.getCode() );
+        return idToken;
     }
 
     @Override
