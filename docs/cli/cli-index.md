@@ -7,12 +7,18 @@ We will refer to this mode as **CL**. Using this mode is difficult compared to I
 
 It will print all information about how to configure Janssen Server using CLI mode:
 
-```commandline
-usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client_secret CLIENT_SECRET] [-debug] [--debug-log-file DEBUG_LOG_FILE]
+```
+usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
+                     [--client_secret CLIENT_SECRET] [-debug]
+                     [--debug-log-file DEBUG_LOG_FILE]
                      [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
-                     [--info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthOpenIDConnectSectorIdentifiers,OAuthScopes,OAuthUMAResources}]
-                     [--op-mode {get,post,put,patch,delete}] [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA] [--username USERNAME] [--password PASSWORD]
-                     [-j J] [--cert-file CERT_FILE] [--key-file KEY_FILE] [-noverify] [--data DATA]
+                     [--info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthScopes,OAuthUMAResources}]
+                     [--op-mode {get,post,put,patch,delete}]
+                     [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA]
+                     [--username USERNAME] [--password PASSWORD] [-j J]
+                     [--cert-file CERT_FILE] [--key-file KEY_FILE] [-noverify]
+                     [--patch-add PATCH_ADD] [--patch-replace PATCH_REPLACE]
+                     [--patch-remove PATCH_REMOVE] [--data DATA]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -27,13 +33,15 @@ optional arguments:
   --operation-id OPERATION_ID
                         Operation ID to be done
   --url-suffix URL_SUFFIX
-                        Argument to be added api endpoint url. For example inum:2B29
-  --info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthOpenIDConnectSectorIdentifiers,OAuthScopes,OAuthUMAResources}
+                        Argument to be added api endpoint url. For example
+                        inum:2B29
+  --info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthScopes,OAuthUMAResources}
                         Help for operation
   --op-mode {get,post,put,patch,delete}
                         Operation mode to be done
   --endpoint-args ENDPOINT_ARGS
-                        Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE
+                        Arguments to pass endpoint separated by comma. For
+                        example limit:5,status:INACTIVE
   --schema SCHEMA       Get sample json schema
   --username USERNAME   Auth username
   --password PASSWORD   Auth password
@@ -42,7 +50,17 @@ optional arguments:
                         Path to SSL Certificate file
   --key-file KEY_FILE   Path to SSL Key file
   -noverify             Ignore verifying the SSL certificate
+  --patch-add PATCH_ADD
+                        Colon delimited key:value pair for add patch
+                        operation. For example loggingLevel:DEBUG
+  --patch-replace PATCH_REPLACE
+                        Colon delimited key:value pair for replace patch
+                        operation. For example loggingLevel:DEBUG
+  --patch-remove PATCH_REMOVE
+                        Key for remove patch operation. For example
+                        imgLocation
   --data DATA           Path to json data file
+root@testjans:~# 
 ```
 We start with getting information about tasks, tasks are options of argument `--info`:
 
@@ -51,16 +69,16 @@ Attribute, CacheConfiguration, CacheConfigurationInMemory, CacheConfigurationMem
 ```
 
 To get information for a specific task we run command as below: 
-```commandline
+```
 /opt/jans/jans-cli/config-cli.py --info [task]
 ``` 
 for example: 
-```commandline
+```
 /opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
 ``` 
 
 It returns with some `operation id`:
-```commandline
+```
 Operation ID: get-acrs
   Description: Gets default authentication method.
 Operation ID: put-acrs
@@ -71,7 +89,7 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 ```
 To perform any operation, you have to run command line with the operation id. for example:
 
-```commandline
+```
 /opt/jans/jans-cli/config-cli.py --operation-id get-acrs
 ```
 It returns:
