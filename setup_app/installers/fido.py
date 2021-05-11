@@ -80,6 +80,13 @@ class FidoInstaller(JettyInstaller):
             os.path.join(self.fido2ConfigFolder, 'server_metadata')
             )
 
+        # copy Apple_WebAuthn_Root_CA
+        apple_weauthn = os.path.join(Config.distAppFolder, 'Apple_WebAuthn_Root_CA.pem')
+        if os.path.exists(apple_weauthn):
+            target_dir = os.path.join(self.fido2ConfigFolder, 'apple')
+            self.run([paths.cmd_mkdir, '-p', target_dir])
+            self.copyFile(apple_weauthn, target_dir)
+
 
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
