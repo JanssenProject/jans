@@ -45,6 +45,7 @@ public class ConfigResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
+        System.out.println("ConfigResource::getAppConfiguration() patchAppConfigurationProperty - requestString = " + requestString);
         log.debug("AUTH CONF details to patch - requestString = " + requestString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
