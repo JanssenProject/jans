@@ -30,6 +30,8 @@ Operation ID: patch-oauth-scopes-by-id
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
 ```
+## Find/View OAuth Scopes
+
 Operations will be done with **Operation ID**. Some operations may take parameters, let's retrieve `3` scopes (**limit**) that has `view` in it's description (**pattern**) and **type** `openid`:
 
 ```
@@ -130,6 +132,8 @@ Calling with params limit=3&pattern=view&type=openid
 ]
 ```
 
+## Create an OAuth Scope
+
 Let's create a scope. Remember when we queried info for a task **OAuthScopes** it printed:
 
 ```
@@ -182,7 +186,11 @@ Server Response:
 
 ```
 
-It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. Let's update `iconUrl` with patch method. So we need a schema for the patch method. Remember when we queried info for the task **OAuthScopes** it printed:
+It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. 
+
+## Patching OAuth Scopes by its ID
+
+Let's update `iconUrl` with patch method. So we need a schema for the patch method. Remember when we queried info for the task **OAuthScopes** it printed:
 
 ```
 Operation ID: patch-oauth-scopes-by-id
@@ -191,7 +199,9 @@ Operation ID: patch-oauth-scopes-by-id
   Schema: Array of /components/schemas/PatchRequest
  ```
  
-This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](cli-tips.md#patch-request) Get schema:
+This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](cli-tips.md#patch-request).
+
+Let's Get schema:
 
 ```
 /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
