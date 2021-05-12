@@ -65,7 +65,6 @@ public class CacheConfigurationResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchCacheConfiguration(@NotNull String requestString) {
         log.debug(" CACHE details to patch - requestString = " + requestString);
@@ -100,7 +99,6 @@ public class CacheConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.REDIS)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
         log.debug("REDIS CACHE details to patch - requestString = " + requestString);
@@ -136,7 +134,6 @@ public class CacheConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.IN_MEMORY)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchInMemoryConfiguration(@NotNull String requestString) {
         log.debug("IN_MEMORY CACHE details to patch - requestString = " + requestString);
@@ -173,7 +170,6 @@ public class CacheConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
         log.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString = " + requestString);
@@ -208,7 +204,6 @@ public class CacheConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.MEMCACHED)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchMemcachedConfiguration(@NotNull String requestString) {
         log.debug("MEMCACHED CACHE details to patch - requestString = " + requestString);

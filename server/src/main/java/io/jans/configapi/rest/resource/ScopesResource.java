@@ -127,7 +127,6 @@ public class ScopesResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
