@@ -56,7 +56,6 @@ public class JwksResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     public Response patch(String requestString) throws JsonPatchException, IOException {
         log.debug("JWKS details to be patched - requestString = " + requestString);
