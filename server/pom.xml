@@ -22,18 +22,34 @@
 
 
 	<dependencies>
+
+		<!-- jans -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-client-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-common</artifactId>
 		</dependency>
-		<!-- <dependency> <groupId>org.glassfish.jersey.bundles</groupId> <artifactId>jaxrs-ri</artifactId> 
-			</dependency> -->
 
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-		</dependency>
-		
+
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>org.eclipse.microprofile.config</groupId>
@@ -64,26 +80,17 @@
 			<artifactId>smallrye-config-core</artifactId>
 		</dependency>
 
-		<!-- jans -->
+
+
+		<!-- Java -->
 		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-util</artifactId>
+			<groupId>javax.json</groupId>
+			<artifactId>javax.json-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-service</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-client-api</artifactId>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
 		</dependency>
 
 		<!-- Weld -->
@@ -98,11 +105,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- RestEasy -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-servlet-initializer</artifactId>
-		</dependency>
 
 		<!-- Logging -->
 		<dependency>
@@ -129,36 +131,75 @@
 		</dependency>
 
 		<!-- Net -->
+		<!-- <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpclient</artifactId> 
+			</dependency> <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpcore</artifactId> 
+			</dependency> -->
+
+
+
+		<!-- RestEasy -->
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-cdi</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-servlet-initializer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxb-provider</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+		</dependency>
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core-spi</artifactId> 
+			<version>4.6.0.Final</version> </dependency> -->
+
+		<!-- Jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
+
+		<!-- Other -->
+
+		<!--<dependency>
+			<groupId>org.glassfish.jersey.bundles</groupId>
+			<artifactId>jaxrs-ri</artifactId>
+		</dependency>-->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 		</dependency>
 
+		<!-- <dependency> <groupId>org.codehaus.jettison</groupId> <artifactId>jettison</artifactId> 
+			</dependency> <dependency> <groupId>com.googlecode.json-simple</groupId> 
+			<artifactId>json-simple</artifactId> </dependency> <dependency> <groupId>org.mvel</groupId> 
+			<artifactId>mvel2</artifactId> </dependency> <dependency> <groupId>org.jetbrains</groupId> 
+			<artifactId>annotations</artifactId> </dependency> -->
 
-		<!-- Other -->
-		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- <dependency> <groupId>javax.websocket</groupId> <artifactId>javax.websocket-api</artifactId> 
+			<scope>test</scope> </dependency> -->
 
 	</dependencies>
 
@@ -420,11 +461,8 @@
 					<groupId>org.jboss.weld</groupId>
 					<artifactId>weld-core-impl</artifactId>
 				</dependency>
-				<!-- <dependency>
-					<groupId>org.jboss.weld.module</groupId>
-					<artifactId>weld-jsf</artifactId>
-					<version>${weld.version}</version>
-				</dependency> -->
+				<!-- <dependency> <groupId>org.jboss.weld.module</groupId> <artifactId>weld-jsf</artifactId> 
+					<version>${weld.version}</version> </dependency> -->
 
 				<dependency>
 					<groupId>org.jboss.spec.javax.ejb</groupId>
@@ -603,15 +641,33 @@
 				</property>
 			</activation>
 
-			<!-- <dependencies> Remove after jans client update to same version <dependency> 
-				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-jaxrs</artifactId> 
-				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
-				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-cdi</artifactId> 
-				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
-				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-client</artifactId> 
-				<version>3.0.21.Final</version> <scope>test</scope> </dependency> <dependency> 
-				<groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-servlet-initializer</artifactId> 
-				<version>3.0.21.Final</version> <scope>test</scope> </dependency> </dependencies> -->
+			<dependencies>
+				<!-- Remove after jans client update to same version -->
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-jaxrs</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-cdi</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-client</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-servlet-initializer</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 
 		<!-- <profile> <id>glassfish</id> <activation> <property> <name>glassfish.enable</name> 
