@@ -49,9 +49,17 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private ResourceInfo resourceInfo;
 
     @Inject
-    AuthorizationService authorizationService;    
+    AuthorizationService authorizationService;  
+    
+    public AuthorizationFilter() {
+        System.out.println("\n\n $$$$$$$$$$$$$$$$$$$$$$$$$ AuthorizationFilter::constructor $$$$$$$$$$$$$$$$$$$$$$$$$ \n\n\n");
+    }
     
     public void filter(ContainerRequestContext context) {
+        System.out.println("\n\n ======================================================================= \n\n");
+        System.out.println("\n\n AuthorizationFilter::filter() - new context = " + context + "\n\n\n\n");
+        System.out.println("\n\n AuthorizationFilter::filter() info - " + info
+                + " , request = " + request + " , httpHeaders = " + httpHeaders +" , resourceInfo = "+resourceInfo+"\n\n\n\n");
         log.info("=======================================================================");
         log.info("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = "
                 + info.getRequestUri() + "\n\n");
