@@ -15,7 +15,7 @@ OAuth - OpenID Connect - Clients
 ```
 Using Janssen CLI, the Administrator can easily `create/update/delete` OpenID Connect without any interruption.
 
-- **__list of OpenID Connect clients__**
+## Get list of OpenID Connect clients
 
 By selecting option '1' you will get a list of OpenID Connect clients.
 You may enter `limit[50]` and `pattern` to filter in searching.
@@ -372,7 +372,7 @@ Selection:
 
 ```
 
-- **__Create a New OpenID Client__**
+## Create a New OpenID Client
 
 To create a new OpenID client, you need two enter '2' from OpenID Menu.
 It will ask to enter below information:
@@ -629,7 +629,7 @@ Please wait while posting data ...
 Selection: 
 ```
 
-- **__Update an OpenID Client by its inum__**
+## Update an OpenID Client by its inum
 
 If anything you want to update of an OpenID client, you can choose option '3' and enter the `inum` of the OpenID client. Here I've used the `inum=1929a64c-6f67-4399-bdd3-6a8d44cc04ae` of the above OpenID client. After then, You will get a list of fields to choose which one you are going to update.
 Here is what you can see in return:
@@ -725,7 +725,7 @@ Selection:
 
 
 
-**__Get OpenID client by its inum__**
+## Get OpenID client by its inum
 
 `inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
 
@@ -830,8 +830,3 @@ Getting access token for scope https://jans.io/oauth/config/openid/clients.reado
 
 Selection: 
 ```
-
-<!-- 
-
-(removed since sector identifier is depcreated and does not include in Janssen Server anymore)
-

@@ -19,7 +19,9 @@ Configuration – SMTP
 ```
 Just go with the option and perform operation.
 
-- **__view / find__** : select option 1, it will return as below:
+## Get Current SMTP Server Configuration
+
+To view the current SMTP server configuration on your Janssen server, please select option 1, it will return as below:
 
 ```text
 Returns SMTP server configuration
@@ -40,38 +42,21 @@ Getting access token for scope https://jans.io/oauth/config/smtp.readonly
   "password": null
 }
 ```
-- **__Add SMTP Server__**
-To add a smtp server, chose option 2 from SMTP Configuration Menu:
-  
+## Setup new SMTP server
+
+To add a smtp server, chose option 2 from SMTP Configuration Menu. It will ask few things to fill each property.
+
+- host
+- port
+- requiresSsl[true, false]
+- serverTrust[true, false]
+- fromName
+- fromEmailAddress
+- requireAuthentication [true, false]
+- username
+- password
+
 ```text
-Selection: 2
-
-«Hostname of the SMTP server. Type: string»
-host: 
-
-«Port number of the SMTP server. Type: integer»
-port: 
-
-«Boolean value with default value false. If true, SSL will be enabled. Type: boolean»
-requiresSsl  [false]: 
-
-«Boolean value with default value false. Type: boolean»
-serverTrust  [false]: 
-
-«Name of the sender. Type: string»
-fromName: 
-
-«Email Address of the Sender. Type: string»
-fromEmailAddress: 
-
-«Boolean value with default value false. It true it will enable sender authentication. Type: boolean»
-requiresAuthentication  [false]: 
-
-«Username of the SMTP. Type: string»
-userName: 
-
-«Password for the SMTP. Type: string»
-password: 
 Obtained Data:
 
 {
@@ -89,8 +74,8 @@ Obtained Data:
 Continue? 
 ```
 
-Fill each property with the correct information.
-- **Test SMTP Server**
+
+## Test SMTP Configuration
 
 If the server is running, and all the information you have entered is correct. You can test SMTP server from the following option 5, it will respond if the server is configured properly.
 

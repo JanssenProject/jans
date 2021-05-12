@@ -14,7 +14,7 @@ Database - LDAP configuration
 7 Tests an LDAP configuration
 ```
 
-- **List of Existing LDAP**
+## Gets List of Existing LDAP Configuration
 
 To get a list of existing LDAP configurations, select option 1 and press enter, you will get a list of existing LDAP configurations in your Janssen server.
 
@@ -47,7 +47,7 @@ Getting access token for scope https://jans.io/oauth/config/database/ldap.readon
   }
 ]
 ```
-- **Adding new LDAP**
+## Adding new LDAP Configuration
 
 To add a new LDAP configuration, choose option 2 and add the following properties:
 ```json5
@@ -69,11 +69,11 @@ To add a new LDAP configuration, choose option 2 and add the following propertie
 ```
 Then enter `y` to confirm.
 
-- **Update an LDAP configuration**
+## Update an Existing LDAP configuration
 
 To update an existing LDAP configuration, select option 3 and enter the LDAP configuration name. If it matches to the existing configuration then It will ask to enter a value for each properties.
 
-- **Delete a LDAP configuration**
+## Delete an Existing LDAP configuration
 
 To delete an existing ldap configuration, enter a name of an existing ldap configuration and enter `yes/y` to confirm.
 
