@@ -1,19 +1,11 @@
 package io.jans.as.server.servlet;
 
-import javax.servlet.http.HttpServlet;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.token.TokenService;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -22,16 +14,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.token.TokenService;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 
 /**
