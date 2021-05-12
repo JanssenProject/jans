@@ -13,7 +13,7 @@ Configuration – JWK - JSON Web Key (JWK)
 ```
 You can `view` the list of JSON Web Key, `add/replace` and `patch` using Janssen CLI.
 
-- **__`Get list of JSON Web Key`__**
+## Get list of JSON Web Key
 
 Select option 1 from JSON Web Key Menu and it will return a list of key with details information as below:
   
@@ -196,7 +196,7 @@ Getting access token for scope https://jans.io/oauth/config/jwks.readonly
 }
 ```
 
-- **`puts/replace - JWK`**
+## Creating or Replacing - JWK
 
 You can add a new JWK or replace an old JWK with new value through this Interactive Mode option.
 When it will ask `Add JwonWebKey?` just press `y` to confirm. Fill each property with a value, keep empty to skip.
@@ -295,7 +295,8 @@ Please wait while posting data ...
 }
 ```
 
-- **`Patch JWK`**
+## Update an Existing JWK Configuration
 
-Just chose this option and fill the value for `op`, `path`, and `value` to patch JSON Web Key.
+
+Just choose this option and fill the value for `op`, `path`, and `value` to patch JSON Web Key.
 
