@@ -83,15 +83,18 @@
 
 
 		<!-- Java -->
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>javax.json</groupId> <artifactId>javax.json-api</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>jsp-api</artifactId>
 			<version>2.2</version>
 		</dependency>
+		<!-- <dependency> <groupId>org.json</groupId> <artifactId>json</artifactId> 
+			<version>20200518</version> </dependency> <dependency> <groupId>com.github.java-json-tools</groupId> 
+			<artifactId>json-patch</artifactId> <version>1.12</version> </dependency> -->
+		<!-- <dependency> <groupId>com.github.java-json-tools</groupId> <artifactId>json-patch</artifactId> 
+			<version>1.13</version> </dependency> -->
 
 		<!-- Weld -->
 		<dependency>
@@ -141,28 +144,35 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-cdi</artifactId>
+			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
+			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-servlet-initializer</artifactId>
+			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
+			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
+			<!-- <version>3.14.0.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jackson2-provider</artifactId>
+			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
-		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core-spi</artifactId> 
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core</artifactId> 
+			<version>4.5.8.Final</version> </dependency> -->		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core-spi</artifactId> 
 			<version>4.6.0.Final</version> </dependency> -->
 
 		<!-- Jackson -->
@@ -182,10 +192,8 @@
 
 		<!-- Other -->
 
-		<!--<dependency>
-			<groupId>org.glassfish.jersey.bundles</groupId>
-			<artifactId>jaxrs-ri</artifactId>
-		</dependency>-->
+		<!--<dependency> <groupId>org.glassfish.jersey.bundles</groupId> <artifactId>jaxrs-ri</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
@@ -200,6 +208,38 @@
 
 		<!-- <dependency> <groupId>javax.websocket</groupId> <artifactId>javax.websocket-api</artifactId> 
 			<scope>test</scope> </dependency> -->
+
+		<!-- Testing -->
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.intuit.karate</groupId>
+			<artifactId>karate-apache</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.masterthought</groupId>
+			<artifactId>cucumber-reporting</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 

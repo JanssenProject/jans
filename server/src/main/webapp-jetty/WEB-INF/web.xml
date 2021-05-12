@@ -19,12 +19,12 @@
 		<param-value>true</param-value> </context-param> <context-param> <param-name>resteasy.scan.resources</param-name> 
 		<param-value>true</param-value> </context-param> -->
 
-
+<!--
 	<listener>
 		<listener-class>
 			org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
 		</listener-class>
-	</listener>
+	</listener>-->
 
 	<!-- Jetty -->
 	<context-param>
@@ -43,7 +43,7 @@
 		</listener-class>
 	</listener>
 
-
+<!--
 	<security-constraint>
 		<display-name>Restrict raw XHTML Documents</display-name>
 		<web-resource-collection>
@@ -51,7 +51,7 @@
 			<url-pattern>*.xhtml</url-pattern>
 		</web-resource-collection>
 		<auth-constraint />
-	</security-constraint>
+	</security-constraint>-->
 
 	<!-- Weld -->
 	<resource-env-ref>
