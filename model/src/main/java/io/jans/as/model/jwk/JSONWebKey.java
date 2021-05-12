@@ -6,14 +6,13 @@
 
 package io.jans.as.model.jwk;
 
-import java.util.List;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.jans.as.model.crypto.signature.ECEllipticCurve;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -41,9 +40,6 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
 
     private String x;
     private String y;
-
-    public JSONWebKey() {
-    }
 
     /**
      * Returns the Key ID. The Key ID member can be used to match a specific key. This can be used, for instance,

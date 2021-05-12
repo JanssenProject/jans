@@ -91,7 +91,6 @@ public class AccountsServlet extends HttpServlet {
                 httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
             } else {
                 xfapiinteractionid = UUID.randomUUID().toString();
-                ;
                 httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
             }
 
