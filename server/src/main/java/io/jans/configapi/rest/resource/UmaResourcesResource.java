@@ -108,7 +108,6 @@ public class UmaResourcesResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS })
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)

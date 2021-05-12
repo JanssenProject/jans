@@ -94,7 +94,6 @@ public class LdapConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
     public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {

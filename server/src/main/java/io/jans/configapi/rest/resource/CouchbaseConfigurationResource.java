@@ -82,7 +82,6 @@ public class CouchbaseConfigurationResource extends BaseResource {
 
     @PATCH
     @Path(ApiConstants.NAME_PARAM_PATH)
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response patch(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws Exception {
         log.debug("COUCHBASE to be patched - name = " + name + " , requestString = " + requestString);

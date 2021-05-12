@@ -122,7 +122,6 @@ public class ClientsResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)

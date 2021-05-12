@@ -42,7 +42,7 @@ public class ConfigResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
         System.out.println("ConfigResource::getAppConfiguration() patchAppConfigurationProperty - requestString = " + requestString);
