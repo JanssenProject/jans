@@ -870,5 +870,16 @@
     "spanner": {
       "type": "ARRAY<STRING(MAX)>"
     }
+  },
+  "jansClntIdIssuedAt": {
+    "mysql": {
+      "type": "DATETIME(3)"
+    },
+    "pgsql": {
+      "type": "TIMESTAMP"
+    },
+    "spanner": {
+      "type": "TIMESTAMP"
+    }
   }
 }
