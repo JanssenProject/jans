@@ -36,7 +36,7 @@
 		<microprofile.version>2.0.1</microprofile.version>
 		<httpcore.version>4.4.6</httpcore.version>
 		<httpclient.version>4.5.3</httpclient.version>
-
+		<uel-impl.version>2.2.1-b05</uel-impl.version>
 	</properties>
 
 	<prerequisites>
@@ -216,7 +216,51 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- Java -->
+			<!-- Validation -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator-cdi</artifactId>
+				<version>5.4.1.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>6.0.13.Final</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-validator-provider-11</artifactId>
+				<version>3.6.3.Final</version>
+			</dependency>
+			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-hibernatevalidator-provider</artifactId> 
+				<version>3.0.19.Final</version> <scope>provided</scope> </dependency> -->
+			<!-- <dependency> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
+				<version>2.2.1-b04</version> <scope>provided</scope> </dependency> -->
+			<!-- <dependency> <groupId>org.glassfish.web</groupId> <artifactId>el-impl</artifactId> 
+				<version>${uel-impl.version}</version> </dependency> -->
+			<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.el</artifactId> 
+				<version>3.0.3</version> </dependency> <dependency> <groupId>org.hibernate</groupId> 
+				<artifactId>hibernate-validator-cdi</artifactId> <version>5.4.1.Final</version> 
+				</dependency> <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
+				<version>2.0.1.Final</version> <scope>provided</scope> </dependency> <dependency> 
+				<groupId>org.hibernate.validator</groupId> <artifactId>hibernate-validator</artifactId> 
+				<version>6.0.13.Final</version> <scope>provided</scope> </dependency> -->
+
+			<!-- <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
+				<version>2.0.1.Final</version> <scope>provided</scope> </dependency> <dependency> 
+				<groupId>org.hibernate.validator</groupId> <artifactId>hibernate-validator</artifactId> 
+				<version>6.0.13.Final</version> <scope>provided</scope> </dependency> <dependency> 
+				<groupId>org.hibernate.validator</groupId> <artifactId>hibernate-validator-cdi</artifactId> 
+				<version>7.0.0.Final</version> </dependency> <dependency> <groupId>org.glassfish</groupId> 
+				<artifactId>jakarta.el</artifactId> <version>3.0.3</version> </dependency> -->
+
 			<!-- <dependency> <groupId>javax.interceptor</groupId> <artifactId>javax.interceptor-api</artifactId> 
 				<version>1.2</version> </dependency> <dependency> <groupId>javax.websocket</groupId> 
 				<artifactId>javax.websocket-api</artifactId> <version>1.1</version> </dependency> 

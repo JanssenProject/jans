@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest;
 
+import io.jans.configapi.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.rest.resource.AcrsResource;
 import io.jans.configapi.rest.resource.AttributesResource;
 import io.jans.configapi.rest.resource.CacheConfigurationResource;
@@ -37,27 +38,25 @@ public class ApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
         
+        //General
+        classes.add(ObjectMapperContextResolver.class);
         
+        //oAuth Config       
         classes.add(AcrsResource.class);
-        classes.add(AttributesResource.class);
-        
+        classes.add(AttributesResource.class);        
         classes.add(CacheConfigurationResource.class);
         classes.add(ClientsResource.class);
         classes.add(ConfigResource.class);
         classes.add(ConfigSmtpResource.class);
         classes.add(CouchbaseConfigurationResource.class);
-        classes.add(CustomScriptResource.class);
-        
-        classes.add(Fido2ConfigResource.class);
-        
-        classes.add(JwksResource.class);
-        
+        classes.add(CustomScriptResource.class);        
+        classes.add(Fido2ConfigResource.class);        
+        classes.add(JwksResource.class);        
         classes.add(LdapConfigurationResource.class);
-        classes.add(LoggingResource.class);
+        classes.add(LoggingResource.class);        
+        classes.add(ScopesResource.class);        
+        classes.add(UmaResourcesResource.class);        
         
-        classes.add(ScopesResource.class);
-        
-        classes.add(UmaResourcesResource.class);
         
         return classes;
     }
