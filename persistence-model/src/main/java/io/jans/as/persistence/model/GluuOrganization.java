@@ -6,19 +6,17 @@
 
 package io.jans.as.persistence.model;
 
-import java.io.Serializable;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
 
 /**
  * Group
@@ -68,9 +66,6 @@ public class GluuOrganization extends Entry implements Serializable {
 
 	@AttributeName(name = "jansCustomMessage")
 	private String[] customMessages;
-
-	@AttributeName(name = "oxInumConfig")
-	private String oxInumConfig;
 
 	@AttributeName(name = "title")
 	private String title;
@@ -158,14 +153,6 @@ public class GluuOrganization extends Entry implements Serializable {
 
 	public void setOrganization(String organization) {
 		this.organization = organization;
-	}
-
-	public String getOxInumConfig() {
-		return oxInumConfig;
-	}
-
-	public void setOxInumConfig(String oxInumConfig) {
-		this.oxInumConfig = oxInumConfig;
 	}
 
 	public String getSeeAlso() {
