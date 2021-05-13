@@ -12,41 +12,22 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.IntrospectionService;
-import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import io.jans.as.client.uma.UmaMetadataService;
-import io.jans.as.client.uma.UmaPermissionService;
-import io.jans.as.client.uma.UmaRptIntrospectionService;
-import io.jans.as.model.uma.UmaMetadata;
 import io.jans.configapi.util.Jackson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
-import java.util.List;
-import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-/*
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.eclipse.microprofile.rest.client.inject.RestClient;*/
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-//import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;*/
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AuthClientService {
-
-    // @Inject
-    // @RestClient
-    // OpenIdClientService openIdClientService;
 
     private static Logger log = LoggerFactory.getLogger(AuthClientService.class);
 

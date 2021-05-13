@@ -32,10 +32,10 @@ import javax.ws.rs.ext.Provider;
 public class AuthorizationFilter implements ContainerRequestFilter {
 
     private static final String AUTHENTICATION_SCHEME = "Bearer";
-    
+
     @Inject
     Logger log;
-    
+
     @Context
     UriInfo info;
 
@@ -49,20 +49,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private ResourceInfo resourceInfo;
 
     @Inject
-    AuthorizationService authorizationService;  
-    
-    public AuthorizationFilter() {
-        System.out.println("\n\n $$$$$$$$$$$$$$$$$$$$$$$$$ AuthorizationFilter::constructor $$$$$$$$$$$$$$$$$$$$$$$$$ \n\n\n");
-    }
-    
+    AuthorizationService authorizationService;
+
     public void filter(ContainerRequestContext context) {
-        System.out.println("\n\n ======================================================================= \n\n");
-        System.out.println("\n\n AuthorizationFilter::filter() - new context = " + context + "\n\n\n\n");
-        System.out.println("\n\n AuthorizationFilter::filter() info - " + info
-                + " , request = " + request + " , httpHeaders = " + httpHeaders +" , resourceInfo = "+resourceInfo+"\n\n\n\n");
         log.info("=======================================================================");
-        log.info("====== info.getAbsolutePath() = " + info.getAbsolutePath() + " , info.getRequestUri() = "
-                + info.getRequestUri() + "\n\n");
+        log.info("====== context = " + context + " , info.getAbsolutePath() = " + info.getAbsolutePath()
+                + " , info.getRequestUri() = " + info.getRequestUri() + "\n\n");
         log.info("====== info.getBaseUri()=" + info.getBaseUri() + " info.getPath()=" + info.getPath()
                 + " info.toString()=" + info.toString());
         log.info("====== request.getContextPath()=" + request.getContextPath() + " request.getRequestURI()="

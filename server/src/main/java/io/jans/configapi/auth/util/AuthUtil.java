@@ -3,19 +3,12 @@ package io.jans.configapi.auth.util;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeType;
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.UmaPermission;
-import io.jans.as.model.uma.UmaPermissionList;
-import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.auth.api.ApiProtectionCache;
 import io.jans.configapi.auth.service.AuthClientService;
-//import io.jans.configapi.auth.service.UmaService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.ConfigurationService;
@@ -33,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -42,7 +33,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-//@DependsOn("appInitializer")
 public class AuthUtil {
 
     @Inject

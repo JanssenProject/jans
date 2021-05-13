@@ -20,7 +20,6 @@
 		<maven>${maven.min-version}</maven>
 	</prerequisites>
 
-
 	<dependencies>
 
 		<!-- jans -->
@@ -49,6 +48,22 @@
 			<artifactId>jans-config-api-common</artifactId>
 		</dependency>
 
+		<!-- Weld -->
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Security -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+		</dependency>
 
 		<!-- Microprofile -->
 		<dependency>
@@ -80,100 +95,51 @@
 			<artifactId>smallrye-config-core</artifactId>
 		</dependency>
 
-
-
-		<!-- Java -->
-		<!-- <dependency> <groupId>javax.json</groupId> <artifactId>javax.json-api</artifactId> 
-			</dependency> -->
+		<!-- Validation -->
 		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.2</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-cdi</artifactId>
 		</dependency>
-		<!-- <dependency> <groupId>org.json</groupId> <artifactId>json</artifactId> 
-			<version>20200518</version> </dependency> <dependency> <groupId>com.github.java-json-tools</groupId> 
-			<artifactId>json-patch</artifactId> <version>1.12</version> </dependency> -->
-		<!-- <dependency> <groupId>com.github.java-json-tools</groupId> <artifactId>json-patch</artifactId> 
-			<version>1.13</version> </dependency> -->
-
-		<!-- Weld -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-
-		<!-- Logging -->
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-validator-provider-11</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jul</artifactId>
-		</dependency>
-
-		<!-- Security -->
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-		</dependency>
-
-		<!-- Net -->
-		<!-- <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpclient</artifactId> 
-			</dependency> <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpcore</artifactId> 
-			</dependency> -->
-
-
 
 		<!-- RestEasy -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-cdi</artifactId>
-			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
-			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-servlet-initializer</artifactId>
-			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
-			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
-			<!-- <version>3.14.0.Final</version> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jackson2-provider</artifactId>
-			<!-- <version>4.5.8.Final</version> -->
 		</dependency>
-		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core</artifactId> 
-			<version>4.5.8.Final</version> </dependency> -->		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-core-spi</artifactId> 
-			<version>4.6.0.Final</version> </dependency> -->
 
 		<!-- Jackson -->
 		<dependency>
@@ -189,27 +155,32 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-
-		<!-- Other -->
-
-		<!--<dependency> <groupId>org.glassfish.jersey.bundles</groupId> <artifactId>jaxrs-ri</artifactId> 
-			</dependency> -->
+		<!-- Java -->
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.codehaus.jettison</groupId> <artifactId>jettison</artifactId> 
-			</dependency> <dependency> <groupId>com.googlecode.json-simple</groupId> 
-			<artifactId>json-simple</artifactId> </dependency> <dependency> <groupId>org.mvel</groupId> 
-			<artifactId>mvel2</artifactId> </dependency> <dependency> <groupId>org.jetbrains</groupId> 
-			<artifactId>annotations</artifactId> </dependency> -->
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jul</artifactId>
+		</dependency>
 
-
-		<!-- <dependency> <groupId>javax.websocket</groupId> <artifactId>javax.websocket-api</artifactId> 
-			<scope>test</scope> </dependency> -->
-
-		<!-- Testing -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
@@ -243,8 +214,6 @@
 
 	</dependencies>
 
-
-
 	<build>
 		<finalName>jans-config-api</finalName>
 
@@ -265,10 +234,6 @@
 				</includes>
 			</testResource>
 		</testResources>
-		<!-- <resources> <resource> <directory>src/main/resources</directory> <filtering>true</filtering> 
-			<includes> <include>**/*.properties</include> <include>**/*.json</include> 
-			<include>**/*.xml</include> <include>**/*.properties</include> </includes> 
-			</resource> </resources> -->
 
 		<plugins>
 			<plugin>
@@ -342,9 +307,6 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}</outputDirectory>
 							<resources>
-								<!-- <resource> <directory>src/test/resources</directory> <filtering>true</filtering> 
-									<includes> <include>karate.properties</include> <include>karate_jenkins.properties</include> 
-									<include>test.properties</include> <include>*.*</include> </includes> </resource> -->
 								<resource>
 									<directory>src/main/resources</directory>
 									<filtering>true</filtering>
@@ -368,11 +330,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<!-- <quarkus.http.test-port>8083</quarkus.http.test-port> -->
 					</systemPropertyVariables>
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
-						<!-- <java.util.logging.manager>org.jboss.logmanager.LogManager </java.util.logging.manager> -->
 						<karate.options>--tags ~@ignore</karate.options>
 					</systemProperties>
 				</configuration>
@@ -480,12 +440,17 @@
 					<groupId>javax.enterprise</groupId>
 					<artifactId>cdi-api</artifactId>
 				</dependency>
-				<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.faces</artifactId> 
-					</dependency> -->
 
-				<!-- <dependency> <groupId>org.glassfish.web</groupId> <artifactId>el-impl</artifactId> 
-					<exclusions> <exclusion> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
-					</exclusion> </exclusions> </dependency> -->
+				<dependency>
+					<groupId>org.glassfish.web</groupId>
+					<artifactId>el-impl</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
 
 				<dependency>
 					<groupId>javax.el</groupId>
@@ -501,8 +466,6 @@
 					<groupId>org.jboss.weld</groupId>
 					<artifactId>weld-core-impl</artifactId>
 				</dependency>
-				<!-- <dependency> <groupId>org.jboss.weld.module</groupId> <artifactId>weld-jsf</artifactId> 
-					<version>${weld.version}</version> </dependency> -->
 
 				<dependency>
 					<groupId>org.jboss.spec.javax.ejb</groupId>
@@ -554,11 +517,11 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+									<addDefaultImplementationEntries>true
+									</addDefaultImplementationEntries>
 								</manifest>
 								<manifestEntries>
 									<Implementation-Build>${buildNumber}</Implementation-Build>
-									<!--suppress UnresolvedMavenProperty -->
 									<Build-Branch>${git.branch}</Build-Branch>
 								</manifestEntries>
 							</archive>
@@ -601,7 +564,6 @@
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<webResources>
-								<!-- Duplicity for m2e-wtp plugin -->
 								<resource>
 									<directory>src/main/webapp</directory>
 									<filtering>true</filtering>
@@ -644,7 +606,6 @@
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<webResources>
-								<!-- Duplicity for m2e-wtp plugin -->
 								<resource>
 									<directory>src/main/webapp</directory>
 									<filtering>true</filtering>
@@ -709,13 +670,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
-
-		<!-- <profile> <id>glassfish</id> <activation> <property> <name>glassfish.enable</name> 
-			</property> </activation> <dependencies> Glassfish <dependency> <groupId>org.glassfish.main.extras</groupId> 
-			<artifactId>glassfish-embedded-all</artifactId> <version>4.1.2</version> 
-			<scope>test</scope> </dependency> <dependency> <groupId>org.jboss.arquillian.container</groupId> 
-			<artifactId>arquillian-glassfish-embedded-3.1</artifactId> <version>1.0.0.Final</version> 
-			<scope>test</scope> </dependency> </dependencies> </profile> -->
 
 	</profiles>
 </project>

@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -31,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-//@DependsOn("appInitializer")
 public class ApiProtectionService {
 
     public static final String PROTECTION_CONFIGURATION_FILE_NAME = "config-api-rs-protect.json";
@@ -49,10 +46,6 @@ public class ApiProtectionService {
     ClientService clientService;
 
     Collection<RsResource> rsResourceList;
-
-    public ApiProtectionService() {
-
-    }
 
     public Collection<RsResource> getResourceList() {
         return rsResourceList;
