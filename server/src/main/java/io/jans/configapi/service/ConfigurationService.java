@@ -15,7 +15,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 

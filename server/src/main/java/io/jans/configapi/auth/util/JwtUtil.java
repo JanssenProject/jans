@@ -23,7 +23,6 @@ import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.json.JSONObject;
 
-import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -33,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 
 @ApplicationScoped
-//@DependsOn("appInitializer","authUtil")
 public class JwtUtil {
 
     @Inject

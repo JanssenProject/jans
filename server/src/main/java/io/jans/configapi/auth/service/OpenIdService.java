@@ -8,10 +8,8 @@ package io.jans.configapi.auth.service;
 
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.configapi.auth.service.AuthClientService;
 import io.jans.configapi.service.ConfigurationService;
 
-import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.inject.Inject;
@@ -22,7 +20,6 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("openIdService")
-//@DependsOn("appInitializer")
 public class OpenIdService implements Serializable {
 
     private static final long serialVersionUID = 4564959567069741194L;
