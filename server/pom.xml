@@ -80,9 +80,40 @@
 			<artifactId>smallrye-config-core</artifactId>
 		</dependency>
 
-
-
-		<!-- Java -->
+		<!-- Validation -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator-cdi</artifactId>
+			<version>5.4.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.1.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.13.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-validator-provider-11</artifactId>
+			<version>3.6.3.Final</version>
+		</dependency>
+		<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-hibernatevalidator-provider</artifactId> 
+			<scope>provided</scope> </dependency> -->
+		<!-- <dependency> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
+			<scope>provided</scope> </dependency> -->
+		<!-- <dependency> <groupId>org.glassfish.web</groupId> <artifactId>el-impl</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.el</artifactId> 
+			</dependency> <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-validator-cdi</artifactId> 
+			</dependency> <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
+			<scope>provided</scope> </dependency> <dependency> <groupId>org.hibernate.validator</groupId> 
+			<artifactId>hibernate-validator</artifactId> <scope>provided</scope> </dependency> -->
 		<!-- <dependency> <groupId>javax.json</groupId> <artifactId>javax.json-api</artifactId> 
 			</dependency> -->
 		<dependency>
@@ -368,7 +399,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
-						<!-- <quarkus.http.test-port>8083</quarkus.http.test-port> -->
 					</systemPropertyVariables>
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
@@ -483,9 +513,16 @@
 				<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.faces</artifactId> 
 					</dependency> -->
 
-				<!-- <dependency> <groupId>org.glassfish.web</groupId> <artifactId>el-impl</artifactId> 
-					<exclusions> <exclusion> <groupId>javax.el</groupId> <artifactId>el-api</artifactId> 
-					</exclusion> </exclusions> </dependency> -->
+				<dependency>
+					<groupId>org.glassfish.web</groupId>
+					<artifactId>el-impl</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
 
 				<dependency>
 					<groupId>javax.el</groupId>
