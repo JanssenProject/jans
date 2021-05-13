@@ -6,9 +6,6 @@
 
 package io.jans.as.persistence.model.configuration;
 
-import java.io.Serializable;
-import java.util.List;
-
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -17,6 +14,9 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Gluu Configuration
@@ -27,85 +27,85 @@ import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 @ObjectClass(value = "jansAppConf")
 public class GluuConfiguration extends InumEntry implements Serializable {
 
-	private static final long serialVersionUID = -2818003894646725601L;
+    private static final long serialVersionUID = -2818003894646725601L;
 
-	@AttributeName(ignoreDuringUpdate = true)
-	private String inum;
+    @AttributeName(ignoreDuringUpdate = true)
+    private String inum;
 
-	@AttributeName(name = "jansSmtpConf")
-	@JsonObject
-	private SmtpConfiguration smtpConfiguration;
+    @AttributeName(name = "jansSmtpConf")
+    @JsonObject
+    private SmtpConfiguration smtpConfiguration;
 
-	@AttributeName(name = "jansCacheConf")
-	@JsonObject
-	private CacheConfiguration cacheConfiguration;
+    @AttributeName(name = "jansCacheConf")
+    @JsonObject
+    private CacheConfiguration cacheConfiguration;
 
-	@AttributeName(name = "jansDocStoreConf")
-	@JsonObject
-	private DocumentStoreConfiguration documentStoreConfiguration;
+    @AttributeName(name = "jansDocStoreConf")
+    @JsonObject
+    private DocumentStoreConfiguration documentStoreConfiguration;
 
-	@AttributeName(name = "jansDbAuth")
-	@JsonObject
-	private List<IDPAuthConf> idpAuthn;
+    @AttributeName(name = "jansDbAuth")
+    @JsonObject
+    private List<IDPAuthConf> idpAuthn;
 
-	@AttributeName(name = "jansAuthMode")
-	private String authenticationMode;
+    @AttributeName(name = "jansAuthMode")
+    private String authenticationMode;
 
-	public String getInum() {
-		return inum;
-	}
+    public String getInum() {
+        return inum;
+    }
 
-	public void setInum(String inum) {
-		this.inum = inum;
-	}
+    public void setInum(String inum) {
+        this.inum = inum;
+    }
 
-	public SmtpConfiguration getSmtpConfiguration() {
-		return smtpConfiguration;
-	}
+    public SmtpConfiguration getSmtpConfiguration() {
+        return smtpConfiguration;
+    }
 
-	public CacheConfiguration getCacheConfiguration() {
-		return cacheConfiguration;
-	}
+    public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
+        this.smtpConfiguration = smtpConfiguration;
+    }
 
-	public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
-		this.cacheConfiguration = cacheConfiguration;
-	}
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfiguration;
+    }
 
-	public DocumentStoreConfiguration getDocumentStoreConfiguration() {
-		return documentStoreConfiguration;
-	}
+    public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
+        this.cacheConfiguration = cacheConfiguration;
+    }
 
-	public void setDocumentStoreConfiguration(DocumentStoreConfiguration documentStoreConfiguration) {
-		this.documentStoreConfiguration = documentStoreConfiguration;
-	}
+    public DocumentStoreConfiguration getDocumentStoreConfiguration() {
+        return documentStoreConfiguration;
+    }
 
-	public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
-		this.smtpConfiguration = smtpConfiguration;
-	}
+    public void setDocumentStoreConfiguration(DocumentStoreConfiguration documentStoreConfiguration) {
+        this.documentStoreConfiguration = documentStoreConfiguration;
+    }
 
-	public List<IDPAuthConf> getIdpAuthn() {
-		return idpAuthn;
-	}
+    public List<IDPAuthConf> getIdpAuthn() {
+        return idpAuthn;
+    }
 
-	public void setIdpAuthn(List<IDPAuthConf> idpAuthn) {
-		this.idpAuthn = idpAuthn;
-	}
+    public void setIdpAuthn(List<IDPAuthConf> idpAuthn) {
+        this.idpAuthn = idpAuthn;
+    }
 
-	public String getAuthenticationMode() {
-		return authenticationMode;
-	}
+    public String getAuthenticationMode() {
+        return authenticationMode;
+    }
 
-	public void setAuthenticationMode(String authenticationMode) {
-		this.authenticationMode = authenticationMode;
-	}
+    public void setAuthenticationMode(String authenticationMode) {
+        this.authenticationMode = authenticationMode;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", idpAuthn=")
-				.append(idpAuthn).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
-				.append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("GluuConfiguration [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", idpAuthn=")
+                .append(idpAuthn).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
+                .append("]");
+        return builder.toString();
+    }
 
 }
