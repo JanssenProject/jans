@@ -6,22 +6,21 @@
 
 package io.jans.as.persistence.model;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2018
  */
-@DataEntry(sortBy = {"id","description"}, sortByName = {"jansId", "description"})
+@DataEntry(sortBy = {"id", "description"}, sortByName = {"jansId", "description"})
 @ObjectClass(value = "jansSectorIdentifier")
 public class SectorIdentifier extends BaseEntry implements Serializable {
 
