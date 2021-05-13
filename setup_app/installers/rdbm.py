@@ -291,13 +291,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
 
-
-                for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
+                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
                     if Config.rdbm_type == 'mysql':
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` ({3});'.format(
                                         Config.rdbm_db,
                                         tblCls,
-                                        'custom_{}'.format(i+1),
+                                        '{}_Idx{}'.format(tblCls, i+1),
                                         custom_index
                                     )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
