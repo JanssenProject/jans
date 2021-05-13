@@ -21,7 +21,9 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
     final ObjectMapper defaultObjectMapper;
 
     public ObjectMapperContextResolver() {
+        System.out.println("\n\n\n ObjectMapperContextResolver::constructor -  Entry \n\n\n");
         defaultObjectMapper = createDefaultMapper();
+        System.out.println("\n\n\n ObjectMapperContextResolver::constructor - defaultObjectMapper = "+defaultObjectMapper+"\n\n\n");
     }
 
     @Override
@@ -32,10 +34,10 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
     public static ObjectMapper createDefaultMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
