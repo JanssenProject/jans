@@ -6,12 +6,12 @@
 
 package io.jans.as.persistence.model;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

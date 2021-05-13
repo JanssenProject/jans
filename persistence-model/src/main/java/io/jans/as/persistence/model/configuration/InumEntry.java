@@ -13,36 +13,34 @@ import io.jans.orm.annotation.ObjectClass;
 
 /**
  * Provides global inum search ability.
- * @author Oleksiy Tataryn
  *
+ * @author Oleksiy Tataryn
  */
 @DataEntry
 @ObjectClass
 public class InumEntry extends Entry {
 
-	@AttributeName(ignoreDuringUpdate = true)
-	private String inum;
+    @AttributeName(ignoreDuringUpdate = true)
+    private String inum;
 
-	/**
-	 * @param inum the inum to set
-	 */
-	public void setInum(String inum) {
-		this.inum = inum;
-	}
+    /**
+     * @return the inum
+     */
+    public String getInum() {
+        return inum;
+    }
 
+    /**
+     * @param inum the inum to set
+     */
+    public void setInum(String inum) {
+        this.inum = inum;
+    }
 
-	/**
-	 * @return the inum
-	 */
-	public String getInum() {
-		return inum;
-	}
-
-
-	@Override
-	public String toString() {
-		return String.format("Entry [dn=%s, inum=%s]", getDn(), getInum());
-	}
+    @Override
+    public String toString() {
+        return String.format("Entry [dn=%s, inum=%s]", getDn(), getInum());
+    }
 
 
 }
