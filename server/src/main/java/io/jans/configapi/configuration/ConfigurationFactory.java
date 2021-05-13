@@ -14,9 +14,6 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
-//import io.jans.configapi.auth.AuthorizationService;
-//import io.jans.configapi.auth.OpenIdAuthorizationService;
-//import io.jans.configapi.auth.ConfigApiResourceProtectionService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -45,17 +42,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
-
 @ApplicationScoped
 @Alternative
 @Priority(1)
-//@DependsOn("customConfigSource")
 public class ConfigurationFactory {
-
-    public ConfigurationFactory() {
-        System.out.println(
-                "\n\n\n\n ****************************  ConfigurationFactory() ****************************  \n\n\n\n");
-    }
 
     static {
         if (System.getProperty("jans.base") != null) {
@@ -81,7 +71,6 @@ public class ConfigurationFactory {
 
     @Inject
     private Logger log;
-
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -153,27 +142,11 @@ public class ConfigurationFactory {
 
     public void create() {
         loadBaseConfiguration();
-        System.out.println("\n ****************************  ConfigurationFactory::create() - 1  \n");
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-        System.out.println("\n ****************************  ConfigurationFactory::create() - this.saltFilePath = "
-                + this.saltFilePath + "  \n");
-        /*
-         * try { getStringEncrypter(); } catch (Exception ex) { throw new
-         * ConfigurationException("Failed to initialize StringEncrypter - " +
-         * ex.getMessage()); }
-         */
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
-        System.out.println(
-                "\n ****************************  ConfigurationFactory::create() - this.persistenceConfiguration = "
-                        + this.persistenceConfiguration + "  \n");
         loadCryptoConfigurationSalt();
-        System.out.println("\n ****************************  ConfigurationFactory::create() - 2  \n");
 
-        System.out
-                .println("\n ****************************  ConfigurationFactory::create() - 3 , this.getApiClientId() ="
-                        + this.getApiClientId() + " ,this.getApiClientPassword() = " + this.getApiClientPassword()
-                        + " ,this.getApiProtectionType() = " + this.getApiProtectionType());
         if (!createFromDb()) {
             log.error("Failed to load configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from persistence.");
@@ -181,8 +154,6 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
-        System.out
-        .println("\n ****************************  ConfigurationFactory::create() - 4 - calling  installSecurityProvider()");
         installSecurityProvider();
 
     }
@@ -284,15 +255,11 @@ public class ConfigurationFactory {
     }
 
     private void installSecurityProvider() {
-        System.out
-        .println("\n ****************************  ConfigurationFactory::installSecurityProvider() - - Entry ");
         try {
             SecurityProviderUtility.installBCProvider();
         } catch (Exception ex) {
             log.error("Failed to install BC provider properly", ex);
         }
-        System.out
-        .println("\n ****************************  ConfigurationFactory::installSecurityProvider() - - Exit ");
     }
 
     @Produces
@@ -325,52 +292,5 @@ public class ConfigurationFactory {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
         }
     }
-
-    /*
-     * @Produces
-     * 
-     * @ApplicationScoped
-     * 
-     * @Named("authorizationService") private AuthorizationService
-     * createAuthorizationService() { log.
-     * info("=============  createAuthorizationService() - ConfigurationFactory.getApiProtectionType() = "
-     * + getApiProtectionType()); if (StringHelper.isEmpty(getApiProtectionType()))
-     * { throw new ConfigurationException("API Protection Type not defined"); } try
-     * { // Verify resources available
-     * apiProtectionService.verifyResources(getApiProtectionType(),
-     * getApiClientId()); return
-     * authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
-     * } catch (Exception ex) {
-     * log.error("Failed to create AuthorizationService instance", ex); throw new
-     * ConfigurationException("Failed to create AuthorizationService instance", ex);
-     * } }
-     */
-
-    /*
-     * @Produces
-     * 
-     * @ApplicationScoped public CacheConfiguration getCacheConfiguration() {
-     * 
-     * CacheConfiguration cacheConfiguration =
-     * configurationService.getConfiguration().getCacheConfiguration(); if
-     * (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() ==
-     * null) { log.
-     * error("Failed to read cache configuration from DB. Please check configuration jsCacheConf attribute "
-     * +
-     * "that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: "
-     * + configurationService.getConfiguration().getDn());
-     * log.info("Creating fallback IN-MEMORY cache configuration ... ");
-     * 
-     * cacheConfiguration = new CacheConfiguration();
-     * cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
-     * 
-     * log.info("IN-MEMORY cache configuration is created."); } if
-     * (cacheConfiguration.getNativePersistenceConfiguration() != null) { if
-     * (!StringUtils.isEmpty(staticConfiguration.getBaseDn().getSessions())) {
-     * cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(
-     * StringUtils.remove(staticConfiguration.getBaseDn().getSessions(),
-     * "ou=sessions,").trim()); } } log.info("Cache configuration: " +
-     * cacheConfiguration); return cacheConfiguration; }
-     */
 
 }

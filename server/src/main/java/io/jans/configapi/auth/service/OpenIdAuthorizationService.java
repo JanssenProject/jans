@@ -8,14 +8,12 @@ package io.jans.configapi.auth.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.configapi.auth.service.AuthorizationService;
 import io.jans.configapi.auth.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;

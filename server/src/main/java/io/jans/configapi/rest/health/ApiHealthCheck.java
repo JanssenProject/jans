@@ -10,12 +10,10 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.Liveness;
 
-import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 
 @Liveness
 @ApplicationScoped
-//@DependsOn("appInitializer")
 public class ApiHealthCheck implements HealthCheck {
     public HealthCheckResponse call() {
         return HealthCheckResponse.up("jans-config-api liveness");
