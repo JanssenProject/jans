@@ -21,7 +21,9 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
     final ObjectMapper defaultObjectMapper;
 
     public ObjectMapperContextResolver() {
+        System.out.println("\n\n\n ObjectMapperContextResolver::constructor -  Entry \n\n\n");
         defaultObjectMapper = createDefaultMapper();
+        System.out.println("\n\n\n ObjectMapperContextResolver::constructor - defaultObjectMapper = "+defaultObjectMapper+"\n\n\n");
     }
 
     @Override
