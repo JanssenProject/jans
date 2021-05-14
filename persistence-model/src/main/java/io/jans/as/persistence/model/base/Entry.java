@@ -15,35 +15,36 @@ import io.jans.orm.annotation.DN;
  */
 public class Entry {
 
-	@DN
-	private String dn;
+    @DN
+    private String dn;
 
-	public Entry() {}
+    public Entry() {
+    }
 
-	public Entry(String dn) {
-		super();
-		this.dn = dn;
-	}
+    public Entry(String dn) {
+        super();
+        this.dn = dn;
+    }
 
-	public String getDn() {
-		return dn;
-	}
+    public String getDn() {
+        return dn;
+    }
 
-	public void setDn(String dn) {
-		this.dn = dn;
-	}
+    public void setDn(String dn) {
+        this.dn = dn;
+    }
 
-	public String getBaseDn() {
-		return dn;
-	}
+    public String getBaseDn() {
+        return dn;
+    }
 
-	public void setBaseDn(String dn) {
-		this.dn = dn;
-	}
+    public void setBaseDn(String dn) {
+        this.dn = dn;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("Entry [dn=%s]", dn);
-	}
+    @Override
+    public String toString() {
+        return String.format("Entry [dn=%s]", dn);
+    }
 
 }
