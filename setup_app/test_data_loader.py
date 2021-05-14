@@ -107,6 +107,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
+        if self.getMappingType('spanner'):
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-spanner.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            config_oxauth_test_properties += '\n#spanner\n' +  rendered_text
+
         if self.getMappingType('rdbm'):
             base.current_app.RDBMInstaller.server_time_zone()
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-sql.properties.nrnd'))
