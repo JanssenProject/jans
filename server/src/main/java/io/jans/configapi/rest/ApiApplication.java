@@ -7,21 +7,7 @@
 package io.jans.configapi.rest;
 
 import io.jans.configapi.configuration.ObjectMapperContextResolver;
-import io.jans.configapi.rest.resource.AcrsResource;
-import io.jans.configapi.rest.resource.AttributesResource;
-import io.jans.configapi.rest.resource.CacheConfigurationResource;
-import io.jans.configapi.rest.resource.ClientsResource;
-import io.jans.configapi.rest.resource.ConfigResource;
-import io.jans.configapi.rest.resource.ConfigSmtpResource;
-import io.jans.configapi.rest.resource.CouchbaseConfigurationResource;
-import io.jans.configapi.rest.resource.CustomScriptResource;
-import io.jans.configapi.rest.resource.Fido2ConfigResource;
-import io.jans.configapi.rest.resource.JwksResource;
-import io.jans.configapi.rest.resource.LdapConfigurationResource;
-import io.jans.configapi.rest.resource.LoggingResource;
-import io.jans.configapi.rest.resource.ScopesResource;
-import io.jans.configapi.rest.resource.UmaResourcesResource;
-
+import io.jans.configapi.rest.resource.*;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
