@@ -7,7 +7,7 @@
 package io.jans.configapi.rest;
 
 import io.jans.configapi.configuration.ObjectMapperContextResolver;
-import io.jans.configapi.rest.resource.*;
+import io.jans.configapi.rest.resource.auth.*;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;

@@ -2,8 +2,6 @@ package io.jans.configapi.configuration;
 
 import io.jans.exception.ConfigurationException;
 import io.jans.orm.util.properties.FileConfiguration;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +21,6 @@ public class CustomConfigSource implements ConfigSource {
     private final String FILE_CONFIG = "application.properties";
     private FileConfiguration appProperties;
 
-    public CustomConfigSource() {
-        System.out.println(" CustomConfigSource::constructor() - Entry \n\n");
-    }
-
     @Override
     public Map<String, String> getProperties() {
         try {
@@ -34,7 +28,6 @@ public class CustomConfigSource implements ConfigSource {
 
             Map<String, String> map = new HashMap<>();
             properties.stringPropertyNames().stream().forEach(key -> map.put(key, properties.getProperty(key)));
-            System.out.println("\n\n CustomConfigSource::getProperties() - Exit - map = " + map + "\n\n");
             return map;
 
         } catch (Exception e) {
@@ -46,7 +39,6 @@ public class CustomConfigSource implements ConfigSource {
 
     @Override
     public Set<String> getPropertyNames() {
-        System.out.println("\n\n CustomConfigSource::getPropertyNames() - Entry \n\n");
         try {
             Properties properties = this.readPropertiesFile(FILE_CONFIG);
             return properties.stringPropertyNames();
@@ -66,7 +58,6 @@ public class CustomConfigSource implements ConfigSource {
     @Override
     public String getValue(String s) {
 
-        System.out.println("\n\n CustomConfigSource::getValue() - s = " + s + "\n\n");
         try {
 
             Properties properties = this.readPropertiesFile(FILE_CONFIG);
@@ -88,7 +79,6 @@ public class CustomConfigSource implements ConfigSource {
         try {
             // Load the properties file
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            System.out.println("\n\n CustomConfigSource::readPropertiesFile() - loader 1 = " + loader + "\n\n");
             InputStream inputStream = loader.getResourceAsStream(fileName);
             Properties properties = new Properties();
             properties.load(inputStream);
