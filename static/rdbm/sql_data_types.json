@@ -881,5 +881,13 @@
     "spanner": {
       "type": "TIMESTAMP"
     }
+  },
+  "jansData": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
   }
 }
