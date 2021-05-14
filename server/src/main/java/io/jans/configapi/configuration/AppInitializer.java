@@ -6,9 +6,9 @@
 
 package io.jans.configapi.configuration;
 
-import io.jans.configapi.auth.api.ApiProtectionService;
-import io.jans.configapi.auth.service.AuthorizationService;
-import io.jans.configapi.auth.service.OpenIdAuthorizationService;
+import io.jans.configapi.security.api.ApiProtectionService;
+import io.jans.configapi.security.service.AuthorizationService;
+import io.jans.configapi.security.service.OpenIdAuthorizationService;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;

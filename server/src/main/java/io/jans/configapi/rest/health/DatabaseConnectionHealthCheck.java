@@ -6,7 +6,7 @@
 
 package io.jans.configapi.rest.health;
 
-import io.jans.configapi.service.ConfigurationService;
+import io.jans.configapi.service.auth.ConfigurationService;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
