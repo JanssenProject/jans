@@ -6,9 +6,6 @@
 
 package io.jans.as.persistence.model;
 
-import java.io.Serializable;
-import java.util.List;
-
 import io.jans.as.model.common.ScopeType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -16,6 +13,9 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.DeletableEntity;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -129,10 +129,6 @@ public class Scope extends DeletableEntity implements Serializable {
         return this.defaultScope;
     }
 
-    public void setDefaultScope(Boolean defaultScope) {
-        this.defaultScope = defaultScope;
-    }
-
     public Boolean isGroupClaims() {
         return groupClaims;
     }
@@ -179,6 +175,10 @@ public class Scope extends DeletableEntity implements Serializable {
 
     public Boolean getDefaultScope() {
         return defaultScope;
+    }
+
+    public void setDefaultScope(Boolean defaultScope) {
+        this.defaultScope = defaultScope;
     }
 
     public boolean isUmaType() {
