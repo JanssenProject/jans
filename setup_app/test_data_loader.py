@@ -107,6 +107,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
             config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
 
+<<<<<<< HEAD
+=======
+        if self.getMappingType('rdbm') and Config.rdbm_type == 'spanner':
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-spanner.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            config_oxauth_test_properties += '\n#spanner\n' +  rendered_text
+
+>>>>>>> No code
         if self.getMappingType('rdbm'):
 
             if Config.rdbm_type == 'spanner': 
