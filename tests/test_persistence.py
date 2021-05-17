@@ -562,3 +562,35 @@ auth.userPassword=fHL54sT5qHk=
 
     render_sql_properties(gmanager, str(src), str(dest))
     assert dest.read() == expected
+
+
+@pytest.mark.parametrize("dialect", [
+    "mysql",
+    "pgsql",
+])
+def test_sql_client_init(monkeypatch, dialect):
+    from jans.pycloudlib.persistence.sql import SQLClient
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
+
+    client = SQLClient()
+    assert client.adapter.dialect == dialect
+
+
+def test_sql_client_getattr(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SQLClient
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
+
+    client = SQLClient()
+    assert client.__getattr__("create_table")
+
+
+def test_sql_client_getattr_error(monkeypatch):
+    from jans.pycloudlib.persistence.sql import SQLClient
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
+
+    client = SQLClient()
+    with pytest.raises(AttributeError):
+        assert client.__getattr__("random_attr")

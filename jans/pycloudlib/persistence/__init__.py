@@ -7,6 +7,7 @@ from jans.pycloudlib.persistence.hybrid import render_hybrid_properties  # noqa:
 from jans.pycloudlib.persistence.ldap import render_ldap_properties  # noqa: F401
 from jans.pycloudlib.persistence.ldap import sync_ldap_truststore  # noqa: F401
 from jans.pycloudlib.persistence.sql import render_sql_properties  # noqa: F401
+from jans.pycloudlib.persistence.spanner import render_spanner_properties  # noqa: F401
 
 
 def render_salt(manager, src: str, dest: str) -> None:

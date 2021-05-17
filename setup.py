@@ -42,6 +42,8 @@ setup(
         "google-cloud-secret-manager>=2.2.0",
         "pymysql>=1.0.2",
         "sqlalchemy>=1.3,<1.4",
+        "psycopg2>=2.8.6",
+        "google-cloud-spanner>=3.3.0",
     ],
     classifiers=[
         "Intended Audience :: Developers",
