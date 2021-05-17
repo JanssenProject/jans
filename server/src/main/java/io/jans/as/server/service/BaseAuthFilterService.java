@@ -223,12 +223,15 @@ public abstract class BaseAuthFilterService {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter).multiValued(false);
+        log.debug("Using filter: '{}'", ldapFilter);
         List<T> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), entryClass, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
             log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
             return null;
         }
+
+        log.debug("Found entries: {}", foundEntries.size());
 
         if (!(foundEntries.size() == 1)) {
             return null;
