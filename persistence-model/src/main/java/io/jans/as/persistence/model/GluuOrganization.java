@@ -52,7 +52,7 @@ public class GluuOrganization extends Entry implements Serializable {
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
-    @AttributeName(name = "jansManagerGroup")
+    @AttributeName(name = "jansManagerGrp")
     private String managerGroup;
 
     @AttributeName(name = "jansThemeColor")
