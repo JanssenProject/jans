@@ -196,7 +196,11 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 	@Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
 	public void requestAccessTokenCustomClientAuth2(final String tokenPath, final String userId,
 													final String userSecret) throws Exception {
-		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+		
+        System.out.println("Sleeping for 20 seconds ..... (needed for Spanner emulator)");
+        Thread.sleep(20000);
+
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
 		io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
 		tokenRequest.setUsername(userId);
