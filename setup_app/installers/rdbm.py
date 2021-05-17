@@ -232,14 +232,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                         self.dbUtils.spanner.create_table(sql_cmd)
 
-                for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
-                    sql_cmd = 'CREATE INDEX `{0}_custom_Idx{1}` ON `{0}` (`{2}`)'.format(
-                                tblCls,
-                                i,
-                                custom_index
+                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
+                    sql_cmd = 'CREATE INDEX `{0}_CustomIdx{1}` ON {0} ({2})'.format(
+                                    tblCls,
+                                    i+1, 
+                                    custom_index
                                 )
                     self.dbUtils.spanner.create_table(sql_cmd)
-
 
         else:
             for tblCls in self.dbUtils.Base.classes.keys():
@@ -291,13 +290,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
 
-
-                for i, custom_index in enumerate(sql_indexes['__common__'].get(tblCls, {}).get('custom', [])):
+                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
                     if Config.rdbm_type == 'mysql':
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` (({3}));'.format(
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` ({3});'.format(
                                         Config.rdbm_db,
                                         tblCls,
-                                        'custom_{}'.format(i+1),
+                                        '{}_CustomIdx{}'.format(tblCls, i+1),
                                         custom_index
                                     )
                         self.dbUtils.exec_rdbm_query(sql_cmd)

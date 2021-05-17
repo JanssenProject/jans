@@ -7,6 +7,72 @@
       "lower(`mail`)"
     ]
   },
+  "jansClnt": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansUmaPCT": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansScope": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansU2fReq": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansMetric": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansToken": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansDeviceRegistration": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansCache": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansSessId": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansUmaResource": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansClntAuthz": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
   "__common__": {
     "JSON": [
       "CAST($field->'$.v' AS $data_type ARRAY)",
