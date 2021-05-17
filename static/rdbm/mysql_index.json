@@ -2,9 +2,9 @@
   "jansPerson": {
     "fields": [],
     "custom": [
-      "CAST(address->'$.v' AS CHAR(48) ARRAY)",
-      "lower(`uid`)",
-      "lower(`mail`)"
+      "(CAST(address->'$.v' AS CHAR(48) ARRAY))",
+      "(lower(`uid`))",
+      "(lower(`mail`))"
     ]
   },
   "jansClnt": {
