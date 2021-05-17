@@ -19,8 +19,8 @@ import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +122,7 @@ public class StatService {
         stat.setTokenCountPerGrantType(tokenCounters);
         stat.setLastUpdatedAt(now.getTime());
 
-        currentEntry.setUserHllData(new String(hll.toBytes(), StandardCharsets.UTF_8));
+        currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
         entryManager.merge(currentEntry);
 
         log.trace("Finished updateStat.");
@@ -143,7 +143,7 @@ public class StatService {
         try {
             StatEntry entryFromPersistence = entryManager.find(StatEntry.class, dn);
             if (entryFromPersistence != null && month.equals(entryFromPersistence.getStat().getMonth())) {
-                hll = HLL.fromBytes(entryFromPersistence.getUserHllData().getBytes(StandardCharsets.UTF_8));
+                hll = HLL.fromBytes(Base64.getDecoder().decode(entryFromPersistence.getUserHllData()));
                 tokenCounters = new ConcurrentHashMap<>(entryFromPersistence.getStat().getTokenCountPerGrantType());
                 currentEntry = entryFromPersistence;
                 log.trace("Stat entry loaded.");
@@ -161,7 +161,7 @@ public class StatService {
             currentEntry = new StatEntry();
             currentEntry.setId(nodeId);
             currentEntry.setDn(dn);
-            currentEntry.setUserHllData(new String(hll.toBytes(), StandardCharsets.UTF_8));
+            currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
             currentEntry.getStat().setMonth(PERIOD_DATE_FORMAT.format(new Date()));
             entryManager.persist(currentEntry);
             log.trace("Created stat entry.");
