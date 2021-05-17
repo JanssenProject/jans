@@ -1780,7 +1780,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public String getLoggingLevel() {
-        return "DEBUG";
+        return loggingLevel;
     }
 
     public void setLoggingLevel(String loggingLevel) {
