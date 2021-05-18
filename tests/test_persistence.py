@@ -594,3 +594,47 @@ def test_sql_client_getattr_error(monkeypatch):
     client = SQLClient()
     with pytest.raises(AttributeError):
         assert client.__getattr__("random_attr")
+
+
+# =======
+# SPANNER
+# =======
+
+
+def test_render_spanner_properties(monkeypatch, tmpdir, gmanager):
+    import json
+    from jans.pycloudlib.persistence.spanner import render_spanner_properties
+
+    creds = tmpdir.join("google-credentials.json")
+    creds.write(json.dumps({
+        "client_id": "random-id",
+        "client_secret": "random-secret",
+        "refresh_token": "random-refresh-token",
+        "type": "authorized_user"
+    }))
+
+    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(creds))
+    monkeypatch.setenv("GCLOUD_PROJECT", "testing-project")
+    monkeypatch.setenv("CN_SPANNER_INSTANCE_ID", "testing-instance")
+    monkeypatch.setenv("CN_SPANNER_DATABASE_ID", "testing-db")
+
+    tmpl = """
+connection.project=%(spanner_project)s
+connection.instance=%(spanner_instance)s
+connection.database=%(spanner_database)s
+%(spanner_creds)s
+""".strip()
+
+    expected = """
+connection.project=testing-project
+connection.instance=testing-instance
+connection.database=testing-db
+auth.credentials-file={}
+""".format(str(creds)).strip()
+
+    src = tmpdir.join("jans-spanner.properties.tmpl")
+    src.write(tmpl)
+    dest = tmpdir.join("jans-spanner.properties")
+
+    render_spanner_properties(gmanager, str(src), str(dest))
+    assert dest.read() == expected

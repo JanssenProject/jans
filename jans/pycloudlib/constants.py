@@ -10,7 +10,7 @@ PERSISTENCE_TYPES = (
     "couchbase",
     "hybrid",
     "sql",
-    # "spanner",
+    "spanner",
 )
 
 PERSISTENCE_LDAP_MAPPINGS = (
