@@ -11,21 +11,6 @@
 		<param-value>true</param-value>
 	</context-param>
 
-	<!-- <context-param> <param-name>resteasy.injector.factory</param-name> 
-		<param-value>org.jboss.resteasy.cdi.CdiInjectorFactory</param-value> </context-param> 
-		<context-param> <param-name>resteasy.providers</param-name> <param-value>io.jans.configapi.filterss.AuthorizationFilter</param-value> 
-		</context-param> <context-param> <param-name>resteasy.scan</param-name> <param-value>true</param-value> 
-		</context-param> <context-param> <param-name>resteasy.scan.providers</param-name> 
-		<param-value>true</param-value> </context-param> <context-param> <param-name>resteasy.scan.resources</param-name> 
-		<param-value>true</param-value> </context-param> -->
-
-<!--
-	<listener>
-		<listener-class>
-			org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
-		</listener-class>
-	</listener>-->
-
 	<!-- Jetty -->
 	<context-param>
 		<param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
@@ -42,16 +27,6 @@
 		<listener-class>org.jboss.weld.environment.servlet.Listener
 		</listener-class>
 	</listener>
-
-<!--
-	<security-constraint>
-		<display-name>Restrict raw XHTML Documents</display-name>
-		<web-resource-collection>
-			<web-resource-name>XHTML</web-resource-name>
-			<url-pattern>*.xhtml</url-pattern>
-		</web-resource-collection>
-		<auth-constraint />
-	</security-constraint>-->
 
 	<!-- Weld -->
 	<resource-env-ref>

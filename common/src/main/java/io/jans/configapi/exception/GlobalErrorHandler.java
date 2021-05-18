@@ -26,14 +26,14 @@ public class GlobalErrorHandler implements ExceptionMapper<Exception> {
     Logger log;
 
     public Response toResponse(Exception e) {
-        log.error(" ******** GlobalErrorHandler ************ " + e.getMessage(), e);
+        log.error(e.getMessage(), e);
         if (e instanceof WebApplicationException && ((WebApplicationException) e).getResponse() != null) {
             return ((WebApplicationException) e).getResponse();
         } else if (e instanceof ConstraintViolationException
                 && ((ConstraintViolationException) e).getMessage() != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-        log.error(e.getMessage(), e);
+        
         return Response.serverError()
                 .entity(new ApiError.ErrorBuilder()
                         .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
