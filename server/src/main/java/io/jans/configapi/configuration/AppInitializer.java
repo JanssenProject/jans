@@ -57,7 +57,6 @@ public class AppInitializer {
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
 
-    // void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
