@@ -55,7 +55,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 '-expiration', '365','>', keys_json_fn]
 
         cmd = ' '.join(args)
-        
+
         self.run(cmd, shell=True)
 
         self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
@@ -64,7 +64,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
     def load_test_data(self):
         self.logIt("Re-binding database")
         self.dbUtils.bind(force=True)
-        
+
         self.logIt("Checking Internet conncetion")
         socket.setdefaulttimeout(3)
         try:
@@ -94,7 +94,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
             self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             )
-
 
         if self.getMappingType('ldap'):
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-ldap.properties.nrnd'))
@@ -131,7 +130,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
                     os.path.join(Config.outputFolder, 'test/scim-client/schema/'),
                     )
-            
+
             oxauth_json_schema_fn =os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json')
             scim_json_schema_fn = os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json')
             jans_schema_json_files = [ oxauth_json_schema_fn, scim_json_schema_fn ]
@@ -152,7 +151,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                         'x_origin': 'Jans created objectclass'
                         }
             scim_schema['objectClasses'].append(jansPerson)
-            
+
             with open(scim_json_schema_fn, 'w') as w:
                 json.dump(scim_schema, w, indent=2)
 
@@ -173,7 +172,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data-user.ldif')
-        
+
         scim_test_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data.ldif')
         scim_test_user_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data-user.ldif')
 
@@ -258,8 +257,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA')
 
         self.dbUtils.set_oxAuthConfDynamic(oxAuthConfDynamic_changes)
-        
-        
+
+
         # Enable custom scripts
         for inum in custom_scripts:
             self.dbUtils.enable_script(inum)
@@ -294,13 +293,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, openDjSchemaFolder)
-            
+
             self.logIt("Making opndj listen all interfaces")
             ldap_operation_result = self.dbUtils.ldap_conn.modify(
                     'cn=LDAPS Connection Handler,cn=Connection Handlers,cn=config', 
                      {'ds-cfg-listen-address': [ldap3.MODIFY_REPLACE, '0.0.0.0']}
                     )
-            
+
             if not ldap_operation_result:
                     self.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
                     self.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
@@ -309,13 +308,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             self.logIt("Re-starting opendj")
             self.restart('opendj')
-            
+
             self.logIt("Re-binding opendj")
             # try 5 times to re-bind opendj
             for i in range(5):
                 time.sleep(5)
                 self.logIt("Try binding {} ...".format(i+1))
-                bind_result = self.dbUtils.ldap_conn.bind()                
+                bind_result = self.dbUtils.ldap_conn.bind()
                 if bind_result:
                     self.logIt("Binding to opendj was successful")
                     break
@@ -371,6 +370,19 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
             self.run([paths.cmd_tar, '-zxf', eleven_tokens_package, '-C', target_dir])
+
+        if Config.installScimServer:
+            self.restart('jans-scim')
+
+        if Config.installFido2:
+            self.restart('jans-fido2')
+
+        if Config.installConfigApi:
+            self.restart('jans-config-api')
+
+        if Config.installEleven:
+            self.restart('jans-eleven')
+
 
         # Prepare for tests run
         #install_command, update_command, query_command, check_text = self.get_install_commands()
