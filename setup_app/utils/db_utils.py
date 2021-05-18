@@ -263,7 +263,7 @@ class DBUtils:
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            self.spanner.update_data(table='jansAppConf', columns=['doc_id', service], values=[["jans-auth", True]])
+            self.spanner.update_data(table='jansAppConf', columns=['doc_id', service], values=[["configuration", True]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
