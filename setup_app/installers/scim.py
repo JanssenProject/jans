@@ -110,7 +110,7 @@ class ScimInstaller(JettyInstaller):
         self.createDirs(self.output_folder)
 
     def render_import_templates(self):
-        
+
         self.renderTemplateInOut(self.dynamic_config_fn, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.static_config_fn, self.templates_folder, self.output_folder)
         Config.templateRenderingDict['scim_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.dynamic_config_fn)
