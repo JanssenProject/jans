@@ -7,6 +7,7 @@ import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim2.client.UserBaseTest;
+import io.jans.scim2.listener.SkipTest;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -17,21 +18,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static javax.ws.rs.core.Response.Status.OK;
-
 import static org.testng.Assert.*;
 
+@SkipTest(databases = { "couchbase" })
 public class SpecialCharsTest extends UserBaseTest {
 
-    private static final String[] SPECIAL_CHARS = new String[]{"*", /*"\\",*/ "(", ")"};    //, "\0" (see nullChar test)
+    private static final String[] SPECIAL_CHARS = new String[]{"*", "\\", "(", ")"};    //, "\0" (see nullChar test)
     private List<String> specialFilterLdapChars = null;
 
     private List<String> userNames;
 
     @BeforeTest
     private void addOne() {
-        specialFilterLdapChars = Stream.of(SPECIAL_CHARS).map(SpecialCharsTest::escapeValue).collect(Collectors.toList());
+        specialFilterLdapChars = Stream.of(SPECIAL_CHARS).map(StringHelper::escapeJson).collect(Collectors.toList());
         //Per customer request
-        specialFilterLdapChars.add(escapeValue("/"));
+        specialFilterLdapChars.add(StringHelper.escapeJson("/"));
     }
 
     @Test
@@ -132,11 +133,5 @@ public class SpecialCharsTest extends UserBaseTest {
         assertEquals(response.readEntity(ListResponse.class).getResources().size(), 1);
 
     }
-
-	private static String escapeValue(String str) {
-		String result = StringHelper.escapeJson(str);
-		
-		return result;
-	}
 
 }

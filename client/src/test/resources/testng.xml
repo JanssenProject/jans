@@ -3,6 +3,11 @@
 <suite name="SCIM-Client" parallel="false">
 
     <parameter name="propertiesFile" value="target/test-classes/testng2.properties" />
+    
+    <listeners>
+        <listener class-name="io.jans.scim2.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.scim2.listener.SkipTestsListener" />
+    </listeners>
 
     <test name="Service Provider Configuration Endpoints Test" enabled="true">
         <!-- section 4 RFC 7644 -->
