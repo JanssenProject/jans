@@ -19,7 +19,6 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.persistence.ldap import LdapClient
 
 

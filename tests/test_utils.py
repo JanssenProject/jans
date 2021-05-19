@@ -184,7 +184,7 @@ def test_generate_ssl_certkey(tmpdir):
     from jans.pycloudlib.utils import generate_ssl_certkey
 
     base_dir = tmpdir.mkdir("certs")
-    cert, key = generate_ssl_certkey(
+    generate_ssl_certkey(
         "my-suffix",
         "email@org.local",
         "my.org.local",
@@ -204,7 +204,7 @@ def test_generate_ssl_ca_certkey(tmpdir):
     from jans.pycloudlib.utils import generate_ssl_ca_certkey
 
     base_dir = tmpdir.mkdir("certs")
-    cert, key = generate_ssl_ca_certkey(
+    generate_ssl_ca_certkey(
         "cert-auth",
         "email@org.local",
         "my.org.local",
@@ -235,7 +235,7 @@ def test_generate_signed_ssl_certkey(tmpdir):
         base_dir=str(base_dir),
     )
 
-    cert, key = generate_signed_ssl_certkey(
+    generate_signed_ssl_certkey(
         "my-suffix",
         ca_key,
         ca_cert,
