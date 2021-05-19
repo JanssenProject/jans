@@ -2,8 +2,6 @@ import json
 import os
 from urllib.parse import urlparse
 
-from sqlalchemy.sql import text
-
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -49,16 +47,12 @@ class SqlPersistence:
         self.client = SQLClient()
 
     def get_auth_config(self):
-        with self.client.engine.connect() as conn:
-            result = conn.execute(
-                text("SELECT jansConfDyn FROM jansAppConf WHERE doc_id = :doc_id"),
-                **{"doc_id": "jans-auth"}
-            )
-            if not result.rowcount:
-                return {}
-
-            row = result.fetchone()
-            return row[0]
+        config = self.client.get(
+            "jansAppConf",
+            "jans-auth",
+            ["jansConfDyn"],
+        )
+        return config.get("jansConfDyn", "")
 
 
 def transform_url(url):
