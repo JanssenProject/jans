@@ -6,8 +6,6 @@ import time
 from collections import Counter
 from collections import deque
 
-from sqlalchemy.sql import text
-
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -156,34 +154,24 @@ class SqlPersistence(BasePersistence):
         self.client = SQLClient()
 
     def get_auth_config(self):
-        with self.client.engine.connect() as conn:
-            query = "SELECT jansRevision, jansConfDyn, jansConfWebKeys FROM jansAppConf WHERE doc_id = :doc_id"
-            result = conn.execute(
-                text(query),
-                **{"doc_id": "jans-auth"}
-            )
-            row = result.fetchone()
+        config = self.client.get(
+            "jansAppConf",
+            "jans-auth",
+            ["jansRevision", "jansConfDyn", "jansConfWebKeys"],
+        )
+        if not config:
+            return {}
 
-            if not row:
-                return {}
-
-            config = dict(row)
-            config["id"] = "jans-auth"
-            return config
+        config["id"] = "jans-auth"
+        return config
 
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
-        with self.client.engine.connect() as conn:
-            query = "UPDATE jansAppConf SET jansRevision = :rev, jansConfDyn = :conf_dynamic, jansConfWebKeys = :conf_webkeys WHERE doc_id = :doc_id"
-            result = conn.execute(
-                text(query),
-                **{
-                    "doc_id": id_,
-                    "rev": rev,
-                    "conf_dynamic": json.dumps(conf_dynamic),
-                    "conf_webkeys": json.dumps(conf_webkeys),
-                }
-            )
-            return bool(result.rowcount)
+        modified = self.client.update(
+            "jansAppConf",
+            id_,
+            {"jansRevision": rev, "jansConfDyn": json.dumps(conf_dynamic), "jansConfWebKeys": json.dumps(conf_webkeys)}
+        )
+        return modified
 
 
 class AuthHandler(BaseHandler):
