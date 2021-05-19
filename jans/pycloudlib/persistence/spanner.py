@@ -8,6 +8,7 @@ with Google Spanner database.
 
 import logging
 import os
+from contextlib import suppress
 
 from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import NotFound
@@ -124,10 +125,8 @@ class SpannerClient:
                 values=[column_mapping.values()]
             )
 
-        try:
+        with suppress(AlreadyExists):
             self.database.run_in_transaction(insert_rows)
-        except AlreadyExists:
-            pass
 
     def row_exists(self, table_name, id_):
         """Check whether a row is exist."""
@@ -220,11 +219,9 @@ class SpannerClient:
             )
 
         modified = False
-        try:
+        with suppress(NotFound):
             self.database.run_in_transaction(update_rows)
             modified = True
-        except NotFound:
-            pass
         return modified
 
 
