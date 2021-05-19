@@ -1,8 +1,6 @@
 import json
 import os
 
-from sqlalchemy import text
-
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -93,51 +91,25 @@ class SqlPersistence(BasePersistence):
     def __init__(self, manager):
         self.client = SQLClient()
 
-    def quoted_id(self, identifier):
-        dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if dialect == "mysql":
-            char = "`"
-        else:
-            char = '"'
-        return f"{char}{identifier}{char}"
-
     def get_auth_config(self):
-        with self.client.engine.connect() as conn:
-            query = (
-                f"SELECT {self.quoted_id('jansRevision')}, {self.quoted_id('jansConfDyn')} "
-                f"FROM {self.quoted_id('jansAppConf')} "
-                f"WHERE {self.quoted_id('doc_id')} = :doc_id"
-            )
+        config = self.client.get(
+            "jansAppConf",
+            "jans-auth",
+            ["jansRevision", "jansConfDyn"],
+        )
+        if not config:
+            return {}
 
-            result = conn.execute(
-                text(query),
-                **{"doc_id": "jans-auth"}
-            )
-            row = result.fetchone()
-
-            if not row:
-                return {}
-
-            config = dict(row)
-            config["id"] = "jans-auth"
-            return config
+        config["id"] = "jans-auth"
+        return config
 
     def modify_auth_config(self, id_, rev, conf_dynamic):
-        with self.client.engine.connect() as conn:
-            query = (
-                f"UPDATE {self.quoted_id('jansAppConf')} "
-                f"SET {self.quoted_id('jansRevision')} = :rev, {self.quoted_id('jansConfDyn')} = :conf_dynamic "
-                f"WHERE {self.quoted_id('doc_id')} = :doc_id"
-            )
-            result = conn.execute(
-                text(query),
-                **{
-                    "doc_id": id_,
-                    "rev": rev,
-                    "conf_dynamic": json.dumps(conf_dynamic),
-                }
-            )
-            return bool(result.rowcount)
+        modified = self.client.update(
+            "jansAppConf",
+            id_,
+            {"jansRevision": rev, "jansConfDyn": json.dumps(conf_dynamic)}
+        )
+        return modified
 
 
 def modify_keystore_path(manager, path, jwks_uri):
