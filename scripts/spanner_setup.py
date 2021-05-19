@@ -5,12 +5,12 @@ import os
 import re
 from collections import OrderedDict
 from collections import defaultdict
-from string import Template
+# from string import Template
 
 from ldap3.utils import dn as dnutils
 from ldif3 import LDIFParser
 
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -24,17 +24,17 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
 
 
-class SQLBackend:
+class SpannerBackend:
     def __init__(self, manager):
         self.manager = manager
+        self.db_dialect = "spanner"
 
-        self.db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         self.schema_files = [
             "/app/static/jans_schema.json",
             "/app/static/custom_schema.json",
         ]
 
-        self.client = SQLClient()
+        self.client = SpannerClient()
 
         with open("/app/static/sql/sql_data_types.json") as f:
             self.sql_data_types = json.loads(f.read())
@@ -51,11 +51,7 @@ class SQLBackend:
         with open("/app/static/sql/ldap_sql_data_type_mapping.json") as f:
             self.sql_data_types_mapping = json.loads(f.read())
 
-        if self.db_dialect == "mysql":
-            index_fn = "mysql_index.json"
-        else:
-            index_fn = "postgresql_index.json"
-
+        index_fn = "spanner_index.json"
         with open(f"/app/static/sql/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
@@ -198,7 +194,7 @@ class SQLBackend:
         # make unique fields
         return list(set(fields))
 
-    def create_mysql_indexes(self, table_name: str, column_mapping: dict):
+    def create_spanner_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
 
         for column_name, column_type in column_mapping.items():
@@ -207,48 +203,12 @@ class SQLBackend:
 
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
-            if column_type.lower() != "json":
+            if column_type.lower() != "array":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                # TODO: revise JSON type
-                #
-                # some MySQL versions don't support JSON array (NotSupportedError)
-                # also some of them don't support functional index that returns
-                # JSON or Geometry value
-                for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
-                    index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name, "data_type": column_type,
-                    })
-                    name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
-                    self.client.create_index(query)
-
-        for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
-            name = f"{table_name}_CustomIdx{i}"
-            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
-            self.client.create_index(query)
-
-    def create_pgsql_indexes(self, table_name: str, column_mapping: dict):
-        fields = self.get_index_fields(table_name)
-
-        for column_name, column_type in column_mapping.items():
-            if column_name == "doc_id" or column_name not in fields:
-                continue
-
-            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
-
-            if column_type.lower() != "json":
-                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
-            else:
-                for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
-                    index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name, "data_type": column_type,
-                    })
-                    name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
-                    self.client.create_index(query)
+                # TODO: how to create index for ARRAY?
+                pass
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
@@ -257,10 +217,7 @@ class SQLBackend:
 
     def create_indexes(self):
         for table_name, column_mapping in self.client.get_table_mapping().items():
-            if self.db_dialect == "pgsql":
-                index_func = self.create_pgsql_indexes
-            elif self.db_dialect == "mysql":
-                index_func = self.create_mysql_indexes
+            index_func = self.create_spanner_indexes
             # run the callback
             index_func(table_name, column_mapping)
 
@@ -287,7 +244,7 @@ class SQLBackend:
 
         should_skip = as_boolean(os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False))
         if should_skip and is_initialized():
-            logger.info("SQL backend already initialized")
+            logger.info("Spanner backend already initialized")
             return
 
         logger.info("Creating tables (if not exist)")

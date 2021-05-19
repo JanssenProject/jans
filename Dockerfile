@@ -5,7 +5,7 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache py3-pip curl tini py3-cryptography py3-grpcio \
+    && apk add --no-cache py3-pip curl tini py3-cryptography py3-grpcio py3-psycopg2 \
     && apk add --no-cache --virtual build-deps git
 
 # ======
