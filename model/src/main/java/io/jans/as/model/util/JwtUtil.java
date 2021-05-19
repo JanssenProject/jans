@@ -6,16 +6,25 @@
 
 package io.jans.as.model.util;
 
-import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
-import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
-import static io.jans.as.model.jwk.JWKParameter.X;
-import static io.jans.as.model.jwk.JWKParameter.Y;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.util.StringHelper;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.openssl.PEMParser;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -28,26 +37,15 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Set;
 
-import javax.ws.rs.HttpMethod;
-
-import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.openssl.PEMParser;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.util.StringHelper;
+import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
+import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
 
 /**
  * @author Javier Rojas Blum
@@ -56,7 +54,7 @@ import io.jans.util.StringHelper;
  */
 public class JwtUtil {
 
-    private static final Logger log = Logger.getLogger(JwtUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     public static void printAlgorithmsAndProviders() {
         Set<String> algorithms = Security.getAlgorithms("Signature");
