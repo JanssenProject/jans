@@ -195,7 +195,7 @@ def main():
             jks_fn="/etc/certs/ob-ext-signing.jks",
             in_key=ext_key,
             in_cert=ext_cert,
-            alias=alias,
+            alias=ob_ext_alias,
             in_passwd=ext_key_passphrase,
         )
 
@@ -219,7 +219,7 @@ def main():
                 jks_fn="/etc/certs/ob-transport.jks",
                 in_key=ob_transport_key,
                 in_cert=ob_transport_cert,
-                alias=alias,
+                alias=ob_transport_alias,
                 in_passwd=ob_transport_passphrase,
             )
 
