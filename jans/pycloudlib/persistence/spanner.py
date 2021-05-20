@@ -29,7 +29,7 @@ class SpannerClient:
 
         - ``GOOGLE_APPLICATION_CREDENTIALS``: Path to JSON file contains
           Google credentials
-        - ``GCLOUD_PROJECT``: (a.k.a Google project ID)
+        - ``GOOGLE_PROJECT_ID``: (a.k.a Google project ID)
         - ``CN_SPANNER_INSTANCE_ID``: Spanner instance ID
         - ``CN_SPANNER_DATABASE_ID``: Spanner database ID
         """
@@ -240,7 +240,7 @@ def render_spanner_properties(manager, src: str, dest: str) -> None:
         cred_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
         creds = f"auth.credentials-file={cred_file}"
         rendered_txt = txt % {
-            "spanner_project": os.environ.get("GCLOUD_PROJECT", ""),
+            "spanner_project": os.environ.get("GOOGLE_PROJECT_ID", ""),
             "spanner_instance": os.environ.get("CN_SPANNER_INSTANCE_ID", ""),
             "spanner_database": os.environ.get("CN_SPANNER_DATABASE_ID", ""),
             "spanner_creds": creds,
