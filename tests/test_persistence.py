@@ -629,8 +629,38 @@ connection.database=%(spanner_database)s
 connection.project=testing-project
 connection.instance=testing-instance
 connection.database=testing-db
-auth.credentials-file={}
+connection.credentials-file={}
 """.format(str(creds)).strip()
+
+    src = tmpdir.join("jans-spanner.properties.tmpl")
+    src.write(tmpl)
+    dest = tmpdir.join("jans-spanner.properties")
+
+    render_spanner_properties(gmanager, str(src), str(dest))
+    assert dest.read() == expected
+
+
+def test_render_spanner_properties_emulator(monkeypatch, tmpdir, gmanager):
+    from jans.pycloudlib.persistence.spanner import render_spanner_properties
+
+    monkeypatch.setenv("SPANNER_EMULATOR_HOST", "localhost:9010")
+    monkeypatch.setenv("GOOGLE_PROJECT_ID", "testing-project")
+    monkeypatch.setenv("CN_GOOGLE_SPANNER_INSTANCE_ID", "testing-instance")
+    monkeypatch.setenv("CN_GOOGLE_SPANNER_DATABASE_ID", "testing-db")
+
+    tmpl = """
+connection.project=%(spanner_project)s
+connection.instance=%(spanner_instance)s
+connection.database=%(spanner_database)s
+%(spanner_creds)s
+""".strip()
+
+    expected = """
+connection.project=testing-project
+connection.instance=testing-instance
+connection.database=testing-db
+connection.emulator-host=localhost:9010
+""".strip()
 
     src = tmpdir.join("jans-spanner.properties.tmpl")
     src.write(tmpl)

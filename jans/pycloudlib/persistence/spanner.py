@@ -238,8 +238,13 @@ def render_spanner_properties(manager, src: str, dest: str) -> None:
         txt = f.read()
 
     with open(dest, "w") as f:
-        cred_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
-        creds = f"auth.credentials-file={cred_file}"
+        if "SPANNER_EMULATOR_HOST" in os.environ:
+            emulator_host = os.environ.get("SPANNER_EMULATOR_HOST")
+            creds = f"connection.emulator-host={emulator_host}"
+        else:
+            cred_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+            creds = f"connection.credentials-file={cred_file}"
+
         rendered_txt = txt % {
             "spanner_project": os.environ.get("GOOGLE_PROJECT_ID", ""),
             "spanner_instance": os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", ""),
