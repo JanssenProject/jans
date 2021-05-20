@@ -49,8 +49,9 @@ class SpannerClient:
         cntr = 0
         with self.database.snapshot() as snapshot:
             result = snapshot.execute_sql("SELECT 1")
-            row = list(result)[0]
-            cntr = row[0]
+            with suppress(IndexError):
+                row = list(result)[0]
+                cntr = row[0]
         return cntr > 0
 
     def create_table(self, table_name: str, column_mapping: dict, pk_column: str):
@@ -142,9 +143,10 @@ class SpannerClient:
                 ]),
                 limit=1,
             )
-            row = list(result)[0]
-            if row:
-                exists = True
+            with suppress(IndexError):
+                row = list(result)[0]
+                if row:
+                    exists = True
         return exists
 
     def create_index(self, query):
