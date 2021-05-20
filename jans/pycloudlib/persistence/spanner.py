@@ -30,15 +30,16 @@ class SpannerClient:
         - ``GOOGLE_APPLICATION_CREDENTIALS``: Path to JSON file contains
           Google credentials
         - ``GOOGLE_PROJECT_ID``: (a.k.a Google project ID)
-        - ``CN_SPANNER_INSTANCE_ID``: Spanner instance ID
-        - ``CN_SPANNER_DATABASE_ID``: Spanner database ID
+        - ``CN_GOOGLE_SPANNER_INSTANCE_ID``: Spanner instance ID
+        - ``CN_GOOGLE_SPANNER_DATABASE_ID``: Spanner database ID
         """
 
-        client = spanner.Client()
-        instance_id = os.environ.get("CN_SPANNER_INSTANCE_ID", "")
+        project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
+        client = spanner.Client(project=project_id)
+        instance_id = os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", "")
         self.instance = client.instance(instance_id)
 
-        database_id = os.environ.get("CN_SPANNER_DATABASE_ID", "")
+        database_id = os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", "")
         self.database = self.instance.database(database_id)
 
     def connected(self):
@@ -241,8 +242,8 @@ def render_spanner_properties(manager, src: str, dest: str) -> None:
         creds = f"auth.credentials-file={cred_file}"
         rendered_txt = txt % {
             "spanner_project": os.environ.get("GOOGLE_PROJECT_ID", ""),
-            "spanner_instance": os.environ.get("CN_SPANNER_INSTANCE_ID", ""),
-            "spanner_database": os.environ.get("CN_SPANNER_DATABASE_ID", ""),
+            "spanner_instance": os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", ""),
+            "spanner_database": os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", ""),
             "spanner_creds": creds,
         }
         f.write(rendered_txt)

@@ -614,9 +614,9 @@ def test_render_spanner_properties(monkeypatch, tmpdir, gmanager):
     }))
 
     monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(creds))
-    monkeypatch.setenv("GCLOUD_PROJECT", "testing-project")
-    monkeypatch.setenv("CN_SPANNER_INSTANCE_ID", "testing-instance")
-    monkeypatch.setenv("CN_SPANNER_DATABASE_ID", "testing-db")
+    monkeypatch.setenv("GOOGLE_PROJECT_ID", "testing-project")
+    monkeypatch.setenv("CN_GOOGLE_SPANNER_INSTANCE_ID", "testing-instance")
+    monkeypatch.setenv("CN_GOOGLE_SPANNER_DATABASE_ID", "testing-db")
 
     tmpl = """
 connection.project=%(spanner_project)s
