@@ -152,13 +152,9 @@ def main():
         ob_transport_cert = "/etc/certs/ob-transport.crt"
         ob_transport_key = "/etc/certs/ob-transport.key"
         ob_transport_pin = "/etc/certs/ob-transport.pin"
+        ob_transport_alias = os.environ.get("CN_OB_AS_TRANSPORT_ALIAS", "OpenBankingAsTransport")
 
-        # Open Banking truststore signing cert and key. Use for generating the PKCS12 file.
-        ob_truststore_cert = "/etc/certs/ob-truststore.crt"
-        ob_truststore_key = "/etc/certs/ob-truststore.key"
-        ob_truststore_pin = "/etc/certs/ob-truststore.pin"
-
-        alias = os.environ.get("CN_OB_EXT_SIGNING_ALIAS", "OpenBanking")
+        ob_ext_alias = os.environ.get("CN_OB_EXT_SIGNING_ALIAS", "OpenBanking")
 
         parsed_url = urlparse(ext_jwks_uri)
         # uses hostname instead of netloc as netloc may have host:port format
@@ -181,7 +177,7 @@ def main():
         )
 
         cert_to_truststore(
-            alias,
+            ob_ext_alias,
             ext_cert,
             "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
             "changeit",
@@ -205,7 +201,7 @@ def main():
 
         if os.path.isfile(ob_transport_cert):
             cert_to_truststore(
-                alias,
+                ob_transport_alias,
                 ob_transport_cert,
                 "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
                 "changeit",
@@ -225,30 +221,6 @@ def main():
                 in_cert=ob_transport_cert,
                 alias=alias,
                 in_passwd=ob_transport_passphrase,
-            )
-
-        if os.path.isfile(ob_truststore_cert):
-            cert_to_truststore(
-                alias,
-                ob_truststore_cert,
-                "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
-                "changeit",
-            )
-
-            ob_truststore_passphrase = ""
-            with suppress(FileNotFoundError):
-                with open(ob_truststore_pin) as f:
-                    ob_truststore_passphrase = f.read().strip()
-
-            generate_keystore(
-                "ob-truststore",
-                manager.config.get("hostname"),
-                manager.secret.get("auth_openid_jks_pass"),
-                jks_fn="/etc/certs/ob-truststore.jks",
-                in_key=ob_truststore_key,
-                in_cert=ob_truststore_cert,
-                alias=alias,
-                in_passwd=ob_truststore_passphrase,
             )
 
         keystore_path = "/etc/certs/ob-ext-signing.jks"
