@@ -41,6 +41,11 @@ public class StatService {
     private static final int regwidth = 5;
     private static final int log2m = 15;
 
+    public static final String ACCESS_TOKEN_KEY = "access_token";
+    public static final String ID_TOKEN_KEY = "id_token";
+    public static final String REFRESH_TOKEN_KEY = "refresh_token";
+    public static final String UMA_TOKEN_KEY = "uma_token";
+
     @Inject
     private Logger log;
 
@@ -247,19 +252,19 @@ public class StatService {
     }
 
     public void reportAccessToken(GrantType grantType) {
-        reportToken(grantType, "access_token");
+        reportToken(grantType, ACCESS_TOKEN_KEY);
     }
 
     public void reportIdToken(GrantType grantType) {
-        reportToken(grantType, "id_token");
+        reportToken(grantType, ID_TOKEN_KEY);
     }
 
     public void reportRefreshToken(GrantType grantType) {
-        reportToken(grantType, "refresh_token");
+        reportToken(grantType, REFRESH_TOKEN_KEY);
     }
 
     public void reportUmaToken(GrantType grantType) {
-        reportToken(grantType, "uma_token");
+        reportToken(grantType, UMA_TOKEN_KEY);
     }
 
 
