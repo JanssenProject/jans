@@ -507,13 +507,23 @@ class SetupUtils(Crypto64):
         certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
         return certificate_text
 
-    def render_templates_folder(self, templatesFolder):
+    def render_templates_folder(self, templatesFolder, ignoredirs=[], ignorefiles=[]):
         self.logIt("Rendering templates folder: %s" % templatesFolder)
-
         #coucbase_dict = self.couchbaseDict()
+
+        def in_ignoredirs(p):
+            for idir in ignoredirs:
+                if p.as_posix().startswith(idir):
+                    return True
 
         tp = Path(templatesFolder)
         for te in tp.rglob('*'):
+            if in_ignoredirs(te):
+                continue
+
+            if te.is_file() and te.name in ignorefiles:
+                continue
+
             if te.is_file() and not te.name.endswith('.nrnd'):
                 self.logIt("Rendering template {}".format(te))
                 rp = te.relative_to(Config.templateFolder)
