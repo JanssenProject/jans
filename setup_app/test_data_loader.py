@@ -159,14 +159,19 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
             if Config.rdbm_type != 'spanner': 
-                self.dbUtils.rdm_automapper()
+                self.dbUtils.rdm_automapper(force=True)
 
         self.writeFile(
             os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
             config_oxauth_test_properties
             )
 
-        self.render_templates_folder(self.template_base)
+        ignoredirs = []
+
+        if not Config.installConfigApi:
+            ignoredirs.append(os.path.join(self.template_base, 'jans-config-api'))
+
+        self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
 
         self.logIt("Loading test ldif files")
 
