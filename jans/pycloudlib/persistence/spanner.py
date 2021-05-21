@@ -143,7 +143,7 @@ class SpannerClient:
                 ]),
                 limit=1,
             )
-            with suppress(IndexError):
+            with suppress(IndexError, NotFound):
                 row = list(result)[0]
                 if row:
                     exists = True
