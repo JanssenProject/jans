@@ -171,6 +171,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
 
 
     def load_test_data(self):
+        if not self.installed():
+            return
 
         self.check_clients([('jca_test_client_id', '1802.')])
 
