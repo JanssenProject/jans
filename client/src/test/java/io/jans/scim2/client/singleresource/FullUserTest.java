@@ -33,8 +33,8 @@ public class FullUserTest extends UserBaseTest {
     private UserResource user;
 
     @Parameters("user_full_create")
-    @Test
-    public void createFull(String json){
+    @Test(dependsOnGroups="avgTestFinished")
+    public void createFull(String json) {
         logger.debug("Creating user from json...");
         user=createUserFromJson(json);
 
