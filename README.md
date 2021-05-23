@@ -46,7 +46,7 @@ In the following example we leverage the OAuth SCIM Client to get a token and is
 
 Log into your Janssen machine and run the commands provided:
 
-- Get the client id: `cat /opt/jans/jans-cli/config.ini | grep 'scim_client_id'`
+- Get the client id: `cat /root/.config/jans-cli.ini | grep 'scim_client_id'`
 - Get the encrypted client secret: `cat /root/.config/jans-cli.ini | grep 'scim_client_secret_enc'`
 - Decrypt the secret: `/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE`
 
