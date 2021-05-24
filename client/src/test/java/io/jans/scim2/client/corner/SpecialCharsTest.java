@@ -58,7 +58,7 @@ public class SpecialCharsTest extends UserBaseTest {
 
     }
 
-    @SkipTest(databases = { "spanner" })
+    @SkipTest(databases = { "spanner", "couchbase" })
     @Test
     public void containabilityAll() {
 
@@ -81,7 +81,7 @@ public class SpecialCharsTest extends UserBaseTest {
 
     }
 
-    @SkipTest(databases = { "spanner" })
+    @SkipTest(databases = { "spanner", "couchbase" })
     @Test
     public void containabilityAllInGivenName() {
 
