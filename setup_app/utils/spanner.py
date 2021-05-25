@@ -14,15 +14,6 @@ from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
 
-# TODO: add logging to all functions
-
-logging.basicConfig(
-        filename=os.path.join(base.par_dir, 'logs/spanner.log'), 
-        format='%(asctime)s %(levelname)s: %(message)s', 
-        level=logging.DEBUG
-        )
-
-
 class Spanner:
 
     def __init__(self):
