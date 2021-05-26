@@ -24,7 +24,7 @@ public class ExpiredObject implements Serializable {
     private Date iat;
     @AttributeName(name = "exp")
     private Date exp;
-    @AttributeName(name = "oxType")
+    @AttributeName(name = "jansTyp")
     private String typeString;
     private ExpiredObjectType type;
     @Expiration

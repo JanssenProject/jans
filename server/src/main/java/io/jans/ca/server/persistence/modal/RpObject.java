@@ -5,12 +5,12 @@ import java.io.Serializable;
 import io.jans.orm.annotation.*;
 
 @DataEntry
-@ObjectClass("oxRp")
+@ObjectClass("jansRp")
 public class RpObject implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "oxId")
+    @AttributeName(name = "jansId")
     private String id;
     @JsonObject
     @AttributeName(name = "dat")
