@@ -263,7 +263,7 @@ public class RegisterResponseMapper {
 
     public static Rp createRp(RegisterResponse response) {
         Rp rpFromRegisterResponse = new Rp();
-        RegisterRequest request = RegisterRequest.fromJson(response.getEntity(), false);
+        RegisterRequest request = RegisterRequest.fromJson(response.getEntity());
 
         RegisterRequestMapper.fillRp(rpFromRegisterResponse, request);
         rpFromRegisterResponse.setClientId(response.getClientId());
