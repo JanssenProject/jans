@@ -42,14 +42,11 @@ public class PersistenceServiceImpl implements PersistenceService {
                 return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
             case "redis":
                 return new RedisPersistenceService(this.configurationService.getConfiguration());
-            case "sql":
-                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
-            case "spanner":
-                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
             case "jans_server_configuration":
                 return new JansPersistenceService(this.configurationService.getConfiguration());
+            case "sql":
+            case "spanner":
             case "ldap":
-                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
             case "couchbase":
                 return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
         }
