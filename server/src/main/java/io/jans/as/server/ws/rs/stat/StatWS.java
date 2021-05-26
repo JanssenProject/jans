@@ -11,6 +11,9 @@ import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
+import io.prometheus.client.exporter.common.TextFormat;
 import net.agkn.hll.HLL;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -27,12 +30,20 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * Provides server with basic statistic.
+ *
+ * https://github.com/GluuFederation/oxAuth/issues/1512
+ * https://github.com/GluuFederation/oxAuth/issues/1321
+ *
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
@@ -63,18 +74,18 @@ public class StatWS {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month) {
-        return stat(month);
+    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format) {
+        return stat(month, format);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month) {
-        return stat(month);
+    public Response statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("format") String format) {
+        return stat(month, format);
     }
 
-    public Response stat(String month) {
-        log.debug("Attempting to request stat, month: " + month);
+    public Response stat(String month, String format) {
+        log.debug("Attempting to request stat, month: " + month + ", format: " + format);
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
         validateAuthorization();
@@ -89,7 +100,14 @@ public class StatWS {
 
         try {
             log.trace("Recognized months: " + months);
-            final String responseAsStr = ServerUtil.asJson(buildResponse(months));
+            final StatResponse statResponse = buildResponse(months);
+
+            final String responseAsStr;
+            if ("openmetrics".equalsIgnoreCase(format)) {
+                responseAsStr = createOpenMetricsResponse(statResponse);
+            } else {
+                responseAsStr = ServerUtil.asJson(statResponse);
+            }
             log.trace("Stat: " + responseAsStr);
             return Response.ok().entity(responseAsStr).build();
         } catch (WebApplicationException e) {
@@ -215,5 +233,59 @@ public class StatWS {
         long timeDiff = System.currentTimeMillis() - lastProcessedAt;
 
         return timeDiff >= timerInterval;
+    }
+
+    private String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
+        Writer writer = new StringWriter();
+        CollectorRegistry registry = new CollectorRegistry();
+
+        for (Map.Entry<String, StatResponseItem> entry : statResponse.getResponse().entrySet()) {
+            final String month = entry.getKey();
+            final StatResponseItem item = entry.getValue();
+
+            Counter.build()
+                    .name("monthly_active_users")
+                    .labelNames(month)
+                    .help("Monthly active users")
+                    .register(registry)
+                    .inc(item.getMonthlyActiveUsers());
+
+
+            for (Map.Entry<String, Map<String, Long>> tokenEntry : item.getTokenCountPerGrantType().entrySet()) {
+                final String grantType = tokenEntry.getKey();
+                final Map<String, Long> tokenMap = tokenEntry.getValue();
+
+                Counter.build()
+                        .name(StatService.ACCESS_TOKEN_KEY)
+                        .labelNames(month, grantType)
+                        .help("Access Token")
+                        .register(registry)
+                        .inc(tokenMap.get(StatService.ACCESS_TOKEN_KEY));
+
+                Counter.build()
+                        .name(StatService.ID_TOKEN_KEY)
+                        .labelNames(month, grantType)
+                        .help("Id Token")
+                        .register(registry)
+                        .inc(tokenMap.get(StatService.ID_TOKEN_KEY));
+
+                Counter.build()
+                        .name(StatService.REFRESH_TOKEN_KEY)
+                        .labelNames(month, grantType)
+                        .help("Refresh Token")
+                        .register(registry)
+                        .inc(tokenMap.get(StatService.REFRESH_TOKEN_KEY));
+
+                Counter.build()
+                        .name(StatService.UMA_TOKEN_KEY)
+                        .labelNames(month, grantType)
+                        .help("UMA Token")
+                        .register(registry)
+                        .inc(tokenMap.get(StatService.UMA_TOKEN_KEY));
+            }
+        }
+
+        TextFormat.write004(writer, registry.metricFamilySamples());
+        return writer.toString();
     }
 }
