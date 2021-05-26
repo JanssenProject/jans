@@ -3873,7 +3873,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
-        "jansId",
+        "rpId",
         "dat",
         "iat",
         "exp",
@@ -3883,7 +3883,7 @@
         "objectclass"
       ],
       "names": [
-        "jansExpiredObj"
+        "rpExpiredObject"
       ],
       "oid": "jansObjClass",
       "sup": [
