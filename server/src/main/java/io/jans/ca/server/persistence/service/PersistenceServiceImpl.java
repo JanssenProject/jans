@@ -3,7 +3,6 @@ package io.jans.ca.server.persistence.service;
 import com.google.inject.Inject;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.server.persistence.providers.H2PersistenceProvider;
-import io.jans.ca.server.persistence.providers.JDBCPersistenceProvider;
 import io.jans.ca.server.persistence.providers.SqlPersistenceProvider;
 import io.jans.ca.server.service.ConfigurationService;
 import io.jans.ca.server.service.Rp;
@@ -43,13 +42,11 @@ public class PersistenceServiceImpl implements PersistenceService {
                 return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
             case "redis":
                 return new RedisPersistenceService(this.configurationService.getConfiguration());
-            case "jdbc":
-                this.sqlProvider = new JDBCPersistenceProvider(this.configurationService);
-                return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
             case "jans_server_configuration":
                 return new JansPersistenceService(this.configurationService.getConfiguration());
+            case "sql":
+            case "spanner":
             case "ldap":
-                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
             case "couchbase":
                 return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
         }
