@@ -49,6 +49,9 @@
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
 		<shrinkwrap.version>2.1.0</shrinkwrap.version>
+
+		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
+		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
 	</properties>
 
 	<prerequisites>
@@ -658,7 +661,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.19.1</version>
 					<configuration>
-						<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
+						<argLine>@{argLine}</argLine>
 
 						<!-- Needed as we have both junit and testng -->
 						<failIfNoTests>false</failIfNoTests>
@@ -715,6 +718,11 @@
 					<groupId>org.owasp</groupId>
 					<artifactId>dependency-check-maven</artifactId>
 					<version>5.2.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.7</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
