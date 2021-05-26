@@ -429,6 +429,12 @@
             <groupId>com.lightstep.tracer</groupId>
             <artifactId>lightstep-tracer-jre</artifactId>
             <version>0.14.2</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.google.protobuf</groupId>
+            		<artifactId>protobuf-java</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.jaegertracing</groupId>
@@ -460,6 +466,10 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
+            <artifactId>jans-orm-annotation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
             <artifactId>jans-orm-ldap</artifactId>
         </dependency>
         <dependency>
@@ -473,6 +483,12 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-sql</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.google.protobuf</groupId>
+            		<artifactId>protobuf-java</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
