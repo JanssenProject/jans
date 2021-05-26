@@ -470,6 +470,14 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-couchbase</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-sql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-spanner</artifactId>
+        </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
