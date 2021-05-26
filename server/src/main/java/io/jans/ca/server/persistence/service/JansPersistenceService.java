@@ -1,5 +1,7 @@
 package io.jans.ca.server.persistence.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.Jackson2;
@@ -7,17 +9,22 @@ import io.jans.ca.common.PersistenceConfigKeys;
 import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.modal.OrganizationBranch;
 import io.jans.ca.server.persistence.modal.RpObject;
+import io.jans.ca.server.persistence.providers.ClientApiPersistenceEntryManagerFactory;
 import io.jans.ca.server.persistence.providers.JansPersistenceConfiguration;
-import io.jans.ca.server.persistence.providers.PersistenceEntryManagerFactory;
+import io.jans.ca.server.service.ConfigurationService;
 import io.jans.ca.server.service.MigrationService;
 import io.jans.ca.server.service.Rp;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.operation.SqlOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class JansPersistenceService implements PersistenceService {
@@ -27,6 +34,7 @@ public class JansPersistenceService implements PersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
     private String persistenceType;
     private String baseDn;
+    //private String expiredObjectColumnName;
 
     public JansPersistenceService(RpServerConfiguration configuration) {
         this.configuration = configuration;
@@ -35,6 +43,7 @@ public class JansPersistenceService implements PersistenceService {
     public JansPersistenceService(RpServerConfiguration configuration, String persistenceType) {
         this.configuration = configuration;
         this.persistenceType = persistenceType;
+        //this.expiredObjectColumnName = getKeyColumnName(configurationService);
     }
 
     public void create() {
@@ -43,15 +52,12 @@ public class JansPersistenceService implements PersistenceService {
             JansPersistenceConfiguration jansPersistenceConfiguration = new JansPersistenceConfiguration(configuration);
             Properties props = jansPersistenceConfiguration.getPersistenceProps();
             this.baseDn = props.getProperty(PersistenceConfigKeys.BaseDn.getKeyName());
-            if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")
-                    || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {
-
-                this.persistenceEntryManager = PersistenceEntryManagerFactory.createLdapPersistenceEntryManager(props);
-
-            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")) {
-
-                this.persistenceEntryManager = PersistenceEntryManagerFactory.createCouchbasePersistenceEntryManager(props);
+            ClientApiPersistenceEntryManagerFactory clientApiPersistenceEntryManagerFactory = new ClientApiPersistenceEntryManagerFactory();
+            String persistenceType = props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName());
+            if (persistenceType.equalsIgnoreCase("hybrid")) {
+                persistenceType = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name();
             }
+            this.persistenceEntryManager = clientApiPersistenceEntryManagerFactory.createPersistenceEntryManager(props, persistenceType);
 
             if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()))) {
                 LOG.error("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
@@ -66,6 +72,7 @@ public class JansPersistenceService implements PersistenceService {
     }
 
     public void prepareBranch() {
+
         if (!this.persistenceEntryManager.hasBranchesSupport(this.baseDn)) {
             return;
         }
@@ -77,21 +84,21 @@ public class JansPersistenceService implements PersistenceService {
         if (!containsBranch(String.format("%s,%s", ou("configuration"), this.baseDn))) {
             addBranch(String.format("%s,%s", ou("configuration"), this.baseDn), "configuration");
         }
-        //create `ou=rp,ou=configuration,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn))) {
-            addBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn), "rp");
+        //create `ou=client-api,ou=configuration,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s,%s", ou("client-api"), ou("configuration"), this.baseDn))) {
+            addBranch(String.format("%s,%s,%s", ou("client-api"), ou("configuration"), this.baseDn), "client-api");
         }
-        //create `ou=rp,o=gluu` if not present
-        if (!containsBranch(getRpDn())) {
-            addBranch(getRpDn(), "rp");
+        //create `ou=client-api,o=gluu` if not present
+        if (!containsBranch(getClientApiDn())) {
+            addBranch(getClientApiDn(), "client-api");
         }
-        //create `ou=rp,ou=rp,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s", getRpOu(), getRpDn()))) {
-            addBranch(String.format("%s,%s", getRpOu(), getRpDn()), "rp");
+        //create `ou=rp,ou=client-api,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s", getRpOu(), getClientApiDn()))) {
+            addBranch(String.format("%s,%s", getRpOu(), getClientApiDn()), "rp");
         }
         //create `ou=expiredObjects,ou=rp,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()))) {
-            addBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()), "expiredObjects");
+        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getClientApiDn()))) {
+            addBranch(String.format("%s,%s", getExpiredObjOu(), getClientApiDn()), "expiredObjects");
         }
     }
 
@@ -204,7 +211,7 @@ public class JansPersistenceService implements PersistenceService {
 
     public boolean removeAllRps() {
         try {
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getRpDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getClientApiDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all Rps successfully. ");
             return true;
         } catch (Exception e) {
@@ -215,7 +222,7 @@ public class JansPersistenceService implements PersistenceService {
 
     public Set<Rp> getRps() {
         try {
-            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getRpDn()}), RpObject.class, null);
+            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getClientApiDn()}), RpObject.class, null);
 
             Set<Rp> result = new HashSet();
             for (RpObject ele : rpObjects) {
@@ -270,7 +277,7 @@ public class JansPersistenceService implements PersistenceService {
             final Date currentTime = cal.getTime();
             Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceEntryManager.encodeTime(baseDn, currentTime));
 
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getRpDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getClientApiDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
@@ -280,19 +287,19 @@ public class JansPersistenceService implements PersistenceService {
     }
 
     public String getDnForRp(String rpId) {
-        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getRpOu(), getRpDn()});
+        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getRpOu(), getClientApiDn()});
     }
 
     public String getDnForExpiredObj(String rpId) {
-        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getExpiredObjOu(), getRpDn()});
+        return String.format("oxId=%s,%s,%s", new Object[]{rpId, getExpiredObjOu(), getClientApiDn()});
     }
 
     public String ou(String ouName) {
         return String.format("ou=%s", ouName);
     }
 
-    private String getRpDn() {
-        return String.format("%s,%s", ou("rp"), this.baseDn);
+    private String getClientApiDn() {
+        return String.format("%s,%s", ou("client-api"), this.baseDn);
     }
 
     private String getRpOu() {
