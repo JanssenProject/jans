@@ -54,8 +54,8 @@ public class RegisterRequestMapper {
         rp.setAccessTokenSigningAlg(safeToString(request.getAccessTokenSigningAlg()));
         rp.setRptAsJwt(request.getRptAsJwt());
 
-        if (CollectionUtils.isNotEmpty(request.getResponseTypes_())) {
-            rp.setResponseTypes(request.getResponseTypes_());
+        if (CollectionUtils.isNotEmpty(request.getResponseTypesStrings())) {
+            rp.setResponseTypes(request.getResponseTypesStrings());
         }
 
         if (CollectionUtils.isNotEmpty(request.getDefaultAcrValues())) {
@@ -196,7 +196,7 @@ public class RegisterRequestMapper {
         request.setRptAsJwt(rp.getRptAsJwt());
 
         if (CollectionUtils.isNotEmpty(rp.getResponseTypes())) {
-            request.setResponseTypes_(rp.getResponseTypes());
+            request.setResponseTypesStrings(rp.getResponseTypes());
         }
 
         if (CollectionUtils.isNotEmpty(rp.getAcrValues())) {

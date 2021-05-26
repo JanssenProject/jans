@@ -1,5 +1,7 @@
 package io.jans.ca.server.persistence.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.Jackson2;
@@ -7,17 +9,22 @@ import io.jans.ca.common.PersistenceConfigKeys;
 import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.modal.OrganizationBranch;
 import io.jans.ca.server.persistence.modal.RpObject;
+import io.jans.ca.server.persistence.providers.ClientApiPersistenceEntryManagerFactory;
 import io.jans.ca.server.persistence.providers.JansPersistenceConfiguration;
-import io.jans.ca.server.persistence.providers.PersistenceEntryManagerFactory;
+import io.jans.ca.server.service.ConfigurationService;
 import io.jans.ca.server.service.MigrationService;
 import io.jans.ca.server.service.Rp;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.operation.SqlOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class JansPersistenceService implements PersistenceService {
@@ -27,6 +34,7 @@ public class JansPersistenceService implements PersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
     private String persistenceType;
     private String baseDn;
+    //private String expiredObjectColumnName;
 
     public JansPersistenceService(RpServerConfiguration configuration) {
         this.configuration = configuration;
@@ -35,6 +43,7 @@ public class JansPersistenceService implements PersistenceService {
     public JansPersistenceService(RpServerConfiguration configuration, String persistenceType) {
         this.configuration = configuration;
         this.persistenceType = persistenceType;
+        //this.expiredObjectColumnName = getKeyColumnName(configurationService);
     }
 
     public void create() {
@@ -43,15 +52,12 @@ public class JansPersistenceService implements PersistenceService {
             JansPersistenceConfiguration jansPersistenceConfiguration = new JansPersistenceConfiguration(configuration);
             Properties props = jansPersistenceConfiguration.getPersistenceProps();
             this.baseDn = props.getProperty(PersistenceConfigKeys.BaseDn.getKeyName());
-            if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")
-                    || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {
-
-                this.persistenceEntryManager = PersistenceEntryManagerFactory.createLdapPersistenceEntryManager(props);
-
-            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")) {
-
-                this.persistenceEntryManager = PersistenceEntryManagerFactory.createCouchbasePersistenceEntryManager(props);
+            ClientApiPersistenceEntryManagerFactory clientApiPersistenceEntryManagerFactory = new ClientApiPersistenceEntryManagerFactory();
+            String persistenceType = props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName());
+            if (persistenceType.equalsIgnoreCase("hybrid")) {
+                persistenceType = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name();
             }
+            this.persistenceEntryManager = clientApiPersistenceEntryManagerFactory.createPersistenceEntryManager(props, persistenceType);
 
             if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()))) {
                 LOG.error("The value of the `storage` field in `client-api-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
@@ -66,6 +72,7 @@ public class JansPersistenceService implements PersistenceService {
     }
 
     public void prepareBranch() {
+
         if (!this.persistenceEntryManager.hasBranchesSupport(this.baseDn)) {
             return;
         }
@@ -78,20 +85,20 @@ public class JansPersistenceService implements PersistenceService {
             addBranch(String.format("%s,%s", ou("configuration"), this.baseDn), "configuration");
         }
         //create `ou=rp,ou=configuration,o=gluu` if not present
-        if (!containsBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn))) {
-            addBranch(String.format("%s,%s,%s", ou("rp"), ou("configuration"), this.baseDn), "rp");
+        if (!containsBranch(String.format("%s,%s,%s", ou("jansRp"), ou("configuration"), this.baseDn))) {
+            addBranch(String.format("%s,%s,%s", ou("jansRp"), ou("configuration"), this.baseDn), "rp");
         }
         //create `ou=rp,o=gluu` if not present
         if (!containsBranch(getRpDn())) {
-            addBranch(getRpDn(), "rp");
+            addBranch(getRpDn(), "jansRp");
         }
         //create `ou=rp,ou=rp,o=gluu` if not present
         if (!containsBranch(String.format("%s,%s", getRpOu(), getRpDn()))) {
-            addBranch(String.format("%s,%s", getRpOu(), getRpDn()), "rp");
+            addBranch(String.format("%s,%s", getRpOu(), getRpDn()), "jansRp");
         }
         //create `ou=expiredObjects,ou=rp,o=gluu` if not present
         if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()))) {
-            addBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()), "expiredObjects");
+            addBranch(String.format("%s,%s", getExpiredObjOu(), getRpDn()), "jansExpiredObj");
         }
     }
 
@@ -292,14 +299,14 @@ public class JansPersistenceService implements PersistenceService {
     }
 
     private String getRpDn() {
-        return String.format("%s,%s", ou("rp"), this.baseDn);
+        return String.format("%s,%s", ou("jansRp"), this.baseDn);
     }
 
     private String getRpOu() {
-        return ou("rp");
+        return ou("jansRp");
     }
 
     private String getExpiredObjOu() {
-        return ou("expiredObjects");
+        return ou("jansExpiredObj");
     }
 }
