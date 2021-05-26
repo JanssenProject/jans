@@ -11,12 +11,12 @@ import java.util.Calendar;
 import java.util.Date;
 
 @DataEntry
-@ObjectClass("jansExpiredObj")
+@ObjectClass("rpExpiredObject")
 public class ExpiredObject implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "rpId")
     private String key;
     @AttributeName(name = "dat")
     private String value;

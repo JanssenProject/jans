@@ -8,6 +8,8 @@ import io.jans.orm.couchbase.impl.CouchbaseEntryManagerFactory;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.sql.impl.SqlEntryManagerFactory;
+import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,7 @@ public class ClientApiPersistenceEntryManagerFactory {
 
             PersistenceEntryManagerFactory persistenceEntryManagerFactory = this.persistenceEntryManagerFactoryNames.get(persistenceType);
             if (persistenceType.equalsIgnoreCase("couchbase")) {
-                ((CouchbaseEntryManagerFactory)persistenceEntryManagerFactory).create();
+                ((CouchbaseEntryManagerFactory) persistenceEntryManagerFactory).create();
             }
             Properties connProps = createConnectionProperties(properties, persistenceEntryManagerFactory.getPersistenceType());
             PersistenceEntryManager ret = persistenceEntryManagerFactory.createEntryManager(connProps);
@@ -50,23 +52,27 @@ public class ClientApiPersistenceEntryManagerFactory {
         return connProps;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     private void initPersistenceManagerMaps() {
-        this.persistenceEntryManagerFactoryNames = new HashMap<String, PersistenceEntryManagerFactory>();
+        try {
+            this.persistenceEntryManagerFactoryNames = new HashMap<String, PersistenceEntryManagerFactory>();
 
-        org.reflections.Reflections reflections = new org.reflections.Reflections(new org.reflections.util.ConfigurationBuilder()
-                .setUrls(org.reflections.util.ClasspathHelper.forPackage("io.jans.orm"))
-                .setScanners(new org.reflections.scanners.SubTypesScanner()));
-        Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
+            org.reflections.Reflections reflections = new org.reflections.Reflections(new org.reflections.util.ConfigurationBuilder()
+                    .setUrls(org.reflections.util.ClasspathHelper.forPackage("io.jans.orm"))
+                    .setScanners(new org.reflections.scanners.SubTypesScanner()));
+            Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
 
-        LOG.info("Found '{}' PersistenceEntryManagerFactory", classes.size());
+            LOG.info("Found '{}' PersistenceEntryManagerFactory", classes.size());
 
-        List<Class<? extends PersistenceEntryManagerFactory>> classesList = new ArrayList<Class<? extends PersistenceEntryManagerFactory>>(classes);
-        for (Class<? extends PersistenceEntryManagerFactory> clazz : classesList) {
-            LOG.info("Found PersistenceEntryManagerFactory '{}'", clazz);
-            PersistenceEntryManagerFactory persistenceEntryManagerFactory = createPersistenceEntryManagerFactoryImpl(clazz);
-            persistenceEntryManagerFactoryNames.put(persistenceEntryManagerFactory.getPersistenceType(), persistenceEntryManagerFactory);
+            List<Class<? extends PersistenceEntryManagerFactory>> classesList = new ArrayList<Class<? extends PersistenceEntryManagerFactory>>(classes);
+            for (Class<? extends PersistenceEntryManagerFactory> clazz : classesList) {
+                LOG.info("Found PersistenceEntryManagerFactory '{}'", clazz);
+                PersistenceEntryManagerFactory persistenceEntryManagerFactory = createPersistenceEntryManagerFactoryImpl(clazz);
+                persistenceEntryManagerFactoryNames.put(persistenceEntryManagerFactory.getPersistenceType(), persistenceEntryManagerFactory);
 
+            }
+        } catch (ReflectionsException ex) {
+            //handle warnings ReflectionsException
         }
     }
 
