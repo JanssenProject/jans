@@ -2,10 +2,11 @@ name: Code quality check
 
 on:
   push:
-    branches: [ sonar-integration ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ sonar-integration ]
-    types: [opened, synchronize, reopened]
+    branches:
+      - master
 
 jobs:
   build:
