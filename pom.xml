@@ -52,6 +52,10 @@
 
 		<!-- argLine property needs to stay as POM property so that JaCoCo plugin can append it at build time -->
 		<argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
+
+		<sonar.projectKey>JanssenProject_jans-auth-server</sonar.projectKey>
+		<sonar.organization>janssenproject</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<prerequisites>
