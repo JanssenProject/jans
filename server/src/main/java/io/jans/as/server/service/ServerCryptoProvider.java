@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -15,6 +16,7 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
@@ -46,7 +48,8 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
                 return null;
             }
 
-            if (configurationFactory.getAppConfiguration().getKeySignWithSameKeyButDiffAlg()) { // open banking: same key with different algorithms
+            final AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
+            if (appConfiguration.getKeySignWithSameKeyButDiffAlg()) { // open banking: same key with different algorithms
                 LOG.trace("Getting key by use: " + use);
                 for (JSONWebKey key : jsonWebKeySet.getKeys()) {
                     if (use != null && use == key.getUse()) {
@@ -54,6 +57,12 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
                         return key.getKid();
                     }
                 }
+            }
+
+            final String staticKid = appConfiguration.getStaticKid();
+            if (StringUtils.isNotBlank(staticKid)) {
+                LOG.trace("Use staticKid: " + staticKid);
+                return staticKid;
             }
 
             final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
