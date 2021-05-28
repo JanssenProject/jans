@@ -6,8 +6,6 @@
 
 package io.jans.as.server.model.token;
 
-import org.python.jline.internal.Preconditions;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -20,6 +18,10 @@ import io.jans.as.model.jwt.JwtType;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import io.jans.service.cdi.util.CdiUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.python.jline.internal.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,6 +30,8 @@ import io.jans.service.cdi.util.CdiUtil;
  */
 
 public class JwtSigner {
+
+    private final static Logger log = LoggerFactory.getLogger(JwtSigner.class);
 
     private AbstractCryptoProvider cryptoProvider;
     private SignatureAlgorithm signatureAlgorithm;
@@ -73,7 +77,7 @@ public class JwtSigner {
         jwt = new Jwt();
 
         // Header
-        String keyId = cryptoProvider.getKeyId(webKeys, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+        String keyId = getKid();
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -84,6 +88,16 @@ public class JwtSigner {
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
         jwt.getClaims().setAudience(audience);
         return jwt;
+    }
+
+    private String getKid() throws Exception {
+        final String staticKid = appConfiguration.getStaticKid();
+        if (StringUtils.isNotBlank(staticKid)) {
+            log.trace("Use staticKid: " + staticKid);
+            return staticKid;
+        }
+
+        return cryptoProvider.getKeyId(webKeys, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
     }
 
     public Jwt sign() throws Exception {
