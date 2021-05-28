@@ -100,8 +100,8 @@ parser.add_argument("--username", help="Auth username")
 parser.add_argument("--password", help="Auth password")
 parser.add_argument("-j", help="Auth password file")
 
-parser.add_argument("--cert-file", help="Path to SSL Certificate file")
-parser.add_argument("--key-file", help="Path to SSL Key file")
+parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
+parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
@@ -256,11 +256,11 @@ class JCA_CLI:
         else:
             self.swagger_configuration.verify_ssl = True
 
-        if args.cert_file:
-            self.swagger_configuration.cert_file = args.cert_file
+        if args.config_api_mtls_client_cert:
+            self.swagger_configuration.cert_file = args.config_api_mtls_client_cert
 
-        if args.key_file:
-            self.swagger_configuration.key_file = args.key_file
+        if args.config_api_mtls_client_key:
+            self.swagger_configuration.key_file = args.config_api_mtls_client_key
 
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
@@ -1443,7 +1443,7 @@ class JCA_CLI:
 
         return api_caller
 
-    def process_command_get(self, path, suffix_param, endpoint_params, data_fn):
+    def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
 
         api_caller = self.get_path_api_caller_for_path(path)
         api_response = None
@@ -1488,7 +1488,7 @@ class JCA_CLI:
         print()
         sys.exit()
 
-    def process_command_post(self, path, suffix_param, endpoint_params, data_fn):
+    def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
         api_caller = self.get_path_api_caller_for_path(path)
 
         endpoint = Menu(name='', info=path)
@@ -1497,24 +1497,26 @@ class JCA_CLI:
 
         model = getattr(swagger_client.models, model_name)
 
-        if data_fn.endswith('jwt'):
-            with open(data_fn) as reader:
-                data_org = jwt.decode(reader.read(),
-                                      options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
-        else:
-            try:
-                data_org = self.get_json_from_file(data_fn)
-            except ValueError as ve:
-                self.exit_with_error(str(ve))
+        if not data:
 
-        data = {}
-
-        for k in data_org:
-            if k in model.attribute_map:
-                mapped_key = model.attribute_map[k]
-                data[mapped_key] = data_org[k]
+            if data_fn.endswith('jwt'):
+                with open(data_fn) as reader:
+                    data_org = jwt.decode(reader.read(),
+                                          options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
             else:
-                data[k] = data_org[k]
+                try:
+                    data_org = self.get_json_from_file(data_fn)
+                except ValueError as ve:
+                    self.exit_with_error(str(ve))
+
+            data = {}
+
+            for k in data_org:
+                if k in model.attribute_map:
+                    mapped_key = model.attribute_map[k]
+                    data[mapped_key] = data_org[k]
+                else:
+                    data[k] = data_org[k]
 
         try:
             body = myapi._ApiClient__deserialize_model(data, model)
@@ -1534,8 +1536,8 @@ class JCA_CLI:
         sys.stderr.write("Server Response:\n")
         print(json.dumps(unmapped_response, indent=2))
 
-    def process_command_put(self, path, suffix_param, endpoint_params, data_fn):
-        self.process_command_post(path, suffix_param, endpoint_params, data_fn)
+    def process_command_put(self, path, suffix_param, endpoint_params, data_fn, data=None):
+        self.process_command_post(path, suffix_param, endpoint_params, data_fn, data=None)
 
     def process_command_patch(self, path, suffix_param, endpoint_params, data_fn, data=None):
 
@@ -1572,7 +1574,7 @@ class JCA_CLI:
         sys.stderr.write("Server Response:\n")
         print(json.dumps(unmapped_response, indent=2))
 
-    def process_command_delete(self, path, suffix_param, endpoint_params, data_fn):
+    def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
 
         api_caller = self.get_path_api_caller_for_path(path)
         api_response = None
@@ -1588,7 +1590,7 @@ class JCA_CLI:
             sys.stderr.write("Server Response:\n")
             print(json.dumps(unmapped_response, indent=2))
 
-    def process_command_by_id(self, operation_id, url_suffix, endpoint_args, data_fn):
+    def process_command_by_id(self, operation_id, url_suffix, endpoint_args, data_fn, data=None):
         path = self.get_path_by_id(operation_id)
 
         if not path:
@@ -1603,30 +1605,29 @@ class JCA_CLI:
         endpoint = Menu('', info=path)
         schema = self.get_scheme_for_endpoint(endpoint)
 
+        if not data:
+            op_path = self.get_path_by_id(operation_id)
+            if op_path['__method__'] == 'patch' and not data_fn:
+                pop, pdata = '', ''
+                if args.patch_add:
+                    pop = 'add'
+                    pdata = args.patch_add 
+                elif args.patch_remove:
+                    pop = 'remove'
+                    pdata = args.patch_remove
+                elif args.patch_replace:
+                    pop = 'replace'
+                    pdata = args.patch_replace
 
-        data = None
-        op_path = self.get_path_by_id(operation_id)
-        if op_path['__method__'] == 'patch' and not data_fn:
-            pop, pdata = '', ''
-            if args.patch_add:
-                pop = 'add'
-                pdata = args.patch_add 
-            elif args.patch_remove:
-                pop = 'remove'
-                pdata = args.patch_remove
-            elif args.patch_replace:
-                pop = 'replace'
-                pdata = args.patch_replace
+                if pop:
+                    if pop != 'remove' and pdata.count(':') != 1:
+                        self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
 
-            if pop:
-                if pop != 'remove' and pdata.count(':') != 1:
-                    self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
-
-                if pop != 'remove':
-                    ppath, pval = pdata.split(':')
-                    data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
-                else:
-                    data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
+                    if pop != 'remove':
+                        ppath, pval = pdata.split(':')
+                        data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
+                    else:
+                        data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
 
         if (schema and not data_fn) and not data:
             self.exit_with_error("Please provide schema with --data argument")
