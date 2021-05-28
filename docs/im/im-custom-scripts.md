@@ -10,7 +10,8 @@ Custom Scripts
 3 Updates a custom script
 4 Deletes a custom script
 ```
-- **get info of custom scripts**
+
+## Get list of Custom Scripts
 
 To get the status of each type of script select option 1, you will get the below result in return:
 
@@ -101,6 +102,8 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 
 ```
 
+## Add a new Custom Script
+
 To add a new script, choose option 2 and fill each property:
 
 `dn, inum, display name, valid script`
@@ -109,7 +112,8 @@ ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDE
 
 Programming Language: [PYTHON, JAVA]
 ```
-- **update scripts**
+
+## Update Custom Scripts
 
 Let update `Person Authentication basic` by its inum. Select option 3 from **custom scripts** menu
 and enter its inum, in my case it's `A51E-76DA`
@@ -136,7 +140,7 @@ enabled  [true]:
 ```
 In this way you can update any field you want.
 
-- **Delete scripts**
+## How to delete Custom Scripts?
 
 To delete a custom script, you need an `inum` of a custom script that you want to delete.
 It will ask for confirmation when you enter `inum`, simply enter `yes/y` to delete it otherwise enter `no/n` to cancel the operation.
