@@ -62,13 +62,15 @@ After creating the json file, just run the patch operation command.
 /opt/jans/jans-cli/config-cli.py --operation-id [patch operation id name] --data [json file absolute url]
 ```
 
-## Instant Patch Properties
+## Quick Patch Operations
 
 There is another patch request feature. It is a single line patch-request command line. It supports three types of operations:
 
 - `patch-replace`: to replace value with new one.
 - `patch-add`: it will add value into the key path.
 - `patch-remove`: to remove value from any key path.
+
+The command line looks like below:
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id [patch-operation-id] --[patch-operation-name] key:value
@@ -79,4 +81,9 @@ for example:
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --patch-replace memcachedConfiguration/bufferSize:32788
 ```
+
+In this command line: 
+- `patch-config-cache` is a operation-id from *Cache Configurations* task.
+- `patch-replace` type of operation; used to replace values in
+- `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
