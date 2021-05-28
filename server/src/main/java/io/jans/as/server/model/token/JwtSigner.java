@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.token;
 
+import com.google.common.base.Preconditions;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -19,7 +20,6 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
