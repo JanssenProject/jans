@@ -2777,13 +2777,6 @@ components:
           type: integer
           description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
           example: 10000
-        cleanServiceBaseDns:
-          type: object
-          description: Map of additional base dns under which AS will look up for expired entities.
-          additionalProperties:
-            type: string
-          example:
-            - {"key1": "value1","key2": "value2"}
         keyRegenerationEnabled:
           type: boolean
           description: Boolean value specifying whether to regenerate keys.
@@ -3317,6 +3310,9 @@ components:
           items:
             type: string
           example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
+        staticKid:
+          type: string
+          description: Specifies static Kid 
  
     GluuAttribute:
       title: GluuAttribute
