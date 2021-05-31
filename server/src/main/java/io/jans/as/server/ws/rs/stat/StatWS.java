@@ -240,12 +240,12 @@ public class StatWS {
         CollectorRegistry registry = new CollectorRegistry();
 
         for (Map.Entry<String, StatResponseItem> entry : statResponse.getResponse().entrySet()) {
-            final String month = "month_" + entry.getKey();
+            final String month = entry.getKey();
             final StatResponseItem item = entry.getValue();
 
             Counter.build()
                     .name("monthly_active_users")
-                    .labelNames(month)
+                    .labelNames("month")
                     .help("Monthly active users")
                     .register(registry)
                     .labels(month)
@@ -258,7 +258,7 @@ public class StatWS {
 
                 Counter.build()
                         .name(StatService.ACCESS_TOKEN_KEY)
-                        .labelNames(month, grantType)
+                        .labelNames("month", "grantType")
                         .help("Access Token")
                         .register(registry)
                         .labels(month, grantType)
@@ -266,7 +266,7 @@ public class StatWS {
 
                 Counter.build()
                         .name(StatService.ID_TOKEN_KEY)
-                        .labelNames(month, grantType)
+                        .labelNames("month", "grantType")
                         .help("Id Token")
                         .register(registry)
                         .labels(month, grantType)
@@ -274,7 +274,7 @@ public class StatWS {
 
                 Counter.build()
                         .name(StatService.REFRESH_TOKEN_KEY)
-                        .labelNames(month, grantType)
+                        .labelNames("month", "grantType")
                         .help("Refresh Token")
                         .register(registry)
                         .labels(month, grantType)
@@ -282,7 +282,7 @@ public class StatWS {
 
                 Counter.build()
                         .name(StatService.UMA_TOKEN_KEY)
-                        .labelNames(month, grantType)
+                        .labelNames("month", "grantType")
                         .help("UMA Token")
                         .register(registry)
                         .labels(month, grantType)
