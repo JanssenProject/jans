@@ -262,7 +262,7 @@ public class StatWS {
                         .help("Access Token")
                         .register(registry)
                         .labels(month, grantType)
-                        .inc(tokenMap.get(StatService.ACCESS_TOKEN_KEY));
+                        .inc(getToken(tokenMap, StatService.ACCESS_TOKEN_KEY));
 
                 Counter.build()
                         .name(StatService.ID_TOKEN_KEY)
@@ -270,7 +270,7 @@ public class StatWS {
                         .help("Id Token")
                         .register(registry)
                         .labels(month, grantType)
-                        .inc(tokenMap.get(StatService.ID_TOKEN_KEY));
+                        .inc(getToken(tokenMap, StatService.ID_TOKEN_KEY));
 
                 Counter.build()
                         .name(StatService.REFRESH_TOKEN_KEY)
@@ -278,7 +278,7 @@ public class StatWS {
                         .help("Refresh Token")
                         .register(registry)
                         .labels(month, grantType)
-                        .inc(tokenMap.get(StatService.REFRESH_TOKEN_KEY));
+                        .inc(getToken(tokenMap, StatService.REFRESH_TOKEN_KEY));
 
                 Counter.build()
                         .name(StatService.UMA_TOKEN_KEY)
@@ -286,11 +286,16 @@ public class StatWS {
                         .help("UMA Token")
                         .register(registry)
                         .labels(month, grantType)
-                        .inc(tokenMap.get(StatService.UMA_TOKEN_KEY));
+                        .inc(getToken(tokenMap, StatService.UMA_TOKEN_KEY));
             }
         }
 
         TextFormat.write004(writer, registry.metricFamilySamples());
         return writer.toString();
+    }
+
+    private static long getToken(Map<String, Long> map, String key) {
+        Long v = map.get(key);
+        return v != null ? v : 0;
     }
 }
