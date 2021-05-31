@@ -21,6 +21,13 @@
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 		<gluu.version>1.0.0-SNAPSHOT</gluu.version>
         <weld.version>3.1.2.Final</weld.version>
+
+		<jacoco.version>0.8.7</jacoco.version>
+
+		<sonar.projectKey>JanssenProject_jans-orm</sonar.projectKey>
+		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+		<sonar.organization>janssenproject</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<prerequisites>
@@ -123,6 +130,11 @@
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
