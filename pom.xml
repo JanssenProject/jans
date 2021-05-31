@@ -22,6 +22,13 @@
         <guava.version>[24.1.1,)</guava.version>
         <selenium.version>2.53.1</selenium.version>
         <skip.swagger.client.generation>false</skip.swagger.client.generation>
+
+        <jacoco.version>0.8.7</jacoco.version>
+
+        <sonar.projectKey>JanssenProject_docker-jans-client-api</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.organization>janssenproject</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <prerequisites>
@@ -361,6 +368,11 @@
                     <configuration>
                         <failOnError>false</failOnError>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
