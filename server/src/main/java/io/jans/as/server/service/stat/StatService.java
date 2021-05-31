@@ -120,7 +120,9 @@ public class StatService {
         stat.setTokenCountPerGrantType(tokenCounters);
         stat.setLastUpdatedAt(now.getTime());
 
-        currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
+        synchronized (hll) {
+            currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
+        }
         entryManager.merge(currentEntry);
 
         log.trace("Finished updateStat.");
@@ -235,11 +237,14 @@ public class StatService {
             return;
         }
 
+        final int hashCode = id.hashCode();
         try {
             setupCurrentEntry();
-            hll.addRaw(id.hashCode());
+            synchronized (hll) {
+                hll.addRaw(hashCode);
+            }
         } catch (Exception e) {
-            log.error("Failed to report active user.", e);
+            log.error("Failed to report active user, id: " + id + ", hash: " + hashCode, e);
         }
     }
 
