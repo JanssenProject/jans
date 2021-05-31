@@ -186,4 +186,22 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
+    <repositories>
+        <repository>
+            <id>mavencentral</id>
+            <name>maven central</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+        <repository>
+            <id>bouncycastle</id>
+            <name>Bouncy Castle</name>
+            <url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+        </repository>
+    </repositories>
 </project>
