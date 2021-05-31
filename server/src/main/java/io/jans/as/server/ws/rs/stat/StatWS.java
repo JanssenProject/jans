@@ -228,7 +228,7 @@ public class StatWS {
             interval = DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS;
         }
 
-        long timerInterval = interval * 1000;
+        long timerInterval = interval * 1000L;
 
         long timeDiff = System.currentTimeMillis() - lastProcessedAt;
 
@@ -240,7 +240,7 @@ public class StatWS {
         CollectorRegistry registry = new CollectorRegistry();
 
         for (Map.Entry<String, StatResponseItem> entry : statResponse.getResponse().entrySet()) {
-            final String month = entry.getKey();
+            final String month = "month_" + entry.getKey();
             final StatResponseItem item = entry.getValue();
 
             Counter.build()
@@ -248,6 +248,7 @@ public class StatWS {
                     .labelNames(month)
                     .help("Monthly active users")
                     .register(registry)
+                    .labels("count")
                     .inc(item.getMonthlyActiveUsers());
 
 
@@ -260,6 +261,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Access Token")
                         .register(registry)
+                        .labels("count")
                         .inc(tokenMap.get(StatService.ACCESS_TOKEN_KEY));
 
                 Counter.build()
@@ -267,6 +269,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Id Token")
                         .register(registry)
+                        .labels("count")
                         .inc(tokenMap.get(StatService.ID_TOKEN_KEY));
 
                 Counter.build()
@@ -274,6 +277,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Refresh Token")
                         .register(registry)
+                        .labels("count")
                         .inc(tokenMap.get(StatService.REFRESH_TOKEN_KEY));
 
                 Counter.build()
@@ -281,6 +285,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("UMA Token")
                         .register(registry)
+                        .labels("count")
                         .inc(tokenMap.get(StatService.UMA_TOKEN_KEY));
             }
         }
