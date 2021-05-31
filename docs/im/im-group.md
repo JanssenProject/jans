@@ -20,7 +20,9 @@ replacements operations. See section 3.5.2 of RFC 7644
 
 ```
 
-  1. **Query Group Resources**: It shows all the group resources and its perspective user resources. To find list of resources with custom filter, it supports advanced search with few properties:
+## Query Group Resources
+
+It shows all the group resources and its perspective user resources. To find list of resources with custom filter, it supports advanced search with few properties:
 
     1. attributes
     2. excludeattributes
@@ -92,26 +94,27 @@ Getting access token for scope https://jans.io/scim/groups.read
 Selection: 
 
 ```
-  4. **_Update a group Resource_**: 
+## Update a group Resource: 
   
-  Updating a group resource works in a replacement fashion and every attribute value found in the payload will replace the one in the existing resource. Attributes those are not passed in the payload will be left as same as before.
+Updating a group resource works in a replacement fashion and every attribute value found in the payload will replace the one in the existing resource. Attributes those are not passed in the payload will be left as same as before.
 
-  If you select option 4 it will be asked to enter the id of a group that you may want to update. After then You will get a list of Fields:
+If you select option 4 it will be asked to enter the id of a group that you may want to update. After then You will get a list of Fields:
 
-   ```
-   Fields:
+  ```
+  Fields:
     1 displayName
     2 id
     3 members
     4 meta
     5 schemas
-   ```
-  You can select each of these fields to update one by one. Let's select 3rd field to add memebers in the group. It will ask to enter some follow-up questions, like `Add Member? [y, n]`. Then enter each value of the user attributes:
+  ```
+
+You can select each of these fields to update one by one. Let's select 3rd field to add memebers in the group. It will ask to enter some follow-up questions, like `Add Member? [y, n]`. Then enter each value of the user attributes:
   
-    - ref: User referral url
-    - type: type as a User
-    - display: User display Name
-    - value: inum of the user
+  - ref: User referral url
+  - type: type as a User
+  - display: User display Name
+  - value: inum of the user
 
   As you see below, If you choose `y` for `Add another Member?` then similarly you can add resource for another user. But if you choose `n` then you can select few options: 
 
