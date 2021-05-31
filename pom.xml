@@ -25,7 +25,7 @@
 
         <jacoco.version>0.8.7</jacoco.version>
 
-        <sonar.projectKey>JanssenProject_docker-jans-client-api</sonar.projectKey>
+        <sonar.projectKey>JanssenProject_jans-client-api</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <sonar.organization>janssenproject</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
