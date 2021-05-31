@@ -23,7 +23,9 @@ Selection:
 
 ```
 
-1. **Query User Resources**: Query User Resources presents all the user information and its attributes.  It supprts query with filter by a list of attributes:
+## Query User Resources
+
+Query User Resources presents all the user information and its attributes.  It supports query with filter by a list of attributes:
 
     1. **attributes**: Use comma (,) for multiple attributes
     2. **excludeAttributes**: Use comma (,) for multiple attributes
@@ -64,7 +66,7 @@ Calling Api with parameters: {'count': 1}
 Please wait while retreiving data ...
 
 Getting access token for scope https://jans.io/scim/users.read
-{
+
   "Resources": [
     {
       "externalId": null,
@@ -135,7 +137,9 @@ Selection:
 
 ```
 
-2. **Creating an User**: With this option, An adminstration can create  user resources easily. To create an user, you need to provide user value for its attributes. List of attributes are given below:
+## Creating an User
+
+With this option, An adminstration can create  user resources easily. To create an user, you need to provide user value for its attributes. List of attributes are given below:
 
     1. familyName
     2. givenName
@@ -147,7 +151,7 @@ Selection:
     8. Email
 
     
-  Optiaonal Fields:
+  Optional Fields:
 
       1 schemas
       2 id
@@ -212,7 +216,7 @@ Please enter one of y, n
 Add Email? n
 
 Populate optional fields? y
-Optiaonal Fields:
+Optional Fields:
 1 schemas
 2 id
 3 meta
@@ -326,7 +330,9 @@ Selection:
 
 ```
 
-3. **Retrives an User Resources by its ID**: You can retrieve an user resources by its ID. Also it supports filter in searching means you can choose list of attributes you want to retrieve and exclude list of attributes that you don't want to retrieve. Here, I have skipped for each property to retrieve all its attributes.
+## Retrieves an User Resources by its ID
+
+You can retrieve an user resources by its ID. Also it supports filter in searching means you can choose list of attributes you want to retrieve and exclude list of attributes that you don't want to retrieve. Here, I have skipped for each property to retrieve all its attributes.
 
 ```
 Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
@@ -390,7 +396,9 @@ Getting access token for scope https://jans.io/scim/users.read
 Selection: 
 ```
 
-4. **Update an User resource**: You can update an user resources by its ID also. If you enter an ID of an user resource, It will show a list of attributes. You can select any of theme one by one to update each value of its property. 
+## Update an User resource: 
+
+You can update an user resources by its ID also. If you enter an ID of an user resource, It will show a list of attributes. You can select any of theme one by one to update each value of its property. 
 
 ```
 
@@ -504,7 +512,9 @@ Selection:
 This is how you can update each of its attributes.
 
 
-5. **Delete an user resource**: If you want to delete an entry from user resources, you can do that thing easily using the Interatice Mode of Janssen CLI. To delete an user entry, you need to provide its `inum`. In our case: It's `id=7881ed5c-1dad-4265-9b74-ee6c3932c11f` which one are going to be deleted. After then, it will ask for the confirmation, just enter 'y' to delete. Please see below result to better understand.
+## Delete an user resource
+ 
+ If you want to delete an entry from user resources, you can do that thing easily using the Interatice Mode of Janssen CLI. To delete an user entry, you need to provide its `inum`. In our case: It's `id=7881ed5c-1dad-4265-9b74-ee6c3932c11f` which one are going to be deleted. After then, it will ask for the confirmation, just enter 'y' to delete. Please see below result to better understand.
 
 ```
 Selection: 5
@@ -524,7 +534,9 @@ Selection:
 
 ```
 
-6. **Updates user resources using operation mode**: This is an alternative option to update user resources. To use this option, you need to consider the following things: 
+## Updates user resources using operation mode
+
+This is an alternative option to update user resources. To use this option, you need to consider the following things: 
 
     - **id**: an unique id of user resources
     - **op**: one operation to be done from [add, remove, replace] 
