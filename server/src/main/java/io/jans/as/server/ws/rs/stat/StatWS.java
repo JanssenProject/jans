@@ -248,7 +248,7 @@ public class StatWS {
                     .labelNames(month)
                     .help("Monthly active users")
                     .register(registry)
-                    .labels("count")
+                    .labels(month)
                     .inc(item.getMonthlyActiveUsers());
 
 
@@ -261,7 +261,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Access Token")
                         .register(registry)
-                        .labels("count")
+                        .labels(month, grantType)
                         .inc(tokenMap.get(StatService.ACCESS_TOKEN_KEY));
 
                 Counter.build()
@@ -269,7 +269,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Id Token")
                         .register(registry)
-                        .labels("count")
+                        .labels(month, grantType)
                         .inc(tokenMap.get(StatService.ID_TOKEN_KEY));
 
                 Counter.build()
@@ -277,7 +277,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("Refresh Token")
                         .register(registry)
-                        .labels("count")
+                        .labels(month, grantType)
                         .inc(tokenMap.get(StatService.REFRESH_TOKEN_KEY));
 
                 Counter.build()
@@ -285,7 +285,7 @@ public class StatWS {
                         .labelNames(month, grantType)
                         .help("UMA Token")
                         .register(registry)
-                        .labels("count")
+                        .labels(month, grantType)
                         .inc(tokenMap.get(StatService.UMA_TOKEN_KEY));
             }
         }
