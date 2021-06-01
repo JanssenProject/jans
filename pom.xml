@@ -25,7 +25,6 @@
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-
 	</properties>
 
 	<prerequisites>
@@ -42,6 +41,21 @@
 			<id>gluu</id>
 			<name>gluu repository</name>
 			<url>https://ox.gluu.org/maven</url>
+		</repository>
+		<repository>
+			<id>mavencentral</id>
+			<name>maven central</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>bouncycastle</id>
+			<name>Bouncy Castle</name>
+			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 
@@ -76,7 +90,7 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-auth-model</artifactId>
-                                <version>${project.version}</version>
+				<version>${project.version}</version>
 			</dependency>
             <dependency>
                 <groupId>io.jans</groupId>
