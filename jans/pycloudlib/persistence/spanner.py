@@ -191,7 +191,9 @@ class SpannerClient:
     def get(self, table_name, id_, column_names=None) -> dict:
         """Get a row from a table with matching ID."""
 
-        column_names = column_names or []
+        if not column_names:
+            # TODO: faster lookup on column names
+            column_names = self.get_table_mapping().get(table_name).keys()
 
         entry = {}
 
@@ -204,8 +206,9 @@ class SpannerClient:
                 ]),
                 limit=1,
             )
-            row = list(result)[0]
-            entry = dict(zip(column_names, row))
+            with suppress(IndexError, NotFound):
+                row = list(result)[0]
+                entry = dict(zip(column_names, row))
         return entry
 
     def update(self, table_name, id_, column_mapping) -> bool:
@@ -226,6 +229,22 @@ class SpannerClient:
             self.database.run_in_transaction(update_rows)
             modified = True
         return modified
+
+    def search(self, table_name, column_names=None) -> dict:
+        """Get a row from a table with matching ID."""
+
+        if not column_names:
+            # TODO: faster lookup on column names
+            column_names = self.get_table_mapping().get(table_name).keys()
+
+        with self.database.snapshot() as snapshot:
+            result = snapshot.read(
+                table=table_name,
+                columns=column_names,
+                keyset=spanner.KeySet(all_=True),
+            )
+            for row in result:
+                yield dict(zip(column_names, row))
 
 
 def render_spanner_properties(manager, src: str, dest: str) -> None:
