@@ -8,15 +8,18 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.model.common.WebKeyStorage;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -188,6 +191,7 @@ public class AppConfiguration implements Configuration {
     private String oxElevenDeleteKeyEndpoint;
 
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
+    private Boolean introspectionSkipAuthorization;
 
     private Boolean endSessionWithAccessToken;
     private String cookieDomain;
@@ -631,6 +635,15 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionAccessTokenMustHaveUmaProtectionScope(Boolean introspectionAccessTokenMustHaveUmaProtectionScope) {
         this.introspectionAccessTokenMustHaveUmaProtectionScope = introspectionAccessTokenMustHaveUmaProtectionScope;
+    }
+
+    public Boolean getIntrospectionSkipAuthorization() {
+        if (introspectionSkipAuthorization == null) introspectionSkipAuthorization = false;
+        return introspectionSkipAuthorization;
+    }
+
+    public void setIntrospectionSkipAuthorization(Boolean introspectionSkipAuthorization) {
+        this.introspectionSkipAuthorization = introspectionSkipAuthorization;
     }
 
     public Boolean getUmaRptAsJwt() {
