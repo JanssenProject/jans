@@ -88,7 +88,7 @@ public class MTLSService {
         }
 
         if (!cn.equals(client.getClientId()) && !hashedCn.equals(HashUtil.getHash(client.getClientId(), SignatureAlgorithm.HS512))) {
-            log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId());
+            log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId() + ", hashedCn:" + hashedCn);
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
         }
 
