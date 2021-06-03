@@ -21,7 +21,7 @@ public enum TokenType {
     /**
      * The bearer token type is defined in [ietf-oauth-v2-bearer]
      */
-    BEARER("bearer");
+    BEARER("Bearer");
 
     private final String name;
 
@@ -44,7 +44,7 @@ public enum TokenType {
     public static TokenType fromString(String param) {
         if (param != null) {
             for (TokenType rt : TokenType.values()) {
-                if (param.equals(rt.name)) {
+                if (param.equalsIgnoreCase(rt.name)) {
                     return rt;
                 }
             }
