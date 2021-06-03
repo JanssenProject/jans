@@ -12,11 +12,13 @@ import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
+import io.jans.as.model.util.HashUtil;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
@@ -78,7 +80,8 @@ public class MTLSService {
             return false;
         }
         final String cn = CertUtils.getCN(cert);
-        if (!cn.equals(client.getClientId())) {
+        final String hashedCn = HashUtil.getHash(cn, SignatureAlgorithm.HS512);
+        if (!cn.equals(client.getClientId()) && hashedCn != null && !hashedCn.equals(HashUtil.getHash(client.getClientId(), SignatureAlgorithm.HS512))) {
             log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId());
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
         }
