@@ -93,3 +93,141 @@ Getting access token for scope https://jans.io/oauth/config/jwks.readonly
 
 ## Update / Replace JSON Web Key (JWK)
 
+To `update / replace` any JWK configuration, let get the schema first. 
+
+```
+Operation ID: put-config-jwks
+  Description: Puts/replaces JSON Web Keys (JWKS).
+  Schema: /components/schemas/WebKeysConfiguration
+```
+
+To get the schema file:
+
+```
+ /opt/jans/jans-cli/config-cli.py --schema /components/schemas/WebKeysConfiguration > /tmp/path-jwk.json
+```
+
+```
+root@testjans:~# cat /tmp/path-jwk.json
+
+{
+  "keys": {
+    "kid": null,
+    "kty": null,
+    "use": null,
+    "alg": null,
+    "crv": null,
+    "exp": null,
+    "x5c": [],
+    "n": null,
+    "e": null,
+    "x": null,
+    "y": null
+  }
+}
+```
+
+It's a json file containing `key-value` pair. Each of these properties in the key is defined by the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
+
+
+Properties
+===
+
+|name|Description|
+|:---:|:---|
+|`kid`| It's a unique identifier for the key configuration.|
+|`kty`| It's used to define the type of the specific cryptographic algorithms |
+|`use`| This parameter identifies the intend use of the public key. `sig` for signature and `enc` for encryption|
+|`alg`| The specific algorithm used with the key|
+|`crv`|  |
+|`exp`| The exponent for the RSA public key. |
+|`x5c`| The `x5c` parameter contains a chain of one or more PKIX certificates [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280) |
+|`n`| The modulus for the [RSA public key](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1.1). |
+|`e`| The "e" (exponent) parameter contains the exponent value for the [RSA public key](https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.1.2).  It is represented as a Base64urlUInt-encoded value. |
+|`x`| The "x" (x coordinate) parameter contains the x coordinate for the [Elliptic Curve point](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2). |
+|`y`|  The "y" (y coordinate) parameter contains the y coordinate for the [Elliptic Curve point](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3). |
+
+If you want to explore more go through the reference link.
+
+Let's update the json file to create a new key configuration.
+
+```
+{
+   "keys":
+   [{
+      "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA-OAEP",
+      "crv": "",
+      "exp": 1622245655163,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
+      ],
+      "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+  }]
+}
+```
+
+Please remember if `kid` already matched then this will be replaced otherwise a new key configuration will be created in the janssen server.
+
+Now let's put the updated data into the janssen server.
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks --data /tmp/path-jwk.json
+```
+
+```
+Getting access token for scope https://jans.io/oauth/config/jwks.write
+Server Response:
+{
+  "keys": [
+    {
+      "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
+      "kty": "RSA",
+      "use": "enc",
+      "alg": "RSA-OAEP",
+      "crv": "",
+      "exp": 1622245655163,
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
+      ],
+      "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
+      "e": "AQAB",
+      "x": null,
+      "y": null
+    }
+  ]
+}
+```
+
+## Patch JSON Web Key (JWK)
+
+With this operation id, we can modify JSON Web Keys partially of its properties.
+
+```
+Operation ID: patch-config-jwks
+  Description: Patch JSON Web Keys (JWKS).
+  Schema: Array of /components/schemas/PatchRequest
+```
+Please read [tips](cli/../cli-tips.md), You can get some idea how this patch method works to modify particular properties of any task. 
+
+
+
+<!-- 
+For any quick changes, you can go with the one line command as stated below:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwks [patch operation name] key:value
+```
+
+For example: 
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwks --patch-replace use:sig 
+```
+
+-->
