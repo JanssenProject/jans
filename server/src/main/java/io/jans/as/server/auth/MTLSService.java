@@ -103,9 +103,8 @@ public class MTLSService {
                 return false;
             }
 
-            // we check only `subjectDn`, the PKI certificate validation is performed by
-            // apache/httpd
-            if (io.jans.as.model.util.StringUtils.equalsIgnoringSpaces(subjectDn, cert.getSubjectDN().getName())) {
+            // we check only `subjectDn`, the PKI certificate validation is performed by apache/httpd
+            if (CertUtils.equalsRdn(subjectDn, cert.getSubjectDN().getName())) {
                 log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
                 authenticatedSuccessfully(client, httpRequest);
 
