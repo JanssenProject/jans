@@ -123,7 +123,7 @@ public class CertUtils {
     }
 
     public static boolean equalsRdn(String rdn1, String rdn2) {
-        if (StringUtils.isBlank(rdn1) || StringUtils.isBlank(rdn1))
+        if (StringUtils.isBlank(rdn1) || StringUtils.isBlank(rdn2))
             return false;
 
         X500Name n1 = new X500Name (rdn1);
