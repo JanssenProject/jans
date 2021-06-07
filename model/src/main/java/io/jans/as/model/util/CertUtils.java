@@ -121,4 +121,14 @@ public class CertUtils {
         }
         return "";
     }
+
+    public static boolean equalsRdn(String rdn1, String rdn2) {
+        if (StringUtils.isBlank(rdn1) || StringUtils.isBlank(rdn1))
+            return false;
+
+        X500Name n1 = new X500Name (rdn1);
+        X500Name n2 = new X500Name (rdn2);
+
+        return n1.equals(n2);
+    }
 }
