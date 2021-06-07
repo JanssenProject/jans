@@ -200,3 +200,70 @@ Finally lets do the operation:
 
 It will update the configuration if match with its `configId` otherwise return an error.
 
+## Gets LDAP Database Configuration by its name
+
+In the above operation, we have updated `test_ldap.json`. Let's check the updated result with this operation by calling its name id. 
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap-by-name --url-suffix name:test_ldap
+```
+
+Here name is the `configId` of the configuration. If we run this command, it returns the configuration details matched with configId.
+
+```
+Getting access token for scope https://jans.io/oauth/config/database/ldap.readonly
+{
+  "configId": "test_ldap",
+  "bindDN": "cn=directory manager",
+  "bindPassword": "3eFs1t1aRPsW4xtxvCiGQQ==",
+  "servers": [
+    "localhost:1636"
+  ],
+  "maxConnections": 100,
+  "useSSL": true,
+  "baseDNs": [
+    "ou=people,o=jans"
+  ],
+  "primaryKey": "uid",
+  "localPrimaryKey": "uid",
+  "useAnonymousBind": false,
+  "enabled": false,
+  "version": 0,
+  "level": 0
+}
+
+```
+
+## Patching LDAP Database Configurations
+
+If required, We can patch single information of a ldap database configuration by using its name id. In that case, we have to make an array of operations in schema file. So, let's get the schema file first.
+
+```
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > patch.json
+```
+
+We know already that this operation support three types of value `op`, `path` and `value` to be replaced. For more info visit this [link](cli-tips.md#patch-request)
+
+
+For example, let's say, we want to change the level of the `test_ldap` configuration. So, Let's update the patch file as below:
+
+```
+[
+  {
+    "op": "replace",
+    "path": "level",
+    "value": "100"
+  }
+]
+
+```
+
+To patch data, the command looks like for this:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-database-ldap-by-name --url-suffix name:test_ldap --data patch.json
+```
+
+It will update the configuration and will show the updated result as below image on the display.
+
+![patch-ldap](../img/cli-patch-ldap-configuration.png)
