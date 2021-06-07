@@ -20,7 +20,8 @@ public enum ApplicationType implements AttributeEnum {
 
     OX_AUTH("jans_auth", "Jans Auth"),
     OX_TRUST("oxtrust", "oxTrust"),
-    FIDO2("fido2", "FIDO2");
+    FIDO2("fido2", "FIDO2"),
+    SCIM("scim", "SCIM");
 
     private String value;
     private String displayName;

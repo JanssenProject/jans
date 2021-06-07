@@ -7,6 +7,7 @@
 package io.jans.service;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.cloud.spanner.impl.SpannerEntryManagerFactory;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 
 import java.io.Serializable;
@@ -25,6 +26,10 @@ public class DataSourceTypeService implements Serializable {
 
     public boolean isLDAP(String key) {
         return entryManager.getPersistenceType(key).equals(LdapEntryManagerFactory.PERSISTENCE_TYPE);
+    }
+
+    public boolean isSpanner(String key) {
+        return entryManager.getPersistenceType(key).equals(SpannerEntryManagerFactory.PERSISTENCE_TYPE);
     }
 
 }
