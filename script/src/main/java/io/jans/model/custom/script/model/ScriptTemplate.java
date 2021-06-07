@@ -13,9 +13,9 @@ public enum ScriptTemplate {
             "\n" +
             "import java\n" +
             "\n" +
-            "class SamplePersonScript(PersonAuthenticationType):\n" +
+            "class PersonAuthentication(PersonAuthenticationType):\n" +
             "    def __init__(self, currentTimeMillis):\n" +
-            "       \n" +
+            "        self.currentTimeMillis = currentTimeMillis\n" +
             "\n" +
             "    def init(self, configurationAttributes):\n" +
             "        return True   \n" +
@@ -36,7 +36,7 @@ public enum ScriptTemplate {
             "        return True\n" +
             "\n" +
             "    def prepareForStep(self, configurationAttributes, requestParameters, step):\n" +
-            "        \n" +
+            "        return True\n" +
             "\n" +
             "    def getExtraParametersForStep(self, configurationAttributes, step):\n" +
             "        return None\n" +
