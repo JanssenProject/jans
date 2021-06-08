@@ -265,7 +265,7 @@ Feature: Verify Auth configuration endpoint
     And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And def request_body = (response.dcrSignatureValidationSharedSecret  == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":"+response.dcrSignatureValidationSharedSecret+"} ]")
+    And def request_body = (response.dcrSignatureValidationSharedSecret  == null ? "[ {\"op\":\"add\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/dcrSignatureValidationSharedSecret\", \"value\":\""+response.dcrSignatureValidationSharedSecret+"\" } ]")
     And print 'request_body ='+request_body
     And request request_body
     When method PATCH
@@ -345,7 +345,7 @@ Feature: Verify Auth configuration endpoint
     And header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And def request_body = (response.staticKid == null ? "[ {\"op\":\"add\", \"path\": \"/staticKid\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/staticKid\", \"value\":"+response.staticKid+"} ]")
+    And def request_body = (response.staticKid == null ? "[ {\"op\":\"add\", \"path\": \"/staticKid\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/staticKid\", \"value\":\""+response.staticKid+"\"} ]")
     And print 'request_body ='+request_body
     And request request_body
     When method PATCH
