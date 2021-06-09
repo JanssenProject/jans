@@ -70,6 +70,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public String scriptName(String acr) {
+		if (StringHelper.isEmpty(acr)) {
+			return null;
+		}
+
 		if (scriptAliasMap.containsKey(acr)) {
 			return scriptAliasMap.get(acr);
 		}
