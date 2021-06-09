@@ -23,9 +23,11 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.util.Util;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.cloud.spanner.impl.SpannerEntryManagerFactory;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.DataSourceTypeService;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 
@@ -45,6 +47,9 @@ public abstract class UserService {
 
     @Inject
     protected PersistenceEntryManager persistenceEntryManager;
+
+    @Inject
+    protected DataSourceTypeService dataSourceTypeService;
 
     @Inject
     private InumService inumService;
@@ -83,9 +88,15 @@ public abstract class UserService {
 			return null;
 		}
 
-		Filter userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(userId));
+		String peopleBaseDn = getPeopleBaseDn();
+		Filter userUidFilter;
+		if (dataSourceTypeService.isSpanner(peopleBaseDn)) {
+			userUidFilter = Filter.createEqualityFilter("uid", StringHelper.toLowerCase(userId));
+		} else {
+			userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(userId));
+		}
 
-		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, userUidFilter, returnAttributes);
+		List<User> entries = persistenceEntryManager.findEntries(peopleBaseDn, User.class, userUidFilter, returnAttributes);
 		log.debug("Found {} entries for user id = {}", entries.size(), userId);
 
 		if (entries.size() > 0) {
@@ -148,10 +159,10 @@ public abstract class UserService {
         String inum = inumService.generatePeopleInum();
 
         user.setDn("inum=" + inum + "," + peopleBaseDN);
-        user.setAttribute("inum", inum);
+        user.setAttribute("inum", inum, false);
 
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
-        user.setAttribute("jansStatus",  status.getValue());
+        user.setAttribute("jansStatus",  status.getValue(), false);
 
         List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
@@ -250,10 +261,18 @@ public abstract class UserService {
 
 		log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
 
+		String peopleBaseDn = getPeopleBaseDn();
+
 		List<Filter> filters = new ArrayList<Filter>(); 
 		for (String attributeName : attributeNames) {
-			Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attributeName), attributeValue);
-	        if (multiValued != null) {
+			Filter filter;
+			if (dataSourceTypeService.isSpanner(peopleBaseDn)) {
+				filter = Filter.createEqualityFilter(attributeName, attributeValue);
+			} else {
+				filter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attributeName), attributeValue);
+			}
+
+			if (multiValued != null) {
 	        	filter.multiValued(multiValued);
 	        }
 			filters.add(filter);
