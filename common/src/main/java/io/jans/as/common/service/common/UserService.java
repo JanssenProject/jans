@@ -213,7 +213,7 @@ public abstract class UserService {
 						break;
 					}
 				} catch (Exception e) {
-					log.debug(e.getMessage());
+					log.debug(e.getMessage(), e);
 				}
 			}
 		}
