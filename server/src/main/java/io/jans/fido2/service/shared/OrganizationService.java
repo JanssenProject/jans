@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.model.ApplicationType;
 
 @ApplicationScoped
 @Named("organizationService")
@@ -22,5 +23,10 @@ public class OrganizationService extends io.jans.as.common.service.OrganizationS
     protected boolean isUseLocalCache() {
     	return appConfiguration.isUseLocalCache();
     }
+
+	@Override
+	public ApplicationType getApplicationType() {
+		return ApplicationType.FIDO2;
+	}
 
 }
