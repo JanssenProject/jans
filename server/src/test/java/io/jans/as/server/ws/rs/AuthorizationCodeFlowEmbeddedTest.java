@@ -601,7 +601,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "dynamicClientRegistration", priority = 40)
     public void tokenExpirationStep1(final String authorizePath, final String userId, final String userSecret,
                                      final String redirectUri) throws Exception {
-    	
+
     	// Store current configuration
     	int currentAuthorizationCodeLifetime = appConfiguration.getAuthorizationCodeLifetime();
     	int currentCleanServiceInterval = appConfiguration.getCleanServiceInterval();
@@ -610,7 +610,6 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     	appConfiguration.setAuthorizationCodeLifetime(8);
     	appConfiguration.setCleanServiceInterval(6);
     	try {
-	
 	        final String state = UUID.randomUUID().toString();
 	
 	        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
