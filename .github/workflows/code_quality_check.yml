@@ -97,13 +97,20 @@ jobs:
             mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
           esac
-      
+
+      - name: Convert repo org name to lowercase for non JVM projects
+        if: contains(env.NON_JVM_PROJECTS, github.repository)
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          echo "REPO_ORG=${REPO_OWNER,,}" >>${GITHUB_ENV}
+
       - name: SonarCloud Scan for non-JVM project
         if: contains(env.NON_JVM_PROJECTS, github.repository)
         uses: SonarSource/sonarcloud-github-action@master
         with:
           args: >
-            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.organization=${{ env.REPO_ORG }}
             -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
