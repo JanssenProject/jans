@@ -293,7 +293,7 @@ class DBUtils:
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            self.spanner.insert_data(table='jansAppConf', columns=["doc_id", component], values=[["jans-auth", value]])
+            self.spanner.update_data(table='jansAppConf', columns=["doc_id", component], values=[["configuration", value]])
 
 
         elif self.moddb == BackendTypes.COUCHBASE:
