@@ -876,7 +876,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 oAuth2AuditLog.setScope(clientScopesToString(client));
                                 oAuth2AuditLog.setSuccess(true);
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
+                                return Response.status(Response.Status.CREATED).entity(clientAsEntity(client)).build();
                             } else {
                                 log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
