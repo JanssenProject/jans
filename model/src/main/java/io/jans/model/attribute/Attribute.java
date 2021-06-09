@@ -90,9 +90,6 @@ public class Attribute extends Entry implements Serializable {
     @AttributeName(name = "jansClaimName")
     private String claimName;
 
-    @AttributeName(name = "seeAlso")
-    private String seeAlso;
-
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
@@ -236,14 +233,6 @@ public class Attribute extends Entry implements Serializable {
 
     public void setClaimName(String claimName) {
         this.claimName = claimName;
-    }
-
-    public String getSeeAlso() {
-        return seeAlso;
-    }
-
-    public void setSeeAlso(String seeAlso) {
-        this.seeAlso = seeAlso;
     }
 
     public GluuStatus getStatus() {
