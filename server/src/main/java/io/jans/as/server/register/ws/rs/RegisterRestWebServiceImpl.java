@@ -163,7 +163,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private Response registerClientImpl(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
         errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
 
-        Response.ResponseBuilder builder = Response.ok();
+        Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
             final JSONObject requestObject = parseRequestObjectWithoutValidation(requestParams);
@@ -876,7 +876,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 oAuth2AuditLog.setScope(clientScopesToString(client));
                                 oAuth2AuditLog.setSuccess(true);
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                return Response.status(Response.Status.CREATED).entity(clientAsEntity(client)).build();
+                                return Response.ok().entity(clientAsEntity(client)).build();
                             } else {
                                 log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
