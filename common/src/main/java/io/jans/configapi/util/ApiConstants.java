@@ -60,6 +60,8 @@ public class ApiConstants {
     public static final String SCOPE_INUM_PATH = "{scope_inum}";
     public static final String TYPE_PATH = "/{type}";
     public static final String NAME_PARAM_PATH = "/{name}";
+    public static final String KEY_PATH = "/key";
+    public static final String KID_PATH = "/{kid}";
 
     public static final String LIMIT = "limit";
     public static final String PATTERN = "pattern";
@@ -70,6 +72,8 @@ public class ApiConstants {
     public static final String TYPE = "type";
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
+    public static final String KID = "kid";
+    
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";

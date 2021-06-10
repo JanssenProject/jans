@@ -33,6 +33,8 @@
 		<karate.version>0.9.5</karate.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
+
+		<resteasy.version>4.5.6.Final</resteasy.version>
 	</properties>
 
 	<prerequisites>
@@ -114,26 +116,68 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-util</artifactId>
 				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.jackrabbit</groupId>
+						<artifactId>jackrabbit-core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-model</artifactId>
 				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.jackrabbit</groupId>
+						<artifactId>jackrabbit-core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-auth-common</artifactId>
 				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss.resteasy</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.jackrabbit</groupId>
+						<artifactId>jackrabbit-core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-service</artifactId>
 				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-client-api</artifactId>
 				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Security -->
@@ -163,6 +207,11 @@
 			<dependency>
 				<groupId>org.eclipse.microprofile.config</groupId>
 				<artifactId>microprofile-config-api</artifactId>
+				<version>2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.microprofile.rest.client</groupId>
+				<artifactId>microprofile-rest-client-api</artifactId>
 				<version>2.0</version>
 			</dependency>
 			<dependency>
@@ -220,6 +269,38 @@
 				<artifactId>resteasy-validator-provider-11</artifactId>
 				<version>3.6.3.Final</version>
 			</dependency>
+			
+				<!-- RestEasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-cdi</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-servlet-initializer</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxb-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+	<!-- 	<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		
 
 			<!-- jetty -->
 			<dependency>
@@ -321,6 +402,15 @@
 				<version>${cucumber.version}</version>
 				<scope>test</scope>
 			</dependency>
+
+			<!-- Others -->
+			<dependency>
+				<groupId>com.github.fge</groupId>
+				<artifactId>json-patch</artifactId>
+				<version>1.9</version>
+			</dependency>
+
+
 
 		</dependencies>
 	</dependencyManagement>
