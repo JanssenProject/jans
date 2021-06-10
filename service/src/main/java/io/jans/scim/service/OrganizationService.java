@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.config.oxtrust.LdapOxAuthConfiguration;
+import io.jans.model.ApplicationType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.scim.model.GluuOrganization;
@@ -85,6 +86,11 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 		}
 
 		return cacheService;
+	}
+
+	@Override
+	public ApplicationType getApplicationType() {
+		return ApplicationType.SCIM;
 	}
 
 }
