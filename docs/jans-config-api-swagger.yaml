@@ -1463,6 +1463,105 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/jwks.write]
+  /jans-config-api/api/v1/config/jwks/key:
+    post:
+      tags:
+        - Configuration – JWK - JSON Web Key (JWK)
+      summary: Adds a new key to JSON Web Keys (JWKS)
+      description: Adds a new key to JSON Web Keys (JWKS).
+      operationId: post-config-jwks-key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonWebKey'  
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonWebKey'  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/jwks.write]  
+  /jans-config-api/api/v1/config/jwks/{kid}:
+    parameters:
+      - schema:
+          type: string
+        name: kid
+        in: path
+        description: The unique identifier for the key.
+        required: true
+    get:
+      tags:
+        - Configuration – JWK - JSON Web Key (JWK)
+      summary: Get a JSON Web Key based on kid
+      description: Get a JSON Web Key based on kid
+      operationId: put-config-jwk-kid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonWebKey'  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/jwks.readonly]
+    patch:
+      tags:
+        - Configuration – JWK - JSON Web Key (JWK)
+      summary: Patch a specific JSON Web Key based on kid
+      description: Patch a specific JSON Web Key based on kid
+      operationId: patch-config-jwk-kid
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items: 
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+              example: '[{"op": "add","path": "/kty", "value": "RSA"}]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonWebKey'  
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [https://jans.io/oauth/config/jwks.write]
+    delete:
+      tags:
+        - Configuration – JWK - JSON Web Key (JWK)
+      summary: Delete a JSON Web Key based on kid
+      description: Delete a JSON Web Key based on kid
+      operationId: delete-config-jwk-kid
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/jwks.write]
   /jans-config-api/api/v1/openid/clients:
     get:
       tags:
