@@ -22,6 +22,7 @@ import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
+import io.jans.model.ApplicationType;
 import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -86,6 +87,9 @@ public class CleanerTimer {
 
     @Inject
     private Event<TimerEvent> cleanerEvent;
+
+    @Inject
+	private MetricService metricService;
 
     private long lastFinishedTime;
 
@@ -192,7 +196,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
         cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
         // cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
-        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getMetric(), MetricEntry.class);
+        cleanServiceBaseDns.put(metricService.buildDn(null, null, ApplicationType.OX_AUTH), MetricEntry.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
