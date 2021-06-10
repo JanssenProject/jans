@@ -70,8 +70,8 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             yml_str = self.readFile(config_api_swagger_yaml_fn)
             yml_str = yml_str.replace('\t', ' ')
             cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-            scopes_def = cfg_yml['components']['securitySchemes']['jans-auth']['flows']['clientCredentials']['scopes']
-            scope_type = cfg_yml['components']['securitySchemes']['jans-auth']['type']
+            scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
+            scope_type = cfg_yml['components']['securitySchemes']['oauth2']['type']
         except:
             scopes_def = {}
             scope_type = 'oauth2'
