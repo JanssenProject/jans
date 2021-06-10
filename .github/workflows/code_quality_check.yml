@@ -47,6 +47,10 @@ jobs:
               echo "Run maven build for jans-eleven"
               mvn clean -fae -pl \!client,\!server jacoco:prepare-agent test jacoco:report
             ;;
+            "JanssenProject/jans-config-api")
+              echo "Run maven build for jans-config-api"
+              mvn clean -fae -DskipTests=true jacoco:prepare-agent install jacoco:report
+            ;;
             *) 
             echo "Run maven build for Java repository"
             mvn clean -fae jacoco:prepare-agent test install jacoco:report
@@ -91,6 +95,10 @@ jobs:
             "JanssenProject/jans-eleven")
               echo "Run Sonar analysis for jans-scim"
               mvn -B -pl \!client,\!server verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            "JanssenProject/jans-config-api")
+              echo "Run Sonar analysis for jans-config-api"
+              mvn -B -DskipTests=true verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
             *) 
             echo "Run maven build for Java repository"
