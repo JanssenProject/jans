@@ -62,6 +62,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
 
     def load_test_data(self):
+        Config.pbar.progress(self.service_name, "Loading Test Data", False)
         self.logIt("Re-binding database")
         self.dbUtils.bind(force=True)
 
@@ -81,6 +82,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.encode_test_passwords()
 
+        Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
 
         if Config.rdbm_type == 'spanner':
@@ -174,6 +176,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
 
         self.logIt("Loading test ldif files")
+        Config.pbar.progress(self.service_name, "Importing ldif files", False)
 
         ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data-user.ldif')
