@@ -195,7 +195,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
 
-
+        Config.pbar.progress(self.service_name, "Updating oxauth config", False)
         oxAuthConfDynamic_changes = {
                                     'dynamicRegistrationCustomObjectClass':  'jansClntCustomAttributes',
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
@@ -271,9 +271,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         for inum in custom_scripts:
             self.dbUtils.enable_script(inum)
 
-
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             # Update LDAP schema
+            Config.pbar.progress(self.service_name, "Updating schema", False)
             openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema/')
             self.copyFile(os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
             self.copyFile(os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
