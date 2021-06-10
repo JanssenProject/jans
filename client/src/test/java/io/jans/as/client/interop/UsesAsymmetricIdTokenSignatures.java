@@ -64,7 +64,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -119,7 +119,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -174,7 +174,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -229,7 +229,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -284,7 +284,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -339,7 +339,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
