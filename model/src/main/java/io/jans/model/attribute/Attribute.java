@@ -324,7 +324,6 @@ public class Attribute extends Entry implements Serializable {
         result = prime * result + ((salt == null) ? 0 : salt.hashCode());
         result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
         result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
-        result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());
         result = prime * result + ((sourceAttribute == null) ? 0 : sourceAttribute.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
