@@ -6,23 +6,6 @@
 
 package io.jans.as.client.ciba;
 
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
-import org.apache.commons.lang.RandomStringUtils;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BackchannelAuthenticationClient;
 import io.jans.as.client.BackchannelAuthenticationRequest;
 import io.jans.as.client.BackchannelAuthenticationResponse;
@@ -39,6 +22,22 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import org.apache.commons.lang.RandomStringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Milton BO
@@ -69,7 +68,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -162,7 +161,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
@@ -256,7 +255,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());

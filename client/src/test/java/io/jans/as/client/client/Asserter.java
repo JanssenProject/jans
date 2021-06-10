@@ -25,7 +25,7 @@ public class Asserter {
     }
 
     public static void assertOk(RegisterResponse registerResponse) {
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getClientIdIssuedAt());
