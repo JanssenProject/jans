@@ -71,6 +71,10 @@
 			<artifactId>microprofile-config-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.microprofile.rest.client</groupId>
+			<artifactId>microprofile-rest-client-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.microprofile.metrics</groupId>
 			<artifactId>microprofile-metrics-api</artifactId>
 		</dependency>
@@ -108,7 +112,7 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<scope>provided</scope>
+			<!-- <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -131,10 +135,6 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
