@@ -351,7 +351,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200);
+        assertEquals(registerResponse.getStatus(), 201);
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
