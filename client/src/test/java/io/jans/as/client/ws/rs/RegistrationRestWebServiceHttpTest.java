@@ -6,65 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
-import static io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS;
-import static io.jans.as.model.common.GrantType.IMPLICIT;
-import static io.jans.as.model.common.GrantType.OXAUTH_UMA_TICKET;
-import static io.jans.as.model.common.GrantType.REFRESH_TOKEN;
-import static io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS;
-import static io.jans.as.model.common.ResponseType.CODE;
-import static io.jans.as.model.common.ResponseType.ID_TOKEN;
-import static io.jans.as.model.common.ResponseType.TOKEN;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ws.rs.HttpMethod;
-
-import org.json.JSONArray;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -79,6 +21,30 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.json.JSONArray;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.HttpMethod;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
+import static io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS;
+import static io.jans.as.model.common.GrantType.IMPLICIT;
+import static io.jans.as.model.common.GrantType.OXAUTH_UMA_TICKET;
+import static io.jans.as.model.common.GrantType.REFRESH_TOKEN;
+import static io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS;
+import static io.jans.as.model.common.ResponseType.CODE;
+import static io.jans.as.model.common.ResponseType.ID_TOKEN;
+import static io.jans.as.model.common.ResponseType.TOKEN;
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Functional tests for Client Registration Web Services (HTTP)
@@ -213,7 +179,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
@@ -289,7 +255,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
@@ -319,7 +285,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
 
         // check whether info is really updated
