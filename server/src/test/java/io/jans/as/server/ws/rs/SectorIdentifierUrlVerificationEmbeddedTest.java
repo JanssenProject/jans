@@ -6,35 +6,6 @@
 
 package io.jans.as.server.ws.rs;
 
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
@@ -51,6 +22,33 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * Functional tests for Sector Identifier URL Verification (embedded)
@@ -96,7 +94,7 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 		showResponse("requestAuthorizationCodeWithSectorIdentifierStep1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
 		assertNotNull(entity, "Unexpected result: " + entity);
 		try {
 			JSONObject jsonObj = new JSONObject(entity);
