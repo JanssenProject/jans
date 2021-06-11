@@ -1,3 +1,5 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
 name: Code quality check
 
 on:
@@ -7,14 +9,34 @@ on:
   pull_request:
     branches:
       - master
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      JVM_PROJECTS: JanssenProject/jans-auth-server|JanssenProject/jans-orm|JanssenProject/jans-config-api|JanssenProject/jans-client-api|JanssenProject/jans-scim|JanssenProject/jans-core|JanssenProject/jans-notify|JanssenProject/jans-fido2|JanssenProject/jans-eleven
-      NON_JVM_PROJECTS: JanssenProject/jans-setup|JanssenProject/jans-cli|JanssenProject/docker-jans-persistence-loader|JanssenProject/docker-jans-client-api|JanssenProject/jans-pycloudlib|JanssenProject/docker-jans-auth-server|JanssenProject/docker-jans-fido2|JanssenProject/docker-jans-scim|JanssenProject/docker-jans-config-api|JanssenProject/docker-jans-certmanager|JanssenProject/docker-jans-configuration-manager|JanssenProject/jans-cloud-native
-    
+      JVM_PROJECTS: |
+        JanssenProject/jans-auth-server
+        JanssenProject/jans-orm
+        JanssenProject/jans-config-api
+        JanssenProject/jans-client-api
+        JanssenProject/jans-scim
+        JanssenProject/jans-core
+        JanssenProject/jans-notify
+        JanssenProject/jans-fido2
+        JanssenProject/jans-eleven
+      NON_JVM_PROJECTS: |
+        JanssenProject/jans-setup
+        JanssenProject/jans-cli
+        JanssenProject/docker-jans-persistence-loader
+        JanssenProject/docker-jans-client-api
+        JanssenProject/jans-pycloudlib
+        JanssenProject/docker-jans-auth-server
+        JanssenProject/docker-jans-fido2
+        JanssenProject/docker-jans-scim
+        JanssenProject/docker-jans-config-api
+        JanssenProject/docker-jans-certmanager
+        JanssenProject/docker-jans-configuration-manager
+        JanssenProject/jans-cloud-native
     steps:
       - uses: actions/checkout@v2
         with:
