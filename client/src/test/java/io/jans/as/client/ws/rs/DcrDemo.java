@@ -37,7 +37,7 @@ public class DcrDemo extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
     }
 
     @Test

@@ -6,20 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -27,6 +13,18 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.URLPatternList;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.HttpMethod;
+import java.util.Arrays;
+import java.util.List;
+
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum
@@ -93,7 +91,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
