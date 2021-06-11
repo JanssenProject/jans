@@ -23,6 +23,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -85,6 +86,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
         // 2. Client read
         RegisterRequest readRequest = new RegisterRequest(registrationAccessToken);
+        readRequest.setHttpMethod(HttpMethod.GET);
 
         RegisterClient readClient = new RegisterClient(registrationClientUri);
         readClient.setRequest(readRequest);
