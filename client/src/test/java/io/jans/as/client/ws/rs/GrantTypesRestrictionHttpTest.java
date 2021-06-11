@@ -90,7 +90,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
         RegisterClient readClient = new RegisterClient(registrationClientUri);
         readClient.setRequest(readRequest);
-        RegisterResponse readResponse = registerClient.exec();
+        RegisterResponse readResponse = readClient.exec();
 
         showClient(registerClient);
         assertEquals(readResponse.getStatus(), 200);
