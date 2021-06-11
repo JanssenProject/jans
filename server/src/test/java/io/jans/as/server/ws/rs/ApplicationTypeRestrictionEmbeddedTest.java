@@ -83,7 +83,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
         showResponse("omittedApplicationTypeStep1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
