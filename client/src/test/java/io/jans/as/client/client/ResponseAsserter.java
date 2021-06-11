@@ -57,7 +57,7 @@ public class ResponseAsserter {
     }
 
     public ResponseAsserter assertRegisterResponse() {
-        assertStatusOk();
+        assertStatus(200);
         json = assertJsonObject();
         json.hasKeys(RegisterResponseParam.CLIENT_ID.toString(),
                 CLIENT_SECRET.toString(),
