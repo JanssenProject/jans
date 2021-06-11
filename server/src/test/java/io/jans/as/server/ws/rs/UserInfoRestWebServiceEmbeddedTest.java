@@ -107,7 +107,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("dynamicClientRegistration", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
@@ -550,7 +550,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestUserInfoHS256Step1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -695,7 +695,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestUserInfoHS384Step1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -840,7 +840,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestUserInfoHS512Step1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);

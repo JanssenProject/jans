@@ -6,6 +6,36 @@
 
 package io.jans.as.server.ws.rs;
 
+import com.google.common.collect.Lists;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.uma.TestUtil;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ServerUtil;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
@@ -20,39 +50,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
-
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.register.RegisterResponseParam;
-import io.jans.as.model.uma.TestUtil;
-import io.jans.as.model.util.StringUtils;
-import io.jans.as.server.BaseTest;
-import io.jans.as.server.util.ServerUtil;
 
 /**
  * Functional tests for Client Registration Web Services (embedded)
@@ -91,7 +88,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestClientAssociate1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
@@ -139,7 +136,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestClientAssociate2", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
