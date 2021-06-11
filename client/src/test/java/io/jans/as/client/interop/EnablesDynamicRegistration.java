@@ -6,14 +6,6 @@
 
 package io.jans.as.client.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -23,6 +15,13 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Enables Dynamic Registration
@@ -53,7 +52,7 @@ public class EnablesDynamicRegistration extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());

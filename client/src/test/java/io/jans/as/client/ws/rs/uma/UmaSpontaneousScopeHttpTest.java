@@ -75,7 +75,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
         clientResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(clientResponse.getStatus(), 200, "Unexpected response code: " + clientResponse.getEntity());
+        assertEquals(clientResponse.getStatus(), 201, "Unexpected response code: " + clientResponse.getEntity());
         assertNotNull(clientResponse.getClientId());
         assertNotNull(clientResponse.getClientSecret());
         assertNotNull(clientResponse.getRegistrationAccessToken());
