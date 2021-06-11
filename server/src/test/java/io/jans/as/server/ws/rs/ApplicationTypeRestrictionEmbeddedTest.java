@@ -6,6 +6,25 @@
 
 package io.jans.as.server.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ServerUtil;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
@@ -20,27 +39,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.register.RegisterResponseParam;
-import io.jans.as.model.util.StringUtils;
-import io.jans.as.server.BaseTest;
-import io.jans.as.server.util.ServerUtil;
 
 /**
  * @author Javier Rojas Blum
@@ -171,7 +169,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
         showResponse("applicationTypeWebStep1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -298,7 +296,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
         showResponse("applicationTypeNativeStep1", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
