@@ -92,7 +92,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         readClient.setRequest(readRequest);
         RegisterResponse readResponse = readClient.exec();
 
-        showClient(registerClient);
+        showClient(readClient);
         assertEquals(readResponse.getStatus(), 200);
         assertNotNull(readResponse.getClientId());
         assertNotNull(readResponse.getClientSecret());
