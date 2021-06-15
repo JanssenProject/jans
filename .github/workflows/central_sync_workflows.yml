@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DRY_RUN: false
+      PULL_REQUEST: true
       REPOSITORIES: |
         JanssenProject/docker-jans-auth-server
         JanssenProject/docker-jans-certmanager
@@ -41,6 +42,7 @@ jobs:
 
       WORKFLOW_FILES: |
         .github/workflows/commit-check.yml
+        .github/workflows/central_code_quality_check.yml
       COMMIT_MESSAGE: 'ci(workflows): sync workflows'
     steps:
       - name: Fetching Local Repository
@@ -58,6 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DRY_RUN: false
+      PULL_REQUEST: true
       REPOSITORIES: |
         JanssenProject/docker-jans-auth-server
         JanssenProject/docker-jans-certmanager
