@@ -19,8 +19,22 @@ Operation ID: put-config-jwks
 Operation ID: patch-config-jwks
   Description: Patch JSON Web Keys (JWKS).
   Schema: Array of /components/schemas/PatchRequest
+Operation ID: post-config-jwks-key
+  Description: Adds a new key to JSON Web Keys (JWKS).
+  Schema: /components/schemas/JsonWebKey
+Operation ID: put-config-jwk-kid
+  Description: Get a JSON Web Key based on kid
+  url-suffix: kid
+Operation ID: patch-config-jwk-kid
+  Description: Patch a specific JSON Web Key based on kid
+  url-suffix: kid
+  Schema: Array of /components/schemas/PatchRequest
+Operation ID: delete-config-jwk-kid
+  Description: Delete a JSON Web Key based on kid
+  url-suffix: kid
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+
 
 ```
 Let's explore each of these operations.
@@ -91,6 +105,63 @@ Getting access token for scope https://jans.io/oauth/config/jwks.readonly
   ]
 ```
 
+## Adds new JSON Web key (JWK)
+
+In case we need to add new key, we can use this operation id. To add a new key, we need to follow the schema definition. If we look at the description, we can see a schema definition available.
+
+```
+Operation ID: post-config-jwks-key
+  Description: Adds a new key to JSON Web Keys (JWKS).
+  Schema: /components/schemas/JsonWebKey
+```
+
+So, let's get the schema file and update it with keys data:
+
+```
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JsonWebKey > /tmp/jwk.json
+```
+
+```
+{
+  "kid": "string",
+  "kty": "string",
+  "use": "string",
+  "alg": "string",
+  "crv": null,
+  "exp": "integer",
+  "x5c": [],
+  "n": null,
+  "e": null,
+  "x": null,
+  "y": null
+}
+```
+
+Let's update the json file; In our case, I have added sample data for testing purpose only. 
+
+```
+"kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
+"kty": "RSA",
+"use": "enc",
+"alg": "RSA-OAEP",
+"crv": "",
+"exp": 1622245655163,
+"x5c": [
+  "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
+],
+"n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
+"e": "AQAB",
+"x": null,
+"y": null
+```
+
+Now let's post this keys into the list using below command:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id post-config-jwks-key --data /tmp/jwk.json
+```
+
+
 ## Update / Replace JSON Web Key (JWK)
 
 To `update / replace` any JWK configuration, let get the schema first. 
@@ -130,8 +201,8 @@ root@testjans:~# cat /tmp/path-jwk.json
 It's a json file containing `key-value` pair. Each of these properties in the key is defined by the JWK specification [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517), and for algorithm-specific properties, in [RFC 7518](https://datatracker.ietf.org/doc/html/rfc7518).
 
 
-Properties
-===
+### Properties
+
 
 |name|Description|
 |:---:|:---|
