@@ -7,7 +7,8 @@ on:
       - main
     paths:
       - ".github/**"
-
+  workflow_dispatch:
+    
 jobs:
   All_Repos_Common_Workflows:
     runs-on: ubuntu-latest
