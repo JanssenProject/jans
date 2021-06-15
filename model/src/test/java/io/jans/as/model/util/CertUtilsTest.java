@@ -51,4 +51,20 @@ public class CertUtilsTest {
 
         assertFalse(CertUtils.equalsRdn(r1, r2));
     }
+
+    @Test
+    public void equalsRdn_withCorrectValuesAndSpaced_shouldReturnTrue() {
+        String r1 = "cn = myclient,o = My Dept,o = My Company";
+        String r2 = "cn=myclient,o=My Dept,o=My Company";
+
+        assertTrue(CertUtils.equalsRdn(r1, r2));
+    }
+
+    @Test
+    public void equalsRdn_withDifferenceInSpaces_shouldReturnFalse() {
+        String r1 = "cn = myclient,o = My Dept,o = My Company";
+        String r2 = "cn=myclient,o=MyDept,o=MyCompany";
+
+        assertFalse(CertUtils.equalsRdn(r1, r2));
+    }
 }
