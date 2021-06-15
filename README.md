@@ -52,9 +52,10 @@ Table of Contents
     ```
 
     This command will generate executable called `jans-cli.pyz` under the same directory.
-    
-**jans-cli** is automatically installed if you choose `jans-config-api` during VM installation 
-of the [Janssen Server](https://github.com/JanssenProject/home).
+
+## Virtual Machine Setup
+
+**jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home) Installation on Virtual Machine. 
 
 ![](docs/img/jans-config-api.png)
 
