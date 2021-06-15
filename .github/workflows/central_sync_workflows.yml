@@ -55,6 +55,7 @@ jobs:
           WORKFLOW_FILES: ${{ env.WORKFLOW_FILES }}
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+          PULL_REQUEST: ${{ env.PULL_REQUEST }}
 
   Docker_Repos_Common_Workflows:
     runs-on: ubuntu-latest
@@ -87,3 +88,4 @@ jobs:
           WORKFLOW_FILES: ${{ env.WORKFLOW_FILES }}
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+          PULL_REQUEST: ${{ env.PULL_REQUEST }}
