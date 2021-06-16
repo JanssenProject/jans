@@ -66,6 +66,8 @@ The following environment variables are supported by the container:
 - `CN_CONTAINER_METADATA`: The name of scheduler to pull container metadata (one of `docker` or `kubernetes`; default to `docker`).
 - `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
+- `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 
 ## Usage
 

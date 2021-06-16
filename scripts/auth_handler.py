@@ -11,6 +11,7 @@ from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_base64_contents
@@ -174,6 +175,19 @@ class SqlPersistence(BasePersistence):
         return modified
 
 
+class SpannerPersistence(SqlPersistence):
+    def __init__(self, manager):
+        self.client = SpannerClient()
+
+
+_backend_classes = {
+    "ldap": LdapPersistence,
+    "couchbase": CouchbasePersistence,
+    "sql": SqlPersistence,
+    "spanner": SpannerPersistence,
+}
+
+
 class AuthHandler(BaseHandler):
     def __init__(self, manager, dry_run, **opts):
         super().__init__(manager, dry_run, **opts)
@@ -181,7 +195,7 @@ class AuthHandler(BaseHandler):
         persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
         ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
-        if persistence_type in ("ldap", "couchbase", "sql"):
+        if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
             backend_type = persistence_type
         else:
             # persistence_type is hybrid
@@ -191,13 +205,7 @@ class AuthHandler(BaseHandler):
                 backend_type = "couchbase"
 
         # resolve backend
-        if backend_type == "ldap":
-            self.backend = LdapPersistence(manager)
-        elif backend_type == "couchbase":
-            self.backend = CouchbasePersistence(manager)
-        else:
-            self.backend = SqlPersistence(manager)
-
+        self.backend = _backend_classes[backend_type](manager)
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "OLDER")
