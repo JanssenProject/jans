@@ -224,6 +224,11 @@ class BaseClient:
             for entry in result:
                 yield dict(entry)
 
+    @property
+    def server_version(self):
+        """Display server version."""
+        raise NotImplementedError
+
 
 class PostgresqlClient(BaseClient):
     """Class for PostgreSQL adapter.
@@ -275,6 +280,11 @@ class PostgresqlClient(BaseClient):
             pass
         else:
             raise exc
+
+    @property
+    def server_version(self):
+        """Display server version."""
+        return self.engine.scalar("SHOW server_version")
 
 
 class MysqlClient(BaseClient):
@@ -328,6 +338,11 @@ class MysqlClient(BaseClient):
         else:
             raise exc
 
+    @property
+    def server_version(self):
+        """Display server version."""
+        return self.engine.scalar("SELECT VERSION()")
+
 
 class SQLClient:
     """This class interacts with SQL database.
@@ -345,6 +360,7 @@ class SQLClient:
         "get",
         "update",
         "search",
+        "server_version",
     )
 
     def __init__(self):
