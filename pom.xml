@@ -38,6 +38,11 @@
 			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
 		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
 			<id>gluu</id>
 			<name>gluu repository</name>
 			<url>https://ox.gluu.org/maven</url>
@@ -46,11 +51,6 @@
 			<id>mavencentral</id>
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>jans</id>
-			<name>Janssen project repository</name>
-			<url>https://maven.jans.io/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>
