@@ -1,0 +1,12 @@
+{
+  "pgsql": {},
+  "mysql": {},
+  "spanner": {
+    "jansPerson": [
+      [
+        "jansExtUid",
+        "STRING(MAX)"
+      ]
+    ]
+  }
+}

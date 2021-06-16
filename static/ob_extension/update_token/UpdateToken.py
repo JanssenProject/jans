@@ -1,6 +1,7 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.token import UpdateTokenType
 from io.jans.as.server.service import SessionIdService
+from io.jans.as.server.model.config import ConfigurationFactory
 import java
 import sys
 import os
@@ -41,17 +42,24 @@ class UpdateToken(UpdateTokenType):
 			openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
 			acr = sessionId.getSessionAttributes().get("acr_ob")
 
-            # header claims
+            # An example of how to set header claims
 			#jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
 			
 			#custom claims
 			jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id)
+            # If the ASPSP issues a refresh token, the ASPSP must indicate the date-time at which the refresh token # # will expire in a claim named http://openbanking.org.uk/refresh_token_expires_at in the Id token (returned # by the token end-point or userinfo end-point). Its value MUST be a number containing a NumericDate value, # as specified in https://tools.ietf.org/html/rfc7519#section-2
+            refresh_token_expires_at = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getRefreshTokenLifetime()
+            jsonWebResponse.getClaims().setClaim("refresh_token_expires_at", refresh_token_expires_at)
+            
 			
-			#regular claims        
-			#jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
+			# this claim is currently commented and should have the unique id of the user for whom consent was passed
+            # please fill it as per the implementation
+			jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
 
 			print "Update token script. After modify idToken: %s" % jsonWebResponse
 		
+			# Use this blog to implement how RT claims can be retained. https://github.com/GluuFederation/oxAuth/wiki/Retain-access-token-claim
+
 			return True
 		except:
 	                print "update token failure" , sys.exc_info()[1]

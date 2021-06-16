@@ -172,6 +172,9 @@ def get_base_ctx(manager):
     ctx["jwks_uri"] = jwks_uri
     ctx["auth_openid_jks_fn"] = auth_openid_jks_fn
 
+    # static kid
+    ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
+
     # finalize ctx
     return ctx
 

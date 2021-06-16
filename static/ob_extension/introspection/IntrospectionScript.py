@@ -41,12 +41,13 @@ class Introspection(IntrospectionType):
         print "modifyResponse invoked"
         
         sessionIdService = CdiUtil.bean(SessionIdService)
-        print "session id from context - %s" % context.getTokenGrant().getSessionDn()
-        sessionId = sessionIdService.getSessionByDn(context.getTokenGrant().getSessionDn()) # fetch from persistence
-        openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
-        print "openbanking_intent_id from session : "+openbanking_intent_id
-       
-        responseAsJsonObject.accumulate("openbanking_intent_id", openbanking_intent_id)
+        
+        if context.getTokenGrant().getSessionDn() is not None:
+            print "session id from context - %s" % context.getTokenGrant().getSessionDn()
+            sessionId = sessionIdService.getSessionByDn(context.getTokenGrant().getSessionDn()) # fetch from persistence
+            openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
+            print "openbanking_intent_id from session : "+openbanking_intent_id
+            responseAsJsonObject.accumulate("openbanking_intent_id", openbanking_intent_id)
 
         return True
         

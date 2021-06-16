@@ -1,4 +1,5 @@
 # import itertools
+import hashlib
 import json
 import logging.config
 import os
@@ -60,6 +61,9 @@ class SpannerBackend:
         #     txt = f.read()  # .replace("!bucket_prefix!", prefix)
         #     self.cb_indexes = json.loads(txt)
 
+        with open("/app/static/sql/sub_tables.json") as f:
+            self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
+
     def get_attr_syntax(self, attr):
         for attr_type in self.attr_types:
             if attr not in attr_type["names"]:
@@ -76,7 +80,7 @@ class SpannerBackend:
         type_def = self.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def.get(self.db_dialect) or type_def["mysql"]
+            type_ = type_def.get(self.db_dialect)  # or type_def["mysql"]
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -89,24 +93,33 @@ class SpannerBackend:
         # data type is undefined, hence check from syntax
         syntax = self.get_attr_syntax(attr)
         syntax_def = self.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.db_dialect) or syntax_def["mysql"]
+        type_ = syntax_def.get(self.db_dialect)  # or syntax_def["mysql"]
 
-        char_type = "VARCHAR"
-        if self.db_dialect == "spanner":
-            char_type = "STRING"
+        # char_type = "VARCHAR"
+        # if self.db_dialect == "spanner":
+        char_type = "STRING"
 
         if type_["type"] != char_type:
+            # not STRING
             data_type = type_["type"]
         else:
-            if type_["size"] <= 127:
-                data_type = f"{char_type}({type_['size']})"
-            elif type_["size"] <= 255:
-                data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
-            else:
-                data_type = "TEXT"
+            # if "size" in type_:
+            #     size = type_["size"]
+            #     # data_type = f"{char_type}(type['size'])"
+            # else:
+            #     # data_type = "STRING(MAX)"
+            #     size = "MAX"
+            size = type_.get("size") or "MAX"
+            data_type = f"{char_type}({size})"
+            # if type_["size"] <= 127:
+            #     data_type = f"{char_type}({type_['size']})"
+            # elif type_["size"] <= 255:
+            #     data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
+            # else:
+            #     data_type = "TEXT"
 
-        if data_type == "TEXT" and self.db_dialect == "spanner":
-            data_type = "STRING(MAX)"
+        # if data_type == "TEXT" and self.db_dialect == "spanner":
+        #     data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -139,8 +152,8 @@ class SpannerBackend:
             doc_id_type = self.get_data_type("doc_id", table)
             table_columns[table].update({
                 "doc_id": doc_id_type,
-                "objectClass": "VARCHAR(48)" if self.db_dialect != "spanner" else "STRING(48)",
-                "dn": "VARCHAR(128)" if self.db_dialect != "spanner" else "STRING(128)",
+                "objectClass": "STRING(48)",
+                "dn": "STRING(128)",
             })
 
             # make sure ``oc["may"]`` doesn't have duplicate attribute
@@ -210,19 +223,20 @@ class SpannerBackend:
                 # TODO: how to create index for ARRAY?
                 pass
 
-        for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
-            name = f"{table_name}_custom_{i}"
-            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({custom}))"
+        custom_indexes = self.sql_indexes.get(table_name, {}).get("custom", [])
+        for i, custom in enumerate(custom_indexes, start=1):
+            name = f"{table_name}_CustomIdx_{i}"
+            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
             self.client.create_index(query)
 
     def create_indexes(self):
         for table_name, column_mapping in self.client.get_table_mapping().items():
-            index_func = self.create_spanner_indexes
             # run the callback
-            index_func(table_name, column_mapping)
+            self.create_spanner_indexes(table_name, column_mapping)
 
     def import_ldif(self):
-        ldif_mappings = get_ldif_mappings()
+        optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
+        ldif_mappings = get_ldif_mappings(optional_scopes)
 
         ctx = prepare_template_ctx(self.manager)
 
@@ -237,6 +251,8 @@ class SpannerBackend:
 
                 for table_name, column_mapping in self.data_from_ldif(dst):
                     self.client.insert_into(table_name, column_mapping)
+                    # inject rows into subtable (if any)
+                    self.insert_into_subtable(table_name, column_mapping)
 
     def initialize(self):
         def is_initialized():
@@ -249,6 +265,7 @@ class SpannerBackend:
 
         logger.info("Creating tables (if not exist)")
         self.create_tables()
+        self.create_subtables()
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
@@ -262,7 +279,7 @@ class SpannerBackend:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 
-        type_ = type_.get(self.db_dialect) or type_["mysql"]
+        type_ = type_.get(self.db_dialect)  # or type_["mysql"]
         data_type = type_["type"]
 
         if data_type in ("SMALLINT", "BOOL",):
@@ -275,11 +292,11 @@ class SpannerBackend:
 
         if data_type in ("DATETIME(3)", "TIMESTAMP",):
             dval = values[0].strip("Z")
-            sep = " "
-            postfix = ""
-            if self.db_dialect == "spanner":
-                sep = "T"
-                postfix = "Z"
+            # sep = " "
+            # postfix = ""
+            # if self.db_dialect == "spanner":
+            sep = "T"
+            postfix = "Z"
             # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
             return "{}-{}-{}{}{}:{}:{}{}{}".format(
                 dval[0:4],
@@ -336,6 +353,57 @@ class SpannerBackend:
                 })
 
                 for attr in entry:
+                    # TODO: check if attr in sub table
                     value = self.transform_value(attr, entry[attr])
                     attr_mapping[attr] = value
                 yield table_name, attr_mapping
+
+    def create_subtables(self):
+        for table_name, columns in self.sub_tables.items():
+            for column_name, column_type in columns:
+                subtable_name = f"{table_name}_{column_name}"
+                self.client.create_subtable(
+                    table_name,
+                    subtable_name,
+                    {
+                        "doc_id": "STRING(64)",
+                        "dict_doc_id": "STRING(64)",
+                        column_name: column_type,
+                    },
+                    "doc_id",
+                    "dict_doc_id",
+                )
+
+                index_name = f"{subtable_name}Idx"
+                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(subtable_name)} ({self.client.quoted_id(column_name)})"
+                self.client.create_index(query)
+
+    def column_in_subtable(self, table_name, column):
+        exists = False
+
+        # column_mapping is a list
+        column_mapping = self.sub_tables.get(table_name, [])
+        for cm in column_mapping:
+            if column == cm[0]:
+                exists = True
+                break
+        return exists
+
+    def insert_into_subtable(self, table_name, column_mapping):
+        for column, value in column_mapping.items():
+            if not self.column_in_subtable(table_name, column):
+                continue
+
+            for item in value:
+                hashed = hashlib.sha256()
+                hashed.update(item.encode())
+                dict_doc_id = hashed.digest().hex()
+
+                self.client.insert_into(
+                    f"{table_name}_{column}",
+                    {
+                        "doc_id": column_mapping["doc_id"],
+                        "dict_doc_id": dict_doc_id,
+                        column: item
+                    },
+                )
