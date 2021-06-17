@@ -243,9 +243,9 @@ Let's update the json file to create a new key configuration.
 }
 ```
 
-Please remember if `kid` already matched then this will be replaced otherwise a new key configuration will be created in the janssen server.
+Please remember if `kid` already matched then this will be replaced otherwise a new key configuration will be created in the Janssen server.
 
-Now let's put the updated data into the janssen server.
+Now let's put the updated data into the Janssen server.
 
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks --data /tmp/path-jwk.json
