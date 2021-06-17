@@ -12,13 +12,42 @@ Table of Contents
 
 # _Installation_
 
+You can directly download the `jans-cli` bundle package file as below:
+
+### For macOs:
+
+```
+wget https://github.com/JanssenProject/jans-cli/releases/latest/download/jans-cli-macos-amd64.pyz
+```
+
+### for linux:
+
+```
+wget https://github.com/JanssenProject/jans-cli/releases/latest/download/jans-cli-linux-amd64.pyz
+```
 
 ## Build `jans-cli.pyz` manually
 
-## Prerequisites
+If you would like to build `jans-cli` manually, you can go through the following steps noted here:
 
-1.  Python 3.6+.
-1.  Python `pip3` package.
+## Prerequisites
+1. git
+1. Python 3.6+.
+1. Python `pip3` package.
+
+### Downloading `jans-cli` files
+
+1. Clone the repository:
+
+    ```
+    git clone https://github.com/JanssenProject/jans-cli/
+    ```
+
+2. open directory
+
+    ```
+    cd jans-cli
+    ```
 
 ### Standard Python package
 
@@ -55,7 +84,7 @@ Table of Contents
 
 ## Virtual Machine Setup
 
-**jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home) Installation on Virtual Machine. 
+**jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home/blob/main/development.md#install-janssen-into-vm) Installation on Virtual Machine. 
 
 ![](docs/img/jans-config-api.png)
 
