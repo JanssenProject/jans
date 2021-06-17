@@ -43,11 +43,6 @@
 			<url>https://maven.jans.io/maven</url>
 		</repository>
 		<repository>
-			<id>gluu</id>
-			<name>gluu repository</name>
-			<url>https://ox.gluu.org/maven</url>
-		</repository>
-		<repository>
 			<id>mavencentral</id>
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
