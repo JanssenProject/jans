@@ -209,6 +209,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'forceOfflineAccessScopeToEnableRefreshToken' : False,
                                     'dynamicRegistrationPasswordGrantTypeEnabled' : True,
                                     'cibaEnabled': True,
+                                    'backchannelTokenDeliveryModesSupported': ["poll", "ping", "push"],
                                     'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
                                     'backchannelClientId': '123-123-123',
                                     'backchannelUserCodeParameterSupported': True,
