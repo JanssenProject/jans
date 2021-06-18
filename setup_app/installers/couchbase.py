@@ -53,10 +53,9 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
 
-
         if Config.cb_install == InstallTypes.LOCAL:
             Config.couchbase_hostname = Config.hostname
-        
+
         self.dbUtils.set_cbm()
 
         if Config.cb_install == InstallTypes.LOCAL:
