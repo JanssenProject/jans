@@ -17,6 +17,7 @@ class ObjectClass:
                 'MUST':(()),
                 'MAY':(),
                 'X-ORIGIN': '',
+                'X-RDBM-IGNORE':('',),
               }
 
         l = split_tokens(s)
