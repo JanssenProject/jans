@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -40,10 +41,11 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RegisterProvider(OpenIdClientService.class)
 public class AuthClientFactory {
 
     @Inject
-    //@RestClient
+    @RestClient
     OpenIdClientService openIdClientService;
 
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
