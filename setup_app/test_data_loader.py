@@ -160,6 +160,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
 
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
+
             if Config.rdbm_type != 'spanner': 
                 self.dbUtils.rdm_automapper(force=True)
 
