@@ -12,7 +12,7 @@ Table of Contents
 
 # _Installation_
 
-You can directly download the `jans-cli` bundle package file as below:
+You can directly download the `jans-cli` package file as below:
 
 ### For macOs:
 
@@ -81,6 +81,16 @@ If you would like to build `jans-cli` manually, you can go through the following
     ```
 
     This command will generate executable called `jans-cli.pyz` under the same directory.
+
+
+You can verify with the following command line if everything is done successfully.
+
+```
+python3 jans-cli.pyz -h
+```
+
+![](docs/img/build-jans-cli-pyz-manually.png)
+
 
 ## Virtual Machine Setup
 
