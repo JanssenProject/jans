@@ -18,6 +18,7 @@ import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.StringHelper;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -30,6 +31,10 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
+
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 
 @ApplicationScoped
 @Named("appInitializer")
@@ -61,10 +66,14 @@ public class AppInitializer {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("=================================================================");
-
+        System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
+        
+        ResteasyProviderFactory instance=ResteasyProviderFactory.getInstance();
+        RegisterBuiltin.register(instance);
+        instance.registerProvider(ResteasyJackson2Provider.class);
 
         log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
