@@ -132,6 +132,21 @@ public class AttributesResource extends BaseResource {
         attributeService.updateAttribute(existingAttribute);
         return Response.ok(existingAttribute).build();
     }
+    
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
+    @Path(ApiConstants.INUM_PATH)
+    public Response patchPutAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+            throws JsonPatchException, IOException {
+        log.debug(" GluuAttribute details to patch - inum = " + inum + " , pathString = " + pathString);
+        GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
+        checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
+
+        existingAttribute = Jackson.applyPatch(pathString, existingAttribute);
+        attributeService.updateAttribute(existingAttribute);
+        return Response.ok(existingAttribute).build();
+    }
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)

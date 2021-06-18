@@ -8,6 +8,7 @@ package io.jans.configapi.security.service;
 
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.configapi.auth.client.AuthClientFactory;
 import io.jans.configapi.service.auth.ConfigurationService;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -46,12 +47,12 @@ public class OpenIdService implements Serializable {
 
         String introspectionUrl = getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
-            introspectionUrl = AuthClientService.getIntrospectionEndpoint(issuer);
+            introspectionUrl = AuthClientFactory.getIntrospectionEndpoint(issuer);
             log.trace("\n\n oAuth Issuer's introspectionUrl = " + introspectionUrl);
         }
-
+        
         log.info("\n\n oAuth Final introspectionUrl = " + introspectionUrl);
-        return AuthClientService.getIntrospectionResponse(introspectionUrl, header, token, false);
+        return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
     }
 
 }
