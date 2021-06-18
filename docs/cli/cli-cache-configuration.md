@@ -23,9 +23,11 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for 
 Table of Contents
 =================
 
-* [Cache Configuration](#cache-configuration)
-  * [Get Cache Configuration](#get-cache-configuration)
-  * [Patch Cache Configuration](#patch-cache-configuration)
+- [Cache Configuration](#cache-configuration)
+- [Table of Contents](#table-of-contents)
+  - [Get Cache Configuration](#get-cache-configuration)
+  - [Patch Cache Configuration](#patch-cache-configuration)
+  - [Quick Patch Operation](#quick-patch-operation)
 
 ## Get Cache Configuration
 
@@ -153,3 +155,15 @@ Server Response:
 ```
 
 You see `bufferSize` has changed. You may want to know more about patching cache configuration. Please, have a look to [this link](cli-tips.md#patch-request) to know more about how you can modify the schema file.
+
+
+## Quick Patch Operation
+
+In case you need to do a quick patch operation, you can do that also. For example, let's say we would like to replace `defaultPutExpiration` value from `nativePersistenceConfiguration`. We can do that simply by the following command line:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
+```
+
+It will change the value with given one. There are few option to do such quick patch operations. Please check them out from [here](cli-tips.md#quick-patch-operations).
+
