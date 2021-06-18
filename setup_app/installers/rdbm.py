@@ -105,6 +105,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return data_type
 
     def create_tables(self, jans_schema_files):
+        self.logIt("Creating tables for {}".format(jans_schema_files))
         qchar = '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
         tables = []
         all_schema = {}
@@ -153,12 +154,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 col_def = '{0}{1}{0} {2}'.format(qchar, attrname, data_type)
                 sql_tbl_cols.append(col_def)
 
-            if self.dbUtils.table_exists(sql_tbl_name):
-                for tbl_col in sql_tbl_cols:
-                    sql_cmd = alter_table_sql_cmd.format(sql_tbl_name, tbl_col)
-                    self.dbUtils.exec_rdbm_query(sql_cmd)
-                    tables.append(sql_cmd)
-            else:
+            if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
                     sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
