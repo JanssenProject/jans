@@ -50,6 +50,7 @@ public class ApiConstants {
     public static final String DATABASE = "/database";
     public static final String LDAP = "/ldap";
     public static final String COUCHBASE = "/couchbase";
+    public static final String SQL = "/sql";
     public static final String REDIS = "/redis";
     public static final String IN_MEMORY = "/in-memory";
     public static final String NATIVE_PERSISTENCE = "/native-persistence";
