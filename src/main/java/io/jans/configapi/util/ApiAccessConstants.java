@@ -23,6 +23,10 @@ public class ApiAccessConstants {
     public static final String DATABASE_COUCHBASE_WRITE_ACCESS = "https://jans.io/oauth/config/database/couchbase.write";
     public static final String DATABASE_COUCHBASE_DELETE_ACCESS = "https://jans.io/oauth/config/database/couchbase.delete";
 
+    public static final String DATABASE_SQL_READ_ACCESS = "https://jans.io/oauth/config/database/sql.readonly";
+    public static final String DATABASE_SQL_WRITE_ACCESS = "https://jans.io/oauth/config/database/sql.write";
+    public static final String DATABASE_SQL_DELETE_ACCESS = "https://jans.io/oauth/config/database/sql.delete";
+
     public static final String SCRIPTS_READ_ACCESS = "https://jans.io/oauth/config/scripts.readonly";
     public static final String SCRIPTS_WRITE_ACCESS = "https://jans.io/oauth/config/scripts.write";
     public static final String SCRIPTS_DELETE_ACCESS = "https://jans.io/oauth/config/scripts.delete";
