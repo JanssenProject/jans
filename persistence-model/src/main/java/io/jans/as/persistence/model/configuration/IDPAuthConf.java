@@ -118,6 +118,10 @@ public class IDPAuthConf {
         return read(CouchbaseConnectionConfiguration.class);
     }
 
+    public SqlConnectionConfiguration asSqlConfiguration() {
+        return read(SqlConnectionConfiguration.class);
+    }
+
     private <T> T read(Class<T> clazz) {
         try {
             if (config != null) {
