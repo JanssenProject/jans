@@ -190,6 +190,17 @@
         ]
     },
     {
+        "path":"/jans-config-api/api/v1/jans-auth-server/config/persistence",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly"
+                ]
+            }
+        ]
+    },
+    {
         "path":"/jans-config-api/api/v1/config/smtp",
         "conditions":[
             {
