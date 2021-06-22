@@ -11,7 +11,6 @@ from ldap3.utils import dn as dnutils
 from ldif3 import LDIFParser
 
 from jans.pycloudlib.persistence.sql import SQLClient
-from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
@@ -58,11 +57,6 @@ class SQLBackend:
 
         with open(f"/app/static/sql/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
-
-        # with open("/app/static/couchbase/index.json") as f:
-        #     # prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        #     txt = f.read()  # .replace("!bucket_prefix!", prefix)
-        #     self.cb_indexes = json.loads(txt)
 
     def get_attr_syntax(self, attr):
         for attr_type in self.attr_types:
@@ -168,32 +162,9 @@ class SQLBackend:
         #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
         #     logger.info(sql_cmd)
 
-    # def _fields_from_cb_indexes(self):
-    #     fields = []
-
-    #     for _, data in self.cb_indexes.items():
-    #         # extract and flatten
-    #         attrs = list(itertools.chain.from_iterable(data["attributes"]))
-    #         fields += attrs
-
-    #         for static in data["static"]:
-    #             attrs = [
-    #                 attr for attr in static[0]
-    #                 if "(" not in attr
-    #             ]
-    #             fields += attrs
-
-    #     fields = list(set(fields))
-    #     # exclude objectClass
-    #     if "objectClass" in fields:
-    #         fields.remove("objectClass")
-    #     return fields
-
     def get_index_fields(self, table_name):
-        # cb_fields = self._fields_from_cb_indexes()
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]
-        # fields += cb_fields
 
         # make unique fields
         return list(set(fields))
@@ -225,6 +196,9 @@ class SQLBackend:
                     self.client.create_index(query)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
+            # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
+            if table_name == "jansPerson" and self.get_server_version() < "8.0":
+                continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
             self.client.create_index(query)
@@ -283,14 +257,6 @@ class SQLBackend:
                     self.client.insert_into(table_name, column_mapping)
 
     def initialize(self):
-        def is_initialized():
-            return self.client.row_exists("jansClnt", self.manager.config.get("jca_client_id"))
-
-        should_skip = as_boolean(os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False))
-        if should_skip and is_initialized():
-            logger.info("SQL backend already initialized")
-            return
-
         logger.info("Creating tables (if not exist)")
         self.create_tables()
 
@@ -366,8 +332,6 @@ class SQLBackend:
 
                 table_name = oc[-1]
 
-                # entry.pop(rdn_name)
-
                 if "objectClass" in entry:
                     entry.pop("objectClass")
                 elif "objectclass" in entry:
@@ -383,3 +347,16 @@ class SQLBackend:
                     value = self.transform_value(attr, entry[attr])
                     attr_mapping[attr] = value
                 yield table_name, attr_mapping
+
+    def get_server_version(self):
+        # TODO: remove this method once SQLClient has server_version attribute
+        if hasattr(self.client, "server_version"):
+            return self.client.server_version
+
+        if self.db_dialect == "mysql":
+            query = "SELECT VERSION()"
+        else:
+            query = "SHOW server_version"
+
+        version = self.client.adapter.engine.scalar(query)
+        return version

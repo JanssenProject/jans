@@ -201,7 +201,7 @@ objectClass: jansAttr
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
 
 dn: inum=98FC,ou=attributes,o=jans
-description:: RW5kLVVzZXIncyBiaXJ0aGRheSwgcmVwcmVzZW50ZWQgYXMgYW4gSVNPIDg2MDE6MjAwNCBbSVNPODYwMeKAkTIwMDRdIFlZWVktTU0tREQgZm9ybWF0Lg==
+description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601] YYYY-MM-DD format.
 displayName: Birthdate
 inum: 98FC
 jansAttrEditTyp: user
@@ -257,7 +257,12 @@ objectClass: jansAttr
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zoneinfo
 
 dn: inum=36D9,ou=attributes,o=jans
-description:: RW5kLVVzZXIncyBsb2NhbGUsIHJlcHJlc2VudGVkIGFzIGEgQkNQNDcgKFJGQzU2NDYpIGxhbmd1YWdlIHRhZy4gVGhpcyBpcyB0eXBpY2FsbHkgYW5JU08gNjM5LTEgQWxwaGEtMiBbSVNPNjM54oCRMV0gbGFuZ3VhZ2UgY29kZSBpbiBsb3dlcmNhc2UgYW5kIGFuIElTTyAzMTY2LTEgQWxwaGEtMmNvdW50cnkgY29kZSBpbiB1cHBlcmNhc2UsIHNlcGFyYXRlZCBieSBhIGRhc2guIEZvciBleGFtcGxlLCBlbi1VUyBvciBmci1DQS4gQXMgYSBjb21wYXRpYmlsaXR5IG5vdGUsc29tZSBpbXBsZW1lbnRhdGlvbnMgaGF2ZSB1c2VkIGFuIHVuZGVyc2NvcmUgYXMgdGhlIHNlcGFyYXRvciByYXRoZXIgdGhhbiBhIGRhc2gsIGZvciBleGFtcGxlLCBlbl9VUztSZWx5aW5nIFBhcnRpZXMgTUFZIGNob29zZSB0byBhY2NlcHQgdGhpcyBsb2NhbGUgc3ludGF4IGFzIHdlbGwu
+description: End-User's locale, represented as a BCP47 (RFC5646) language tag.
+ This is typically anISO 639-1 Alpha-2 [ISO639] language code in lowercase and
+ an ISO 3166-1 Alpha-2country code in uppercase, separated by a dash. For example,
+ en-US or fr-CA. As a compatibility note,some implementations have used an underscore
+ as the separator rather than a dash, for example, en_US;Relying Parties MAY choose
+ to accept this locale syntax as well.
 displayName: Locale
 inum: 36D9
 jansAttrEditTyp: user
@@ -1054,7 +1059,7 @@ objectClass: jansAttr
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
 dn: inum=002A,ou=attributes,o=jans
-description: Specifies the person's affiliation within a particular security domainin broad categories such as student, faculty, staff, alum, etc. Thevalues consistof a left and right component separated by an "@" sign. The left component is one ofthe values from the eduPersonAffiliation controlledvocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intentionally matches that used for the right-hand sidevalues for eduPersonPrincipalName since both identify a security domain. Multiple "@" signsare not recommended, but in any case, the first occurrence of the "@" sign starting from theleft is to be taken as the delimiter between components. Thus, user identifier is to the left,security domain to the right of the first "@". This parsing rule conforms to the POSIX "greedy"disambiguation method in regular expression processing.
+description: Specifies the person's affiliation within a particular security domainin broad categories such as student, faculty, staff, alum, etc. Thevalues consistof a left and right component separated by an "@" sign. The left component is one ofthe values from the eduPersonAffiliation controlledvocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intentionally matches that used for the right-hand sidevalues for eduPersonPrincipalName since both identify a security domain. Multiple "@" signsare not recommended, but in any case, the first occurrence of the "@" sign starting from theleft is to be taken as the delimiter between components. Thus, user identifier is to the left,security domain to the right of the first "@".
 displayName: eduPersonScopedAffiliation
 inum: 002A
 jansAttrEditTyp: admin
@@ -1255,4 +1260,3 @@ jansStatus: active
 objectClass: top
 objectClass: jansAttr
 urn: urn:mace:dir:attribute-def:jansBackchannelUsrCode
-
