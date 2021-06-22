@@ -84,6 +84,28 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/api/v1/jans-auth-server/config/persistence:
+    get:
+      summary: Returns persistence type configured for Jans authorization server.
+      description: Returns persistence type configured for Jans authorization server.
+      operationId: get-properties-persistence
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
+      tags:
+        - Configuration – Properties
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: PersistenceConfiguration
+                description: Jans Authorization Persistence Configuration object.
+                $ref: '#/components/schemas/PersistenceConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/fido2/config:
     get:
       summary: Gets Jans Authorization Server Fido2 configuration properties.
@@ -2280,6 +2302,9 @@ components:
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
             https://jans.io/oauth/config/uma/resources.write: Manage UMA Resource related information
             https://jans.io/oauth/config/uma/resources.delete: Delete UMA Resource related information
+            https://jans.io/oauth/config/database/sql.readonly: View SQL database related information
+            https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
+            https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
   responses:
     Found:
       description: Resource Found.
@@ -2432,6 +2457,7 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
+		  
     LdapConfiguration:
       type: object
       required:
@@ -2497,6 +2523,7 @@ components:
         level:
           type: integer
           description: A string that indicates the level.
+		  
     CouchbaseConfiguration:
       type: object
       required:
@@ -2592,6 +2619,7 @@ components:
           description: List of certificate attributes.
           items:
             type: string
+			
     SqlConfiguration:
       type: object
       required:
@@ -2699,7 +2727,21 @@ components:
         y:
           type: string
           description: The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
-
+   
+    PersistenceConfiguration:
+      title: PersistenceConfiguration
+      description: Persistence configuration properties.
+      properties:
+        persistenceType:
+          type: string
+          description: Jans Auth Server persistence type configured.
+          enum:
+          - ldap
+          - couchbase
+          - sql
+          - spanner
+          - hybrid
+		  
     AppConfiguration:
       title: AppConfiguration
       description: App configuration properties.
