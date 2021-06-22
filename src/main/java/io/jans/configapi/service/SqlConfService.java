@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.as.persistence.model.configuration.IDPAuthConf;
-import io.jans.as.persistence.model.configuration.SqlConnectionConfiguration;
+import io.jans.orm.sql.model.SqlConnectionConfiguration;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
 
