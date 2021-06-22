@@ -603,11 +603,11 @@ paths:
   /jans-config-api/api/v1/config/database/sql/{name}:
     parameters:
       - name: name
-      in: path
-      required: true
-      description: Name of Sql configuration.
-      schema:
-        type: string
+        in: path
+        required: true
+        description: Name of Sql configuration.
+        schema:
+          type: string
     get:
       summary: Gets a Sql configurations by name.
       description: Gets a Sql configurations by name.
