@@ -33,10 +33,9 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           # Required
-          commit_message: 'feat(Dockerfile): Updated build date'
+          commit_message: 'feat(Dockerfile): updated build date'
           # Optional local file path to the repository
           repository: .
-          commit-message: 'chore: update wars'
           # Optional commit user and author settings
           commit_user_name: ${{ github.actor }}
           commit_user_email: ${{ github.actor }}@users.noreply.github.com
