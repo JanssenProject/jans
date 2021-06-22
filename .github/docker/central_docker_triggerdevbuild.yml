@@ -36,7 +36,7 @@ jobs:
           commit_message: 'feat(Dockerfile): Updated build date'
           # Optional local file path to the repository
           repository: .
-          commit-message: 'feat(helm): Update Helm Chart'
+          commit-message: 'chore: update wars'
           # Optional commit user and author settings
           commit_user_name: ${{ github.actor }}
           commit_user_email: ${{ github.actor }}@users.noreply.github.com
