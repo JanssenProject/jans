@@ -47,6 +47,7 @@ public class ApiConstants {
     public static final String SMTP = "/smtp";
     public static final String GRANT_TYPES = "/grant-types";
     public static final String CACHE = "/cache";
+    public static final String PERSISTENCE = "/persistence";
     public static final String DATABASE = "/database";
     public static final String LDAP = "/ldap";
     public static final String COUCHBASE = "/couchbase";
