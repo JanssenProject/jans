@@ -52,8 +52,8 @@ jobs:
             JanssenProject/jans-scim
             JanssenProject/jans-setup
           WORKFLOW_FILES: |
-            .github/workflows/commit-check.yml
-            .github/workflows/central_code_quality_check.yml
+            .github/workflows/commit-check.yml=.github/workflows/commit-check.yml
+            .github/workflows/central_code_quality_check.yml=.github/workflows/central_code_quality_check.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
         run: |
