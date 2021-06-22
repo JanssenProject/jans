@@ -20,7 +20,7 @@ jobs:
         uses: crazy-max/ghaction-import-gpg@v3
         with:
           gpg-private-key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
           git-user-signingkey: true
           git-commit-gpgsign: true
 
