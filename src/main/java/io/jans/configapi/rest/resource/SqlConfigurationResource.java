@@ -7,7 +7,7 @@
 package io.jans.configapi.rest.resource;
 
 import com.google.common.base.Joiner;
-import io.jans.as.persistence.model.configuration.SqlConnectionConfiguration;
+import io.jans.orm.sql.model.SqlConnectionConfiguration;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.SqlConfService;
 import io.jans.configapi.util.ApiAccessConstants;
