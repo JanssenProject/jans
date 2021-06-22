@@ -8,85 +8,79 @@ on:
     paths:
       - ".github/**"
   workflow_dispatch:
-    
+
 jobs:
   All_Repos_Common_Workflows:
     runs-on: ubuntu-latest
-    env:
-      DRY_RUN: false
-      PULL_REQUEST: true
-      REPOSITORIES: |
-        JanssenProject/docker-jans-auth-server
-        JanssenProject/docker-jans-certmanager
-        JanssenProject/docker-jans-client-api
-        JanssenProject/docker-jans-config-api
-        JanssenProject/docker-jans-configuration-manager
-        JanssenProject/docker-jans-fido2
-        JanssenProject/docker-jans-persistence-loader
-        JanssenProject/docker-jans-scim
-        JanssenProject/jans-pycloudlib
-        JanssenProject/docs
-        JanssenProject/home
-        JanssenProject/jans-auth-server
-        JanssenProject/jans-bom
-        JanssenProject/jans-cli
-        JanssenProject/jans-client-api
-        JanssenProject/jans-cloud-native
-        JanssenProject/jans-config-api
-        JanssenProject/jans-core
-        JanssenProject/jans-eleven
-        JanssenProject/jans-fido2
-        JanssenProject/jans-notify
-        JanssenProject/jans-orm
-        JanssenProject/jans-scim
-        JanssenProject/jans-setup
-
-      WORKFLOW_FILES: |
-        .github/workflows/commit-check.yml
-        .github/workflows/central_code_quality_check.yml
-      COMMIT_MESSAGE: 'ci(workflows): sync workflows'
     steps:
       - name: Fetching Local Repository
         uses: actions/checkout@master
-      - name: Running Workflow Sync
-        uses: mo-auto/actions-sync-workflows@main
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v3
         with:
-          DRY_RUN: ${{ env.DRY_RUN }}
-          REPOSITORIES: ${{ env.REPOSITORIES }}
-          WORKFLOW_FILES: ${{ env.WORKFLOW_FILES }}
-          GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
-          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
-          PULL_REQUEST: ${{ env.PULL_REQUEST }}
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          git-user-signingkey: true
+          git-commit-gpgsign: true
 
-  Docker_Repos_Common_Workflows:
-    runs-on: ubuntu-latest
-    env:
-      DRY_RUN: false
-      PULL_REQUEST: true
-      REPOSITORIES: |
-        JanssenProject/docker-jans-auth-server
-        JanssenProject/docker-jans-certmanager
-        JanssenProject/docker-jans-client-api
-        JanssenProject/docker-jans-config-api
-        JanssenProject/docker-jans-configuration-manager
-        JanssenProject/docker-jans-fido2
-        JanssenProject/docker-jans-persistence-loader
-        JanssenProject/docker-jans-scim
-
-      WORKFLOW_FILES: |
-        .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
-        .github/docker/central_docker_release.yml=.github/workflows/release.yml
-        .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
-      COMMIT_MESSAGE: 'ci(workflows): sync workflows'
-    steps:
-      - name: Fetching Local Repository
-        uses: actions/checkout@master
-      - name: Running Workflow Sync
-        uses: mo-auto/actions-sync-workflows@main
-        with:
-          DRY_RUN: ${{ env.DRY_RUN }}
-          REPOSITORIES: ${{ env.REPOSITORIES }}
-          WORKFLOW_FILES: ${{ env.WORKFLOW_FILES }}
+      - name: Running General Workflow Sync
+        env:
+          REPOSITORIES: |
+            JanssenProject/docker-jans-auth-server
+            JanssenProject/docker-jans-certmanager
+            JanssenProject/docker-jans-client-api
+            JanssenProject/docker-jans-config-api
+            JanssenProject/docker-jans-configuration-manager
+            JanssenProject/docker-jans-fido2
+            JanssenProject/docker-jans-persistence-loader
+            JanssenProject/docker-jans-scim
+            JanssenProject/jans-pycloudlib
+            JanssenProject/docs
+            JanssenProject/home
+            JanssenProject/jans-auth-server
+            JanssenProject/jans-bom
+            JanssenProject/jans-cli
+            JanssenProject/jans-client-api
+            JanssenProject/jans-cloud-native
+            JanssenProject/jans-config-api
+            JanssenProject/jans-core
+            JanssenProject/jans-eleven
+            JanssenProject/jans-fido2
+            JanssenProject/jans-notify
+            JanssenProject/jans-orm
+            JanssenProject/jans-scim
+            JanssenProject/jans-setup
+          WORKFLOW_FILES: |
+            .github/workflows/commit-check.yml
+            .github/workflows/central_code_quality_check.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
-          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
-          PULL_REQUEST: ${{ env.PULL_REQUEST }}
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: |
+          echo
+          wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
+          chmod u+x org_workflows_sync.sh
+          bash org_workflows_sync.sh
+
+      - name: Running Docker Workflow Sync
+        env:
+          REPOSITORIES: |
+            JanssenProject/docker-jans-auth-server
+            JanssenProject/docker-jans-certmanager
+            JanssenProject/docker-jans-client-api
+            JanssenProject/docker-jans-config-api
+            JanssenProject/docker-jans-configuration-manager
+            JanssenProject/docker-jans-fido2
+            JanssenProject/docker-jans-persistence-loader
+            JanssenProject/docker-jans-scim
+          WORKFLOW_FILES: |
+            .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
+            .github/docker/central_docker_release.yml=.github/workflows/release.yml
+            .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
+          GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+        run: |
+          echo
+          wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
+          chmod u+x org_workflows_sync.sh
+          bash org_workflows_sync.sh
