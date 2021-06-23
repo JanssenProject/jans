@@ -5,7 +5,7 @@ FROM alpine:3.13
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl bash openjdk11-jre-headless py3-cryptography py3-grpcio \
+    && apk add --no-cache openssl py3-pip tini curl bash openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
     && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
@@ -44,7 +44,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-06-01 04:11'
+ENV CN_BUILD_DATE='2021-06-22 16:59'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
