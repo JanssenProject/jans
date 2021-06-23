@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.model.util.Util;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
+import io.jans.orm.sql.model.SqlConnectionConfiguration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -116,6 +117,10 @@ public class IDPAuthConf {
 
     public CouchbaseConnectionConfiguration asCouchbaseConfiguration() {
         return read(CouchbaseConnectionConfiguration.class);
+    }
+
+    public SqlConnectionConfiguration asSqlConfiguration() {
+        return read(SqlConnectionConfiguration.class);
     }
 
     private <T> T read(Class<T> clazz) {
