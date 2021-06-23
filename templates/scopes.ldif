@@ -118,12 +118,12 @@ objectClass: top
 objectClass: jansScope
 
 dn: inum=6D90,ou=scopes,o=jans
-description: oxd scope which is required to call oxd API
-displayName: oxd
+description: jans_client_api scope which is required to call jans_client_api API
+displayName: jans_client_api
 inum: 6D90
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
-jansId: oxd
+jansId: jans_client_api
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
@@ -173,4 +173,3 @@ jansId: offline_access
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
-
