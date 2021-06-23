@@ -45,6 +45,15 @@ def modify_jetty_xml():
         flags=re.DOTALL | re.M,
     )
 
+    # set custom request header size
+    req_header_size = os.environ.get("CN_JETTY_REQUEST_HEADER_SIZE", "8192")
+    updates = re.sub(
+        r'(<Set name="requestHeaderSize"><Property name="jetty.httpConfig.requestHeaderSize" deprecated="jetty.request.header.size" default=)"\d+"( /></Set>)',
+        r'\1"{}"\2'.format(req_header_size),
+        updates,
+        flags=re.DOTALL | re.M,
+    )
+
     with open(fn, "w") as f:
         f.write(updates)
 

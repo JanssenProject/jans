@@ -6,6 +6,7 @@ from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
 
 
 class BasePersistence:
@@ -112,11 +113,24 @@ class SqlPersistence(BasePersistence):
         return modified
 
 
+class SpannerPersistence(SqlPersistence):
+    def __init__(self, manager):
+        self.client = SpannerClient()
+
+
+_backend_classes = {
+    "ldap": LdapPersistence,
+    "couchbase": CouchbasePersistence,
+    "sql": SqlPersistence,
+    "spanner": SpannerPersistence,
+}
+
+
 def modify_keystore_path(manager, path, jwks_uri):
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
-    if persistence_type in ("ldap", "couchbase", "sql"):
+    if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
         backend_type = persistence_type
     else:
         # persistence_type is hybrid
@@ -126,12 +140,7 @@ def modify_keystore_path(manager, path, jwks_uri):
             backend_type = "couchbase"
 
     # resolve backend
-    if backend_type == "ldap":
-        backend = LdapPersistence(manager)
-    elif backend_type == "couchbase":
-        backend = CouchbasePersistence(manager)
-    else:
-        backend = SqlPersistence(manager)
+    backend = _backend_classes[backend_type](manager)
 
     config = backend.get_auth_config()
     if not config:

@@ -73,3 +73,6 @@ The following environment variables are supported by the container:
 - `CN_SYNC_JKS_INTERVAL`: Interval of JKS sync in seconds (if needed); obsolete.
 - `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
+- `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
+- `CN_JETTY_REQUEST_HEADER_SIZE`: Maximum size of request header accepted by Jetty (default to `8192`).

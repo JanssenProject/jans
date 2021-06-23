@@ -51,7 +51,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-06-01 16:06'
+ENV CN_BUILD_DATE='2021-06-22 16:57'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -156,7 +156,9 @@ ENV CN_PERSISTENCE_TYPE=ldap \
     CN_COUCHBASE_BUCKET_PREFIX=jans \
     CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
     CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
-    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500 \
+    CN_GOOGLE_SPANNER_INSTANCE_ID="" \
+    CN_GOOGLE_SPANNER_DATABASE_ID=""
 
 # ===========
 # Generic ENV
