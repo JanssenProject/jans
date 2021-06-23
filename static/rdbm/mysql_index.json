@@ -26,6 +26,14 @@
       "`del`, `exp`"
     ]
   },
+  "jansPar": {
+    "fields": [
+      "jansId"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
   "jansUmaPCT": {
     "fields": [
       "tknCde"

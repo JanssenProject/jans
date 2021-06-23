@@ -1761,5 +1761,12 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.33 NAME 'jansStatEntry'
   MUST ( objectclass )
   MAY ( jansId $ dat $ attr )
   X-ORIGIN 'Jans created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.34 NAME 'jansPar'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( jansId $ jansAttrs $ exp $ del )
+  X-ORIGIN 'Jans created objectclass' )
+
 
 
