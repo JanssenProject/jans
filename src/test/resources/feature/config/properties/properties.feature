@@ -20,7 +20,7 @@ Feature: Verify Auth configuration endpoint
     And print response
     And assert response.length != null
     
-    @ignore
+    
     @auth-config-get-persistence-details
     Scenario: Get Persistence details
     Given url  mainUrl
