@@ -3949,6 +3949,26 @@
         "top"
       ],
       "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+        "jansAttrs",
+        "exp",
+        "del"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansPar"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
     }
   ],
   "oidMacros": {
