@@ -6,6 +6,7 @@
         "clients":"ou=clients,o=jans",
         "sessions":"ou=sessions,o=jans",
         "stat":"ou=stat,o=jans",
+        "par":"ou=par,o=jans",
         "tokens":"ou=tokens,o=jans",
         "authorizations": "ou=authorizations,o=jans",
         "scopes":"ou=scopes,o=jans",
