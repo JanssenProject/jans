@@ -8,6 +8,7 @@ from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SQLClient
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
 
 
 class LdapPersistence:
@@ -25,12 +26,15 @@ class LdapPersistence:
 
 
 class CouchbasePersistence:
-    def __init__(self, host, user, password):
-        self.backend = CouchbaseClient(host, user, password)
+    def __init__(self, manager):
+        host = os.environ.get("CN_COUCHBASE_URL", "localhost")
+        user = get_couchbase_user(manager)
+        password = get_couchbase_password(manager)
+        self.client = CouchbaseClient(host, user, password)
 
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        req = self.backend.exec_query(
+        req = self.client.exec_query(
             f"SELECT jansConfDyn FROM `{bucket}` USE KEYS 'configuration_jans-auth'"
         )
         if not req.ok:
@@ -43,7 +47,7 @@ class CouchbasePersistence:
 
 
 class SqlPersistence:
-    def __init__(self):
+    def __init__(self, manager):
         self.client = SQLClient()
 
     def get_auth_config(self):
@@ -53,6 +57,11 @@ class SqlPersistence:
             ["jansConfDyn"],
         )
         return config.get("jansConfDyn", "")
+
+
+class SpannerPersistence(SqlPersistence):
+    def __init__(self, manager):
+        self.client = SpannerClient()
 
 
 def transform_url(url):
@@ -70,13 +79,21 @@ def transform_url(url):
     return url
 
 
+_backend_classes = {
+    "ldap": LdapPersistence,
+    "couchbase": CouchbasePersistence,
+    "sql": SqlPersistence,
+    "spanner": SpannerPersistence,
+}
+
+
 def get_injected_urls():
     manager = get_manager()
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
 
-    if persistence_type in ("ldap", "couchbase", "sql"):
+    if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
         backend_type = persistence_type
     else:
         # maybe hybrid
@@ -86,15 +103,7 @@ def get_injected_urls():
             backend_type = "couchbase"
 
     # resolve backend
-    if backend_type == "ldap":
-        backend = LdapPersistence(manager)
-    elif backend_type == "couchbase":
-        host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_user(manager)
-        password = get_couchbase_password(manager)
-        backend = CouchbasePersistence(host, user, password)
-    else:
-        backend = SqlPersistence()
+    backend = _backend_classes[backend_type](manager)
 
     auth_config = backend.get_auth_config()
     try:

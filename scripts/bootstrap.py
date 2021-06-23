@@ -9,6 +9,7 @@ from jans.pycloudlib.persistence import render_salt
 from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
+from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import safe_render
 
@@ -69,6 +70,13 @@ def main():
             manager,
             "/app/templates/jans-sql.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
+        )
+
+    if persistence_type == "spanner":
+        render_spanner_properties(
+            manager,
+            "/app/templates/jans-spanner.properties.tmpl",
+            "/etc/jans/conf/jans-spanner.properties",
         )
 
     if not all([

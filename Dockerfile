@@ -15,7 +15,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-05-28 12:56'
+ENV CN_BUILD_DATE='2021-06-22 13:16'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
 
 RUN mkdir -p /opt/jans/jans-config-api \
@@ -108,7 +108,9 @@ ENV CN_PERSISTENCE_TYPE=ldap \
     CN_COUCHBASE_BUCKET_PREFIX=jans \
     CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
     CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
-    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500 \
+    CN_GOOGLE_SPANNER_INSTANCE_ID="" \
+    CN_GOOGLE_SPANNER_DATABASE_ID=""
 
 # ===========
 # Generic ENV
