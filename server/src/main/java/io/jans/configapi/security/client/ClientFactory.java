@@ -1,4 +1,4 @@
-package io.jans.configapi.auth.client;
+package io.jans.configapi.security.client;
 
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
