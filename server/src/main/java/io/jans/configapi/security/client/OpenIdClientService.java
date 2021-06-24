@@ -1,4 +1,4 @@
-package io.jans.configapi.auth.client;
+package io.jans.configapi.security.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.model.common.IntrospectionResponse;

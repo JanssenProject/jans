@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.auth.client;
+package io.jans.configapi.security.client;
 
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
@@ -72,9 +72,10 @@ public class AuthClientFactory {
         log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects);
         
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-                .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
-        restClient.property("Authorization", "Basic " + header);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
+               // .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
+        //restClient = restClient.property("Authorization", "Basic " + header);
+        //restClient = restClient.property("Content-Type", MediaType.APPLICATION_JSON);
 
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .property("Content-Type", MediaType.APPLICATION_JSON).target(url);

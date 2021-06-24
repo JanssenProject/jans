@@ -34,8 +34,9 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 
-		<!-- <resteasy.version>4.5.6.Final</resteasy.version> -->
-		<resteasy.version>3.14.0.Final</resteasy.version>
+		<resteasy.version>4.5.6.Final</resteasy.version>
+		<!-- <resteasy.version>3.14.0.Final</resteasy.version>
+		<weld.version>4.0.1.Final</weld.version> -->
 	</properties>
 
 	<prerequisites>
@@ -117,7 +118,7 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-util</artifactId>
 				<version>${jans.version}</version>
-				<!-- <exclusions>
+				<exclusions>
 					<exclusion>
 						<groupId>org.jboss.resteasy</groupId>
 						<artifactId>*</artifactId>
@@ -126,13 +127,13 @@
 						<groupId>org.apache.jackrabbit</groupId>
 						<artifactId>jackrabbit-core</artifactId>
 					</exclusion>
-				</exclusions> -->
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-model</artifactId>
 				<version>${jans.version}</version>
-				<!-- <exclusions>
+				<exclusions>
 					<exclusion>
 						<groupId>org.jboss.resteasy</groupId>
 						<artifactId>*</artifactId>
@@ -141,13 +142,13 @@
 						<groupId>org.apache.jackrabbit</groupId>
 						<artifactId>jackrabbit-core</artifactId>
 					</exclusion>
-				</exclusions> -->
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-auth-common</artifactId>
 				<version>${jans.version}</version>
-				<!-- <exclusions>
+				<exclusions>
 					<exclusion>
 						<groupId>org.jboss.resteasy</groupId>
 						<artifactId>*</artifactId>
@@ -156,29 +157,29 @@
 						<groupId>org.apache.jackrabbit</groupId>
 						<artifactId>jackrabbit-core</artifactId>
 					</exclusion>
-				</exclusions> -->
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-core-service</artifactId>
 				<version>${jans.version}</version>
-				<!-- <exclusions>
+				<exclusions>
 					<exclusion>
 						<artifactId>org.jboss.resteasy</artifactId>
 						<groupId>*</groupId>
 					</exclusion>
-				</exclusions> -->
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-client-api</artifactId>
 				<version>${jans.version}</version>
-				<!-- <exclusions>
+				<exclusions>
 					<exclusion>
 						<artifactId>org.jboss.resteasy</artifactId>
 						<groupId>*</groupId>
 					</exclusion>
-				</exclusions> -->
+				</exclusions>
 			</dependency>
 
 
@@ -247,7 +248,7 @@
 				<version>${smallrye.version}</version>
 				<scope>test</scope>
 			</dependency> -->
-			<!-- <dependency>
+			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-rest-client</artifactId>
 				<version>1.2.2</version>
@@ -257,7 +258,7 @@
 						<groupId>*</groupId>
 					</exclusion>
 				</exclusions>
-			</dependency> -->
+			</dependency>
 
 
 			<!-- Validation -->
@@ -282,9 +283,15 @@
 				<version>3.6.3.Final</version> </dependency> -->
 
 			<!-- RestEasy -->
+			 <dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-cdi</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
 			<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
+			<!-- <version>3.14.0.Final</version> -->
 			<version>${resteasy.version}</version>
 		</dependency>
 		<dependency>
@@ -307,11 +314,8 @@
 			<artifactId>resteasy-json-p-provider</artifactId>
 			<version>${resteasy.version}</version>
 		</dependency>
-<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
+       
+
 
 		<!-- Weld -->
 		<!-- <dependency>
