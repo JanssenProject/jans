@@ -66,12 +66,13 @@ public class AppInitializer {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("=================================================================");
-        //System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
+        // System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED,
+        // "true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
-        
-        ResteasyProviderFactory instance=ResteasyProviderFactory.getInstance();
+
+        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(instance);
         instance.registerProvider(ResteasyJackson2Provider.class);
 

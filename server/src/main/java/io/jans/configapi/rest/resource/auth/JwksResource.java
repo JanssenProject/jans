@@ -69,92 +69,92 @@ public class JwksResource extends BaseResource {
         final String json = configurationService.findConf().getWebKeys().toString();
         return Response.ok(json).build();
     }
-    
+
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     @Path(ApiConstants.KEY_PATH)
     public Response getKeyById(@NotNull JSONWebKey jwk) {
-        log.debug("Add a new Key to the JWKS = "+jwk); 
+        log.debug("Add a new Key to the JWKS = " + jwk);
         Conf conf = configurationService.findConf();
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         log.debug("WebKeysConfiguration before addding new key =" + webkeys);
-        
-        //Reject if key with same kid already exists
-        //if(webkeys.getKeys().stream().anyMatch(x -> x.getKid()!=null && x.getKid().equals(jwk.getKid())) ){
-        if(getJSONWebKey(webkeys, jwk.getKid())!=null) {
-            throw new NotAcceptableException(getNotAcceptableException(
-                    "JWK with same kid - '" + jwk.getKid() + "' already exists!"));
+
+        // Reject if key with same kid already exists
+        // if(webkeys.getKeys().stream().anyMatch(x -> x.getKid()!=null &&
+        // x.getKid().equals(jwk.getKid())) ){
+        if (getJSONWebKey(webkeys, jwk.getKid()) != null) {
+            throw new NotAcceptableException(
+                    getNotAcceptableException("JWK with same kid - '" + jwk.getKid() + "' already exists!"));
         }
-        
-        //Add key
+
+        // Add key
         webkeys.getKeys().add(jwk);
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
         webkeys = configurationService.findConf().getWebKeys();
         return Response.status(Response.Status.CREATED).entity(jwk).build();
     }
-    
+
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response getKeyById(@PathParam(ApiConstants.KID) @NotNull String kid) {
-        log.debug("Fetch JWK details by kid = "+kid);        
+        log.debug("Fetch JWK details by kid = " + kid);
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         log.debug("WebKeysConfiguration before addding new key =" + webkeys);
         JSONWebKey jwk = getJSONWebKey(webkeys, kid);
         return Response.ok(jwk).build();
     }
-      
+
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
-    public Response patch(@PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString) throws JsonPatchException, IOException {
-        log.debug("JWKS details to be patched for kid = "+kid+" ,requestString = "+requestString);
+    public Response patch(@PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString)
+            throws JsonPatchException, IOException {
+        log.debug("JWKS details to be patched for kid = " + kid + " ,requestString = " + requestString);
         Conf conf = configurationService.findConf();
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         JSONWebKey jwk = getJSONWebKey(webkeys, kid);
-        if(jwk==null) {
-            throw new NotFoundException(getNotFoundError(
-                    "JWK with kid - '" + kid + "' does not exist!"));
+        if (jwk == null) {
+            throw new NotFoundException(getNotFoundError("JWK with kid - '" + kid + "' does not exist!"));
         }
-        
-        //Patch
+
+        // Patch
         jwk = Jackson.applyPatch(requestString, jwk);
-        log.debug("JWKS details patched - jwk = "+jwk);
-        
-        //Remove old Jwk
-        conf.getWebKeys().getKeys().removeIf(x -> x.getKid()!=null && x.getKid().equals(kid));
+        log.debug("JWKS details patched - jwk = " + jwk);
+
+        // Remove old Jwk
+        conf.getWebKeys().getKeys().removeIf(x -> x.getKid() != null && x.getKid().equals(kid));
         log.debug("WebKeysConfiguration after removing old key =" + conf.getWebKeys().getKeys());
-        
-        //Update
+
+        // Update
         conf.getWebKeys().getKeys().add(jwk);
         configurationService.merge(conf);
-        
+
         return Response.ok(jwk).build();
     }
-        
+
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
     public Response deleteKey(@PathParam(ApiConstants.KID) @NotNull String kid) {
-        log.debug("Key to be to be deleted - kid = "+kid);
+        log.debug("Key to be to be deleted - kid = " + kid);
         final Conf conf = configurationService.findConf();
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         JSONWebKey jwk = getJSONWebKey(webkeys, kid);
-        if(jwk==null) {
-            throw new NotFoundException(getNotFoundError(
-                    "JWK with kid - '" + kid + "' does not exist!"));
+        if (jwk == null) {
+            throw new NotFoundException(getNotFoundError("JWK with kid - '" + kid + "' does not exist!"));
         }
-        
-        conf.getWebKeys().getKeys().removeIf(x -> x.getKid()!=null && x.getKid().equals(kid));
+
+        conf.getWebKeys().getKeys().removeIf(x -> x.getKid() != null && x.getKid().equals(kid));
         configurationService.merge(conf);
         return Response.noContent().build();
     }
-    
+
     private JSONWebKey getJSONWebKey(WebKeysConfiguration webkeys, String kid) {
-        if(kid!=null && webkeys.getKeys()!=null && !webkeys.getKeys().isEmpty()) {
-            return webkeys.getKeys().stream().filter(x -> x.getKid()!=null && x.getKid().equals(kid)).findAny()
+        if (kid != null && webkeys.getKeys() != null && !webkeys.getKeys().isEmpty()) {
+            return webkeys.getKeys().stream().filter(x -> x.getKid() != null && x.getKid().equals(kid)).findAny()
                     .orElse(null);
         }
         return null;

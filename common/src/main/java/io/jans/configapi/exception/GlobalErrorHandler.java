@@ -33,7 +33,7 @@ public class GlobalErrorHandler implements ExceptionMapper<Exception> {
                 && ((ConstraintViolationException) e).getMessage() != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-        
+
         return Response.serverError()
                 .entity(new ApiError.ErrorBuilder()
                         .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))

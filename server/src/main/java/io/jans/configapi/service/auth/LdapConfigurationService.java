@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class LdapConfigurationService {
 
     private static final String AUTH = "auth";
-    
+
     @Inject
     Logger log;
 
@@ -72,8 +72,8 @@ public class LdapConfigurationService {
 
     public GluuLdapConfiguration findByName(String name) {
         List<GluuLdapConfiguration> ldapConfigurations = findLdapConfigurations();
-        log.debug(" findByName name = name "+name+" ldapConfigurations = "+ldapConfigurations);
-        
+        log.debug(" findByName name = name " + name + " ldapConfigurations = " + ldapConfigurations);
+
         Optional<GluuLdapConfiguration> matchingLdapConfiguration = ldapConfigurations.stream()
                 .filter(d -> d.getConfigId().equals(name)).findFirst();
         return matchingLdapConfiguration.get();
@@ -117,7 +117,8 @@ public class LdapConfigurationService {
 
     private List<GluuLdapConfiguration> excludeFromConfigurations(List<GluuLdapConfiguration> ldapConfigurations,
             GluuLdapConfiguration ldapConfiguration) {
-        log.debug("\n\n\n excludeFromConfigurations ldapConfigurations = "+ldapConfigurations+" , ldapConfiguration = "+ldapConfiguration+"\n\n\n");
+        log.debug("\n\n\n excludeFromConfigurations ldapConfigurations = " + ldapConfigurations
+                + " , ldapConfiguration = " + ldapConfiguration + "\n\n\n");
         boolean hadConfiguration = Iterables.removeIf(ldapConfigurations,
                 c -> c.getConfigId().equals(ldapConfiguration.getConfigId()));
         if (!hadConfiguration) {

@@ -73,7 +73,6 @@ public class ApiConstants {
     public static final String NAME = "name";
     public static final String DISPLAY_NAME = "displayName";
     public static final String KID = "kid";
-    
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";

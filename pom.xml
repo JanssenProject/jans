@@ -23,8 +23,9 @@
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
 		<weld.version>3.1.2.Final</weld.version>
-		<jackson.version>2.10.1</jackson.version>
 		<jetty.version>9.4.19.v20190610</jetty.version>
+		<resteasy.version>4.5.6.Final</resteasy.version>
+		<jackson.version>2.10.1</jackson.version>
 		<microprofile.version>3.0</microprofile.version>
 		<smallrye.version>2.2.0</smallrye.version>
 		<log4j.version>2.13.3</log4j.version>
@@ -33,9 +34,6 @@
 		<karate.version>0.9.5</karate.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
-
-		<resteasy.version>4.5.6.Final</resteasy.version>
-		<!-- <resteasy.version>3.14.0.Final</resteasy.version> <weld.version>4.0.1.Final</weld.version> -->
 	</properties>
 
 	<prerequisites>
@@ -181,7 +179,6 @@
 				</exclusions>
 			</dependency>
 
-
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -207,21 +204,8 @@
 
 			<!-- Microprofile -->
 			<dependency>
-				<groupId>org.eclipse.microprofile.config</groupId>
-				<artifactId>microprofile-config-api</artifactId>
-				<version>2.0</version>
-			</dependency>
-			<!-- <dependency> <groupId>org.eclipse.microprofile.rest.client</groupId> 
-				<artifactId>microprofile-rest-client-api</artifactId> <version>2.0</version> 
-				</dependency> -->
-			<dependency>
 				<groupId>org.eclipse.microprofile.metrics</groupId>
 				<artifactId>microprofile-metrics-api</artifactId>
-				<version>${microprofile.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.microprofile.health</groupId>
-				<artifactId>microprofile-health-api</artifactId>
 				<version>${microprofile.version}</version>
 			</dependency>
 			<dependency>
@@ -239,8 +223,6 @@
 				<artifactId>smallrye-config</artifactId>
 				<version>1.5.0</version>
 			</dependency>
-			<!-- <dependency> <groupId>io.smallrye.config</groupId> <artifactId>smallrye-config-core</artifactId> 
-				<version>${smallrye.version}</version> <scope>test</scope> </dependency> -->
 			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-rest-client</artifactId>
@@ -252,7 +234,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 
 			<!-- Validation -->
 			<dependency>
@@ -284,7 +265,6 @@
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-client</artifactId>
-				<!-- <version>3.14.0.Final</version> -->
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
@@ -307,19 +287,6 @@
 				<artifactId>resteasy-json-p-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
-
-
-
-			<!-- Weld -->
-			<!-- <dependency> <groupId>javax.enterprise</groupId> <artifactId>cdi-api</artifactId> 
-				<version>2.0.SP1</version> <scope>provided</scope> </dependency> <dependency> 
-				<groupId>org.jboss.weld.servlet</groupId> <artifactId>weld-servlet-core</artifactId> 
-				<version>2.0.SP1</version> </dependency> <dependency> <groupId>org.jboss.weld</groupId> 
-				<artifactId>weld-core-impl</artifactId> </dependency> <dependency> <groupId>org.jboss.spec.javax.ejb</groupId> 
-				<artifactId>jboss-ejb-api_3.2_spec</artifactId> <scope>provided</scope> </dependency> 
-				<dependency> <groupId>javax.servlet</groupId> <artifactId>javax.servlet-api</artifactId> 
-				<version>3.1.0</version> <scope>provided</scope> </dependency> -->
-
 
 			<!-- jetty -->
 			<dependency>
@@ -428,17 +395,11 @@
 				<artifactId>json-patch</artifactId>
 				<version>1.9</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.json/json -->
 			<dependency>
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 				<version>20210307</version>
 			</dependency>
-
-
-			<!-- Try -->
-
-
 
 		</dependencies>
 	</dependencyManagement>
@@ -533,16 +494,6 @@
 					</configuration>
 				</plugin>
 
-				<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-shade-plugin</artifactId> 
-					<version>2.1</version> <executions> <execution> <phase>package</phase> <goals> 
-					<goal>shade</goal> </goals> <configuration> <createDependencyReducedPom>false</createDependencyReducedPom> 
-					<transformers> <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> 
-					<mainClass>com.foo.bar.MyMainClass</mainClass> </transformer> <transformer 
-					implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"> 
-					<resource>META-INF/services/javax.ws.rs.ext.Providers</resource> </transformer> 
-					</transformers> <filters> <filter> <artifact>*:*</artifact> </filter> </filters> 
-					</configuration> </execution> </executions> </plugin> -->
-
 				<plugin>
 					<groupId>org.Apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
@@ -579,7 +530,6 @@
 									</transformer>
 								</transformers>
 								<artifactSet />
-								<!-- <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile> -->
 							</configuration>
 						</execution>
 					</executions>
@@ -604,7 +554,6 @@
 		</profile>
 
 		<profile>
-			<!-- Neded to resolve test dependencies -->
 			<id>set-skip-test-variable</id>
 			<activation>
 				<property>
