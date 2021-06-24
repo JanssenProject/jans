@@ -20,7 +20,7 @@ public class CustomConfigSource implements ConfigSource {
     private final static String FILE_CONFIG = "application.properties";
     private FileConfiguration appProperties;
     private Properties properties = null;
-    
+
     public CustomConfigSource() {
         this.loadProperties();
     }
@@ -28,8 +28,8 @@ public class CustomConfigSource implements ConfigSource {
     @Override
     public Map<String, String> getProperties() {
         try {
-            
-            if(properties == null) {
+
+            if (properties == null) {
                 this.loadProperties();
             }
 
@@ -48,7 +48,7 @@ public class CustomConfigSource implements ConfigSource {
     @Override
     public Set<String> getPropertyNames() {
         try {
-            if(properties == null) {
+            if (properties == null) {
                 this.loadProperties();
             }
             return properties.stringPropertyNames();
@@ -69,7 +69,7 @@ public class CustomConfigSource implements ConfigSource {
     @Override
     public String getValue(String s) {
         try {
-            if(properties == null) {
+            if (properties == null) {
                 this.loadProperties();
             }
             return properties.getProperty(s);

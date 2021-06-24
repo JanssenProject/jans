@@ -8,7 +8,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-
 @RegisterRestClient
 @ApplicationScoped
 public interface OpenIdClientService {

@@ -69,13 +69,14 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = "+url+" , header = "+header+" , token = "+token+" , followRedirects = "+followRedirects);
-        
+        log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = " + url + " , header = " + header
+                + " , token = " + token + " , followRedirects = " + followRedirects);
+
         ApacheHttpClient43Engine engine = ClientFactory.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
-               // .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
-        //restClient = restClient.property("Authorization", "Basic " + header);
-        //restClient = restClient.property("Content-Type", MediaType.APPLICATION_JSON);
+        // .property("Content-Type", MediaType.APPLICATION_JSON).register(engine);
+        // restClient = restClient.property("Authorization", "Basic " + header);
+        // restClient = restClient.property("Content-Type", MediaType.APPLICATION_JSON);
 
         ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
                 .property("Content-Type", MediaType.APPLICATION_JSON).target(url);

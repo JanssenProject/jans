@@ -15,7 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.inject.Inject;
 import java.io.Serializable;
- 
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -48,13 +48,14 @@ public class OpenIdService implements Serializable {
         String introspectionUrl = getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
             introspectionUrl = AuthClientFactory.getIntrospectionEndpoint(issuer);
-            //introspectionUrl = AuthClientService.getIntrospectionEndpoint(issuer);
+            // introspectionUrl = AuthClientService.getIntrospectionEndpoint(issuer);
             log.trace("\n\n oAuth Issuer's introspectionUrl = " + introspectionUrl);
         }
-        
+
         log.info("\n\n oAuth Final introspectionUrl = " + introspectionUrl);
         return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
-        //return AuthClientService.getIntrospectionResponse(introspectionUrl, header, token, false);
+        // return AuthClientService.getIntrospectionResponse(introspectionUrl, header,
+        // token, false);
     }
 
 }
