@@ -123,13 +123,13 @@ We need to fill some of these properties with valid data to add this new script.
 ```
 We can remove `dn`, `inum`. As because these two items are auto generated with random value. Also we see `aliases`, `moduleproperties` and `configurationProperties` are the array type `keys`. So we need to put data into `[]` otherwise it will raise an error. We can also use `null` value if we need to skip any of them. For `scriptType` we can choose only selected type of script from the below list.
 
-#### Name of the type of scripts
+### Name of the type of scripts
 
 ```
 PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP, UPDATE_TOKEN
 ```
 
-#### Programming Language
+### Programming Language
 
 Two types of programming language available there. Those are `Python` and `JavaScript`. We can choose any of them regarding the script we need to add.
 
@@ -275,4 +275,82 @@ For an example, let's find all the scripts of `UPDATE_USER` type. So, the comman
 
 It returns all the custom scripts that are related to the `UPDATE_USER` type available in the Janssen Server. You will find the name of all the types [here](cli-custom-scripts.md#name-of-the-type-of-scripts)
 
+## Get Custom Scripts by it's `inum`
 
+In case we need to find out details configuration of any custom script, we can search by its unique `inum` value. 
+
+```
+Operation ID: get-config-scripts-by-inum
+  Description: Gets a script by Inum.
+  url-suffix: inum
+```
+
+command line:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
+```
+
+
+For example, we can show details here that we already added in the Janssen Server and we know it's `inum` value is `61aef81b-b22d-42c0-89d5-b098c976a2b7`.
+
+In our case, the command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+```
+
+It returns the configuration of the custom script matched with the given `inum` value.
+
+```
+Getting access token for scope https://jans.io/oauth/config/scripts.readonly
+{
+  "dn": "inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans",
+  "inum": "61aef81b-b22d-42c0-89d5-b098c976a2b7",
+  "name": "custom_script_update_user",
+  "aliases": null,
+  "description": "Testing custom script addition",
+  "script": "...",
+  "scriptType": "UPDATE_USER",
+  "programmingLanguage": "PYTHON",
+  "moduleProperties": [
+    {
+      "value1": "myvalue1",
+      "value2": "myvalue2",
+      "description": "description for this property"
+    }
+  ],
+  "configurationProperties": [
+    {
+      "value1": "testconfigvalue1",
+      "value2": "testconfigvalue2",
+      "description": "description for configuration property",
+      "hide": true
+    }
+  ],
+  "level": 100,
+  "revision": 0,
+  "enabled": false,
+  "scriptError": null,
+  "modified": false,
+  "internal": false
+}
+```
+
+## How to delete Custom Script?
+
+Well, we can delete any custom script also in deed. In that case, we need to remember the `inum` value of the custom script we want to delete. In the above we [added](cli-custom-scripts.md#adds-a-new-custom-script), [updated](cli-custom-scripts.md#update-an-existing-custom-script) a custom script. We know the `inum` value, so let's delete this one.
+
+Command line: 
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
+```
+
+For example, in our case; the command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+```
+
+That's all for `Custom Script` management with `CLI` feature. You can check `IM` method from [here](../im/im-custom-scripts.md).
