@@ -1,0 +1,148 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
+# Sonar cloud https://sonarcloud.io/organizations/janssenproject/projects
+name: Code quality check
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      JVM_PROJECTS: |
+        JanssenProject/jans-auth-server
+        JanssenProject/jans-orm
+        JanssenProject/jans-config-api
+        JanssenProject/jans-client-api
+        JanssenProject/jans-scim
+        JanssenProject/jans-core
+        JanssenProject/jans-notify
+        JanssenProject/jans-fido2
+        JanssenProject/jans-eleven
+      NON_JVM_PROJECTS: |
+        JanssenProject/jans-setup
+        JanssenProject/jans-cli
+        JanssenProject/docker-jans-persistence-loader
+        JanssenProject/docker-jans-client-api
+        JanssenProject/jans-pycloudlib
+        JanssenProject/docker-jans-auth-server
+        JanssenProject/docker-jans-fido2
+        JanssenProject/docker-jans-scim
+        JanssenProject/docker-jans-config-api
+        JanssenProject/docker-jans-certmanager
+        JanssenProject/docker-jans-configuration-manager
+        JanssenProject/jans-cloud-native
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
+      
+      - name: Set up JDK 11
+        if: contains(env.JVM_PROJECTS, github.repository)
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          
+      - name: Build with Maven
+        if: contains(env.JVM_PROJECTS, github.repository)
+        run: |
+          case "$GITHUB_REPOSITORY" in
+            "JanssenProject/jans-auth-server") 
+              echo "Run maven build for jans-auth-server "
+              mvn clean -fae -X -pl \!client,\!static,\!server,\!rp-spring-boot jacoco:prepare-agent test install jacoco:report
+            ;;
+            "JanssenProject/jans-client-api") 
+              echo "Run maven build for jans-client-api"
+              mvn clean -fae -pl \!server jacoco:prepare-agent test install jacoco:report
+            ;;
+            "JanssenProject/jans-scim") 
+              echo "Run maven build for jans-scim"
+              mvn clean -fae -pl \!client jacoco:prepare-agent test install jacoco:report
+            ;;
+            "JanssenProject/jans-eleven")
+              echo "Run maven build for jans-eleven"
+              mvn clean -fae -pl \!client,\!server jacoco:prepare-agent test jacoco:report
+            ;;
+            "JanssenProject/jans-config-api")
+              echo "Run maven build for jans-config-api"
+              mvn clean -fae -DskipTests=true jacoco:prepare-agent install jacoco:report
+            ;;
+            *) 
+            echo "Run maven build for Java repository"
+            mvn clean -fae jacoco:prepare-agent test install jacoco:report
+            ;;
+          esac
+
+      - name: Cache SonarCloud packages for JVM based project
+        if: contains(env.JVM_PROJECTS, github.repository)
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+          
+      - name: Cache Maven packages
+        if: contains(env.JVM_PROJECTS, github.repository)
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
+      - name: Build and analyze JVM based project
+        if: contains(env.JVM_PROJECTS, github.repository)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          case "$GITHUB_REPOSITORY" in
+            "JanssenProject/jans-auth-server") 
+              echo "Run Sonar analysis for jans-auth-server "
+              mvn -B -pl \!client,\!static,\!server,\!rp-spring-boot verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            "JanssenProject/jans-client-api") 
+              echo "Run Sonar analysis for jans-client-api"
+              mvn -B -pl \!server verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            "JanssenProject/jans-scim") 
+              echo "Run Sonar analysis for jans-scim"
+              mvn -B -pl \!client verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            "JanssenProject/jans-eleven")
+              echo "Run Sonar analysis for jans-scim"
+              mvn -B -pl \!client,\!server verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            "JanssenProject/jans-config-api")
+              echo "Run Sonar analysis for jans-config-api"
+              mvn -B -DskipTests=true verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+            *) 
+            echo "Run maven build for Java repository"
+            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            ;;
+          esac
+
+      - name: Convert repo org name to lowercase for non JVM projects
+        if: contains(env.NON_JVM_PROJECTS, github.repository)
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          echo "REPO_ORG=${REPO_OWNER,,}" >>${GITHUB_ENV}
+
+      - name: SonarCloud Scan for non-JVM project
+        if: contains(env.NON_JVM_PROJECTS, github.repository)
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.organization=${{ env.REPO_ORG }}
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
