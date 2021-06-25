@@ -6,24 +6,24 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTH_LEVEL_MAPPING;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTH_LEVEL_MAPPING;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.PAR_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
 
 /**
  * Created by eugeniuparvan on 8/12/16.
@@ -71,6 +71,9 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
                 }
                 if (jsonObj.has(INTROSPECTION_ENDPOINT)) {
                     getResponse().setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
+                }
+                if (jsonObj.has(PAR_ENDPOINT)) {
+                    getResponse().setParEndpoint(PAR_ENDPOINT);
                 }
                 if (jsonObj.has(AUTH_LEVEL_MAPPING)) {
                     getResponse().setAuthLevelMapping(mapJsonToAuthLevelMapping(jsonObj.getJSONObject(AUTH_LEVEL_MAPPING)));

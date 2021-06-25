@@ -6,16 +6,16 @@
 
 package io.jans.as.client;
 
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Represents an OpenId Configuration received from the authorization server.
@@ -38,6 +38,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String registrationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+    private String parEndpoint;
     private String deviceAuthzEndpoint;
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
@@ -395,6 +396,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     @Deprecated
     public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
         introspectionEndpoint = p_introspectionEndpoint;
+    }
+
+    public String getParEndpoint() {
+        return parEndpoint;
+    }
+
+    public void setParEndpoint(String parEndpoint) {
+        this.parEndpoint = parEndpoint;
     }
 
     /**
