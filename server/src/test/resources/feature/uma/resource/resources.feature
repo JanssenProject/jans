@@ -66,7 +66,7 @@ And assert response.name == 'UpdatedQAAddedResource'
 And assert response.id == id_before
 Given url mainUrl + '/' +response.id
 And header Authorization = 'Bearer ' + accessToken
-And header Content-Type = 'application/json'
+And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
 And def newName = response.name
 And print " newName = "+newName

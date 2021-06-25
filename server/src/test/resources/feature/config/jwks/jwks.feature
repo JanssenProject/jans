@@ -29,7 +29,7 @@ Feature: JWKS endpoint
     And assert response.length != null
   	Given url  mainUrl
     And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And print response.keys[0].exp
     And request "[ {\"op\":\"replace\", \"path\": \"/keys/0/exp\", \"value\":\""+response.keys[0].exp+"\" } ]"

@@ -29,7 +29,7 @@ And print response.inum
 # Patch OpenId Connect Client with CustomAttribute
 Given url openidclients_url + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
-And header Content-Type = 'application/json'
+And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
 And request read('client_custom_attribute_patch.json')
 When method PATCH

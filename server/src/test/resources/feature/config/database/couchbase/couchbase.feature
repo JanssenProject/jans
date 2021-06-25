@@ -77,7 +77,7 @@ Feature: Couchbase connection configuration
     Given url  mainUrl
     And param name = response.name
     And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request request_body
     Then print request

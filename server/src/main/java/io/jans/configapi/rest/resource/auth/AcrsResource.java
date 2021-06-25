@@ -31,7 +31,7 @@ public class AcrsResource extends BaseResource {
 
     @Inject
     Logger log;
-
+    
     @Inject
     ConfigurationService configurationService;
 
@@ -48,11 +48,10 @@ public class AcrsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
-        log.debug("ACRS details to update - authenticationMethod = " + authenticationMethod);
+        log.debug("ACRS details to  update - authenticationMethod = "+authenticationMethod );
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
         configurationService.merge(gluuConfiguration);
-        log.debug("ACRS details post update - authenticationMethod = " + authenticationMethod);
         return Response.ok(authenticationMethod).build();
     }
 
