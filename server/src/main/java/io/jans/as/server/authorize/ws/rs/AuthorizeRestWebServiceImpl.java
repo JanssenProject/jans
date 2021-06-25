@@ -12,7 +12,6 @@ import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -30,7 +29,11 @@ import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.authorize.*;
+import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
+import io.jans.as.server.model.authorize.Claim;
+import io.jans.as.server.model.authorize.IdTokenMember;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
@@ -39,7 +42,16 @@ import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.AttributeService;
+import io.jans.as.server.service.AuthenticationFilterService;
+import io.jans.as.server.service.ClientAuthorizationsService;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.DeviceAuthorizationService;
+import io.jans.as.server.service.RedirectUriResponse;
+import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -69,8 +81,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import static io.jans.as.model.util.StringUtils.implode;
 
@@ -249,7 +265,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri, client, redirectUriResponse, cryptoProvider, appConfiguration);
 
                     if (jwtRequest == null) {
-                        throw createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
                     }
                     if (StringUtils.isNotBlank(jwtRequest.getState())) {
                         state = jwtRequest.getState();
@@ -264,10 +280,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                     // MUST be equal
                     if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
-                        throw createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
                     }
                     if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
-                        throw createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
                     }
 
                     // JWT wins
@@ -281,7 +297,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                     }
                     if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(redirectUri)) {
-                        throw createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
                     }
                     if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
                         nonce = jwtRequest.getNonce();
@@ -335,7 +351,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     throw e;
                 } catch (Exception e) {
                     log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
-                    throw createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
+                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
             }
             if (!cibaRequestService.hasCibaCompatibility(client)) {
@@ -718,14 +734,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }
-    }
-
-    private WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
-        if (appConfiguration.getFapiCompatibility()) {
-            log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known.
-            return redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
-        }
-        return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
     }
 
     private void updateSessionForROPC(HttpServletRequest httpRequest, SessionId sessionUser) {
