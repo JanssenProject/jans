@@ -52,6 +52,7 @@ public class AppConfiguration implements Configuration {
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
+    private Boolean requirePar = false;
     private String deviceAuthzEndpoint;
 
     private Boolean sessionAsJwt = false;
@@ -947,6 +948,15 @@ public class AppConfiguration implements Configuration {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getRequirePar() {
+        if (requirePar == null) requirePar = false;
+        return requirePar;
+    }
+
+    public void setRequirePar(Boolean requirePar) {
+        this.requirePar = requirePar;
     }
 
     public String getOpenIdConfigurationEndpoint() {
