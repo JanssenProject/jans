@@ -24,6 +24,7 @@
     "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
     "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
     "backchannelAuthenticationEndpoint":"${config.oxauth.contextPath}/restv1/bc-authorize",
+    "parEndpoint":"${config.oxauth.contextPath}/restv1/par",
     "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
