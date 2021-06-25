@@ -76,7 +76,7 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
-        log.debug("Client details to be added - client = " + client);
+        log.debug("Client details to be added - client = "+client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = clientService.generateInumForNewClient();
@@ -99,7 +99,7 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        log.debug("Client details to be updated - client = " + client);
+        log.debug("Client details to be updated - client = "+client);
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -120,11 +120,12 @@ public class ClientsResource extends BaseResource {
     }
 
     @PATCH
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("Client details to be patched - inum = " + inum + " , pathString = " + pathString);
+        log.debug("Client details to be patched - inum = "+inum+" , pathString = "+pathString);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
@@ -137,7 +138,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS })
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("Client to be deleted - inum = " + inum);
+        log.debug("Client to be deleted - inum = "+inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         clientService.removeClient(client);

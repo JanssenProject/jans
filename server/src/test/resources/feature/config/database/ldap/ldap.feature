@@ -107,7 +107,7 @@ return temp;
     And print 'Patch - ' + first_response[0].configId
   	Given url  mainUrl + '/' +first_response[0].configId
     And  header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/maxConnections\", \"value\": "+first_response[0].maxConnections+"} ]"
 	Then print request

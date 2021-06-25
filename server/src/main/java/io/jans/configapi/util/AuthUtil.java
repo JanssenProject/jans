@@ -8,7 +8,8 @@ import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.security.api.ApiProtectionCache;
-import io.jans.configapi.security.service.AuthClientService;
+//import io.jans.configapi.security.service.AuthClientService;
+import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
@@ -229,7 +230,8 @@ public class AuthUtil {
         }
         log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
 
-        TokenResponse tokenResponse = AuthClientService.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+        //TokenResponse tokenResponse = AuthClientService.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+        TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());
             log.trace("RequestAccessToken() - tokenResponse.getAccessToken() = " + tokenResponse.getAccessToken());

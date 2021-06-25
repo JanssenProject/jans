@@ -71,7 +71,7 @@ And assert response.displayName == 'UpdatedQAAddedUmaScope'
 And assert response.inum == inum_before
 Given url mainUrl + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
-And header Content-Type = 'application/json'
+And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
 And def newDisplayName = response.displayName
 And print " newDisplayName = "+newDisplayName

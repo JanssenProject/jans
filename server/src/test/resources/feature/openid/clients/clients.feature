@@ -102,7 +102,7 @@ Then status 200
 And print response
 Given url mainUrl + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
-And header Content-Type = 'application/json'
+And header Content-Type = 'application/json-patch+json'
 And header Accept = 'application/json'
 And def newName = response[0].displayName
 And print " newName = "+newName

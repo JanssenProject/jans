@@ -12,7 +12,7 @@ public class OrganizationService extends io.jans.as.common.service.OrganizationS
     protected boolean isUseLocalCache() {
         return false;
     }
-
+    
     public ApplicationType getApplicationType() {
         return ApplicationType.JANS_CONFIG_API;
     }
