@@ -301,6 +301,8 @@ public enum RegisterRequestParam {
      */
     ACCESS_TOKEN_LIFETIME("access_token_lifetime"),
 
+    PAR_LIFETIME("par_lifetime"),
+
     /**
      * A unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.
