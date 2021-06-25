@@ -20,6 +20,8 @@ public class GluuConfigurationResponse extends BaseResponse {
 
     private String parEndpoint;
 
+    private Boolean requirePar;
+
     private Map<Integer, Set<String>> authLevelMapping;
 
     private Map<String, Set<String>> scopeToClaimsMapping;
@@ -30,6 +32,14 @@ public class GluuConfigurationResponse extends BaseResponse {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getRequirePar() {
+        return requirePar;
+    }
+
+    public void setRequirePar(Boolean requirePar) {
+        this.requirePar = requirePar;
     }
 
     public String getIdGenerationEndpoint() {
@@ -69,8 +79,10 @@ public class GluuConfigurationResponse extends BaseResponse {
         return "GluuConfigurationResponse{" +
                 "idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
+                ", parEndpoint='" + parEndpoint + '\'' +
+                ", requirePar=" + requirePar +
                 ", authLevelMapping=" + authLevelMapping +
                 ", scopeToClaimsMapping=" + scopeToClaimsMapping +
-                '}';
+                "} " + super.toString();
     }
 }
