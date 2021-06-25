@@ -84,6 +84,7 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_PAR;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_MODES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
@@ -266,6 +267,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
             jsonObj.put(PAR_ENDPOINT, appConfiguration.getParEndpoint());
+            jsonObj.put(REQUIRE_PAR, appConfiguration.getRequirePar());
 
             JSONArray responseTypesSupported = new JSONArray();
             for (Set<ResponseType> responseTypes : appConfiguration.getResponseTypesSupported()) {
