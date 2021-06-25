@@ -149,7 +149,7 @@ LABEL name="FIDO2" \
     maintainer="Janssen io <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b4" \
+    release="b6" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
