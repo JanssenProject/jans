@@ -39,6 +39,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
+    private Boolean requirePar;
     private String deviceAuthzEndpoint;
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
@@ -404,6 +405,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public Boolean getRequirePar() {
+        return requirePar;
+    }
+
+    public void setRequirePar(Boolean requirePar) {
+        this.requirePar = requirePar;
     }
 
     /**

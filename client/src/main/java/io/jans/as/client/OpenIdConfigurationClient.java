@@ -53,6 +53,7 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_PAR;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_MODES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
@@ -209,6 +210,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         }
         if (jsonObj.has(PAR_ENDPOINT)) {
             response.setParEndpoint(jsonObj.getString(PAR_ENDPOINT));
+        }
+        if (jsonObj.has(REQUIRE_PAR)) {
+            response.setRequirePar(jsonObj.getBoolean(REQUIRE_PAR));
         }
         if (jsonObj.has(DEVICE_AUTHZ_ENDPOINT)) {
             response.setDeviceAuthzEndpoint(jsonObj.getString(DEVICE_AUTHZ_ENDPOINT));
