@@ -12,6 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
@@ -201,6 +202,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPar(), Par.class);
 
         return cleanServiceBaseDns;
     }
