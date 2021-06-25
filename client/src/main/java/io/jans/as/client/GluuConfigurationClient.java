@@ -23,6 +23,7 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTH_LEV
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.PAR_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_PAR;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
 
 /**
@@ -73,7 +74,10 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
                     getResponse().setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
                 }
                 if (jsonObj.has(PAR_ENDPOINT)) {
-                    getResponse().setParEndpoint(PAR_ENDPOINT);
+                    getResponse().setParEndpoint(jsonObj.getString(PAR_ENDPOINT));
+                }
+                if (jsonObj.has(REQUIRE_PAR)) {
+                    getResponse().setRequirePar(jsonObj.getBoolean(REQUIRE_PAR));
                 }
                 if (jsonObj.has(AUTH_LEVEL_MAPPING)) {
                     getResponse().setAuthLevelMapping(mapJsonToAuthLevelMapping(jsonObj.getJSONObject(AUTH_LEVEL_MAPPING)));
