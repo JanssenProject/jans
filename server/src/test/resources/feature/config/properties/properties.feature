@@ -10,7 +10,6 @@ Feature: Verify Auth configuration endpoint
     When method GET
     Then status 401
     And print response
-    
 
  	@auth-config-get
   	Scenario: Retrieve Auth configuration
@@ -21,7 +20,17 @@ Feature: Verify Auth configuration endpoint
     And print response
     And assert response.length != null
     
-	
+    @ignore
+    @auth-config-get-persistence-details
+    Scenario: Get Persistence details
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And path 'persistence'
+    Then print url
+    When method GET
+    Then status 200
+    And print response
+    	
     @auth-config-dcr-patch
   	Scenario: Patch dcrSignatureValidationEnabled configuration
   	Given url  mainUrl
