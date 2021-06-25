@@ -281,4 +281,12 @@ public class AuthorizeRestWebServiceValidator {
                 .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""))
                 .build());
     }
+
+    public WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
+        if (appConfiguration.getFapiCompatibility()) {
+            log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known.
+            return redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+        return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
+    }
 }
