@@ -6,6 +6,22 @@
 
 package io.jans.as.server.service;
 
+import com.google.common.collect.Lists;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import io.jans.model.security.Identity;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -16,25 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import com.google.common.collect.Lists;
-
-import io.jans.as.model.authorize.AuthorizeRequestParam;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.Util;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.model.security.Identity;
-import io.jans.util.Pair;
-import io.jans.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
@@ -219,19 +216,17 @@ public class RequestParameterService {
      * @param customParameters Custom parameters used in the authorization flow.
      */
     public void getCustomParameters(JwtAuthorizationRequest jwtRequest, Map<String, String> customParameters) {
-        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration
-                .getAuthorizationRequestCustomAllowedParameters();
+        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
 
         if (authorizationRequestCustomAllowedParameters == null) {
             return;
         }
 
-        JSONObject jsonPayload = new JSONObject(jwtRequest.getPayload());
+        JSONObject jsonPayload = jwtRequest.getJsonPayload();
         for (String customParam : authorizationRequestCustomAllowedParameters) {
             if (jsonPayload.has( customParam )) {
                 customParameters.put(customParam, jsonPayload.getString(customParam));
             }
         }
     }
-
 }
