@@ -159,7 +159,7 @@ LABEL name="SCIM" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b4" \
+    release="b6" \
     summary="Janssen SCIM" \
     description="SCIM server"
 
