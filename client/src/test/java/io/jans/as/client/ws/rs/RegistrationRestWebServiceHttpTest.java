@@ -172,6 +172,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setParLifetime(38);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -224,6 +225,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.ES256,
                 SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
+        assertEquals(38, Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())));
         JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {
@@ -278,6 +280,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setHttpMethod(HttpMethod.PUT);
         registerRequest.setContacts(Arrays.asList(contact1NewValue, contact2NewValue));
         registerRequest.setLogoUri(logoUriNewValue);
+        registerRequest.setParLifetime(32);
 
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
@@ -293,7 +296,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         final String responseLogoUri = response.getClaims().get(LOGO_URI.toString());
 
         assertTrue(responseContacts.contains(contact1NewValue) && responseContacts.contains(contact2NewValue));
-        assertNotNull(responseLogoUri.equals(logoUriNewValue));
+        assertEquals(responseLogoUri, logoUriNewValue);
+        assertEquals(32, Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())));
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
