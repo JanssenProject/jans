@@ -121,16 +121,16 @@ public class FapiOpenIdConfiguration  extends HttpServlet {
     	String xfapiinteractionid = null;
     	String tempaccess_token = null;
     	//end addedforfapi
-    	
+
     	httpResponse.setContentType("application/json");
-    	
-    	            	
-    	
+
+
+
         try (PrintWriter out = httpResponse.getWriter()) {
         	//addedforfapi
-        	
-        
-        
+
+
+
         	xfapiinteractionid = servletRequest.getHeader("x-fapi-interaction-id");
             tempaccess_token=servletRequest.getParameter("access_token"); 
         	if ((tempaccess_token !=null) && (xfapiinteractionid != null) ) {
@@ -211,16 +211,16 @@ public class FapiOpenIdConfiguration  extends HttpServlet {
         	}
         	else
         		log.info("FAPI: ClientDn from Authoirization(tokenService) is NULL*********************************************");
-        
-    	      	
+
+
             //end addedforfapi
 
-            
+
             JSONObject jsonObj = new JSONObject();            // original 
-    
+
             //addedforfapi
 //            String xfapiinteractionid=servletRequest.getHeader("x-fapi-interaction-id");
-            
+
             if (xfapiinteractionid!=null) {
             	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
         		log.info("x-fapi-interaction-id*************************="+xfapiinteractionid);
@@ -230,11 +230,11 @@ public class FapiOpenIdConfiguration  extends HttpServlet {
             	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
         		log.info("x-fapi-interaction-id***********************="+xfapiinteractionid);
             }
-            
-            
-            	
+
+
+
             //end addedforfapi
-            
+
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
@@ -249,6 +249,7 @@ public class FapiOpenIdConfiguration  extends HttpServlet {
             jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
+            jsonObj.put(PAR_ENDPOINT, appConfiguration.getParEndpoint());
 
             JSONArray responseTypesSupported = new JSONArray();
             for (Set<ResponseType> responseTypes : appConfiguration.getResponseTypesSupported()) {

@@ -6,66 +6,7 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CHECK_SESSION_IFRAME;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_LOCALES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIM_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLIENT_INFO_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.DEVICE_AUTHZ_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.DISPLAY_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.END_SESSION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.GRANT_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.ISSUER;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.JWKS_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_MODES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.REVOCATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SERVICE_DOCUMENTATION;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SESSION_REVOCATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.SUBJECT_TYPES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_REVOCATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
-
-import java.io.IOException;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -73,7 +14,11 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.util.Util;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
@@ -207,6 +152,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         }
         if (jsonObj.has(INTROSPECTION_ENDPOINT)) {
             response.setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
+        }
+        if (jsonObj.has(PAR_ENDPOINT)) {
+            response.setParEndpoint(jsonObj.getString(PAR_ENDPOINT));
         }
         if (jsonObj.has(DEVICE_AUTHZ_ENDPOINT)) {
             response.setDeviceAuthzEndpoint(jsonObj.getString(DEVICE_AUTHZ_ENDPOINT));

@@ -18,10 +18,19 @@ public class GluuConfigurationResponse extends BaseResponse {
 
     private String introspectionEndpoint;
 
+    private String parEndpoint;
+
     private Map<Integer, Set<String>> authLevelMapping;
 
     private Map<String, Set<String>> scopeToClaimsMapping;
 
+    public String getParEndpoint() {
+        return parEndpoint;
+    }
+
+    public void setParEndpoint(String parEndpoint) {
+        this.parEndpoint = parEndpoint;
+    }
 
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
