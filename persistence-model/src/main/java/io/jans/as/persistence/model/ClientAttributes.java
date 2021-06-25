@@ -19,10 +19,12 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
 
+    public static final int DEFAULT_PAR_LIFETIME = 600;
+
     /**
      *
      */
-    private static final long serialVersionUID = 213428216912083393L;
+    private static final long serialVersionUID = 213428216912083394L;
 
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
@@ -62,6 +64,19 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("rptClaimsScripts")
     private List<String> rptClaimsScripts;
+
+    @JsonProperty("parLifetime")
+    private Integer parLifetime;
+
+    public Integer getParLifetime() {
+        if (parLifetime == null || parLifetime == 0)
+            parLifetime = DEFAULT_PAR_LIFETIME;
+        return parLifetime;
+    }
+
+    public void setParLifetime(Integer parLifetime) {
+        this.parLifetime = parLifetime;
+    }
 
     public List<String> getRptClaimsScripts() {
         if (rptClaimsScripts == null) rptClaimsScripts = Lists.newArrayList();
