@@ -376,7 +376,7 @@ public class AuthenticationFilter implements Filter {
                 filterChain.doFilter(servletRequest, servletResponse);
             }
         } catch (Exception ex) {
-            log.info("Bearer authorization failed: {}", ex);
+            log.info("Bearer authorization failed.", ex);
         }
     }
 
@@ -450,7 +450,7 @@ public class AuthenticationFilter implements Filter {
                 sendError(servletResponse);
             }
         } catch (Exception ex) {
-            log.error("Post authentication failed: {}", ex);
+            log.error("Post authentication failed.", ex);
         }
     }
 
@@ -487,7 +487,7 @@ public class AuthenticationFilter implements Filter {
 
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (ServletException | IOException | InvalidJwtException ex) {
-            log.info("JWT authentication failed: {}", ex);
+            log.info("JWT authentication failed.", ex);
         }
 
         if (!authorized) {
