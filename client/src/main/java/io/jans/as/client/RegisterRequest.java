@@ -113,6 +113,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> requestUris;
     private List<String> authorizedOrigins;
     private Integer accessTokenLifetime;
+    private Integer parLifetime;
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
@@ -1022,6 +1023,14 @@ public class RegisterRequest extends BaseRequest {
         this.accessTokenLifetime = accessTokenLifetime;
     }
 
+    public Integer getParLifetime() {
+        return parLifetime;
+    }
+
+    public void setParLifetime(Integer parLifetime) {
+        this.parLifetime = parLifetime;
+    }
+
     /**
      * Returns a unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.
@@ -1299,6 +1308,9 @@ public class RegisterRequest extends BaseRequest {
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
         }
+        if (parLifetime != null) {
+            parameters.put(PAR_LIFETIME.toString(), parLifetime.toString());
+        }
         if (StringUtils.isNotBlank(softwareId)) {
             parameters.put(SOFTWARE_ID.toString(), softwareId);
         }
@@ -1457,6 +1469,7 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
                 requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
+        result.setParLifetime(requestObject.has(PAR_LIFETIME.toString()) ? requestObject.getInt(PAR_LIFETIME.toString()) : null);
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
@@ -1689,6 +1702,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenLifetime != null) {
             parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);
+        }
+        if (parLifetime != null) {
+            parameters.put(PAR_LIFETIME.toString(), parLifetime);
         }
         if (StringUtils.isNotBlank(softwareId)) {
             parameters.put(SOFTWARE_ID.toString(), softwareId);
