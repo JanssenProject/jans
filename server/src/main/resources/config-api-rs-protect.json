@@ -190,6 +190,17 @@
         ]
     },
     {
+        "path":"/jans-config-api/api/v1/jans-auth-server/config/persistence",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/jans-auth-server/config/properties.readonly"
+                ]
+            }
+        ]
+    },
+    {
         "path":"/jans-config-api/api/v1/config/smtp",
         "conditions":[
             {
@@ -388,6 +399,57 @@
                 "httpMethods":["POST"],
                 "scopes":[
                     "https://jans.io/oauth/config/database/ldap.readonly"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/database/sql",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.readonly"
+                ]
+            },
+            {
+                "httpMethods":["POST","PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.write"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/database/sql/{name}",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.delete"
+                ]
+            }
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/config/database/sql/test",
+        "conditions":[
+            {
+                "httpMethods":["POST"],
+                "scopes":[
+                    "https://jans.io/oauth/config/database/sql.readonly"
                 ]
             }
         ]

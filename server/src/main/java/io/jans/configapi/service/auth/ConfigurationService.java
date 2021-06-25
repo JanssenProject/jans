@@ -57,4 +57,8 @@ public class ConfigurationService {
         }
         return persistenceManager.find(GluuConfiguration.class, configurationDn);
     }
+    
+    public String getPersistenceType() {
+        return configurationFactory.getBaseConfiguration().getString("persistence.type");
+    }
 }
