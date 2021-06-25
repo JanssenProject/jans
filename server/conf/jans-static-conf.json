@@ -16,6 +16,7 @@
         "metric": "ou=statistic,o=metric",
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
         "ciba": "ou=ciba,o=jans",
-        "stat": "ou=stat,o=jans"
+        "stat": "ou=stat,o=jans",
+        "par": "ou=par,o=jans"
     }
 }

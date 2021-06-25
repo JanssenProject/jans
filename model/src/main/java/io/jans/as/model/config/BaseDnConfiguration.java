@@ -6,12 +6,12 @@
 
 package io.jans.as.model.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -57,6 +57,8 @@ public class BaseDnConfiguration {
     private String ciba;
     @XmlElement(name = "stat")
     private String stat;
+    @XmlElement(name = "par")
+    private String par;
 
     public String getStat() {
         return stat;
@@ -64,6 +66,14 @@ public class BaseDnConfiguration {
 
     public void setStat(String stat) {
         this.stat = stat;
+    }
+
+    public String getPar() {
+        return par;
+    }
+
+    public void setPar(String par) {
+        this.par = par;
     }
 
     public String getAuthorizations() {
