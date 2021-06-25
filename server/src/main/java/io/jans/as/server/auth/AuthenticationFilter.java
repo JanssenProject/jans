@@ -70,6 +70,7 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.I
                 "/restv1/revoke",
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
+                "/restv1/par",
                 "/restv1/internal/*",
                 "/restv1/device_authorization"},
         displayName = "oxAuth")
@@ -138,6 +139,7 @@ public class AuthenticationFilter implements Filter {
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean statEndpoint = requestUrl.endsWith("/stat");
+            boolean isParEndpoint = requestUrl.endsWith("/par");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
             if (processMTLS(httpRequest, httpResponse, filterChain)) {
@@ -150,7 +152,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || statEndpoint) {
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || statEndpoint || isParEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -335,6 +337,7 @@ public class AuthenticationFilter implements Filter {
                                 || servletRequest.getRequestURI().endsWith("/userinfo")
                                 || servletRequest.getRequestURI().endsWith("/bc-authorize")
                                 || servletRequest.getRequestURI().endsWith("/stat")
+                                || servletRequest.getRequestURI().endsWith("/par")
                                 || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                             Client client = clientService.getClient(username);
                             if (client == null
