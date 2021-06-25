@@ -28,6 +28,7 @@ public interface ConfigurationResponseClaim {
     String ID_GENERATION_ENDPOINT = "id_generation_endpoint";
     String INTROSPECTION_ENDPOINT = "introspection_endpoint";
     String DEVICE_AUTHZ_ENDPOINT = "device_authorization_endpoint";
+    String PAR_ENDPOINT = "pushed_authorization_request_endpoint";
     String SCOPES_SUPPORTED = "scopes_supported";
     String SCOPE_TO_CLAIMS_MAPPING = "scope_to_claims_mapping";
     String RESPONSE_TYPES_SUPPORTED = "response_types_supported";
