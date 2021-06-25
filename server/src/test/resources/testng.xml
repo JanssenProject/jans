@@ -283,6 +283,7 @@
 	<parameter name="serverUri" value="https://${test.server.name}" />
 	<parameter name="authorizePath" value="restv1/authorize" />
 	<parameter name="introspectionPath" value="restv1/introspection" />
+	<parameter name="parPath" value="restv1/par" />
 	<parameter name="tokenPath" value="restv1/token" />
 	<parameter name="validateTokenPath" value="restv1/validate" />
 	<parameter name="jwksPath" value="restv1/jwks" />
