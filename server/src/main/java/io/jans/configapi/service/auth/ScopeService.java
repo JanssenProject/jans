@@ -91,7 +91,7 @@ public class ScopeService {
     }
 
     public List<Scope> searchScopesById(String jsId) {
-        Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.jsId, jsId);
+        Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.jsId,jsId);
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter);
         } catch (Exception e) {

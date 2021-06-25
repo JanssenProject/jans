@@ -1,4 +1,4 @@
-package io.jans.configapi.service;
+package io.jans.configapi.service.auth;
 
 import com.github.fge.jackson.JacksonUtils;
 import com.google.common.collect.Lists;

@@ -31,7 +31,7 @@ Feature: Verify Cache configuration endpoint
     And print response.cacheProviderType
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/cacheProviderType\", \"value\":\""+response.cacheProviderType+"\" } ]"
 	Then print request
@@ -50,7 +50,7 @@ Feature: Verify Cache configuration endpoint
     And print response.nativePersistenceConfiguration
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/nativePersistenceConfiguration\", \"value\":"+response.nativePersistenceConfiguration+" } ]"
 	Then print request
@@ -69,7 +69,7 @@ Feature: Verify Cache configuration endpoint
     And print response.inMemoryConfiguration
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/inMemoryConfiguration\", \"value\":"+response.inMemoryConfiguration+" } ]"
 	Then print request
@@ -88,7 +88,7 @@ Feature: Verify Cache configuration endpoint
     And print response.redisConfiguration
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/redisConfiguration\", \"value\":"+response.redisConfiguration+" } ]"
 	Then print request
@@ -107,7 +107,7 @@ Feature: Verify Cache configuration endpoint
     And print response.memcachedConfiguration
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/memcachedConfiguration\", \"value\":"+response.memcachedConfiguration+" } ]"
 	Then print request
@@ -154,7 +154,7 @@ Feature: Verify Cache configuration endpoint
     And assert response.length != null
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/redisConfiguration/defaultPutExpiration\", \"value\":"+response.defaultPutExpiration+"} ]"
     And path 'redis'
@@ -202,7 +202,7 @@ Feature: Verify Cache configuration endpoint
     And assert response.length != null
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/inMemoryConfiguration/defaultPutExpiration\", \"value\":"+response.defaultPutExpiration+" } ]"
     And path 'in-memory'
@@ -250,7 +250,7 @@ Feature: Verify Cache configuration endpoint
     And assert response.length != null
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/nativePersistenceConfiguration/defaultPutExpiration\", \"value\":"+response.defaultPutExpiration+"} ]"
     And path 'native-persistence'
@@ -299,7 +299,7 @@ Feature: Verify Cache configuration endpoint
     And assert response.length != null
   	Given url  mainUrl
   	And header Authorization = 'Bearer ' + accessToken
-    And header Content-Type = 'application/json'
+    And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And request "[ {\"op\":\"replace\", \"path\": \"/memcachedConfiguration/defaultPutExpiration\", \"value\":"+response.defaultPutExpiration+"} ]"
     And path 'memcached'

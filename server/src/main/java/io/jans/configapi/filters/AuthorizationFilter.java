@@ -76,21 +76,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            /* To test - Start */
-            if (context.getMethod().equals("PATCH")) {
-                MediaType requestMediaType = context.getMediaType();
-                log.info("====== PATCH Method ======" + isJsonPatch(requestMediaType));
-                /*
-                 * if(isJsonPatch(requestMediaType) && requestMediaType.getParameters() != null
-                 * && !requestMediaType.getParameters().isEmpty()) {
-                 */
-                if (isJsonPatch(requestMediaType)) {
-                    log.info("====== PATCH Method  content-type ======");
-                    // context.getHeaders().putSingle("content-type",MediaType.APPLICATION_JSON_PATCH_JSON);
-                }
-            }
-            /* To test - End */
-
             this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
                     context.getMethod(), request.getRequestURI());
             log.info("======AUTHORIZATION  GRANTED===========================================");
@@ -109,16 +94,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
-    }
-
-    protected boolean isJsonPatch(MediaType mediaType) {
-        log.info("====== PATCH Method mediaType.getType() = " + mediaType.getType() + " , mediaType.getSubtype() = "
-                + mediaType.getSubtype() + "\n\n");
-        if (mediaType != null && StringUtils.equalsIgnoreCase(mediaType.getType(), "application")
-                && StringUtils.equalsIgnoreCase(mediaType.getSubtype(), "json-patch+json")) {
-            return true;
-        }
-        return false;
     }
 
 }

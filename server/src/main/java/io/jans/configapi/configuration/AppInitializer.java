@@ -62,12 +62,11 @@ public class AppInitializer {
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
 
-    public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=================================================================");
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("=================================================================");
-        // System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED,
-        // "true");
+         System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED,"true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
