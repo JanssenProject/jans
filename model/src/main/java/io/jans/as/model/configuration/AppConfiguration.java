@@ -51,6 +51,7 @@ public class AppConfiguration implements Configuration {
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+    private String parEndpoint;
     private String deviceAuthzEndpoint;
 
     private Boolean sessionAsJwt = false;
@@ -938,6 +939,14 @@ public class AppConfiguration implements Configuration {
 
     public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
         introspectionEndpoint = p_introspectionEndpoint;
+    }
+
+    public String getParEndpoint() {
+        return parEndpoint;
+    }
+
+    public void setParEndpoint(String parEndpoint) {
+        this.parEndpoint = parEndpoint;
     }
 
     public String getOpenIdConfigurationEndpoint() {
