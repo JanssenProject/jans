@@ -67,7 +67,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
@@ -80,6 +80,28 @@ paths:
                 title: AppConfiguration
                 description: Jans authorization server config properties.
                 $ref: '#/components/schemas/AppConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/api/v1/jans-auth-server/config/persistence:
+    get:
+      summary: Returns persistence type configured for Jans authorization server.
+      description: Returns persistence type configured for Jans authorization server.
+      operationId: get-properties-persistence
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
+      tags:
+        - Configuration – Properties
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: PersistenceConfiguration
+                description: Jans Authorization Persistence Configuration object.
+                $ref: '#/components/schemas/PersistenceConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -281,7 +303,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: displayName, value: \"CustomAttribute\" } ]'
@@ -299,7 +321,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /jans-config-api/api/v1/acrs:
-    get:      
+    get:
       summary: Gets default authentication method.
       description: Gets default authentication method.
       operationId: get-acrs
@@ -311,7 +333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthenticationMethod'                  
+                $ref: '#/components/schemas/AuthenticationMethod'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -346,7 +368,7 @@ paths:
   /jans-config-api/api/v1/config/database/ldap:
     get:
       summary: Gets list of existing LDAP configurations.
-      description: Gets list of existing LDAP configurations. 
+      description: Gets list of existing LDAP configurations.
       operationId: get-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -391,7 +413,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/database/ldap.write]		
+        - oauth2: [https://jans.io/oauth/config/database/ldap.write]
     put:
       summary: Updates LDAP configuration.
       description: Updates LDAP configuration.
@@ -479,7 +501,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: maxConnections, value: 8 } ]'
@@ -517,17 +539,195 @@ paths:
               schema:
                 type: boolean
                 description: LDAP connection status true if connection is successfully established.
-                  
+
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/database/ldap.readonly]
+      - oauth2: [https://jans.io/oauth/config/database/ldap.readonly]
+  /jans-config-api/api/v1/config/database/sql:
+    get:
+      summary: Gets list of existing sql configurations.
+      description: Gets list of existing sql configurations.
+      operationId: get-config-database-sql
+      tags:
+      - Database - Sql configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: SqlConfiguration
+                description: List of configured Sql configuration.
+                items:
+                  $ref: '#/components/schemas/SqlConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
+    post:
+      summary: Adds a new Sql configuration.
+      description: Adds a new Sql configuration.
+      operationId: post-config-database-sql
+      tags:
+        - Database - Sql configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SqlConfiguration'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+    put:
+      summary: Updates Sql configuration.
+      description: Updates Sql configuration.
+      operationId: put-config-database-sql
+      tags:
+        - Database - Sql configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SqlConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+    parameters: []
+  /jans-config-api/api/v1/config/database/sql/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: Name of Sql configuration.
+        schema:
+          type: string
+    get:
+      summary: Gets a Sql configurations by name.
+      description: Gets a Sql configurations by name.
+      operationId: get-config-database-sql-by-name
+      tags:
+        - Database - Sql configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: SqlConfiguration
+                description: List of configured Sql configuration.
+                $ref: '#/components/schemas/SqlConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
+    patch:
+      summary: Partially modify an Sql configuration.
+      description: Partially modify an Sql configuration.
+      operationId: patch-config-database-sql-by-name
+      tags:
+        - Database - Sql configuration
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: maxConnections, value: 8 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+    delete:
+      summary: Deletes a Sql configurations by name.
+      description: Deletes a Sql configurations by name.
+      operationId: delete-config-database-sql-by-name
+      tags:
+        - Database - Sql configuration
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.delete]
+  /jans-config-api/api/v1/config/database/sql/test:
+    post:
+      summary: Tests a Sql configuration.
+      description: Tests a Sql configuration.
+      operationId: post-config-database-sql-test
+      tags:
+        - Database - Sql configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SqlConfiguration'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: Sql connection status true if connection is successfully established.
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
   /jans-config-api/api/v1/config/database/couchbase:
     get:
       summary: Gets list of existing Couchbase configurations.
-      description: Gets list of existing Couchbase configurations. 
+      description: Gets list of existing Couchbase configurations.
       operationId: get-config-database-couchbase
       tags:
         - Database - Couchbase configuration
@@ -640,7 +840,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: maxConnections, value: 8 } ]'
@@ -658,7 +858,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/database/couchbase.write]
+      - oauth2: [https://jans.io/oauth/config/database/couchbase.write]
     delete:
       summary: Deletes a Couchbase configurations by name.
       description: Deletes a Couchbase configurations by name.
@@ -695,7 +895,7 @@ paths:
               schema:
                 type: boolean
                 description: Couchbase connection status true if connection is successfully established.
-                  
+
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -744,7 +944,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
-          $ref: '#/components/responses/InternalServerError'      
+          $ref: '#/components/responses/InternalServerError'
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.write]
     put:
@@ -924,7 +1124,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration } ]'
@@ -999,7 +1199,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: memcachedConfiguration, value: response.memcachedConfiguration } ]'
@@ -1072,7 +1272,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: redisConfiguration/defaultPutExpiration, value: 80 } ]'
@@ -1145,7 +1345,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: inMemoryConfiguration/defaultPutExpiration, value: 80 } ]'
@@ -1218,7 +1418,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: nativePersistenceConfiguration/defaultPutExpiration, value: 80 } ]'
@@ -1357,7 +1557,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoggingConfiguration'       
+                $ref: '#/components/schemas/LoggingConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1374,14 +1574,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoggingConfiguration'       
+              $ref: '#/components/schemas/LoggingConfiguration'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoggingConfiguration' 
+                $ref: '#/components/schemas/LoggingConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1404,7 +1604,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebKeysConfiguration'  
+                $ref: '#/components/schemas/WebKeysConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1421,14 +1621,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WebKeysConfiguration'  
+              $ref: '#/components/schemas/WebKeysConfiguration'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebKeysConfiguration'  
+                $ref: '#/components/schemas/WebKeysConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1446,7 +1646,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
               example: '[{"op": "add","path": "/keys/1", "value": { "kty": "RSA", "e": "AQAB","use": "sig","crv": "","kid": "dd570bfb-276a-44aa-a97d-667b57587108_sig_rs256","x5c": ["MIIDBDCC..."],"exp": 1599751946863,"alg": "RS256","n": "zj1NE.."}}]'
@@ -1456,7 +1656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebKeysConfiguration'  
+                $ref: '#/components/schemas/WebKeysConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1474,20 +1674,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JsonWebKey'  
+              $ref: '#/components/schemas/JsonWebKey'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonWebKey'  
+                $ref: '#/components/schemas/JsonWebKey'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-        - oauth2: [https://jans.io/oauth/config/jwks.write]  
+        - oauth2: [https://jans.io/oauth/config/jwks.write]
   /jans-config-api/api/v1/config/jwks/{kid}:
     parameters:
       - schema:
@@ -1508,7 +1708,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonWebKey'  
+                $ref: '#/components/schemas/JsonWebKey'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1526,7 +1726,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
               example: '[{"op": "add","path": "/kty", "value": "RSA"}]'
@@ -1536,7 +1736,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonWebKey'  
+                $ref: '#/components/schemas/JsonWebKey'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1707,7 +1907,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: backchannel_authentication_request_signing_alg, value: false } ]'
@@ -1825,7 +2025,7 @@ paths:
       tags:
         - OAuth - UMA Resources
       summary: Gets an UMA resource by ID.
-      description: Gets an UMA resource by ID.  
+      description: Gets an UMA resource by ID.
       operationId: get-oauth-uma-resources-by-id
       responses:
         '200':
@@ -1871,7 +2071,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
@@ -2009,7 +2209,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-        - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+      - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
     delete:
       tags:
         - OAuth - Scopes
@@ -2038,7 +2238,7 @@ paths:
           application/json-patch+json:
             schema:
               type: array
-              items: 
+              items:
                 $ref: '#/components/schemas/PatchRequest'
                 description: String representing patch-document.
                 example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
@@ -2065,7 +2265,7 @@ components:
       flows:
         clientCredentials:
           tokenUrl: 'https://{op-hostname}/.../token'
-          scopes: 
+          scopes:
             https://jans.io/oauth/jans-auth-server/config/properties.readonly: View Auth Server properties related information
             https://jans.io/oauth/jans-auth-server/config/properties.write: Manage Auth Server properties related information
             https://jans.io/oauth/config/fido2.readonly: View FIDO2 related information
@@ -2102,6 +2302,9 @@ components:
             https://jans.io/oauth/config/uma/resources.readonly: View UMA Resource related information
             https://jans.io/oauth/config/uma/resources.write: Manage UMA Resource related information
             https://jans.io/oauth/config/uma/resources.delete: Delete UMA Resource related information
+            https://jans.io/oauth/config/database/sql.readonly: View SQL database related information
+            https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
+            https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
   responses:
     Found:
       description: Resource Found.
@@ -2252,8 +2455,9 @@ components:
           default: false
         internal:
           type: boolean
-          description: boolean value indicating if the script is internal. 
+          description: boolean value indicating if the script is internal.
           default: false
+		  
     LdapConfiguration:
       type: object
       required:
@@ -2291,12 +2495,12 @@ components:
           default: 2
         useSSL:
           type: boolean
-          description: Enable SSL communication between Jans Server and LDAP server.   
+          description: Enable SSL communication between Jans Server and LDAP server.
         baseDNs:
           type: array
           description: List contains the location of the Active Directory/LDAP tree from where the Gluu Server shall read the user information.
           items:
-            type: string          
+            type: string
         primaryKey:
           type: string
           description: Used to search and bind operations in configured LDAP server.
@@ -2318,7 +2522,8 @@ components:
           description: LDAP server version.
         level:
           type: integer
-          description: A string that indicates the level. 
+          description: A string that indicates the level.
+		  
     CouchbaseConfiguration:
       type: object
       required:
@@ -2414,6 +2619,68 @@ components:
           description: List of certificate attributes.
           items:
             type: string
+			
+    SqlConfiguration:
+      type: object
+      required:
+        - configId
+        - userName
+        - userPassword
+        - connectionUri
+        - schemaName
+        - passwordEncryptionMethod
+      properties:
+        configId:
+          type: string
+          description: Unique identifier
+        userName:
+          type: string
+          description: Sql server user.
+        userPassword:
+          type: string
+          description: Encoded Sql server user password.
+        connectionUri:
+          type: array
+          items:
+            type: string
+          description: Sql server connection Uri.
+        schemaName:
+          type: string
+          description: Database schema name.
+        passwordEncryptionMethod:
+          type: string
+          description: A list of the password encryption algorithms.
+          enum:
+            - SHA
+            - SSHA
+            - SHA-256
+            - SSHA-256
+            - SHA-384
+            - SSHA-384
+            - SHA-512
+            - SSHA-512
+            - MD5
+            - SMD5
+            - CRYPT
+            - CRYPT-MD5
+            - CRYPT-SHA-256
+            - CRYPT-SHA-512
+            - CRYPT-BCRYPT
+            - CRYPT-BCRYPT
+            - PKCS5S2
+        serverTimezone:
+          type: string
+          description: Database schema name.
+        binaryAttributes:
+          type: array
+          description: List of binary attributes.
+          items:
+            type: string
+        certificateAttributes:
+          type: array
+          description: List of certificate attributes.
+          items:
+            type: string
     JsonWebKey:
       type: object
       description: JsonWebKey
@@ -2460,7 +2727,21 @@ components:
         y:
           type: string
           description: The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
- 
+   
+    PersistenceConfiguration:
+      title: PersistenceConfiguration
+      description: Persistence configuration properties.
+      properties:
+        persistenceType:
+          type: string
+          description: Jans Auth Server persistence type configured.
+          enum:
+          - ldap
+          - couchbase
+          - sql
+          - spanner
+          - hybrid
+		  
     AppConfiguration:
       title: AppConfiguration
       description: App configuration properties.
@@ -2985,7 +3266,7 @@ components:
           type: array
           description: List of authentication filters.
           items:
-            $ref: '#/components/schemas/AuthenticationFilters' 
+            $ref: '#/components/schemas/AuthenticationFilters'
         clientAuthenticationFilters:
           type: array
           description: List of client authentication filters.
@@ -3218,7 +3499,7 @@ components:
           description: Boolean value specifying whether to return detailed reason of the error from AS..
         removeRefreshTokensForClientOnLogout:
           type: boolean
-          description: Boolean value specifying whether to remove refresh tokens on logout. 
+          description: Boolean value specifying whether to remove refresh tokens on logout.
         skipRefreshTokenDuringRefreshing:
           type: boolean
           description: Boolean value specifying whether to skip refreshing tokens on refreshing.
@@ -3248,11 +3529,11 @@ components:
         authenticationProtectionConfiguration:
           type: object
           description: Authentication Brute Force Protection Configuration.
-          $ref: '#/components/schemas/AuthenticationProtectionConfiguration' 
+          $ref: '#/components/schemas/AuthenticationProtectionConfiguration'
         errorHandlingMethod:
           type: string
           description: A list of possible error handling methods.
-          enum:  
+          enum:
            - internal
            - remote
         keepAuthenticatorAttributesOnAcrChange:
@@ -3287,8 +3568,8 @@ components:
           description: Backchannel Token Delivery Modes Supported.
           items:
             type: string
-            enum: 
-              - poll 
+            enum:
+              - poll
               - ping
               - push
         backchannelAuthenticationRequestSigningAlgValuesSupported:
@@ -3296,8 +3577,8 @@ components:
           description: Backchannel Authentication Request Signing Alg Values Supported.
           items:
             type: string
-            enum: 
-              - RS512 
+            enum:
+              - RS512
               - ES256
               - ES384
               - ES512
@@ -3326,7 +3607,7 @@ components:
         cibaEndUserNotificationConfig:
           type: object
           description: CIBA End User Notification Config.
-          $ref: '#/components/schemas/CIBAEndUserNotificationConfig' 
+          $ref: '#/components/schemas/CIBAEndUserNotificationConfig'
         backchannelRequestsProcessorJobIntervalSec:
           type: integer
           description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
@@ -3369,21 +3650,21 @@ components:
           description: Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
         dcrSignatureValidationJwks:
           type: string
-          description: Specifies JWKS for all DCR's validations.		  
+          description: Specifies JWKS for all DCR's validations.
         dcrSignatureValidationJwksUri:
           type: string
           description: Specifies JWKS URI for all DCR's validations.
         dcrAuthorizationWithClientCredentials:
-          type: boolean	
-          description: Boolean value indicating if DCR authorization to be performed using client credentials.	
+          type: boolean
+          description: Boolean value indicating if DCR authorization to be performed using client credentials.
         dcrSkipSignatureValidation:
-          type: boolean	
-          description: Boolean value indicating if signature validation is to be skipped.	
+          type: boolean
+          description: Boolean value indicating if signature validation is to be skipped.
         statTimerIntervalInSeconds:
-          type: integer				  
+          type: integer
           description: Statistical data capture time interval.
         statWebServiceIntervalLimitInSeconds:
-          type: integer		
+          type: integer
           description: Statistical data capture time interval limit.
         keyAlgsAllowedForGeneration:
           type: array
@@ -3411,8 +3692,8 @@ components:
           example: 'HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..'
         staticKid:
           type: string
-          description: Specifies static Kid 
- 
+          description: Specifies static Kid
+
     GluuAttribute:
       title: GluuAttribute
       description: Attribute.
@@ -3536,16 +3817,16 @@ components:
           type: string
         jansHideOnDiscovery:
           type: boolean
-          description: Boolean value indicating if the attribute should be shown on that discovery page.		  
-    PatchRequest: 
-      description: A JSONPatch document as defined by RFC 6902 
+          description: Boolean value indicating if the attribute should be shown on that discovery page.
+    PatchRequest:
+      description: A JSONPatch document as defined by RFC 6902
       required:
        - "op"
        - "path"
-      properties: 
-       op: 
-        type: string 
-        description: The operation to be performed 
+      properties:
+       op:
+        type: string
+        description: The operation to be performed
         enum:
          - "add"
          - "remove"
@@ -3553,11 +3834,11 @@ components:
          - "move"
          - "copy"
          - "test"
-       path: 
-        type: string 
-        description: A JSON-Pointer 
-       value: 
-        type: object 
+       path:
+        type: string
+        description: A JSON-Pointer
+       value:
+        type: object
         description: The value to be used within the operations.
     Scope:
       title: Scope
@@ -3680,33 +3961,33 @@ components:
         spontaneousScopeScriptDns:
           type: array
           items:
-            type: string        
+            type: string
         backchannelLogoutUri:
           type: array
           items:
-            type: string        
+            type: string
         backchannelLogoutSessionRequired:
           type: boolean
         additionalAudience:
           type: array
           items:
-            type: string   
+            type: string
         postAuthnScripts:
           type: array
           items:
-            type: string   
+            type: string
         consentGatheringScripts:
           type: array
           items:
-            type: string   
+            type: string
         introspectionScripts:
           type: array
           items:
-            type: string   
+            type: string
         rptClaimsScripts:
           type: array
           items:
-            type: string   
+            type: string
     Client:
       title: Client object
       description: Client.
@@ -3742,12 +4023,12 @@ components:
           items:
             type: string
           example:
-            - 'https://client.example.org/cb'	        
+            - 'https://client.example.org/cb'
         claimRedirectUris:
           description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
           type: array
           items:
-            type: string  
+            type: string
         responseTypes:
           description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
           type: array
@@ -3756,7 +4037,7 @@ components:
             enum:
               - code
               - token
-              - id_token        
+              - id_token
         grantTypes:
           description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
           type: array
@@ -3770,13 +4051,13 @@ components:
               - refresh_token
               - urn:ietf:params:oauth:grant-type:uma-ticket
               - urn:openid:params:grant-type:ciba
-              - urn:ietf:params:oauth:grant-type:device_code     
+              - urn:ietf:params:oauth:grant-type:device_code
         applicationType:
           description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
           type: string
           enum:
             - web
-            - native        
+            - native
         contacts:
           description: e-mail addresses of people responsible for this Client.
           type: array
@@ -3784,10 +4065,10 @@ components:
             type: string
         clientName:
           description: A human-readable name of the client.
-          type: string        
+          type: string
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
-          type: string         
+          type: string
         logoUri:
           description: URL that references a logo for the Client application.
           type: string
@@ -3815,7 +4096,7 @@ components:
           type: string
           enum:
             - pairwise
-            - public          
+            - public
         idTokenSignedResponseAlg:
           description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
           type: string
@@ -3945,7 +4226,7 @@ components:
           example: 1000000
         requireAuthTime:
           description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-          type: boolean         
+          type: boolean
         defaultAcrValues:
           description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
           type: array
@@ -3953,7 +4234,7 @@ components:
             type: string
         initiateLoginUri:
           description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
-          type: string         
+          type: string
         postLogoutRedirectUris:
           description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
           type: array
@@ -3962,25 +4243,25 @@ components:
           example:
             - 'https://client.example.org/logout/page1'
             - 'https://client.example.org/logout/page2'
-            - 'https://client.example.org/logout/page3'         
+            - 'https://client.example.org/logout/page3'
         requestUris:
           description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
           type: array
           items:
-            type: string        
+            type: string
         scopes:
           description: Provide list of scopes granted to the client.
           type: array
           items:
             type: string
           example:
-            - read write dolphin        
+            - read write dolphin
         claims:
           description: Provide list of claims granted to the client.
           type: array
           items:
             type: string
-            description: String containing a space-separated list of claims that can be requested individually.        
+            description: String containing a space-separated list of claims that can be requested individually.
         trustedClient:
           description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
           type: boolean
@@ -3992,7 +4273,7 @@ components:
         lastLogonTime:
           description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.'
           type: string
-          format: date-time        
+          format: date-time
         persistClientAuthorizations:
           description: Specifies if the client authorization details are to be persisted. Default value is true.
           type: boolean
@@ -4009,15 +4290,15 @@ components:
           description: Specifies the Client-specific access token expiration.
           type: integer
           format: int32
-          example: 100000000        
+          example: 100000000
         customAttributes:
           type: array
           items:
-            $ref: '#/components/schemas/CustomAttribute'        
+            $ref: '#/components/schemas/CustomAttribute'
         customObjectClasses:
           type: array
           items:
-            type: string        
+            type: string
         rptAsJwt:
           description: Specifies whether RPT should be return as signed JWT.
           type: boolean
@@ -4062,17 +4343,17 @@ components:
           type: string
         attributes:
           type: object
-          $ref: '#/components/schemas/ClientAttributes'        
+          $ref: '#/components/schemas/ClientAttributes'
         backchannelTokenDeliveryMode:
           description: specifies how backchannel token will be delivered.
           type: string
-          enum: 
+          enum:
             - poll
             - ping
-            - push        
+            - push
         backchannelClientNotificationEndpoint:
           description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
-          type: string        
+          type: string
         backchannelAuthenticationRequestSigningAlg:
           description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
           type: string
@@ -4085,7 +4366,7 @@ components:
             - ES512
             - PS256
             - PS384
-            - PS512        
+            - PS512
         backchannelUserCodeParameter:
           description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
           type: boolean
@@ -4170,7 +4451,7 @@ components:
       type: object
       description: Sector Identifier Details.
       required:
-        - id
+      - id
       properties:
         id:
           description: XRI i-number. Sector Identifier to uniquely identify the sector.
@@ -4205,14 +4486,14 @@ components:
             - NATIVE_PERSISTENCE
         memcachedConfiguration:
           type: object
-          $ref: '#/components/schemas/MemcachedConfiguration'        
+          $ref: '#/components/schemas/MemcachedConfiguration'
         redisConfiguration:
           type: object
           $ref: '#/components/schemas/RedisConfiguration'
-        inMemoryConfiguration:  
+        inMemoryConfiguration:
           type: object
           $ref: '#/components/schemas/InMemoryConfiguration'
-        nativePersistenceConfiguration:  
+        nativePersistenceConfiguration:
           type: object
           $ref: '#/components/schemas/NativePersistenceConfiguration'
     MemcachedConfiguration:
@@ -4380,7 +4661,7 @@ components:
             type: string
           example:
             - /auth/img
-            - /auth/stylesheet  
+            - /auth/stylesheet
     WebKeysConfiguration:
       type: object
       description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
@@ -4392,7 +4673,7 @@ components:
           description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
           items:
             $ref: '#/components/schemas/JsonWebKey'
-       
+
     AuthenticationMethod:
       type: object
       description: Authentication Method Configuration
@@ -4418,7 +4699,7 @@ components:
           description: Time interval for the Clean Service in seconds.
         cleanServiceBatchChunkSize:
           type: integer
-          description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. 
+          description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
         useLocalCache:
           description: Boolean value to indicate if Local Cache is to be used.
           type: boolean
@@ -4448,7 +4729,7 @@ components:
         fido2Configuration:
           description: Fido2Configuration.
           $ref: '#/components/schemas/Fido2Configuration'
-    
+
     Fido2Configuration:
       type: object
       description: Fido2 configuration properties.
@@ -4580,7 +4861,7 @@ components:
         corsRequestDecorate:
           type: boolean
           description: A flag to control if CORS specific attributes should be added to the HttpServletRequest object.
-        
+
     AuthenticationProtectionConfiguration:
           type: object
           description: Authentication Brute Force Protection Configuration.

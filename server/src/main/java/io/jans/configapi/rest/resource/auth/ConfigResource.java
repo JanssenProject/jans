@@ -20,6 +20,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.CONFIG)
@@ -58,4 +59,17 @@ public class ConfigResource extends BaseResource {
         log.debug("AUTH CONF details AFTER patch merge - appConfiguration = " + appConfiguration);
         return Response.ok(appConfiguration).build();
     }
+    
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
+    @Path(ApiConstants.PERSISTENCE)
+    public Response getPersistenceDetails() {
+        String persistenceType = configurationService.getPersistenceType();
+        log.debug("ConfigResource::getPersistenceDetails() - persistenceType - "+persistenceType);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("persistenceType", persistenceType);
+        log.debug("\n\n\n ConfigResource::getPersistenceDetails() - jsonObject = "+jsonObject+"\n\n");
+        return Response.ok(jsonObject.toString()).build();
+    }
+    
 }
