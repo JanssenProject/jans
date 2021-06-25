@@ -107,6 +107,7 @@ public abstract class BaseTest {
     protected String deviceAuthzEndpoint;
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
+    protected String parEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
     protected String issuer;
 
@@ -231,6 +232,14 @@ public abstract class BaseTest {
 
     public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
         introspectionEndpoint = p_introspectionEndpoint;
+    }
+
+    public String getParEndpoint() {
+        return parEndpoint;
+    }
+
+    public void setParEndpoint(String parEndpoint) {
+        this.parEndpoint = parEndpoint;
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -843,6 +852,7 @@ public abstract class BaseTest {
             registrationEndpoint = response.getRegistrationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
+            parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
             backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
             revokeSessionEndpoint = response.getSessionRevocationEndpoint();
@@ -864,6 +874,7 @@ public abstract class BaseTest {
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
+            parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");
             backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
             revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
