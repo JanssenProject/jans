@@ -14,7 +14,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.util.CertUtils;
@@ -51,7 +50,59 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTH_LEVEL_MAPPING;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SESSION_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_LOGOUT_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CHECK_SESSION_IFRAME;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_LOCALES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_PARAMETER_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIMS_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLAIM_TYPES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.CLIENT_INFO_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.DISPLAY_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.END_SESSION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.GRANT_TYPES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN_TOKEN_BINDING_CNF_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.ISSUER;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.JWKS_URI;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.PAR_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_MODES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.REVOCATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SERVICE_DOCUMENTATION;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SESSION_REVOCATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.SUBJECT_TYPES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_REVOCATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
 import static io.jans.as.model.util.StringUtils.implode;
 
 /**
@@ -60,187 +111,152 @@ import static io.jans.as.model.util.StringUtils.implode;
  * @version August 14, 2019
  */
 @WebServlet(urlPatterns = "/open-banking/v3.1/aisp/", loadOnStartup = 9)
-public class FapiOpenIdConfiguration  extends HttpServlet {
+public class FapiOpenIdConfiguration extends HttpServlet {
 
-	private static final long serialVersionUID = -8224898157373678903L;
+    private static final long serialVersionUID = -8224898157373678903L;
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
-	@Inject
-	private AttributeService attributeService;
+    @Inject
+    private AttributeService attributeService;
 
-	@Inject
-	private ScopeService scopeService;
+    @Inject
+    private ScopeService scopeService;
 
-	@Inject
-	private ExternalAuthenticationService externalAuthenticationService;
+    @Inject
+    private ExternalAuthenticationService externalAuthenticationService;
 
-	@Inject
-	private ExternalDynamicScopeService externalDynamicScopeService;
+    @Inject
+    private ExternalDynamicScopeService externalDynamicScopeService;
 
-	@Inject
-	private CIBAConfigurationService cibaConfigurationService;
-	
-	//addedforfapi
-	private ErrorResponseFactory errorResponseFactory;
-	
+    @Inject
+    private CIBAConfigurationService cibaConfigurationService;
+
     @Inject
     private TokenService tokenService;
-    
+
     @Inject
     private ClientService clientService;
-    
+
     @Inject
     private AbstractCryptoProvider cryptoProvider;
-    
-    private String body;
-    
-	//end addedforfapi
-	
-	
-	@Override 
-	public void init() throws ServletException
-	{
-		log.info("Inside init method of FapiOpenIdConfiguration***********************************************************************");
-	}
-	
-	/**
-	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-	 * methods.
-	 *
-	 * @param servletRequest servlet request
-	 * @param httpResponse servlet response
-	 */
-	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
-    	//addedforfapi
-		String authFromReq = null;
-    	String xfapiinteractionid = null;
-    	String tempaccess_token = null;
-    	//end addedforfapi
 
-    	httpResponse.setContentType("application/json");
+    @Override
+    public void init() throws ServletException {
+        log.info("Inside init method of FapiOpenIdConfiguration***********************************************************************");
+    }
 
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     *
+     * @param servletRequest servlet request
+     * @param httpResponse   servlet response
+     */
+    protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
+        //addedforfapi
+        String authFromReq = null;
+        String xfapiinteractionid = null;
+        String tempaccess_token = null;
+
+        httpResponse.setContentType("application/json");
 
 
         try (PrintWriter out = httpResponse.getWriter()) {
-        	//addedforfapi
 
-
-
-        	xfapiinteractionid = servletRequest.getHeader("x-fapi-interaction-id");
-            tempaccess_token=servletRequest.getParameter("access_token"); 
-        	if ((tempaccess_token !=null) && (xfapiinteractionid != null) ) {
-	            if (tempaccess_token.startsWith("Bearer")) {
-	            	log.info("FAPI: Authorization Bearer Token from qeury *********************************************",tempaccess_token);      
-	                log.info("FAPI: Bearler Token is not allowed.**********************************************************************.");
-	                httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "Bearer token in query is disallowed"); 
-	                //throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "FAPI: access_token in query is disallowed.");
-	            }
-	            else
-	            	httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "token in query is disallowed"); 
-	            	log.info("FAPI: Authorization token is non-Bearer is not allowed in query*********************************************");
-        	}
-        	
-        	String clientCertAsPem = servletRequest.getHeader("X-ClientCert");
-        	if (clientCertAsPem!=null) {
-            	log.info("FAPI: clientCertAsPem found*****************************************");
-            	log.info("FAPI: clientCertAsPem found*****************************************"+clientCertAsPem);
+            xfapiinteractionid = servletRequest.getHeader("x-fapi-interaction-id");
+            tempaccess_token = servletRequest.getParameter("access_token");
+            if ((tempaccess_token != null) && (xfapiinteractionid != null)) {
+                if (tempaccess_token.startsWith("Bearer")) {
+                    log.info("FAPI: Authorization Bearer Token from qeury ********************************************* {}", tempaccess_token);
+                    log.info("FAPI: Bearler Token is not allowed.**********************************************************************.");
+                    httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "Bearer token in query is disallowed");
+                } else
+                    httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "token in query is disallowed");
+                log.info("FAPI: Authorization token is non-Bearer is not allowed in query*********************************************");
             }
-            else	
-            	log.info("FAPI: Nooooooooo clientCertAsPem *****************************************");
-        	
-        	authFromReq = servletRequest.getHeader("Authorization");
-        	
-        	String clientDn=null;
-            Client cl=null;
-            clientDn=tokenService.getClientDn(authFromReq);
-        	String bearerToken=tokenService.getBearerToken(authFromReq);
-        	X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
-        	
-        	AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
+
+            String clientCertAsPem = servletRequest.getHeader("X-ClientCert");
+            if (clientCertAsPem != null) {
+                log.info("FAPI: clientCertAsPem found*****************************************");
+                log.info("FAPI: clientCertAsPem found*****************************************" + clientCertAsPem);
+            } else
+                log.info("FAPI: No clientCertAsPem *****************************************");
+
+            authFromReq = servletRequest.getHeader("Authorization");
+
+            String clientDn = null;
+            Client cl = null;
+            clientDn = tokenService.getClientDn(authFromReq);
+            String bearerToken = tokenService.getBearerToken(authFromReq);
+            X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
+
+            AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
             if (authorizationGrant == null) {
                 log.error("FAPI: Authorization grant is null.*********************************************");
-            	httpResponse.sendError(httpResponse.SC_UNAUTHORIZED, "Authorization grant is null."); 
-
-                //Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Authorization grant is null.")).build();
+                httpResponse.sendError(httpResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
             }
-        	
+
             if (cert == null) {
                 log.debug("Failed to parse client certificate, client_id: {}.", cl.getClientId());
             }
             PublicKey publicKey = cert.getPublicKey();
             byte[] encodedKey = publicKey.getEncoded();
-            
-        	
-        	if (clientDn != null) {
-        		log.info("FAPI: ClientDn from Authoirization(tokenService) *********************************************"+clientDn);
-        		cl=clientService.getClientByDn(clientDn);
-                JSONObject jsonWebKeys = new JSONObject(cl.getJwks());             
+
+            if (clientDn != null) {
+                log.info("FAPI: ClientDn from Authoirization(tokenService) *********************************************" + clientDn);
+                cl = clientService.getClientByDn(clientDn);
+                JSONObject jsonWebKeys = new JSONObject(cl.getJwks());
                 if (jsonWebKeys == null) {
                     log.debug("********************Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", cl.getClientId(), cl.getJwksUri(), cl.getJwks());
                 }
 
-                int matchctr=0;
+                int matchctr = 0;
                 final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
-                
-                try {  
-                	
-        	        for (JSONWebKey key : keySet.getKeys()) {
-        	            if (ArrayUtils.isEquals(encodedKey,
-        	                    cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
-        	            		matchctr+=1;
-        	                log.debug("********************************Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
-        	                        cl.getClientId(), key.getKid());
-        	            }
-        	        }
-        	
-        	        if (matchctr==0){
-        	            log.error("Client certificate does not match clientId. clientId: " + cl.getClientId()+"*********************************************");
-        	            
-        	            httpResponse.setStatus(401, "The resource owner or authorization server denied the request");
-        	            return;
-        	            //throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, servletRequest.getParameter("state"), "")).build());
-        	        }
-                }catch(Exception e) {
-                	log.info("Exception while keymatching****************************************************************");
+
+                try {
+
+                    for (JSONWebKey key : keySet.getKeys()) {
+                        if (ArrayUtils.isEquals(encodedKey,
+                                cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
+                            matchctr += 1;
+                            log.debug("********************************Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
+                                    cl.getClientId(), key.getKid());
+                        }
+                    }
+
+                    if (matchctr == 0) {
+                        log.error("Client certificate does not match clientId. clientId: " + cl.getClientId() + "*********************************************");
+
+                        httpResponse.setStatus(401, "The resource owner or authorization server denied the request");
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.info("Exception while keymatching****************************************************************");
                 }
-        	}
-        	else
-        		log.info("FAPI: ClientDn from Authoirization(tokenService) is NULL*********************************************");
+            } else
+                log.info("FAPI: ClientDn from Authoirization(tokenService) is NULL*********************************************");
 
+            JSONObject jsonObj = new JSONObject();            // original
 
-            //end addedforfapi
-
-
-            JSONObject jsonObj = new JSONObject();            // original 
-
-            //addedforfapi
-//            String xfapiinteractionid=servletRequest.getHeader("x-fapi-interaction-id");
-
-            if (xfapiinteractionid!=null) {
-            	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
-        		log.info("x-fapi-interaction-id*************************="+xfapiinteractionid);
+            if (xfapiinteractionid != null) {
+                httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
+                log.info("x-fapi-interaction-id*************************=" + xfapiinteractionid);
+            } else {
+                xfapiinteractionid = "c770aef3-6784-41f7-8e0e-ff5f97bddb3a";
+                httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
+                log.info("x-fapi-interaction-id***********************=" + xfapiinteractionid);
             }
-            else { 
-            	xfapiinteractionid="c770aef3-6784-41f7-8e0e-ff5f97bddb3a";
-            	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
-        		log.info("x-fapi-interaction-id***********************="+xfapiinteractionid);
-            }
-
-
-
-            //end addedforfapi
 
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(TOKEN_REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint()); // remove this line in 5.x
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
-            jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl( "/revoke_session"));
+            jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
             jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
             jsonObj.put(CLIENT_INFO_ENDPOINT, appConfiguration.getClientInfoEndpoint());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
@@ -444,149 +460,147 @@ public class FapiOpenIdConfiguration  extends HttpServlet {
             jsonObj.put(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED, Boolean.TRUE);
             jsonObj.put(FRONTCHANNEL_LOGOUT_SUPPORTED, Boolean.TRUE);
             jsonObj.put(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED, Boolean.TRUE);
-            jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED,
-                    appConfiguration.getFrontChannelLogoutSessionSupported());
+            jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED, appConfiguration.getFrontChannelLogoutSessionSupported());
 
-            // CIBA Configuration
             cibaConfigurationService.processConfiguration(jsonObj);
 
             out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-	}
+    }
 
-	private String endpointUrl(String path) {
+    private String endpointUrl(String path) {
         return StringUtils.replace(appConfiguration.getEndSessionEndpoint(), "/end_session", path);
     }
 
-	/**
-	 * @deprecated theses params:
-	 *             <ul>
-	 *             <li>id_generation_endpoint</li>
-	 *             <li>introspection_endpoint</li>
-	 *             <li>auth_level_mapping</li>
-	 *             <li>scope_to_claims_mapping</li>
-	 *             </ul>
-	 *             will be moved from /.well-known/openid-configuration to
-	 *             /.well-known/gluu-configuration
-	 */
-	@Deprecated
-	private JSONArray createScopeToClaimsMapping(JSONArray scopesSupported, JSONArray claimsSupported) {
-		final JSONArray scopeToClaimMapping = new JSONArray();
-		Set<String> scopes = new HashSet<String>();
-		Set<String> claims = new HashSet<String>();
+    /**
+     * @deprecated theses params:
+     * <ul>
+     * <li>id_generation_endpoint</li>
+     * <li>introspection_endpoint</li>
+     * <li>auth_level_mapping</li>
+     * <li>scope_to_claims_mapping</li>
+     * </ul>
+     * will be moved from /.well-known/openid-configuration to
+     * /.well-known/gluu-configuration
+     */
+    @Deprecated
+    private JSONArray createScopeToClaimsMapping(JSONArray scopesSupported, JSONArray claimsSupported) {
+        final JSONArray scopeToClaimMapping = new JSONArray();
+        Set<String> scopes = new HashSet<String>();
+        Set<String> claims = new HashSet<String>();
 
-		try {
-			for (Scope scope : scopeService.getAllScopesList()) {
-				if ((scope.getScopeType() == ScopeType.SPONTANEOUS && scope.isDeletable())
-						|| !(canShowInConfigEndpoint(scope.getAttributes()))) {
-			        continue;
+        try {
+            for (Scope scope : scopeService.getAllScopesList()) {
+                if ((scope.getScopeType() == ScopeType.SPONTANEOUS && scope.isDeletable())
+                        || !(canShowInConfigEndpoint(scope.getAttributes()))) {
+                    continue;
                 }
 
-				final JSONArray claimsList = new JSONArray();
-				final JSONObject mapping = new JSONObject();
-				mapping.put(scope.getId(), claimsList);
-				scopes.add(scope.getId());
+                final JSONArray claimsList = new JSONArray();
+                final JSONObject mapping = new JSONObject();
+                mapping.put(scope.getId(), claimsList);
+                scopes.add(scope.getId());
 
-				scopeToClaimMapping.put(mapping);
+                scopeToClaimMapping.put(mapping);
 
-				if (ScopeType.DYNAMIC.equals(scope.getScopeType())) {
-					List<String> claimNames = externalDynamicScopeService
-							.executeExternalGetSupportedClaimsMethods(Arrays.asList(scope));
-					for (String claimName : claimNames) {
-						if (StringUtils.isNotBlank(claimName)) {
-							claimsList.put(claimName);
-							claims.add(claimName);
-						}
-					}
-				} else {
-					final List<String> claimIdList = scope.getClaims();
-					if (claimIdList != null && !claimIdList.isEmpty()) {
-						for (String claimDn : claimIdList) {
-							final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
-							final String claimName = attribute.getClaimName();
-							if (StringUtils.isNotBlank(claimName)) {
-								claimsList.put(claimName);
-								claims.add(claimName);
-							}
-						}
-					}
-				}
-			}
+                if (ScopeType.DYNAMIC.equals(scope.getScopeType())) {
+                    List<String> claimNames = externalDynamicScopeService
+                            .executeExternalGetSupportedClaimsMethods(Arrays.asList(scope));
+                    for (String claimName : claimNames) {
+                        if (StringUtils.isNotBlank(claimName)) {
+                            claimsList.put(claimName);
+                            claims.add(claimName);
+                        }
+                    }
+                } else {
+                    final List<String> claimIdList = scope.getClaims();
+                    if (claimIdList != null && !claimIdList.isEmpty()) {
+                        for (String claimDn : claimIdList) {
+                            final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                            final String claimName = attribute.getClaimName();
+                            if (StringUtils.isNotBlank(claimName)) {
+                                claimsList.put(claimName);
+                                claims.add(claimName);
+                            }
+                        }
+                    }
+                }
+            }
 
-			for (String scope : scopes) {
-				scopesSupported.put(scope);
-			}
-			for (String claim : claims) {
-				claimsSupported.put(claim);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return scopeToClaimMapping;
-	}
-	
-	private boolean canShowInConfigEndpoint(ScopeAttributes scopeAttributes) {
-		return scopeAttributes.isShowInConfigurationEndpoint();
-	}
+            for (String scope : scopes) {
+                scopesSupported.put(scope);
+            }
+            for (String claim : claims) {
+                claimsSupported.put(claim);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return scopeToClaimMapping;
+    }
 
-	/**
-	 * @deprecated theses params:
-	 *             <ul>
-	 *             <li>id_generation_endpoint</li>
-	 *             <li>introspection_endpoint</li>
-	 *             <li>auth_level_mapping</li>
-	 *             <li>scope_to_claims_mapping</li>
-	 *             </ul>
-	 *             will be moved from /.well-known/openid-configuration to
-	 *             /.well-known/gluu-configuration
-	 */
-	@Deprecated
-	private JSONObject createAuthLevelMapping() {
-		final JSONObject mappings = new JSONObject();
-		try {
-			Map<Integer, Set<String>> map = externalAuthenticationService.levelToAcrMapping();
-			for (Integer level : map.keySet())
-				mappings.put(level.toString(), map.get(level));
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return mappings;
-	}
+    private boolean canShowInConfigEndpoint(ScopeAttributes scopeAttributes) {
+        return scopeAttributes.isShowInConfigurationEndpoint();
+    }
 
-	/**
-	 * Handles the HTTP <code>GET</code> method.
-	 *
-	 * @param request servlet request
-	 * @param response servlet response
-	 * @throws IOException if an I/O error occurs
-	 */
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		processRequest(request, response);
-	}
+    /**
+     * @deprecated theses params:
+     * <ul>
+     * <li>id_generation_endpoint</li>
+     * <li>introspection_endpoint</li>
+     * <li>auth_level_mapping</li>
+     * <li>scope_to_claims_mapping</li>
+     * </ul>
+     * will be moved from /.well-known/openid-configuration to
+     * /.well-known/gluu-configuration
+     */
+    @Deprecated
+    private JSONObject createAuthLevelMapping() {
+        final JSONObject mappings = new JSONObject();
+        try {
+            Map<Integer, Set<String>> map = externalAuthenticationService.levelToAcrMapping();
+            for (Integer level : map.keySet())
+                mappings.put(level.toString(), map.get(level));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return mappings;
+    }
 
-	/**
-	 * Handles the HTTP <code>POST</code> method.
-	 *
-	 * @param request servlet request
-	 * @param response servlet response
-	 * @throws IOException if an I/O error occurs
-	 */
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)	throws IOException {
-		processRequest(request, response);
-	}
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request  servlet request
+     * @param response servlet response
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        processRequest(request, response);
+    }
 
-	/**
-	 * Returns a short description of the servlet.
-	 *
-	 * @return a String containing servlet description
-	 */
-	@Override
-	public String getServletInfo() {
-		return "OpenID Provider Configuration Information";
-	}
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request  servlet request
+     * @param response servlet response
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "OpenID Provider Configuration Information";
+    }
 
 }
