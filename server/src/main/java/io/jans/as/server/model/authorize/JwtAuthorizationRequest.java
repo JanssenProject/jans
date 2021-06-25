@@ -95,6 +95,7 @@ public class JwtAuthorizationRequest {
 
     private String encodedJwt;
     private String payload;
+    private JSONObject jsonPayload;
 
     private AppConfiguration appConfiguration;
 
@@ -109,7 +110,6 @@ public class JwtAuthorizationRequest {
             if (StringUtils.isEmpty(encodedJwt)) {
                 throw new InvalidJwtException("The JWT is null or empty");
             }
-
 
             String[] parts = encodedJwt.split("\\.");
 
@@ -199,7 +199,7 @@ public class JwtAuthorizationRequest {
     private void loadPayload(String payload) throws JSONException, UnsupportedEncodingException {
         this.payload = payload;
 
-        JSONObject jsonPayload = new JSONObject(payload);
+        jsonPayload = new JSONObject(payload);
 
         if (jsonPayload.has("response_type")) {
             JSONArray responseTypeJsonArray = jsonPayload.optJSONArray("response_type");
@@ -308,6 +308,10 @@ public class JwtAuthorizationRequest {
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
         return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
+    }
+
+    public JSONObject getJsonPayload() {
+        return jsonPayload;
     }
 
     public String getEncryptionAlgorithm() {
