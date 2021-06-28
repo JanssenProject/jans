@@ -11,7 +11,7 @@
     ],
     "custom": []
   },
-  "jansPerson_oxExternalUid": {
+  "jansPerson_jansExtUid": {
     "fields": [
       "jansExternalUid"
     ],
