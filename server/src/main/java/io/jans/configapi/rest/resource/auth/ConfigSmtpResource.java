@@ -17,8 +17,6 @@ import io.jans.service.MailService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
