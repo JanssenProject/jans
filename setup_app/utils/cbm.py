@@ -68,7 +68,6 @@ class CBM:
         return {}
 
     def get_buckets(self):
-        
         return self._get('pools/default/buckets')
 
 

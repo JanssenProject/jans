@@ -51,7 +51,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             Config.rdbm_user = 'jans'
 
         if Config.rdbm_install_type == InstallTypes.LOCAL:
-
+            base.argsp.n = True
+            packageUtils.check_and_install_packages()
             if Config.rdbm_type == 'mysql':
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
