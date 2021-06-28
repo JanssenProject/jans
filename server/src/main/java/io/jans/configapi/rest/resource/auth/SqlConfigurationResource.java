@@ -46,14 +46,14 @@ public class SqlConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_READ_ACCESS })
     public Response getWithName(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("SqlConfigurationResource::getWithName() -  name = "+name+"\n\n");
+        log.debug("SqlConfigurationResource::getWithName() -  name = " + name + "\n\n");
         return Response.ok(findByName(name)).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS })
     public Response add(@Valid @NotNull SqlConnectionConfiguration conf) {
-        log.debug("SQL details to be added - conf = "+conf);
+        log.debug("SQL details to be added - conf = " + conf);
         sqlConfService.save(conf);
         conf = findByName(conf.getConfigId());
         return Response.status(Response.Status.CREATED).entity(conf).build();
@@ -62,7 +62,7 @@ public class SqlConfigurationResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS })
     public Response update(@Valid @NotNull SqlConnectionConfiguration conf) {
-        log.debug("SQL details to be updated - conf = "+conf);
+        log.debug("SQL details to be updated - conf = " + conf);
         findByName(conf.getConfigId());
         sqlConfService.save(conf);
         return Response.ok(conf).build();
@@ -72,7 +72,7 @@ public class SqlConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_DELETE_ACCESS })
     public Response delete(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("SQL to be deleted - name = "+name);
+        log.debug("SQL to be deleted - name = " + name);
         findByName(name);
         log.trace("Delete configuration by name " + name);
         this.sqlConfService.remove(name);
@@ -84,7 +84,7 @@ public class SqlConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_WRITE_ACCESS })
     public Response patch(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws Exception {
-        log.debug("SQL to be patched - name = "+name+" , requestString = "+requestString);
+        log.debug("SQL to be patched - name = " + name + " , requestString = " + requestString);
         SqlConnectionConfiguration conf = findByName(name);
         log.info("Patch configuration by name " + name);
         conf = Jackson.applyPatch(requestString, conf);
@@ -96,7 +96,7 @@ public class SqlConfigurationResource extends BaseResource {
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_SQL_READ_ACCESS })
     public Response test(@Valid @NotNull SqlConnectionConfiguration conf) {
-        log.debug("SQL to be tested - conf = "+conf);
+        log.debug("SQL to be tested - conf = " + conf);
         Properties properties = new Properties();
 
         properties.put("sql.db.schema.name", conf.getSchemaName());

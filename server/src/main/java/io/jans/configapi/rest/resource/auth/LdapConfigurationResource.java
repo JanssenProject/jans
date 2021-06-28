@@ -58,7 +58,7 @@ public class LdapConfigurationResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
     public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        log.debug("LDAP configuration to be added - ldapConfiguration = "+ldapConfiguration);
+        log.debug("LDAP configuration to be added - ldapConfiguration = " + ldapConfiguration);
         // Ensure that an LDAP server with same name does not exists.
         try {
             ldapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
@@ -75,7 +75,7 @@ public class LdapConfigurationResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
     public Response updateLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        log.debug("LDAP configuration to be updated - ldapConfiguration = "+ldapConfiguration);
+        log.debug("LDAP configuration to be updated - ldapConfiguration = " + ldapConfiguration);
         findLdapConfigurationByName(ldapConfiguration.getConfigId());
         this.ldapConfigurationService.update(ldapConfiguration);
         return Response.ok(ldapConfiguration).build();
@@ -85,7 +85,7 @@ public class LdapConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS })
     public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("LDAP configuration to be deleted - name = "+name);
+        log.debug("LDAP configuration to be deleted - name = " + name);
         findLdapConfigurationByName(name);
         log.info("Delete Ldap Configuration by name " + name);
         this.ldapConfigurationService.remove(name);
@@ -98,7 +98,7 @@ public class LdapConfigurationResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS })
     public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {
-        log.debug("LDAP configuration to be patched - name = "+name+" , requestString = "+requestString);
+        log.debug("LDAP configuration to be patched - name = " + name + " , requestString = " + requestString);
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         log.info("Patch Ldap Configuration by name " + name);
         ldapConfiguration = Jackson.applyPatch(requestString, ldapConfiguration);
@@ -110,7 +110,7 @@ public class LdapConfigurationResource extends BaseResource {
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS })
     public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        log.debug("LDAP configuration to be tested - ldapConfiguration = "+ldapConfiguration);
+        log.debug("LDAP configuration to be tested - ldapConfiguration = " + ldapConfiguration);
         log.info("Test ldapConfiguration " + ldapConfiguration);
         boolean status = connectionStatus.isUp(ldapConfiguration);
         log.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = " + status + "\n\n\n");
