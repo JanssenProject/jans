@@ -6,6 +6,7 @@ from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.static import InstallTypes
 
 class PackageUtils(SetupUtils):
 
@@ -46,9 +47,9 @@ class PackageUtils(SetupUtils):
 
         os_type_version = base.os_type + ' ' + base.os_version
 
-        if base.argsp.local_rdbm == 'mysql':
+        if base.argsp.local_rdbm == 'mysql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'mysql'):
             package_list[os_type_version]['mondatory'] += ' mysql-server'
-        if base.argsp.local_rdbm == 'pgsql':
+        if base.argsp.local_rdbm == 'pgsql' or (Config.get('rdbm_install_type') == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql'):
             package_list[os_type_version]['mondatory'] += ' postgresql python3-psycopg2'
             if base.clone_type == 'deb':
                 package_list[os_type_version]['mondatory'] += ' postgresql-contrib'
