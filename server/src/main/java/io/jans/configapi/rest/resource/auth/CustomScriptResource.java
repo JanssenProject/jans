@@ -64,7 +64,7 @@ public class CustomScriptResource extends BaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("CustomScript to be fetched - inum = "+inum);
+        log.debug("CustomScript to be fetched - inum = " + inum);
         CustomScript script = null;
         try {
             script = this.customScriptService.getScriptByInum(inum);

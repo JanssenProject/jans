@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 public class Fido2ConfigResource extends BaseResource {
 
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
-    
+
     @Inject
     Logger log;
 
@@ -44,7 +44,7 @@ public class Fido2ConfigResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS })
     public Response updateFido2Configuration(@NotNull String fido2ConfigJson) {
-        log.debug("FIDO2 details to be updated - fido2ConfigJson = "+fido2ConfigJson);
+        log.debug("FIDO2 details to be updated - fido2ConfigJson = " + fido2ConfigJson);
         checkResourceNotNull(fido2ConfigJson, FIDO2_CONFIGURATION);
         this.fido2Service.merge(fido2ConfigJson);
         return Response.ok(fido2ConfigJson).build();

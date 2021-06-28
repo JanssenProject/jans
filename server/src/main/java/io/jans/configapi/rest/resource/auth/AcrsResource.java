@@ -31,7 +31,7 @@ public class AcrsResource extends BaseResource {
 
     @Inject
     Logger log;
-    
+
     @Inject
     ConfigurationService configurationService;
 

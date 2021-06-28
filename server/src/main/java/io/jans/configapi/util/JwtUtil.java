@@ -64,7 +64,7 @@ public class JwtUtil {
         return null;
     }
 
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {     
+    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -220,7 +220,7 @@ public class JwtUtil {
         if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
             return configurationService.find().getJwksUri();
         }
-        //return AuthClientService.getJwksUri(issuer);
+        // return AuthClientService.getJwksUri(issuer);
         return AuthClientFactory.getJwksUri(issuer);
 
     }

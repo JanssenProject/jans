@@ -47,14 +47,14 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response getWithName(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("CouchbaseConfigurationResource::getWithName() -  name = "+name+"\n\n");
+        log.debug("CouchbaseConfigurationResource::getWithName() -  name = " + name + "\n\n");
         return Response.ok(findByName(name)).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response add(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE details to be added - conf = "+conf);
+        log.debug("COUCHBASE details to be added - conf = " + conf);
         couchbaseConfService.save(conf);
         conf = findByName(conf.getConfigId());
         return Response.status(Response.Status.CREATED).entity(conf).build();
@@ -63,7 +63,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response update(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE details to be updated - conf = "+conf);
+        log.debug("COUCHBASE details to be updated - conf = " + conf);
         findByName(conf.getConfigId());
         couchbaseConfService.save(conf);
         return Response.ok(conf).build();
@@ -73,7 +73,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_DELETE_ACCESS })
     public Response delete(@PathParam(ApiConstants.NAME) String name) {
-        log.debug("COUCHBASE to be deleted - name = "+name);
+        log.debug("COUCHBASE to be deleted - name = " + name);
         findByName(name);
         log.trace("Delete configuration by name " + name);
         this.couchbaseConfService.remove(name);
@@ -85,7 +85,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_WRITE_ACCESS })
     public Response patch(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws Exception {
-        log.debug("COUCHBASE to be patched - name = "+name+" , requestString = "+requestString);
+        log.debug("COUCHBASE to be patched - name = " + name + " , requestString = " + requestString);
         CouchbaseConnectionConfiguration conf = findByName(name);
         log.info("Patch configuration by name " + name);
         conf = Jackson.applyPatch(requestString, conf);
@@ -97,7 +97,7 @@ public class CouchbaseConfigurationResource extends BaseResource {
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_COUCHBASE_READ_ACCESS })
     public Response test(@Valid @NotNull CouchbaseConnectionConfiguration conf) {
-        log.debug("COUCHBASE to be tested - conf = "+conf);
+        log.debug("COUCHBASE to be tested - conf = " + conf);
         Properties properties = new Properties();
 
         properties.put("couchbase.servers", Joiner.on(",").join(conf.getServers()));

@@ -113,7 +113,7 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("UMA_RESOURCE to be patched - id = "+id+" , pathString = "+pathString);
+        log.debug("UMA_RESOURCE to be patched - id = " + id + " , pathString = " + pathString);
         UmaResource existingResource = findOrThrow(id);
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
