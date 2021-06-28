@@ -303,6 +303,8 @@ public enum RegisterRequestParam {
 
     PAR_LIFETIME("par_lifetime"),
 
+    REQUIRE_PAR("require_par"),
+
     /**
      * A unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.

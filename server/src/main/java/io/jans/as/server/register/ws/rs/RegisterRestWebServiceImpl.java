@@ -788,6 +788,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getParLifetime() != null) {
             p_client.getAttributes().setParLifetime(requestObject.getParLifetime());
         }
+        if (requestObject.getRequirePar() != null) {
+            p_client.getAttributes().setRequirePar(requestObject.getRequirePar());
+        }
 
         if (StringUtils.isNotBlank(requestObject.getSoftwareId())) {
             p_client.setSoftwareId(requestObject.getSoftwareId());
@@ -1068,6 +1071,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, PAR_LIFETIME.toString(), client.getAttributes().getParLifetime());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_PAR.toString(), client.getAttributes().getRequirePar());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_ID.toString(), client.getSoftwareId());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_VERSION.toString(), client.getSoftwareVersion());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SOFTWARE_STATEMENT.toString(), client.getSoftwareStatement());
