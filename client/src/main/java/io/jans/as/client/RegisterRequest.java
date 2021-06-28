@@ -114,6 +114,7 @@ public class RegisterRequest extends BaseRequest {
     private List<String> authorizedOrigins;
     private Integer accessTokenLifetime;
     private Integer parLifetime;
+    private Boolean requirePar;
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
@@ -1031,6 +1032,14 @@ public class RegisterRequest extends BaseRequest {
         this.parLifetime = parLifetime;
     }
 
+    public Boolean getRequirePar() {
+        return requirePar;
+    }
+
+    public void setRequirePar(Boolean requirePar) {
+        this.requirePar = requirePar;
+    }
+
     /**
      * Returns a unique identifier string (UUID) assigned by the client developer or software publisher used by
      * registration endpoints to identify the client software to be dynamically registered.
@@ -1311,6 +1320,9 @@ public class RegisterRequest extends BaseRequest {
         if (parLifetime != null) {
             parameters.put(PAR_LIFETIME.toString(), parLifetime.toString());
         }
+        if (requirePar != null) {
+            parameters.put(REQUIRE_PAR.toString(), requirePar.toString());
+        }
         if (StringUtils.isNotBlank(softwareId)) {
             parameters.put(SOFTWARE_ID.toString(), softwareId);
         }
@@ -1470,6 +1482,7 @@ public class RegisterRequest extends BaseRequest {
         result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
                 requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
         result.setParLifetime(requestObject.has(PAR_LIFETIME.toString()) ? requestObject.getInt(PAR_LIFETIME.toString()) : null);
+        result.setRequirePar(requestObject.has(REQUIRE_PAR.toString()) ? requestObject.getBoolean(REQUIRE_PAR.toString()) : null);
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
@@ -1705,6 +1718,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (parLifetime != null) {
             parameters.put(PAR_LIFETIME.toString(), parLifetime);
+        }
+        if (requirePar != null) {
+            parameters.put(REQUIRE_PAR.toString(), requirePar);
         }
         if (StringUtils.isNotBlank(softwareId)) {
             parameters.put(SOFTWARE_ID.toString(), softwareId);

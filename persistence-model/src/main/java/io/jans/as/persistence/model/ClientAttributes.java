@@ -24,7 +24,7 @@ public class ClientAttributes implements Serializable {
     /**
      *
      */
-    private static final long serialVersionUID = 213428216912083394L;
+    private static final long serialVersionUID = 213428216912083395L;
 
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
@@ -67,6 +67,18 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("parLifetime")
     private Integer parLifetime;
+
+    @JsonProperty("requirePar")
+    private Boolean requirePar;
+
+    public Boolean getRequirePar() {
+        if (requirePar == null) requirePar = false;
+        return requirePar;
+    }
+
+    public void setRequirePar(Boolean requirePar) {
+        this.requirePar = requirePar;
+    }
 
     public Integer getParLifetime() {
         if (parLifetime == null || parLifetime == 0)
