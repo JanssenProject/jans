@@ -253,9 +253,13 @@
 				<version>6.0.13.Final</version>
 				<scope>provided</scope>
 			</dependency>
-			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-validator-provider-11</artifactId> 
-				<version>3.6.3.Final</version> </dependency> -->
-
+			<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.el</artifactId> 
+				<version>3.0.3</version> </dependency> -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-validator-provider</artifactId>
+				<version>4.6.1.Final</version>
+			</dependency>
 			<!-- RestEasy -->
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>

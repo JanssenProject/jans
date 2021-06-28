@@ -230,7 +230,8 @@ public class AuthUtil {
         }
         log.trace("\n\n\n RequestAccessToken() - scope = " + scope);
 
-        //TokenResponse tokenResponse = AuthClientService.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
+        // TokenResponse tokenResponse = AuthClientService.requestAccessToken(tokenUrl,
+        // clientId, clientSecret, scope);
         TokenResponse tokenResponse = AuthClientFactory.requestAccessToken(tokenUrl, clientId, clientSecret, scope);
         if (tokenResponse != null) {
             log.debug(" tokenScope: {} = ", tokenResponse.getScope());

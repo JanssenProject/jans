@@ -71,7 +71,7 @@ public class SqlConfService {
     }
 
     private List<IDPAuthConf> getOrCreateIDPAuthConfs(List<IDPAuthConf> existing,
-                                                      List<SqlConnectionConfiguration> confs) {
+            List<SqlConnectionConfiguration> confs) {
         if (existing == null) {
             existing = Lists.newArrayList();
         }
