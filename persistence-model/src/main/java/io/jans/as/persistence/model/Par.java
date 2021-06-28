@@ -35,6 +35,10 @@ public class Par extends DeletableEntity implements Serializable {
         return attributes;
     }
 
+    public void setAttributes(ParAttributes attributes) {
+        this.attributes = attributes;
+    }
+
     @Override
     public String getDn() {
         return dn;
