@@ -80,9 +80,6 @@ public class JwksResource extends BaseResource {
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         log.debug("WebKeysConfiguration before addding new key =" + webkeys);
 
-        // Reject if key with same kid already exists
-        // if(webkeys.getKeys().stream().anyMatch(x -> x.getKid()!=null &&
-        // x.getKid().equals(jwk.getKid())) ){
         if (getJSONWebKey(webkeys, jwk.getKid()) != null) {
             throw new NotAcceptableException(
                     getNotAcceptableException("JWK with same kid - '" + jwk.getKid() + "' already exists!"));
