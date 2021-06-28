@@ -15,7 +15,6 @@ import io.jans.as.model.jws.AbstractJwsSigner;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.configapi.security.client.AuthClientFactory;
-import io.jans.configapi.security.service.AuthClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -220,7 +219,6 @@ public class JwtUtil {
         if (StringHelper.isNotEmpty(issuer) && issuer.equals(configurationService.find().getIssuer())) {
             return configurationService.find().getJwksUri();
         }
-        // return AuthClientService.getJwksUri(issuer);
         return AuthClientFactory.getJwksUri(issuer);
 
     }
