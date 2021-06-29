@@ -116,7 +116,6 @@ public class CustomScriptResource extends BaseResource {
             log.info("Error deleting script by inum " + inum, ex);
             throw new NotFoundException(getNotFoundError(CUSTOM_SCRIPT));
         }
-
     }
 
 }
