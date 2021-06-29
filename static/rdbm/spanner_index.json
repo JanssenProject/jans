@@ -171,7 +171,7 @@
     ],
     "custom": []
   },
-  "cibaReq": {
+  "jansCibaReq": {
     "fields": [],
     "custom": [
       "`oxStatus`, `exp`"
@@ -202,14 +202,6 @@
       "creationDate",
       "jansStatus",
       "personInum"
-    ],
-    "custom": []
-  },
-  "jansSAMLconfig": {
-    "fields": [
-      "inum",
-      "displayName",
-      "description"
     ],
     "custom": []
   },
