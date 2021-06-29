@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -46,8 +48,6 @@ public class ParAttributes implements Serializable {
     @JsonProperty
     private String requestUri;
     @JsonProperty
-    private String requestSessionId;
-    @JsonProperty
     private String sessionId;
     @JsonProperty
     private String originHeaders;
@@ -59,6 +59,8 @@ public class ParAttributes implements Serializable {
     private String customResponseHeaders;
     @JsonProperty
     private String claims;
+    @JsonProperty
+    private Map<String, String> customParameters;
 
     public String getScope() {
         return scope;
@@ -196,14 +198,6 @@ public class ParAttributes implements Serializable {
         this.requestUri = requestUri;
     }
 
-    public String getRequestSessionId() {
-        return requestSessionId;
-    }
-
-    public void setRequestSessionId(String requestSessionId) {
-        this.requestSessionId = requestSessionId;
-    }
-
     public String getSessionId() {
         return sessionId;
     }
@@ -252,6 +246,15 @@ public class ParAttributes implements Serializable {
         this.claims = claims;
     }
 
+    public Map<String, String> getCustomParameters() {
+        if (customParameters == null) customParameters = new HashMap<>();
+        return customParameters;
+    }
+
+    public void setCustomParameters(Map<String, String> customParameters) {
+        this.customParameters = customParameters;
+    }
+
     @Override
     public String toString() {
         return "ParAttributes{" +
@@ -272,13 +275,13 @@ public class ParAttributes implements Serializable {
                 ", amrValuesStr='" + amrValuesStr + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +
-                ", requestSessionId='" + requestSessionId + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", originHeaders='" + originHeaders + '\'' +
                 ", codeChallenge='" + codeChallenge + '\'' +
                 ", codeChallengeMethod='" + codeChallengeMethod + '\'' +
                 ", customResponseHeaders='" + customResponseHeaders + '\'' +
                 ", claims='" + claims + '\'' +
+                ", customParameters='" + customParameters + '\'' +
                 '}';
     }
 }
