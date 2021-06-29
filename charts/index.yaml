@@ -2,11 +2,98 @@ apiVersion: v1
 entries:
   jans:
   - annotations:
+      artifacthub.io/changes: |
+        - Janssen 1.0 under dev charts
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0_b6
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0_b6
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0_b6
+        - name: configuration-manager
+          image: janssenproject/configuration-manager:1.0.0_b6
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0_b6
+        - name: fido2
+          image: janssenproject/fido2:1.0.0_b6
+        - name: opendj
+          image: gluufedration/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0_b6
+        - name: scim
+          image: janssenproject/scim:1.0.0_b6
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 1.0.0-b6
+    created: "2021-06-29T04:58:02.613671-04:00"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-b6
+    - condition: global.istio.ingress
+      name: cn-istio-ingress
+      repository: ""
+      version: 1.0.0-b6
+    description: Janssen Authorization server
+    digest: eccab7d9271c6efce077a0fbad1c36c715650cf259cf19fba4a3a1b06f3b4e57
+    home: https://github.com/JanssenProject/jans-cloud-native
+    icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
+    kubeVersion: '>=v1.17.0-0'
+    maintainers:
+    - email: mo@gluu.org
+      name: moabu
+    name: jans
+    sources:
+    - https://github.com/JanssenProject/jans-cloud-native/charts
+    urls:
+    - jans-1.0.0-b6.tgz
+    version: 1.0.0-b6
+  - annotations:
       artifacthub.io/license: Apache-2.0
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-03-22T16:06:51.511821946Z"
+    created: "2021-06-29T04:58:02.605444-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -66,4 +153,4 @@ entries:
     urls:
     - jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-03-22T16:06:51.505404703Z"
+generated: "2021-06-29T04:58:02.599267-04:00"
