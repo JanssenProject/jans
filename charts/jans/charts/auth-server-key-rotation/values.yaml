@@ -3,7 +3,7 @@
 # Default values for auth-server-key-rotation.
 image:
   repository: janssenproject/certmanager
-  tag: 1.0.0_dev
+  tag: 1.0.0_b6
   pullPolicy: Always
 keysLife: 48
 nameOverride: ""

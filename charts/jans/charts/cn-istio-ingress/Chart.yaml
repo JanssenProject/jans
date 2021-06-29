@@ -2,8 +2,8 @@ apiVersion: v2
 name: cn-istio-ingress
 description: Istio ingress integration files
 type: application
-version: 1.0.0-a4
+version: 1.0.0-b6
 maintainers:
 - name: moabu
   email: mo@gluu.org
-appVersion: "1.0.0-a4"
+appVersion: "1.0.0-b6"
