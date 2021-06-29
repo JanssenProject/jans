@@ -187,19 +187,17 @@ class SetupUtils(Crypto64):
         json_data =json.loads(json_content, object_pairs_hook=OrderedDict)
         return json_data
 
-    def insertLinesInFile(self, inFilePath, index, text):        
-            inFilePathLines = None                    
+    def insertLinesInFile(self, inFilePath, index, text):
+            inFilePathLines = None
             try:
-                inFilePathLines = self.readFile(inFilePath).splitlines()            
+                inFilePathLines = self.readFile(inFilePath).splitlines()
                 try:
-                    
-                    inFilePathLines.insert(index, text)    
+                    inFilePathLines.insert(index, text)
                     inFileText = ''.join(inFilePathLines)
-                    self.backupFile(inFilePath, cur_content=inFileText)
                     self.writeFile(inFilePath, inFileText)
-                except:            
-                    self.logIt("Error writing %s" % inFilePathLines, True)            
-            except:            
+                except:
+                    self.logIt("Error writing %s" % inFilePathLines, True)
+            except:
                 self.logIt("Error reading %s" % inFilePathLines, True)
 
     def commentOutText(self, text):
