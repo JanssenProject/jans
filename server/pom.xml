@@ -63,18 +63,6 @@
 			<artifactId>weld-core-impl</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- Security -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
@@ -128,8 +116,6 @@
 			<artifactId>hibernate-validator</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency> <groupId>org.glassfish</groupId> <artifactId>jakarta.el</artifactId> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-validator-provider</artifactId>
@@ -182,6 +168,7 @@
 			<artifactId>log4j-jul</artifactId>
 		</dependency>
 
+		<!-- Testing -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
@@ -212,7 +199,6 @@
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- Others -->
 		<dependency>
