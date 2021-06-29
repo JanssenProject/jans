@@ -28,7 +28,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b6
-    created: "2021-06-29T04:58:02.613671-04:00"
+    created: "2021-06-29T09:42:48.907578339Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -75,7 +75,7 @@ entries:
       repository: ""
       version: 1.0.0-b6
     description: Janssen Authorization server
-    digest: eccab7d9271c6efce077a0fbad1c36c715650cf259cf19fba4a3a1b06f3b4e57
+    digest: 6a8ef250292e93465365731bb53d6283c81197633dc605eb991c5bec879ebc86
     home: https://github.com/JanssenProject/jans-cloud-native
     icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
     kubeVersion: '>=v1.17.0-0'
@@ -93,7 +93,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-06-29T04:58:02.605444-04:00"
+    created: "2021-06-29T09:42:48.899628344Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -153,4 +153,4 @@ entries:
     urls:
     - jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-06-29T04:58:02.599267-04:00"
+generated: "2021-06-29T09:42:48.890558149Z"
