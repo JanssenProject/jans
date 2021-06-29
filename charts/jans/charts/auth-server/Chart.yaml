@@ -1,7 +1,7 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v1
-appVersion: "1.0.0-a4"
+appVersion: "1.0.0-b6"
 home: https://jans.io
 maintainers:
 - name: moabu
@@ -9,4 +9,4 @@ maintainers:
 
 description: Helm chart for auth-server service
 name: auth-server
-version: 1.0.0-a4
+version: 1.0.0-b6
