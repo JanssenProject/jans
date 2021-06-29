@@ -13,11 +13,10 @@ from setup_app.utils import base
 from setup_app.static import InstallTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils.package_utils import packageUtils
 
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
-
-    packageUtils = None
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
