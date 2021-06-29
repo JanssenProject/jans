@@ -28,10 +28,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Configure Git
-      run: |
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v3
+      with:
+        gpg-private-key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git-user-signingkey: true
+        git-commit-gpgsign: true
 
     # Package chart as tgz file
     - name: Package Helm chart
@@ -43,11 +47,15 @@ jobs:
       run: helm repo index .
       working-directory: ./charts
 
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+        git commit -S -s -m "chore: update helm package"
     # Push updated index and packaged tgz back into git repo
     - name: Update repo with output
-      uses: mikeal/publish-to-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: peter-evans/create-pull-request@v3
 
     - name: Prepare directory
       run: |
