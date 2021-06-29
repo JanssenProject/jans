@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context antiJARLocking="true" path="/jans-config-api">
+
+    <!-- Cert authentication for case when there is no proxy like Apache -->
+    <!-- Don't remove. Use when there is standalone tomcat only.
+		<Realm className="org.gluu.tomcat7.WantSslRealm" validate="true" allRolesMode="authOnly"/>
+    	<Valve className="org.gluu.tomcat7.WantSslAuthenticator" />
+     -->
+
+  <!-- For Tomcat -->
+  <Context>
+    <Resource name="BeanManager"
+              auth="Container"
+              type="javax.enterprise.inject.spi.BeanManager"
+              factory="org.jboss.weld.resources.ManagerObjectFactory"/>
+  </Context>
+
+</Context>
