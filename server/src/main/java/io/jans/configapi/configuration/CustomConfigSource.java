@@ -1,7 +1,6 @@
 package io.jans.configapi.configuration;
 
 import io.jans.exception.ConfigurationException;
-import io.jans.orm.util.properties.FileConfiguration;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +17,6 @@ public class CustomConfigSource implements ConfigSource {
     private Logger log;
 
     private final static String FILE_CONFIG = "application.properties";
-    private FileConfiguration appProperties;
     private Properties properties = null;
 
     public CustomConfigSource() {
