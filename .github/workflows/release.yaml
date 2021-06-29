@@ -52,6 +52,7 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+        git add .
         git commit -S -s -m "chore: update helm package"
     # Push updated index and packaged tgz back into git repo
     - name: Update repo with output
