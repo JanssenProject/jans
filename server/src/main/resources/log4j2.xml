@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration packages="io.jans.log">
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+        </Console>
+
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/configapi.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="250 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+
+		
+    </Appenders>
+
+    <Loggers>
+		<!-- ############### Jans ################# -->
+		<Logger name="io.jans." level="${log4j.default.log.level}" />
+
+        <Logger name="io.jans.configapi" level="DEBUG">
+            <AppenderRef ref="FILE" />
+        </Logger>
+
+        <Root level="INFO">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="STDOUT" />
+        </Root>
+    </Loggers>
+
+</Configuration>
