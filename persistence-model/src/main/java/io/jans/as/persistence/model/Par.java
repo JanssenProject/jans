@@ -3,6 +3,7 @@ package io.jans.as.persistence.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.DeletableEntity;
@@ -30,6 +31,13 @@ public class Par extends DeletableEntity implements Serializable {
     @JsonObject
     private ParAttributes attributes;
 
+    @Expiration
+    private Integer ttl;
+
+    public Par() {
+        setDeletable(true);
+    }
+
     public ParAttributes getAttributes() {
         if (attributes == null) attributes = new ParAttributes();
         return attributes;
@@ -55,6 +63,14 @@ public class Par extends DeletableEntity implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
     }
 
     @Override
