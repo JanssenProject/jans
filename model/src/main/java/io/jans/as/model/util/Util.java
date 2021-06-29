@@ -6,6 +6,21 @@
 
 package io.jans.as.model.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import io.jans.as.model.common.HasParamName;
+import io.jans.orm.annotation.AttributeEnum;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -14,29 +29,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-
-import io.jans.as.model.common.HasParamName;
-import io.jans.orm.annotation.AttributeEnum;
+import java.util.TimeZone;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -304,5 +305,14 @@ public class Util {
         }
 
         return null;
+    }
+
+    public static Date createExpirationDate(Integer lifetimeInSeconds) {
+        if (lifetimeInSeconds == null || lifetimeInSeconds == 0)
+            throw new IllegalArgumentException("lifetime can't be null or zero");
+
+        final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.add(Calendar.SECOND, lifetimeInSeconds);
+        return calendar.getTime();
     }
 }
