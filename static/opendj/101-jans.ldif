@@ -1563,6 +1563,42 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.271 NAME 'jansAdminUIRole'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Jans created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.272 NAME 'jansPrimaryKeyAttrName'
+  DESC 'Primary Key Attribute Name'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jans created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.273 NAME 'jansPrimaryKeyValue'
+  DESC 'Primary Key Value'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jans created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.274 NAME 'jansSecondaryKeyAttrName'
+  DESC 'Secondary Key Attribute Name'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jansuu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.275 NAME 'jansSecondaryKeyValue'
+  DESC 'Secondary Key Value'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jans created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.276 NAME 'jansTertiaryKeyAttrName'
+  DESC 'Tertiary Key Attribute Name'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jans created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.277 NAME 'jansTertiaryKeyValue'
+  DESC 'Tertiary Key Value'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Jans created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'jansPairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
@@ -1585,7 +1621,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.4 NAME 'jansOrganization'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( c $ county $ description $ displayName $ jansCustomMessage $ jansFaviconImage $ jansLogoImage $ jansManager $ jansManagerGrp $ jansOrgShortName $ jansThemeColor $ inum $ l $ mail $ memberOf $ o $ jansCreationTimestamp $ jansRegistrationConf $ postalCode $ st $ street $ telephoneNumber $ title $ uid $ jansLogoPath $ jansFaviconPath $ jansStatus )
+  MAY ( c $ county $ description $ displayName $ jansCustomMessage $ jansFaviconImage $ jansLogoImage $ jansManager $ jansManagerGrp $ jansOrgShortName $ jansThemeColor $ inum $ l $ mail $ memberOf $ o $ jansCreationTimestamp $ jansRegistrationConf $ postalCode $ st $ street $ telephoneNumber $ title $ uid $ jansLogoPath $ jansStatus $ jansFaviconPath )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.5 NAME 'jansAppConf'
   SUP ( top )
@@ -1767,6 +1803,11 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.34 NAME 'jansPar'
   MUST ( objectclass )
   MAY ( jansId $ jansAttrs $ exp $ del )
   X-ORIGIN 'Jans created objectclass' )
-
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.35 NAME 'jansInumMap'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( jansStatus $ inum $ jansPrimaryKeyAttrName $ jansPrimaryKeyValue $ jansSecondaryKeyAttrName $ jansSecondaryKeyValue $ jansTertiaryKeyAttrName $ jansTertiaryKeyValue )
+  X-ORIGIN 'Jans created objectclass' )
 
 
