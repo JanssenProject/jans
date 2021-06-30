@@ -189,7 +189,7 @@
   "jansCibaReq": {
     "fields": [],
     "custom": [
-      "`oxStatus`, `exp`"
+      "`jansStatus`, `exp`"
     ]
   },
   "jansStatEntry": {
