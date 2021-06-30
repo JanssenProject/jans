@@ -10,24 +10,22 @@ from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
 from setup_app.config import Config
-from setup_app.utils.setup_utils import SetupUtils
-from setup_app.installers.base import BaseInstaller
+from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
 
-class ConfigApiInstaller(SetupUtils, BaseInstaller):
+class ConfigApiInstaller(JettyInstaller):
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-config-api'
         self.needdb = True # we don't need backend connection in this class
+        self.check_version = False #TODO: remove this when version format is changed to 1.0.0
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installConfigApi'
         self.register_progess()
 
-        self.root_dir = os.path.join(Config.jansOptFolder, 'jans-config-api')
-        self.conf_dir = os.path.join(self.root_dir, 'config')
-        self.log_dir = os.path.join(self.root_dir, 'logs')
+
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.application_properties_tmp = os.path.join(self.templates_folder, 'application.properties')
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
@@ -37,30 +35,28 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         self.load_ldif_files = [self.scope_ldif_fn]
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api-runner.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/{0}/jans-config-api-{0}-runner.jar'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion))
                 ]
 
     def install(self):
-        self.copyFile(self.source_files[0][0], self.root_dir)
+        self.logIt("Copying jans-config-api.war into jetty webapps folder...")
 
-        self.copyFile(
-                os.path.join(Config.staticFolder, 'system/initd', self.service_name),
-                os.path.join(Config.distFolder, 'scripts')
-                )
+        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
-        self.run([paths.cmd_chmod, '+x', os.path.join(Config.distFolder, 'scripts', self.service_name)])
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.enable()
 
     def installed(self):
-        return os.path.exists(self.root_dir)
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
 
 
     def create_folders(self):
-        for d in (self.root_dir, self.conf_dir, self.log_dir, self.output_folder):
+        for d in (self.output_folder,):
             if not os.path.exists(d):
                 self.createDirs(d)
 
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.root_dir])
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
     def generate_configuration(self):
@@ -76,7 +72,7 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
             scopes_def = {}
             scope_type = 'oauth2'
 
-        self.check_clients([('jca_client_id', '1801.')])
+        self.check_clients([('jca_client_id', '1800.')])
 
         if not Config.get('jca_client_pw'):
             Config.jca_client_pw = self.getPW()
@@ -87,7 +83,6 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
         scopes = {}
         jansUmaScopes_all = []
-
 
         for scope in scopes_def:
 
@@ -165,8 +160,16 @@ class ConfigApiInstaller(SetupUtils, BaseInstaller):
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
             Config.templateRenderingDict[param] = oxauth_config[param]
 
+        Config.templateRenderingDict['apiProtectionType'] = 'oauth2'
+        Config.templateRenderingDict['endpointInjectionEnabled'] = 'false'
+        Config.templateRenderingDict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
+        Config.templateRenderingDict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
+
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
-        self.copyFile(os.path.join(self.output_folder, 'application.properties'), self.conf_dir)
+        self.copyFile(
+            os.path.join(self.output_folder, 'application.properties'),
+            os.path.join(Config.jetty_base, self.service_name)
+             )
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 

@@ -28,7 +28,8 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
-        self.check_for_download()
+        if getattr(self, 'check_version', True):
+            self.check_for_download()
 
         if not base.snap:
             self.create_user()
