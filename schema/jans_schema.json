@@ -2960,6 +2960,72 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Primary Key Attribute Name", 
+      "equality": "caseIgnoreMatch", 
+      "names": [
+        "jansPrimaryKeyAttrName"
+      ], 
+      "oid": "jansAttr", 
+      "substr": "caseIgnoreSubstringsMatch", 
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+      "x_origin": "Jans created attribute"
+    }, 
+    {
+        "desc": "Primary Key Value", 
+        "equality": "caseIgnoreMatch", 
+        "names": [
+            "jansPrimaryKeyValue"
+        ], 
+        "oid": "jansAttr", 
+        "substr": "caseIgnoreSubstringsMatch", 
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+        "x_origin": "Jans created attribute"
+    }, 
+    {
+        "desc": "Secondary Key Attribute Name", 
+        "equality": "caseIgnoreMatch", 
+        "names": [
+            "jansSecondaryKeyAttrName"
+        ], 
+        "oid": "jansAttr", 
+        "substr": "caseIgnoreSubstringsMatch", 
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+        "x_origin": "Jansuu created attribute"
+    }, 
+    {
+        "desc": "Secondary Key Value", 
+        "equality": "caseIgnoreMatch", 
+        "names": [
+            "jansSecondaryKeyValue"
+        ], 
+        "oid": "jansAttr", 
+        "substr": "caseIgnoreSubstringsMatch", 
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+        "x_origin": "Jans created attribute"
+    }, 
+    {
+        "desc": "Tertiary Key Attribute Name", 
+        "equality": "caseIgnoreMatch", 
+        "names": [
+            "jansTertiaryKeyAttrName"
+        ], 
+        "oid": "jansAttr", 
+        "substr": "caseIgnoreSubstringsMatch", 
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+        "x_origin": "Jans created attribute"
+    }, 
+    {
+        "desc": "Tertiary Key Value", 
+        "equality": "caseIgnoreMatch", 
+        "names": [
+            "jansTertiaryKeyValue"
+        ], 
+        "oid": "jansAttr", 
+        "substr": "caseIgnoreSubstringsMatch", 
+        "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+        "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -3968,6 +4034,30 @@
       "sup": [
         "top"
       ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansStatus",
+        "inum",
+        "jansPrimaryKeyAttrName",
+        "jansPrimaryKeyValue",
+        "jansSecondaryKeyAttrName",
+        "jansSecondaryKeyValue",
+        "jansTertiaryKeyAttrName",
+        "jansTertiaryKeyValue"
+      ], 
+      "must": [
+        "objectclass"
+      ], 
+      "names": [
+        "jansInumMap"
+      ], 
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ], 
       "x_origin": "Jans created objectclass"
     }
   ],
