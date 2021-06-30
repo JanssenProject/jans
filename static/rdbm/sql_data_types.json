@@ -9,7 +9,8 @@
   },
   "description": {
     "mysql": {
-      "type": "TEXT"
+      "size": 768,
+      "type": "VARCHAR"
     },
     "spanner": {
       "type": "STRING(MAX)"

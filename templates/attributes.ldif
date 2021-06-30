@@ -1036,7 +1036,7 @@ objectClass: jansAttr
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
 dn: inum=002A,ou=attributes,o=jans
-description: Specifies the person's affiliation within a particular security domainin broad categories such as student, faculty, staff, alum, etc. Thevalues consistof a left and right component separated by an "@" sign. The left component is one ofthe values from the eduPersonAffiliation controlledvocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intentionally matches that used for the right-hand sidevalues for eduPersonPrincipalName since both identify a security domain. Multiple "@" signsare not recommended, but in any case, the first occurrence of the "@" sign starting from theleft is to be taken as the delimiter between components. Thus, user identifier is to the left,security domain to the right of the first "@". This parsing rule conforms to the POSIX "greedy"disambiguation method in regular expression processing.
+description: Specifies the person's affiliation within a particular security domainin broad categories such as student, faculty, staff, alum, etc. Thevalues consistof a left and right component separated by an "@" sign. The left component is one ofthe values from the eduPersonAffiliation controlledvocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intentionally matches that used for the right-hand sidevalues for eduPersonPrincipalName since both identify a security domain. Multiple "@" signsare not recommended, but in any case, the first occurrence of the "@" sign starting from theleft is to be taken as the delimiter between components. Thus, user identifier is to the left,security domain to the right of the first "@".
 displayName: eduPersonScopedAffiliation
 inum: 002A
 jansAttrEditTyp: admin
