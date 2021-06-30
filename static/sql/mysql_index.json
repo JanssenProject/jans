@@ -26,6 +26,14 @@
       "`del`, `exp`"
     ]
   },
+  "jansPar": {
+    "fields": [
+      "jansId"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
   "jansUmaPCT": {
     "fields": [
       "tknCde"
@@ -178,7 +186,7 @@
     ],
     "custom": []
   },
-  "cibaReq": {
+  "jansCibaReq": {
     "fields": [],
     "custom": [
       "`oxStatus`, `exp`"
@@ -209,14 +217,6 @@
       "creationDate",
       "jansStatus",
       "personInum"
-    ],
-    "custom": []
-  },
-  "jansSAMLconfig": {
-    "fields": [
-      "inum",
-      "displayName",
-      "description"
     ],
     "custom": []
   },
