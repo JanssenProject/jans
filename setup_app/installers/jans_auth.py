@@ -43,7 +43,7 @@ class JansAuthInstaller(JettyInstaller):
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.enable()
 

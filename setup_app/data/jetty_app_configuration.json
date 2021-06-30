@@ -57,6 +57,6 @@
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
     },
     "installed": false,
-    "name": "jans-eleven"
+    "name": "jans-config-api"
   }
 }
