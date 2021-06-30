@@ -331,6 +331,7 @@ class Config:
                         'jans-auth-rp': ['opendj oxauth', 84],
                         'jans-radius': ['opendj oxauth', 86],
                         'jans-eleven': ['opendj oxauth', 79],
+                        'jans-config-api': ['opendj oxauth', 85],
                         }
 
         self.install_time_ldap = None
