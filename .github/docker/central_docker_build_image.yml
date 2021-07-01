@@ -1,0 +1,81 @@
+name: Build and Publish Releases to Hub
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare
+        id: prep
+        run: |
+          MAIN_VERSION=$(python3 -c 'import __version__ ; print(str(__version__.__version__)[:5])')
+          DOCKER_IMAGE=janssenproject/$(python3 -c 'import os ; REPO = os.environ.get("GITHUB_REPOSITORY") ; print(str(REPO).split("/")[1][12:])')
+          VERSION=${MAIN_VERSION}_dev
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
+          fi
+          echo ::set-output name=tags::${TAGS}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@master
+        with:
+          image: tonistiigi/binfmt:master
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.MOAUTO_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.MOAUTO_DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          #target: prod
+          # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
+          # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
+          # add to platforms comma seperated ,linux/arm/v6 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/arm/v7 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
+          # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
+
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
