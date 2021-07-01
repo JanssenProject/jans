@@ -56,6 +56,7 @@ jobs:
             .github/workflows/central_code_quality_check.yml=.github/workflows/central_code_quality_check.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          PR_BRANCH_NAME: repo_sync
         run: |
           echo
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
@@ -80,6 +81,7 @@ jobs:
             .github/docker/dependabot.yml=.github/dependabot.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          PR_BRANCH_NAME: docker_repo_sync
         run: |
           echo
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
