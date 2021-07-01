@@ -168,7 +168,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
         self.copyFile(
             os.path.join(self.output_folder, 'application.properties'),
-            os.path.join(Config.jetty_base, self.service_name)
+            os.path.join(Config.jetty_base, self.service_name, 'resources')
              )
         self.dbUtils.import_ldif(self.load_ldif_files)
 
