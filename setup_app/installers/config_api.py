@@ -185,6 +185,7 @@ class ConfigApiInstaller(JettyInstaller):
             os.path.join(jettyServiceWebapps, os.path.basename(war_file))
             )
 
+        self.run([paths.cmd_chown, 'jetty:jetty', os.path.join(jettyServiceWebapps, os.path.basename(war_file))])
         shutil.rmtree(tmp_dir)
 
     def load_test_data(self):
