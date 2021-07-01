@@ -77,6 +77,7 @@ jobs:
             .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
             .github/docker/central_docker_release.yml=.github/workflows/release.yml
             .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
+            .github/docker/dependabot.yml=.github/dependabot.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
         run: |

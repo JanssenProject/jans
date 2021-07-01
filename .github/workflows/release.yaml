@@ -58,7 +58,6 @@ jobs:
     - name: Update repo with output
       uses: peter-evans/create-pull-request@v3
       with:
-        commit-message: 'chore: update helm package'
         committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
         author: mo-auto <54212639+mo-auto@users.noreply.github.com>
         branch: helm-package-update
