@@ -230,14 +230,15 @@ class SetupUtils(Crypto64):
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
 
-    def copyFile(self, inFile, destFolder):
+    def copyFile(self, inFile, destFolder, backup=True):
         if os.path.isfile(inFile):
             with open(inFile, 'rb') as f:
                 cur_content = f.read()
         else:
             cur_content = ''
 
-        self.backupFile(inFile, destFolder, cur_content=cur_content)
+        if backup:
+            self.backupFile(inFile, destFolder, cur_content=cur_content)
         self.logIt("Copying file {} to {}".format(inFile, destFolder))
         try:
             shutil.copy(inFile, destFolder)
