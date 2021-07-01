@@ -39,28 +39,28 @@ jobs:
           git-user-signingkey: true
           git-commit-gpgsign: true
 
-    - name: Configure Git
-      run: |
-        git config user.name "mo-auto"
-        git config user.email "54212639+mo-auto@users.noreply.github.com"
-        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-        git add .
-        git commit -S -s -m "chore(Dockerfile): updated build date"
-    # Push updated index and packaged tgz back into git repo
-    - name: Update repo with output
-      uses: peter-evans/create-pull-request@v3
-      with:
-        committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
-        author: mo-auto <54212639+mo-auto@users.noreply.github.com>
-        branch: update-source-build-date
-        title: 'chore(Dockerfile): updated build date'
-        body: |
-          - Update Helm package and index
-          - Auto-generated
+      - name: Configure Git
+        run: |
+          git config user.name "mo-auto"
+          git config user.email "54212639+mo-auto@users.noreply.github.com"
+          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+          git add .
+          git commit -S -s -m "chore(Dockerfile): updated build date"
+      # Push updated index and packaged tgz back into git repo
+      - name: Update repo with output
+        uses: peter-evans/create-pull-request@v3
+        with:
+          committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          author: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          branch: update-source-build-date
+          title: 'chore(Dockerfile): updated build date'
+          body: |
+            - Update Helm package and index
+            - Auto-generated
 
-        labels: |
-          enhancement
-          bot
-        assignees: moabu
-        reviewers: moabu
-        delete-branch: true
+          labels: |
+            enhancement
+            bot
+          assignees: moabu
+          reviewers: moabu
+          delete-branch: true

@@ -78,7 +78,8 @@ jobs:
             .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
             .github/docker/central_docker_release.yml=.github/workflows/release.yml
             .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
-            .github/docker/dependabot.yml=.github/dependabot.yml
+            .github/docker/central_docker_build_image.yml=.github/workflows/build_image.yml
+            .github/docker/central_docker_dependabot.yml=.github/dependabot.yml
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
           PR_BRANCH_NAME: docker_repo_sync
