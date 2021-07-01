@@ -4,6 +4,8 @@ import glob
 import json
 import ruamel.yaml
 import base64
+import shutil
+
 from string import Template
 
 from setup_app import paths
@@ -39,12 +41,7 @@ class ConfigApiInstaller(JettyInstaller):
                 ]
 
     def install(self):
-        self.logIt("Copying jans-config-api.war into jetty webapps folder...")
-
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.enable()
 
     def installed(self):
@@ -166,12 +163,29 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
 
         self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
-        self.copyFile(
-            os.path.join(self.output_folder, 'application.properties'),
-            os.path.join(Config.jetty_base, self.service_name, 'resources')
-             )
         self.dbUtils.import_ldif(self.load_ldif_files)
 
+        self.merge_properties()
+
+    def merge_properties(self):
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        tmp_dir = '/tmp/{}'.format(os.urandom(10).hex())
+        war_file = self.source_files[0][0]
+        shutil.unpack_archive(war_file, tmp_dir, format='zip')
+
+        shutil.copy2(
+            os.path.join(self.output_folder, 'application.properties'),
+            os.path.join(tmp_dir, 'WEB-INF/classes')
+             )
+
+        new_war_fn = shutil.make_archive(tmp_dir, 'zip', tmp_dir)
+
+        shutil.copyfile(
+            new_war_fn, 
+            os.path.join(jettyServiceWebapps, os.path.basename(war_file))
+            )
+
+        shutil.rmtree(tmp_dir)
 
     def load_test_data(self):
         if not self.installed():
