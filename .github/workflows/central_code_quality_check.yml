@@ -1,6 +1,6 @@
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 # Contact @moabu
-#
+# Sonar cloud https://sonarcloud.io/organizations/janssenproject/projects
 name: Code quality check
 
 on:
