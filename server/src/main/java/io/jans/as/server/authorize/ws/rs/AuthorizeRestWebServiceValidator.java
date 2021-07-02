@@ -69,6 +69,10 @@ public class AuthorizeRestWebServiceValidator {
     private AppConfiguration appConfiguration;
 
     public Client validateClient(String clientId, String state) {
+        return validateClient(clientId, state, false);
+    }
+
+    public Client validateClient(String clientId, String state, boolean isPar) {
         if (StringUtils.isBlank(clientId)) {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
@@ -90,6 +94,15 @@ public class AuthorizeRestWebServiceValidator {
                 throw new WebApplicationException(Response
                         .status(Response.Status.UNAUTHORIZED)
                         .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state, "Client is disabled."))
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .build());
+            }
+
+            if (!isPar && client.getAttributes().getRequirePar()) {
+                log.debug("Client can performa only PAR requests.");
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Client can performa only PAR requests."))
                         .type(MediaType.APPLICATION_JSON_TYPE)
                         .build());
             }
