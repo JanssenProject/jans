@@ -25,7 +25,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+//import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -84,22 +84,36 @@ public class ConfigurationFactory {
     private FileConfiguration baseConfiguration;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
+    
+    private io.jans.configapi.model.configuration.AppConfiguration apiAppConfiguration;
+    //private AppConfiguration apiAppDynamicConf;
+    private StaticConfiguration apiAppStaticConf;
+    private long loadedRevision = -1;
 
-    @Inject
-    @ConfigProperty(name = "api.protection.type")
-    private String API_PROTECTION_TYPE;
+    /*
+     * @Inject
+     * 
+     * @ConfigProperty(name = "api.protection.type")
+     */
+    private String apiProtectionType;
 
-    @Inject
-    @ConfigProperty(name = "api.client.id")
-    private String API_CLIENT_ID;
+//    @Inject
+//    @ConfigProperty(name = "api.client.id")
+    private String apiClientId;
 
-    @Inject
-    @ConfigProperty(name = "api.client.password")
-    private String API_CLIENT_PASSWORD;
+    /*
+     * @Inject
+     * 
+     * @ConfigProperty(name = "api.client.password")
+     */
+    private String apiClientPassword;
 
-    @Inject
-    @ConfigProperty(name = "api.approved.issuer")
-    private List<String> API_APPROVED_ISSUER;
+    /*
+     * @Inject
+     * 
+     * @ConfigProperty(name = "api.approved.issuer")
+     */
+    private List<String> apiApprovedIssuer;
 
     @Produces
     @ApplicationScoped
@@ -122,25 +136,25 @@ public class ConfigurationFactory {
     }
 
     public String getApiProtectionType() {
-        return API_PROTECTION_TYPE;
+        return this.apiProtectionType;
     }
 
     public String getApiClientId() {
-        return API_CLIENT_ID;
+        return this.apiClientId;
     }
 
     public String getApiClientPassword() {
-        return API_CLIENT_PASSWORD;
+        return this.apiClientPassword;
     }
 
     public List<String> getApiApprovedIssuer() {
-        return API_APPROVED_ISSUER;
+        return this.apiApprovedIssuer;
     }
 
     public void create() {
         loadBaseConfiguration();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-
+        
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
 
@@ -150,6 +164,8 @@ public class ConfigurationFactory {
         } else {
             log.info("Configuration loaded successfully.");
         }
+        
+        loadApiAppConfigurationFromDb();
 
         installSecurityProvider();
 
@@ -158,7 +174,7 @@ public class ConfigurationFactory {
     private boolean createFromDb() {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
-            final Conf c = loadConfigurationFromDb();
+            final Conf c = loadAuthConfigurationFromDb();
             if (c != null) {
                 init(c);
                 return true;
@@ -173,11 +189,54 @@ public class ConfigurationFactory {
     public String getConfigurationDn() {
         return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
-
-    private Conf loadConfigurationFromDb() {
+    
+    private Conf loadAuthConfigurationFromDb() {
+        log.info("loading Auth Server Configuration From DB....");
+        return this.loadConfigurationFromDb(this.getConfigurationDn());
+    }
+    
+    private void loadApiAppConfigurationFromDb() {
+        log.info("loading Api App Configuration From DB....");
+        io.jans.configapi.model.configuration.Conf conf = null;
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            return persistenceEntryManager.find(Conf.class, getConfigurationDn());
+            conf =  persistenceEntryManager.find(io.jans.configapi.model.configuration.Conf.class, this.baseConfiguration.getString("configApi_ConfigurationEntryDN"));
+        } catch (BasePersistenceException ex) {
+            log.error(ex.getMessage());
+        }
+        
+        if(conf == null) {
+            throw new ConfigurationException("Failed to Api App Configuration From DB " + conf);
+        }
+        log.info("ApiAppConfigurationFromDb = ....");
+        if (conf.getDynamicConf() != null) {
+            this.apiAppConfiguration = conf.getDynamicConf();
+        }
+        if (conf.getStaticConf() != null) {
+            this.apiAppStaticConf = conf.getStaticConf();
+        }
+        this.loadedRevision = conf.getRevision();
+        this.setApiConfigurationProperties();
+    }
+    
+    private void setApiConfigurationProperties() {
+        log.info("setApiConfigurationProperties ");
+        if(this.apiAppConfiguration == null) {
+            throw new ConfigurationException("Failed to load Configuration properties " + this.apiAppConfiguration);
+        }
+        this.apiApprovedIssuer = this.apiAppConfiguration.getApiApprovedIssuer();
+        this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
+        this.apiClientId = this.apiAppConfiguration.getApiClientId();
+        this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
+        
+        log.info("Properties set, this.apiApprovedIssuer = "+this.apiApprovedIssuer+" , this.apiProtectionType = "+this.apiProtectionType+" , this.apiClientId = "+this.apiClientId+" , this.apiClientPassword = "+this.apiClientPassword);
+    }
+
+    private Conf loadConfigurationFromDb(String returnAttribute) {
+        log.info("loadConfigurationFromDb " + returnAttribute);
+        final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        try {
+            return persistenceEntryManager.find(Conf.class, returnAttribute);
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
             return null;

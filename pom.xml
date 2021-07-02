@@ -218,11 +218,11 @@
 				<artifactId>smallrye-health</artifactId>
 				<version>3.0.1</version>
 			</dependency>
-			<dependency>
+			<!-- <dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-config</artifactId>
 				<version>1.5.0</version>
-			</dependency>
+			</dependency> -->
 			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-rest-client</artifactId>
