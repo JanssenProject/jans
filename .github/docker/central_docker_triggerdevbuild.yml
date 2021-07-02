@@ -50,12 +50,13 @@ jobs:
       - name: Update repo with output
         uses: peter-evans/create-pull-request@v3
         with:
+          token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: update-source-build-date
           title: 'chore(Dockerfile): updated build date'
           body: |
-            - Update Helm package and index
+            - Updated build date
             - Auto-generated
 
           labels: |
