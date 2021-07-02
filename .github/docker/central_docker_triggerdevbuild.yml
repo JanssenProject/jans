@@ -44,7 +44,7 @@ jobs:
           git config user.name "mo-auto"
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          git add .
+          git add -A
           git commit -S -s -m "chore(Dockerfile): updated build date"
       # Push updated index and packaged tgz back into git repo
       - name: Update repo with output
@@ -56,8 +56,9 @@ jobs:
           branch: update-source-build-date
           title: 'chore(Dockerfile): updated build date'
           body: |
-            - Updated build date
-            - Auto-generated
+            - Leave open until official image release.
+            - Updated build date.
+            - Auto-generated.
 
           labels: |
             enhancement
