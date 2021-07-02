@@ -2,18 +2,7 @@
 # Contact @moabu
 name: 'Commit Message Check'
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
   push:
-
 jobs:
   check-commit-message:
     name: Check Commit Message
@@ -34,7 +23,7 @@ jobs:
 
         # If this workflow was triggered by a push then resolve the commit message from HEAD
       - name: "[Push] Check Commit Standard"
-        if: github.event_name == 'push' || github.event_name == 'pull_request_target'
+        if: github.event_name == 'push'
         id: push_get_commit_message
         run: |
           git log --format=%B -n 1 HEAD | npx commitlint |& tee -a output.txt
@@ -42,52 +31,8 @@ jobs:
           git log --format=%B -n 1 HEAD | npx commitlint
         continue-on-error: true
 
-        # If this workflow was triggered by a pull request (open or synchronize!) then resolve the commit message from HEAD^2
-      - name: "[Pull Request] Check Commit Standard"
-        if: github.event_name == 'pull_request'
-        id: pr_get_commit_message
-        run: |
-          git log --format=%B -n 1 HEAD^2 | npx commitlint |& tee -a output.txt
-          echo "::set-output name=errormsg::$(tr -d "\n\r" < output.txt)"
-          git log --format=%B -n 1 HEAD^2 | npx commitlint
-        continue-on-error: true
-
-
-  #    - name: Check Line Length
-  #      id: linelength
-  #      uses: gsactions/commit-message-checker@v1
-  #      continue-on-error: true
-  #      with:
-  #        pattern: '^.{1,50}$'
-  #        error: 'The maximum line length of 50 characters is exceeded.'
-  #        excludeDescription: 'true' # optional: this excludes the description body of a pull request
-  #        excludeTitle: 'true' # optional: this excludes the title of a pull request
-  #        checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
-  #        accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true
-
-#      - name: Check for Resolves / Fixes
-#        uses: gsactions/commit-message-checker@v1
-#        with:
-#          pattern: '^.+(Resolves|Fixes): \#[0-9]+$'
-#          error: 'You need at least one "Resolves|Fixes: #<issue number>" line.'
-
-
       - name: "[Push] Report Commit Standard Status"
         if: steps.push_get_commit_message.outcome != 'success' && github.event_name == 'push'
         run: |
           curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Here is why : ${{ steps.push_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
-
-      - name: "[Pull Request] Report Commit Standard Status"
-        if: steps.pr_get_commit_message.outcome != 'success' && github.event_name == 'pull_request'
-        run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/${{github.head_ref}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
-          exit 1
-          
-#      - name: Check Commit length
-#        if: steps.linelength.outcome != 'success'
-#        run: |
-#          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) :thinking_face: by @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Limit your commits to <50 chars. Place additional information in the description body of the commit.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
-#          echo "The maximum line length of 100 characters is exceeded."
-#          exit 1
-
