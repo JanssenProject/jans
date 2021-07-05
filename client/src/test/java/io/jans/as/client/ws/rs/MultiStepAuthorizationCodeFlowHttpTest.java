@@ -6,21 +6,9 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
@@ -28,9 +16,15 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Test cases for the multi step authorization code flow (HTTP)
@@ -109,28 +103,4 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
         return authorizationResponse;
     }
-
-    private RegisterResponse registerClient(
-            final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScope(scopes);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-        return registerResponse;
-    }
-
 }
