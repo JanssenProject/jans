@@ -6,12 +6,6 @@
 
 package io.jans.as.server.service;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.authorize.ws.rs.DeviceAuthorizationRestWebServiceImpl;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelAuthorizeRestWebServiceImpl;
@@ -20,6 +14,7 @@ import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
 import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
+import io.jans.as.server.par.ws.rs.ParRestWebService;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
 import io.jans.as.server.revoke.RevokeRestWebServiceImpl;
 import io.jans.as.server.revoke.RevokeSessionRestWebService;
@@ -38,6 +33,11 @@ import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fConfigurationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fRegistrationWS;
 import io.jans.as.server.ws.rs.stat.StatWS;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Integration with Resteasy
@@ -60,6 +60,7 @@ public class ResteasyInitializer extends Application {
         classes.add(RevokeSessionRestWebService.class);
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(IntrospectionWebService.class);
+        classes.add(ParRestWebService.class);
 
         classes.add(TokenRestWebServiceImpl.class);
         classes.add(UserInfoRestWebServiceImpl.class);
