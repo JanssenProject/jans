@@ -184,6 +184,7 @@ public class AppConfiguration implements Configuration {
     private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
     private Boolean keySignWithSameKeyButDiffAlg; // https://github.com/JanssenProject/jans-auth-server/issues/95
     private String staticKid;
+    private String staticDecryptionKid;
 
     //oxEleven
     private String oxElevenTestModeToken;
@@ -351,6 +352,14 @@ public class AppConfiguration implements Configuration {
 
     public void setStaticKid(String staticKid) {
         this.staticKid = staticKid;
+    }
+
+    public String getStaticDecryptionKid() {
+        return staticDecryptionKid;
+    }
+
+    public void setStaticDecryptionKid(String staticDecryptionKid) {
+        this.staticDecryptionKid = staticDecryptionKid;
     }
 
     public List<String> getKeyAlgsAllowedForGeneration() {
