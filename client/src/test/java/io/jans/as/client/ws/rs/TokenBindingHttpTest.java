@@ -6,22 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -36,6 +20,21 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,7 +62,7 @@ public class TokenBindingHttpTest extends BaseTest {
         );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUri, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClientInternal(redirectUri, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -110,7 +109,7 @@ public class TokenBindingHttpTest extends BaseTest {
         return authorizationResponse;
     }
 
-    private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+    private RegisterResponse registerClientInternal(final String redirectUris, final List<ResponseType> responseTypes,
                                             final List<GrantType> grantTypes, final String sectorIdentifierUri) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));

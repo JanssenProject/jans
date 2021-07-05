@@ -6,21 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
-
-import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
@@ -49,6 +34,20 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 
 /**
  * Functional tests for User Info Web Services (HTTP)
@@ -74,7 +73,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -116,7 +115,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -159,7 +158,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "org_name", "work_phone");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -196,7 +195,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -246,7 +245,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -295,7 +294,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -375,7 +374,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -1690,8 +1689,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 
-    private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
-                                            final List<GrantType> grantTypes, final String sectorIdentifierUri) {
+    private RegisterResponse register(final String redirectUris, final List<ResponseType> responseTypes,
+                                      final List<GrantType> grantTypes, final String sectorIdentifierUri) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
