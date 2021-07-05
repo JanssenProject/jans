@@ -11,9 +11,11 @@ import io.jans.as.client.par.ParResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
+import org.apache.commons.lang3.StringUtils;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,7 +29,7 @@ public class Asserter {
 
     public static void assertParResponse(ParResponse response) {
         assertNotNull(response);
-        assertNotNull(response.getRequestUri());
+        assertTrue(StringUtils.isNotBlank(response.getRequestUri()));
         assertNotNull(response.getExpiresIn());
     }
 
