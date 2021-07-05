@@ -786,24 +786,6 @@ objectClass: top
 objectClass: jansAttr
 urn: urn:jans:dir:attribute-def:preferredDeliveryMethod
 
-dn: inum=570B,ou=attributes,o=jans
-description: Work Telephone Number
-displayName: Work Telephone Number
-inum: 570B
-jansAttrEditTyp: user
-jansAttrEditTyp: admin
-jansAttrName: telephoneNumber
-jansAttrOrigin: jansCustomPerson
-jansAttrTyp: string
-jansAttrViewTyp: user
-jansAttrViewTyp: admin
-jansSAML1URI: urn:mace:dir:attribute-def:telephoneNumber
-jansSAML2URI: urn:oid:2.5.4.20
-jansStatus: inactive
-objectClass: top
-objectClass: jansAttr
-urn: urn:mace:dir:attribute-def:telephoneNumber
-
 dn: inum=D90B,ou=attributes,o=jans
 description: Room Number
 displayName: Room Number
