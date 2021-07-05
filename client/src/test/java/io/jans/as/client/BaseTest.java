@@ -10,10 +10,15 @@ import com.google.common.collect.Maps;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
+import io.jans.as.client.par.ParClient;
+import io.jans.as.client.par.ParRequest;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.error.IErrorType;
+import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
@@ -1040,6 +1045,17 @@ public abstract class BaseTest {
         }
     }
 
+    protected ParClient newParClient(ParRequest request) {
+        try {
+            final ParClient client = new ParClient(parEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create par client");
+        }
+    }
+
     protected RevokeSessionClient newRevokeSessionClient(RevokeSessionRequest request) {
         try {
             final RevokeSessionClient client = new RevokeSessionClient(revokeSessionEndpoint);
@@ -1112,5 +1128,26 @@ public abstract class BaseTest {
 
     public static AbstractCryptoProvider createCryptoProviderWithAllowedNone() throws Exception {
         return new AuthCryptoProvider(null, null, null, false);
+    }
+
+    public RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = newRegisterClient(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        return registerResponse;
     }
 }
