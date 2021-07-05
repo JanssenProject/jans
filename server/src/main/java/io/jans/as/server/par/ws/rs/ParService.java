@@ -75,7 +75,7 @@ public class ParService {
         if (StringUtils.isBlank(id)) {
             throw new IllegalArgumentException("PAR id is null or blank.");
         }
-        return String.format("jansPar=%s,%s", id, branchBaseDn());
+        return String.format("jansId=%s,%s", id, branchBaseDn());
     }
 
     public String branchBaseDn() {
