@@ -1,0 +1,27 @@
+{
+  "apiApprovedIssuer": "${apiApprovedIssuer}",
+  "apiProtectionType": "${apiProtectionType}",
+  "apiClientId": "${jca_client_id}",
+  "apiClientPassword": "${jca_client_encoded_pw}",
+  "endpointInjectionEnabled": ${endpointInjectionEnabled},
+  "authIssuerUrl": "${issuer}",
+  "authOpenidConfigurationUrl": "${openIdConfigurationEndpoint}",
+  "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
+  "authOpenidTokenUrl": "${tokenEndpoint}",
+  "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
+  "smallryeHealthRootPath": "/health-check",
+  "corsConfigurationFilters": [
+    {
+      "filterName": "CorsFilter",
+      "corsAllowedOrigins": "*",
+      "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
+      "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+      "corsExposedHeaders": "",
+      "corsSupportCredentials": true,
+      "corsLoggingEnabled": false,
+      "corsPreflightMaxAge": 1800,
+      "corsRequestDecorate": true,
+      "corsEnabled": true
+    }
+  ]
+}
