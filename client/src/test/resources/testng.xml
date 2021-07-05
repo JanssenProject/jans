@@ -16,6 +16,11 @@
             <class name="io.jans.as.client.client.RegisterRequestTest"/>
         </classes>
     </test>
+    <test name="PAR HTTP Client test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.par.ParHttpTest"/>
+        </classes>
+    </test>
 
     <!-- Address claims test -->
     <test name="Address claims test (HTTP)" enabled="true">
