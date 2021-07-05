@@ -6,15 +6,21 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
+import com.google.common.collect.Lists;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.page.LoginPage;
+import io.jans.as.client.page.PageConfig;
+import io.jans.as.client.page.SelectPage;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtHeaderName;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -23,27 +29,14 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.page.LoginPage;
-import io.jans.as.client.page.PageConfig;
-import io.jans.as.client.page.SelectPage;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -193,25 +186,5 @@ public class SelectAccountHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
         return authorizationResponse;
-    }
-
-    private RegisterResponse registerClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth select accounts test app", StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScope(scopes);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = newRegisterClient(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-        return registerResponse;
     }
 }

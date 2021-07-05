@@ -6,18 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
@@ -46,6 +34,17 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * The Jans Auth authorization server's revocation policy acts as follows:
@@ -931,29 +930,6 @@ public class TokenRevocationTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
         return authorizationResponse;
-    }
-
-    private RegisterResponse registerClient(
-            final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScope(scopes);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-        return registerResponse;
     }
 
     private RegisterResponse registerPublicClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {

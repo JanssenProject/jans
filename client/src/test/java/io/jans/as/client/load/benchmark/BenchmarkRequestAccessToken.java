@@ -6,30 +6,24 @@
 
 package io.jans.as.client.load.benchmark;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.testng.Reporter;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Movchan
@@ -96,29 +90,4 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         assertNotNull(response1.getScope(), "The scope is null");
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
-
-    private RegisterResponse registerClient(
-            final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Jans Auth benchmark test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScope(scopes);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        return registerResponse;
-    }
-
 }
