@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author Yuriy Zabrovarnyy
  */
-@Path("/")
+@Path("/par")
 public class ParRestWebService {
 
     @Inject
@@ -65,7 +65,6 @@ public class ParRestWebService {
     private RequestParameterService requestParameterService;
 
     @POST
-    @Path("/par")
     @Produces({MediaType.APPLICATION_JSON})
     public Response requestPushedAuthorizationRequest(
             @FormParam("scope") String scope,
