@@ -26,6 +26,7 @@ jobs:
 
       - name: Running General Workflow Sync
         env:
+          #  JanssenProject/home
           REPOSITORIES: |
             JanssenProject/docker-jans-auth-server
             JanssenProject/docker-jans-certmanager
@@ -37,7 +38,6 @@ jobs:
             JanssenProject/docker-jans-scim
             JanssenProject/jans-pycloudlib
             JanssenProject/docs
-            JanssenProject/home
             JanssenProject/jans-auth-server
             JanssenProject/jans-bom
             JanssenProject/jans-cli

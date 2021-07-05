@@ -2,7 +2,20 @@
 # Contact @moabu
 name: 'Commit Message Check'
 on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
   push:
+
 jobs:
   check-commit-message:
     name: Check Commit Message
@@ -14,7 +27,7 @@ jobs:
           # We need to fetch with a depth of 2 for pull_request so we can do HEAD^2
           fetch-depth: 2
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2.2.0
         with:
           node-version: 14
       - run: |
@@ -23,7 +36,7 @@ jobs:
 
         # If this workflow was triggered by a push then resolve the commit message from HEAD
       - name: "[Push] Check Commit Standard"
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'pull_request_target'
         id: push_get_commit_message
         run: |
           git log --format=%B -n 1 HEAD | npx commitlint |& tee -a output.txt
@@ -31,8 +44,25 @@ jobs:
           git log --format=%B -n 1 HEAD | npx commitlint
         continue-on-error: true
 
+        # If this workflow was triggered by a pull request (open or synchronize!) then resolve the commit message from HEAD^2
+      - name: "[Pull Request] Check Commit Standard"
+        if: github.event_name == 'pull_request'
+        id: pr_get_commit_message
+        run: |
+          git log --format=%B -n 1 HEAD^2 | npx commitlint |& tee -a output.txt
+          echo "::set-output name=errormsg::$(tr -d "\n\r" < output.txt)"
+          git log --format=%B -n 1 HEAD^2 | npx commitlint
+        continue-on-error: true
+
       - name: "[Push] Report Commit Standard Status"
         if: steps.push_get_commit_message.outcome != 'success' && github.event_name == 'push'
         run: |
           curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last [commit](https://github.com/${{github.repository}}/commit/${{github.sha}}). Here is why : ${{ steps.push_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
+
+      - name: "[Pull Request] Report Commit Standard Status"
+        if: steps.pr_get_commit_message.outcome != 'success' && github.event_name == 'pull_request'
+        run: |
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/${{github.head_ref}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          exit 1
+
