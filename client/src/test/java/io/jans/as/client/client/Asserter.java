@@ -6,13 +6,14 @@
 
 package io.jans.as.client.client;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.par.ParResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -22,6 +23,12 @@ import io.jans.as.model.jwt.JwtHeaderName;
 public class Asserter {
 
     private Asserter() {
+    }
+
+    public static void assertParResponse(ParResponse response) {
+        assertNotNull(response);
+        assertNotNull(response.getRequestUri());
+        assertNotNull(response.getExpiresIn());
     }
 
     public static void assertOk(RegisterResponse registerResponse) {
