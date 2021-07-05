@@ -6,6 +6,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.par.ParResponse;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -39,6 +40,9 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
+        parRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        parRequest.setAuthUsername(registerResponse.getClientId());
+        parRequest.setAuthPassword(registerResponse.getClientSecret());
 
         ParClient parClient = newParClient(parRequest);
         parResponse = parClient.exec();
