@@ -127,6 +127,10 @@ public class JwtAuthorizationRequest {
                 JweDecrypterImpl jweDecrypter = null;
                 if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
                     PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+                    if (privateKey == null && StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
+                        privateKey = cryptoProvider.getPrivateKey(appConfiguration.getStaticDecryptionKid());
+                    }
+
                     jweDecrypter = new JweDecrypterImpl(privateKey);
                 } else {
                     ClientService clientService = CdiUtil.bean(ClientService.class);
