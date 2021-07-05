@@ -29,12 +29,13 @@ class ConfigApiInstaller(JettyInstaller):
 
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
-        self.application_properties_tmp = os.path.join(self.templates_folder, 'application.properties')
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
         self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
-        self.load_ldif_files = [self.scope_ldif_fn]
+        self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
+        self.config_ldif_fn = os.path.join(self.output_folder, 'config.ldif')
+        self.load_ldif_files = [self.config_ldif_fn, self.scope_ldif_fn]
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion))
@@ -42,6 +43,9 @@ class ConfigApiInstaller(JettyInstaller):
 
     def install(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.logIt("Copying fido.war into jetty webapps folder...")
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.enable()
 
     def installed(self):
@@ -162,31 +166,12 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['httpSSSLCertificateFile'] = base.current_app.HttpdInstaller.httpdCertFn
         Config.templateRenderingDict['httpSSLCertificateKeyFile'] = base.current_app.HttpdInstaller.httpdKeyFn
 
-        self.renderTemplateInOut(self.application_properties_tmp, self.templates_folder, self.output_folder, pystring=True)
+        self.renderTemplateInOut(self.dynamic_conf_json, self.templates_folder, self.output_folder, pystring=True)
+        Config.templateRenderingDict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
+        self.renderTemplateInOut(self.config_ldif_fn, self.templates_folder, self.output_folder)
+
         self.dbUtils.import_ldif(self.load_ldif_files)
 
-        self.merge_properties()
-
-    def merge_properties(self):
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        tmp_dir = '/tmp/{}'.format(os.urandom(10).hex())
-        war_file = self.source_files[0][0]
-        shutil.unpack_archive(war_file, tmp_dir, format='zip')
-
-        shutil.copy2(
-            os.path.join(self.output_folder, 'application.properties'),
-            os.path.join(tmp_dir, 'WEB-INF/classes')
-             )
-
-        new_war_fn = shutil.make_archive(tmp_dir, 'zip', tmp_dir)
-
-        shutil.copyfile(
-            new_war_fn, 
-            os.path.join(jettyServiceWebapps, os.path.basename(war_file))
-            )
-
-        self.run([paths.cmd_chown, 'jetty:jetty', os.path.join(jettyServiceWebapps, os.path.basename(war_file))])
-        shutil.rmtree(tmp_dir)
 
     def load_test_data(self):
         if not self.installed():
