@@ -12,6 +12,7 @@ import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -24,6 +25,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.Util;
+import io.jans.as.persistence.model.Par;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
@@ -34,13 +36,28 @@ import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCode;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.DeviceCodeGrant;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.IdToken;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
+import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.AttributeService;
 import io.jans.as.server.service.AuthenticationFilterService;
@@ -170,6 +187,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
 
+    @Inject
+    private ParService parService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -178,12 +198,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
-            String requestSessionId, String sessionId, String originHeaders,
+            String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
+                sessionId, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
                 customResponseHeaders, claims, authReqId, httpRequest, httpResponse, securityContext);
     }
 
@@ -192,19 +212,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
-            String requestSessionId, String sessionId, String originHeaders,
+            String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
+                sessionId, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
                 customResponseHeaders, claims, null, httpRequest, httpResponse, securityContext);
     }
 
     private Response requestAuthorization(
             String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
-            String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
+            String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri,
             String sessionId, String method, String originHeaders, String codeChallenge, String codeChallengeMethod,
             String customRespHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
@@ -220,9 +240,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request authorization: "
                         + "responseType = {}, clientId = {}, scope = {}, redirectUri = {}, nonce = {}, "
-                        + "state = {}, request = {}, isSecure = {}, requestSessionId = {}, sessionId = {}",
+                        + "state = {}, request = {}, isSecure = {}, sessionId = {}",
                 responseType, clientId, scope, redirectUri, nonce,
-                state, request, securityContext.isSecure(), requestSessionId, sessionId);
+                state, request, securityContext.isSecure(), sessionId);
 
         log.debug("Attempting to request authorization: "
                         + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}, "
@@ -231,15 +251,60 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseBuilder builder = Response.ok();
 
+        Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString()));
+
+        boolean isPar = parService.isPar(requestUri);
+        if (!isPar && ServerUtil.isTrue(appConfiguration.getRequirePar())) {
+            log.debug("Server configured for PAR only (via requirePar conf property). Failed to find PAR by request_uri (id): " + requestUri);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Failed to find par by request_uri"))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
+        }
+
+        if (isPar) {
+            final Par par = parService.getParAndValidateForAuthorizationRequest(requestUri, state, clientId);
+
+            requestUri = null; // set it to null, we don't want to follow request uri for PAR
+            request = null; // request is validated and parameters parsed by PAR endpoint before PAR persistence
+
+            log.debug("Setting request parameters from PAR");
+
+            responseType = par.getAttributes().getResponseType();
+            respMode = par.getAttributes().getResponseMode();
+            scope = par.getAttributes().getScope();
+            prompt = par.getAttributes().getPrompt();
+            redirectUri = par.getAttributes().getRedirectUri();
+            acrValuesStr = par.getAttributes().getAcrValuesStr();
+            amrValuesStr = par.getAttributes().getAmrValuesStr();
+            codeChallenge = par.getAttributes().getCodeChallenge();
+            codeChallengeMethod = par.getAttributes().getCodeChallengeMethod();
+
+            if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
+                nonce = par.getAttributes().getNonce();
+            if (StringUtils.isNotBlank(par.getAttributes().getState()))
+                state = par.getAttributes().getState();
+            if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
+                sessionId = par.getAttributes().getSessionId();
+            if (StringUtils.isNotBlank(par.getAttributes().getCustomResponseHeaders()))
+                customRespHeaders = par.getAttributes().getCustomResponseHeaders();
+            if (StringUtils.isNotBlank(par.getAttributes().getClaims()))
+                claims = par.getAttributes().getClaims();
+            if (StringUtils.isNotBlank(par.getAttributes().getOriginHeaders()))
+                originHeaders = par.getAttributes().getOriginHeaders();
+            if (StringUtils.isNotBlank(par.getAttributes().getUiLocales()))
+                uiLocalesStr = par.getAttributes().getUiLocales();
+            if (!par.getAttributes().getCustomParameters().isEmpty())
+                customParameters.putAll(par.getAttributes().getCustomParameters());
+        }
+
         List<String> uiLocales = Util.splittedStringAsList(uiLocalesStr, " ");
         List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
         io.jans.as.model.common.ResponseMode responseMode = io.jans.as.model.common.ResponseMode.getByValue(respMode);
-
-        Map<String, String> customParameters = requestParameterService.getCustomParameters(
-                QueryStringDecoder.decode(httpRequest.getQueryString()));
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
@@ -249,7 +314,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             updateSessionForROPC(httpRequest, sessionUser);
 
-            Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
+            Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, isPar);
             String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
             checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
