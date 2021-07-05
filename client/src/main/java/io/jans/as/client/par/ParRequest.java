@@ -14,7 +14,7 @@ public class ParRequest extends ClientAuthnRequest {
 
     public ParRequest(AuthorizationRequest authorizationRequest) {
         this.authorizationRequest = authorizationRequest;
-        this.authorizationRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
+        setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
     }
 
     public AuthorizationRequest getAuthorizationRequest() {

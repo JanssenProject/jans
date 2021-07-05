@@ -1,8 +1,8 @@
 package io.jans.as.persistence.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
@@ -15,11 +15,11 @@ import java.io.Serializable;
  *
  * @author Yuriy Zabrovarnyy
  */
+@DataEntry
 @ObjectClass(value = "jansPar")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Par extends DeletableEntity implements Serializable {
 
-    private static final long serialVersionUID = -3332496019942067970L;
+    private static final long serialVersionUID = -3332496019942067971L;
 
     @DN
     private String dn;
