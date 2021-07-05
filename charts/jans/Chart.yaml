@@ -17,7 +17,7 @@ annotations:
     - name: fido2
       image: janssenproject/fido2:1.0.0_b6
     - name: opendj
-      image: gluufedration/opendj:5.0.0_dev
+      image: gluufederation/opendj:5.0.0_dev
     - name: persistence
       image: janssenproject/persistence-loader:1.0.0_b6
     - name: scim
