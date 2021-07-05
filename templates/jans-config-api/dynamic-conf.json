@@ -1,5 +1,5 @@
 {
-  "apiApprovedIssuer": "${apiApprovedIssuer}",
+  "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
   "apiClientPassword": "${jca_client_encoded_pw}",
