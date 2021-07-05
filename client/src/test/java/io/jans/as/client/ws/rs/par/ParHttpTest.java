@@ -50,6 +50,7 @@ public class ParHttpTest extends BaseTest {
         assertParResponse(parResponse);
     }
 
+    @Parameters({"userId", "userSecret"})
     @Test(dependsOnMethods = "registerPar")
     public void requestAuthorizationWithPar(final String userId, final String userSecret) {
 //        // 2. Request authorization and receive the authorization code.
