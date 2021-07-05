@@ -114,6 +114,15 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public PrivateKey getPrivateKey(String keyId) throws Exception {
-        return cryptoProvider.getPrivateKey(keyId);
+        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+
+        if (privateKey == null) {
+            final AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
+            if (StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
+                privateKey = cryptoProvider.getPrivateKey(appConfiguration.getStaticDecryptionKid());
+            }
+        }
+
+        return privateKey;
     }
 }
