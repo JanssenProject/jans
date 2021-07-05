@@ -6,6 +6,8 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
@@ -18,8 +20,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import io.jans.as.model.authorize.AuthorizeRequestParam;
 
 /**
  * <p>
@@ -77,7 +77,6 @@ public interface AuthorizeRestWebService {
      *                            is an array of case sensitive strings.
      * @param request             A JWT  encoded OpenID Request Object.
      * @param requestUri          An URL that points to an OpenID Request Object.
-     * @param requestSessionId    request session id
      * @param sessionId           session id
      * @param originHeaders
      * @param codeChallenge       PKCE code challenge
@@ -153,7 +152,6 @@ public interface AuthorizeRestWebService {
             @QueryParam("amr_values") String amrValues,
             @QueryParam("request") String request,
             @QueryParam("request_uri") String requestUri,
-            @QueryParam("request_session_id") String requestSessionId,
             @QueryParam("session_id") String sessionId,
             @QueryParam("origin_headers") String originHeaders,
             @QueryParam("code_challenge") String codeChallenge,
@@ -186,7 +184,6 @@ public interface AuthorizeRestWebService {
             @FormParam("amr_values") String amrValues,
             @FormParam("request") String request,
             @FormParam("request_uri") String requestUri,
-            @FormParam("request_session_id") String requestSessionId,
             @FormParam("session_id") String sessionId,
             @FormParam("origin_headers") String originHeaders,
             @QueryParam("code_challenge") String codeChallenge,
