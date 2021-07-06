@@ -6,6 +6,7 @@
 
 package io.jans.as.client.client;
 
+import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenResponse;
@@ -45,21 +46,30 @@ public class Asserter {
         assertNotNull(response.getExpiresIn());
     }
 
-    public static void assertOk(RegisterResponse registerResponse) {
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+    public static void assertOk(RegisterResponse response) {
+        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getClientIdIssuedAt());
+        assertNotNull(response.getClientSecretExpiresAt());
     }
 
-    public static void assertTokenResponse(TokenResponse tokenResponse) {
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    public static void assertTokenResponse(TokenResponse response) {
+        assertNotNull(response);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getStatus());
+        assertNotNull(response.getEntity(), "The entity is null");
+        assertNotNull(response.getAccessToken(), "The access token is null");
+        assertNotNull(response.getExpiresIn(), "The expires in value is null");
+        assertNotNull(response.getTokenType(), "The token type is null");
+        assertNotNull(response.getRefreshToken(), "The refresh token is null");
+    }
+
+    public static void assertAuthorizationResponse(AuthorizationResponse response) {
+        assertNotNull(response);
+        assertNotNull(response.getLocation(), "The location is null");
+        assertNotNull(response.getCode(), "The authorization code is null");
+        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(response.getScope(), "The scope is null");
     }
 
     public static void validateIdToken(String idToken, String jwksUri, SignatureAlgorithm alg) throws InvalidJwtException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
