@@ -1,5 +1,8 @@
 import contextlib
+import base64
+import json
 import os
+from urllib.parse import urlparse
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -302,11 +305,63 @@ def merge_scim_ctx(ctx):
 #     return ctx
 
 
+def merge_config_api_ctx(ctx):
+    def transform_url(url):
+        auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
+
+        if not auth_server_url:
+            return url
+
+        parse_result = urlparse(url)
+        if parse_result.path.startswith("/.well-known"):
+            path = f"/jans-auth{parse_result.path}"
+        else:
+            path = parse_result.path
+        url = f"http://{auth_server_url}{path}"
+        return url
+
+    def get_injected_urls():
+        auth_config = json.loads(
+            base64.b64decode(ctx["auth_config_base64"]).decode()
+        )
+        urls = (
+            "issuer",
+            "openIdConfigurationEndpoint",
+            "introspectionEndpoint",
+            "tokenEndpoint",
+            "tokenRevocationEndpoint",
+        )
+        return {
+            url: transform_url(auth_config[url])
+            for url in urls
+        }
+
+    local_ctx = {
+        "apiApprovedIssuer": os.environ.get("CN_CONFIG_API_APPROVED_ISSUER") or f"https://{ctx['hostname']}",
+        "apiProtectionType": "oauth2",
+        "jca_client_id": ctx["jca_client_id"],
+        "jca_client_encoded_pw": ctx["jca_client_encoded_pw"],
+        "endpointInjectionEnabled": "true",
+    }
+    local_ctx.update(get_injected_urls())
+
+    basedir = '/app/templates/jans-config-api'
+    file_mappings = {
+        "config_api_dynamic_conf_base64": "dynamic-conf.json",
+    }
+    for key, file_ in file_mappings.items():
+        file_path = os.path.join(basedir, file_)
+        with open(file_path) as fp:
+            ctx[key] = generate_base64_contents(fp.read() % local_ctx)
+    return ctx
+
+
 def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     # ctx = merge_radius_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
+    ctx = merge_config_api_ctx(ctx)
     # ctx = merge_oxtrust_ctx(ctx)
     # ctx = merge_oxidp_ctx(ctx)
     # ctx = merge_passport_ctx(ctx)
@@ -344,6 +399,7 @@ def get_ldif_mappings(optional_scopes=None):
             ]
 
         files += [
+            "jans-config-api/configuration.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/clients.ldif",
         ]
