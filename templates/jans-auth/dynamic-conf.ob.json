@@ -14,6 +14,7 @@
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
     "idGenerationEndpoint":"https://%(hostname)s/jans-auth/restv1/id",
     "introspectionEndpoint":"https://%(hostname)s/jans-auth/restv1/introspection",
+    "parEndpoint":"https://%(hostname)s/jans-auth/restv1/par",
     "umaConfigurationEndpoint":"https://%(hostname)s/jans-auth/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"https://%(hostname)s/jans-auth/sectoridentifier",
     "oxElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
