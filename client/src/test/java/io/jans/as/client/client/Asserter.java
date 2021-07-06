@@ -6,13 +6,25 @@
 
 package io.jans.as.client.client;
 
+import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.par.ParResponse;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import org.apache.commons.lang3.StringUtils;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+
+import static io.jans.as.client.BaseTest.clientExecutor;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -39,6 +51,24 @@ public class Asserter {
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getClientIdIssuedAt());
         assertNotNull(registerResponse.getClientSecretExpiresAt());
+    }
+
+    public static void assertTokenResponse(TokenResponse tokenResponse) {
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    public static void validateIdToken(String idToken, String jwksUri, SignatureAlgorithm alg) throws InvalidJwtException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        Jwt jwt = Jwt.parse(idToken);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
+
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientExecutor(true));
+        RSASigner rsaSigner = new RSASigner(alg, publicKey);
+        assertTrue(rsaSigner.validate(jwt));
     }
 
     public static void assertIdToken(Jwt idToken, String... claimsPresence) {
