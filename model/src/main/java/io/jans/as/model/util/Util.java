@@ -51,6 +51,8 @@ public class Util {
 
     public static final String UTF8_STRING_ENCODING = "UTF-8";
 
+    public static final String PAR_ID_REFIX = "urn:ietf:params:oauth:request_uri:";
+
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
@@ -314,5 +316,12 @@ public class Util {
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.SECOND, lifetimeInSeconds);
         return calendar.getTime();
+    }
+
+    public static boolean isPar(String requestUri) {
+        if (StringUtils.isBlank(requestUri)) {
+            return false;
+        }
+        return requestUri.startsWith(PAR_ID_REFIX);
     }
 }
