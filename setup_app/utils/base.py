@@ -297,6 +297,15 @@ def download(url, dst):
         logIt("Creating driectory", pardir)
         os.makedirs(pardir)
     logIt("Downloading {} to {}".format(url, dst))
-    result = urlretrieve(url, dst)
-    f_size = result[1].get('Content-Length','0')
-    logIt("Download size: {} bytes".format(f_size))
+    download_tries = 1
+    while download_tries < 4:
+        try:
+            result = urlretrieve(url, dst)
+            f_size = result[1].get('Content-Length','0')
+            logIt("Download size: {} bytes".format(f_size))
+            time.sleep(0.1)
+        except:
+             logIt("Error downloading {}. Download will be re-tried once more".format(url))
+             download_tries += 1
+        else:
+            break
