@@ -218,7 +218,7 @@ It's a json file containing `key-value` pair. Each of these properties in the ke
 |`x`| The "x" (x coordinate) parameter contains the x coordinate for the [Elliptic Curve point](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.2). |
 |`y`|  The "y" (y coordinate) parameter contains the y coordinate for the [Elliptic Curve point](https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.3). |
 
-If you want to explore more go through the reference link.
+If you want to explore more, please go through the reference link.
 
 Let's update the json file to create a new key configuration.
 
@@ -275,6 +275,7 @@ Server Response:
 }
 ```
 
+Please remember, This operation replaces all JWKs having in the Janssen server with new ones. So, In this case, if you want to keep olds JWKs, you have to put them as well in the schema file.
 ## Patch JSON Web Key (JWK)
 
 With this operation id, we can modify JSON Web Keys partially of its properties.
