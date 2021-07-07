@@ -253,7 +253,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString()));
 
-        boolean isPar = parService.isPar(requestUri);
+        boolean isPar = Util.isPar(requestUri);
         if (!isPar && ServerUtil.isTrue(appConfiguration.getRequirePar())) {
             log.debug("Server configured for PAR only (via requirePar conf property). Failed to find PAR by request_uri (id): " + requestUri);
             throw new WebApplicationException(Response
@@ -269,7 +269,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             requestUri = null; // set it to null, we don't want to follow request uri for PAR
             request = null; // request is validated and parameters parsed by PAR endpoint before PAR persistence
 
-            log.debug("Setting request parameters from PAR");
+            log.debug("Setting request parameters from PAR - " + par);
 
             responseType = par.getAttributes().getResponseType();
             respMode = par.getAttributes().getResponseMode();

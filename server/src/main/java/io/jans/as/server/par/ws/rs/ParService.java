@@ -3,6 +3,7 @@ package io.jans.as.server.par.ws.rs;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.orm.PersistenceEntryManager;
 import org.apache.commons.lang.StringUtils;
@@ -21,8 +22,6 @@ import java.util.UUID;
 @ApplicationScoped
 public class ParService {
 
-    public static final String ID_REFIX = "urn:ietf:params:oauth:request_uri:";
-
     @Inject
     private Logger log;
 
@@ -34,13 +33,6 @@ public class ParService {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
-    public boolean isPar(String requestUri) {
-        if (StringUtils.isBlank(requestUri)) {
-            return false;
-        }
-        return requestUri.startsWith(ID_REFIX);
-    }
 
     public void persist(Par par) {
         setIdAndDnIfNeeded(par);
@@ -63,7 +55,7 @@ public class ParService {
 
     private void setIdAndDnIfNeeded(Par par) {
         if (StringUtils.isBlank(par.getId())) {
-            par.setId(ID_REFIX + UUID.randomUUID().toString());
+            par.setId(Util.PAR_ID_REFIX + UUID.randomUUID().toString());
         }
 
         if (StringUtils.isBlank(par.getDn())) {
