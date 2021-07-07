@@ -239,3 +239,53 @@ Server Response:
 }
 ```
 
+## Find OAuth Scopes by `inum` value
+
+In case We know the `inum` value of an OAuth Scope, We can get the details of that scope.
+
+```
+Operation ID: get-oauth-scopes-by-inum
+  Description: Get Scope by Inum
+  url-suffix: inum
+```
+We can see that, the `url-suffix` here for `inum` value. And the command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum --url-suffix inum:value
+```
+
+For example:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum --url-suffix inum:C4F6
+```
+
+It returns the details of the scope matched with the `inum` value.
+
+```
+{
+  "dn": "inum=C4F6,ou=scopes,o=jans",
+  "inum": "C4F6",
+  "displayName": "refresh_token",
+  "id": "offline_access",
+  "iconUrl": null,
+  "description": "This scope value requests that an OAuth 2.0 Refresh Token be issued.",
+  "scopeType": "openid",
+  "claims": null,
+  "defaultScope": true,
+  "groupClaims": null,
+  "dynamicScopeScripts": null,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": true
+  },
+  "umaType": false,
+  "deletable": false,
+  "expirationDate": null
+}
+
+```
+
+That's it.
