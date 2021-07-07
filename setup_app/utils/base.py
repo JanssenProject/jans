@@ -307,5 +307,6 @@ def download(url, dst):
         except:
              logIt("Error downloading {}. Download will be re-tried once more".format(url))
              download_tries += 1
+             time.sleep(1)
         else:
             break
