@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.1...v0.2.0) (2021-07-08)
+
+
+### Features
+
+* **jwks:** new endpoints to add,get,patch delete for kid jans-config-api-issue[#36](https://www.github.com/JanssenProject/jans-cli/issues/36) ([524c45b](https://www.github.com/JanssenProject/jans-cli/commit/524c45b12d049b6e0ea7845864dd7fa2e24e66c7))
+* **patch:** enable providing patch data with args as well as json file ([4ed73d3](https://www.github.com/JanssenProject/jans-cli/commit/4ed73d39f9e7ce8aee86ccd9535abb72e842b4cb))
+* **persistence:** spec changes for new endpoints persistenceType and sql-resource ([bf55835](https://www.github.com/JanssenProject/jans-cli/commit/bf55835b6ef556e6b3d02ade4b8074652640338c))
+
+
+### Bug Fixes
+
+* **cl:** remove patch operation ([eb615d8](https://www.github.com/JanssenProject/jans-cli/commit/eb615d866fc161ef4b4ea5e3a8bb5c4e28d0afa4))
+* data args (ref: [#35](https://www.github.com/JanssenProject/jans-cli/issues/35)) ([f30ba9b](https://www.github.com/JanssenProject/jans-cli/commit/f30ba9bf58fd221ffbb5a5e5d988c289d2df08d5))
+* heading of each operation task ([9369aae](https://www.github.com/JanssenProject/jans-cli/commit/9369aaed54011d06c95d0900d9bca2d193b67caf))
+* **jca-client:** re-update cleint ([9f3e52c](https://www.github.com/JanssenProject/jans-cli/commit/9f3e52c00ae690be4125f13823fb92ca7438d6f9))
+* **jca-client:** update cleint ([abfe925](https://www.github.com/JanssenProject/jans-cli/commit/abfe925e7b85a01599b84e8254946128a9c39129))
+
+
+### Documentation
+
+* **cli-Authz:** updated authorization server ([c550365](https://www.github.com/JanssenProject/jans-cli/commit/c550365bcd6a28646bcea4c9b8b6dcc703aa1afa))
+* **cli-couchbase:** added couchbase configuration ([f14dc0d](https://www.github.com/JanssenProject/jans-cli/commit/f14dc0d2adf41644949b5c1f96aae5af66da20e0))
+* **cli-custom-scripts:** added custom script cli ([0bf61a7](https://www.github.com/JanssenProject/jans-cli/commit/0bf61a7ffae7c362ba80161dfc21a42bf3ff9656))
+* **cli-custom-scripts:** updated operations ([1518f00](https://www.github.com/JanssenProject/jans-cli/commit/1518f00f26de22bf78901860576c2b8e474bc294))
+* **cli-customs-scripts:** updated operations ([1cdd509](https://www.github.com/JanssenProject/jans-cli/commit/1cdd50965ee79fd9d23eb6d4e09be9dd9f4181ec))
+* **cli-group:** added operations ([03cad75](https://www.github.com/JanssenProject/jans-cli/commit/03cad75a7679f26ea3827a04294fb0ea31dde8aa))
+* **cli-index:** updated cli mode ([70f0201](https://www.github.com/JanssenProject/jans-cli/commit/70f02014406eb09a73fd4febfaccad6340701b80))
+* **cli-jwk:** added and updated ([985445e](https://www.github.com/JanssenProject/jans-cli/commit/985445e3eb5d2cbfd90898be8bb1ad1170db81b6))
+* **cli-jwk:** edited replace option ([d240a5d](https://www.github.com/JanssenProject/jans-cli/commit/d240a5d1c0aeabc189e309d2191008cf5be6853e))
+* **cli-jwk:** updated new method ([53378d3](https://www.github.com/JanssenProject/jans-cli/commit/53378d3f39dabba822e33b3080eb425e419bedaf))
+* **cli-ldap:** added Ldap Database Configuration ([cb9d7a7](https://www.github.com/JanssenProject/jans-cli/commit/cb9d7a76697a203ab3fafe1b2360796c5676a476))
+* **cli-ldap:** edited operations ([18d6b8c](https://www.github.com/JanssenProject/jans-cli/commit/18d6b8c2037ced6a7ddcbe653e26b982ecf289f3))
+* **cli-ldap:** updated operations ([9fbe413](https://www.github.com/JanssenProject/jans-cli/commit/9fbe413a4c6f88461a2327e7c60b3422eef67ef1))
+* **cli-oauth-scopes:** edited operations ([492d0bd](https://www.github.com/JanssenProject/jans-cli/commit/492d0bdd1f27c6e8b1395c7e4faa7a1a5f9e30c3))
+* **cli-oauthscope:** updated operation-id ([fe9c188](https://www.github.com/JanssenProject/jans-cli/commit/fe9c18869a6482d9453f0a62c3a8411246ee4d03))
+* **cli-openid:** edited openid connect ([8ef7f00](https://www.github.com/JanssenProject/jans-cli/commit/8ef7f0012505aca05bc31a57adf1667eea4689b5))
+* **cli-scim:** edited scim index ([787556c](https://www.github.com/JanssenProject/jans-cli/commit/787556c12ccc9a915f8a287106b11749adec628d))
+* **cli-smtp:** updated headings ([48ed1ad](https://www.github.com/JanssenProject/jans-cli/commit/48ed1ad6959ce5870b821199df660e6f4ed6bfee))
+* **cli-tips:** added patch-request features ([a938c7c](https://www.github.com/JanssenProject/jans-cli/commit/a938c7ca307ed9ba412067dec81088fc4c1ac033))
+* **cli-user:** added headings ([571287f](https://www.github.com/JanssenProject/jans-cli/commit/571287f319b10e93cb7fdd4c22fcafed414a31cd))
+* **cli:** updated ([4707b61](https://www.github.com/JanssenProject/jans-cli/commit/4707b617e23e74294250436e60e790ccb3460ea3))
+* **cli:** updated patch request ([5ab5bec](https://www.github.com/JanssenProject/jans-cli/commit/5ab5becf623999d010954a899edec8e9da90a27a))
+* **im-custom-scripts:** updated headings ([2da17b4](https://www.github.com/JanssenProject/jans-cli/commit/2da17b4b43c4773b3f740f0967c8b2947e9d9a28))
+* **im-group:** updated docs headline ([d06c9dc](https://www.github.com/JanssenProject/jans-cli/commit/d06c9dce9e11ae4002f6223959dd638d176f1668))
+* **im-ouath-scopes:** updated headings ([9102903](https://www.github.com/JanssenProject/jans-cli/commit/9102903b15a0edee54a29f4f33aeb05ea619ed8d))
+* **im-user:** updated headings ([302b0c4](https://www.github.com/JanssenProject/jans-cli/commit/302b0c4616405e2b72f3fa8eb2b770c301539f64))
+* **jwk:** updated list item ([9213515](https://www.github.com/JanssenProject/jans-cli/commit/9213515562337f9595e3e3584e27b69028668f3e))
+* **README.md:** added documentation index ([4587447](https://www.github.com/JanssenProject/jans-cli/commit/4587447b1327437f54f604d29a228894f7545111))
+* **readme:** added manual installtion ([c582d7f](https://www.github.com/JanssenProject/jans-cli/commit/c582d7f73d42f888798a6070b73c6986ffe4c481))
+* **README:** index items updated ([7bc0e6f](https://www.github.com/JanssenProject/jans-cli/commit/7bc0e6f4aea430c7814644acdf99ab6c18da1a5e))
+* **README:** updated index list ([d868756](https://www.github.com/JanssenProject/jans-cli/commit/d8687564ebbd6b086a58c859b67871818c4ec90a))
+* **README:** updated installation ([1e19094](https://www.github.com/JanssenProject/jans-cli/commit/1e19094d1604b3d42f61ab6b41ac4244e1f6294d))
+* **spec:** modified spec and test as pet auth-server AppConfiguration issues[#19](https://www.github.com/JanssenProject/jans-cli/issues/19) ([097769d](https://www.github.com/JanssenProject/jans-cli/commit/097769d7888e90bca5bae06cfda2159ae12cc23c))
+
 ### [0.1.1](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.0...v0.1.1) (2021-05-07)
 
 
