@@ -6,17 +6,6 @@
 
 package io.jans.as.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.Display;
@@ -24,6 +13,17 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an authorization request to send to the authorization server.
@@ -32,6 +32,8 @@ import io.jans.as.model.util.Util;
  * @version October 7, 2019
  */
 public class AuthorizationRequest extends BaseRequest {
+
+    private static final Logger LOG = Logger.getLogger(AuthorizationRequest.class);
 
     public static String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
 
@@ -88,8 +90,12 @@ public class AuthorizationRequest extends BaseRequest {
         this.scopes = scopes;
         this.redirectUri = redirectUri;
         this.nonce = nonce;
-        prompts = new ArrayList<Prompt>();
+        prompts = new ArrayList<>();
         useNoRedirectHeader = false;
+    }
+
+    public AuthorizationRequest(String requestUri) {
+        this.requestUri = requestUri;
     }
 
     public CodeVerifier generateAndSetCodeChallengeWithMethod() {
@@ -479,6 +485,32 @@ public class AuthorizationRequest extends BaseRequest {
         }
     }
 
+    public String getParQueryString() {
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            if (StringUtils.isNotBlank(state)) {
+                builder.append("&").append(AuthorizeRequestParam.STATE)
+                        .append("=").append(URLEncoder.encode(state, Util.UTF8_STRING_ENCODING));
+            }
+            if (StringUtils.isNotBlank(nonce)) {
+                builder.append("&").append(AuthorizeRequestParam.NONCE)
+                        .append("=").append(URLEncoder.encode(nonce, Util.UTF8_STRING_ENCODING));
+            }
+            if (StringUtils.isNotBlank(requestUri)) {
+                builder.append("&").append(AuthorizeRequestParam.REQUEST_URI)
+                        .append("=").append(URLEncoder.encode(requestUri, Util.UTF8_STRING_ENCODING));
+            }
+            if (StringUtils.isNotBlank(clientId)) {
+                builder.append("&").append(AuthorizeRequestParam.CLIENT_ID)
+                        .append("=").append(URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING));
+            }
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return builder.toString();
+    }
+
     /**
      * Returns a query string with the parameters of the authorization request.
      * Any <code>null</code> or empty parameter will be omitted.
@@ -487,6 +519,10 @@ public class AuthorizationRequest extends BaseRequest {
      */
     @Override
     public String getQueryString() {
+        if (Util.isPar(requestUri)) {
+            return getParQueryString();
+        }
+
         StringBuilder queryStringBuilder = new StringBuilder();
 
         try {
