@@ -25,7 +25,6 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-//import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -86,33 +85,12 @@ public class ConfigurationFactory {
     private String saltFilePath;
     
     private io.jans.configapi.model.configuration.AppConfiguration apiAppConfiguration;
-    //private AppConfiguration apiAppDynamicConf;
     private StaticConfiguration apiAppStaticConf;
     private long loadedRevision = -1;
 
-    /*
-     * @Inject
-     * 
-     * @ConfigProperty(name = "api.protection.type")
-     */
     private String apiProtectionType;
-
-//    @Inject
-//    @ConfigProperty(name = "api.client.id")
     private String apiClientId;
-
-    /*
-     * @Inject
-     * 
-     * @ConfigProperty(name = "api.client.password")
-     */
     private String apiClientPassword;
-
-    /*
-     * @Inject
-     * 
-     * @ConfigProperty(name = "api.approved.issuer")
-     */
     private List<String> apiApprovedIssuer;
 
     @Produces
