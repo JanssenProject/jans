@@ -20,7 +20,7 @@ Operation ID: put-oauth-scopes
 Operation ID: get-oauth-scopes-by-inum
   Description: Get Scope by Inum
   url-suffix: inum
-Operation ID: delete-oauth-scopes-by-id
+Operation ID: delete-oauth-scopes-by-inum
   Description: Delete Scope.
   url-suffix: inum
 Operation ID: patch-oauth-scopes-by-id
@@ -28,7 +28,8 @@ Operation ID: patch-oauth-scopes-by-id
   url-suffix: inum
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+
 ```
 ## Find/View OAuth Scopes
 
@@ -188,7 +189,76 @@ Server Response:
 
 It created scope with inum `112116fd-257b-40d8-a2c9-0c23536680ed` and returned current data. 
 
-## Patching OAuth Scopes by its ID
+
+## Update Existing OAuth Scopes
+
+In case we need to update an existing OAuth Scope, we can do that as well.
+
+To update an existing OAuth Scope, we have to create a json file with updated details. You can get the schema file as well to understand the format of the OAuth Scope JSON file.
+
+This is an existing OAuth Scope we are going to update.
+```
+{
+  "dn": "inum=5c3ba3f0-d2ce-4974-9efb-883697d929d1,ou=scopes,o=jans",
+  "inum": "5c3ba3f0-d2ce-4974-9efb-883697d929d1",
+  "displayName": "TestScope",
+  "id": "TestScopeID",
+  "iconUrl": null,
+  "description": "TestScope for jans-cli",
+  "scopeType": "dynamic",
+  "claims": null,
+  "defaultScope": true,
+  "groupClaims": true,
+  "dynamicScopeScripts": null,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": false
+  },
+  "umaType": false,
+  "deletable": false,
+  "expirationDate": null
+}
+```
+We have changed only the `scopeType` to `openid`.
+
+The updated data:
+
+```
+{
+  "dn": "inum=5c3ba3f0-d2ce-4974-9efb-883697d929d1,ou=scopes,o=jans",
+  "inum": "5c3ba3f0-d2ce-4974-9efb-883697d929d1",
+  "displayName": "TestScope",
+  "id": "TestScopeID",
+  "iconUrl": null,
+  "description": "TestScope for jans-cli",
+  "scopeType": "openid",
+  "claims": null,
+  "defaultScope": true,
+  "groupClaims": true,
+  "dynamicScopeScripts": null,
+  "umaAuthorizationPolicies": null,
+  "attributes": {
+    "spontaneousClientId": null,
+    "spontaneousClientScopes": null,
+    "showInConfigurationEndpoint": false
+  },
+  "umaType": false,
+  "deletable": false,
+  "expirationDate": null
+}
+```
+
+The command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes --data /tmp/scope.json
+```
+
+This will updated the existing oauth scopes matched with inum value.
+
+## Patch OAuth Scopes by `inum`
 
 Let's update `iconUrl` with patch method. So we need a schema for the patch method. Remember when we queried info for the task **OAuthScopes** it printed:
 
@@ -239,7 +309,7 @@ Server Response:
 }
 ```
 
-## Find OAuth Scopes by `inum` value
+## Find OAuth Scopes by `inum`
 
 In case We know the `inum` value of an OAuth Scope, We can get the details of that scope.
 
@@ -289,3 +359,14 @@ It returns the details of the scope matched with the `inum` value.
 ```
 
 That's it.
+
+## Delete OAuth Scopes by `inum`
+
+You can delete any OAuth Scopes by its `inum` value.
+The command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-scopes-by-inum --url-suffix inum:f9a7add1-04ca-432c-84d4-cb127e84bd48
+```
+
+Just change the `inum` value to your own according to which one you want to delete.
