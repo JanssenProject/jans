@@ -1,4 +1,5 @@
 import os
+import re
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -34,7 +35,7 @@ def render_app_properties(manager):
     with open("/app/templates/application.properties.tmpl") as f:
         txt = safe_render(f.read(), ctx)
 
-    with open("/opt/jans/jans-config-api/config/application.properties", "w") as f:
+    with open("/opt/jans/jetty/jans-config-api/webapps/jans-config-api/WEB-INF/classes/application.properties", "w") as f:
         f.write(txt)
 
 
@@ -93,7 +94,52 @@ def main():
         "changeit",
     )
 
-    render_app_properties(manager)
+    # render_app_properties(manager)
+
+    modify_jetty_xml()
+    modify_webdefault_xml()
+
+
+def modify_jetty_xml():
+    fn = "/opt/jetty/etc/jetty.xml"
+    with open(fn) as f:
+        txt = f.read()
+
+    # disable contexts
+    updates = re.sub(
+        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
+        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>',
+        txt,
+        flags=re.DOTALL | re.M,
+    )
+
+    # disable Jetty version info
+    updates = re.sub(
+        r'(<Set name="sendServerVersion"><Property name="jetty.httpConfig.sendServerVersion" deprecated="jetty.send.server.version" default=")true(" /></Set>)',
+        r'\1false\2',
+        updates,
+        flags=re.DOTALL | re.M,
+    )
+
+    with open(fn, "w") as f:
+        f.write(updates)
+
+
+def modify_webdefault_xml():
+    fn = "/opt/jetty/etc/webdefault.xml"
+    with open(fn) as f:
+        txt = f.read()
+
+    # disable dirAllowed
+    updates = re.sub(
+        r'(<param-name>dirAllowed</param-name>)(\s*)(<param-value>)true(</param-value>)',
+        r'\1\2\3false\4',
+        txt,
+        flags=re.DOTALL | re.M,
+    )
+
+    with open(fn, "w") as f:
+        f.write(updates)
 
 
 if __name__ == "__main__":

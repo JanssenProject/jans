@@ -4,7 +4,7 @@
 # include required files/directories
 # !certs
 !conf
-# !jetty
+!jetty
 # !libs
 !scripts
 !LICENSE

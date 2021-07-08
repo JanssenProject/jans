@@ -9,12 +9,19 @@ if [ ! -f /deploy/touched  ]; then
     touch /deploy/touched
 fi
 
-cd /opt/jans/jans-config-api
+python3 /app/scripts/mod_context.py
+
+# run config-api
+mkdir -p /opt/jetty/temp
+cd /opt/jans/jetty/jans-config-api
 exec java \
+    -server \
     -XX:+DisableExplicitGC \
     -XX:+UseContainerSupport \
     -XX:MaxRAMPercentage=$CN_MAX_RAM_PERCENTAGE \
     -Djans.base=/etc/jans \
-    -Dquarkus.profile=prod \
+    -Dserver.base=/opt/jans/jetty/jans-config-api \
+    -Dlog.base=/opt/jans/jetty/jans-config-api \
+    -Djava.io.tmpdir=/opt/jetty/temp \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jans/jans-config-api/jans-config-api-runner.jar
+    -jar /opt/jetty/start.jar jetty.http.port=8074

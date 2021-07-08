@@ -10,19 +10,39 @@ RUN apk update \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
 
+# =====
+# Jetty
+# =====
+
+ARG JETTY_VERSION=9.4.35.v20201120
+ARG JETTY_HOME=/opt/jetty
+ARG JETTY_BASE=/opt/jans/jetty
+ARG JETTY_USER_HOME_LIB=/home/jetty/lib
+
+# Install jetty
+RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${JETTY_VERSION}/jetty-distribution-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+    && mkdir -p /opt \
+    && tar -xzf /tmp/jetty.tar.gz -C /opt \
+    && mv /opt/jetty-distribution-${JETTY_VERSION} ${JETTY_HOME} \
+    && rm -rf /tmp/jetty.tar.gz
+
 # ==========
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-06-22 13:16'
-ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api/${CN_VERSION}/jans-config-api-${CN_VERSION}-runner.jar
+ENV CN_VERSION=1.0-SNAPSHOT
+ENV CN_BUILD_DATE='2021-07-08 16:29'
+ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
-RUN mkdir -p /opt/jans/jans-config-api \
-    && wget -q ${CN_SOURCE_URL} -O /opt/jans/jans-config-api/jans-config-api-runner.jar
+# Install Jans Config API
+RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
+    && mkdir -p ${JETTY_BASE}/jans-config-api/webapps/jans-config-api \
+    && unzip -qq /tmp/jans-config-api.war -d ${JETTY_BASE}/jans-config-api/webapps/jans-config-api \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-to-start=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket \
+    && rm -f /tmp/jans-config-api.war
 
+# Ports exposed by config-api
 EXPOSE 8074
-EXPOSE 9444
 
 # ======
 # Python
@@ -135,27 +155,29 @@ LABEL name="Config API" \
     summary="Janssen Config API" \
     description=""
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/jans/jans-config-api/logs /opt/jans/jans-config-api/config
+RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf
 RUN touch /etc/hosts.back
+COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+# create non-root user
+RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
- # adjust ownership
-RUN chown -R 1000:1000 /etc/jans \
+# adjust ownership
+RUN chown -R 1000:1000 /opt/jans/jetty \
+    && chown -R 1000:1000 /opt/jetty \
     && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /etc/hosts.back \
-    && chown -R 1000:1000 /opt/jans \
     && chgrp -R 0 /etc/hosts.back && chmod -R g=u /etc/hosts.back \
+    && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
+    && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chgrp -R 0 /opt/jans && chmod -R g=u /opt/jans \
     && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
 
 USER 1000
