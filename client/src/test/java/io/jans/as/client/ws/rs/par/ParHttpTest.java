@@ -1,22 +1,36 @@
 package io.jans.as.client.ws.rs.par;
 
 import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.par.ParResponse;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
 import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.client.client.Asserter.assertParResponse;
+import static io.jans.as.client.client.Asserter.assertTokenResponse;
+import static io.jans.as.client.client.Asserter.validateIdToken;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -50,49 +64,39 @@ public class ParHttpTest extends BaseTest {
         assertParResponse(parResponse);
     }
 
-    @Parameters({"userId", "userSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "registerPar")
-    public void requestAuthorizationWithPar(final String userId, final String userSecret) {
-//        // 2. Request authorization and receive the authorization code.
-//
-//        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce);
-//
-//        String scope = authorizationResponse.getScope();
-//        String authorizationCode = authorizationResponse.getCode();
-//        String idToken = authorizationResponse.getIdToken();
-//
-//        // 3. Request access token using the authorization code.
-//        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-//        tokenRequest.setCode(authorizationCode);
-//        tokenRequest.setRedirectUri(redirectUri);
-//        tokenRequest.setAuthUsername(clientId);
-//        tokenRequest.setAuthPassword(clientSecret);
-//        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-//
-//        TokenClient tokenClient1 = newTokenClient(tokenRequest);
-//        tokenClient1.setRequest(tokenRequest);
-//        TokenResponse tokenResponse1 = tokenClient1.exec();
-//
-//        showClient(tokenClient1);
-//        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-//        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-//        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-//        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-//        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-//        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
-//
-//        String refreshToken = tokenResponse1.getRefreshToken();
-//
-//        // 4. Validate id_token
-//        Jwt jwt = Jwt.parse(idToken);
-//        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
-//
-//        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-//                jwksUri,
-//                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientExecutor(true));
-//        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-//
-//        assertTrue(rsaSigner.validate(jwt));
+    public void requestAuthorizationWithPar(final String userId, final String userSecret, String redirectUri) throws InvalidJwtException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri);
+
+        String authorizationCode = authorizationResponse.getCode();
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Request access token using the authorization code.
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(registerResponse.getClientId());
+        tokenRequest.setAuthPassword(registerResponse.getClientSecret());
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+        TokenClient tokenClient = newTokenClient(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertTokenResponse(tokenResponse);
+        validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256);
     }
 
+    private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, String redirectUri) {
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(parResponse.getRequestUri());
+        authorizationRequest.setState(UUID.randomUUID().toString());
+        authorizationRequest.setClientId(registerResponse.getClientId());
+        authorizationRequest.setRedirectUri(redirectUri); // NOT USED in real scenario. This is needed only to check whether finish selenium authorization or not.
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertAuthorizationResponse(authorizationResponse);
+        return authorizationResponse;
+    }
 }
