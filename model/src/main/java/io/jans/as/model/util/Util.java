@@ -52,6 +52,7 @@ public class Util {
     public static final String UTF8_STRING_ENCODING = "UTF-8";
 
     public static final String PAR_ID_REFIX = "urn:ietf:params:oauth:request_uri:";
+    public static final String PAR_ID_SHORT_REFIX = "par:";
 
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
@@ -322,6 +323,6 @@ public class Util {
         if (StringUtils.isBlank(requestUri)) {
             return false;
         }
-        return requestUri.startsWith(PAR_ID_REFIX);
+        return requestUri.startsWith(PAR_ID_REFIX) || requestUri.startsWith(PAR_ID_SHORT_REFIX);
     }
 }
