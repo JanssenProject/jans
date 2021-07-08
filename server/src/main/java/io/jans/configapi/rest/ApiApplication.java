@@ -8,6 +8,7 @@ package io.jans.configapi.rest;
 
 import io.jans.configapi.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.rest.resource.auth.*;
+import io.jans.configapi.rest.health.ApiHealthCheck;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
@@ -26,6 +27,7 @@ public class ApiApplication extends Application {
 
         // General
         classes.add(ObjectMapperContextResolver.class);
+        classes.add(ApiHealthCheck.class);
 
         // oAuth Config
         classes.add(AcrsResource.class);
