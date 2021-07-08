@@ -6,26 +6,17 @@
 
 package io.jans.configapi.rest.health;
 
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
-import org.eclipse.microprofile.health.Liveness;
-
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.configapi.filters.ProtectedApi;
-import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.rest.resource.auth.BaseResource;
 import io.jans.configapi.service.auth.ConfigurationService;
-import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 
 
@@ -39,6 +30,39 @@ public class ApiHealthCheck extends BaseResource {
 
     @Inject
     ConfigurationService configurationService;
+    
+    @GET
+    public Response getHealthResponse() throws Exception{
+        log.debug("ApiHealthCheck::getHealthResponse() - Entry");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", "UP");
+       
+        //liveness
+        JSONObject dataJsonObject = new JSONObject();
+        dataJsonObject.put("name", "jans-config-api liveness");
+        dataJsonObject.put("status", "UP");
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(0, dataJsonObject);
+        
+        //readiness
+        dataJsonObject = new JSONObject();
+        dataJsonObject.put("name", "jans-config-api readiness");
+        dataJsonObject.put("status", "UP");
+        try {
+            checkDatabaseConnection();            
+            dataJsonObject.put("status", "UP");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            dataJsonObject.put("error", "e.getMessage()");
+            log.debug("\n\n\n ApiHealthCheck::getHealthResponse() - Error Response = " + jsonObject + "\n\n");
+        }        
+        jsonArray.put(1, dataJsonObject);
+        
+        jsonObject.put("checks",jsonArray);
+        log.debug("\n\n\n ApiHealthCheck::getHealthResponse() - jsonObject = " + jsonObject + "\n\n");
+        return Response.ok(jsonObject.toString()).build();
+    }
+    
     
     @GET
     @Path(ApiConstants.LIVE)
@@ -58,8 +82,7 @@ public class ApiHealthCheck extends BaseResource {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", "jans-config-api readiness");
         try {
-            checkDatabaseConnection();
-            
+            checkDatabaseConnection();            
             jsonObject.put("status", "UP");
             log.debug("\n\n\n ApiHealthCheck::getReadinessResponse() - Success Response = " + jsonObject + "\n\n");
             return Response.ok(jsonObject.toString()).build();
