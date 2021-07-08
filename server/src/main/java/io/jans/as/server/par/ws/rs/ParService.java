@@ -55,7 +55,7 @@ public class ParService {
 
     private void setIdAndDnIfNeeded(Par par) {
         if (StringUtils.isBlank(par.getId())) {
-            par.setId(Util.PAR_ID_REFIX + UUID.randomUUID().toString());
+            par.setId(Util.PAR_ID_SHORT_REFIX + UUID.randomUUID().toString());
         }
 
         if (StringUtils.isBlank(par.getDn())) {
@@ -67,7 +67,15 @@ public class ParService {
         if (StringUtils.isBlank(id)) {
             throw new IllegalArgumentException("PAR id is null or blank.");
         }
-        return String.format("jansId=%s,%s", id, branchBaseDn());
+        return String.format("jansId=%s,%s", toPersistenceId(id), branchBaseDn());
+    }
+
+    public static String toPersistenceId(String id) {
+        return StringUtils.replace(id, Util.PAR_ID_REFIX, Util.PAR_ID_SHORT_REFIX);
+    }
+
+    public static String toOutsideId(String id) {
+        return StringUtils.replace(id, Util.PAR_ID_SHORT_REFIX, Util.PAR_ID_REFIX);
     }
 
     public String branchBaseDn() {
