@@ -64,6 +64,9 @@ public class ApiConstants {
     public static final String NAME_PARAM_PATH = "/{name}";
     public static final String KEY_PATH = "/key";
     public static final String KID_PATH = "/{kid}";
+    public static final String HEALTH = "/health";
+    public static final String LIVE = "/live";
+    public static final String READY = "/ready";
 
     public static final String LIMIT = "limit";
     public static final String PATTERN = "pattern";
