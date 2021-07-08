@@ -85,7 +85,7 @@ Operation ID: post-config-database-ldap
 Let's get the schema file and update it to push into the server.
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LdapConfiguration /tmp/ldap.json
+/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LdapConfiguration > /tmp/ldap.json
 ```
 ```
 {
@@ -234,7 +234,19 @@ Getting access token for scope https://jans.io/oauth/config/database/ldap.readon
 
 ```
 
-## Patching LDAP Database Configurations
+## Delete LDAP Database Configurations
+
+In case, we need to delete any existing LDAP Database configuration we can do that as well.
+
+The command line:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-ldap-by-name --url-suffix name:test_ldap
+```
+
+It will delete data ldap database configuration matched with the name.
+
+## Patch LDAP Database Configurations
 
 If required, We can patch single information of a ldap database configuration by using its name id. In that case, we have to make an array of operations in schema file. So, let's get the schema file first.
 
