@@ -205,7 +205,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', code: '{}'", authorizationCodeGrant.getClientId(), code);
                     // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
                     grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_CLIENT, "Client mismatch."), oAuth2AuditLog);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), oAuth2AuditLog);
                 }
 
                 validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
