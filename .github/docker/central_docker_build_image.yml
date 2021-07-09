@@ -3,7 +3,7 @@ name: Build and Publish Releases to Hub
 on:
   push:
     tags:
-      - "*.*.*"
+      - "*"
     branches:
       - master
       - main
