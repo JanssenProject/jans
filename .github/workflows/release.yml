@@ -70,7 +70,8 @@ jobs:
       id: create_release
       uses: actions/create-release@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        # in order for this to trigger proceeding action the token cannot be github default token.
+        GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
       with:
         tag_name: ${{ steps.get_version.outputs.version }}
         release_name: ${{ steps.get_version.outputs.version }}
