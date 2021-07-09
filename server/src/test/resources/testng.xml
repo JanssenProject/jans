@@ -6,7 +6,7 @@
     <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="authServer" value="https://ce-dev6.gluu.org"/>
     <parameter name="opDiscoveryPath" value=""/>
-    <parameter name="emailWebfingerInput" value="${swd.resource}"/>
+    <parameter name="emailWebfingerInput" value="${auth.user.email}"/>
     <parameter name="urlWebfingerInput" value="https://${test.server.name}/admin"/>
     <parameter name="hostnameWebfingerInput" value="${test.server.name}"/>
     <parameter name="opConfigurationEndpoint" value="https://${test.server.name}/.well-known/openid-configuration"/>
