@@ -12,7 +12,7 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class GetIssuerTest {
 
     @Parameters({"host", "opHost", "emailWebfingerInput"})
-    @Test
+    @Test(enabled = false)
     public void emailInputTest(String host, String opHost, String emailWebfingerInput) {
         ClientInterface client = Tester.newClient(host);
 
@@ -28,7 +28,7 @@ public class GetIssuerTest {
     }
 
     @Parameters({"host", "opHost", "urlWebfingerInput"})
-    @Test
+    @Test(enabled = false)
     public void urlInputTest(String host, String opHost, String urlWebfingerInput) {
         ClientInterface client = Tester.newClient(host);
 
