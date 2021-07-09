@@ -15,7 +15,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-05-26 17:55'
+ENV CN_BUILD_DATE='2021-06-28 16:22'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
@@ -139,7 +139,7 @@ LABEL name="Client API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b6" \
+    release="b7" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
