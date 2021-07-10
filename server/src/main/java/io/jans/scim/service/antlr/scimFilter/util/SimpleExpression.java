@@ -8,6 +8,7 @@ package io.jans.scim.service.antlr.scimFilter.util;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.time.Instant;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +21,6 @@ import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.service.antlr.scimFilter.enums.CompValueType;
 import io.jans.scim.service.antlr.scimFilter.enums.ScimOperator;
 import io.jans.scim.service.scim2.ExtensionService;
-import org.joda.time.DateTime;
 
 /**
  * Created by jgomer on 2017-12-10.
@@ -121,10 +121,8 @@ public class SimpleExpression {
         log.trace("SimpleExpression.evaluateDateTimeAttribute");
 
         try{
-            DateTime dtStored=new DateTime(valueInItemObj.toString());
-            DateTime dtProvided=new DateTime(attributeValue);
-            long valueInItem=dtStored.getMillis();
-            long compareAgainst=dtProvided.getMillis();
+            long valueInItem = Instant.parse(valueInItemObj.toString()).toEpochMilli();
+            long compareAgainst = Instant.parse(attributeValue).toEpochMilli();
 
             switch (operator){
                 case EQUAL:

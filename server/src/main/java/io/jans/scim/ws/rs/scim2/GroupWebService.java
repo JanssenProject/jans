@@ -31,8 +31,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.joda.time.format.ISODateTimeFormat;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -49,6 +47,7 @@ import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.patch.PatchOperation;
 import io.jans.scim.model.scim2.patch.PatchRequest;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.GroupService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.Scim2GroupService;
@@ -303,8 +302,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             executeDefaultValidation(group);
 
             //Update timestamp
-            String now=ISODateTimeFormat.dateTime().withZoneUTC().print(System.currentTimeMillis());
-            group.getMeta().setLastModified(now);
+            group.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
             //Replaces the information found in gluuGroup with the contents of group
             scim2GroupService.replaceGroupInfo(gluuGroup, group, endpointUrl, usersUrl);

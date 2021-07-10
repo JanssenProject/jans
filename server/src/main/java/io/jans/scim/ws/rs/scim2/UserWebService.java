@@ -40,6 +40,7 @@ import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.patch.PatchOperation;
 import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.model.scim.ScimCustomPerson;
@@ -50,7 +51,6 @@ import io.jans.scim.ws.rs.scim2.IUserWebService;
 import io.jans.scim.ws.rs.scim2.PATCH;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -310,8 +310,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
             ScimResourceUtil.adjustPrimarySubAttributes(user);
 
             //Update timestamp
-            String now=ISODateTimeFormat.dateTime().withZoneUTC().print(System.currentTimeMillis());
-            user.getMeta().setLastModified(now);
+            user.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
             //Replaces the information found in person with the contents of user
             scim2UserService.replacePersonInfo(person, user, endpointUrl);

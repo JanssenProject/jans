@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import io.jans.model.GluuStatus;
@@ -33,6 +32,7 @@ import io.jans.scim.model.scim2.group.GroupResource;
 import io.jans.scim.model.scim2.group.Member;
 import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.GroupService;
 import io.jans.scim.service.OrganizationService;
 import io.jans.scim.service.PersonService;
@@ -223,8 +223,7 @@ public class Scim2GroupService implements Serializable {
 		GroupResource tmpGroup = new GroupResource();
 		transferAttributesToGroupResource(gluuGroup, tmpGroup, groupsUrl, usersUrl);
 
-		long now = System.currentTimeMillis();
-		tmpGroup.getMeta().setLastModified(ISODateTimeFormat.dateTime().withZoneUTC().print(now));
+		tmpGroup.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
 		tmpGroup = (GroupResource) ScimResourceUtil.transferToResourceReplace(group, tmpGroup,
 				extService.getResourceExtensions(group.getClass()));

@@ -25,7 +25,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +55,7 @@ import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.user.X509Certificate;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.GroupService;
 import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
@@ -285,13 +285,13 @@ public class Scim2UserService implements Serializable {
 		meta.setCreated(person.getAttribute("jansMetaCreated"));
 		if (meta.getCreated() == null) {
 			Date date = person.getCreationDate();
-			meta.setCreated(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
+			meta.setCreated(date == null ? null : DateUtil.millisToISOString(date.getTime()));
 		}
 
 		meta.setLastModified(person.getAttribute("jansMetaLastMod"));
 		if (meta.getLastModified() == null) {
 			Date date = person.getUpdatedAt();
-			meta.setLastModified(date == null ? null : ISODateTimeFormat.dateTime().withZoneUTC().print(date.getTime()));
+			meta.setLastModified(date == null ? null : DateUtil.millisToISOString(date.getTime()));
 		}
 
 		meta.setLocation(person.getAttribute("jansMetaLocation"));
@@ -510,7 +510,7 @@ public class Scim2UserService implements Serializable {
 		transferAttributesToUserResource(gluuPerson, tmpUser, url);
 
 		long now = System.currentTimeMillis();
-		tmpUser.getMeta().setLastModified(ISODateTimeFormat.dateTime().withZoneUTC().print(now));
+		tmpUser.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
 		tmpUser = (UserResource) ScimResourceUtil.transferToResourceReplace(user, tmpUser,
 				extService.getResourceExtensions(user.getClass()));

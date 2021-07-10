@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +28,7 @@ import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
 import io.jans.scim.model.scim2.user.Email;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.AttributeService;
 import io.jans.scim.service.GroupService;
 import io.jans.scim.service.PersonService;
@@ -85,8 +85,7 @@ public class UserPersistenceHelper {
         Date updateDate = new Date();
         person.setUpdatedAt(updateDate);
         if (person.getAttribute("jansMetaLastMod") != null) {
-            person.setAttribute("jansMetaLastMod",
-                    ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
+        	person.setAttribute("jansMetaLastMod", DateUtil.millisToISOString(updateDate.getTime()));            
         }
         attributeService.applyMultiValued(person.getTypedCustomAttributes());
         persistenceEntryManager.merge(person);

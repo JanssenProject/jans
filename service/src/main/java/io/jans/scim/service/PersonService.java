@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -29,7 +30,6 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import io.jans.scim.exception.DuplicateEmailException;
@@ -107,8 +107,7 @@ public class PersonService implements Serializable {
 			Date updateDate = new Date();
 			person.setUpdatedAt(updateDate);
 			if (person.getAttribute("jansMetaLastMod") != null) {
-				person.setAttribute("jansMetaLastMod",
-						ISODateTimeFormat.dateTime().withZoneUTC().print(updateDate.getTime()));
+				person.setAttribute("jansMetaLastMod", Instant.ofEpochMilli(updateDate.getTime()).toString());
 			}
 			attributeService.applyMetaData(person.getCustomAttributes());
 			persistenceEntryManager.merge(person);
