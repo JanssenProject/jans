@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.Path;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.Version;
@@ -45,6 +44,7 @@ import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.model.scim2.util.ResourceValidator;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
+import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
 import io.jans.scim.service.external.ExternalScimService;
@@ -154,8 +154,7 @@ public class BaseScimWebService {
     protected void assignMetaInformation(BaseScimResource resource){
 
         //Generate some meta information (this replaces the info client passed in the request)
-        long now=new Date().getTime();
-        String val= ISODateTimeFormat.dateTime().withZoneUTC().print(now);
+        String val = DateUtil.millisToISOString(System.currentTimeMillis());
 
         Meta meta=new Meta();
         meta.setResourceType(ScimResourceUtil.getType(resource.getClass()));

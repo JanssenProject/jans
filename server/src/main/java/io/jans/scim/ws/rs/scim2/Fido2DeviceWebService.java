@@ -12,7 +12,9 @@ import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.time.Instant;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -53,9 +55,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 
 /**
  * Implementation of /Fido2Devices endpoint. Methods here are intercepted and/or decorated.
@@ -151,8 +150,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
             Fido2DeviceResource updatedResource=new Fido2DeviceResource();
             transferAttributesToFido2Resource(device, updatedResource, endpointUrl, userId);
 
-            long now = System.currentTimeMillis();
-            updatedResource.getMeta().setLastModified(ISODateTimeFormat.dateTime().withZoneUTC().print(now));
+            updatedResource.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
             updatedResource= (Fido2DeviceResource) ScimResourceUtil.transferToResourceReplace(fidoDeviceResource,
                     updatedResource, extService.getResourceExtensions(updatedResource.getClass()));
@@ -298,7 +296,9 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         device.getRegistrationData().setCounter(res.getCounter());
         device.setRegistrationStatus(res.getStatus());
         device.setDisplayName(res.getDisplayName());
-        device.getRegistrationData().setUpdatedDate(new DateTime(res.getMeta().getLastModified()).toDate());
+        
+        Instant instant = Instant.parse(res.getMeta().getLastModified());
+        device.getRegistrationData().setUpdatedDate(new Date(instant.toEpochMilli()));
 
     }
 
