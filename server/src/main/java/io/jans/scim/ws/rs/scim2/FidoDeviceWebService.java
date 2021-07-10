@@ -33,7 +33,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -154,8 +153,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
             FidoDeviceResource updatedResource=new FidoDeviceResource();
             transferAttributesToFidoResource(device, updatedResource, endpointUrl, userId);
 
-            long now = System.currentTimeMillis();
-            updatedResource.getMeta().setLastModified(ISODateTimeFormat.dateTime().withZoneUTC().print(now));
+            updatedResource.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
             updatedResource=(FidoDeviceResource) ScimResourceUtil.transferToResourceReplace(fidoDeviceResource, updatedResource, extService.getResourceExtensions(updatedResource.getClass()));
             transferAttributesToDevice(updatedResource, device);
