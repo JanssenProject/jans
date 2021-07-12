@@ -68,7 +68,7 @@ fullNameOverride: ""
 
 image:
   repository: janssenproject/configuration-manager
-  tag: 1.0.0_b6
+  tag: 1.0.0_b7
 
 volumes: []
   # Configure any additional volumes that need to be attached to the pod
