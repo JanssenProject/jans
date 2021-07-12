@@ -366,6 +366,153 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
+
+  /par:
+    post:
+      tags:
+        - Authorization
+      summary: The Pushed Authorization Endpoint performs Authentication Request registration
+      description: Registers Pushed Authorization Request at Pushed Authorization Endpoint using request parameters defined by https://datatracker.ietf.org/doc/html/draft-ietf-oauth-par-08.
+      operationId: post_par
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - scope
+                - response_type
+                - client_id
+                - redirect_uri
+              properties:
+                scope:
+                  type: string
+                  description: OpenID Connect requests MUST contain the openid scope value. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present.
+                response_type:
+                  type: string
+                  description: OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used.
+                client_id:
+                  type: string
+                  description: OAuth 2.0 Client Identifier valid at the Authorization Server.
+                redirect_uri:
+                  type: string
+                  description: Redirection URI to which the response will be sent. This URI MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider.
+                state:
+                  type: string
+                  description: Opaque value used to maintain state between the request and the callback.
+                response_mode:
+                  type: string
+                  description: Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint.
+                nonce:
+                  type: string
+                  description: String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+                display:
+                  type: string
+                  description: ASCII string value that specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User.
+                prompt:
+                  type: string
+                  description: Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+                max_age:
+                  type: integer
+                  description: Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP.
+                ui_locales:
+                  type: string
+                  description: End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+                  example: \"fr-CA fr en\" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation).
+                id_token_hint:
+                  type: string
+                  description: ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client. If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response.
+                login_hint:
+                  type: string
+                  description: Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary).
+                acr_values:
+                  type: string
+                  description: Requested Authentication Context Class Reference values. Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference.
+                amr_values:
+                  type: string
+                  description: AMR Values.
+                request:
+                  type: string
+                  description: This parameter enables OpenID Connect requests to be passed in a single, self-contained parameter and to be optionally signed and/or encrypted. The parameter value is a Request Object value. It represents the request as a JWT whose Claims are the request parameters.
+                request_session_id:
+                  type: string
+                  description: Request session id.
+                session_id:
+                  type: string
+                  description: Session id of this call.
+                origin_headers:
+                  type: string
+                  description: Origin headers. Used in custom workflows.
+                code_challenge:
+                  type: string
+                  description: PKCE code challenge.
+                code_challenge_method:
+                  type: string
+                  description: PKCE code challenge method.
+                custom_response_headers:
+                  type: string
+                  description: Custom Response Headers.
+                claims:
+                  type: string
+                  description: Requested Claims.
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: ParResponse
+                type: object
+                required:
+                  - request_uri
+                  - expires_in
+                properties:
+                  request_uri:
+                    type: string
+                    description: The request URI corresponding to the authorization request posted.  This URI is used as reference to the respective request data in the subsequent authorization request only. The way the authorization process obtains the authorization request data is at the discretion of the authorization server and out of scope of this specification.  There is no need to make the authorization request data available to other parties via this URI.
+                  expires_in:
+                    type: string
+                    description: A JSON number that represents the lifetime of the request URI in seconds as a positive integer.  The request URI lifetime is at the discretion of the authorization server but will typically be relatively short (e.g., between 5 and 600 seconds).
+        302:
+          description: Error codes for pushed authorization endpoint.
+          content:
+            application/json:
+              schema:
+                title: AuthorizeError
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                      - unauthorized_client
+                      - disabled_client
+                      - access_denied
+                      - retry
+                      - unsupported_response_type
+                      - invalid_scope
+                      - server_error
+                      - temporarily_unavailable
+                      - invalid_request_object
+                      - invalid_authentication_method
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
   /bc-authorize:
     post:
       tags:
@@ -1213,6 +1360,16 @@ paths:
                   type: integer
                   description: Specifies the Client-specific access token expiration.
                   example: 100000000
+                par_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific PAR expiration in seconds.
+                  example: 600
+                require_pushed_authorization_requests:
+                  type: boolean
+                  description: Boolean parameter indicating
+                    whether the only means of initiating an authorization request the
+                    client is allowed to use is a pushed authorization request.  If
+                    omitted, the default value is "false".
                 software_id:
                   type: string
                   description: Specifies a unique identifier string (UUID) assigned
@@ -1538,6 +1695,16 @@ paths:
                   type: integer
                   description: Specifies the Client-specific access token expiration.
                   example: 100000000
+                par_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific PAR expiration in seconds.
+                  example: 600
+                require_pushed_authorization_requests:
+                  type: boolean
+                  description: Boolean parameter indicating
+                    whether the only means of initiating an authorization request the
+                    client is allowed to use is a pushed authorization request.  If
+                    omitted, the default value is "false".
                 software_id:
                   type: string
                   description: Specifies a unique identifier string (UUID) assigned
@@ -1865,6 +2032,16 @@ paths:
                     type: integer
                     description: Specifies the Client-specific access token expiration.
                     example: 100000000
+                  par_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific PAR expiration in seconds.
+                    example: 600
+                  require_pushed_authorization_requests:
+                    type: boolean
+                    description: Boolean parameter indicating
+                      whether the only means of initiating an authorization request the
+                      client is allowed to use is a pushed authorization request.  If
+                      omitted, the default value is "false".
                   software_id:
                     type: string
                     description: Specifies a unique identifier string (UUID) assigned
