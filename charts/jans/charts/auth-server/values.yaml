@@ -2,7 +2,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 image:
   repository: janssenproject/auth-server
-  tag: 1.0.0_b6
+  tag: 1.0.0_b7
   pullPolicy: Always
 
 replicas: 1
