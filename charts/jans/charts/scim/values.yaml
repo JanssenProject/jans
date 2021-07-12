@@ -3,7 +3,7 @@
 replicas: 1
 image:
   repository: janssenproject/scim
-  tag: 1.0.0_b6
+  tag: 1.0.0_b7
   pullPolicy: Always
 
 #Resources for the deployment
