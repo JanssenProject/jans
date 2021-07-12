@@ -3,7 +3,7 @@
 
 image:
   repository: janssenproject/fido2
-  tag: 1.0.0_b6
+  tag: 1.0.0_b7
   pullPolicy: Always
 replicas: 1
 #Resources for the deployment
