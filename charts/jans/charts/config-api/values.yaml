@@ -15,14 +15,14 @@ fullnameOverride: ""
 
 livenessProbe:
   httpGet:
-    path: /api/v1/health/live
+    path: /jans-config-api/api/v1/health/live
     port: 8074
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
 readinessProbe:
   httpGet:
-    path: /api/v1/health/ready
+    path: /jans-config-api/api/v1/health/ready
     port: 8074
   initialDelaySeconds: 25
   periodSeconds: 25
