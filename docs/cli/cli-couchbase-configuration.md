@@ -59,7 +59,6 @@ To update or replace an couchbase database configuration:
 ```
 /opt/jans/jans-cli/config-cli.py --operation-id put-config-database-couchbase --data data.json
 ```
-<!-- 
 
 
 ## Gets Couchbase Database Configuration by its name
@@ -67,7 +66,15 @@ To update or replace an couchbase database configuration:
 To get the couchbase database configuration by its configId:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase-by-name id:configId-name
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase-by-name --url-suffix name:configId-name
 ```
 
--->
+## Delete Couchbase Database Configuration
+
+You can delete the couchbase database configuration by its name.
+The command line is:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-couchbase-by-name --url-suffix name:configId-name
+```
+
