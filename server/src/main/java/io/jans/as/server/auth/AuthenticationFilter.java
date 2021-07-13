@@ -132,11 +132,10 @@ public class AuthenticationFilter implements Filter {
             final String requestUrl = httpRequest.getRequestURL().toString();
             log.trace("Get request to: '{}'", requestUrl);
 
-            boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
-            boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
-            boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
-            boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthzEndpoint());
-            boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
+            boolean tokenEndpoint = requestUrl.endsWith("/token");
+            boolean tokenRevocationEndpoint = requestUrl.endsWith("/revoke");
+            boolean backchannelAuthenticationEnpoint = requestUrl.endsWith("/bc-authorize");
+            boolean deviceAuthorizationEndpoint = requestUrl.endsWith("/device_authorization");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean statEndpoint = requestUrl.endsWith("/stat");
             boolean isParEndpoint = requestUrl.endsWith("/par");
@@ -152,7 +151,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || statEndpoint || isParEndpoint) {
+            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || statEndpoint || isParEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
