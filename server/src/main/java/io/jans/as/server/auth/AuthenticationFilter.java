@@ -28,7 +28,6 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.token.TokenService;
-import io.jans.as.server.util.ServerUtil;
 import io.jans.model.security.Identity;
 import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
