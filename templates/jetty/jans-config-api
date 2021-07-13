@@ -5,7 +5,7 @@ JAVA_OPTIONS="-server -Xms%(jans-config-api_min_heap_mem)sm -Xmx%(jans-config-ap
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/jans-config-api
 JETTY_USER=%(jetty_user)s
-JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8084"
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8074"
 TMPDIR=%(jetty_dist)s/temp
 
 export PYTHON_HOME=%(jython_home)s
