@@ -6,18 +6,20 @@
 
 package io.jans.as.server.service.external.context;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.net.util.SubnetUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
+import org.apache.commons.net.util.SubnetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Holds object required in custom scripts
@@ -30,6 +32,8 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
     private final PersistenceEntryManager ldapEntryManager;
+
+    private WebApplicationException webApplicationException;
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
         this(httpRequest, null);
@@ -71,5 +75,22 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
         }
 
         return "";
+    }
+
+    public WebApplicationException getWebApplicationException() {
+        return webApplicationException;
+    }
+
+    public void setWebApplicationException(WebApplicationException webApplicationException) {
+        this.webApplicationException = webApplicationException;
+    }
+
+    public WebApplicationException createWebApplicationException(int status, String entity) {
+        this.webApplicationException = new WebApplicationException(Response
+                .status(status)
+                .entity(entity)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        return this.webApplicationException;
     }
 }
