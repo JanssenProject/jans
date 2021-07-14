@@ -10,20 +10,16 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
-import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Provides factory methods needed to create external dynamic client registration extension
@@ -45,21 +41,9 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         try {
             log.trace("Executing python 'createClient' method");
             ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
-            Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            if (configurationAttributes != null)
-                configurationAttributes = new HashMap<>(configurationAttributes);
-            else
-                configurationAttributes = new HashMap<>();
-
-            final String cert = httpRequest.getHeader("X-ClientCert");
-
-            if (StringUtils.isNotBlank(cert)) {
-                SimpleCustomProperty certProperty = new SimpleCustomProperty();
-                certProperty.setValue1(cert);
-                configurationAttributes.put("certProperty", certProperty);
-            }
-
-            return externalClientRegistrationType.createClient(registerRequest, client, configurationAttributes);
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, customScriptConfiguration, client);
+            context.setRegisterRequest(registerRequest);
+            return externalClientRegistrationType.createClient(context);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -82,24 +66,27 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         return result;
     }
 
-	public boolean executeExternalUpdateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
+	public boolean executeExternalUpdateClientMethod(HttpServletRequest httpRequest, CustomScriptConfiguration script, RegisterRequest registerRequest, Client client) {
 		try {
 			log.trace("Executing python 'updateClient' method");
-			ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
-			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-			return externalClientRegistrationType.updateClient(registerRequest, client, configurationAttributes);
+			ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) script.getExternalType();
+
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, script, client);
+            context.setRegisterRequest(registerRequest);
+
+			return externalClientRegistrationType.updateClient(context);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
-            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+            saveScriptError(script.getCustomScript(), ex);
 		}
 		
 		return false;
 	}
 
-	public boolean executeExternalUpdateClientMethods(RegisterRequest registerRequest, Client client) {
+	public boolean executeExternalUpdateClientMethods(HttpServletRequest httpRequest, RegisterRequest registerRequest, Client client) {
 		boolean result = true;
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			result &= executeExternalUpdateClientMethod(customScriptConfiguration, registerRequest, client);
+			result &= executeExternalUpdateClientMethod(httpRequest, customScriptConfiguration, registerRequest, client);
 			if (!result) {
 				return result;
 			}
