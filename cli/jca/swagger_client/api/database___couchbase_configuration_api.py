@@ -109,7 +109,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase/{name}', 'DELETE',
@@ -196,7 +196,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase', 'GET',
@@ -291,7 +291,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase/{name}', 'GET',
@@ -394,7 +394,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json-patch+json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase/{name}', 'PATCH',
@@ -493,7 +493,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase', 'POST',
@@ -592,7 +592,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase/test', 'POST',
@@ -691,7 +691,7 @@ class DatabaseCouchbaseConfigurationApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/database/couchbase', 'PUT',

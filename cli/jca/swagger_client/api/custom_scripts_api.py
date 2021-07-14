@@ -105,7 +105,7 @@ class CustomScriptsApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts/{inum}', 'DELETE',
@@ -192,7 +192,7 @@ class CustomScriptsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts', 'GET',
@@ -287,7 +287,7 @@ class CustomScriptsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts/inum/{inum}', 'GET',
@@ -390,7 +390,7 @@ class CustomScriptsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts/type/{type}', 'GET',
@@ -485,7 +485,7 @@ class CustomScriptsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts', 'POST',
@@ -580,7 +580,7 @@ class CustomScriptsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/config/scripts', 'PUT',

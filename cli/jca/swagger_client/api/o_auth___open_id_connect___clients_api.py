@@ -109,7 +109,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients/{inum}', 'DELETE',
@@ -204,7 +204,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients', 'GET',
@@ -299,7 +299,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients/{inum}', 'GET',
@@ -402,7 +402,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json-patch+json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients/{inum}', 'PATCH',
@@ -497,7 +497,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients', 'POST',
@@ -592,7 +592,7 @@ class OAuthOpenIDConnectClientsApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/openid/clients', 'PUT',

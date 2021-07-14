@@ -109,7 +109,7 @@ class AttributeApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes/{inum}', 'DELETE',
@@ -208,7 +208,7 @@ class AttributeApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes', 'GET',
@@ -303,7 +303,7 @@ class AttributeApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes/{inum}', 'GET',
@@ -406,7 +406,7 @@ class AttributeApi(object):
             ['application/json-patch+json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes/{inum}', 'PATCH',
@@ -505,7 +505,7 @@ class AttributeApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes', 'POST',
@@ -604,7 +604,7 @@ class AttributeApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['jans-auth']  # noqa: E501
+        auth_settings = ['oauth2']  # noqa: E501
 
         return self.api_client.call_api(
             '/jans-config-api/api/v1/attributes', 'PUT',
