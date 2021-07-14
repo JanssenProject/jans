@@ -41,6 +41,11 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-core-server</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-client-api</artifactId>
 		</dependency>
 		<dependency>
@@ -290,7 +295,7 @@
 				<executions>
 					<execution>
 						<id>prepare-configuration-files</id>
-						<phase>process-test-resources</phase>
+						<phase>process-resources</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -307,10 +312,10 @@
 									</includes>
 								</resource>
 							</resources>
-							<filters>
+							<!-- <filters>
 								<filter>profiles/${cfg}/config-api-test.properties</filter>
 								<filter>profiles/${cfg}/config-api-server.properties</filter>
-							</filters>
+							</filters> -->
 						</configuration>
 					</execution>
 				</executions>
