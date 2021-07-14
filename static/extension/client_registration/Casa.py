@@ -27,10 +27,11 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.as.client.RegisterRequest
-    #   client is io.jans.as.model.registration.Client
-    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    def createClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def createClient(self, context):
+        registerRequest = context.getRegisterRequest()
+        configurationAttributes = context.getConfigurationAttibutes()
+        client = context.getClient()
 
         print "Casa client registration. CreateClient method"
         redirectUris = client.getRedirectUris()
@@ -55,10 +56,12 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.as.client.RegisterRequest
-    #   client is io.jans.as.model.registration.Client
-    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    def updateClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def updateClient(self, context):
+        registerRequest = context.getRegisterRequest()
+        configurationAttributes = context.getConfigurationAttibutes()
+        client = context.getClient()
+
         print "Casa client registration. UpdateClient method"       
         self.setClientScopes(client, configurationAttributes.get("scopes"))
         return True
