@@ -231,7 +231,7 @@ class Configuration(six.with_metaclass(TypeWithDefault, object)):
         :return: The Auth Settings information dict.
         """
         return {
-            'jans-auth':
+            'oauth2':
                 {
                     'type': 'oauth2',
                     'in': 'header',

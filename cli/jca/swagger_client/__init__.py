@@ -29,6 +29,7 @@ from swagger_client.api.configuration__smtp_api import ConfigurationSMTPApi
 from swagger_client.api.custom_scripts_api import CustomScriptsApi
 from swagger_client.api.database___couchbase_configuration_api import DatabaseCouchbaseConfigurationApi
 from swagger_client.api.database___ldap_configuration_api import DatabaseLDAPConfigurationApi
+from swagger_client.api.database___sql_configuration_api import DatabaseSqlConfigurationApi
 from swagger_client.api.default_authentication_method_api import DefaultAuthenticationMethodApi
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
@@ -61,6 +62,7 @@ from swagger_client.models.logging_configuration import LoggingConfiguration
 from swagger_client.models.memcached_configuration import MemcachedConfiguration
 from swagger_client.models.native_persistence_configuration import NativePersistenceConfiguration
 from swagger_client.models.patch_request import PatchRequest
+from swagger_client.models.persistence_configuration import PersistenceConfiguration
 from swagger_client.models.redis_configuration import RedisConfiguration
 from swagger_client.models.requested_parties import RequestedParties
 from swagger_client.models.scope import Scope
@@ -70,5 +72,6 @@ from swagger_client.models.sector_identifier import SectorIdentifier
 from swagger_client.models.simple_custom_property import SimpleCustomProperty
 from swagger_client.models.simple_extended_custom_property import SimpleExtendedCustomProperty
 from swagger_client.models.smtp_configuration import SmtpConfiguration
+from swagger_client.models.sql_configuration import SqlConfiguration
 from swagger_client.models.uma_resource import UmaResource
 from swagger_client.models.web_keys_configuration import WebKeysConfiguration
