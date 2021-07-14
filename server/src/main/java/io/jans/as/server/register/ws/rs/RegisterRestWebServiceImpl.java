@@ -873,7 +873,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             boolean updateClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
-                                updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(request, client);
+                                updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(httpRequest, request, client);
                             }
 
                             if (updateClient) {
