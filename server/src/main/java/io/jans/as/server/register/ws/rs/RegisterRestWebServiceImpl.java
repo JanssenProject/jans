@@ -12,8 +12,10 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SoftwareStatementValidationType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.StaticConfiguration;
@@ -81,7 +83,59 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_LIFETIME;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.ALLOW_SPONTANEOUS_SCOPES;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.CLAIMS;
+import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
+import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
+import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION;
+import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
+import static io.jans.as.model.register.RegisterRequestParam.PAR_LIFETIME;
+import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
+import static io.jans.as.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
+import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_PAR;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
+import static io.jans.as.model.register.RegisterRequestParam.RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
+import static io.jans.as.model.register.RegisterRequestParam.SPONTANEOUS_SCOPES;
+import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.TOS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
 import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
@@ -266,7 +320,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA,
                         "Invalid Client Metadata registering to use CIBA (Client Initiated Backchannel Authentication).");
             }
-
 
             registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);
             registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
@@ -560,12 +613,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
-            p_client.setRedirectUris(redirectUris.toArray(new String[redirectUris.size()]));
+            p_client.setRedirectUris(redirectUris.toArray(new String[0]));
         }
         List<String> claimsRedirectUris = requestObject.getClaimsRedirectUris();
         if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
             claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
-            p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[claimsRedirectUris.size()]));
+            p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
         }
         if (requestObject.getApplicationType() != null) {
             p_client.setApplicationType(requestObject.getApplicationType());
@@ -577,45 +630,42 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
 
-        Set<io.jans.as.model.common.ResponseType> responseTypeSet = new HashSet<>();
-        responseTypeSet.addAll(requestObject.getResponseTypes());
-
-        Set<io.jans.as.model.common.GrantType> grantTypeSet = new HashSet<>();
-        grantTypeSet.addAll(requestObject.getGrantTypes());
+        Set<ResponseType> responseTypeSet = new HashSet<>(requestObject.getResponseTypes());
+        Set<GrantType> grantTypeSet = new HashSet<>(requestObject.getGrantTypes());
 
         if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
             if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
-                responseTypeSet.add(io.jans.as.model.common.ResponseType.CODE);
+                responseTypeSet.add(ResponseType.CODE);
             }
-            if (responseTypeSet.contains(io.jans.as.model.common.ResponseType.CODE)) {
-                grantTypeSet.add(io.jans.as.model.common.GrantType.AUTHORIZATION_CODE);
-                grantTypeSet.add(io.jans.as.model.common.GrantType.REFRESH_TOKEN);
+            if (responseTypeSet.contains(ResponseType.CODE)) {
+                grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
+                grantTypeSet.add(GrantType.REFRESH_TOKEN);
             }
-            if (grantTypeSet.contains(io.jans.as.model.common.GrantType.AUTHORIZATION_CODE)) {
-                responseTypeSet.add(io.jans.as.model.common.ResponseType.CODE);
-                grantTypeSet.add(io.jans.as.model.common.GrantType.REFRESH_TOKEN);
+            if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
+                responseTypeSet.add(ResponseType.CODE);
+                grantTypeSet.add(GrantType.REFRESH_TOKEN);
             }
         }
-        if (responseTypeSet.contains(io.jans.as.model.common.ResponseType.TOKEN) || responseTypeSet.contains(io.jans.as.model.common.ResponseType.ID_TOKEN)) {
-            grantTypeSet.add(io.jans.as.model.common.GrantType.IMPLICIT);
+        if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
+            grantTypeSet.add(GrantType.IMPLICIT);
         }
-        if (grantTypeSet.contains(io.jans.as.model.common.GrantType.IMPLICIT)) {
-            responseTypeSet.add(io.jans.as.model.common.ResponseType.TOKEN);
+        if (grantTypeSet.contains(GrantType.IMPLICIT)) {
+            responseTypeSet.add(ResponseType.TOKEN);
         }
 
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
 
-        Set<io.jans.as.model.common.GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
         if (!update || requestObject.getResponseTypes().size() > 0) {
-            p_client.setResponseTypes(responseTypeSet.toArray(new io.jans.as.model.common.ResponseType[responseTypeSet.size()]));
+            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
         }
         if (!update) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new io.jans.as.model.common.GrantType[grantTypeSet.size()]));
+            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
         } else if (appConfiguration.getEnableClientGrantTypeUpdate() && requestObject.getGrantTypes().size() > 0) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new io.jans.as.model.common.GrantType[grantTypeSet.size()]));
+            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
         }
 
         List<String> contacts = requestObject.getContacts();
@@ -698,7 +748,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getTokenEndpointAuthMethod() != null) {
             p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
         } else { // If omitted, the default is client_secret_basic
-            p_client.setTokenEndpointAuthMethod(io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+            p_client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
             p_client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
@@ -746,7 +796,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         List<String> scopes = requestObject.getScope();
-        if (grantTypeSet.contains(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
             scopes = Lists.newArrayList(scopes);
             scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
         }
@@ -1031,7 +1081,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS.toString(), client.getRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS_REDIRECT_URIS.toString(), client.getClaimRedirectUris());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), io.jans.as.model.common.ResponseType.toStringArray(client.getResponseTypes()));
+        Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), ResponseType.toStringArray(client.getResponseTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), GrantType.toStringArray(client.getGrantTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CONTACTS.toString(), client.getContacts());
