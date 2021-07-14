@@ -30,11 +30,12 @@ class ClientRegistration(ClientRegistrationType):
         return True   
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.as.client.RegisterRequest
-    #   client is io.jans.as.model.registration.Client
-    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    def createClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def createClient(self, context):
         print "Client registration. CreateClient method"
+        registerRequest = context.getRegisterRequest()
+        configurationAttributes = context.getConfigurationAttibutes()
+        client = context.getClient()
 
         redirectUris = client.getRedirectUris()
         print "Client registration. Redirect Uris: %s" % redirectUris
@@ -61,10 +62,8 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     # Update client entry before persistent it
-    #   registerRequest is io.jans.as.client.RegisterRequest
-    #   client is io.jans.as.model.registration.Client
-    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
-    def updateClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def updateClient(self, context):
         print "Client registration. UpdateClient method"
         return True
 
