@@ -1,9 +1,21 @@
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v2
-name: cn-istio-ingress
-description: Istio ingress integration files
-type: application
+name:  cn-istio-ingress
 version: 1.0.0-b7
+kubeVersion: ">=v1.17.0-0"
+description: Istio Gateway
+type: application
+keywords:
+  - istio
+  - gateway
+home: https://jans.io/
+sources:
+  - https://jans.io/
+  - https://github.com/JanssenFederation/cloud-native-edition/tree/master/pyjans/kubernetes/templates/helm/jans/charts/cn-istio-ingress
 maintainers:
-- name: moabu
-  email: mo@gluu.org
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://jans.io/favicon.ico
 appVersion: "1.0.0-b7"

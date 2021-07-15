@@ -35,6 +35,9 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
+        env:
+          {{- include "scim.usr-envs" . | indent 12 }}
+          {{- include "scim.usr-secret-envs" . | indent 12 }}
         {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
         command:
           - /bin/sh
@@ -57,13 +60,21 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
         volumeMounts:
         {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{ if eq .Values.global.configSecretAdapter "google" }}
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-          name: google-secret-manager-sa
+          name: google-sa
           subPath: google-credentials.json
         {{- end }}
         {{- if eq .Values.global.cnPersistenceType "sql" }}
@@ -99,10 +110,10 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ if eq .Values.global.configSecretAdapter "google" }}
-        - name: google-secret-manager-sa
+      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
           secret:
-            secretName: {{ .Release.Name }}-google-secret-manager-sa
+            secretName: {{ .Release.Name }}-google-sa
       {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass

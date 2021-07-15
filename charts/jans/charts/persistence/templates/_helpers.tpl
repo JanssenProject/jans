@@ -54,3 +54,26 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create user custom defined  envs
+*/}}
+{{- define "persistence.usr-envs"}}
+{{- range $key, $val := .Values.usrEnvs.normal }}
+- name: {{ $key }}
+  value: {{ $val }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create user custom defined secret envs
+*/}}
+{{- define "persistence.usr-secret-envs"}}
+{{- range $key, $val := .Values.usrEnvs.secret }}
+- name: {{ $key }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ $.Release.Name }}-{{ $.Chart.Name }}-user-custom-envs
+      key: {{ $key }}
+{{- end }}
+{{- end }}
