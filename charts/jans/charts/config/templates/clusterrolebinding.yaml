@@ -3,7 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Release.Namespace }}-cluster-admin-binding
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-cluster-admin-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -22,7 +22,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app: {{ include "config.name" . }}-load
-  name: {{ .Release.Namespace }}-rolebinding
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -1,0 +1,29 @@
+{{ if .Values.hpa.enabled -}}
+# License terms and conditions for Janssen Cloud Native Edition:
+# https://www.apache.org/licenses/LICENSE-2.0
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "client-api.fullname" . }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "client-api.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  {{- if .Values.hpa.targetCPUUtilizationPercentage }}
+  targetCPUUtilizationPercentage: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+  {{- else if .Values.hpa.metrics }}
+  metrics:
+  {{- with .Values.hpa.metrics }}
+{{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.hpa.behavior }}
+  behavior:
+  {{- with .Values.hpa.behavior }}
+{{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}

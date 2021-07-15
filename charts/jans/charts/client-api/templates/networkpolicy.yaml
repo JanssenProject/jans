@@ -34,15 +34,3 @@ spec:
     ports:
     - protocol: TCP
       port: 8443
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          APP_NAME: gluu-gateway-ui
-    - podSelector:
-        matchLabels:
-          APP_NAME: gluu-gateway-ui
-    ports:
-    - protocol: TCP
-      port: 8443
-    - protocol: TCP
-      port: 8444

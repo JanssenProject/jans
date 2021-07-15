@@ -33,6 +33,9 @@ spec:
       containers:
         - name: {{ include "client-api.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            {{- include "client-api.usr-envs" . | indent 12 }}
+            {{- include "client-api.usr-secret-envs" . | indent 12 }}
           securityContext:
             runAsUser: 1000
             runAsNonRoot: true
@@ -51,6 +54,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-config-cm
+            {{ if .Values.global.usrEnvs.secret }}
+            - secretRef:
+                name: {{ .Release.Name }}-global-user-custom-envs
+            {{- end }}
+            {{ if .Values.global.usrEnvs.normal }}
+            - configMapRef:
+                name: {{ .Release.Name }}-global-user-custom-envs
+            {{- end }}
           livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
@@ -59,9 +70,9 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{ if eq .Values.global.configSecretAdapter "google" }}
+          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
             - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-              name: google-secret-manager-sa
+              name: google-sa
               subPath: google-credentials.json
           {{- end }}
           {{- if eq .Values.global.cnPersistenceType "sql" }}
@@ -95,10 +106,10 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ if eq .Values.global.configSecretAdapter "google" }}
-        - name: google-secret-manager-sa
+      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
           secret:
-            secretName: {{ .Release.Name }}-google-secret-manager-sa
+            secretName: {{ .Release.Name }}-google-sa
       {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass

@@ -1,11 +1,22 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-apiVersion: v1
-appVersion: "1.0.0-b7"
-home: https://jans.io
-maintainers:
-- name: moabu
-  email: mo@gluu.org
-description: A Helm chart for Janssen server
+apiVersion: v2
 name: config
 version: 1.0.0-b7
+kubeVersion: ">=v1.17.0-0"
+description: Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
+type: application
+keywords:
+  - configuration
+  - secrets
+home: https://jans.io/reference/container-configs/
+sources:
+  - https://jans.io/reference/container-configs/
+  - https://github.com/JanssenProject/docker-jans-configuration-manager
+  - https://github.com/JanssenFederation/cloud-native-edition/tree/master/pyjans/kubernetes/templates/helm/jans/charts/config
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://jans.io/favicon.ico
+appVersion: "1.0.0-b7"
