@@ -32,6 +32,9 @@ spec:
       - name: {{ include "auth-server.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+          {{- include "auth-server.usr-envs" . | indent 12 }}
+          {{- include "auth-server.usr-secret-envs" . | indent 12 }}
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
@@ -49,21 +52,56 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
         volumeMounts:
         {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{ if .Values.global.cnExtSigningJwksUri }}
-          - name: cn-ext-signing-jwks-key
-            mountPath: /etc/certs/ext-signing.key
-            subPath: ext-signing.key
-          - name: cn-ext-signing-jwks-crt
-            mountPath: /etc/certs/ext-signing.crt
-            subPath: ext-signing.crt
+        {{ if .Values.global.cnObExtSigningJwksKeyPassPhrase }}
+          - name: cn-ob-ext-signing-jwks-key-passphrase
+            mountPath: /etc/certs/ob-ext-signing.pin
+            subPath: ob-ext-signing.pin
         {{- end }}
-        {{ if eq .Values.global.configSecretAdapter "google" }}
+        {{ if .Values.global.cnObExtSigningJwksKey }}
+          - name: cn-ob-ext-signing-jwks-key
+            mountPath: /etc/certs/ob-ext-signing.key
+            subPath: ob-ext-signing.key
+        {{- end }}
+        {{ if .Values.global.cnObExtSigningJwksCrt }}
+          - name: cn-ob-ext-signing-jwks-crt
+            mountPath: /etc/certs/ob-ext-signing.crt
+            subPath: ob-ext-signing.crt
+        {{- end }}
+        {{ if .Values.global.cnObTransportKeyPassPhrase }}
+          - name: cn-ob-transport-key-passphrase
+            mountPath: /etc/certs/ob-transport.pin
+            subPath: ob-transport.pin
+        {{- end }}
+        {{ if .Values.global.cnObTransportKey }}
+          - name: cn-ob-transport-key
+            mountPath: /etc/certs/ob-transport.key
+            subPath: ob-transport.key
+        {{- end }}
+        {{ if .Values.global.cnObTransportCrt }}
+          - name: cn-ob-transport-crt
+            mountPath: /etc/certs/ob-transport.crt
+            subPath: ob-transport.crt
+        {{- end }}
+        {{ if .Values.global.cnObTransportTrustStore }}
+          - name: cn-ob-transport-truststore
+            mountPath: /etc/certs/ob-transport-truststore.p12
+            subPath: ob-transport-truststore.p12
+        {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-secret-manager-sa
+            name: google-sa
             subPath: google-credentials.json
         {{- end }}
         {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
@@ -107,18 +145,63 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ if .Values.global.cnExtSigningJwksUri }}
-        - name: cn-ext-signing-jwks-crt
+      {{ if .Values.global.cnObExtSigningJwksCrt }}
+        - name: cn-ob-ext-signing-jwks-crt
           secret:
-            secretName: {{ .Release.Name }}-ext-signing-jwks-crt
-        - name: cn-ext-signing-jwks-key
-          secret:
-            secretName: {{ .Release.Name }}-ext-signing-jwks-key
+            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
+            items:
+              - key: ob-ext-signing.crt
+                path: ob-ext-signing.crt
       {{- end }}
-      {{ if eq .Values.global.configSecretAdapter "google" }}
-        - name: google-secret-manager-sa
+      {{ if .Values.global.cnObExtSigningJwksKey }}
+        - name: cn-ob-ext-signing-jwks-key
           secret:
-            secretName: {{ .Release.Name }}-google-secret-manager-sa
+            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
+            items:
+              - key: ob-ext-signing.key
+                path: ob-ext-signing.key
+      {{- end }}
+      {{ if .Values.global.cnObExtSigningJwksKeyPassPhrase }}
+        - name: cn-ob-ext-signing-jwks-key-passphrase
+          secret:
+            secretName: {{ .Release.Name }}-ob-ext-signing-jwks-crt-key-pin
+            items:
+              - key: ob-ext-signing.pin
+                path: ob-ext-signing.pin
+      {{- end }}
+      {{ if .Values.global.cnObTransportCrt }}
+        - name: cn-ob-transport-crt
+          secret:
+            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
+            items:
+              - key: ob-transport.crt
+                path: ob-transport.crt
+      {{- end }}
+      {{ if .Values.global.cnObTransportKey }}
+        - name: cn-ob-transport-key
+          secret:
+            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
+            items:
+              - key: ob-transport.key
+                path: ob-transport.key
+      {{- end }}
+      {{ if .Values.global.cnObTransportKeyPassPhrase }}
+        - name: cn-ob-transport-key-passphrase
+          secret:
+            secretName: {{ .Release.Name }}-ob-transport-crt-key-pin
+            items:
+              - key: ob-transport.pin
+                path: ob-transport.pin
+      {{- end }}
+      {{ if .Values.global.cnObTransportTrustStore }}
+        - name: cn-ob-transport-truststore
+          secret:
+            secretName: {{ .Release.Name }}-ob-transport-truststore
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-sa
       {{- end }}
       {{- if eq .Values.global.cnPersistenceType "sql" }}
         - name: sql-pass

@@ -8,7 +8,7 @@ metadata:
   name: {{ .Release.Name }}-ldap-mtls
   namespace: {{.Release.Namespace}}
 spec:
-  host: {{ .Values.service.ldapServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ .Values.global.opendj.ldapServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
