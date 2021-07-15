@@ -158,17 +158,6 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>jans-core-server</artifactId>
-				<version>${jans.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
 				<artifactId>jans-core-service</artifactId>
 				<version>${jans.version}</version>
 				<exclusions>
