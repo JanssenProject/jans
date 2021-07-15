@@ -208,9 +208,8 @@
 		<finalName>jans-config-api</finalName>
 
 		<filters>
-			<filter>profiles/${cfg}/karate.properties</filter>
-			<filter>profiles/${cfg}/test.properties</filter>
-		</filters>
+            <filter>profiles/${cfg}/config-api-test.properties</filter>
+        </filters>
 
 		<testResources>
 			<testResource>
