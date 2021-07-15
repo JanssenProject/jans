@@ -419,7 +419,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 return;
             }
 
-            final Jwt jwt = Jwt.parse(requestParams);
+            final Jwt jwt = Jwt.parseOrThrow(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
 
             final boolean isHmac = AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily());
@@ -495,7 +495,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private JSONObject parseRequestObjectWithoutValidation(String requestParams) throws JSONException {
         try {
             if (appConfiguration.getDcrSignatureValidationEnabled()) {
-                return Jwt.parse(requestParams).getClaims().toJsonObject();
+                return Jwt.parseOrThrow(requestParams).getClaims().toJsonObject();
             }
             return new JSONObject(requestParams);
         } catch (Exception e) {
@@ -511,7 +511,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         try {
-            Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
+            Jwt softwareStatement = Jwt.parseOrThrow(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             final SignatureAlgorithm signatureAlgorithm = softwareStatement.getHeader().getSignatureAlgorithm();
 
             final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
