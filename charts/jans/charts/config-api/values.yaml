@@ -1,25 +1,69 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-# Default values for config-api.
-replicas: 1
-service:
-  # This must match config.configMap.cnClientApiApplicationCertCn
-  clientApiServerServiceName: config-api
-image:
-  repository: janssenproject/config-api
-  tag: 1.0.0_b7
-  pullPolicy: Always
+# -- Janssen Admin UI. This shouldn't be internet facing.
+# -- Configure the HorizontalPodAutoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+  # -- metrics if targetCPUUtilizationPercentage is not set
+  metrics: []
+  # -- Scaling Policies
+  behavior: {}
+
 
 nameOverride: ""
 fullnameOverride: ""
 
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
+image:
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository: janssenproject/config-api
+  # -- Image  tag to use for deploying.
+  tag: 1.0.0_b7
+# -- Service replica number.
+replicas: 1
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit.
+    cpu: 2500m
+    # -- Memory limit.
+    memory: 2500Mi
+  requests:
+    # -- CPU request.
+    cpu: 2500m
+    # -- Memory request.
+    memory: 2500Mi
+service:
+  # -- The name of the config-api port within the config-api service. Please keep it as default.
+  name: http-config-api
+# -- Configure the liveness healthcheck for the auth server if needed.
 livenessProbe:
+  # -- Executes the python3 healthcheck.
+  # https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py
   httpGet:
     path: /jans-config-api/api/v1/health/live
     port: 8074
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
+# -- Configure the readiness healthcheck for the auth server if needed.
+# https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py
 readinessProbe:
   httpGet:
     path: /jans-config-api/api/v1/health/ready
@@ -28,34 +72,13 @@ readinessProbe:
   periodSeconds: 25
   timeoutSeconds: 5
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+# -- Configure any additional volumes that need to be attached to the pod
 volumes: []
-  # Configure any additional volumes need to be attached to the pod
-  # - name: mycustomcert
-  #   secret:
-  #     secretName: mycustomsecret
+# -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
-  # Configure any additional volumesMounts that need to be attached to the containers
-  # - name: mycustomcert
-  #   mountPath: /etc/certs
-dnsPolicy: ""
-dnsConfig: {}
-  # options:
-  #   - name: ndots
-  #     value: "5"

@@ -1,27 +1,42 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-# Default values for persistence.
-replicaCount: 1
-
+# -- Job to generate data and initial config for Janssen Server persistence layer.
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
 image:
-  repository: janssenproject/persistence-loader
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository: gluufederation/persistence
+  # -- Image  tag to use for deploying.
   tag: 1.0.0_b7
-  pullPolicy: Always
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit
+    cpu: 300m
+    # -- Memory limit.
+    memory: 300Mi
+  requests:
+    # -- CPU request.
+    cpu: 300m
+    # -- Memory request.
+    memory: 300Mi
+# -- Configure any additional volumes that need to be attached to the pod
+volumes: []
+# -- Configure any additional volumesMounts that need to be attached to the containers
+volumeMounts: []
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-volumes: []
-  # Configure any additional volumes need to be attached to the pod
-  # - name: mycustomcert
-  #   secret:
-  #     secretName: mycustomsecret
-volumeMounts: []
-  # Configure any additional volumesMounts that need to be attached to the containers
-  # - name: mycustomcert
-  #   mountPath: /etc/certs
-dnsPolicy: ""
-dnsConfig: {}
-  # options:
-  #   - name: ndots
-  #     value: "5"

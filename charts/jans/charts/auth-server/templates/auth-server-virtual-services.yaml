@@ -20,7 +20,7 @@ spec:
       uri: "/auth-server/.well-known/openid-configuration"
     route:
       - destination:
-          host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+          host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
           port:
             number: 8080
         weight: 100
@@ -32,7 +32,7 @@ spec:
       uri: "/auth-server/restv1/uma2-configuration"
     route:
       - destination:
-          host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+          host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
           port:
             number: 8080
         weight: 100
@@ -44,7 +44,7 @@ spec:
       uri: "/auth-server/.well-known/simple-web-discovery"
     route:
     - destination:
-        host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: 8080
       weight: 100
@@ -54,7 +54,7 @@ spec:
         prefix: "/auth-server"
     route:
     - destination:
-        host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: 8080
   - name: "{{ .Release.Name }}-istio-webfinger"
@@ -65,7 +65,7 @@ spec:
       uri: "/auth-server/.well-known/webfinger"
     route:
     - destination:
-        host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: 8080
       weight: 100
@@ -77,7 +77,7 @@ spec:
       uri: "/auth-server/restv1/fido-configuration"
     route:
     - destination:
-        host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
         port:
           number: 8080
       weight: 100
