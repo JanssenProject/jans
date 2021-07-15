@@ -1,18 +1,58 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
+# -- OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.
+# -- Configure the HorizontalPodAutoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+  # -- metrics if targetCPUUtilizationPercentage is not set
+  metrics: []
+  # -- Scaling Policies
+  behavior: {}
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
 image:
-  repository: janssenproject/auth-server
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository:  janssenproject/auth-server
+  # -- Image  tag to use for deploying.
   tag: 1.0.0_b7
-  pullPolicy: Always
-
+# -- Service replica number.
 replicas: 1
-#Resources for the deployment
-requests:
-  memory: 1000Mi
-limits:
-  memory: 1536Mi
-
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit.
+    cpu: 2500m
+    # -- Memory limit.
+    memory: 2500Mi
+  requests:
+    # -- CPU request.
+    cpu: 2500m
+    # -- Memory request.
+    memory: 2500Mi
+service:
+  # -- The name of the oxauth port within the oxauth service. Please keep it as default.
+  name: http-auth
+  # -- Port of the oxauth service. Please keep it as default.
+  port: 8080
+# -- Configure the liveness healthcheck for the auth server if needed.
 livenessProbe:
+  # -- Executes the python3 healthcheck.
+  # https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py
   exec:
     command:
       - python3
@@ -20,6 +60,8 @@ livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
+# -- Configure the readiness healthcheck for the auth server if needed.
+# https://github.com/JanssenFederation/docker-oxauth/blob/4.3/scripts/healthcheck.py
 readinessProbe:
   exec:
     command:
@@ -28,23 +70,6 @@ readinessProbe:
   initialDelaySeconds: 25
   periodSeconds: 25
   timeoutSeconds: 5
-
-# service
-service:
-  authServerServiceName: auth-server
-  name: http-auth
-  port: 8080
 volumes: []
-  # Configure any additional volumes need to be attached to the pod
-  # - name: mycustomcert
-  #   secret:
-  #     secretName: mycustomsecret
+# -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
-  # Configure any additional volumesMounts that need to be attached to the containers
-  # - name: mycustomcert
-  #   mountPath: /etc/certs
-dnsPolicy: ""
-dnsConfig: {}
-  # options:
-  #   - name: ndots
-  #     value: "5"

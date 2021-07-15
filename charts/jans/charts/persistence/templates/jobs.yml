@@ -28,6 +28,9 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
+        env:
+          {{- include "persistence.usr-envs" . | indent 12 }}
+          {{- include "persistence.usr-secret-envs" . | indent 12 }}
         {{- if .Values.global.istio.enabled }}
         command:
           - tini
@@ -42,13 +45,21 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
         volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
-        {{ if eq .Values.global.configSecretAdapter "google" }}
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-secret-manager-sa
+            name: google-sa
             subPath: google-credentials.json
         {{- end }}
         {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
@@ -73,10 +84,10 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ if eq .Values.global.configSecretAdapter "google" }}
-        - name: google-secret-manager-sa
+      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
           secret:
-            secretName: {{ .Release.Name }}-google-secret-manager-sa
+            secretName: {{ .Release.Name }}-google-sa
       {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
         - name: cb-pass

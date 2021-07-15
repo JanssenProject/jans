@@ -1,12 +1,22 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-apiVersion: v1
-appVersion: "1.0.0-b7"
-description: config-api chart
+apiVersion: v2
 name: config-api
 version: 1.0.0-b7
-maintainers:
-- name: moabu
-  email: mo@gluu.org
-
+kubeVersion: ">=v1.17.0-0"
+description: Jans Config Api endpoints can be used to configure jans-auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+type: application
+keywords:
+  - configuration
+  - API
 home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/jans-config-api
+  - https://github.com/JanssenProject/docker-jans-config-api
+  - https://github.com/JanssenFederation/cloud-native-edition/tree/master/pyjans/kubernetes/templates/helm/jans/charts/config-api
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://jans.io/favicon.ico
+appVersion: "1.0.0-b7"

@@ -29,11 +29,12 @@ appVersion: "1.0.0-b7"
 icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
 home: https://github.com/JanssenProject/jans-cloud-native
 sources:
-  - https://github.com/JanssenProject/jans-cloud-native/charts
+- https://jans.io
+- https://github.com/JanssenProject/jans-cloud-native
 maintainers:
 - name: moabu
-  email: mo@gluu.org
-description: Janssen Authorization server
+  email: support@gluu.org
+description: Janssen Access and Identity Management
 name: jans
 version: 1.0.0-b7
 dependencies:
@@ -71,7 +72,6 @@ dependencies:
   condition: global.nginx-ingress.enabled
   version: 1.0.0-b7
   repository: ""
-
 
 - name: auth-server-key-rotation
   condition: global.auth-server-key-rotation.enabled
