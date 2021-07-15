@@ -5,23 +5,23 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/images: |
     - name: auth-server
-      image: janssenproject/auth-server:1.0.0_b7
+      image: janssenproject/auth-server:1.0.0_dev
     - name: auth-server-key-rotation
-      image: janssenproject/certmanager:1.0.0_b7
+      image: janssenproject/certmanager:1.0.0_dev
     - name:  client-api
-      image: janssenproject/client-api:1.0.0_b7
+      image: janssenproject/client-api:1.0.0_dev
     - name: configuration-manager
-      image: janssenproject/configuration-manager:1.0.0_b7
+      image: janssenproject/configuration-manager:1.0.0_dev
     - name:  config-api
-      image: janssenproject/config-api:1.0.0_b7
+      image: janssenproject/config-api:1.0.0_dev
     - name: fido2
-      image: janssenproject/fido2:1.0.0_b7
+      image: janssenproject/fido2:1.0.0_dev
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: janssenproject/persistence-loader:1.0.0_b7
+      image: janssenproject/persistence-loader:1.0.0_dev
     - name: scim
-      image: janssenproject/scim:1.0.0_b7
+      image: janssenproject/scim:1.0.0_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: "true"
 apiVersion: v2
