@@ -1,31 +1,52 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-# Default values for client-api.
-replicas: 1
-service:
-  # This must match config.configMap.cnClientApiApplicationCertCn
-  clientApiServerServiceName: client-api
+# -- Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
+# -- Configure the HorizontalPodAutoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50
+  # -- metrics if targetCPUUtilizationPercentage is not set
+  metrics: []
+  # -- Scaling Policies
+  behavior: {}
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
 image:
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
   repository: janssenproject/client-api
+  # -- Image  tag to use for deploying.
   tag: 1.0.0_b7
-  pullPolicy: Always
-
-nameOverride: ""
-fullnameOverride: ""
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
+# -- Service replica number.
+replicas: 1
+# -- Resource specs.
+resources:
+  limits:
+    # -- CPU limit.
+    cpu: 1000m
+    # -- Memory limit.
+    memory: 400Mi
+  requests:
+    # -- CPU request.
+    cpu: 1000m
+    # -- Memory request.
+    memory: 400Mi
+# -- Configure the liveness healthcheck for the auth server if needed.
 livenessProbe:
+  # -- Executes the python3 healthcheck.
   exec:
     command:
       - curl
@@ -34,6 +55,7 @@ livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
+# -- Configure the readiness healthcheck for the auth server if needed.
 readinessProbe:
   exec:
     command:
@@ -43,23 +65,13 @@ readinessProbe:
   initialDelaySeconds: 25
   periodSeconds: 25
   timeoutSeconds: 5
+# -- Configure any additional volumes that need to be attached to the pod
+volumes: []
+# -- Configure any additional volumesMounts that need to be attached to the containers
+volumeMounts: []
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
-volumes: []
-  # Configure any additional volumes need to be attached to the pod
-  # - name: mycustomcert
-  #   secret:
-  #     secretName: mycustomsecret
-volumeMounts: []
-  # Configure any additional volumesMounts that need to be attached to the containers
-  # - name: mycustomcert
-  #   mountPath: /etc/certs
-dnsPolicy: ""
-dnsConfig: {}
-  # options:
-  #   - name: ndots
-  #     value: "5"

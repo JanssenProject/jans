@@ -3,7 +3,7 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Namespace }}-rolebinding
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-rolebinding
   namespace: {{ .Release.Namespace }}
 subjects:
 - kind: User
@@ -11,5 +11,5 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role # this must be Role or ClusterRole
-  name: {{ .Release.Namespace }}-cn-role # this must match the name of the Role or ClusterRole you wish to bind to
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-cn-role # this must match the name of the Role or ClusterRole you wish to bind to
   apiGroup: rbac.authorization.k8s.io

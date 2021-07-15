@@ -32,10 +32,10 @@ spec:
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
-        {{ if eq .Values.global.configSecretAdapter "google" }}
-        - name: google-secret-manager-sa
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
           secret:
-            secretName: {{ .Release.Name }}-google-secret-manager-sa
+            secretName: {{ .Release.Name }}-google-sa
         {{- end }}
       containers:
       - name: {{ include "config.name" . }}
@@ -43,6 +43,9 @@ spec:
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true
+        env:
+          {{- include "config.usr-envs" . | indent 12 }}
+          {{- include "config.usr-secret-envs" . | indent 12 }}
         volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
@@ -53,14 +56,22 @@ spec:
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py
-          {{ if eq .Values.global.configSecretAdapter "google" }}
+          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-secret-manager-sa
+            name: google-sa
             subPath: google-credentials.json
           {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
         command:
@@ -70,10 +81,14 @@ spec:
           - /bin/sh
           - -c
           - |
-              /app/scripts/entrypoint.sh load
-              /usr/bin/python3 /scripts/tls_generator.py
-              {{- if .Values.global.istio.enabled }}
-              curl -X POST http://localhost:15020/quitquitquit
-              {{- end }}
+              {{- if .Values.migration.enabled }}
+               /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }}
+               {{- else }}
+               /app/scripts/entrypoint.sh load
+               {{- end }}
+               /usr/bin/python3 /scripts/tls_generator.py
+               {{- if .Values.global.istio.enabled }}
+               curl -X POST http://localhost:15020/quitquitquit
+               {{- end }}
       restartPolicy: Never
 {{- end }}
