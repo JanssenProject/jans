@@ -7,7 +7,7 @@ metadata:
   name: {{ .Release.Name }}-auth-server-mtls
   namespace: {{.Release.Namespace}}
 spec:
-  host: {{ .Values.service.authServerServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL

@@ -27,11 +27,14 @@ spec:
           containers:
             - name: {{ include "auth-server-key-rotation.name" . }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              env:
+                {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
+                {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               volumeMounts:
-              {{ if eq .Values.global.configSecretAdapter "google" }}
+              {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
                 - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-                  name: google-secret-manager-sa
+                  name: google-sa
                   subPath: google-credentials.json
                 {{- end }}
                 {{- if eq .Values.global.cnPersistenceType "sql" }}
@@ -55,6 +58,14 @@ spec:
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
+                {{ if .Values.global.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.global.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
               {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
               resources: {}
               {{- else if .Values.global.cloud.testEnviroment }}
@@ -68,10 +79,10 @@ spec:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{ if eq .Values.global.configSecretAdapter "google" }}
-            - name: google-secret-manager-sa
+          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+            - name: google-sa
               secret:
-                secretName: {{ .Release.Name }}-google-secret-manager-sa
+                secretName: {{ .Release.Name }}-google-sa
           {{- end }}
           {{- if eq .Values.global.cnPersistenceType "sql" }}
             - name: sql-pass

@@ -10,6 +10,8 @@ metadata:
   labels:
     storage: opendj
   annotations:
+    # Annotation below is to keep the storage class during upgrade. Otherwise, due to the flag at line 1 which is needed, this resource will be deleted.
+    helm.sh/resource-policy: keep
     storageclass.beta.kubernetes.io/is-default-class: "false"
     {{- if eq .Values.global.storageClass.provisioner "openebs.io/local" }}
     openebs.io/cas-type: local

@@ -1,12 +1,21 @@
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-apiVersion: v1
-appVersion: "1.0.0-b7"
-description: A Helm chart for persistence layer for Janssen server
+apiVersion: v2
 name: persistence
-version: 1.0.0-b7
-maintainers:
-- name: moabu
-  email: mo@gluu.org
-
+version: 5.0.0
+kubeVersion: ">=v1.17.0-0"
+description: Job to generate data and initial config for Janssen Server persistence layer.
+type: application
+keywords:
+  - persistence prep
 home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/docker-jans-persistence-loader
+  - https://github.com/JanssenFederation/cloud-native-edition/tree/master/pyjans/kubernetes/templates/helm/jans/charts/persistence
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://jans.io/favicon.ico
+appVersion: "5.0.0"
+

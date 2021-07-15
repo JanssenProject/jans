@@ -4,7 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
   # the name must match the application
-  name: {{ .Values.service.clientApiServerServiceName }}
+  name: {{ index .Values "global" "client-api" "clientApiServerServiceName" }}
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "client-api.labels" . | indent 4 }}

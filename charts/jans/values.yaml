@@ -1,8 +1,93 @@
+installer-settings:
+  currentVersion:
+  upgrade:
+    targetVersion:
+    image:
+      repository:
+      tag:
+  acceptLicense:
+  namespace: jans
+  releaseName: jans
+  nginxIngress:
+    releaseName:
+    namespace:
+  nodes:
+    names:
+    zones:
+    ips:
+  images:
+    edit:
+  aws:
+    lbType: clb
+    arn:
+      enabled: false
+      arnAcmCert:
+    vpcCidr: "0.0.0.0/0"
+  couchbase:
+    clusterName:
+    namespace:
+    lowResourceInstall:
+    install:
+    customFileOverride:
+    backup:
+      incrementalSchedule:
+      fullSchedule:
+      retentionTime:
+      storageSize:
+    subjectAlternativeName:
+    commonName:
+    totalNumberOfExpectedUsers:
+    totalNumberOfExpectedTransactionsPerSec:
+    volumeType:
+  volumeProvisionStrategy:
+  jansGateway:
+    install:
+    kong:
+      image:
+        repository:
+        tag:
+      releaseName:
+      namespace:
+      postgresUser:
+      postgresPassword:
+      postgresDatabaseName:
+    uI:
+      releaseName:
+      namespace:
+      postgresUser:
+      postgresPassword:
+      postgresDatabaseName:
+  ldap:
+    subsequentCluster:
+    backup:
+      fullSchedule:
+  jackrabbit:
+    clusterMode:
+  postgres:
+    install:
+    namespace:
+    replicas:
+  redis:
+    install:
+    masterNodes:
+    nodesPerMaster:
+    namespace:
+  confirmSettings: false
 auth-server:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/auth-server
     tag: 1.0.0_b7
   replicas: 1
@@ -13,24 +98,35 @@ auth-server:
     requests:
       cpu: 2500m
       memory: 2500Mi
-  service:
-    authServerServiceName: auth-server
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    exec:
+      command:
+      - python3
+      - /app/scripts/healthcheck.py
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    exec:
+      command:
+      - python3
+      - /app/scripts/healthcheck.py
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 auth-server-key-rotation:
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/certmanager
     tag: 1.0.0_b7
-  keysLife: 23
+  keysLife: 48
   resources:
     limits:
       cpu: 300m
@@ -38,19 +134,23 @@ auth-server-key-rotation:
     requests:
       cpu: 300m
       memory: 300Mi
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 client-api:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/client-api
     tag: 1.0.0_b7
   replicas: 1
@@ -61,21 +161,34 @@ client-api:
     requests:
       cpu: 1000m
       memory: 400Mi
-  service:
-    clientApiServerServiceName: client-api
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    exec:
+      command:
+      - curl
+      - -k
+      - https://localhost:8443/health-check
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    exec:
+      command:
+      - curl
+      - -k
+      - https://localhost:8443/health-check
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 config:
+  usrEnvs:
+    normal: {}
+    secret: {}
   adminPassword: Test1234#
   city: Austin
   configmap:
-    cnAuthServerBackend: "auth-server:8080"
+    cnJettyRequestHeaderSize: 8192
     cnSqlDbDialect: mysql
     cnSqlDbHost: my-release-mysql.default.svc.cluster.local
     cnSqlDbPort: 3306
@@ -88,32 +201,28 @@ config:
     cnClientApiAdminCertCn: client-api
     cnClientApiApplicationCertCn: client-api
     cnClientApiBindIpAddresses: "*"
-    cnClientApiServerUrl: "client-api:8443"
     cnConfigKubernetesConfigMap: cn
     cnCouchbaseBucketPrefix: jans
     cnCouchbaseCertFile: /etc/certs/couchbase.crt
     cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     cnCouchbaseIndexNumReplica: 0
-    cnCouchbasePassword: Test1234#
+    cnCouchbasePassword: P@ssw0rd
     cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
     cnCouchbaseSuperUser: admin
     cnCouchbaseSuperUserPassword: Test1234#
     cnCouchbaseSuperUserPasswordFile: /etc/jans/conf/couchbase_superuser_password
     cnCouchbaseUrl: cbjans.default.svc.cluster.local
     cnCouchbaseUser: jans
-    # base64 string for the external signing jwks. Used when .global.cnExtSigningJwksUri is set.
-    cnExtSigningJwksCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-    cnExtSigningJwksKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-    # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
-    # Base64 encode service account. The sa must have roles/secretmanager.admin
+    cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
     cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     cnGoogleProjectId: google-project-to-save-config-and-secrets-to
+    cnGoogleSpannerInstanceId: ""
+    cnGoogleSpannerDatabaseId: ""
     cnSecretGoogleSecretVersionId: "latest"
     cnSecretGoogleSecretNamePrefix: jans
     cnGoogleSecretManagerPassPhrase: Test1234#
     cnConfigGoogleSecretVersionId: "latest"
     cnConfigGoogleSecretNamePrefix: jans
-    # [google_secret_manager_envs] END
     cnLdapUrl: "opendj:1636"
     cnMaxRamPercent: "75.0"
     cnPersistenceLdapMapping: default
@@ -123,17 +232,15 @@ config:
     cnRedisUrl: "redis.redis.svc.cluster.local:6379"
     cnRedisUseSsl: false
     cnSecretKubernetesSecret: cn
-    containerMetadataName: kubernetes
     lbAddr: ""
-    ldapServiceName: opendj
   countryCode: US
   email: support@jans.io
   image:
     repository: janssenproject/configuration-manager
     tag: 1.0.0_b7
-  ldapPassword: Test1234#
+  ldapPassword: P@ssw0rds
   orgName: Janssen
-  redisPassword: Test1234#
+  redisPassword: P@assw0rd
   resources:
     limits:
       cpu: 300m
@@ -142,21 +249,29 @@ config:
       cpu: 300m
       memory: 300Mi
   state: TX
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
   dnsPolicy: ""
   dnsConfig: {}
+  migration:
+    enabled: false
+    migrationDir: /ce-migration
+    migrationDataFormat: ldif
 config-api:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/config-api
     tag: 1.0.0_b7
   replicas: 1
@@ -167,21 +282,37 @@ config-api:
     requests:
       cpu: 1000m
       memory: 400Mi
-  service:
-    configApiServerServiceName: config-api
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    httpGet:
+      path: /jans-config-api/api/v1/health/live
+      port: 8074
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: jans-config-api/api/v1/health/ready
+      port: 8074
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 fido2:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/fido2
     tag: 1.0.0_b7
   replicas: 1
@@ -194,18 +325,30 @@ fido2:
       memory: 500Mi
   service:
     fido2ServiceName: fido2
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    httpGet:
+      path: /jans-fido2/sys/health-check
+      port: http-fido2
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /jans-fido2/sys/health-check
+      port: http-fido2
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 global:
+  usrEnvs:
+    normal: {}
+    secret: {}
   alb:
     ingress: false
   auth-server:
+    authServerServiceName: auth-server
     enabled: true
   auth-server-key-rotation:
     enabled: false
@@ -213,22 +356,29 @@ global:
   azureStorageAccountType: Standard_LRS
   azureStorageKind: Managed
   client-api:
+    clientApiServerServiceName: client-api
     enabled: false
   cloud:
     testEnviroment: false
   cnPersistenceType: ldap
-  cnExtSigningJwksUri: ""
+  cnObExtSigningJwksUri: ""
+  cnObExtSigningJwksCrt: ""
+  cnObExtSigningJwksKey: ""
+  cnObExtSigningJwksKeyPassPhrase: ""
+  cnObExtSigningAlias: ""
+  cnObStaticSigningKeyKid: ""
+  cnObTransportCrt: ""
+  cnObTransportKey: ""
+  cnObTransportKeyPassPhrase: ""
+  cnObTransportAlias: ""
+  cnObTransportTrustStore: ""
   config:
     enabled: true
-  #google/kubernetes
   configAdapterName: kubernetes
-  #google/kubernetes
   configSecretAdapter: kubernetes
-  # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
-  # Base64 encode service account. The sa must have roles/secretmanager.admin
   cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
-  # [google_secret_manager_envs] END
   config-api:
+    configApiServerServiceName: config-api
     enabled: true
   fqdn: demoexample.jans.io
   fido2:
@@ -239,11 +389,12 @@ global:
     enabled: false
     ingress: false
     namespace: istio-system
-  lbIp: "22.22.22.22"
+  lbIp: ""
   nginx-ingress:
     enabled: true
   opendj:
-    enabled: true
+    enabled: false
+    ldapServiceName: opendj
   distribution: default
   persistence:
     enabled: true
@@ -254,13 +405,13 @@ global:
     allowedTopologies: []
     mountOptions:
     - debug
+    # -- parameters:
+    #fsType: ""
+    #kind: ""
+    #pool: ""
+    #storageAccountType: ""
+    #type: ""
     parameters: {}
-    #parameters:
-      #fsType: ""
-      #kind: ""
-      #pool: ""
-      #storageAccountType: ""
-      #type: ""
     provisioner: microk8s.io/hostpath
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
@@ -268,53 +419,53 @@ global:
     enabled: false
 nginx-ingress:
   ingress:
-    # /.well-known/openid-configuration
     openidConfigEnabled: true
-    # /.well-known/uma2-configuration
     uma2ConfigEnabled: true
-    # /.well-known/webfinger
     webfingerEnabled: true
-    # /.well-known/simple-web-discovery
     webdiscoveryEnabled: true
-    # /.well-known/scim-configuration
     scimConfigEnabled: false
-    # /jans-scim
     scimEnabled: false
-    # /jans-config-api
     configApiEnabled: true
-    # /.well-known/fido-configuration
     u2fConfigEnabled: true
-    # /.well-known/fido2-configuration
     fido2ConfigEnabled: false
-    # /jans-auth
     authServerEnabled: true
-    #/jans-auth/restv1/token
     authServerProtectedToken: false
-    #/jans-auth/restv1/register
     authServerProtectedRegister: false
-    # in the format of {cert-manager.io/cluster-issuer: nameOfClusterIssuer, kubernetes.io/tls-acme: "true"}
     additionalAnnotations: {}
     path: /
     hosts:
     - demoexample.jans.io
+    # -- Secrets holding HTTPS CA cert and key.
     tls:
     - secretName: tls-certificate
       hosts:
       - demoexample.jans.io
+
+# -- OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 opendj:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: gluufederation/opendj
     tag: 5.0.0_dev
   multiCluster:
     enabled: false
-    serfAdvertiseAddr: "firstldap.jans.io:30946"
+    serfAdvertiseAddr: "firstldap.jans.org:30946"
     serfKey: Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk=
     serfPeers:
-    - "firstldap.jans.io:30946"
-    - "secondldap.jans.io:31946"
+    - "firstldap.jans.org:30946"
+    - "secondldap.jans.org:31946"
   persistence:
     size: 5Gi
   ports:
@@ -356,21 +507,34 @@ opendj:
     requests:
       cpu: 1500m
       memory: 2000Mi
-  service:
-    ldapServiceName: opendj
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    exec:
+      command:
+      - python3
+      - /app/scripts/healthcheck.py
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 20
+  readinessProbe:
+    exec:
+      command:
+      - python3
+      - /app/scripts/healthcheck.py
+    initialDelaySeconds: 25
+    timeoutSeconds: 5
+    periodSeconds: 25
+    failureThreshold: 20
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 persistence:
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/persistence-loader
     tag: 1.0.0_b7
   resources:
@@ -381,14 +545,22 @@ persistence:
       cpu: 300m
       memory: 300Mi
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers
 scim:
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    metrics: []
+    behavior: {}
+  usrEnvs:
+    normal: {}
+    secret: {}
   dnsPolicy: ""
   dnsConfig: {}
   image:
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     repository: janssenproject/scim
     tag: 1.0.0_b7
   replicas: 1
@@ -401,11 +573,19 @@ scim:
       memory: 1000Mi
   service:
     scimServiceName: scim
-#  livenessProbe:
-#    initialDelaySeconds: 25
-#  readinessProbe:
-#    initialDelaySeconds: 30
+  livenessProbe:
+    httpGet:
+      path: /jans-scim/sys/health-check
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /jans-scim/sys/health-check
+      port: 8080
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
   volumes: []
-    # Configure any additional volumes that need to be attached to the pod
   volumeMounts: []
-    # Configure any additional volumesMounts that need to be attached to the containers

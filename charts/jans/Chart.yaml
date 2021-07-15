@@ -1,7 +1,9 @@
 kubeVersion: ">=v1.17.0-0"
 annotations:
   artifacthub.io/changes: |
-    - Janssen 1.0 under dev charts
+    - Janssen 5.0 Openbanking Distribution. Auth-server and config-api.
+    - Updated new images
+    - https://jans.org/docs/openbanking
   artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/images: |
     - name: auth-server
@@ -25,70 +27,70 @@ annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: "true"
 apiVersion: v2
-appVersion: "1.0.0-b7"
-icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
-home: https://github.com/JanssenProject/jans-cloud-native
+appVersion: "5.0.0"
+icon: https://jans.io/favicon.ico
+home: https://jans.io
 sources:
-  - https://github.com/JanssenProject/jans-cloud-native/charts
+- https://jans.io
+- https://github.com/JanssenFederation/cloud-native-edition
 maintainers:
 - name: moabu
-  email: mo@gluu.org
-description: Janssen Authorization server
+  email: support@jans.io
+description: Janssen Access and Identity Management OpenBanking distribution
 name: jans
-version: 1.0.0-b7
+version: 5.0.0
 dependencies:
 - name: config
   condition: global.config.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: config-api
   condition: global.config-api.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: opendj
   condition: global.opendj.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: auth-server
   condition: global.auth-server.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: fido2
   condition: global.fido2.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: scim
   condition: global.scim.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: nginx-ingress
   condition: global.nginx-ingress.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
-
 
 - name: auth-server-key-rotation
   condition: global.auth-server-key-rotation.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: client-api
   condition: global.client-api.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: persistence
   condition: global.persistence.enabled
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""
 
 - name: cn-istio-ingress
   condition: global.istio.ingress
-  version: 1.0.0-b7
+  version: 5.0.0
   repository: ""

@@ -6,20 +6,37 @@ metadata:
   name: {{ .Release.Name }}-config-cm
   namespace: {{ .Release.Namespace }}
 data:
+  # Jetty header size in bytes in the auth server
+  CN_JETTY_REQUEST_HEADER_SIZE: {{ .Values.configmap.cnJettyRequestHeaderSize | quote }}
   # Distribution
   CN_DISTRIBUTION: {{ .Values.global.distribution | quote }}
-  {{ if .Values.global.cnExtSigningJwksUri }}
-  CN_EXT_SIGNING_JWKS_URI: {{ .Values.global.cnExtSigningJwksUri | quote }}
+  {{ if .Values.global.cnObExtSigningJwksUri }}
+  CN_OB_EXT_SIGNING_JWKS_URI: {{ .Values.global.cnObExtSigningJwksUri | quote }}
+  CN_OB_AS_TRANSPORT_ALIAS: {{ .Values.global.cnObTransportAlias | quote }}
+  CN_OB_EXT_SIGNING_ALIAS: {{ .Values.global.cnObExtSigningAlias | quote }}
+  # force the AS to use a specific signing key
+  CN_OB_STATIC_KID: {{ .Values.global.cnObStaticSigningKeyKid | quote }}
   {{- end }}
-  # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
+  {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+  # [google_envs] Envs related to using Google
   GOOGLE_APPLICATION_CREDENTIALS: {{ .Values.global.cnGoogleApplicationCredentials | quote }}
   GOOGLE_PROJECT_ID: {{ .Values.configmap.cnGoogleProjectId | quote }}
+  {{- end }}
+  {{ if eq .Values.global.cnPersistenceType "spanner" }}
+  # [google_spanner_envs] Envs related to using Google Secret Manager to store config and secret layer
+  CN_GOOGLE_SPANNER_INSTANCE_ID: {{ .Values.configmap.cnGoogleSpannerInstanceId | quote }}
+  CN_GOOGLE_SPANNER_DATABASE_ID: {{ .Values.configmap.cnGoogleSpannerDatabaseId | quote }}
+  # [google_spanner_envs] END
+  {{- end }}
+  {{ if eq .Values.global.configSecretAdapter "google" }}
+  # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
   CN_SECRET_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnSecretGoogleSecretVersionId | quote }}
   CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE: {{ .Values.configmap.cnGoogleSecretManagerPassPhrase | quote }}
   CN_SECRET_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnSecretGoogleSecretNamePrefix | quote }}
   CN_CONFIG_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnConfigGoogleSecretVersionId | quote }}
   CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnConfigGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
+  {{- end }}
   CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}
   CN_SQL_DB_HOST: {{ .Values.configmap.cnSqlDbHost }}
   CN_SQL_DB_PORT: {{ .Values.configmap.cnSqlDbPort | quote }}
@@ -36,9 +53,13 @@ data:
   CN_CONTAINER_METADATA: {{ .Values.configmap.containerMetadataName | quote }}
   CN_MAX_RAM_PERCENTAGE: {{ .Values.configmap.cnMaxRamPercent | quote }}
   CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
+  CN_DOCUMENT_STORE_TYPE: {{ .Values.configmap.cnDocumentStoreType | quote }}
+  {{- if .Values.configmap.cnJackrabbitUrl }}
+  {{- else }}
+  {{- end }}
   DOMAIN: {{ .Values.global.fqdn | quote }}
-  CN_AUTH_SERVER_BACKEND: {{ .Values.configmap.cnAuthServerBackend | quote }}
-  CN_CLIENT_API_SERVER_URL: {{ .Values.configmap.cnClientApiServerUrl | quote }}
+  CN_AUTH_SERVER_BACKEND: {{ cat ( index .Values "global" "auth-server" "authServerServiceName" ) ":8080" | quote | nospace }}
+  CN_CLIENT_API_SERVER_URL: {{ cat ( index .Values "global" "client-api" "clientApiServerServiceName" ) ":8443" | quote | nospace }}
   CN_CLIENT_API_BIND_IP_ADDRESSES: {{ .Values.configmap.cnClientApiBindIpAddresses | quote }}
   {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
   LB_ADDR: {{ .Values.configmap.lbAddr }}
@@ -46,7 +67,11 @@ data:
   CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}
   {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid")  }}
   # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
+  {{- if .Values.configmap.cnLdapUrl }}
   CN_LDAP_URL: {{ .Values.configmap.cnLdapUrl | quote }}
+  {{- else }}
+  CN_LDAP_URL: {{ cat ( .Values.global.opendj.ldapServiceName ) ":1636" | quote | nospace }}
+  {{- end }}
   {{- else if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
   #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
@@ -65,10 +90,11 @@ data:
   CN_CONTAINER_MAIN_NAME: {{ .Release.Name }}-auth-server
   # options: default/user/site/cache/statistic used only if CN_PERSISTENCE_TYPE is hybrid or hybrid
   {{- if or (eq .Values.global.cnPersistenceType "hybrid") (eq .Values.global.cnPersistenceType "ldap") }}
+   # must the same as the opendj service name
+  CN_CERT_ALT_NAME: {{ .Values.global.opendj.ldapServiceName }} #{{ template "cn.fullname" . }}-service
   CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceLdapMapping | quote }}
   {{- end }}
-  # must the same as the opendj service name
-  CN_CERT_ALT_NAME: {{ .Values.configmap.ldapServiceName }} #{{ template "cn.fullname" . }}-service
+  {{- end }}
   # Auto enable installation of some services
   CN_CLIENT_API_APPLICATION_CERT_CN: {{ .Values.configmap.cnClientApiApplicationCertCn | quote }}
   CN_CLIENT_API_ADMIN_CERT_CN: {{ .Values.configmap.cnClientApiAdminCertCn | quote }}
