@@ -760,7 +760,12 @@
 			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>2.24</version>
+				<version>2.44.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>htmlunit-driver</artifactId>
+				<version>2.44.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.w3c.css</groupId>
