@@ -98,22 +98,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.spec.javax.interceptor</groupId>
-			<artifactId>jboss-interceptors-api_1.2_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- JSF, EL -->
@@ -162,12 +152,12 @@
 
 		<!-- Other -->
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
+					<groupId>com.sun.activation</groupId>
+					<artifactId>jakarta.activation</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
