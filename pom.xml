@@ -16,10 +16,10 @@
 		<resteasy.version>3.14.0.Final</resteasy.version>
 		<resteasy.jaxrs.version>3.14.0.Final</resteasy.jaxrs.version>
 
-		<httpcore.version>4.4.13</httpcore.version>
-		<httpclient.version>4.5.12</httpclient.version>
+		<httpcore.version>4.4.14</httpcore.version>
+		<httpclient.version>4.5.13</httpclient.version>
 
-		<weld.version>3.1.4.Final</weld.version>
+		<weld.version>3.1.8.Final</weld.version>
 		<richfaces.version>4.5.18-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.20</jsf-api.version>
@@ -27,16 +27,17 @@
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
-		<jackson.version>2.11.2</jackson.version>
+		<jackson.version>2.12.4</jackson.version>
 		<jackson.databind.version>2.11.2</jackson.databind.version>
-		<json.version>20200518</json.version>
+		<json.version>20210307</json.version>
 
-		<log4j.version>2.14.0</log4j.version>
-		<slf4j.version>1.7.30</slf4j.version>
+		<log4j.version>2.14.1</log4j.version>
+		<slf4j.version>1.7.31</slf4j.version>
 
-		<guava.version>29.0-jre</guava.version>
+		<guava.version>30.1.1-jre</guava.version>
 
-		<aws.sns.version>1.11.836</aws.sns.version>
+		<aws.sns.version>1.12.25</aws.sns.version>
+		<jackrabbit.version>2.21.7</jackrabbit.version>
 	</properties>
 
 	<repositories>
@@ -228,17 +229,17 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>8.22.1</version>
+				<version>9.11.1</version>
 			</dependency>
 
 			<!-- Weld -->
@@ -326,12 +327,12 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.7</version>
+				<version>2.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-lang</groupId>
 				<artifactId>commons-lang</artifactId>
-				<version>2.6</version>
+				<version>2.15</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -461,12 +462,17 @@
         		 <dependency>
 			        <groupId>org.apache.jackrabbit</groupId>
 		        	<artifactId>jackrabbit-core</artifactId>
-			        <version>2.20.2</version>
+			        <version>${jackrabbit.version}</version>
 			 </dependency>
 			 <dependency>
 			    	<groupId>org.apache.jackrabbit</groupId>
 			    	<artifactId>jackrabbit-jcr-rmi</artifactId>
-			    	<version>2.20.2</version>
+			    	<version>${jackrabbit.version}</version>
+			 </dependency>
+			 <dependency>
+			    	<groupId>org.apache.jackrabbit</groupId>
+			    	<artifactId>jackrabbit-webdav</artifactId>
+			    	<version>${jackrabbit.version}</version>
 			 </dependency>
 
 			<!-- RestEasy -->
@@ -515,16 +521,16 @@
 
 			<!-- Net -->
 			<dependency>
-				<groupId>javax.mail</groupId>
-				<artifactId>mail</artifactId>
-				<version>1.4.7</version>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>1.6.7</version>
 			</dependency>
 
 			<!-- Cache -->
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
 				<artifactId>ehcache-core</artifactId>
-				<version>2.10.6</version>
+				<version>2.10.9.2</version>
 			</dependency>
 
 			<dependency>
@@ -554,6 +560,11 @@
 				<artifactId>httpcore</artifactId>
 				<version>${httpcore.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>3.1</version>
+			</dependency>
 
 			<!-- SAML -->
 			<dependency>
@@ -569,14 +580,14 @@
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>
-			    <version>2.2.1</version>
+			    <version>2.2.2</version>
 			</dependency>
 
 			<!-- LDAP -->
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>5.1.0</version>
+				<version>6.0.0</version>
 			</dependency>
 
 			<!-- Couchbase -->
@@ -595,7 +606,7 @@
 			<dependency>
 			    <groupId>mysql</groupId>
 			    <artifactId>mysql-connector-java</artifactId>
-			    <version>8.0.22</version>
+			    <version>8.0.25</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
@@ -607,7 +618,7 @@
 			<dependency>
 			    <groupId>com.querydsl</groupId>
 			    <artifactId>querydsl-sql</artifactId>
-			    <version>4.4.0</version>
+			    <version>4.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
@@ -626,15 +637,7 @@
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
-				<version>4.1.11</version>
-			</dependency>
-
-			<!-- Jetty -->
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-deploy</artifactId>
-				<version>9.4.19.v20190610</version>
-				<scope>provided</scope>
+				<version>4.2.2</version>
 			</dependency>
 			
 			<!-- Timer -->
@@ -673,7 +676,7 @@
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
-				<version>2.2</version>
+				<version>2.3</version>
 			</dependency>
 			
 			<!-- Date/time utils -->
@@ -687,7 +690,7 @@
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>2.3.3</version>
+				<version>3.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.annotation</groupId>
@@ -709,6 +712,14 @@
 				<scope>test</scope>
 			</dependency>
 
+			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-deploy</artifactId>
+				<version>9.4.19.v20190610</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<!--Can be removed once TestNG dependency contains JCommander 1.74 or 
 				newer -->
 			<dependency>
@@ -718,6 +729,17 @@
 				<scope>test</scope>
 			</dependency>
 
+			<!-- Use compatible with selenium-htmlunit-driver version -->
+			<dependency>
+				<groupId>net.sourceforge.htmlunit</groupId>
+				<artifactId>htmlunit</artifactId>
+				<version>2.24</version>
+			</dependency>
+			<dependency>
+				<groupId>org.w3c.css</groupId>
+				<artifactId>sac</artifactId>
+				<version>1.3</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>
