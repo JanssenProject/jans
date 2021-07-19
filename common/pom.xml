@@ -74,6 +74,22 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-couchbase</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-sql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-spanner</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-hybrid</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-core-util</artifactId>
 		</dependency>
 		<dependency>
