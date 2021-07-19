@@ -18,9 +18,11 @@ import java.util.Map;
  */
 public interface ClientRegistrationType extends BaseExternalType {
 
-    public boolean createClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
+    // context - io.jans.as.server.service.external.context.DynamicClientRegistrationContext
+    boolean createClient(Object context);
 
-    public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
+    // context - io.jans.as.server.service.external.context.DynamicClientRegistrationContext
+    boolean updateClient(Object context);
 
     String getSoftwareStatementHmacSecret(Object context);
 
