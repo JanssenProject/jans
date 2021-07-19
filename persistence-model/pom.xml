@@ -81,9 +81,8 @@
 			<artifactId>jans-core-document-store</artifactId>
 		</dependency>
 		<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-orm-model</artifactId>
-				<version>${jans-core.version}</version>
-			</dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-model</artifactId>
+		</dependency>
 	</dependencies>
 </project>
