@@ -247,8 +247,6 @@
 				<groupId>org.jboss.weld</groupId>
 				<artifactId>weld-core-parent</artifactId>
 				<version>${weld.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>javax.enterprise</groupId>
@@ -365,7 +363,7 @@
 				<version>3.2.2</version>
 			</dependency>
 
-			<!-- \Logging -->
+			<!-- Logging -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
@@ -384,6 +382,11 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-jul</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
 
@@ -419,8 +422,6 @@
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
 				<version>${jackson.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
