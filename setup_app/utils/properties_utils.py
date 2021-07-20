@@ -861,7 +861,7 @@ class PropertiesUtils(SetupUtils):
         Config.admin_password = adminPass
 
         self.promptForConfigApi()
-        self.promptAdminUI()
+        #self.promptAdminUI()
         self.promptForScimServer()
         self.promptForFido2Server()
         self.promptForEleven()
