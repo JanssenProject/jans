@@ -45,6 +45,7 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.ID_TOKEN
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.ISSUER;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.JWKS_URI;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.MTLS_ENDPOINT_ALIASES;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
@@ -215,6 +216,11 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         }
         if (jsonObj.has(SCOPE_TO_CLAIMS_MAPPING)) {
             response.setScopeToClaimsMapping(OpenIdConfigurationResponse.parseScopeToClaimsMapping(jsonObj.getJSONArray(SCOPE_TO_CLAIMS_MAPPING)));
+        }
+        if (jsonObj.has(MTLS_ENDPOINT_ALIASES)) {
+            final JSONObject mtlsAliases = jsonObj.optJSONObject(MTLS_ENDPOINT_ALIASES);
+            if (mtlsAliases != null)
+                response.setMltsAliases(mtlsAliases.toMap());
         }
         Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
