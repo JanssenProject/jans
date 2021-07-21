@@ -6,6 +6,7 @@
 
 package io.jans.configapi.security.client;
 
+import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -35,12 +36,18 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 @RegisterProvider(OpenIdClientService.class)
 public class AuthClientFactory {
 
     @Inject
     @RestClient
     OpenIdClientService openIdClientService;
+
+    @Inject
+    @RestClient
+    StatClient statClient;
 
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
@@ -50,26 +57,75 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        ApacheHttpClient43Engine engine = null;
-        try {
-            log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = " + url + " , header = " + header
-                    + " , token = " + token + " , followRedirects = " + followRedirects);
 
-            engine = ClientFactory.createEngine(false);
-            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
+        log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = " + url + " , header = " + header
+                + " , token = " + token + " , followRedirects = " + followRedirects);
 
-            ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
-                    .newClient(restClient.getConfiguration()).property("Content-Type", MediaType.APPLICATION_JSON)
-                    .target(url);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
 
-            IntrospectionService proxy = target.proxy(IntrospectionService.class);
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .property("Content-Type", MediaType.APPLICATION_JSON).target(url);
 
-            return proxy.introspectToken(header, token);
-        } finally {
-            if (engine != null) {
-                engine.close();
-            }
+        IntrospectionService proxy = target.proxy(IntrospectionService.class);
+
+        return proxy.introspectToken(header, token);
+
+    }
+
+    public static JsonNode getStatResponse(String url, String token, String month, String format) {
+
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , url = " + url + " , token = " + token + " , month = "
+                + month + " , format = " + format);
+
+        Builder request = ResteasyClientBuilder.newClient().target(url).request();
+        request.header("Authorization", "Basic " + token);
+        request.header("Content-Type", MediaType.APPLICATION_JSON);
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap();
+        multivaluedHashMap.add("month", month);
+        multivaluedHashMap.add("format", format);
+
+        ApacheHttpClient43Engine engine = ClientFactoryUtil.createEngine(false);
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(url);
+        StatService statService = target.proxy(StatService.class);
+        JsonNode node = statService.stat(token, month);
+
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , node = " + node + "\n");
+        return node;
+    }
+
+    public static JsonNode getStatResponse1(String url, String token, String month, String format) {
+
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , url = " + url + " , token = " + token + " , month = "
+                + month + " , format = " + format);
+
+        Builder request = ResteasyClientBuilder.newClient().target(url).request();
+        request.header("Authorization", "Basic " + token);
+        request.header("Content-Type", MediaType.APPLICATION_JSON);
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap();
+        multivaluedHashMap.add("month", month);
+        multivaluedHashMap.add("format", format);
+
+        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .target(url);
+        Response response = request.post(Entity.form(multivaluedHashMap));
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , response = " + response + "\n");
+        if (response.getStatus() == 200) {
+            String entity = response.readEntity(String.class);
+            log.error("\n\n AuthClientFactory:::getStatResponse() - , entity = " + entity + "\n");
+
         }
+
+        /*
+         * final StatService service = ClientFactory.instance().createStatService(url);
+         * final JsonNode node = service.stat(token, month);
+         * log.error("\n\n AuthClientFactory:::getStatResponse() - , node = " +
+         * node+"\n"); return node;
+         */
+        return null;
+
     }
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
@@ -88,7 +144,7 @@ public class AuthClientFactory {
 
             request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-            engine = ClientFactory.createEngine(false);
+            engine = ClientFactoryUtil.createEngine(false);
             RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
                     .register(engine);
             restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
@@ -137,7 +193,7 @@ public class AuthClientFactory {
     private static IntrospectionService createIntrospectionService(String url, boolean followRedirects) {
         ApacheHttpClient43Engine engine = null;
         try {
-            engine = ClientFactory.createEngine(followRedirects);
+            engine = ClientFactoryUtil.createEngine(followRedirects);
             RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
                     .register(engine);
             ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder

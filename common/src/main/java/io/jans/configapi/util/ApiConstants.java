@@ -67,6 +67,8 @@ public class ApiConstants {
     public static final String HEALTH = "/health";
     public static final String LIVE = "/live";
     public static final String READY = "/ready";
+    public static final String STATISTICS = "/stat";
+    public static final String USER = "/user";
 
     public static final String LIMIT = "limit";
     public static final String PATTERN = "pattern";
