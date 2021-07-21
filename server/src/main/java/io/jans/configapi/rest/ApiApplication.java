@@ -44,6 +44,7 @@ public class ApiApplication extends Application {
         classes.add(LoggingResource.class);
         classes.add(ScopesResource.class);
         classes.add(UmaResourcesResource.class);
+        classes.add(StatResource.class);
 
         return classes;
     }

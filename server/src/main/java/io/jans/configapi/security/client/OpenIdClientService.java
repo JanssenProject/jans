@@ -3,7 +3,6 @@ package io.jans.configapi.security.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.model.common.IntrospectionResponse;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;

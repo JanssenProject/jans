@@ -89,12 +89,6 @@
 		<dependency>
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-rest-client</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>org.jboss.resteasy</artifactId>
-					<groupId>*</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Validation -->
@@ -208,8 +202,8 @@
 		<finalName>jans-config-api</finalName>
 
 		<filters>
-            <filter>profiles/${cfg}/config-api-test.properties</filter>
-        </filters>
+			<filter>profiles/${cfg}/config-api-test.properties</filter>
+		</filters>
 
 		<testResources>
 			<testResource>
