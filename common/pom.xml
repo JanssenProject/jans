@@ -70,10 +70,6 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-orm-ldap</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
 			<artifactId>jans-core-util</artifactId>
 		</dependency>
 		<dependency>
