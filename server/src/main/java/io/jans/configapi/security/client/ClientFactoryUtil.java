@@ -16,7 +16,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import io.jans.configapi.util.ApiConstants;
 
-public class ClientFactory {
+public class ClientFactoryUtil {
 
     public static ApacheHttpClient43Engine createEngine(boolean followRedirects) {
         return createEngine(ApiConstants.CONNECTION_POOL_MAX_TOTAL, ApiConstants.CONNECTION_POOL_DEFAULT_MAX_PER_ROUTE,

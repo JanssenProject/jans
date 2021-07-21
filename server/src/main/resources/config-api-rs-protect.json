@@ -551,6 +551,17 @@
             }
             
         ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/stat/user",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/stats/user.readonly"
+                ]
+            }
+        ]
     }
 ]
 }
