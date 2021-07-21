@@ -67,7 +67,6 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.TLS_CLIE
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_REVOCATION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
@@ -174,9 +173,6 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         }
         if (jsonObj.has(TOKEN_ENDPOINT)) {
             response.setTokenEndpoint(jsonObj.getString(TOKEN_ENDPOINT));
-        }
-        if (jsonObj.has(TOKEN_REVOCATION_ENDPOINT)) {
-            response.setRevocationEndpoint(jsonObj.getString(TOKEN_REVOCATION_ENDPOINT));
         }
         if (jsonObj.has(REVOCATION_ENDPOINT)) {
             response.setRevocationEndpoint(jsonObj.getString(REVOCATION_ENDPOINT));
