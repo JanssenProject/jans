@@ -55,6 +55,20 @@ public class AppConfiguration implements Configuration {
     private Boolean requirePar = false;
     private String deviceAuthzEndpoint;
 
+    private String mtlsAuthorizationEndpoint;
+    private String mtlsTokenEndpoint;
+    private String mtlsTokenRevocationEndpoint;
+    private String mtlsUserInfoEndpoint;
+    private String mtlsClientInfoEndpoint;
+    private String mtlsCheckSessionIFrame;
+    private String mtlsEndSessionEndpoint;
+    private String mtlsJwksUri;
+    private String mtlsRegistrationEndpoint;
+    private String mtlsIdGenerationEndpoint;
+    private String mtlsIntrospectionEndpoint;
+    private String mtlsParEndpoint;
+    private String mtlsDeviceAuthzEndpoint;
+
     private Boolean sessionAsJwt = false;
 
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
@@ -2176,5 +2190,109 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenFilterClaimsBasedOnAccessToken(Boolean idTokenFilterClaimsBasedOnAccessToken) {
         this.idTokenFilterClaimsBasedOnAccessToken = idTokenFilterClaimsBasedOnAccessToken;
+    }
+
+    public String getMtlsAuthorizationEndpoint() {
+        return mtlsAuthorizationEndpoint;
+    }
+
+    public void setMtlsAuthorizationEndpoint(String mtlsAuthorizationEndpoint) {
+        this.mtlsAuthorizationEndpoint = mtlsAuthorizationEndpoint;
+    }
+
+    public String getMtlsTokenEndpoint() {
+        return mtlsTokenEndpoint;
+    }
+
+    public void setMtlsTokenEndpoint(String mtlsTokenEndpoint) {
+        this.mtlsTokenEndpoint = mtlsTokenEndpoint;
+    }
+
+    public String getMtlsTokenRevocationEndpoint() {
+        return mtlsTokenRevocationEndpoint;
+    }
+
+    public void setMtlsTokenRevocationEndpoint(String mtlsTokenRevocationEndpoint) {
+        this.mtlsTokenRevocationEndpoint = mtlsTokenRevocationEndpoint;
+    }
+
+    public String getMtlsUserInfoEndpoint() {
+        return mtlsUserInfoEndpoint;
+    }
+
+    public void setMtlsUserInfoEndpoint(String mtlsUserInfoEndpoint) {
+        this.mtlsUserInfoEndpoint = mtlsUserInfoEndpoint;
+    }
+
+    public String getMtlsClientInfoEndpoint() {
+        return mtlsClientInfoEndpoint;
+    }
+
+    public void setMtlsClientInfoEndpoint(String mtlsClientInfoEndpoint) {
+        this.mtlsClientInfoEndpoint = mtlsClientInfoEndpoint;
+    }
+
+    public String getMtlsCheckSessionIFrame() {
+        return mtlsCheckSessionIFrame;
+    }
+
+    public void setMtlsCheckSessionIFrame(String mtlsCheckSessionIFrame) {
+        this.mtlsCheckSessionIFrame = mtlsCheckSessionIFrame;
+    }
+
+    public String getMtlsEndSessionEndpoint() {
+        return mtlsEndSessionEndpoint;
+    }
+
+    public void setMtlsEndSessionEndpoint(String mtlsEndSessionEndpoint) {
+        this.mtlsEndSessionEndpoint = mtlsEndSessionEndpoint;
+    }
+
+    public String getMtlsJwksUri() {
+        return mtlsJwksUri;
+    }
+
+    public void setMtlsJwksUri(String mtlsJwksUri) {
+        this.mtlsJwksUri = mtlsJwksUri;
+    }
+
+    public String getMtlsRegistrationEndpoint() {
+        return mtlsRegistrationEndpoint;
+    }
+
+    public void setMtlsRegistrationEndpoint(String mtlsRegistrationEndpoint) {
+        this.mtlsRegistrationEndpoint = mtlsRegistrationEndpoint;
+    }
+
+    public String getMtlsIdGenerationEndpoint() {
+        return mtlsIdGenerationEndpoint;
+    }
+
+    public void setMtlsIdGenerationEndpoint(String mtlsIdGenerationEndpoint) {
+        this.mtlsIdGenerationEndpoint = mtlsIdGenerationEndpoint;
+    }
+
+    public String getMtlsIntrospectionEndpoint() {
+        return mtlsIntrospectionEndpoint;
+    }
+
+    public void setMtlsIntrospectionEndpoint(String mtlsIntrospectionEndpoint) {
+        this.mtlsIntrospectionEndpoint = mtlsIntrospectionEndpoint;
+    }
+
+    public String getMtlsParEndpoint() {
+        return mtlsParEndpoint;
+    }
+
+    public void setMtlsParEndpoint(String mtlsParEndpoint) {
+        this.mtlsParEndpoint = mtlsParEndpoint;
+    }
+
+    public String getMtlsDeviceAuthzEndpoint() {
+        return mtlsDeviceAuthzEndpoint;
+    }
+
+    public void setMtlsDeviceAuthzEndpoint(String mtlsDeviceAuthzEndpoint) {
+        this.mtlsDeviceAuthzEndpoint = mtlsDeviceAuthzEndpoint;
     }
 }

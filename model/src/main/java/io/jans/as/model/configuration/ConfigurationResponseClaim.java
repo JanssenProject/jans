@@ -70,6 +70,7 @@ public interface ConfigurationResponseClaim {
     String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
     String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
+    String MTLS_ENDPOINT_ALIASES = "mtls_endpoint_aliases";
 
     // CIBA
     String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";
