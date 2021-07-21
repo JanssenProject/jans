@@ -109,7 +109,6 @@ public class OpenIdConfiguration extends HttpServlet {
 			jsonObj.put(ISSUER, appConfiguration.getIssuer());
 			jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
 			jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
-			jsonObj.put(TOKEN_REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint()); // remove this line
             jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 

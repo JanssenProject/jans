@@ -98,7 +98,6 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.TLS_CLIE
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.TOKEN_REVOCATION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
@@ -255,7 +254,6 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             jsonObj.put(ISSUER, appConfiguration.getIssuer());
             jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
-            jsonObj.put(TOKEN_REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint()); // remove this line in 5.x
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
             jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl("/revoke_session"));
             jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
