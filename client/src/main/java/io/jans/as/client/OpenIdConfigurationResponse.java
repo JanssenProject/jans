@@ -77,6 +77,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String opPolicyUri;
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
+    private Map<String, Object> mltsAliases = new HashMap<>();
 
     // CIBA
     private String backchannelAuthenticationEndpoint;
@@ -1109,6 +1110,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.deviceAuthzEndpoint = deviceAuthzEndpoint;
     }
 
+    public Map<String, Object> getMltsAliases() {
+        return mltsAliases;
+    }
+
+    public void setMltsAliases(Map<String, Object> mltsAliases) {
+        this.mltsAliases = mltsAliases;
+    }
+
     @Override
     public String toString() {
         return "OpenIdConfigurationResponse{" +
@@ -1165,6 +1174,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", backchannelTokenDeliveryModesSupported=" + backchannelTokenDeliveryModesSupported + '\'' +
                 ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
                 ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
+                ", mltsAliases=" + mltsAliases + '\'' +
                 '}';
     }
 }
