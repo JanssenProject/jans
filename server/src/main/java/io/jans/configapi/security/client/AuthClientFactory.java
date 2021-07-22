@@ -72,8 +72,45 @@ public class AuthClientFactory {
 
     }
 
+    public static Response getStatResponse3(String url, String token, String month, String format) {
+        try {
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , url = " + url + " , token = " + token + " , month = "
+                + month + " , format = " + format);
+        
+        Builder request = ResteasyClientBuilder.newClient().target(url).request();
+        request.header("Authorization", "Basic " + token);
+        request.header("Content-Type", MediaType.APPLICATION_JSON);
+        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap();
+        multivaluedHashMap.add("month", month);
+        multivaluedHashMap.add("format", format);
+        
+        
+        Response response= request.buildGet().invoke();
+        log.debug("\n\n AuthClientFactory:::getStatResponse() - , response = " + response + "\n");
+        
+        /*
+         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
+        return target.proxy(StatService.class);
+         */
+               
+        /*
+         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
+        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+                .property("Content-Type", MediaType.APPLICATION_JSON).target(url);
+                log.debug("\n\n AuthClientFactory:::getStatResponse() - , target.proxy(StatService.class) = " + target.proxy(StatService.class) + "\n");s
+         */
+        
+        return null;
+        }catch(Exception ex) {
+            ex.printStackTrace();
+            log.debug("\n\n AuthClientFactory:::getStatResponse() - , Exception "+ex.getMessage()+ "\n");
+         }
+        return null;
+    }
+    
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
-
+        try {
         log.debug("\n\n AuthClientFactory:::getStatResponse() - , url = " + url + " , token = " + token + " , month = "
                 + month + " , format = " + format);
 
@@ -82,7 +119,7 @@ public class AuthClientFactory {
         request.header("Content-Type", MediaType.APPLICATION_JSON);
         final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap();
         multivaluedHashMap.add("month", month);
-        multivaluedHashMap.add("format", format);
+        //multivaluedHashMap.add("format", format);
 
         ApacheHttpClient43Engine engine = ClientFactoryUtil.createEngine(false);
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
@@ -90,9 +127,15 @@ public class AuthClientFactory {
                 .target(url);
         StatService statService = target.proxy(StatService.class);
         JsonNode node = statService.stat(token, month);
+        //final JsonNode node = statService.stat("Bearer " + "75d711fd-aa84-4b13-8b9e-9fec044d2b07", "202101");
 
         log.debug("\n\n AuthClientFactory:::getStatResponse() - , node = " + node + "\n");
         return node;
+        }catch(Exception ex) {
+            ex.printStackTrace();
+            log.debug("\n\n AuthClientFactory:::getStatResponse() - , Exception "+ex.getMessage()+ "\n");
+         }
+        return null;
     }
 
     public static JsonNode getStatResponse1(String url, String token, String month, String format) {
