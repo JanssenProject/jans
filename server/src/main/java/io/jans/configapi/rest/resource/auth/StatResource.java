@@ -13,7 +13,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.STATISTICS)
@@ -34,13 +33,13 @@ public class StatResource extends BaseResource {
     @Path(ApiConstants.USER)
     @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserStatistics(@HeaderParam("Authorization") String authorization, String month, String format) {
+    public Response getUserStatistics(@HeaderParam("Authorization") String authorization,@QueryParam(value = "month") String month,@QueryParam(value = "format")  String format) {
         logger.error("\n\n StatResource:::getUserStatistics() - authorization = " + authorization + " , month = "
                 + month + " , format = " + format);
         String url = getIssuer() + this.statUrl;
 
         JsonNode jsonNode = this.statisticService.getUserStat(url, authorization, month, format);
-        logger.debug("\n\n\n StatResource::getUserStatistics() - jsonNode = " + jsonNode + "\n\n");
+        logger.debug("\n\n\n StatResource::getUserStatistics() - response = " + jsonNode + "\n\n");
         return Response.ok(jsonNode).build();
     }
 
