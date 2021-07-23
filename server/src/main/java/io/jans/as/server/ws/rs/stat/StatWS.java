@@ -181,16 +181,24 @@ public class StatWS {
     }
 
     private long userCardinality(List<StatEntry> entries) {
-        final StatEntry firstEntry = entries.get(0);
-        HLL hll = HLL.fromBytes(Base64.getDecoder().decode(firstEntry.getUserHllData()));
+        HLL hll = decodeHll(entries.get(0));
 
         // Union hll
         if (entries.size() > 1) {
             for (int i = 1; i < entries.size(); i++) {
-                hll.union(HLL.fromBytes(Base64.getDecoder().decode(entries.get(i).getUserHllData())));
+                hll.union(decodeHll(entries.get(i)));
             }
         }
         return hll.cardinality();
+    }
+
+    private HLL decodeHll(StatEntry entry) {
+        try {
+            return HLL.fromBytes(Base64.getDecoder().decode(entry.getUserHllData()));
+        } catch (Exception e) {
+            log.error("Failed to decode HLL data, entry dn: " + entry.getDn() + ", data: " + entry.getUserHllData());
+            return statService.newHll();
+        }
     }
 
     private void validateAuthorization(String authorization) {
