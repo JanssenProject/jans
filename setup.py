@@ -64,7 +64,7 @@ from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.eleven import ElevenInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
-from setup_app.installers.admin_ui import AdminUIInstaller
+#from setup_app.installers.admin_ui import AdminUIInstaller
 
 
 # from setup_app.installers.oxd import OxdInstaller
@@ -158,7 +158,7 @@ fidoInstaller = FidoInstaller()
 scimInstaller = ScimInstaller()
 elevenInstaller = ElevenInstaller()
 jansCliInstaller = JansCliInstaller()
-adminUIInstaller = AdminUIInstaller()
+#adminUIInstaller = AdminUIInstaller()
 
 # oxdInstaller = OxdInstaller()
 
@@ -166,7 +166,8 @@ rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller,
-                      jansAuthInstaller, scimInstaller, fidoInstaller, adminUIInstaller,
+                      jansAuthInstaller, scimInstaller, fidoInstaller, 
+                      #adminUIInstaller,
                       elevenInstaller, jansCliInstaller
             # oxdInstaller
                       ):
@@ -317,9 +318,9 @@ def do_installation():
                 not Config.installed_instance and Config.get(elevenInstaller.install_var)):
             elevenInstaller.start_installation()
 
-        if (Config.installed_instance and adminUIInstaller.install_var in Config.addPostSetupService) or (
-                not Config.installed_instance and Config.get(adminUIInstaller.install_var)):
-            adminUIInstaller.start_installation()
+        #if (Config.installed_instance and adminUIInstaller.install_var in Config.addPostSetupService) or (
+        #        not Config.installed_instance and Config.get(adminUIInstaller.install_var)):
+        #    adminUIInstaller.start_installation()
 
         if Config.installJansCli:
             jansCliInstaller.start_installation()
