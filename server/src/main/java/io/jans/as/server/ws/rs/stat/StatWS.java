@@ -5,9 +5,10 @@ import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
-import io.jans.as.server.model.session.SessionClient;
-import io.jans.as.server.security.Identity;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.service.stat.StatService;
+import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -62,33 +63,33 @@ public class StatWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private Identity identity;
-
-    @Inject
     private StatService statService;
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private TokenService tokenService;
 
     private long lastProcessedAt;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format) {
-        return stat(month, format);
+        return stat(authorization, month, format);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("format") String format) {
-        return stat(month, format);
+        return stat(authorization, month, format);
     }
 
-    public Response stat(String month, String format) {
+    public Response stat(String authorization, String month, String format) {
         log.debug("Attempting to request stat, month: " + month + ", format: " + format);
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
-        validateAuthorization();
+        validateAuthorization(authorization);
         final List<String> months = validateMonth(month);
 
         if (!allowToRun()) {
@@ -192,11 +193,29 @@ public class StatWS {
         return hll.cardinality();
     }
 
-    private void validateAuthorization() {
-        SessionClient sessionClient = identity.getSessionClient();
-        if (sessionClient == null || sessionClient.getClient() == null) {
-            log.trace("Client is unknown. Skip stat processing.");
-            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.INVALID_CLIENT, "Failed to authenticate client.");
+    private void validateAuthorization(String authorization) {
+        log.trace("Validating authorization: " + authorization);
+
+        AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
+        if (grant == null) {
+            log.trace("Unable to find token by authorization: " + authorization);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Can't find grant for authorization.");
+        }
+
+        final AbstractToken accessToken = grant.getAccessToken(tokenService.getToken(authorization));
+        if (accessToken == null) {
+            log.trace("Unable to find token by authorization: " + authorization);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Can't find access token.");
+        }
+
+        if (accessToken.isExpired()) {
+            log.trace("Access Token is expired: " + accessToken.getCode());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Token expired.");
+        }
+
+        if (!grant.getScopesAsString().contains("stat")) {
+            log.trace("Access Token does NOT have 'stat' scope which is required to call Statistic Endpoint.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "stat scope is required for token.");
         }
     }
 
