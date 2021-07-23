@@ -30,16 +30,14 @@ public class StatResource extends BaseResource {
     StatisticService statisticService;
 
     @GET
-    @Path(ApiConstants.USER)
     @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserStatistics(@HeaderParam("Authorization") String authorization,@QueryParam(value = "month") String month,@QueryParam(value = "format")  String format) {
-        logger.error("\n\n StatResource:::getUserStatistics() - authorization = " + authorization + " , month = "
-                + month + " , format = " + format);
+    public Response getStatistics(@HeaderParam("Authorization") String authorization,@QueryParam(value = "month") String month,@QueryParam(value = "format")  String format) {
+        logger.debug("StatResource:::getUserStatistics() - authorization = " + authorization + " , month = "
+                + month + " , format = " + format);        
         String url = getIssuer() + this.statUrl;
-
-        JsonNode jsonNode = this.statisticService.getUserStat(url, authorization, month, format);
-        logger.debug("\n\n\n StatResource::getUserStatistics() - response = " + jsonNode + "\n\n");
+        JsonNode jsonNode = this.statisticService.getStat(url, authorization, month, format);
+        logger.debug("StatResource::getUserStatistics() - jsonNode = " + jsonNode);
         return Response.ok(jsonNode).build();
     }
 
