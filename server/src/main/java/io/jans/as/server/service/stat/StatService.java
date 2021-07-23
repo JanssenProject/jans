@@ -155,7 +155,7 @@ public class StatService {
 
         if (currentEntry == null) {
             log.trace("Creating stat entry ...");
-            hll = new HLL(log2m, regwidth);
+            hll = newHll();
             tokenCounters = new ConcurrentHashMap<>();
 
             currentEntry = new StatEntry();
@@ -166,6 +166,10 @@ public class StatService {
             entryManager.persist(currentEntry);
             log.trace("Created stat entry.");
         }
+    }
+
+    public HLL newHll() {
+        return new HLL(log2m, regwidth);
     }
 
     private void initNodeId() {
