@@ -16,12 +16,12 @@ import javax.ws.rs.core.MediaType;
 public interface StatService {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    JsonNode stat(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month);
+    JsonNode stat(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format);
 
     @GET
-    String stat(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format);
+    String statOpenMetrics(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format);
 
     @POST
     @Produces({MediaType.APPLICATION_JSON})
-    JsonNode stat(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("client_id") String clientId, @FormParam("client_secret") String clientSecret);
+    JsonNode statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("format") String format);
 }
