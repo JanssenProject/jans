@@ -174,3 +174,12 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=C4F7,ou=scopes,o=gluu
+jansId: stat
+inum: C4F7
+description: This scope is required for calling Statistic Endpoint
+jansDefScope: false
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
