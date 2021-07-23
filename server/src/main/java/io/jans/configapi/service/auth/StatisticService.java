@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 
-import javax.ws.rs.core.Response;
 @ApplicationScoped
 public class StatisticService {
 
@@ -16,13 +15,8 @@ public class StatisticService {
     @Inject
     AuthClientFactory authClientFactory;
 
-    //public JsonNode getUserStat(String url, String token, String month, String format) {
-    public JsonNode getUserStat(String url, String token, String month, String format) {
-        logger.info("\n\n StatisticService:::getUserStat() - url = " + url + " , token = " + token + " , month = "
-                + month + " , format = " + format);
-
+    public JsonNode getStat(String url, String token, String month, String format) {    
         return AuthClientFactory.getStatResponse(url, token, month, format);
-
     }
 
 }
