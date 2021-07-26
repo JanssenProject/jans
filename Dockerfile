@@ -31,7 +31,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/
 # ==========
 
 ENV CN_VERSION=1.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-07-08 16:29'
+ENV CN_BUILD_DATE='2021-07-23 04:18'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -151,7 +151,7 @@ LABEL name="Config API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b7" \
+    release="b8" \
     summary="Janssen Config API" \
     description=""
 
