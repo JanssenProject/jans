@@ -141,11 +141,14 @@ class ClientRegistration(ClientRegistrationType):
         print "Client registration. Destroyed successfully"
         return True
 
-    def createClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def createClient(self, context):
         print "Client registration. CreateClient method"
+        client = context.getClient()
+        configurationAttributes = context.getConfigurationAttibutes()
 
 	# validate the DCR
-        valid = self.validateDCR(registerRequest, client, configurationAttributes)
+        valid = self.validateDCR(context.getRegisterRequest(), client, configurationAttributes)
         if valid == False:
              print "Client registration. Registration failed. Invalid DCR of AS. CN - %s" % cnOfAuthServer 
              return False               
@@ -166,14 +169,14 @@ class ClientRegistration(ClientRegistrationType):
         client.getAttributes().getIntrospectionScripts().add(dnOfIntrospectionScript)
 
 	client.setClientId(cn)
-        client.setJwksUri(Jwt.parse(registerRequest.getSoftwareStatement()).getClaims().getClaimAsString("org_jwks_endpoint"))
+        client.setJwksUri(Jwt.parse(context.getRegisterRequest().getSoftwareStatement()).getClaims().getClaimAsString("org_jwks_endpoint"))
                 
         # scopes must be mapped to the client automatically in the DCR script
 	# These can be trusted because the client has been vetted by OBIE
         # https://github.com/JanssenProject/jans-setup/issues/32
         scopeService = CdiUtil.bean(ScopeService)
         scopeArr = []
-        for s in registerRequest.getScope().toArray() :
+        for s in context.getRegisterRequest().getScope().toArray() :
                 scopeObj = scopeService.getScopeById(String(s))
                 scopeDn = scopeObj.getDn()
                 scopeArr.append(scopeDn)
@@ -203,9 +206,9 @@ class ClientRegistration(ClientRegistrationType):
               return False
 
 
-        
 
-    def updateClient(self, registerRequest, client, configurationAttributes):
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see  https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def updateClient(self, context):
         print "Client registration. UpdateClient method"
         return True
 

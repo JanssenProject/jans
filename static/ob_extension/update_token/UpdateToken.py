@@ -13,7 +13,6 @@ class UpdateToken(UpdateTokenType):
     def init(self, customScript, configurationAttributes):
         print "Update token script. Initializing ..."
         print "Update token script. Initialized successfully"
-
         return True
 
     def destroy(self, configurationAttributes):
@@ -30,37 +29,36 @@ class UpdateToken(UpdateTokenType):
     # jsonWebResponse - is JwtHeader, you can use any method to manipulate JWT
     # context is reference of io.jans.oxauth.service.external.context.ExternalUpdateTokenContext (in https://github.com/GluuFederation/oxauth project, )
     def modifyIdToken(self, jsonWebResponse, context):
-                print "Update token obconnect script. Modify idToken: %s" % jsonWebResponse
-		try :
-			sessionIdService = CdiUtil.bean(SessionIdService)
-			print "session id from context - %s" % context.getGrant().getSessionDn().strip("oxId=")
+        print "Update token obconnect script. Modify idToken: %s" % jsonWebResponse
+        try :
+            sessionIdService = CdiUtil.bean(SessionIdService)
+            print "session id from context - %s" % context.getGrant().getSessionDn().strip("oxId=")
 
-			sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
+            sessionId = sessionIdService.getSessionByDn(context.getGrant().getSessionDn()) # fetch from persistence
 
 
-			print "session id -%s " % sessionId.getSessionAttributes()
-			openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
-			acr = sessionId.getSessionAttributes().get("acr_ob")
+            print "session id -%s " % sessionId.getSessionAttributes()
+            openbanking_intent_id = sessionId.getSessionAttributes().get("openbanking_intent_id")
+            acr = sessionId.getSessionAttributes().get("acr_ob")
 
             # An example of how to set header claims
-			#jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
+            #jsonWebResponse.getHeader().setClaim("custom_header_name", "custom_header_value")
 
-			#custom claims
-			jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id)
-                        # If the ASPSP issues a refresh token, the ASPSP must indicate the date-time at which the refresh token # # will expire in a claim named http://openbanking.org.uk/refresh_token_expires_at in the Id token (returned # by the token end-point or userinfo end-point). Its value MUST be a number containing a NumericDate value, # as specified in https://tools.ietf.org/html/rfc7519#section-2
-                        refresh_token_expires_at = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getRefreshTokenLifetime()
-                        jsonWebResponse.getClaims().setClaim("refresh_token_expires_at", refresh_token_expires_at)
+            #custom claims
+            jsonWebResponse.getClaims().setClaim("openbanking_intent_id", openbanking_intent_id)
+            # If the ASPSP issues a refresh token, the ASPSP must indicate the date-time at which the refresh token # # will expire in a claim named http://openbanking.org.uk/refresh_token_expires_at in the Id token (returned # by the token end-point or userinfo end-point). Its value MUST be a number containing a NumericDate value, # as specified in https://tools.ietf.org/html/rfc7519#section-2
+            refresh_token_expires_at = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getRefreshTokenLifetime()
+            jsonWebResponse.getClaims().setClaim("refresh_token_expires_at", refresh_token_expires_at)
 
 
-			# this claim is currently commented and should have the unique id of the user for whom consent was passed
-                        # please fill it as per the implementation
-			jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
+            # this claim is currently commented and should have the unique id of the user for whom consent was passed
+            # please fill it as per the implementation
+            jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
 
-			print "Update token script. After modify idToken: %s" % jsonWebResponse
+            print "Update token script. After modify idToken: %s" % jsonWebResponse
 
-			# Use this blog to implement how RT claims can be retained. https://github.com/GluuFederation/oxAuth/wiki/Retain-access-token-claim
-
-			return True
-		except:
-	                print "update token failure" , sys.exc_info()[1]
-	                return None
+            # Use this blog to implement how RT claims can be retained. https://github.com/GluuFederation/oxAuth/wiki/Retain-access-token-claim
+            return True
+        except:
+            print "update token failure" , sys.exc_info()[1]
+            return None

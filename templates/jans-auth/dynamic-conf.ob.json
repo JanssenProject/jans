@@ -48,7 +48,8 @@
         "request_parameter_supported",
         "request_uri_parameter_supported",
         "token_endpoint_auth_signing_alg_values_supported",
-        "tls_client_certificate_bound_access_tokens"
+        "tls_client_certificate_bound_access_tokens",
+        "mtls_endpoint_aliases"
     ],
     "responseTypesSupported":[
         ["code", "id_token"]
