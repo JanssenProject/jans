@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.0.0-b7](https://img.shields.io/badge/Version-1.0.0--b7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b7](https://img.shields.io/badge/AppVersion-1.0.0--b7-informational?style=flat-square)
+![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b8](https://img.shields.io/badge/AppVersion-1.0.0--b8-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -91,7 +91,7 @@ Kubernetes: `>=v1.17.0-0`
 | email | string | `"support@jans.io"` | Email address of the administrator usually. Used for certificate creation. |
 | fullNameOverride | string | `""` |  |
 | image.repository | string | `"janssenproject/configuration-manager"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.0_b7"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.0_b8"` | Image  tag to use for deploying. |
 | ldapPassword | string | `"P@ssw0rds"` | LDAP admin password if OpennDJ is used for persistence. |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
 | migration.enabled | bool | `false` | Boolean flag to enable migration from CE |

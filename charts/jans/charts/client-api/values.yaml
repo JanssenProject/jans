@@ -29,7 +29,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/client-api
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b7
+  tag: 1.0.0_b8
 # -- Service replica number.
 replicas: 1
 # -- Resource specs.
