@@ -11,3 +11,5 @@ buttons:
   - b2:
     text: Debugging Interception scripts
     href: /jans-cloud-native/docs/interception-script-debug
+gems:
+  - jekyll-seo-tag
