@@ -34,7 +34,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-07-08 12:50'
+ENV CN_BUILD_DATE='2021-07-23 13:59'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -149,7 +149,7 @@ LABEL name="FIDO2" \
     maintainer="Janssen io <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b7" \
+    release="b8" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
