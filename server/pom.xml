@@ -12,7 +12,7 @@
     <properties>
         <dbcp.version>1.4</dbcp.version>
         <h2.version>1.4.194</h2.version>
-        <dropwizard.version>2.0.12</dropwizard.version>
+        <dropwizard.version>2.0.23</dropwizard.version>
         <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>
         <generate.windows.exe>false</generate.windows.exe>
         <commons-daemon.bin.version>1.2.1</commons-daemon.bin.version>
@@ -373,6 +373,18 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-model</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<groupId>net.minidev</groupId>
+            		<artifactId>json-smart</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.4.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
