@@ -2264,7 +2264,7 @@ paths:
       description: Provides server with basic statistic.
       operationId: get-stat
       security:
-        - oauth2: [https://jans.io/oauth/config/stats.readonly]
+        - oauth2: [https://jans.io/oauth/config/stats.readonly jans_stat]
       tags:
         - Statistics - User
       responses:
@@ -2273,13 +2273,31 @@ paths:
           content:
             application/json:
               schema:
-                title: StatResponseItem
+                title: StatResponse
                 description: Jans Authorization Server statistic data.
-                $ref: '#/components/schemas/StatResponseItem'
+                $ref: '#/components/schemas/StatResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: month
+          description: Month for which the stat report is to be fetched.
+          example:  202012 (2020 Dec) 202101 (2021 Jan)) 
+          required: true
+        - schema:
+            type: string
+            enum: 
+              - json
+              - openmetrics			
+            default: json
+          in: query
+          name: format
+          description: Report format
+          
 components:
   securitySchemes:
     oauth2:
@@ -4937,10 +4955,18 @@ components:
         publicVapidKey:
           type: string
           description: Public Vapid Key
-
+		  
+    StatResponse:
+      type: object
+      description: Server statistics response Object
+      properties:
+        response:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/StatResponseItem'
     StatResponseItem:
       type: object
-      description: Server statistics Data Object
+      description: Server statistics data
       properties:
         monthlyActiveUsers:
           type: integer
@@ -4949,23 +4975,14 @@ components:
           default: 0
         tokenCountPerGrantType:
           type: object
-          properties:
-            id:
-              type: string
-              description: Identifier for a server statistical item.
-              example: {"tokenCountPerGrantType":{"client_credentials":{"access_token":2}},"lastUpdatedAt":1615450812834,"month":"202103"}
-            additionalProperties: 
-              $ref: '#/components/schemas/MapObject'
-    MapObject:
+          additionalProperties:
+            $ref: '#/components/schemas/DataMapObject'
+    DataMapObject:
       type: object
       description: A hashmap with statistical item as a key and the value as statistical value.
-      properties:
-        id:
-          type: string
-          description: Statistical item.
-          example: access_token
-        additionalProperties: 
-          type: integer
-          format: int64
-          example: 2
+      additionalProperties:
+        type: integer
+
+          
+    
 	
