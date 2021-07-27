@@ -14,6 +14,7 @@ import ruamel.yaml
 import importlib
 import code
 import traceback
+import ast
 
 import pprint
 from pathlib import Path
@@ -574,7 +575,12 @@ class JCA_CLI:
         print('-' * len(text.splitlines()[-1]))
 
     def print_colored_output(self, data):
-        data_json = json.dumps(data, indent=2)
+        try:
+            data_json = json.dumps(data, indent=2)
+        except:
+            data = ast.literal_eval(str(data))
+            data_json = json.dumps(data, indent=2)
+
         print(self.colored_text(data_json, success_color))
 
     def pretty_print(self, data):
