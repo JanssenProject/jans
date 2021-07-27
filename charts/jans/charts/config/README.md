@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b8](https://img.shields.io/badge/AppVersion-1.0.0--b8-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -28,7 +28,9 @@ Kubernetes: `>=v1.17.0-0`
 |-----|------|---------|-------------|
 | adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
 | city | string | `"Austin"` | City. Used for certificate creation. |
+| cnOxtrustConfigGeneration | bool | `true` |  |
 | configmap.cnCacheType | string | `"NATIVE_PERSISTENCE"` | Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` . |
+| configmap.cnCasaEnabled | bool | `false` | Enable Casa flag . |
 | configmap.cnClientApiAdminCertCn | string | `"client-api"` | Client-api OAuth client admin certificate common name. This should be left to the default value client-api . |
 | configmap.cnClientApiApplicationCertCn | string | `"client-api"` | Client-api OAuth client application certificate common name. This should be left to the default value client-api. |
 | configmap.cnClientApiBindIpAddresses | string | `"*"` | Client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy |
@@ -65,7 +67,8 @@ Kubernetes: `>=v1.17.0-0`
 | configmap.cnJettyRequestHeaderSize | int | `8192` | Jetty header size in bytes in the auth server |
 | configmap.cnLdapUrl | string | `"opendj:1636"` |  |
 | configmap.cnMaxRamPercent | string | `"75.0"` | Value passed to Java option -XX:MaxRAMPercentage |
-| configmap.cnPersistenceLdapMapping | string | `"default"` | Boolean flag to enable/disable passport chart -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`. |
+| configmap.cnPassportEnabled | bool | `false` | Boolean flag to enable/disable passport chart |
+| configmap.cnPersistenceLdapMapping | string | `"default"` | Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`. |
 | configmap.cnRedisSentinelGroup | string | `""` | Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisSslTruststore | string | `""` | Redis SSL truststore. Optional. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |
 | configmap.cnRedisType | string | `"STANDALONE"` | Redis service type. `STANDALONE` or `CLUSTER`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`. |

@@ -1,94 +1,96 @@
 kubeVersion: ">=v1.17.0-0"
 annotations:
   artifacthub.io/changes: |
-    - Janssen 1.0 under dev charts
+    - Janssen 5.0 Openbanking Distribution. Auth-server and config-api.
+    - Updated new images
+    - https://jans.org/docs/openbanking
   artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/images: |
     - name: auth-server
-      image: janssenproject/auth-server:1.0.0_dev
+      image: janssenproject/auth-server:1.0.0_b8
     - name: auth-server-key-rotation
-      image: janssenproject/certmanager:1.0.0_dev
+      image: janssenproject/certmanager:1.0.0_b8
     - name:  client-api
-      image: janssenproject/client-api:1.0.0_dev
+      image: janssenproject/client-api:1.0.0_b8
     - name: configuration-manager
-      image: janssenproject/configuration-manager:1.0.0_dev
+      image: janssenproject/configuration-manager:1.0.0_b8
     - name:  config-api
-      image: janssenproject/config-api:1.0.0_dev
+      image: janssenproject/config-api:1.0.0_b8
     - name: fido2
-      image: janssenproject/fido2:1.0.0_dev
+      image: janssenproject/fido2:1.0.0_b8
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: janssenproject/persistence-loader:1.0.0_dev
+      image: janssenproject/persistence-loader:1.0.0_b8
     - name: scim
-      image: janssenproject/scim:1.0.0_dev
+      image: janssenproject/scim:1.0.0_b8
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: "true"
 apiVersion: v2
-appVersion: "1.0.0-b8"
-icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
-home: https://github.com/JanssenProject/jans-cloud-native
+appVersion: "5.0.0"
+icon: https://jans.io/favicon.ico
+home: https://jans.io
 sources:
 - https://jans.io
-- https://github.com/JanssenProject/jans-cloud-native
+- https://github.com/JanssenFederation/cloud-native-edition
 maintainers:
 - name: moabu
-  email: support@gluu.org
-description: Janssen Access and Identity Management
+  email: support@jans.io
+description: Janssen Access and Identity Management OpenBanking distribution
 name: jans
-version: 1.0.0-b8
+version: 5.0.0
 dependencies:
 - name: config
   condition: global.config.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: config-api
   condition: global.config-api.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: opendj
   condition: global.opendj.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: auth-server
   condition: global.auth-server.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: fido2
   condition: global.fido2.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: scim
   condition: global.scim.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: nginx-ingress
   condition: global.nginx-ingress.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: auth-server-key-rotation
   condition: global.auth-server-key-rotation.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: client-api
   condition: global.client-api.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: persistence
   condition: global.persistence.enabled
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
 
 - name: cn-istio-ingress
   condition: global.istio.ingress
-  version: 1.0.0-b8
+  version: 5.0.0
   repository: ""
