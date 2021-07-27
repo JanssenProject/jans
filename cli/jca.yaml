@@ -31,6 +31,7 @@ tags:
   - name: OAuth - OpenID Connect - Clients
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
+  - name: Statistics - User
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -2257,6 +2258,46 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/scopes.write]
+  /jans-config-api/api/v1/stat:
+    get:
+      summary: Provides server with basic statistic.
+      description: Provides server with basic statistic.
+      operationId: get-stat
+      security:
+        - oauth2: [https://jans.io/oauth/config/stats.readonly jans_stat]
+      tags:
+        - Statistics - User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: StatResponse
+                description: Jans Authorization Server statistic data.
+                $ref: '#/components/schemas/StatResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: month
+          description: Month for which the stat report is to be fetched.
+          example:  202012 (2020 Dec) 202101 (2021 Jan)) 
+          required: true
+        - schema:
+            type: string
+            enum: 
+              - json
+              - openmetrics			
+            default: json
+          in: query
+          name: format
+          description: Report format
+          
 components:
   securitySchemes:
     oauth2:
@@ -2305,6 +2346,7 @@ components:
             https://jans.io/oauth/config/database/sql.readonly: View SQL database related information
             https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
             https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
+            https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
   responses:
     Found:
       description: Resource Found.
@@ -4913,3 +4955,34 @@ components:
         publicVapidKey:
           type: string
           description: Public Vapid Key
+		  
+    StatResponse:
+      type: object
+      description: Server statistics response Object
+      properties:
+        response:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/StatResponseItem'
+    StatResponseItem:
+      type: object
+      description: Server statistics data
+      properties:
+        monthlyActiveUsers:
+          type: integer
+          format: int64
+          description: Number of active users
+          default: 0
+        tokenCountPerGrantType:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DataMapObject'
+    DataMapObject:
+      type: object
+      description: A hashmap with statistical item as a key and the value as statistical value.
+      additionalProperties:
+        type: integer
+
+          
+    
+	
