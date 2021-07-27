@@ -13,6 +13,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.STATISTICS)
@@ -30,11 +31,15 @@ public class StatResource extends BaseResource {
     StatisticService statisticService;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS,ApiAccessConstants.JANS_STAT})
+    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStatistics(@HeaderParam("Authorization") String authorization,@QueryParam(value = "month") String month,@QueryParam(value = "format")  String format) {
-        logger.debug("StatResource:::getUserStatistics() - authorization = " + authorization + " , month = "
-                + month + " , format = " + format);        
+    public Response getStatistics(@HeaderParam("Authorization") String authorization,
+            @QueryParam(value = "month") String month, @QueryParam(value = "format") String format) {
+        logger.debug("StatResource:::getUserStatistics() - authorization = " + authorization + " , month = " + month
+                + " , format = " + format);
+        if (StringUtils.isBlank(format)) {
+            format = "";
+        }
         String url = getIssuer() + this.statUrl;
         JsonNode jsonNode = this.statisticService.getStat(url, authorization, month, format);
         logger.debug("StatResource::getUserStatistics() - jsonNode = " + jsonNode);
