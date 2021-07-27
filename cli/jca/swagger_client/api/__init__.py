@@ -22,3 +22,4 @@ from swagger_client.api.default_authentication_method_api import DefaultAuthenti
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
 from swagger_client.api.o_auth___uma_resources_api import OAuthUMAResourcesApi
+from swagger_client.api.statistics___user_api import StatisticsUserApi

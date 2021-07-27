@@ -34,6 +34,7 @@ from swagger_client.api.default_authentication_method_api import DefaultAuthenti
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
 from swagger_client.api.o_auth___uma_resources_api import OAuthUMAResourcesApi
+from swagger_client.api.statistics___user_api import StatisticsUserApi
 # import ApiClient
 from swagger_client.api_client import ApiClient
 from swagger_client.configuration import Configuration
@@ -50,6 +51,7 @@ from swagger_client.models.cors_configuration_filter import CorsConfigurationFil
 from swagger_client.models.couchbase_configuration import CouchbaseConfiguration
 from swagger_client.models.custom_attribute import CustomAttribute
 from swagger_client.models.custom_script import CustomScript
+from swagger_client.models.data_map_object import DataMapObject
 from swagger_client.models.error_response import ErrorResponse
 from swagger_client.models.fido2_configuration import Fido2Configuration
 from swagger_client.models.gluu_attribute import GluuAttribute
@@ -73,5 +75,7 @@ from swagger_client.models.simple_custom_property import SimpleCustomProperty
 from swagger_client.models.simple_extended_custom_property import SimpleExtendedCustomProperty
 from swagger_client.models.smtp_configuration import SmtpConfiguration
 from swagger_client.models.sql_configuration import SqlConfiguration
+from swagger_client.models.stat_response import StatResponse
+from swagger_client.models.stat_response_item import StatResponseItem
 from swagger_client.models.uma_resource import UmaResource
 from swagger_client.models.web_keys_configuration import WebKeysConfiguration
