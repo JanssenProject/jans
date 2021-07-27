@@ -1,10 +1,14 @@
 dn: o=metric
 objectClass: top
 objectClass: organization
-o: site
+o: metric
 
 dn: ou=statistic,o=metric
 objectClass: top
 objectClass: organizationalUnit
 ou: statistic
 
+dn: ou=jans_auth,ou=statistic,o=metric
+objectClass: top
+objectClass: organizationalunit
+ou: jans_auth
