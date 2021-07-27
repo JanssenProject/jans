@@ -137,12 +137,3 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trustRelationships
 
-dn: ou=statistic,o=metric
-objectClass: top
-objectClass: organizationalunit
-ou: statistic
-
-dn: ou=jans_auth,ou=statistic,o=metric
-objectClass: top
-objectClass: organizationalunit
-ou: jans_auth

@@ -83,7 +83,7 @@ class ConfigApiInstaller(JettyInstaller):
         scope_ldif_fd = open(self.scope_ldif_fn, 'wb')
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
         scopes = {}
-        jansUmaScopes_all = []
+        jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
 
         for scope in scopes_def:
 
