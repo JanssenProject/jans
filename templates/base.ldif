@@ -122,11 +122,6 @@ objectClass: top
 objectClass: organizationalunit
 ou: metric
 
-dn: ou=jans_auth,ou=statistic,o=metric
-objectClass: top
-objectClass: organizationalunit
-ou: metric
-
 dn: ou=sector_identifiers,o=jans
 objectClass: top
 objectClass: organizationalunit
@@ -142,3 +137,12 @@ objectClass: top
 objectClass: organizationalUnit
 ou: trustRelationships
 
+dn: ou=statistic,o=metric
+objectClass: top
+objectClass: organizationalunit
+ou: statistic
+
+dn: ou=jans_auth,ou=statistic,o=metric
+objectClass: top
+objectClass: organizationalunit
+ou: jans_auth
