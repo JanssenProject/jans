@@ -246,6 +246,18 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-configuration</artifactId>
             <version>${dropwizard.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.26</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -374,10 +386,10 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-model</artifactId>
             <exclusions>
-            	<exclusion>
-            		<groupId>net.minidev</groupId>
-            		<artifactId>json-smart</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>net.minidev</groupId>
+                    <artifactId>json-smart</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -442,10 +454,10 @@
             <artifactId>lightstep-tracer-jre</artifactId>
             <version>0.14.2</version>
             <exclusions>
-            	<exclusion>
-            		<groupId>com.google.protobuf</groupId>
-            		<artifactId>protobuf-java</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -492,10 +504,10 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-sql</artifactId>
             <exclusions>
-            	<exclusion>
-            		<groupId>com.google.protobuf</groupId>
-            		<artifactId>protobuf-java</artifactId>
-            	</exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -561,9 +573,13 @@
                                     <goal>wget</goal>
                                 </goals>
                                 <configuration>
-                                    <url>https://www-us.apache.org/dist/commons/daemon/binaries/windows/commons-daemon-${commons-daemon.bin.version}-bin-windows.zip</url>
+                                    <url>
+                                        https://www-us.apache.org/dist/commons/daemon/binaries/windows/commons-daemon-${commons-daemon.bin.version}-bin-windows.zip
+                                    </url>
                                     <unpack>true</unpack>
-                                    <outputDirectory>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows</outputDirectory>
+                                    <outputDirectory>
+                                        ${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows
+                                    </outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
