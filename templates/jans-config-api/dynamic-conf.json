@@ -14,7 +14,7 @@
     {
       "filterName": "CorsFilter",
       "corsAllowedOrigins": "*",
-      "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
+      "corsAllowedMethods": "GET,PUT,POST,DELETE,PATCH",
       "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
       "corsExposedHeaders": "",
       "corsSupportCredentials": true,
