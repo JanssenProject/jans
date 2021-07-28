@@ -56,7 +56,11 @@
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
-			<id>jans</id>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <id>jans</id>
 			<name>Janssen project repository</name>
 			<url>https://maven.jans.io/maven</url>
 		</repository>
