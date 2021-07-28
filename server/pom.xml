@@ -6,7 +6,6 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-config-api-server</artifactId>
-	<version>1.0-SNAPSHOT</version>
 	<name>jans-config-api-server</name>
 	<packaging>war</packaging>
 
