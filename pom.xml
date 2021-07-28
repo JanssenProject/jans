@@ -78,11 +78,8 @@
 		<module>persistence-model</module>
 		<module>client</module>
 		<module>static</module>
-		<module>rp</module>
-		<module>rp-demo</module>
 		<module>common</module>
 		<module>server</module>
-		<module>rp-spring-boot</module>
   </modules>
 
 	<dependencyManagement>
