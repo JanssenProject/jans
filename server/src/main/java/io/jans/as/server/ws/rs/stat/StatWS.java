@@ -221,9 +221,9 @@ public class StatWS {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Token expired.");
         }
 
-        if (!grant.getScopesAsString().contains("stat")) {
-            log.trace("Access Token does NOT have 'stat' scope which is required to call Statistic Endpoint.");
-            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "stat scope is required for token.");
+        if (!grant.getScopesAsString().contains(appConfiguration.getStatAuthorizationScope())) {
+            log.trace("Access Token does NOT have '" + appConfiguration.getStatAuthorizationScope() + "' scope which is required to call Statistic Endpoint.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, appConfiguration.getStatAuthorizationScope() + " scope is required for token.");
         }
     }
 

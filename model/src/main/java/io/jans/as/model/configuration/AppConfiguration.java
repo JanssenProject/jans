@@ -35,6 +35,7 @@ public class AppConfiguration implements Configuration {
 
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
+    public static final String DEFAULT_STAT_SCOPE = "jans_stat";
 
     private String issuer;
     private String baseEndpoint;
@@ -86,6 +87,7 @@ public class AppConfiguration implements Configuration {
 
     private int statTimerIntervalInSeconds;
     private int statWebServiceIntervalLimitInSeconds;
+    private String statAuthorizationScope;
 
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
@@ -1070,6 +1072,15 @@ public class AppConfiguration implements Configuration {
 
     public void setStatTimerIntervalInSeconds(int statTimerIntervalInSeconds) {
         this.statTimerIntervalInSeconds = statTimerIntervalInSeconds;
+    }
+
+    public String getStatAuthorizationScope() {
+        if (statAuthorizationScope == null) statAuthorizationScope = DEFAULT_STAT_SCOPE;
+        return statAuthorizationScope;
+    }
+
+    public void setStatAuthorizationScope(String statAuthorizationScope) {
+        this.statAuthorizationScope = statAuthorizationScope;
     }
 
     public List<String> getUserInfoEncryptionEncValuesSupported() {
