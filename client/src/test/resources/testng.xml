@@ -819,294 +819,294 @@
     </test>
     <test name="CIBA Ping Mode" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPingMode"></class>
+            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPingMode"/>
         </classes>
     </test>
     <test name="CIBA Poll Mode" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPollMode"></class>
+            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPollMode"/>
         </classes>
     </test>
     <test name="CIBA Push Mode" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPushMode"></class>
+            <class name="io.jans.as.client.ciba.BackchannelAuthenticationPushMode"/>
         </classes>
     </test>
     <test name="CIBA Expired Requests" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.BackchannelAuthenticationExpiredRequestsTests"></class>
+            <class name="io.jans.as.client.ciba.BackchannelAuthenticationExpiredRequestsTests"/>
         </classes>
     </test>
     <test name="CIBA Ping Mode JWT Requests" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.CibaPingModeJwtAuthRequestTests"></class>
+            <class name="io.jans.as.client.ciba.CibaPingModeJwtAuthRequestTests"/>
         </classes>
     </test>
     <test name="CIBA Poll Mode JWT Requests" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ciba.CibaPollModeJwtAuthRequestTests"></class>
+            <class name="io.jans.as.client.ciba.CibaPollModeJwtAuthRequestTests"/>
         </classes>
     </test>
 
     <!-- Device authorization tests -->
     <test name="Tests for Device Authz WS" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.deviceauthz.DeviceAuthzRequestRegistrationTest"></class>
+            <class name="io.jans.as.client.ws.rs.deviceauthz.DeviceAuthzRequestRegistrationTest"/>
         </classes>
     </test>
     <test name="Tests for Device Authz flow" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.deviceauthz.DeviceAuthzFlowHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.deviceauthz.DeviceAuthzFlowHttpTest"/>
         </classes>
     </test>
 
     <!-- JARM -->
     <test name="Test Authorization Response Mode form_post.jwt Response Type code Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type code token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type token id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type token id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode form_post.jwt Response Type token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeTokenSignedHttpTest"/>
         </classes>
     </test>
 
     <test name="Test Authorization Response Mode fragment.jwt Response Type code Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type code token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type token id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type token id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode fragment.jwt Response Type token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeTokenSignedHttpTest"/>
         </classes>
     </test>
 
     <test name="Test Authorization Response Mode jwt Response Type code Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code id_token token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code id_token token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type code token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type token id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type token id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenIdTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Response Mode jwt Response Type token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeTokenSignedHttpTest"/>
         </classes>
     </test>
 
     <test name="Test Authorization Response Mode query jwt Response Type code Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code id_token token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code id_token token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeIdTokenTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeTokenEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code token Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type token id_token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type token id_token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type token id_token Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type token id_token Encrypted" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenIdTokenEncryptedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type token Signed" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type token Signed" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenSignedHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeTokenSignedHttpTest"/>
         </classes>
     </test>
     <test name="Test Authorization Server Metadata" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationServerMetadataHttpTest"></class>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationServerMetadataHttpTest"/>
         </classes>
     </test>
 
