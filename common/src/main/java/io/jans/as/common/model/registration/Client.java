@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -37,7 +40,7 @@ import io.jans.orm.model.base.DeletableEntity;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version July 28, 2021
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
@@ -118,6 +121,15 @@ public class Client extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "jansSubjectTyp")
     private SubjectType subjectType = SubjectType.PUBLIC;
+
+    @AttributeName(name = "jansAuthSignedRespAlg")
+    private String authorizationSignedResponseAlg;
+
+    @AttributeName(name = "jansAuthEncRespAlg")
+    private String authorizationEncryptedResponseAlg;
+
+    @AttributeName(name = "jansAuthEncRespEnc")
+    private String authorizationEncryptedResponseEnc;
 
     @AttributeName(name = "jansIdTknSignedRespAlg")
     private String idTokenSignedResponseAlg;
@@ -761,6 +773,30 @@ public class Client extends DeletableEntity implements Serializable {
      */
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
+    }
+
+    public String getAuthorizationSignedResponseAlg() {
+        return authorizationSignedResponseAlg;
+    }
+
+    public void setAuthorizationSignedResponseAlg(String authorizationSignedResponseAlg) {
+        this.authorizationSignedResponseAlg = authorizationSignedResponseAlg;
+    }
+
+    public String getAuthorizationEncryptedResponseAlg() {
+        return authorizationEncryptedResponseAlg;
+    }
+
+    public void setAuthorizationEncryptedResponseAlg(String authorizationEncryptedResponseAlg) {
+        this.authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg;
+    }
+
+    public String getAuthorizationEncryptedResponseEnc() {
+        return authorizationEncryptedResponseEnc;
+    }
+
+    public void setAuthorizationEncryptedResponseEnc(String authorizationEncryptedResponseEnc) {
+        this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
     }
 
     /**

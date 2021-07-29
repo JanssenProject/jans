@@ -14,16 +14,21 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.ScopeConstants;
+import io.jans.as.model.common.*;
+import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -59,16 +64,7 @@ import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AttributeService;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.ClientAuthorizationsService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -84,6 +80,7 @@ import io.jans.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -111,7 +108,7 @@ import static io.jans.as.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version May 9, 2020
+ * @version July 28, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -159,6 +156,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ConfigurationFactory сonfigurationFactory;
+
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
@@ -699,6 +699,50 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             clientService.updateAccessTime(client, false);
             oAuth2AuditLog.setSuccess(true);
+
+            // JARM
+            if (responseMode == ResponseMode.QUERY_JWT || responseMode == ResponseMode.FRAGMENT_JWT ||
+                    responseMode == ResponseMode.JWT || responseMode == ResponseMode.FORM_POST_JWT) {
+                redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
+                redirectUriResponse.getRedirectUri().setAudience(clientId);
+                redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
+                redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAuthorizationSignedResponseAlg()));
+                redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAuthorizationEncryptedResponseAlg()));
+                redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAuthorizationEncryptedResponseEnc()));
+                redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
+
+                String keyId = null;
+                if (client.getAuthorizationEncryptedResponseAlg() != null && client.getAuthorizationEncryptedResponseEnc() != null) {
+                    JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
+                    if (jsonWebKeys != null) {
+                        keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+                                Algorithm.fromString(client.getAuthorizationEncryptedResponseAlg()),
+                                Use.ENCRYPTION);
+                    }
+                    String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
+                    byte[] sharedSymmetricKey = sharedSecret.getBytes(Util.UTF8_STRING_ENCODING);
+                    redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
+                    redirectUriResponse.getRedirectUri().setSharedSecret(sharedSecret);
+                    redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
+                } else {
+                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
+                    if (client.getAuthorizationSignedResponseAlg() != null) {
+                        signatureAlgorithm = SignatureAlgorithm.fromString(client.getAuthorizationSignedResponseAlg());
+                    }
+
+                    keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+
+                    JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                    redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
+
+                    String clientSecret = clientService.decryptSecret(client.getClientSecret());
+                    byte[] sharedSymmetricKey = clientSecret.getBytes(Util.UTF8_STRING_ENCODING);
+                    redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
+                    redirectUriResponse.getRedirectUri().setSharedSecret(clientSecret);
+                }
+                redirectUriResponse.getRedirectUri().setKeyId(keyId);
+            }
 
             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
 
