@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 20, 2019
+ * @version July 28, 2021
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -96,6 +96,9 @@ public class AppConfiguration implements Configuration {
     private Set<GrantType> grantTypesSupported;
     private List<String> subjectTypesSupported;
     private String defaultSubjectType;
+    private List<String> authorizationSigningAlgValuesSupported;
+    private List<String> authorizationEncryptionAlgValuesSupported;
+    private List<String> authorizationEncryptionEncValuesSupported;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
     private List<String> userInfoEncryptionEncValuesSupported;
@@ -247,10 +250,10 @@ public class AppConfiguration implements Configuration {
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
-    private Boolean errorReasonEnabled  = false;
-    private Boolean removeRefreshTokensForClientOnLogout  = true;
-    private Boolean skipRefreshTokenDuringRefreshing  = false;
-    private Boolean refreshTokenExtendLifetimeOnRotation  = false;
+    private Boolean errorReasonEnabled = false;
+    private Boolean removeRefreshTokensForClientOnLogout = true;
+    private Boolean skipRefreshTokenDuringRefreshing = false;
+    private Boolean refreshTokenExtendLifetimeOnRotation = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
@@ -396,7 +399,8 @@ public class AppConfiguration implements Configuration {
     }
 
     public String getSoftwareStatementValidationType() {
-        if (softwareStatementValidationType == null) return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+        if (softwareStatementValidationType == null)
+            return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
         return softwareStatementValidationType;
     }
 
@@ -481,9 +485,10 @@ public class AppConfiguration implements Configuration {
     public void setIntrospectionScriptBackwardCompatibility(Boolean introspectionScriptBackwardCompatibility) {
         this.introspectionScriptBackwardCompatibility = introspectionScriptBackwardCompatibility;
     }
-    
+
     public Boolean getIntrospectionResponseScopesBackwardCompatibility() {
-        if (introspectionResponseScopesBackwardCompatibility == null) introspectionResponseScopesBackwardCompatibility = false;
+        if (introspectionResponseScopesBackwardCompatibility == null)
+            introspectionResponseScopesBackwardCompatibility = false;
         return introspectionScriptBackwardCompatibility;
     }
 
@@ -1040,6 +1045,30 @@ public class AppConfiguration implements Configuration {
 
     public void setDefaultSubjectType(String defaultSubjectType) {
         this.defaultSubjectType = defaultSubjectType;
+    }
+
+    public List<String> getAuthorizationSigningAlgValuesSupported() {
+        return authorizationSigningAlgValuesSupported;
+    }
+
+    public void setAuthorizationSigningAlgValuesSupported(List<String> authorizationSigningAlgValuesSupported) {
+        this.authorizationSigningAlgValuesSupported = authorizationSigningAlgValuesSupported;
+    }
+
+    public List<String> getAuthorizationEncryptionAlgValuesSupported() {
+        return authorizationEncryptionAlgValuesSupported;
+    }
+
+    public void setAuthorizationEncryptionAlgValuesSupported(List<String> authorizationEncryptionAlgValuesSupported) {
+        this.authorizationEncryptionAlgValuesSupported = authorizationEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getAuthorizationEncryptionEncValuesSupported() {
+        return authorizationEncryptionEncValuesSupported;
+    }
+
+    public void setAuthorizationEncryptionEncValuesSupported(List<String> authorizationEncryptionEncValuesSupported) {
+        this.authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported;
     }
 
     public List<String> getUserInfoSigningAlgValuesSupported() {
@@ -1735,14 +1764,14 @@ public class AppConfiguration implements Configuration {
     }
 
     public String getCookieDomain() {
-		return cookieDomain;
-	}
+        return cookieDomain;
+    }
 
-	public void setCookieDomain(String cookieDomain) {
-		this.cookieDomain = cookieDomain;
-	}
+    public void setCookieDomain(String cookieDomain) {
+        this.cookieDomain = cookieDomain;
+    }
 
-	public Boolean getEnabledOAuthAuditLogging() {
+    public Boolean getEnabledOAuthAuditLogging() {
         return enabledOAuthAuditLogging;
     }
 
@@ -1966,14 +1995,14 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getKeepAuthenticatorAttributesOnAcrChange() {
-		return keepAuthenticatorAttributesOnAcrChange;
-	}
+        return keepAuthenticatorAttributesOnAcrChange;
+    }
 
-	public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
-		this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
-	}
+    public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
+        this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+    }
 
-	public String getBackchannelClientId() {
+    public String getBackchannelClientId() {
         return backchannelClientId;
     }
 
@@ -2006,7 +2035,8 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelTokenDeliveryModesSupported() {
-        if (backchannelTokenDeliveryModesSupported == null) backchannelTokenDeliveryModesSupported = Lists.newArrayList();
+        if (backchannelTokenDeliveryModesSupported == null)
+            backchannelTokenDeliveryModesSupported = Lists.newArrayList();
         return backchannelTokenDeliveryModesSupported;
     }
 
@@ -2015,7 +2045,8 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
-        if (backchannelAuthenticationRequestSigningAlgValuesSupported == null) backchannelAuthenticationRequestSigningAlgValuesSupported = Lists.newArrayList();
+        if (backchannelAuthenticationRequestSigningAlgValuesSupported == null)
+            backchannelAuthenticationRequestSigningAlgValuesSupported = Lists.newArrayList();
         return backchannelAuthenticationRequestSigningAlgValuesSupported;
     }
 
@@ -2087,7 +2118,8 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getDynamicRegistrationAllowedPasswordGrantScopes() {
-        if (dynamicRegistrationAllowedPasswordGrantScopes == null) dynamicRegistrationAllowedPasswordGrantScopes = Lists.newArrayList();
+        if (dynamicRegistrationAllowedPasswordGrantScopes == null)
+            dynamicRegistrationAllowedPasswordGrantScopes = Lists.newArrayList();
         return dynamicRegistrationAllowedPasswordGrantScopes;
     }
 
@@ -2098,6 +2130,7 @@ public class AppConfiguration implements Configuration {
     /**
      * Returns a flag to determinate if Jans Auth supports password grant type for
      * dynamic client registration.
+     *
      * @return Boolean, true if it supports, false if it doesn't support.
      */
     public Boolean getDynamicRegistrationPasswordGrantTypeEnabled() {
@@ -2107,6 +2140,7 @@ public class AppConfiguration implements Configuration {
     /**
      * This method sets the flag that define if Jans Auth supports or not password
      * grant type for dynamic client registration.
+     *
      * @param dynamicRegistrationPasswordGrantTypeEnabled Boolean value for
      *                                                    the flag.
      */

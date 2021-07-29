@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version July 28, 2021
  */
 
 public enum RegisterRequestParam {
@@ -135,6 +135,21 @@ public enum RegisterRequestParam {
      * Algorithm used for signing of JWT
      */
     ACCESS_TOKEN_SIGNING_ALG("access_token_signing_alg"),
+
+    /**
+     * JWS alg algorithm JWA required for signing authorization responses.
+     */
+    AUTHORIZATION_SIGNED_RESPONSE_ALG("authorization_signed_response_alg"),
+
+    /**
+     * JWE alg algorithm JWA required for encrypting authorization responses.
+     */
+    AUTHORIZATION_ENCRYPTED_RESPONSE_ALG("authorization_encrypted_response_alg"),
+
+    /**
+     * JWE enc algorithm JWA required for encrypting auhtorization responses.
+     */
+    AUTHORIZATION_ENCRYPTED_RESPONSE_ENC("authorization_encrypted_response_enc"),
 
     /**
      * JWS alg algorithm (JWA)0 required for the issued ID Token.

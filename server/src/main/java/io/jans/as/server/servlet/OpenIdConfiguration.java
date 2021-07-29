@@ -46,7 +46,7 @@ import static io.jans.as.model.util.StringUtils.implode;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version August 14, 2019
+ * @version July 28, 2021
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration", loadOnStartup = 10)
 public class OpenIdConfiguration extends HttpServlet {
@@ -85,7 +85,7 @@ public class OpenIdConfiguration extends HttpServlet {
 	 *            servlet request
 	 * @param httpResponse
 	 *            servlet response
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@SuppressWarnings("deprecation")
 	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
@@ -175,6 +175,30 @@ public class OpenIdConfiguration extends HttpServlet {
 			if (subjectTypesSupported.length() > 0) {
 				jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
 			}
+
+			JSONArray authorizationSigningAlgValuesSupported = new JSONArray();
+			for (String authorizationSigningAlg : appConfiguration.getAuthorizationSigningAlgValuesSupported()) {
+				authorizationSigningAlgValuesSupported.put(authorizationSigningAlg);
+			}
+			if (!authorizationSigningAlgValuesSupported.isEmpty()) {
+				jsonObj.put(AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED, authorizationSigningAlgValuesSupported);
+			}
+
+			JSONArray authorizationEncryptionAlgValuesSupported = new JSONArray();
+			for (String authorizationEncryptionAlg : appConfiguration.getAuthorizationEncryptionAlgValuesSupported()) {
+			    authorizationEncryptionAlgValuesSupported.put(authorizationEncryptionAlg);
+            }
+			if (!authorizationEncryptionAlgValuesSupported.isEmpty()) {
+			    jsonObj.put(AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED, authorizationEncryptionAlgValuesSupported);
+            }
+
+			JSONArray authorizationEncryptionEncValuesSupported = new JSONArray();
+			for (String authorizationEncyptionEnc : appConfiguration.getAuthorizationEncryptionEncValuesSupported()) {
+			    authorizationEncryptionEncValuesSupported.put(authorizationEncyptionEnc);
+            }
+			if (!authorizationEncryptionEncValuesSupported.isEmpty()) {
+			    jsonObj.put(AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED, authorizationEncryptionEncValuesSupported);
+            }
 
 			JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
 			for (String userInfoSigningAlg : appConfiguration.getUserInfoSigningAlgValuesSupported()) {
