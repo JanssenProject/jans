@@ -6,37 +6,35 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.TokenType;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwe.Jwe;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.TokenType;
-import io.jans.as.model.util.Util;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.PrivateKey;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version July 28, 2021
  */
 public class AuthorizationResponse extends BaseResponse {
 
@@ -52,9 +50,19 @@ public class AuthorizationResponse extends BaseResponse {
     private Map<String, String> customParams;
     private ResponseMode responseMode;
 
+    // JARM
+    protected String response;
+    protected String issuer;
+    protected String audience;
+    protected Integer exp;
+
     private AuthorizeErrorResponseType errorType;
     private String errorDescription;
     private String errorUri;
+
+    private String sharedKey;
+    private PrivateKey privateKey;
+    private String jwksUri;
 
     /**
      * Constructs an authorization response.
@@ -95,83 +103,162 @@ public class AuthorizationResponse extends BaseResponse {
         processLocation();
     }
 
+    public AuthorizationResponse(String location, String sharedKey, PrivateKey privateKey, String jwksUri) {
+        this.location = location;
+        this.sharedKey = sharedKey;
+        this.privateKey = privateKey;
+        this.jwksUri = jwksUri;
+
+        customParams = new HashMap<String, String>();
+
+        processLocation();
+    }
+
     private void processLocation() {
         try {
             if (StringUtils.isNotBlank(location)) {
                 Map<String, String> params = null;
                 int fragmentIndex = location.indexOf("#");
                 if (fragmentIndex != -1) {
-                    responseMode = ResponseMode.FRAGMENT;
                     String fragment = location.substring(fragmentIndex + 1);
                     params = QueryStringDecoder.decode(fragment);
+
+                    if (params.containsKey("response")) {
+                        responseMode = ResponseMode.FRAGMENT_JWT;
+                    } else {
+                        responseMode = ResponseMode.FRAGMENT;
+                    }
                 } else {
                     int queryStringIndex = location.indexOf("?");
                     if (queryStringIndex != -1) {
-                        responseMode = ResponseMode.QUERY;
                         String queryString = location.substring(queryStringIndex + 1);
                         params = QueryStringDecoder.decode(queryString);
+
+                        if (params.containsKey("response")) {
+                            responseMode = ResponseMode.QUERY_JWT;
+                        } else {
+                            responseMode = ResponseMode.QUERY;
+                        }
                     }
                 }
 
                 if (params != null) {
-                    if (params.containsKey(CODE)) {
-                        code = params.get(CODE);
-                        params.remove(CODE);
-                    }
-                    if (params.containsKey(SESSION_ID)) {
-                        sessionId = params.get(SESSION_ID);
-                        params.remove(SESSION_ID);
-                    }
-                    if (params.containsKey(SID)) {
-                        sid = params.get(SID);
-                        params.remove(SID);
-                    }
-                    if (params.containsKey(ACCESS_TOKEN)) {
-                        accessToken = params.get(ACCESS_TOKEN);
-                        params.remove(ACCESS_TOKEN);
-                    }
-                    if (params.containsKey(TOKEN_TYPE)) {
-                        tokenType = TokenType.fromString(params.get(TOKEN_TYPE));
-                        params.remove(TOKEN_TYPE);
-                    }
-                    if (params.containsKey(EXPIRES_IN)) {
-                        expiresIn = Integer.parseInt(params.get(EXPIRES_IN));
-                        params.remove(EXPIRES_IN);
-                    }
-                    if (params.containsKey(SCOPE)) {
-                        scope = URLDecoder.decode(params.get(SCOPE), Util.UTF8_STRING_ENCODING);
-                        params.remove(SCOPE);
-                    }
-                    if (params.containsKey(ID_TOKEN)) {
-                        idToken = params.get(ID_TOKEN);
-                        params.remove(ID_TOKEN);
-                    }
-                    if (params.containsKey(STATE)) {
-                        state = params.get(STATE);
-                        params.remove(STATE);
-                    }
-                    if (params.containsKey("error")) {
-                        errorType = AuthorizeErrorResponseType.fromString(params.get("error"));
-                        params.remove("error");
-                    }
-                    if (params.containsKey("error_description")) {
-                        errorDescription = URLDecoder.decode(params.get("error_description"), Util.UTF8_STRING_ENCODING);
-                        params.remove("error_description");
-                    }
-                    if (params.containsKey("error_uri")) {
-                        errorUri = URLDecoder.decode(params.get("error_uri"), Util.UTF8_STRING_ENCODING);
-                        params.remove("error_uri");
+                    if (params.containsKey(RESPONSE)) {
+                        response = params.get(RESPONSE);
+                        params.remove(RESPONSE);
+
+                        String[] jwtParts = response.split("\\.");
+
+                        if (jwtParts.length == 5) {
+                            byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(Util.UTF8_STRING_ENCODING) : null;
+                            Jwe jwe = Jwe.parse(response, privateKey, sharedSymmetricKey);
+
+                            for (Map.Entry<String, List<String>> entry : jwe.getClaims().toMap().entrySet()) {
+                                params.put(entry.getKey(), entry.getValue().get(0));
+                            }
+                        } else {
+                            Jwt jwt = Jwt.parse(response);
+
+                            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+                            boolean signatureVerified = cryptoProvider.verifySignature(
+                                    jwt.getSigningInput(),
+                                    jwt.getEncodedSignature(),
+                                    jwt.getHeader().getKeyId(),
+                                    JwtUtil.getJSONWebKeys(jwksUri),
+                                    sharedKey,
+                                    jwt.getHeader().getSignatureAlgorithm());
+
+                            if (signatureVerified) {
+                                for (Map.Entry<String, List<String>> entry : jwt.getClaims().toMap().entrySet()) {
+                                    params.put(entry.getKey(), entry.getValue().get(0));
+                                }
+                            }
+                        }
                     }
 
-                    for (Iterator<String> it = params.keySet().iterator(); it.hasNext(); ) {
-                        String key = it.next();
-                        getCustomParams().put(key, params.get(key));
-                    }
+                    loadparams(params);
                 }
             }
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (InvalidJwtException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+    private void loadparams(Map<String, String> params) throws UnsupportedEncodingException {
+        if (params.containsKey(CODE)) {
+            code = params.get(CODE);
+            params.remove(CODE);
+        }
+        if (params.containsKey(SESSION_ID)) {
+            sessionId = params.get(SESSION_ID);
+            params.remove(SESSION_ID);
+        }
+        if (params.containsKey(SID)) {
+            sid = params.get(SID);
+            params.remove(SID);
+        }
+        if (params.containsKey(ACCESS_TOKEN)) {
+            accessToken = params.get(ACCESS_TOKEN);
+            params.remove(ACCESS_TOKEN);
+        }
+        if (params.containsKey(TOKEN_TYPE)) {
+            tokenType = TokenType.fromString(params.get(TOKEN_TYPE));
+            params.remove(TOKEN_TYPE);
+        }
+        if (params.containsKey(EXPIRES_IN)) {
+            expiresIn = Integer.parseInt(params.get(EXPIRES_IN));
+            params.remove(EXPIRES_IN);
+        }
+        if (params.containsKey(SCOPE)) {
+            scope = URLDecoder.decode(params.get(SCOPE), Util.UTF8_STRING_ENCODING);
+            params.remove(SCOPE);
+        }
+        if (params.containsKey(ID_TOKEN)) {
+            idToken = params.get(ID_TOKEN);
+            params.remove(ID_TOKEN);
+        }
+        if (params.containsKey(STATE)) {
+            state = params.get(STATE);
+            params.remove(STATE);
+        }
+
+        // JARM
+        if (params.containsKey(ISS)) {
+            issuer = params.get(ISS);
+            params.remove(ISS);
+        }
+        if (params.containsKey(AUD)) {
+            audience = params.get(AUD);
+            params.remove(AUD);
+        }
+        if (params.containsKey(EXP)) {
+            exp = Integer.parseInt(params.get(EXP));
+        }
+
+        // Error
+        if (params.containsKey("error")) {
+            errorType = AuthorizeErrorResponseType.fromString(params.get("error"));
+            params.remove("error");
+        }
+        if (params.containsKey("error_description")) {
+            errorDescription = URLDecoder.decode(params.get("error_description"), Util.UTF8_STRING_ENCODING);
+            params.remove("error_description");
+        }
+        if (params.containsKey("error_uri")) {
+            errorUri = URLDecoder.decode(params.get("error_uri"), Util.UTF8_STRING_ENCODING);
+            params.remove("error_uri");
+        }
+
+        for (Iterator<String> it = params.keySet().iterator(); it.hasNext(); ) {
+            String key = it.next();
+            getCustomParams().put(key, params.get(key));
+        }
+    }
+
 
     /**
      * Returns the authorization code generated by the authorization server.
@@ -249,6 +336,38 @@ public class AuthorizationResponse extends BaseResponse {
 
     public void setResponseMode(ResponseMode responseMode) {
         this.responseMode = responseMode;
+    }
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
+
+    public Integer getExp() {
+        return exp;
+    }
+
+    public void setExp(Integer exp) {
+        this.exp = exp;
     }
 
     /**

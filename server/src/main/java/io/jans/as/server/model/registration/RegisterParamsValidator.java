@@ -44,7 +44,7 @@ import io.jans.as.server.util.ServerUtil;
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version October 22, 2019
+ * @version July 28, 2021
  */
 @Stateless
 @Named
@@ -192,6 +192,30 @@ public class RegisterParamsValidator {
             log.debug("Parameter token_endpoint_auth_signing_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_signing_alg is not valid.");
+        }
+
+        // JARM
+        if (registerRequest.getAuthorizationSignedResponseAlg() != null &&
+                (!appConfiguration.getAuthorizationSigningAlgValuesSupported().contains(
+                        registerRequest.getAuthorizationSignedResponseAlg().toString()) ||
+                        registerRequest.getAuthorizationSignedResponseAlg() == SignatureAlgorithm.NONE)) {
+            log.debug("Parameter authorization_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter authorization_signed_response_alg is not valid.");
+        }
+        if (registerRequest.getAuthorizationEncryptedResponseAlg() != null &&
+                !appConfiguration.getAuthorizationEncryptionAlgValuesSupported().contains(
+                        registerRequest.getAuthorizationEncryptedResponseAlg().toString())) {
+            log.debug("Parameter authorization_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter authorization_encrypted_response_alg is not valid.");
+        }
+        if (registerRequest.getAuthorizationEncryptedResponseEnc() != null &&
+                !appConfiguration.getAuthorizationEncryptionEncValuesSupported().contains(
+                        registerRequest.getAuthorizationEncryptedResponseEnc().toString())) {
+            log.debug("Parameter authorization_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter authorization_encrypted_response_enc is not valid.");
         }
     }
 

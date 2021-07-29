@@ -8,7 +8,7 @@ package io.jans.as.model.authorize;
 
 /**
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version July 28, 2021
  */
 public interface AuthorizeResponseParam {
 
@@ -20,6 +20,12 @@ public interface AuthorizeResponseParam {
     String ID_TOKEN = "id_token";
     String STATE = "state";
     String SESSION_STATE = "session_state";
+
+    // JARM
+    String RESPONSE = "response";
+    String ISS = "iss";
+    String AUD = "aud";
+    String EXP = "exp";
 
     /**
      * String that represents the End-User's login state at the OP.

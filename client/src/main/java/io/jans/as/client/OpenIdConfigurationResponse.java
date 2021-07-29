@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version August 22, 2019
+ * @version July 28, 2021
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -47,6 +47,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
     private List<String> subjectTypesSupported;
+    private List<String> authorizationSigningAlgValuesSupported;
+    private List<String> authorizationEncryptionAlgValuesSupported;
+    private List<String> authorizationEncryptionEncValuesSupported;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
     private List<String> userInfoEncryptionEncValuesSupported;
@@ -102,6 +105,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         grantTypesSupported = new ArrayList<String>();
         acrValuesSupported = new ArrayList<String>();
         subjectTypesSupported = new ArrayList<String>();
+        authorizationSigningAlgValuesSupported = new ArrayList<>();
+        authorizationEncryptionAlgValuesSupported = new ArrayList<>();
+        authorizationEncryptionEncValuesSupported = new ArrayList<>();
         userInfoSigningAlgValuesSupported = new ArrayList<String>();
         userInfoEncryptionAlgValuesSupported = new ArrayList<String>();
         userInfoEncryptionEncValuesSupported = new ArrayList<String>();
@@ -520,6 +526,66 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setSubjectTypesSupported(List<String> subjectTypesSupported) {
         this.subjectTypesSupported = subjectTypesSupported;
+    }
+
+    /**
+     * Returns a list of the JWS signing algorithms (alg values) JWA supported by the authorization endpoint to sign the
+     * responses.
+     *
+     * @return A list of the JWS singing algorithms.
+     */
+    public List<String> getAuthorizationSigningAlgValuesSupported() {
+        return authorizationSigningAlgValuesSupported;
+    }
+
+    /**
+     * Sets a list of the JWS signing algorithms (alg values) JWA supported by the authorization endpoint to sign the
+     * responses.
+     *
+     * @param authorizationSigningAlgValuesSupported A list of the JWS singing algorithms.
+     */
+    public void setAuthorizationSigningAlgValuesSupported(List<String> authorizationSigningAlgValuesSupported) {
+        this.authorizationSigningAlgValuesSupported = authorizationSigningAlgValuesSupported;
+    }
+
+    /**
+     * Returns a list of the JWE encryption algorithms (alg values) JWA supported by the authorization endpoint to
+     * encrypt the response.
+     *
+     * @return A list of the JWE encryption algorithms.
+     */
+    public List<String> getAuthorizationEncryptionAlgValuesSupported() {
+        return authorizationEncryptionAlgValuesSupported;
+    }
+
+    /**
+     * Sets a list of the JWE encryption algorithms (alg values) JWA supported by the authorization endpoint to encrypt
+     * the response.
+     *
+     * @param authorizationEncryptionAlgValuesSupported A list of the JWE encryption algorithms.
+     */
+    public void setAuthorizationEncryptionAlgValuesSupported(List<String> authorizationEncryptionAlgValuesSupported) {
+        this.authorizationEncryptionAlgValuesSupported = authorizationEncryptionAlgValuesSupported;
+    }
+
+    /**
+     * Returns a list of the JWE encryption algorithms (enc values) JWA supported by the authorization endpoint to
+     * encrypt the response.
+     *
+     * @return A list of the JWE encryption algorithms.
+     */
+    public List<String> getAuthorizationEncryptionEncValuesSupported() {
+        return authorizationEncryptionEncValuesSupported;
+    }
+
+    /**
+     * Sets a list of the JWE encryption algorithms (enc values) JWA supported by the authorization endpoint to encrypt
+     * the response.
+     *
+     * @param authorizationEncryptionEncValuesSupported A list of the JWE encryption algorithms.
+     */
+    public void setAuthorizationEncryptionEncValuesSupported(List<String> authorizationEncryptionEncValuesSupported) {
+        this.authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported;
     }
 
     /**
@@ -1140,6 +1206,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", grantTypesSupported=" + grantTypesSupported +
                 ", acrValuesSupported=" + acrValuesSupported +
                 ", subjectTypesSupported=" + subjectTypesSupported +
+                ", authorizationSigningAlgValuesSupported=" + authorizationSigningAlgValuesSupported +
+                ", authorizationEncryptionAlgValuesSupported=" + authorizationEncryptionAlgValuesSupported +
+                ", authorizationEncryptionEncValuesSupported=" + authorizationEncryptionEncValuesSupported +
                 ", userInfoSigningAlgValuesSupported=" + userInfoSigningAlgValuesSupported +
                 ", userInfoEncryptionAlgValuesSupported=" + userInfoEncryptionAlgValuesSupported +
                 ", userInfoEncryptionEncValuesSupported=" + userInfoEncryptionEncValuesSupported +
