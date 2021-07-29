@@ -8,7 +8,7 @@ package io.jans.as.model.configuration;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version July 28, 2021
  */
 public interface ConfigurationResponseClaim {
 
@@ -35,6 +35,9 @@ public interface ConfigurationResponseClaim {
     String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     String ACR_VALUES_SUPPORTED = "acr_values_supported";
     String SUBJECT_TYPES_SUPPORTED = "subject_types_supported";
+    String AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED = "authorization_signing_alg_values_supported";
+    String AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED = "authorization_encryption_alg_values_supported";
+    String AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED = "authorization_encryption_enc_values_supported";
     String USER_INFO_SIGNING_ALG_VALUES_SUPPORTED = "userinfo_signing_alg_values_supported";
     String USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED = "userinfo_encryption_alg_values_supported";
     String USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED = "userinfo_encryption_enc_values_supported";
