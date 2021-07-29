@@ -64,4 +64,9 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
     public String getDcrJwks(Object context) {
         return "";
     }
+
+    @Override
+    public boolean isCertValidForClient(Object cert, Object context) {
+        return false;
+    }
 }
