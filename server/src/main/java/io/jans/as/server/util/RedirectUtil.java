@@ -6,10 +6,13 @@
 
 package io.jans.as.server.util;
 
-import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
-
-import java.net.MalformedURLException;
-import java.net.URI;
+import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.common.ResponseMode;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
@@ -17,18 +20,13 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.net.MalformedURLException;
+import java.net.URI;
 
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jans.as.common.util.RedirectUri;
-import io.jans.as.model.common.ResponseMode;
+import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
 
 /**
- * @version October 7, 2019
+ * @version July 28, 2021
  */
 public class RedirectUtil {
 
@@ -60,18 +58,18 @@ public class RedirectUtil {
                 builder = Response.serverError();
                 log.debug(e.getMessage(), e);
             }
-        } else if (redirectUriResponse.getResponseMode() != ResponseMode.FORM_POST) {
-            URI redirectURI = URI.create(redirectUriResponse.toString());
-            builder = new ResponseBuilderImpl();
-            builder = Response.status(HTTP_REDIRECT);
-            builder.location(redirectURI);
-        } else {
+        } else if (redirectUriResponse.getResponseMode() == ResponseMode.FORM_POST
+                || redirectUriResponse.getResponseMode() == ResponseMode.FORM_POST_JWT) {
             builder = new ResponseBuilderImpl();
             builder.status(Response.Status.OK);
             builder.type(MediaType.TEXT_HTML_TYPE);
             builder.cacheControl(CacheControl.valueOf("no-cache, no-store"));
             builder.header("Pragma", "no-cache");
             builder.entity(redirectUriResponse.toString());
+        } else {
+            URI redirectURI = URI.create(redirectUriResponse.toString());
+            builder = Response.status(HTTP_REDIRECT);
+            builder.location(redirectURI);
         }
 
         return builder;

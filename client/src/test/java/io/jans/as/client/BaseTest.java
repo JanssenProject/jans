@@ -66,10 +66,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
@@ -87,7 +84,7 @@ import static org.testng.Assert.fail;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version July 28, 2021
  */
 public abstract class BaseTest {
 
@@ -115,6 +112,8 @@ public abstract class BaseTest {
     protected String parEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
     protected String issuer;
+    protected String sharedKey;
+    protected PrivateKey privateKey;
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
 
@@ -522,9 +521,10 @@ public abstract class BaseTest {
             System.out.println("authenticateResourceOwnerAndGrantAccess: sessionId:" + sessionIdCookie.getValue());
         }
 
-        AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr,
+                sharedKey, privateKey, jwksUri);
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
-            authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
+            authorizationResponse.setResponseMode(authorizationRequest.getResponseMode());
         }
         if (authorizeClient != null) {
             authorizeClient.setResponse(authorizationResponse);

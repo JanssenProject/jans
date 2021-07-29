@@ -40,15 +40,14 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
-import static io.jans.as.model.util.StringUtils.implode;
-import static io.jans.as.model.util.StringUtils.toJSONArray;
+import static io.jans.as.model.util.StringUtils.*;
 
 /**
  * Represents a register request to send to the authorization server.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version August 20, 2019
+ * @version July 28, 2021
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -65,7 +64,7 @@ public class RegisterRequest extends BaseRequest {
      * code id_token: authorization_code, implicit
      * code token: authorization_code, implicit
      * code token id_token: authorization_code, implicit
-     *
+     * <p>
      * https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
      */
     private List<String> responseTypes;
@@ -94,6 +93,9 @@ public class RegisterRequest extends BaseRequest {
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
     private SignatureAlgorithm accessTokenSigningAlg;
+    private SignatureAlgorithm authorizationSignedResponseAlg;
+    private KeyEncryptionAlgorithm authorizationEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm authorizationEncryptedResponseEnc;
     private SignatureAlgorithm idTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
     private BlockEncryptionAlgorithm idTokenEncryptedResponseEnc;
@@ -653,6 +655,30 @@ public class RegisterRequest extends BaseRequest {
 
     public void setAccessTokenSigningAlg(SignatureAlgorithm accessTokenSigningAlg) {
         this.accessTokenSigningAlg = accessTokenSigningAlg;
+    }
+
+    public SignatureAlgorithm getAuthorizationSignedResponseAlg() {
+        return authorizationSignedResponseAlg;
+    }
+
+    public void setAuthorizationSignedResponseAlg(SignatureAlgorithm authorizationSignedResponseAlg) {
+        this.authorizationSignedResponseAlg = authorizationSignedResponseAlg;
+    }
+
+    public KeyEncryptionAlgorithm getAuthorizationEncryptedResponseAlg() {
+        return authorizationEncryptedResponseAlg;
+    }
+
+    public void setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm authorizationEncryptedResponseAlg) {
+        this.authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg;
+    }
+
+    public BlockEncryptionAlgorithm getAuthorizationEncryptedResponseEnc() {
+        return authorizationEncryptedResponseEnc;
+    }
+
+    public void setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm authorizationEncryptedResponseEnc) {
+        this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
     }
 
     /**
@@ -1224,6 +1250,15 @@ public class RegisterRequest extends BaseRequest {
         if (accessTokenSigningAlg != null) {
             parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
         }
+        if (authorizationSignedResponseAlg != null) {
+            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.getName());
+        }
+        if (authorizationEncryptedResponseAlg != null) {
+            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.getName());
+        }
+        if (authorizationEncryptedResponseEnc != null) {
+            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.getName());
+        }
         if (idTokenSignedResponseAlg != null) {
             parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
         }
@@ -1493,6 +1528,12 @@ public class RegisterRequest extends BaseRequest {
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
+        result.setAuthorizationSignedResponseAlg(requestObject.has(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString()) ?
+                SignatureAlgorithm.fromString(requestObject.optString(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString())) : null);
+        result.setAuthorizationEncryptedResponseAlg(requestObject.has(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString()) ?
+                KeyEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+        result.setAuthorizationEncryptedResponseEnc(requestObject.has(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString()) ?
+                BlockEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
                 SignatureAlgorithm.fromString(requestObject.optString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
@@ -1640,6 +1681,15 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenSigningAlg != null) {
             parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
+        }
+        if (authorizationSignedResponseAlg != null) {
+            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.toString());
+        }
+        if (authorizationEncryptedResponseAlg != null) {
+            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.toString());
+        }
+        if (authorizationEncryptedResponseEnc != null) {
+            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.toString());
         }
         if (idTokenSignedResponseAlg != null) {
             parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
