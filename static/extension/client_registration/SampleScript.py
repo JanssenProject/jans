@@ -104,3 +104,8 @@ class ClientRegistration(ClientRegistrationType):
     # context is reference of io.jans.as.service.external.context.DynamicClientRegistrationContext (in https://github.com/JanssenFederation/oxauth project )
     def getSoftwareStatementJwks(self, context):
         return ""
+
+    # cert - java.security.cert.X509Certificate
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def isCertValidForClient(self, cert, context):
+        return False
