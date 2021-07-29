@@ -32,4 +32,7 @@ public interface ClientRegistrationType extends BaseExternalType {
 
     String getDcrJwks(Object context);
 
+    // context - io.jans.as.server.service.external.context.DynamicClientRegistrationContext
+    // cert - java.security.cert.X509Certificate
+    boolean isCertValidForClient(Object cert, Object context);
 }
