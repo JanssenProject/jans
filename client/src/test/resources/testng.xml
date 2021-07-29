@@ -1044,7 +1044,7 @@
         </classes>
     </test>
 
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode query jwt Response Type code Encrypted" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeQueryJwtResponseTypeCodeEncryptedHttpTest"></class>
         </classes>
