@@ -158,6 +158,17 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
+				<artifactId>jans-core-server</artifactId>
+				<version>${jans.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>org.jboss.resteasy</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
 				<artifactId>jans-core-service</artifactId>
 				<version>${jans.version}</version>
 				<exclusions>
@@ -230,22 +241,20 @@
 				<artifactId>hibernate-validator-cdi</artifactId>
 				<version>7.0.1.Final</version>
 			</dependency>
-			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>2.0.1.Final</version>
-				<scope>provided</scope>
-			</dependency>
+			<!-- <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
+				<version>2.0.1.Final</version> <scope>provided</scope> </dependency> -->
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>7.0.1.Final</version>
-				<scope>provided</scope>
+				<!-- <scope>provided</scope> -->
 			</dependency>
+			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-validator-provider</artifactId> 
+				<version>4.6.1.Final</version> </dependency> -->
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-validator-provider</artifactId>
-				<version>4.6.1.Final</version>
+				<groupId>org.glassfish</groupId>
+				<artifactId>jakarta.el</artifactId>
+				<version>3.0.3</version>
 			</dependency>
 
 			<!-- RestEasy -->

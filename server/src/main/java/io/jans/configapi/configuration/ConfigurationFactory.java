@@ -14,6 +14,7 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -84,7 +85,7 @@ public class ConfigurationFactory {
     private String cryptoConfigurationSalt;
     private String saltFilePath;
     
-    private io.jans.configapi.model.configuration.AppConfiguration apiAppConfiguration;
+    private ApiAppConfiguration apiAppConfiguration;
     private StaticConfiguration apiAppStaticConf;
     private long loadedRevision = -1;
 
@@ -97,6 +98,13 @@ public class ConfigurationFactory {
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
         return appConfiguration;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public ApiAppConfiguration getApiAppConfiguration() {
+        log.debug("\n\n\n *** ConfigurationFactory::getApiAppConfiguration() - apiAppConfiguration = "+apiAppConfiguration+" *** \n\n\n");
+        return apiAppConfiguration;
     }
 
     @Produces
@@ -194,6 +202,8 @@ public class ConfigurationFactory {
             this.apiAppStaticConf = conf.getStaticConf();
         }
         this.loadedRevision = conf.getRevision();
+        
+        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "+this.apiAppConfiguration+" *** \n\n\n");
         this.setApiConfigurationProperties();
     }
     
@@ -202,12 +212,15 @@ public class ConfigurationFactory {
         if(this.apiAppConfiguration == null) {
             throw new ConfigurationException("Failed to load Configuration properties " + this.apiAppConfiguration);
         }
+        
+        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration = "+this.apiAppConfiguration+" *** \n\n\n");
         this.apiApprovedIssuer = this.apiAppConfiguration.getApiApprovedIssuer();
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
         
-        log.info("Properties set, this.apiApprovedIssuer = "+this.apiApprovedIssuer+" , this.apiProtectionType = "+this.apiProtectionType+" , this.apiClientId = "+this.apiClientId+" , this.apiClientPassword = "+this.apiClientPassword);
+        
+        log.info("Properties set, this.apiApprovedIssuer = "+this.apiApprovedIssuer+" , this.apiProtectionType = "+this.apiProtectionType+" , this.apiClientId = "+this.apiClientId+" , this.apiClientPassword = "+this.apiClientPassword+" , this.apiAppConfiguration.getCorsConfigurationFilters().get(0).getCorsAllowedMethods() = "+this.apiAppConfiguration.getCorsConfigurationFilters().get(0).getCorsAllowedMethods());
     }
 
     private Conf loadConfigurationFromDb(String returnAttribute) {
