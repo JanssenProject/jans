@@ -17,7 +17,7 @@ public class Conf {
 
     @JsonObject
     @AttributeName(name = "jansConfDyn")
-    private AppConfiguration dynamicConf;
+    private ApiAppConfiguration dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
@@ -37,11 +37,11 @@ public class Conf {
         dn = p_dn;
     }
 
-    public AppConfiguration getDynamicConf() {
+    public ApiAppConfiguration getDynamicConf() {
         return dynamicConf;
     }
 
-    public void setDynamicConf(AppConfiguration dynamicConf) {
+    public void setDynamicConf(ApiAppConfiguration dynamicConf) {
         this.dynamicConf = dynamicConf;
     }
 
