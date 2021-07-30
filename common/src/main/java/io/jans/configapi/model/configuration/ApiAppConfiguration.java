@@ -3,10 +3,12 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.configuration.CorsConfigurationFilter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration implements Configuration {
+public class ApiAppConfiguration implements Configuration {
 
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
@@ -113,11 +115,32 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
+        if (corsConfigurationFilters == null) {
+            corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+        }
+
         return corsConfigurationFilters;
     }
 
     public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
-        this.corsConfigurationFilters = corsConfigurationFilters;
+        System.out.println("\n\n\n ApiAppConfiguration::corsConfigurationFilters = "+corsConfigurationFilters+"\n\n\n");
+        if (corsConfigurationFilters == null) {
+            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+        } else {
+            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            this.corsConfigurationFilters.addAll(corsConfigurationFilters);
+        }
     }
-       
+
+    @Override
+    public String toString() {
+        return "ApiAppConfiguration [" + " apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
+                + apiProtectionType + ", apiClientId=" + apiClientId + ", apiClientPassword=" + apiClientPassword
+                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
+                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
+                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
+                + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath
+                + ", corsConfigurationFilters=" + corsConfigurationFilters + "]";
+    }
+
 }

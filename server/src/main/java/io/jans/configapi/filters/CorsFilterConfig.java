@@ -6,27 +6,29 @@
 
 package io.jans.configapi.filters;
 
-import org.slf4j.Logger;
-
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.annotation.WebFilter;
-import javax.ws.rs.ext.Provider;
+//import javax.ws.rs.ext.Provider;
 
-import io.jans.configapi.model.configuration.AppConfiguration;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.as.model.configuration.CorsConfigurationFilter;
 
-@Provider
+import org.slf4j.Logger;
+
 public class CorsFilterConfig implements FilterConfig {
 
     private String filterName;
     private Map<String, String> initParameters;
+
+    @Inject
+    Logger log;
 
     /**
      * Key to retrieve if filter enabled from {@link CorsConfigurationFilter}.
@@ -69,15 +71,16 @@ public class CorsFilterConfig implements FilterConfig {
     public static final String PARAM_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
 
     /**
-     * Key to determine if request should be decorated {@link CorsConfigurationFilter}.
+     * Key to determine if request should be decorated
+     * {@link CorsConfigurationFilter}.
      */
     public static final String PARAM_CORS_REQUEST_DECORATE = "cors.request.decorate";
 
-    public CorsFilterConfig(String filterName, AppConfiguration appConfiguration) {
+    public CorsFilterConfig(String filterName, ApiAppConfiguration appConfiguration) {
         this.filterName = filterName;
         initParameters = new HashMap<String, String>();
-
         List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
+        
         for (CorsConfigurationFilter corsConfigurationFilter : corsConfigurationFilters) {
             if (filterName.equals(corsConfigurationFilter.getFilterName())) {
                 initParameters.put(PARAM_CORS_ENABLED, corsConfigurationFilter.getCorsEnabled().toString());
@@ -85,12 +88,16 @@ public class CorsFilterConfig implements FilterConfig {
                 initParameters.put(PARAM_CORS_ALLOWED_METHODS, corsConfigurationFilter.getCorsAllowedMethods());
                 initParameters.put(PARAM_CORS_ALLOWED_HEADERS, corsConfigurationFilter.getCorsAllowedHeaders());
                 initParameters.put(PARAM_CORS_EXPOSED_HEADERS, corsConfigurationFilter.getCorsExposedHeaders());
-                initParameters.put(PARAM_CORS_SUPPORT_CREDENTIALS, corsConfigurationFilter.getCorsSupportCredentials().toString());
-                initParameters.put(PARAM_CORS_LOGGING_ENABLED, corsConfigurationFilter.getCorsLoggingEnabled().toString());
-                initParameters.put(PARAM_CORS_PREFLIGHT_MAXAGE, corsConfigurationFilter.getCorsPreflightMaxAge().toString());
-                initParameters.put(PARAM_CORS_REQUEST_DECORATE, corsConfigurationFilter.getCorsRequestDecorate().toString());
+                initParameters.put(PARAM_CORS_SUPPORT_CREDENTIALS,
+                        corsConfigurationFilter.getCorsSupportCredentials().toString());
+                initParameters.put(PARAM_CORS_LOGGING_ENABLED,
+                        corsConfigurationFilter.getCorsLoggingEnabled().toString());
+                initParameters.put(PARAM_CORS_PREFLIGHT_MAXAGE,
+                        corsConfigurationFilter.getCorsPreflightMaxAge().toString());
+                initParameters.put(PARAM_CORS_REQUEST_DECORATE,
+                        corsConfigurationFilter.getCorsRequestDecorate().toString());
             }
-        }
+        }       
 
     }
 
