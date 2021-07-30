@@ -172,7 +172,7 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-htmlunit-driver</artifactId>
+            <artifactId>htmlunit-driver</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
