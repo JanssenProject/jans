@@ -11,7 +11,7 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class GetIssuerTest {
 
     @Parameters({"opHost", "emailWebfingerInput"})
-    @Test
+    @Test(enabled = false)
     public void emailInputTest(String opHost, String emailWebfingerInput) throws Exception {
         DevelopersApi api = Tester.api();
 
@@ -27,7 +27,7 @@ public class GetIssuerTest {
     }
 
     @Parameters({"opHost", "urlWebfingerInput"})
-    @Test
+    @Test(enabled = false)
     public void urlInputTest(String opHost, String urlWebfingerInput) throws Exception {
         DevelopersApi api = Tester.api();
 
@@ -43,7 +43,7 @@ public class GetIssuerTest {
     }
 
     @Parameters({"opHost", "hostnameWebfingerInput"})
-    @Test
+    @Test(enabled = false)
     public void hostnameInputTest(String opHost, String hostnameWebfingerInput) throws Exception {
         DevelopersApi api = Tester.api();
 
