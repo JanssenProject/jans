@@ -108,7 +108,7 @@ import static io.jans.as.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version July 30, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -706,17 +706,17 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
                 redirectUriResponse.getRedirectUri().setAudience(clientId);
                 redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-                redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAuthorizationSignedResponseAlg()));
-                redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAuthorizationEncryptedResponseAlg()));
-                redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAuthorizationEncryptedResponseEnc()));
+                redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+                redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
+                redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
                 redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
 
                 String keyId = null;
-                if (client.getAuthorizationEncryptedResponseAlg() != null && client.getAuthorizationEncryptedResponseEnc() != null) {
+                if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
                     JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
                     if (jsonWebKeys != null) {
                         keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-                                Algorithm.fromString(client.getAuthorizationEncryptedResponseAlg()),
+                                Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
                                 Use.ENCRYPTION);
                     }
                     String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -726,8 +726,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
                 } else {
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
-                    if (client.getAuthorizationSignedResponseAlg() != null) {
-                        signatureAlgorithm = SignatureAlgorithm.fromString(client.getAuthorizationSignedResponseAlg());
+                    if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) {
+                        signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
                     }
 
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
