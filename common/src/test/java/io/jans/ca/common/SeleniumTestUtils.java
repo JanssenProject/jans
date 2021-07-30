@@ -112,7 +112,8 @@ public class SeleniumTestUtils {
     }
 
     private static WebDriver initWebDriver(boolean enableJavascript, boolean cleanupCookies) {
-        HtmlUnitDriver currentDriver = new HtmlUnitDriver(enableJavascript);
+        WebDriver currentDriver = new HtmlUnitDriver();
+        ((HtmlUnitDriver) currentDriver).setJavascriptEnabled(enableJavascript);
         try {
             if (cleanupCookies) {
                 currentDriver.manage().deleteAllCookies();
