@@ -12,12 +12,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -72,22 +67,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toList;
 
@@ -97,7 +80,7 @@ import static io.jans.as.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 28, 2021
+ * @version July 30, 2021
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -671,13 +654,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
         }
         if (requestObject.getAuthorizationSignedResponseAlg() != null) {
-            p_client.setAuthorizationSignedResponseAlg(requestObject.getAuthorizationSignedResponseAlg().toString());
+            p_client.getAttributes().setAuthorizationSignedResponseAlg(requestObject.getAuthorizationSignedResponseAlg().toString());
         }
         if (requestObject.getAuthorizationEncryptedResponseAlg() != null) {
-            p_client.setAuthorizationEncryptedResponseAlg(requestObject.getAuthorizationEncryptedResponseAlg().toString());
+            p_client.getAttributes().setAuthorizationEncryptedResponseAlg(requestObject.getAuthorizationEncryptedResponseAlg().toString());
         }
         if (requestObject.getAuthorizationEncryptedResponseEnc() != null) {
-            p_client.setAuthorizationEncryptedResponseEnc(requestObject.getAuthorizationEncryptedResponseEnc().toString());
+            p_client.getAttributes().setAuthorizationEncryptedResponseEnc(requestObject.getAuthorizationEncryptedResponseEnc().toString());
         }
         if (requestObject.getIdTokenSignedResponseAlg() != null) {
             p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
@@ -1054,9 +1037,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS_URI.toString(), client.getJwksUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SECTOR_IDENTIFIER_URI.toString(), client.getSectorIdentifierUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SUBJECT_TYPE.toString(), client.getSubjectType());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), client.getAuthorizationSignedResponseAlg());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), client.getAuthorizationEncryptedResponseAlg());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), client.getAuthorizationEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), client.getAttributes().getAuthorizationSignedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), client.getAttributes().getAuthorizationEncryptedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), client.getAttributes().getAuthorizationEncryptedResponseEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), client.getIdTokenSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), client.getIdTokenEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), client.getIdTokenEncryptedResponseEnc());
@@ -1239,7 +1222,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
     }
 
-    private void putCustomAttributesInResponse(Client client,  JSONObject responseJsonObject) {
+    private void putCustomAttributesInResponse(Client client, JSONObject responseJsonObject) {
         final List<String> allowedCustomAttributeNames = appConfiguration.getDynamicRegistrationCustomAttributes();
         final List<CustomAttribute> customAttributes = client.getCustomAttributes();
         if (allowedCustomAttributeNames == null || allowedCustomAttributeNames.isEmpty() || customAttributes == null) {
