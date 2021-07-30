@@ -38,7 +38,12 @@
     "responseModesSupported":[
         "query",
         "fragment",
-        "form_post"
+        "form_post",
+        "form_post",
+        "query.jwt",
+        "fragment.jwt",
+        "form_post.jwt",
+        "jwt"
     ],
     "grantTypesSupported":[
         "authorization_code",
@@ -54,6 +59,33 @@
         "pairwise"
     ],
     "defaultSubjectType": "pairwise",
+    "authorizationSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "authorizationEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "authorizationEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
     "userInfoSigningAlgValuesSupported":[
         "HS256",
         "HS384",
