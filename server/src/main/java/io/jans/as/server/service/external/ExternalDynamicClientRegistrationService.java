@@ -21,6 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
+import java.security.cert.X509Certificate;
 
 /**
  * Provides factory methods needed to create external dynamic client registration extension
@@ -185,6 +186,24 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             log.error(ex.getMessage(), ex);
             saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
             return "";
+        }
+    }
+
+    public boolean isCertValidForClient(X509Certificate cert, DynamicClientRegistrationContext context) {
+        try {
+            log.trace("Executing python 'isCertValidForClient' method");
+            context.setScript(defaultExternalCustomScript);
+            ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
+            final boolean result = externalType.isCertValidForClient(cert, context);
+            throwWebApplicationExceptionIfSet(context);
+            log.trace("Result of python 'isCertValidForClient' method: " + result);
+            return result;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
+            return false;
         }
     }
 

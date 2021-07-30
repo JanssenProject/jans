@@ -23,6 +23,8 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -64,6 +66,9 @@ public class MTLSService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
+
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain, Client client) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
@@ -82,14 +87,15 @@ public class MTLSService {
         final String cn = CertUtils.getCN(cert);
         final String hashedCn = HashUtil.getHash(cn, SignatureAlgorithm.HS512);
 
-        if (StringUtils.isBlank(cn) || StringUtils.isBlank(hashedCn)) {
-            log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId());
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
-        }
+        if ((StringUtils.isBlank(cn) || StringUtils.isBlank(hashedCn)) || (!cn.equals(client.getClientId()) && !hashedCn.equals(HashUtil.getHash(client.getClientId(), SignatureAlgorithm.HS512)))) {
+            log.trace("Client certificate CN does not match clientId. Invoke registration script's isCertValidForClient, CN: " + cn + ", clientId: " + client.getClientId() + ", hashedCn:" + hashedCn);
 
-        if (!cn.equals(client.getClientId()) && !hashedCn.equals(HashUtil.getHash(client.getClientId(), SignatureAlgorithm.HS512))) {
-            log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId() + ", hashedCn:" + hashedCn);
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, new JSONObject(), null, client);
+            boolean result = externalDynamicClientRegistrationService.isCertValidForClient(cert, context);
+            if (!result) {
+                log.error("Reject request. isCertValidForClient returned false.");
+                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
+            }
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
