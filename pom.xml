@@ -20,7 +20,7 @@
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>[24.1.1,)</guava.version>
-        <selenium.version>2.53.1</selenium.version>
+        <selenium.version>3.141.59</selenium.version>
         <skip.swagger.client.generation>false</skip.swagger.client.generation>
 
         <jacoco.version>0.8.7</jacoco.version>
@@ -251,12 +251,24 @@
             <dependency>
                 <groupId>net.sourceforge.htmlunit</groupId>
                 <artifactId>htmlunit-cssparser</artifactId>
-                <version>1.5.0</version>
+                <version>1.9.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-htmlunit-driver</artifactId>
+                <artifactId>htmlunit-driver</artifactId>
+                <version>2.52.0</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.sourceforge.htmlunit</groupId>
+                        <artifactId>htmlunit</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
                 <version>2.52.0</version>
                 <scope>test</scope>
             </dependency>
