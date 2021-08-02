@@ -685,7 +685,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionUser.setId(newSessionId);
                 log.trace("newSessionId = {}", newSessionId);
             }
-            if (!appConfiguration.getFapiCompatibility()) {
+            if (!appConfiguration.getFapiCompatibility() && appConfiguration.getSessionIdRequestParameterEnabled()) {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
             }
             redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SID, sessionUser.getOutsideSid());
