@@ -71,6 +71,15 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("requirePar")
     private Boolean requirePar;
 
+    @JsonProperty("jansAuthSignedRespAlg")
+    private String authorizationSignedResponseAlg;
+
+    @JsonProperty("jansAuthEncRespAlg")
+    private String authorizationEncryptedResponseAlg;
+
+    @JsonProperty("jansAuthEncRespEnc")
+    private String authorizationEncryptedResponseEnc;
+
     public Boolean getRequirePar() {
         if (requirePar == null) requirePar = false;
         return requirePar;
@@ -210,6 +219,30 @@ public class ClientAttributes implements Serializable {
         this.backchannelLogoutSessionRequired = backchannelLogoutSessionRequired;
     }
 
+    public String getAuthorizationSignedResponseAlg() {
+        return authorizationSignedResponseAlg;
+    }
+
+    public void setAuthorizationSignedResponseAlg(String authorizationSignedResponseAlg) {
+        this.authorizationSignedResponseAlg = authorizationSignedResponseAlg;
+    }
+
+    public String getAuthorizationEncryptedResponseAlg() {
+        return authorizationEncryptedResponseAlg;
+    }
+
+    public void setAuthorizationEncryptedResponseAlg(String authorizationEncryptedResponseAlg) {
+        this.authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg;
+    }
+
+    public String getAuthorizationEncryptedResponseEnc() {
+        return authorizationEncryptedResponseEnc;
+    }
+
+    public void setAuthorizationEncryptedResponseEnc(String authorizationEncryptedResponseEnc) {
+        this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
@@ -226,6 +259,9 @@ public class ClientAttributes implements Serializable {
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
                 ", rptClaimsScripts=" + rptClaimsScripts +
+                ", authorizationSignedResponseAlg=" + authorizationSignedResponseAlg +
+                ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
+                ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 '}';
     }
 }
