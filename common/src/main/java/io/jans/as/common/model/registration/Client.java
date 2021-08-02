@@ -40,7 +40,7 @@ import io.jans.orm.model.base.DeletableEntity;
 
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version July 30, 2021
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
@@ -121,15 +121,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "jansSubjectTyp")
     private SubjectType subjectType = SubjectType.PUBLIC;
-
-    @AttributeName(name = "jansAuthSignedRespAlg")
-    private String authorizationSignedResponseAlg;
-
-    @AttributeName(name = "jansAuthEncRespAlg")
-    private String authorizationEncryptedResponseAlg;
-
-    @AttributeName(name = "jansAuthEncRespEnc")
-    private String authorizationEncryptedResponseEnc;
 
     @AttributeName(name = "jansIdTknSignedRespAlg")
     private String idTokenSignedResponseAlg;
@@ -773,30 +764,6 @@ public class Client extends DeletableEntity implements Serializable {
      */
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
-    }
-
-    public String getAuthorizationSignedResponseAlg() {
-        return authorizationSignedResponseAlg;
-    }
-
-    public void setAuthorizationSignedResponseAlg(String authorizationSignedResponseAlg) {
-        this.authorizationSignedResponseAlg = authorizationSignedResponseAlg;
-    }
-
-    public String getAuthorizationEncryptedResponseAlg() {
-        return authorizationEncryptedResponseAlg;
-    }
-
-    public void setAuthorizationEncryptedResponseAlg(String authorizationEncryptedResponseAlg) {
-        this.authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg;
-    }
-
-    public String getAuthorizationEncryptedResponseEnc() {
-        return authorizationEncryptedResponseEnc;
-    }
-
-    public void setAuthorizationEncryptedResponseEnc(String authorizationEncryptedResponseEnc) {
-        this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
     }
 
     /**
