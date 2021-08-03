@@ -19,51 +19,49 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
-
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ApiHealthCheck extends BaseResource {
-    
+
     @Inject
     Logger log;
 
     @Inject
     ConfigurationService configurationService;
-    
+
     @GET
-    public Response getHealthResponse() throws Exception{
+    public Response getHealthResponse() throws Exception {
         log.debug("ApiHealthCheck::getHealthResponse() - Entry");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", "UP");
-       
-        //liveness
+
+        // liveness
         JSONObject dataJsonObject = new JSONObject();
         dataJsonObject.put("name", "jans-config-api liveness");
         dataJsonObject.put("status", "UP");
         JSONArray jsonArray = new JSONArray();
         jsonArray.put(0, dataJsonObject);
-        
-        //readiness
+
+        // readiness
         dataJsonObject = new JSONObject();
         dataJsonObject.put("name", "jans-config-api readiness");
         dataJsonObject.put("status", "UP");
         try {
-            checkDatabaseConnection();            
+            checkDatabaseConnection();
             dataJsonObject.put("status", "UP");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             dataJsonObject.put("error", "e.getMessage()");
             log.debug("\n\n\n ApiHealthCheck::getHealthResponse() - Error Response = " + jsonObject + "\n\n");
-        }        
+        }
         jsonArray.put(1, dataJsonObject);
-        
-        jsonObject.put("checks",jsonArray);
+
+        jsonObject.put("checks", jsonArray);
         log.debug("\n\n\n ApiHealthCheck::getHealthResponse() - jsonObject = " + jsonObject + "\n\n");
         return Response.ok(jsonObject.toString()).build();
     }
-    
-    
+
     @GET
     @Path(ApiConstants.LIVE)
     public Response getLivenessResponse() {
@@ -74,7 +72,7 @@ public class ApiHealthCheck extends BaseResource {
         log.debug("\n\n\n ApiHealthCheck::getLivenessResponse() - jsonObject = " + jsonObject + "\n\n");
         return Response.ok(jsonObject.toString()).build();
     }
-    
+
     @GET
     @Path(ApiConstants.READY)
     public Response getReadinessResponse() {
@@ -82,7 +80,7 @@ public class ApiHealthCheck extends BaseResource {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", "jans-config-api readiness");
         try {
-            checkDatabaseConnection();            
+            checkDatabaseConnection();
             jsonObject.put("status", "UP");
             log.debug("\n\n\n ApiHealthCheck::getReadinessResponse() - Success Response = " + jsonObject + "\n\n");
             return Response.ok(jsonObject.toString()).build();
@@ -91,7 +89,7 @@ public class ApiHealthCheck extends BaseResource {
             jsonObject.put("error", "e.getMessage()");
             log.debug("\n\n\n ApiHealthCheck::getReadinessResponse() - Error Response = " + jsonObject + "\n\n");
             return Response.ok(jsonObject.toString()).build();
-        }        
+        }
     }
 
     private void checkDatabaseConnection() {
