@@ -55,7 +55,7 @@ public class ApiAccessConstants {
     public static final String SCOPES_READ_ACCESS = "https://jans.io/oauth/config/scopes.readonly";
     public static final String SCOPES_WRITE_ACCESS = "https://jans.io/oauth/config/scopes.write";
     public static final String SCOPES_DELETE_ACCESS = "https://jans.io/oauth/config/scopes.delete";
-    
+
     public static final String STATS_USER_READ_ACCESS = "https://jans.io/oauth/config/stats.readonly";
     public static final String JANS_STAT = "jans_stat";
 

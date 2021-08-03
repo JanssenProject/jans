@@ -80,7 +80,7 @@ public class CorsFilterConfig implements FilterConfig {
         this.filterName = filterName;
         initParameters = new HashMap<String, String>();
         List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
-        
+
         for (CorsConfigurationFilter corsConfigurationFilter : corsConfigurationFilters) {
             if (filterName.equals(corsConfigurationFilter.getFilterName())) {
                 initParameters.put(PARAM_CORS_ENABLED, corsConfigurationFilter.getCorsEnabled().toString());
@@ -97,7 +97,7 @@ public class CorsFilterConfig implements FilterConfig {
                 initParameters.put(PARAM_CORS_REQUEST_DECORATE,
                         corsConfigurationFilter.getCorsRequestDecorate().toString());
             }
-        }       
+        }
 
     }
 

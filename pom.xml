@@ -241,16 +241,12 @@
 				<artifactId>hibernate-validator-cdi</artifactId>
 				<version>7.0.1.Final</version>
 			</dependency>
-			<!-- <dependency> <groupId>javax.validation</groupId> <artifactId>validation-api</artifactId> 
-				<version>2.0.1.Final</version> <scope>provided</scope> </dependency> -->
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>7.0.1.Final</version>
-				<!-- <scope>provided</scope> -->
+				<scope>provided</scope>
 			</dependency>
-			<!-- <dependency> <groupId>org.jboss.resteasy</groupId> <artifactId>resteasy-validator-provider</artifactId> 
-				<version>4.6.1.Final</version> </dependency> -->
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.el</artifactId>

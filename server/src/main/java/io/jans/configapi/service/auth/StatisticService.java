@@ -15,7 +15,7 @@ public class StatisticService {
     @Inject
     AuthClientFactory authClientFactory;
 
-    public JsonNode getStat(String url, String token, String month, String format) {    
+    public JsonNode getStat(String url, String token, String month, String format) {
         return AuthClientFactory.getStatResponse(url, token, month, format);
     }
 
