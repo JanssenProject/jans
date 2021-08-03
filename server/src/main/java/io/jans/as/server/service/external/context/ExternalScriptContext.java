@@ -93,4 +93,9 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
                 .build());
         return this.webApplicationException;
     }
+
+    public void throwWebApplicationExceptionIfSet() {
+        if (webApplicationException != null)
+            throw webApplicationException;
+    }
 }
