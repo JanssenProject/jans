@@ -14,6 +14,7 @@ public interface StatClient {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format);
+    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month,
+            @QueryParam("format") String format);
 
 }

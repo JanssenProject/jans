@@ -14,7 +14,9 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.as.model.configuration.CorsConfigurationFilter;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
+import io.jans.configapi.model.configuration.CorsConfiguration;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -84,8 +86,9 @@ public class ConfigurationFactory {
     private FileConfiguration baseConfiguration;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
-    
+
     private ApiAppConfiguration apiAppConfiguration;
+    private CorsConfigurationFilter corsConfigurationFilter;
     private StaticConfiguration apiAppStaticConf;
     private long loadedRevision = -1;
 
@@ -103,8 +106,38 @@ public class ConfigurationFactory {
     @Produces
     @ApplicationScoped
     public ApiAppConfiguration getApiAppConfiguration() {
-        log.debug("\n\n\n *** ConfigurationFactory::getApiAppConfiguration() - apiAppConfiguration = "+apiAppConfiguration+" *** \n\n\n");
+        log.debug("\n\n\n *** ConfigurationFactory::getApiAppConfiguration() - apiAppConfiguration = "
+                + apiAppConfiguration + " *** \n\n\n");
         return apiAppConfiguration;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public CorsConfigurationFilter getCorsConfigurationFilters() {
+        return this.corsConfigurationFilter;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public CorsConfiguration getCorsConfiguration() {
+        try {
+            if (this.corsConfigurationFilter != null) {
+                CorsConfiguration corsConfiguration = new CorsConfiguration();
+                corsConfiguration.parseAndStore(this.corsConfigurationFilter.getCorsAllowedOrigins(),
+                        this.corsConfigurationFilter.getCorsAllowedMethods(),
+                        this.corsConfigurationFilter.getCorsAllowedHeaders(),
+                        this.corsConfigurationFilter.getCorsExposedHeaders(),
+                        this.corsConfigurationFilter.getCorsSupportCredentials().toString(),
+                        Long.toString(this.corsConfigurationFilter.getCorsPreflightMaxAge()),
+                        this.corsConfigurationFilter.getCorsRequestDecorate().toString());
+                log.error("\n\n Initializing CorsConfiguration = "+corsConfiguration);
+                return corsConfiguration;
+            }
+
+        } catch (Exception ex) {
+            throw new ConfigurationException("Failed to initialize  CorsConfiguration" + corsConfigurationFilter);
+        }
+        return null;
     }
 
     @Produces
@@ -140,7 +173,7 @@ public class ConfigurationFactory {
     public void create() {
         loadBaseConfiguration();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
-        
+
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
 
@@ -150,7 +183,7 @@ public class ConfigurationFactory {
         } else {
             log.info("Configuration loaded successfully.");
         }
-        
+
         loadApiAppConfigurationFromDb();
 
         installSecurityProvider();
@@ -175,23 +208,24 @@ public class ConfigurationFactory {
     public String getConfigurationDn() {
         return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
-    
+
     private Conf loadAuthConfigurationFromDb() {
         log.info("loading Auth Server Configuration From DB....");
         return this.loadConfigurationFromDb(this.getConfigurationDn());
     }
-    
+
     private void loadApiAppConfigurationFromDb() {
         log.info("loading Api App Configuration From DB....");
         io.jans.configapi.model.configuration.Conf conf = null;
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            conf =  persistenceEntryManager.find(io.jans.configapi.model.configuration.Conf.class, this.baseConfiguration.getString("configApi_ConfigurationEntryDN"));
+            conf = persistenceEntryManager.find(io.jans.configapi.model.configuration.Conf.class,
+                    this.baseConfiguration.getString("configApi_ConfigurationEntryDN"));
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
         }
-        
-        if(conf == null) {
+
+        if (conf == null) {
             throw new ConfigurationException("Failed to Api App Configuration From DB " + conf);
         }
         log.info("ApiAppConfigurationFromDb = ....");
@@ -202,25 +236,40 @@ public class ConfigurationFactory {
             this.apiAppStaticConf = conf.getStaticConf();
         }
         this.loadedRevision = conf.getRevision();
-        
-        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "+this.apiAppConfiguration+" *** \n\n\n");
+
+        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
+                + this.apiAppConfiguration + " *** \n\n\n");
         this.setApiConfigurationProperties();
     }
-    
+
     private void setApiConfigurationProperties() {
         log.info("setApiConfigurationProperties ");
-        if(this.apiAppConfiguration == null) {
+        if (this.apiAppConfiguration == null) {
             throw new ConfigurationException("Failed to load Configuration properties " + this.apiAppConfiguration);
         }
-        
-        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration = "+this.apiAppConfiguration+" *** \n\n\n");
+
+        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration = "
+                + this.apiAppConfiguration + " *** \n\n\n");
         this.apiApprovedIssuer = this.apiAppConfiguration.getApiApprovedIssuer();
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
-        
-        
-        log.info("Properties set, this.apiApprovedIssuer = "+this.apiApprovedIssuer+" , this.apiProtectionType = "+this.apiProtectionType+" , this.apiClientId = "+this.apiClientId+" , this.apiClientPassword = "+this.apiClientPassword+" , this.apiAppConfiguration.getCorsConfigurationFilters().get(0).getCorsAllowedMethods() = "+this.apiAppConfiguration.getCorsConfigurationFilters().get(0).getCorsAllowedMethods());
+        if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
+                && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
+            this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
+                    .filter(x -> x.getFilterName().equals("CorsFilter")).findAny().orElse(null);
+
+        }
+
+        log.info("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
+                + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
+                + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter);
+
+        // Populate corsConfigurationFilter object
+        CorsConfiguration corsConfiguration = this.getCorsConfiguration();
+        log.error("CorsConfiguration Produced " + corsConfiguration);
+        printCorsConfigurationFilter(this.corsConfigurationFilter);
+
     }
 
     private Conf loadConfigurationFromDb(String returnAttribute) {
@@ -337,6 +386,30 @@ public class ConfigurationFactory {
             return StringEncrypter.instance(cryptoConfigurationSalt);
         } catch (StringEncrypter.EncryptionException ex) {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
+        }
+    }
+
+    public void printCorsConfigurationFilter(CorsConfigurationFilter corsConfigurationFilter) {
+        if (this.corsConfigurationFilter != null) {
+            log.error( "CorsConfigurationFilter [" + " , corsConfigurationFilter.getFilterName()="
+                    + corsConfigurationFilter.getFilterName() + " , corsConfigurationFilter.getCorsEnabled()="
+                    + corsConfigurationFilter.getCorsEnabled() + " , corsConfigurationFilter.getCorsAllowedOrigins()="
+                    + corsConfigurationFilter.getCorsAllowedOrigins()
+                    + " , corsConfigurationFilter.getCorsAllowedMethods()="
+                    + corsConfigurationFilter.getCorsAllowedMethods()
+                    + " , corsConfigurationFilter.getCorsAllowedHeaders()="
+                    + corsConfigurationFilter.getCorsAllowedHeaders()
+                    + " , corsConfigurationFilter.getCorsExposedHeaders()="
+                    + corsConfigurationFilter.getCorsExposedHeaders()
+                    + " , corsConfigurationFilter.getCorsSupportCredentials()="
+                    + corsConfigurationFilter.getCorsSupportCredentials()
+                    + " , corsConfigurationFilter.getCorsLoggingEnabled()="
+                    + corsConfigurationFilter.getCorsLoggingEnabled()
+                    + " , corsConfigurationFilter.getCorsPreflightMaxAge()="
+                    + corsConfigurationFilter.getCorsPreflightMaxAge()
+                    + " , corsConfigurationFilter.getCorsRequestDecorate()="
+                    + corsConfigurationFilter.getCorsRequestDecorate() + "]"
+                    );
         }
     }
 

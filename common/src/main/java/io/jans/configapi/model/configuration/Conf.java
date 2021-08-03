@@ -7,11 +7,10 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
-
 @DataEntry
 @ObjectClass(value = "jansAppConf")
 public class Conf {
-    
+
     @DN
     private String dn;
 
@@ -63,6 +62,7 @@ public class Conf {
 
     @Override
     public String toString() {
-        return "Conf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision=" + revision + "]";
+        return "Conf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
+                + revision + "]";
     }
 }
