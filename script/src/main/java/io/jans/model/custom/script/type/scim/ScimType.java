@@ -47,5 +47,13 @@ public interface ScimType extends BaseExternalType {
     boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
     
     boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
+  
+    boolean allowResourceOperation(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes);
     
+    String allowSearchOperation(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
+    
+    String rejectedResourceOperationResponse(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes);
+    
+    String rejectedSearchOperationResponse(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
+
 }

@@ -116,4 +116,24 @@ public class DummyScimType implements ScimType {
         return false;
     }
 
+    @Override
+    public boolean allowResourceOperation(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes) {
+    	return true;
+    }
+    
+    @Override
+    public String allowSearchOperation(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
+    	return "";
+    }
+    
+    @Override
+    public String rejectedResourceOperationResponse(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes) {
+    	return null;
+    }
+    
+    @Override
+    public String rejectedSearchOperationResponse(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return null;
+    }
+    
 }
