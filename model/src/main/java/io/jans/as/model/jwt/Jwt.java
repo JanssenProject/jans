@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.token.JsonWebResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -23,6 +25,8 @@ import io.jans.as.model.token.JsonWebResponse;
  * @version May 3, 2017
  */
 public class Jwt extends JsonWebResponse {
+
+    private static final Logger log = LoggerFactory.getLogger(Jwt.class);
 
     private String encodedHeader;
     private String encodedClaims;
@@ -57,6 +61,15 @@ public class Jwt extends JsonWebResponse {
         if (jwt == null)
             throw new InvalidJwtException("Jwt is null");
         return jwt;
+    }
+
+    public static Jwt parseSilently(String encodedJwt) {
+        try {
+            return parse(encodedJwt);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+            return null;
+        }
     }
 
     public static Jwt parse(String encodedJwt) throws InvalidJwtException {
