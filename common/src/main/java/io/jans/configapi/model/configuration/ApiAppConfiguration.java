@@ -2,7 +2,6 @@ package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.configuration.CorsConfigurationFilter;
 
 import java.util.ArrayList;
 import java.util.List;

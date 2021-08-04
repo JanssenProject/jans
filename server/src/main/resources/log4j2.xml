@@ -22,7 +22,7 @@
 
     <Loggers>
 		<!-- ############### Jans ################# -->
-		<Logger name="io.jans." level="${log4j.default.log.level}" />
+		<Logger name="io.jans" level="DEBUG" />
 
         <Logger name="io.jans.configapi" level="DEBUG">
             <AppenderRef ref="FILE" />

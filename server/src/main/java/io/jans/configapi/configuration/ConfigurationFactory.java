@@ -14,9 +14,9 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.as.model.configuration.CorsConfigurationFilter;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.CorsConfiguration;
+import io.jans.configapi.model.configuration.CorsConfigurationFilter;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -123,14 +123,16 @@ public class ConfigurationFactory {
         try {
             if (this.corsConfigurationFilter != null) {
                 CorsConfiguration corsConfiguration = new CorsConfiguration();
-                corsConfiguration.parseAndStore(this.corsConfigurationFilter.getCorsAllowedOrigins(),
+                corsConfiguration.parseAndStore(
+                        this.corsConfigurationFilter.getCorsEnabled().toString(),
+                        this.corsConfigurationFilter.getCorsAllowedOrigins(),
                         this.corsConfigurationFilter.getCorsAllowedMethods(),
                         this.corsConfigurationFilter.getCorsAllowedHeaders(),
                         this.corsConfigurationFilter.getCorsExposedHeaders(),
                         this.corsConfigurationFilter.getCorsSupportCredentials().toString(),
                         Long.toString(this.corsConfigurationFilter.getCorsPreflightMaxAge()),
                         this.corsConfigurationFilter.getCorsRequestDecorate().toString());
-                log.error("\n\n Initializing CorsConfiguration = "+corsConfiguration);
+                log.debug("\n\n Initializing CorsConfiguration = "+corsConfiguration);
                 return corsConfiguration;
             }
 
@@ -255,22 +257,22 @@ public class ConfigurationFactory {
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
        
-        /*if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
+        if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
                     .filter(x -> x.getFilterName().equals("CorsFilter")).findAny().orElse(null);
 
-        }*/
+        }
 
         log.info("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
                 + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
                 + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter);
 
         // Populate corsConfigurationFilter object
-        //CorsConfiguration corsConfiguration = this.getCorsConfiguration();
-        //log.error("CorsConfiguration Produced " + corsConfiguration);
+        CorsConfiguration corsConfiguration = this.getCorsConfiguration();
+        log.debug("CorsConfiguration Produced " + corsConfiguration);
         getCorsConfigurationFilters();
-        //printCorsConfigurationFilter(this.corsConfigurationFilter);
+        printCorsConfigurationFilter(this.corsConfigurationFilter);
 
     }
 
@@ -393,7 +395,7 @@ public class ConfigurationFactory {
 
     public void printCorsConfigurationFilter(CorsConfigurationFilter corsConfigurationFilter) {
         if (this.corsConfigurationFilter != null) {
-            log.error( "CorsConfigurationFilter [" + " , corsConfigurationFilter.getFilterName()="
+            log.debug( "CorsConfigurationFilter [" + " , corsConfigurationFilter.getFilterName()="
                     + corsConfigurationFilter.getFilterName() + " , corsConfigurationFilter.getCorsEnabled()="
                     + corsConfigurationFilter.getCorsEnabled() + " , corsConfigurationFilter.getCorsAllowedOrigins()="
                     + corsConfigurationFilter.getCorsAllowedOrigins()
