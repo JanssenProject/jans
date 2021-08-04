@@ -6,6 +6,7 @@ import javax.servlet.*;
 
 public class CorsConfiguration {
     
+        
     /**
      * A {@link Collection} of origins consisting of zero or more origins that
      * are allowed access to the resource.
@@ -58,6 +59,8 @@ public class CorsConfiguration {
         this.exposedHeaders = new HashSet<String>();
     }  
     
+
+     
     public Collection<String> getAllowedOrigins() {
         return allowedOrigins;
     }
@@ -126,11 +129,14 @@ public class CorsConfiguration {
      *                            result of the pre-flight request.
      * @throws ServletException
      */
-    public void parseAndStore(final String allowedOrigins,
+    public void parseAndStore(final String corsEnabled, final String allowedOrigins,
                                  final String allowedHttpMethods, final String allowedHttpHeaders,
                                  final String exposedHeaders, final String supportsCredentials,
                                  final String preflightMaxAge, final String decorateRequest)
             throws ServletException {
+        
+        this.enabled = Boolean.parseBoolean(corsEnabled);
+        
         if (allowedOrigins != null) {
             if (!allowedOrigins.trim().equals("*")) {
                 Set<String> setAllowedOrigins =
@@ -217,7 +223,7 @@ public class CorsConfiguration {
     
     @Override
     public String toString() {
-        return "CorsConfiguration [allowedOrigins=" + allowedOrigins + ", allowedHttpMethods=" + allowedHttpMethods
+        return "CorsConfiguration [enabled="+enabled+" ,allowedOrigins=" + allowedOrigins + ", allowedHttpMethods=" + allowedHttpMethods
                 + ", allowedHttpHeaders=" + allowedHttpHeaders + ", exposedHeaders=" + exposedHeaders
                 + ", supportsCredentials=" + supportsCredentials + ", preflightMaxAge=" + preflightMaxAge
                 + ", decorateRequest=" + decorateRequest + "]";

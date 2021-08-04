@@ -18,7 +18,7 @@ import javax.servlet.ServletContext;
 //import javax.ws.rs.ext.Provider;
 
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
-import io.jans.as.model.configuration.CorsConfigurationFilter;
+import io.jans.configapi.model.configuration.CorsConfigurationFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
