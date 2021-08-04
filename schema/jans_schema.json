@@ -3026,6 +3026,17 @@
         "substr": "caseIgnoreSubstringsMatch", 
         "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
         "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Relying Party Id for jans-client-api",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "rpId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
