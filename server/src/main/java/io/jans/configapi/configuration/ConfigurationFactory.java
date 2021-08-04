@@ -254,21 +254,23 @@ public class ConfigurationFactory {
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
-        if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
+       
+        /*if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
                     .filter(x -> x.getFilterName().equals("CorsFilter")).findAny().orElse(null);
 
-        }
+        }*/
 
         log.info("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
                 + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
                 + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter);
 
         // Populate corsConfigurationFilter object
-        CorsConfiguration corsConfiguration = this.getCorsConfiguration();
-        log.error("CorsConfiguration Produced " + corsConfiguration);
-        printCorsConfigurationFilter(this.corsConfigurationFilter);
+        //CorsConfiguration corsConfiguration = this.getCorsConfiguration();
+        //log.error("CorsConfiguration Produced " + corsConfiguration);
+        getCorsConfigurationFilters();
+        //printCorsConfigurationFilter(this.corsConfigurationFilter);
 
     }
 
