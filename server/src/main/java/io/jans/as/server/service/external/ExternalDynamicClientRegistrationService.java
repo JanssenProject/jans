@@ -8,6 +8,7 @@ package io.jans.as.server.service.external;
 
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -33,7 +35,10 @@ import java.security.cert.X509Certificate;
 @Named
 public class ExternalDynamicClientRegistrationService extends ExternalScriptService {
 
-	private static final long serialVersionUID = 1416361273036208687L;
+	private static final long serialVersionUID = 1416361273036208688L;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
 	public ExternalDynamicClientRegistrationService() {
 		super(CustomScriptType.CLIENT_REGISTRATION);
@@ -43,10 +48,14 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         try {
             log.trace("Executing python 'createClient' method");
             ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
+
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, customScriptConfiguration, client);
             context.setRegisterRequest(registerRequest);
+            context.setErrorResponseFactory(errorResponseFactory);
+            context.setSoftwareStatement(Jwt.parseSilently(registerRequest.getSoftwareStatement()));
+
             final boolean result = externalClientRegistrationType.createClient(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -79,9 +88,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, script, client);
             context.setRegisterRequest(registerRequest);
+            context.setErrorResponseFactory(errorResponseFactory);
 
             final boolean result = externalClientRegistrationType.updateClient(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -111,10 +121,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
             context.setSoftwareStatement(softwareStatement);
+            context.setErrorResponseFactory(errorResponseFactory);
 
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementJwks(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             log.info("Result of python 'getSoftwareStatementJwks' method: " + result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
@@ -132,10 +143,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
             context.setSoftwareStatement(softwareStatement);
+            context.setErrorResponseFactory(errorResponseFactory);
 
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementHmacSecret(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             log.trace("Result of python 'getSoftwareStatementHmacSecret' method: " + result);
             return result;
         } catch (WebApplicationException e) {
@@ -153,10 +165,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, defaultExternalCustomScript);
             context.setDcr(dcr);
+            context.setErrorResponseFactory(errorResponseFactory);
 
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrJwks(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             log.trace("Result of python 'getDcrJwks' method: " + result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
@@ -174,10 +187,11 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, defaultExternalCustomScript);
             context.setDcr(dcr);
+            context.setErrorResponseFactory(errorResponseFactory);
 
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrHmacSecret(context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             log.trace("Result of python 'getDcrHmacSecret' method: " + result);
             return result;
         } catch (WebApplicationException e) {
@@ -193,9 +207,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         try {
             log.trace("Executing python 'isCertValidForClient' method");
             context.setScript(defaultExternalCustomScript);
+            context.setErrorResponseFactory(errorResponseFactory);
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final boolean result = externalType.isCertValidForClient(cert, context);
-            throwWebApplicationExceptionIfSet(context);
+            context.throwWebApplicationExceptionIfSet();
             log.trace("Result of python 'isCertValidForClient' method: " + result);
             return result;
         } catch (WebApplicationException e) {
@@ -205,11 +220,5 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
             return false;
         }
-    }
-
-    private void throwWebApplicationExceptionIfSet(DynamicClientRegistrationContext context) {
-        final WebApplicationException e = context.getWebApplicationException();
-        if (e != null)
-            throw e;
     }
 }
