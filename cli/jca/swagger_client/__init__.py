@@ -31,6 +31,7 @@ from swagger_client.api.database___couchbase_configuration_api import DatabaseCo
 from swagger_client.api.database___ldap_configuration_api import DatabaseLDAPConfigurationApi
 from swagger_client.api.database___sql_configuration_api import DatabaseSqlConfigurationApi
 from swagger_client.api.default_authentication_method_api import DefaultAuthenticationMethodApi
+from swagger_client.api.health___check_api import HealthCheckApi
 from swagger_client.api.o_auth___open_id_connect___clients_api import OAuthOpenIDConnectClientsApi
 from swagger_client.api.o_auth___scopes_api import OAuthScopesApi
 from swagger_client.api.o_auth___uma_resources_api import OAuthUMAResourcesApi
@@ -56,6 +57,8 @@ from swagger_client.models.error_response import ErrorResponse
 from swagger_client.models.fido2_configuration import Fido2Configuration
 from swagger_client.models.gluu_attribute import GluuAttribute
 from swagger_client.models.gluu_attribute_attribute_validation import GluuAttributeAttributeValidation
+from swagger_client.models.health_status import HealthStatus
+from swagger_client.models.health_status_item import HealthStatusItem
 from swagger_client.models.in_memory_configuration import InMemoryConfiguration
 from swagger_client.models.jans_fido2_dyn_configuration import JansFido2DynConfiguration
 from swagger_client.models.json_web_key import JsonWebKey

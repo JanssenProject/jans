@@ -31,6 +31,8 @@ from swagger_client.models.error_response import ErrorResponse
 from swagger_client.models.fido2_configuration import Fido2Configuration
 from swagger_client.models.gluu_attribute import GluuAttribute
 from swagger_client.models.gluu_attribute_attribute_validation import GluuAttributeAttributeValidation
+from swagger_client.models.health_status import HealthStatus
+from swagger_client.models.health_status_item import HealthStatusItem
 from swagger_client.models.in_memory_configuration import InMemoryConfiguration
 from swagger_client.models.jans_fido2_dyn_configuration import JansFido2DynConfiguration
 from swagger_client.models.json_web_key import JsonWebKey
