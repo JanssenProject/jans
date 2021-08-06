@@ -37,6 +37,7 @@ Feature: Verify Default ACRS configuration endpoint
     And print response
     And assert response.length != null
     
+    @ignore
     @acrs-error
     Scenario: Default Authentication Mode configuration cannot be null or blank
     Given url  mainUrl

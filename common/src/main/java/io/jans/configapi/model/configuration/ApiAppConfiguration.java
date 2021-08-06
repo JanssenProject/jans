@@ -122,7 +122,6 @@ public class ApiAppConfiguration implements Configuration {
     }
 
     public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
-        System.out.println("\n\n\n ApiAppConfiguration::corsConfigurationFilters = "+corsConfigurationFilters+"\n\n\n");
         if (corsConfigurationFilters == null) {
             this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
         } else {

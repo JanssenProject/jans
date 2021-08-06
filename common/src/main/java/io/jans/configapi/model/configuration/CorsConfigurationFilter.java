@@ -141,5 +141,5 @@ public class CorsConfigurationFilter {
                 + ", corsSupportCredentials=" + corsSupportCredentials + ", corsLoggingEnabled=" + corsLoggingEnabled
                 + ", corsPreflightMaxAge=" + corsPreflightMaxAge + ", corsRequestDecorate=" + corsRequestDecorate + "]";
     }
-    
+
 }
