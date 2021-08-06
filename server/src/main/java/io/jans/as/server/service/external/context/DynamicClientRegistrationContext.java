@@ -115,6 +115,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     public void validateSSA() {
         validateSSANotNull();
         validateSSARedirectUri();
+        validateSoftwareId();
     }
 
     public void validateSSARedirectUri() {
@@ -141,6 +142,20 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
             throwWebApplicationExceptionIfSet();
             throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT));
         }
+    }
+
+    public void validateSoftwareId() {
+        final String softwareId = registerRequest.getSoftwareId();
+        if (StringUtils.isBlank(softwareId))
+            return;
+
+        final String ssaSoftwareId = softwareStatement.getClaims().getClaimAsString("software_id");
+        if (softwareId.equals(ssaSoftwareId))
+            return;
+
+        log.error(String.format("SSA softwareId (%s), does not match to softwareId in request (%s)", ssaSoftwareId, softwareId));
+        throwWebApplicationExceptionIfSet();
+        throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
     }
 
     public ErrorResponseFactory getErrorResponseFactory() {
