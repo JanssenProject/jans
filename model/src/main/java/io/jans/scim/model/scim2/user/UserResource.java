@@ -74,7 +74,7 @@ public class UserResource extends BaseScimResource {
     private String locale;
 
     @Attribute(description = "The User's time zone in the 'Olson' timezone database format; e.g.,'America/Los_Angeles'")
-    @StoreReference(ref = "timezone")
+    @StoreReference(ref = "zoneinfo")
     @Validator(value = Validations.TIMEZONE)
     private String timezone;
 
