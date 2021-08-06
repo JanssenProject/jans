@@ -32,6 +32,7 @@ tags:
   - name: OAuth - UMA Resources
   - name: OAuth - Scopes
   - name: Statistics - User
+  - name: Health - Check
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -2297,6 +2298,23 @@ paths:
           in: query
           name: format
           description: Report format
+		  
+  /jans-config-api/api/v1/health:
+    get:
+      summary: Returns application health status.
+      description: Returns application health status.
+      operationId: get-config-cache
+      tags:
+        - Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '500':
+          description: Internal Server Error
           
 components:
   securitySchemes:
@@ -4982,6 +5000,35 @@ components:
       description: A hashmap with statistical item as a key and the value as statistical value.
       additionalProperties:
         type: integer
+		
+    HealthStatus:
+      type: object
+      description: Server health data
+      properties:
+        status:
+          type: string
+          description: Health parameter name
+        error:
+          type: string
+          description: error message in case of error
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthStatusItem'
+            description: health check status details.
+            example: '"checks": [{"name": "jans-config-api liveness","status": "UP"},{"name": "jans-config-api readiness","status": "UP"}],"status": "UP"}'
+		
+
+    HealthStatusItem:
+      type: object
+      description: Server health data
+      properties:
+        name:
+          type: string
+          description: Health parameter name
+        status:
+          type: string
+          description: Health parameter status
 
           
     
