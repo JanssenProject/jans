@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CorsFilterConfig implements FilterConfig {
-    
+
     private static Logger log = LoggerFactory.getLogger(CorsFilterConfig.class);
     private String filterName;
     private Map<String, String> initParameters;
@@ -76,15 +76,17 @@ public class CorsFilterConfig implements FilterConfig {
     public static final String PARAM_CORS_REQUEST_DECORATE = "cors.request.decorate";
 
     public CorsFilterConfig(String filterName, ApiAppConfiguration appConfiguration) {
-        
+
         this.filterName = filterName;
         initParameters = new HashMap<String, String>();
         List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
-        
-        log.debug("\n\n CorsFilterConfig::CorsFilterConfig() -  filterName = "+filterName+" , corsConfigurationFilters =  "+corsConfigurationFilters);
+
+        log.debug("\n\n CorsFilterConfig::CorsFilterConfig() -  filterName = " + filterName
+                + " , corsConfigurationFilters =  " + corsConfigurationFilters);
 
         for (CorsConfigurationFilter corsConfigurationFilter : corsConfigurationFilters) {
-            log.debug("\n  CorsFilterConfig::CorsFilterConfig() -  filterName = "+filterName+" , corsConfigurationFilter.getFilterName() =  "+corsConfigurationFilter.getFilterName());
+            log.debug("\n  CorsFilterConfig::CorsFilterConfig() -  filterName = " + filterName
+                    + " , corsConfigurationFilter.getFilterName() =  " + corsConfigurationFilter.getFilterName());
             if (filterName.equals(corsConfigurationFilter.getFilterName())) {
                 initParameters.put(PARAM_CORS_ENABLED, corsConfigurationFilter.getCorsEnabled().toString());
                 initParameters.put(PARAM_CORS_ALLOWED_ORIGINS, corsConfigurationFilter.getCorsAllowedOrigins());

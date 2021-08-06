@@ -46,12 +46,12 @@ public class ApiHealthCheck extends BaseResource {
         // readiness
         dataJsonObject = new JSONObject();
         dataJsonObject.put("name", "jans-config-api readiness");
-        dataJsonObject.put("status", "UP");
         try {
             checkDatabaseConnection();
             dataJsonObject.put("status", "UP");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            dataJsonObject.put("status", "DOWN");
             dataJsonObject.put("error", "e.getMessage()");
             log.debug("\n\n\n ApiHealthCheck::getHealthResponse() - Error Response = " + jsonObject + "\n\n");
         }

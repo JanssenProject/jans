@@ -5,23 +5,22 @@ import java.util.Optional;
 import javax.servlet.*;
 
 public class CorsConfiguration {
-    
-        
+
     /**
-     * A {@link Collection} of origins consisting of zero or more origins that
-     * are allowed access to the resource.
+     * A {@link Collection} of origins consisting of zero or more origins that are
+     * allowed access to the resource.
      */
     private Collection<String> allowedOrigins;
 
     /**
-     * A {@link Collection} of methods consisting of zero or more methods that
-     * are supported by the resource.
+     * A {@link Collection} of methods consisting of zero or more methods that are
+     * supported by the resource.
      */
     private final Collection<String> allowedHttpMethods;
 
     /**
-     * A {@link Collection} of headers consisting of zero or more header field
-     * names that are supported by the resource.
+     * A {@link Collection} of headers consisting of zero or more header field names
+     * that are supported by the resource.
      */
     private final Collection<String> allowedHttpHeaders;
 
@@ -33,15 +32,15 @@ public class CorsConfiguration {
     private final Collection<String> exposedHeaders;
 
     /**
-     * A supports credentials flag that indicates whether the resource supports
-     * user credentials in the request. It is true when the resource does and
-     * false otherwise.
+     * A supports credentials flag that indicates whether the resource supports user
+     * credentials in the request. It is true when the resource does and false
+     * otherwise.
      */
     private boolean supportsCredentials;
 
     /**
-     * Indicates (in seconds) how long the results of a pre-flight request can
-     * be cached in a pre-flight result cache.
+     * Indicates (in seconds) how long the results of a pre-flight request can be
+     * cached in a pre-flight result cache.
      */
     private long preflightMaxAge;
 
@@ -50,17 +49,14 @@ public class CorsConfiguration {
      */
     private boolean decorateRequest;
     private boolean enabled;
-    
-    
+
     public CorsConfiguration() {
         this.allowedOrigins = new HashSet<String>();
         this.allowedHttpMethods = new HashSet<String>();
         this.allowedHttpHeaders = new HashSet<String>();
         this.exposedHeaders = new HashSet<String>();
-    }  
-    
+    }
 
-     
     public Collection<String> getAllowedOrigins() {
         return allowedOrigins;
     }
@@ -88,11 +84,11 @@ public class CorsConfiguration {
     public boolean isDecorateRequest() {
         return decorateRequest;
     }
-    
+
     public void setDecorateRequest(boolean decorateRequest) {
         this.decorateRequest = decorateRequest;
     }
-    
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -113,49 +109,44 @@ public class CorsConfiguration {
         return exposedHeaders;
     }
 
-
-
     /**
-     * Parses each param-value and populates configuration variables. If a param
-     * is provided, it overrides the default.
+     * Parses each param-value and populates configuration variables. If a param is
+     * provided, it overrides the default.
      *
+     * @param corsEnabled         "true" if CORS needs to be enabled.
      * @param allowedOrigins      A {@link String} of comma separated origins.
      * @param allowedHttpMethods  A {@link String} of comma separated HTTP methods.
      * @param allowedHttpHeaders  A {@link String} of comma separated HTTP headers.
-     * @param exposedHeaders      A {@link String} of comma separated headers that needs to be
-     *                            exposed.
+     * @param exposedHeaders      A {@link String} of comma separated headers that
+     *                            needs to be exposed.
      * @param supportsCredentials "true" if support credentials needs to be enabled.
-     * @param preflightMaxAge     The amount of seconds the user agent is allowed to cache the
-     *                            result of the pre-flight request.
+     * @param preflightMaxAge     The amount of seconds the user agent is allowed to
+     *                            cache the result of the pre-flight request.
+     * @param decorateRequest     "true" if request needs to enhanced
      * @throws ServletException
      */
-    public void parseAndStore(final String corsEnabled, final String allowedOrigins,
-                                 final String allowedHttpMethods, final String allowedHttpHeaders,
-                                 final String exposedHeaders, final String supportsCredentials,
-                                 final String preflightMaxAge, final String decorateRequest)
-            throws ServletException {
-        
+    public void parseAndStore(final String corsEnabled, final String allowedOrigins, final String allowedHttpMethods,
+            final String allowedHttpHeaders, final String exposedHeaders, final String supportsCredentials,
+            final String preflightMaxAge, final String decorateRequest) throws ServletException {
+
         this.enabled = Boolean.parseBoolean(corsEnabled);
-        
+
         if (allowedOrigins != null) {
             if (!allowedOrigins.trim().equals("*")) {
-                Set<String> setAllowedOrigins =
-                        parseStringToSet(allowedOrigins);
+                Set<String> setAllowedOrigins = parseStringToSet(allowedOrigins);
                 this.allowedOrigins.clear();
                 this.allowedOrigins.addAll(setAllowedOrigins);
             }
         }
 
         if (allowedHttpMethods != null) {
-            Set<String> setAllowedHttpMethods =
-                    parseStringToSet(allowedHttpMethods);
+            Set<String> setAllowedHttpMethods = parseStringToSet(allowedHttpMethods);
             this.allowedHttpMethods.clear();
             this.allowedHttpMethods.addAll(setAllowedHttpMethods);
         }
 
         if (allowedHttpHeaders != null) {
-            Set<String> setAllowedHttpHeaders =
-                    parseStringToSet(allowedHttpHeaders);
+            Set<String> setAllowedHttpHeaders = parseStringToSet(allowedHttpHeaders);
             Set<String> lowerCaseHeaders = new HashSet<String>();
             for (String header : setAllowedHttpHeaders) {
                 String lowerCase = header.toLowerCase();
@@ -173,8 +164,7 @@ public class CorsConfiguration {
 
         if (supportsCredentials != null) {
             // For any value other then 'true' this will be false.
-            this.supportsCredentials = Boolean
-                    .parseBoolean(supportsCredentials);
+            this.supportsCredentials = Boolean.parseBoolean(supportsCredentials);
         }
 
         if (preflightMaxAge != null) {
@@ -194,7 +184,7 @@ public class CorsConfiguration {
             this.decorateRequest = Boolean.parseBoolean(decorateRequest);
         }
     }
-    
+
     /**
      * Takes a comma separated list and returns a Set<String>.
      *
@@ -207,7 +197,7 @@ public class CorsConfiguration {
         if (data != null && data.length() > 0) {
             splits = data.split(",");
         } else {
-            splits = new String[]{};
+            splits = new String[] {};
         }
 
         Set<String> set = new HashSet<String>();
@@ -220,30 +210,29 @@ public class CorsConfiguration {
         return set;
     }
 
-    
+    public boolean isOriginAllowed(final String origin) {
+        if (isAnyOriginAllowed()) {
+            return true;
+        }
+
+        // If 'Origin' header is a case-sensitive match of any of allowed
+        // origins, then return true, else return false.
+        return allowedOrigins.contains(origin);
+    }
+
+    public boolean isAnyOriginAllowed() {
+        if (allowedOrigins != null && allowedOrigins.size() == 0) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
-        return "CorsConfiguration [enabled="+enabled+" ,allowedOrigins=" + allowedOrigins + ", allowedHttpMethods=" + allowedHttpMethods
-                + ", allowedHttpHeaders=" + allowedHttpHeaders + ", exposedHeaders=" + exposedHeaders
-                + ", supportsCredentials=" + supportsCredentials + ", preflightMaxAge=" + preflightMaxAge
-                + ", decorateRequest=" + decorateRequest + "]";
+        return "CorsConfiguration [enabled=" + enabled + " ,allowedOrigins=" + allowedOrigins + ", allowedHttpMethods="
+                + allowedHttpMethods + ", allowedHttpHeaders=" + allowedHttpHeaders + ", exposedHeaders="
+                + exposedHeaders + ", supportsCredentials=" + supportsCredentials + ", preflightMaxAge="
+                + preflightMaxAge + ", decorateRequest=" + decorateRequest + "]";
     }
-
-public boolean isOriginAllowed(final String origin) {
-    if (isAnyOriginAllowed()) {
-        return true;
-    }
-
-    // If 'Origin' header is a case-sensitive match of any of allowed
-    // origins, then return true, else return false.
-    return allowedOrigins.contains(origin);
-}
-
-public boolean isAnyOriginAllowed() {
-    if (allowedOrigins != null && allowedOrigins.size() == 0) {
-        return true;
-    }
-    return false;
-}
 
 }

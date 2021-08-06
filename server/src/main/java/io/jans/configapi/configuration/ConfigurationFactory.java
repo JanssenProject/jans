@@ -106,8 +106,6 @@ public class ConfigurationFactory {
     @Produces
     @ApplicationScoped
     public ApiAppConfiguration getApiAppConfiguration() {
-        log.debug("\n\n\n *** ConfigurationFactory::getApiAppConfiguration() - apiAppConfiguration = "
-                + apiAppConfiguration + " *** \n\n\n");
         return apiAppConfiguration;
     }
 
@@ -123,8 +121,7 @@ public class ConfigurationFactory {
         try {
             if (this.corsConfigurationFilter != null) {
                 CorsConfiguration corsConfiguration = new CorsConfiguration();
-                corsConfiguration.parseAndStore(
-                        this.corsConfigurationFilter.getCorsEnabled().toString(),
+                corsConfiguration.parseAndStore(this.corsConfigurationFilter.getCorsEnabled().toString(),
                         this.corsConfigurationFilter.getCorsAllowedOrigins(),
                         this.corsConfigurationFilter.getCorsAllowedMethods(),
                         this.corsConfigurationFilter.getCorsAllowedHeaders(),
@@ -132,7 +129,7 @@ public class ConfigurationFactory {
                         this.corsConfigurationFilter.getCorsSupportCredentials().toString(),
                         Long.toString(this.corsConfigurationFilter.getCorsPreflightMaxAge()),
                         this.corsConfigurationFilter.getCorsRequestDecorate().toString());
-                log.debug("\n\n Initializing CorsConfiguration = "+corsConfiguration);
+                log.debug("\n\n Initializing CorsConfiguration = " + corsConfiguration);
                 return corsConfiguration;
             }
 
@@ -256,12 +253,11 @@ public class ConfigurationFactory {
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
-       
+
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
-                    .filter(x -> x.getFilterName().equals("CorsFilter")).findAny().orElse(null);
-
+                    .filter(x -> "CorsFilter".equals(x.getFilterName())).findAny().orElse(null);
         }
 
         log.info("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
@@ -272,8 +268,6 @@ public class ConfigurationFactory {
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();
         log.debug("CorsConfiguration Produced " + corsConfiguration);
         getCorsConfigurationFilters();
-        printCorsConfigurationFilter(this.corsConfigurationFilter);
-
     }
 
     private Conf loadConfigurationFromDb(String returnAttribute) {
@@ -390,30 +384,6 @@ public class ConfigurationFactory {
             return StringEncrypter.instance(cryptoConfigurationSalt);
         } catch (StringEncrypter.EncryptionException ex) {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
-        }
-    }
-
-    public void printCorsConfigurationFilter(CorsConfigurationFilter corsConfigurationFilter) {
-        if (this.corsConfigurationFilter != null) {
-            log.debug( "CorsConfigurationFilter [" + " , corsConfigurationFilter.getFilterName()="
-                    + corsConfigurationFilter.getFilterName() + " , corsConfigurationFilter.getCorsEnabled()="
-                    + corsConfigurationFilter.getCorsEnabled() + " , corsConfigurationFilter.getCorsAllowedOrigins()="
-                    + corsConfigurationFilter.getCorsAllowedOrigins()
-                    + " , corsConfigurationFilter.getCorsAllowedMethods()="
-                    + corsConfigurationFilter.getCorsAllowedMethods()
-                    + " , corsConfigurationFilter.getCorsAllowedHeaders()="
-                    + corsConfigurationFilter.getCorsAllowedHeaders()
-                    + " , corsConfigurationFilter.getCorsExposedHeaders()="
-                    + corsConfigurationFilter.getCorsExposedHeaders()
-                    + " , corsConfigurationFilter.getCorsSupportCredentials()="
-                    + corsConfigurationFilter.getCorsSupportCredentials()
-                    + " , corsConfigurationFilter.getCorsLoggingEnabled()="
-                    + corsConfigurationFilter.getCorsLoggingEnabled()
-                    + " , corsConfigurationFilter.getCorsPreflightMaxAge()="
-                    + corsConfigurationFilter.getCorsPreflightMaxAge()
-                    + " , corsConfigurationFilter.getCorsRequestDecorate()="
-                    + corsConfigurationFilter.getCorsRequestDecorate() + "]"
-                    );
         }
     }
 
