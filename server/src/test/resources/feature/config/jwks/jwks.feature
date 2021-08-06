@@ -79,7 +79,7 @@ Feature: JWKS endpoint
     When method PATCH
     Then status 200
     And print response    
-    Given url mainUrl + '/' +response.kid
+    Given url mainUrl + '/test12345-66f1-4b4a-92ec-d969522f4cbc_sig_rs256'
     And header Authorization = 'Bearer ' + accessToken
     When method DELETE
     Then status 204 

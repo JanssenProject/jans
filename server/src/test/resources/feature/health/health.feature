@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Verify API HealthCheck
 
 Background:
@@ -13,44 +13,20 @@ Background:
   Given url mainUrl
   When method GET
   Then status 200
-  And match response == 
-     """
-  { 
-
-    "status": #string? _ == status_str,
-    "checks": '#(health_schema)',
-     checks: '#[2]'  
- }
-  """
+  And print response
   
   
   Scenario: Verify liveness status of API
   Given url mainUrl + '/live/'
   When method GET
   Then status 200
-  And match response == 
-     """
-  { 
-
-    "status": #string? _ == status_str,
-    "checks": '#(health_schema)',
-     checks: '#[1]'  
- }
-  """
+  And print response
     
   Scenario: Verify readiness status of API
   Given url mainUrl + '/ready/'
   When method GET
   Then status 200
-   And match response == 
-     """
-  { 
-
-    "status": #string? _ == status_str,
-    "checks": '#(health_schema)',
-     checks: '#[1]'  
- }
-  """
+  And print response
   
   
    
