@@ -11,15 +11,18 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.util.CertUtils;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     private Jwt dcr;
     private Client client;
     private ErrorResponseFactory errorResponseFactory;
+    private X509Certificate certificate;
 
     public DynamicClientRegistrationContext(HttpServletRequest httpRequest, JSONObject registerRequest, CustomScriptConfiguration script) {
         this(httpRequest, registerRequest, script, null);
@@ -116,6 +120,23 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         validateSSANotNull();
         validateSSARedirectUri();
         validateSoftwareId();
+        validateCertSubjectHasCNAndOU();
+    }
+
+    public void validateCertSubjectHasCNAndOU() {
+        final String cn = CertUtils.getAttr(certificate, BCStyle.CN);
+        if (StringUtils.isBlank(cn)) {
+            log.error("CN of certificate is not set.");
+            throwWebApplicationExceptionIfSet();
+            throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+        }
+
+        final String ou = CertUtils.getAttr(certificate, BCStyle.OU);
+        if (StringUtils.isBlank(ou)) {
+            log.error("OU of certificate is not set.");
+            throwWebApplicationExceptionIfSet();
+            throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+        }
     }
 
     public void validateSSARedirectUri() {
@@ -164,6 +185,14 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
 
     public void setErrorResponseFactory(ErrorResponseFactory errorResponseFactory) {
         this.errorResponseFactory = errorResponseFactory;
+    }
+
+    public X509Certificate getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(X509Certificate certificate) {
+        this.certificate = certificate;
     }
 
     @Override
