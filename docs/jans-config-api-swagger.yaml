@@ -2303,7 +2303,7 @@ paths:
     get:
       summary: Returns application health status.
       description: Returns application health status.
-      operationId: get-config-cache
+      operationId: get-config-health
       tags:
         - Health - Check
       responses:
@@ -2315,7 +2315,38 @@ paths:
                 $ref: '#/components/schemas/HealthStatus'
         '500':
           description: Internal Server Error
-          
+  /jans-config-api/api/v1/health/live:
+    get:
+      summary: Returns application liveness status.
+      description: Returns application liveness status.
+      operationId: get-config-health-live
+      tags:
+        - Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatusItem'
+        '500':
+          description: Internal Server Error
+  /jans-config-api/api/v1/health/ready:
+    get:
+      summary: Returns application readiness status.
+      description: Returns application readiness status.
+      operationId: get-config-health-ready
+      tags:
+        - Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatusItem'
+        '500':
+          description: Internal Server Error
 components:
   securitySchemes:
     oauth2:
