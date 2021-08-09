@@ -1000,7 +1000,8 @@ class JCA_CLI:
 
     def get_api_caller(self, endpoint):
         security = self.get_scope_for_endpoint(endpoint)
-        self.get_access_token(security)
+        if security.strip():
+            self.get_access_token(security)
         client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
 
         api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
@@ -1441,7 +1442,8 @@ class JCA_CLI:
 
         dummy_enpoint = Menu(name='', info=path)
         security = self.get_scope_for_endpoint(dummy_enpoint)
-        self.get_access_token(security)
+        if security.strip():
+            self.get_access_token(security)
         class_name = self.get_api_class_name(path['tags'][0])
         client = getattr(swagger_client, class_name)
         api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
