@@ -82,15 +82,15 @@ public class AccontAccessConsentServlet extends HttpServlet {
         	
         	for (String keyStr : jsonBody.keySet()) {
     	    	Object keyvalue = jsonBody.get(keyStr);
-    	    	jsonObj.put(keyStr, keyvalue);
+    	    	/*jsonObj.put(keyStr, keyvalue);
     		    if (keyStr.equals("Risk"))
         	   	{
-        	   	}
-    	    	if (keyStr.equals("Data")) {
+        	   	}*/
+    	    	if (keyStr.equals("data")) {
     	    		JSONObject keyvalueTemp = (JSONObject)jsonBody.get(keyStr);
     		    	for (String keyStr1 : keyvalueTemp.keySet()) {
     		    		Object keyvalue1 = keyvalueTemp.get(keyStr1);
-    		    		if (keyStr1.equals("Permissions"))
+    		    		if (keyStr1.equals("permissions"))
     		    	   	{
     		    	   		permissionKey=keyStr1; 
     		    	   		permissionValue=keyvalue1.toString();
@@ -121,16 +121,16 @@ public class AccontAccessConsentServlet extends HttpServlet {
         		ConsentID=UUID.randomUUID().toString();
         		log.info("FAPIOBUK: ClientID is null");
         	}
-        	jsonObj.put("Links", new JSONObject().put("self","/open-banking/v3.1/aisp/account-access-consents/"+ConsentID));
+        	jsonObj.put("links", new JSONObject().put("self","/open-banking/v3.1/aisp/account-access-consents/"+ConsentID));
         	
         	JSONObject data=new JSONObject();
         	Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        	data.put("CreationDateTime", timestamp.getTime());
-        	data.put("Status", "AwaitingAuthorisation");
+        	data.put("creationDateTime", timestamp.getTime());
+        	data.put("status", "AwaitingAuthorisation");
         	data.put(permissionKey, permissionValue);
-        	data.put("ConsentId",ConsentID);
-        	data.put("StatusUpdateDateTime", timestamp.getTime());
-        	jsonObj.put("Data",data);
+        	data.put("consentId",ConsentID);
+        	data.put("statusUpdateDateTime", timestamp.getTime());
+        	jsonObj.put("data",data);
         	   	
         	out.print(jsonObj.toString());
         	httpResponse.setStatus(201, "Created");
