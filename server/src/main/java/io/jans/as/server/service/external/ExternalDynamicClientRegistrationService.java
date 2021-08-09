@@ -10,11 +10,13 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import javax.ejb.DependsOn;
@@ -53,6 +55,13 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             context.setRegisterRequest(registerRequest);
             context.setErrorResponseFactory(errorResponseFactory);
             context.setSoftwareStatement(Jwt.parseSilently(registerRequest.getSoftwareStatement()));
+
+            final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+            if (StringUtils.isNotBlank(clientCertAsPem)) {
+                context.setCertificate(CertUtils.x509CertificateFromPem(clientCertAsPem));
+            } else {
+                log.trace("Cert is not set for client registration. X-ClientCert header has no value.");
+            }
 
             final boolean result = externalClientRegistrationType.createClient(context);
             context.throwWebApplicationExceptionIfSet();
