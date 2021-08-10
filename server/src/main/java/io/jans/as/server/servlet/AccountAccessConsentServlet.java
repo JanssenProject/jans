@@ -5,6 +5,7 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.token.TokenService;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
