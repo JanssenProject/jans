@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "auth-server-key-rotation.labels" -}}
-app: {{ include "auth-server-key-rotation.name" . }}
+app: {{ .Release.Name }}-{{ include "auth-server-key-rotation.name" . }}
 helm.sh/chart: {{ include "auth-server-key-rotation.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

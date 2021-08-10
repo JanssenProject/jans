@@ -30,7 +30,9 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/fido2
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b8
+  tag: 1.0.0_b9
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
 # -- Service replica number.
 replicas: 1
 # -- Resource specs.

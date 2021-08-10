@@ -15,5 +15,5 @@ spec:
   - port: {{ .Values.service.port }}
     name: {{ .Values.service.name }}
   selector:
-    app: {{ include "scim.name" . }} #scim
+    app: {{ .Release.Name }}-{{ include "scim.name" . }} #scim
     

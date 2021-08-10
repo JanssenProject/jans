@@ -1,6 +1,6 @@
 # nginx-ingress
 
-![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b8](https://img.shields.io/badge/AppVersion-1.0.0--b8-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
 
 Nginx ingress definitions chart
 
@@ -28,23 +28,38 @@ Kubernetes: `>=v1.17.0-0`
 |-----|------|---------|-------------|
 | fullnameOverride | string | `""` |  |
 | ingress.additionalAnnotations | object | `{}` |  |
+| ingress.additionalLabels | object | `{}` | Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"} |
+| ingress.adminUiEnabled | bool | `true` | Enable Admin UI endpoints. COMING SOON. |
+| ingress.adminUiLabels | object | `{}` | Admin UI ingress resource labels. key app is taken. |
 | ingress.annotations | object | `{}` |  |
-| ingress.authServerEnabled | bool | `true` |  |
-| ingress.authServerProtectedRegister | bool | `false` |  |
-| ingress.authServerProtectedToken | bool | `false` |  |
+| ingress.authServerEnabled | bool | `true` | Enable Auth server endpoints /jans-auth |
+| ingress.authServerLabels | object | `{}` | Auth server config ingress resource labels. key app is taken |
+| ingress.authServerProtectedRedisterLabels | object | `{}` | Auth server protected token ingress resource labels. key app is taken |
+| ingress.authServerProtectedRegister | bool | `false` | Enable mTLS onn Auth server endpoint /jans-auth/restv1/register |
+| ingress.authServerProtectedToken | bool | `false` | Enable mTLS on Auth server endpoint /jans-auth/restv1/token |
+| ingress.authServerProtectedTokenLabels | object | `{}` | Auth server protected token ingress resource labels. key app is taken |
 | ingress.configApiEnabled | bool | `true` |  |
-| ingress.fido2ConfigEnabled | bool | `false` |  |
+| ingress.configApiLabels | object | `{}` | configAPI ingress resource labels. key app is taken |
+| ingress.fido2ConfigEnabled | bool | `false` | Enable endpoint /.well-known/fido2-configuration |
+| ingress.fido2ConfigLabels | object | `{}` | fido2 config ingress resource labels. key app is taken |
 | ingress.hosts[0] | string | `"demoexample.jans.io"` |  |
-| ingress.openidConfigEnabled | bool | `true` |  |
+| ingress.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |
+| ingress.openidConfigLabels | object | `{}` | openid-configuration ingress resource labels. key app is taken |
 | ingress.path | string | `"/"` |  |
-| ingress.scimConfigEnabled | bool | `false` |  |
-| ingress.scimEnabled | bool | `false` |  |
+| ingress.scimConfigEnabled | bool | `false` | Enable endpoint /.well-known/scim-configuration |
+| ingress.scimConfigLabels | object | `{}` | webdiscovery ingress resource labels. key app is taken |
+| ingress.scimEnabled | bool | `false` | Enable SCIM endpoints /jans-scim |
+| ingress.scimLabels | object | `{}` | scim config ingress resource labels. key app is taken |
 | ingress.tls[0].hosts[0] | string | `"demoexample.jans.io"` |  |
 | ingress.tls[0].secretName | string | `"tls-certificate"` |  |
-| ingress.u2fConfigEnabled | bool | `true` |  |
-| ingress.uma2ConfigEnabled | bool | `true` |  |
-| ingress.webdiscoveryEnabled | bool | `false` |  |
-| ingress.webfingerEnabled | bool | `true` |  |
+| ingress.u2fConfigEnabled | bool | `true` | Enable endpoint /.well-known/fido-configuration |
+| ingress.u2fConfigLabels | object | `{}` | u2f config ingress resource labels. key app is taken |
+| ingress.uma2ConfigEnabled | bool | `true` | Enable endpoint /.well-known/uma2-configuration |
+| ingress.uma2ConfigLabels | object | `{}` | uma 2 config ingress resource labels. key app is taken |
+| ingress.webdiscoveryEnabled | bool | `true` | Enable endpoint /.well-known/simple-web-discovery |
+| ingress.webdiscoveryLabels | object | `{}` | webdiscovery ingress resource labels. key app is taken |
+| ingress.webfingerEnabled | bool | `true` | Enable endpoint /.well-known/webfinger |
+| ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
 | nameOverride | string | `""` |  |
 | service.port | int | `8080` |  |
 | service.type | string | `"ClusterIP"` |  |

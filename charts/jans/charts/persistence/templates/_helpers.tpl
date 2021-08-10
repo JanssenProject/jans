@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "persistence.labels" -}}
-app: {{ include "persistence.name" . }}
+app: {{ .Release.Name }}-{{ include "persistence.name" . }}
 helm.sh/chart: {{ include "persistence.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
