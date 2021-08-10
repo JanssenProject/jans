@@ -9,6 +9,7 @@ package io.jans.as.server.service.external.context;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.CertUtils;
@@ -121,22 +122,49 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         validateSSARedirectUri();
         validateSoftwareId();
         validateCertSubjectHasCNAndOU();
+        validateCNEqualsSoftwareId();
     }
 
     public void validateCertSubjectHasCNAndOU() {
-        final String cn = CertUtils.getAttr(certificate, BCStyle.CN);
-        if (StringUtils.isBlank(cn)) {
-            log.error("CN of certificate is not set.");
-            throwWebApplicationExceptionIfSet();
-            throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
-        }
+        validateCNIsNotBlank();
+        validateOUIsNotBlank();
+    }
 
+    public String validateOUIsNotBlank() {
         final String ou = CertUtils.getAttr(certificate, BCStyle.OU);
         if (StringUtils.isBlank(ou)) {
-            log.error("OU of certificate is not set.");
-            throwWebApplicationExceptionIfSet();
-            throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+            throwWebApplicationException("OU of certificate is not set.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
         }
+        return ou;
+    }
+
+    public String validateCNIsNotBlank() {
+        final String cn = CertUtils.getAttr(certificate, BCStyle.CN);
+        if (StringUtils.isBlank(cn)) {
+            throwWebApplicationException("CN of certificate is not set.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+        }
+        return cn;
+    }
+
+    public void throwWebApplicationException(String message, IErrorType errorType) {
+        log.error(message);
+        throwWebApplicationExceptionIfSet();
+        throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(errorType));
+    }
+
+    public void validateCNEqualsSoftwareId() {
+        final String cn = validateCNIsNotBlank();
+        final String softwareId = registerRequest.getSoftwareId();
+
+        if (StringUtils.isBlank(softwareId)) {
+            throwWebApplicationException("softwareId is not set in SSA", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+            return;
+        }
+
+        if (cn.equals(softwareId)) // success
+            return;
+
+        throwWebApplicationException("CN does not equals to softwareId in SSA. CN: " + cn + ", softwareId: " + softwareId, RegisterErrorResponseType.INVALID_CLIENT_METADATA);
     }
 
     public void validateSSARedirectUri() {
@@ -152,16 +180,12 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         if (ssaRedirectUris.containsAll(redirectUris))
             return;
 
-        log.error("SSA redirect_uris does not match redirect_uris of the request. SSA redirect_uris: " + ssaRedirectUris + ", request redirectUris: " + redirectUris);
-        throwWebApplicationExceptionIfSet();
-        throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
+        throwWebApplicationException("SSA redirect_uris does not match redirect_uris of the request. SSA redirect_uris: " + ssaRedirectUris + ", request redirectUris: " + redirectUris, RegisterErrorResponseType.INVALID_REDIRECT_URI);
     }
 
     public void validateSSANotNull() {
         if (softwareStatement == null) {
-            log.error("SSA is null");
-            throwWebApplicationExceptionIfSet();
-            throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT));
+            throwWebApplicationException("SSA is null", RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT);
         }
     }
 
@@ -174,9 +198,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         if (softwareId.equals(ssaSoftwareId))
             return;
 
-        log.error(String.format("SSA softwareId (%s), does not match to softwareId in request (%s)", ssaSoftwareId, softwareId));
-        throwWebApplicationExceptionIfSet();
-        throw createWebApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+        throwWebApplicationException(String.format("SSA softwareId (%s), does not match to softwareId in request (%s)", ssaSoftwareId, softwareId), RegisterErrorResponseType.INVALID_CLIENT_METADATA);
     }
 
     public ErrorResponseFactory getErrorResponseFactory() {
