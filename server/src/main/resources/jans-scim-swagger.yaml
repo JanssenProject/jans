@@ -50,7 +50,7 @@ paths:
 
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - scim_oauth: [https://jans.io/scim/groups.read]
 
       parameters:
         - 
@@ -112,7 +112,7 @@ paths:
 
       description: Allows creating a Group resource via POST (see section 3.3 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - scim_oauth: [https://jans.io/scim/groups.write]
 
       parameters:
         -
@@ -159,7 +159,7 @@ paths:
 
       description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - scim_oauth: [https://jans.io/scim/groups.read]
 
       parameters:
         -
@@ -204,7 +204,7 @@ paths:
         attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
         not passed in the payload will be left intact.
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - scim_oauth: [https://jans.io/scim/groups.write]
 
       parameters:
         -
@@ -265,7 +265,7 @@ paths:
         Updates one or more attributes of a Group resource using a sequence of additions, removals, and 
         replacements operations. See section 3.5.2 of RFC 7644
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - scim_oauth: [https://jans.io/scim/groups.write]
 
       parameters:
         -
@@ -314,7 +314,7 @@ paths:
 
       description: Deletes a group resource (see section 3.6 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/groups.write]
+        - scim_oauth: [https://jans.io/scim/groups.write]
 
       parameters:
         -
@@ -347,7 +347,7 @@ paths:
 
       description: Query Group resources (see section 3.4.2 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/groups.read]
+        - scim_oauth: [https://jans.io/scim/groups.read]
       
       parameters:
         -
@@ -382,7 +382,7 @@ paths:
 
       description: Query Fido resources
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - scim_oauth: [https://jans.io/scim/fido.read]
 
       parameters:
         - 
@@ -452,7 +452,7 @@ paths:
 
       description: Retrieves a U2F/Super Gluu device by Id 
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - scim_oauth: [https://jans.io/scim/fido.read]
 
       parameters:
         -
@@ -502,7 +502,7 @@ paths:
         attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
         not passed in the payload will be left intact.
       security:
-        - scim_auth: [https://jans.io/scim/fido.write]
+        - scim_oauth: [https://jans.io/scim/fido.write]
 
       parameters:
         -
@@ -554,7 +554,7 @@ paths:
 
       description: Deletes a Fido resource
       security:
-        - scim_auth: [https://jans.io/scim/fido.write]
+        - scim_oauth: [https://jans.io/scim/fido.write]
 
       parameters:
         -
@@ -587,7 +587,7 @@ paths:
 
       description: Query Fido resources
       security:
-        - scim_auth: [https://jans.io/scim/fido.read]
+        - scim_oauth: [https://jans.io/scim/fido.read]
       
       parameters:
         - 
@@ -631,7 +631,7 @@ paths:
 
       description: Query Fido 2 resources
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read]
+        - scim_oauth: [https://jans.io/scim/fido2.read]
 
       parameters:
         - 
@@ -701,7 +701,7 @@ paths:
 
       description: Retrieves a Fido 2 device by Id
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read] 
+        - scim_oauth: [https://jans.io/scim/fido2.read]
 
       parameters:
         -
@@ -751,7 +751,7 @@ paths:
         attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
         not passed in the payload will be left intact.
       security:
-        - scim_auth: [https://jans.io/scim/fido2.write]
+        - scim_oauth: [https://jans.io/scim/fido2.write]
 
       parameters:
         -
@@ -803,7 +803,7 @@ paths:
 
       description: Deletes a Fido 2 resource
       security:
-        - scim_auth: [https://jans.io/scim/fido2.write]
+        - scim_oauth: [https://jans.io/scim/fido2.write]
 
       parameters:
         -
@@ -836,7 +836,7 @@ paths:
 
       description: Query Fido 2 resources
       security:
-        - scim_auth: [https://jans.io/scim/fido2.read]
+        - scim_oauth: [https://jans.io/scim/fido2.read]
       
       parameters:
         - 
@@ -880,7 +880,7 @@ paths:
 
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - scim_oauth: [https://jans.io/scim/users.read]
 
       parameters:
         - 
@@ -942,7 +942,7 @@ paths:
 
       description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - scim_oauth: [https://jans.io/scim/users.write]
 
       parameters:
         -
@@ -989,7 +989,7 @@ paths:
 
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - scim_oauth: [https://jans.io/scim/users.read]
 
       parameters:
         -
@@ -1034,7 +1034,7 @@ paths:
         attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
         not passed in the payload will be left intact.
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - scim_oauth: [https://jans.io/scim/users.write]
 
       parameters:
         -
@@ -1095,7 +1095,7 @@ paths:
         Updates one or more attributes of a User resource using a sequence of additions, removals, and 
         replacements operations. See section 3.5.2 of RFC 7644
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - scim_oauth: [https://jans.io/scim/users.write]
 
       parameters:
         -
@@ -1144,7 +1144,7 @@ paths:
 
       description: Deletes a user resource
       security:
-        - scim_auth: [https://jans.io/scim/users.write]
+        - scim_oauth: [https://jans.io/scim/users.write]
 
       parameters:
         -
@@ -1177,7 +1177,7 @@ paths:
 
       description: Query User resources (see section 3.4.2 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/users.read]
+        - scim_oauth: [https://jans.io/scim/users.read]
       
       parameters:
         -
@@ -1216,7 +1216,7 @@ paths:
       description: |
         Search (from system root) for one or more resource (see section 3.4.3 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/all-resources.search]
+        - scim_oauth: [https://jans.io/scim/all-resources.search]
         
       parameters:
         -
@@ -1249,7 +1249,7 @@ paths:
 
       description: Send several resource operations in a single request (see section 3.7 of RFC 7644)
       security:
-        - scim_auth: [https://jans.io/scim/bulk]
+        - scim_oauth: [https://jans.io/scim/bulk]
       
       parameters:
         -
@@ -2143,7 +2143,7 @@ definitions:
             type: object
 
 securityDefinitions:
-  scim_auth:
+  scim_oauth:
     type: oauth2
     description: Endpoints protected by a bearer token passed in the Authorization header.
     flow: application
