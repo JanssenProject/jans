@@ -52,4 +52,19 @@ public abstract class AuthorizationService implements Serializable {
         return this.configurationFactory.getApiApprovedIssuer();
     }
 
+    public List<String> getAuthSpecificScopeRequired(String method, String path) {
+        return authUtil.getAuthSpecificScopeRequired(method,path);
+    }
+    
+    public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
+        return authUtil.getAuthSpecificScopeRequired(resourceInfo);
+    }
+    
+    public List<String> findMissingElements(List<String> list1, List<String> list2) {
+        return authUtil.findMissingElements(list1,list2);
+    }
+    
+    public boolean isEqualCollection(List<String> list1, List<String> list2) {
+        return authUtil.isEqualCollection(list1,list2);
+    }
 }

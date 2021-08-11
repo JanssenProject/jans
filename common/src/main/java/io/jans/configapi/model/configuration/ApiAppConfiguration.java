@@ -22,6 +22,7 @@ public class ApiAppConfiguration implements Configuration {
     private String authOpenidRevokeUrl;
 
     private String smallryeHealthRootPath;
+    private List<String> exclusiveAuthScopes;
 
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
@@ -121,12 +122,20 @@ public class ApiAppConfiguration implements Configuration {
         return corsConfigurationFilters;
     }
 
-    public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
-        if (corsConfigurationFilters == null) {
-            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+    public List<String> getExclusiveAuthScopes() {
+        if (exclusiveAuthScopes == null) {
+            exclusiveAuthScopes = new ArrayList<String>();
+        }
+        return exclusiveAuthScopes;
+    }
+
+    public void setExclusiveAuthScopes(List<String> exclusiveAuthScopes) {
+        this.exclusiveAuthScopes = exclusiveAuthScopes;
+        if (exclusiveAuthScopes == null) {
+            this.exclusiveAuthScopes = new ArrayList<String>();
         } else {
-            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
-            this.corsConfigurationFilters.addAll(corsConfigurationFilters);
+            this.exclusiveAuthScopes = new ArrayList<String>();
+            this.exclusiveAuthScopes.addAll(exclusiveAuthScopes);
         }
     }
 
@@ -138,7 +147,8 @@ public class ApiAppConfiguration implements Configuration {
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
                 + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath
-                + ", corsConfigurationFilters=" + corsConfigurationFilters + "]";
+                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
+                + exclusiveAuthScopes + "]";
     }
 
 }
