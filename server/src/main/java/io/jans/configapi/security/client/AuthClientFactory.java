@@ -92,6 +92,8 @@ public class AuthClientFactory {
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
+        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
+                clientId, clientSecret, scope);
         ApacheHttpClient43Engine engine = null;
         try {
             Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
@@ -115,7 +117,7 @@ public class AuthClientFactory {
             ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
                     .newClient(restClient.getConfiguration()).target(tokenUrl);
             Response response = request.post(Entity.form(multivaluedHashMap));
-
+            log.debug("Response for Access Token -  response = " + response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
 
