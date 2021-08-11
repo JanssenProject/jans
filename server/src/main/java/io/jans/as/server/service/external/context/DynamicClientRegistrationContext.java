@@ -123,6 +123,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         validateSoftwareId();
         validateCertSubjectHasCNAndOU();
         validateCNEqualsSoftwareId();
+        validateOUEqualsOrgId();
     }
 
     public void validateCertSubjectHasCNAndOU() {
@@ -154,7 +155,7 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
 
     public void validateCNEqualsSoftwareId() {
         final String cn = validateCNIsNotBlank();
-        final String softwareId = registerRequest.getSoftwareId();
+        final String softwareId = softwareStatement.getClaims().getClaimAsString("software_id");
 
         if (StringUtils.isBlank(softwareId)) {
             throwWebApplicationException("softwareId is not set in SSA", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
@@ -165,6 +166,21 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
             return;
 
         throwWebApplicationException("CN does not equals to softwareId in SSA. CN: " + cn + ", softwareId: " + softwareId, RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+    }
+
+    public void validateOUEqualsOrgId() {
+        final String ou = validateOUIsNotBlank();
+        final String orgId = softwareStatement.getClaims().getClaimAsString("org_id");
+
+        if (StringUtils.isBlank(orgId)) {
+            throwWebApplicationException("orgId is not set in SSA", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+            return;
+        }
+
+        if (ou.equals(orgId)) // success
+            return;
+
+        throwWebApplicationException("OU does not equals to orgId in SSA. OU: " + ou + ", orgId: " + orgId, RegisterErrorResponseType.INVALID_CLIENT_METADATA);
     }
 
     public void validateSSARedirectUri() {
