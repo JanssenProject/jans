@@ -5,12 +5,13 @@
  */
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -37,22 +38,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                null, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -81,23 +68,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.HS256);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.HS256, null, null);
 
         String clientId = registerResponse.getClientId();
         sharedKey = registerResponse.getClientSecret();
@@ -127,23 +99,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.HS384);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.HS384, null, null);
 
         String clientId = registerResponse.getClientId();
         sharedKey = registerResponse.getClientSecret();
@@ -173,23 +130,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.HS512);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.HS512, null, null);
 
         String clientId = registerResponse.getClientId();
         sharedKey = registerResponse.getClientSecret();
@@ -219,23 +161,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS256);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.RS256, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -271,23 +198,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS384);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.RS384, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -316,23 +228,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS512);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.RS512, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -361,23 +258,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES256);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.ES256, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -406,23 +288,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES384);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.ES384, null, null);
 
         String clientId = registerResponse.getClientId();
 
@@ -451,23 +318,8 @@ public class AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenSig
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
         // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES512);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, null,
+                SignatureAlgorithm.ES512, null, null);
 
         String clientId = registerResponse.getClientId();
 
