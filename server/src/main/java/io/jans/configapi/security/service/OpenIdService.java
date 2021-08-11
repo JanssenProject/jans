@@ -8,13 +8,16 @@ package io.jans.configapi.security.service;
 
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.security.client.AuthClientFactory;
+import io.jans.configapi.util.AuthUtil;
 
+import java.io.Serializable;
+import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
 import javax.inject.Inject;
-import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +32,9 @@ public class OpenIdService implements Serializable {
     Logger log;
 
     @Inject
+    AuthUtil authUtil;
+
+    @Inject
     ConfigurationService configurationService;
 
     private IntrospectionService introspectionService;
@@ -41,9 +47,12 @@ public class OpenIdService implements Serializable {
         return configurationService.find().getIntrospectionEndpoint();
     }
 
+    public String getTokenEndpoint() {
+        return configurationService.find().getTokenEndpoint();
+    }
+
     public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws Exception {
-        log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}, method: {}, path: {} ", header, token,
-                issuer);
+        log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}", header, token, issuer);
 
         String introspectionUrl = getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
@@ -55,4 +64,14 @@ public class OpenIdService implements Serializable {
         return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
     }
 
+    public String requestAccessToken(final String clientId, final List<String> scope) throws Exception {
+        log.info("oAuth request AccessToken - clientId:{}, scope:{} ", clientId, scope);
+        String tokenUrl = getTokenEndpoint();
+        Token token = authUtil.requestAccessToken(tokenUrl, clientId, scope);
+        log.info("oAuth AccessToken response - token = " + token);
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        return null;
+    }
 }

@@ -63,7 +63,7 @@ public class JwtUtil {
         return null;
     }
 
-    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
+    public List<String> validateToken(String token) throws InvalidJwtException, Exception {
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -125,7 +125,80 @@ public class JwtUtil {
             if (!isJwtSignatureValid) {
                 throw new WebApplicationException("Jwt Signature is Invalid.",
                         Response.status(Response.Status.UNAUTHORIZED).build());
+            }
 
+           
+            return scopes;
+        } catch (InvalidJwtException exp) {
+            log.error("Not a valid Jwt token = " + exp);
+            throw exp;
+        }
+        
+    }
+    
+    public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
+        log.trace("Validate Jwt Token - token = " + token + " ,resourceScopes = " + resourceScopes+ "\n");
+        // 1. Parse Jwt token
+        // 2. Validate Token
+        // 3. Validate Issuer
+        // 4. Retrieve Auth Server JSON Web Keys - jwks_uri"
+        // :"https://jenkins-config-api.gluu.org/jans-auth/restv1/jwks",
+        // 5. Verify the signature used to sign the access token
+        // 6. Verify the scopes
+
+        try {
+            // Parse Token
+            Jwt jwt = this.parse(token);
+            log.trace("JwtUtil::validateToken() -JWT details : " + " jwt.getSigningInput() = " + jwt.getSigningInput()
+                    + " ,jwt.getEncodedSignature() = " + jwt.getEncodedSignature() + " ,jwt.getHeader().getKeyId() = "
+                    + jwt.getHeader().getKeyId() + " ,jwt.getHeader().getSignatureAlgorithm() = "
+                    + jwt.getHeader().getSignatureAlgorithm()
+                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM) = "
+                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ALGORITHM)
+                    + " ,jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) = "
+                    + jwt.getClaims().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD) + ".");
+
+            final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
+
+            log.debug("\n\n JwtUtil::validateToken() - expiresAt = " + expiresAt + " , issuer =" + issuer
+                    + " , scopes = " + scopes + "\n");
+
+            // Validate token is not expired
+            log.info("Validate JWT");
+            final Date now = new Date();
+            if (now.after(expiresAt)) {
+                log.error("ID Token is expired. (It is after " + now + ").");
+                throw new WebApplicationException("ID Token is expired",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            // Validate issuer
+            log.info("Validate JWT Issuer");
+            if (!authUtil.isValidIssuer(issuer)) {
+                throw new WebApplicationException("Jwt Issuer is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+
+            // Retrieve JSON Web Key Set Uri
+            log.info("Retrieve JSON Web Key Set URI");
+            String jwksUri = this.getJwksUri(issuer);
+            log.trace("\n\n JwtUtil::validateToken() - jwksUri = " + jwksUri);
+
+            // Retrieve JSON Web Key Set
+            log.info("Retrieve JSON Web Key Set");
+            JSONWebKeySet jsonWebKeySet = this.getJSONWebKeys(jwksUri);
+            log.trace("\n\n JwtUtil::validateToken() - jsonWebKeySet = " + jsonWebKeySet);
+
+            // Verify the signature used to sign the access token
+            log.info("Verify JWT signature");
+            boolean isJwtSignatureValid = this.validateSignature(jwt, jsonWebKeySet);
+            log.debug("\n\n JwtUtil::validateToken() - isJwtSignatureValid = " + isJwtSignatureValid + "\n\n");
+
+            if (!isJwtSignatureValid) {
+                throw new WebApplicationException("Jwt Signature is Invalid.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
             // Validate Scopes
@@ -142,6 +215,7 @@ public class JwtUtil {
         }
 
     }
+
 
     public boolean validateSignature(Jwt jwt, JSONWebKeySet jsonWebKeySet) {
         log.trace("\n\n JwtUtil::validateSignature() - jwt = " + jwt + " , jsonWebKeySet =" + jsonWebKeySet + "\n");

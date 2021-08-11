@@ -15,6 +15,8 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
@@ -308,4 +310,67 @@ public class AuthUtil {
                 + this.configurationFactory.getApiApprovedIssuer().contains(issuer));
         return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
     }
+
+    public List<String> getAuthSpecificScopeRequired(String method, String path) {
+        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - method = " + method + " , path = " + path);
+
+        // Get required oauth scopes for the endpoint
+        List<String> resourceScopes = getRequestedScopes(method, path);
+        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
+                + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
+                + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
+
+        // Check if the path has any exclusiveAuthScopes requirement
+        List<String> exclusiveAuthScopesToReq = new ArrayList<String>();
+        if (resourceScopes != null && resourceScopes.size() == 0
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() != null
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() == 0) {
+            exclusiveAuthScopesToReq = resourceScopes.stream()
+                    .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
+                    .collect(Collectors.toList());
+            // exclusiveAuthScopesToReq =
+            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collector.toList());
+        }
+
+        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - exclusiveAuthScopesToReq = "
+                + exclusiveAuthScopesToReq);
+        return exclusiveAuthScopesToReq;
+    }
+
+    public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
+        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
+
+        // Get required oauth scopes for the endpoint
+        List<String> resourceScopes = getRequestedScopes(resourceInfo);
+        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
+                + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
+                + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
+
+        // Check if the path has any exclusiveAuthScopes requirement
+        List<String> exclusiveAuthScopesToReq = new ArrayList<String>();
+        if (resourceScopes != null && resourceScopes.size() == 0
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() != null
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() == 0) {
+            exclusiveAuthScopesToReq = resourceScopes.stream()
+                    .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
+                    .collect(Collectors.toList());
+            // exclusiveAuthScopesToReq =
+            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collectors.toList());
+        }
+
+        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - exclusiveAuthScopesToReq = "
+                + exclusiveAuthScopesToReq);
+        return exclusiveAuthScopesToReq;
+    }
+
+    public List<String> findMissingElements(List<String> list1, List<String> list2) {
+        List<String> unavailable = list1.stream().filter(e -> !list2.contains(e)).collect(Collectors.toList());
+        return unavailable;
+
+    }
+
+    public boolean isEqualCollection(List<String> list1, List<String> list2) {
+        return CollectionUtils.isEqualCollection(list1, list2);
+    }
+
 }
