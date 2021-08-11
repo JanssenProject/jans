@@ -110,7 +110,7 @@ import static io.jans.as.model.util.StringUtils.implode;
  * @author Yuriy Movchan Date: 2016/04/26
  * @version August 14, 2019
  */
-@WebServlet(urlPatterns = "/open-banking/v3.1/aisp/", loadOnStartup = 9)
+@WebServlet(urlPatterns = "/fapi-rs/.well-known/openid-configuration", loadOnStartup = 9)
 public class FapiOpenIdConfiguration extends HttpServlet {
 
     private static final long serialVersionUID = -8224898157373678903L;
