@@ -109,7 +109,9 @@ public class CertificateService {
             Iterator<Path> iter = directoryStream.iterator();
             while (iter.hasNext()) {
                 Path filePath = iter.next();
-                certificates.add(getCertificate(Files.newInputStream(filePath)));
+                if (!Files.isDirectory(filePath)) {
+					certificates.add(getCertificate(Files.newInputStream(filePath)));
+				}
             }
         } catch (Exception ex) {
             log.error("Failed to load cert from folder: '{}'", rootCertificatePath, ex);

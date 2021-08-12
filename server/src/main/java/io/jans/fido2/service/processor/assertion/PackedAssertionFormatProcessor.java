@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
@@ -96,8 +97,12 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
 
             log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
             log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
-
-            authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
+            // apple algorithm = -7
+            // windows hello algorithm is -257
+            log.debug("registration.getSignatureAlgorithm(): "+registration.getSignatureAlgorithm());
+            log.debug("Platform authenticator: "+ String.valueOf(registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm()));
+            authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm());
+           
         } catch (Fido2CompromisedDevice ex) {
         	throw ex;
         } catch (Exception ex) {
