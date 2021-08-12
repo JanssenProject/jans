@@ -47,193 +47,215 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @ApplicationScoped
 public class AttestationService {
 
-    @Inject
-    private Logger log;
+	@Inject
+	private Logger log;
 
-    @Inject
-    private AppConfiguration appConfiguration;
+	@Inject
+	private AppConfiguration appConfiguration;
 
-    @Inject
-    private RegistrationPersistenceService registrationPersistenceService;
+	@Inject
+	private RegistrationPersistenceService registrationPersistenceService;
 
-    @Inject
-    private AttestationVerifier attestationVerifier;
+	@Inject
+	private AttestationVerifier attestationVerifier;
 
-    @Inject
-    private DomainVerifier domainVerifier;
+	@Inject
+	private DomainVerifier domainVerifier;
 
-    @Inject
-    private ChallengeGenerator challengeGenerator;
+	@Inject
+	private ChallengeGenerator challengeGenerator;
 
-    @Inject
-    private CommonVerifiers commonVerifiers;
+	@Inject
+	private CommonVerifiers commonVerifiers;
 
-    @Inject
-    private DataMapperService dataMapperService;
+	@Inject
+	private DataMapperService dataMapperService;
 
-    @Inject
-    private Base64Service base64Service;
+	@Inject
+	private Base64Service base64Service;
 
-    /*
-     * Requires mandatory parameters: username, displayName, attestation
-     * Support non mandatory parameters: authenticatorSelection, documentDomain, extensions, timeout
-     */
-    public JsonNode options(JsonNode params) {
-        log.debug("Attestation options {}", params);
+	/*
+	 * Requires mandatory parameters: username, displayName, attestation Support non
+	 * mandatory parameters: authenticatorSelection, documentDomain, extensions,
+	 * timeout
+	 */
+	public JsonNode options(JsonNode params) {
+		log.debug("Attestation options {}", params);
 
-        // Verify request parameters
-        commonVerifiers.verifyAttestationOptions(params);
+		// Verify request parameters
+		commonVerifiers.verifyAttestationOptions(params);
 
-        // Create result object
-        ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
+		// Create result object
+		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
 
-        // Put attestation
-        AttestationConveyancePreference attestationConveyancePreference = commonVerifiers.verifyAttestationConveyanceType(params);
-        optionsResponseNode.put("attestation", attestationConveyancePreference.toString());
-        log.debug("Put attestation {}", attestationConveyancePreference);
+		// Put attestation
+		AttestationConveyancePreference attestationConveyancePreference = commonVerifiers
+				.verifyAttestationConveyanceType(params);
+		optionsResponseNode.put("attestation", attestationConveyancePreference.toString());
+		log.debug("Put attestation {}", attestationConveyancePreference);
 
-        // Put authenticatorSelection
-        ObjectNode authenticatorSelectionNode = prepareAuthenticatorSelection(params);
-        optionsResponseNode.set("authenticatorSelection", authenticatorSelectionNode);
-        log.debug("Put authenticatorSelection {}", authenticatorSelectionNode);
+		// Put authenticatorSelection
+		ObjectNode authenticatorSelectionNode = prepareAuthenticatorSelection(params);
+		optionsResponseNode.set("authenticatorSelection", authenticatorSelectionNode);
+		log.debug("Put authenticatorSelection {}", authenticatorSelectionNode);
 
-        // Generate and put challenge
-        String challenge = challengeGenerator.getChallenge();
-        optionsResponseNode.put("challenge", challenge);
-        log.debug("Put challenge {}", challenge);
+		// Generate and put challenge
+		String challenge = challengeGenerator.getChallenge();
+		optionsResponseNode.put("challenge", challenge);
+		log.debug("Put challenge {}", challenge);
 
-        // Put pubKeyCredParams
-        ArrayNode credentialParametersNode = preparePublicKeyCredentialSelection();
-        optionsResponseNode.set("pubKeyCredParams", credentialParametersNode);
-        log.debug("Put pubKeyCredParams {}", credentialParametersNode);
+		// Put pubKeyCredParams
+		ArrayNode credentialParametersNode = preparePublicKeyCredentialSelection();
+		optionsResponseNode.set("pubKeyCredParams", credentialParametersNode);
+		log.debug("Put pubKeyCredParams {}", credentialParametersNode);
 
-        // Put RP
-        String documentDomain = commonVerifiers.verifyRpDomain(params);
-        ObjectNode credentialRpEntityNode = createRpDomain(documentDomain);
-        if (credentialRpEntityNode != null) {
-	        optionsResponseNode.set("rp", credentialRpEntityNode);
-	        log.debug("Put rp {}", credentialRpEntityNode);
-        }
+		// Put RP
+		String documentDomain = commonVerifiers.verifyRpDomain(params);
+		ObjectNode credentialRpEntityNode = createRpDomain(documentDomain);
+		if (credentialRpEntityNode != null) {
+			optionsResponseNode.set("rp", credentialRpEntityNode);
+			log.debug("Put rp {}", credentialRpEntityNode);
+		}
 
-        // Put user
-        String userId = generateUserId();
-        String username = params.get("username").asText();
-        String displayName = params.get("displayName").asText();
+		// Put user
+		String userId = generateUserId();
+		String username = params.get("username").asText();
+		String displayName = params.get("displayName").asText();
 
-        ObjectNode credentialUserEntityNode = createUserCredentials(userId, username, displayName);
-        optionsResponseNode.set("user", credentialUserEntityNode);
-        log.debug("Put user {}", credentialUserEntityNode);
+		ObjectNode credentialUserEntityNode = createUserCredentials(userId, username, displayName);
+		optionsResponseNode.set("user", credentialUserEntityNode);
+		log.debug("Put user {}", credentialUserEntityNode);
 
-        // Put excludeCredentials
-        ArrayNode excludedCredentials = prepareExcludeCredentials(documentDomain, username);
-        optionsResponseNode.set("excludeCredentials", excludedCredentials);
-        log.debug("Put excludeCredentials {}", excludedCredentials);
+		// Put excludeCredentials
+		ArrayNode excludedCredentials = prepareExcludeCredentials(documentDomain, username);
+		optionsResponseNode.set("excludeCredentials", excludedCredentials);
+		log.debug("Put excludeCredentials {}", excludedCredentials);
 
-        // Put timeout
-        int timeout = commonVerifiers.verifyTimeout(params);
-        log.debug("Put timeout {}", timeout);
-        optionsResponseNode.put("timeout", timeout);
+		// Copy extensions
+		if (params.hasNonNull("extensions")) {
+			JsonNode extensions = params.get("extensions");
+			optionsResponseNode.set("extensions", extensions);
+			log.debug("Put extensions {}", extensions);
+		}
+		// incase of Apple's Touch ID and Window's Hello; timeout,status and error message cause a NotAllowedError on the browser, so skipping these attributes
+		if(AuthenticatorAttachment.CROSS_PLATFORM.equals(authenticatorSelectionNode.get("authenticatorAttachment").asText()))
+		{
+			// Put timeout
+			int timeout = commonVerifiers.verifyTimeout(params);
+			log.debug("Put timeout {}", timeout);
+			optionsResponseNode.put("timeout", timeout);
 
-        // Copy extensions
-        if (params.hasNonNull("extensions")) {
-        	JsonNode extensions = params.get("extensions");
-            optionsResponseNode.set("extensions", extensions);
-            log.debug("Put extensions {}", extensions);
-        }
+			optionsResponseNode.put("status", "ok");
+			optionsResponseNode.put("errorMessage", "");
+		}
+		
+		// Store request in DB
+		Fido2RegistrationData entity = new Fido2RegistrationData();
+		entity.setUsername(username);
+		entity.setUserId(userId);
+		entity.setChallenge(challenge);
+		entity.setDomain(documentDomain);
+		entity.setStatus(Fido2RegistrationStatus.pending);
 
-        optionsResponseNode.put("status", "ok");
-        optionsResponseNode.put("errorMessage", "");
+		// Store original requests
+		entity.setAttenstationRequest(params.toString());
 
-        // Store request in DB
-        Fido2RegistrationData entity = new Fido2RegistrationData();
-        entity.setUsername(username);
-        entity.setUserId(userId);
-        entity.setChallenge(challenge);
-        entity.setDomain(documentDomain);
-        entity.setStatus(Fido2RegistrationStatus.pending);
+		registrationPersistenceService.save(entity);
 
-        // Store original requests
-        entity.setAttenstationRequest(params.toString());
+		log.debug("Saved in LDAP");
 
-        registrationPersistenceService.save(entity);
+		return optionsResponseNode;
+	}
 
-        return optionsResponseNode;
-    }
+	public JsonNode verify(JsonNode params) {
+		log.debug("Attestation verify {}", params);
 
-    public JsonNode verify(JsonNode params) {
-        log.debug("Attestation verify {}", params);
+		// Verify if there are mandatory request parameters
+		commonVerifiers.verifyBasicPayload(params);
+		commonVerifiers.verifyAssertionType(params, "type");
 
-        // Verify if there are mandatory request parameters
-        commonVerifiers.verifyBasicPayload(params);
-        commonVerifiers.verifyAssertionType(params, "type");
+		// Get response
+		JsonNode responseNode = params.get("response");
 
-        // Get response
-        JsonNode responseNode = params.get("response");
+		// Verify client data
+		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
+		commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
 
-        // Verify client data
-        JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-        commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		// Get challenge
+		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
-        // Get challenge
-        String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
+		// Find registration entry
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
+				.parallelStream().findAny().orElseThrow(() -> new Fido2RuntimeException(
+						String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
+		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
-        // Find registration entry
-        Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge).parallelStream().findAny()
-                .orElseThrow(() -> new Fido2RuntimeException(String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
-        Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
+		// Verify domain
+		domainVerifier.verifyDomain(registrationData.getDomain(), clientDataJSONNode);
 
-        // Verify domain
-        domainVerifier.verifyDomain(registrationData.getDomain(), clientDataJSONNode);
+		// Verify authenticator attestation response
+		CredAndCounterData attestationData = attestationVerifier.verifyAuthenticatorAttestationResponse(responseNode,
+				registrationData);
 
-        // Verify authenticator attestation response
-        CredAndCounterData attestationData = attestationVerifier.verifyAuthenticatorAttestationResponse(responseNode, registrationData);
+		registrationData.setUncompressedECPoint(attestationData.getUncompressedEcPoint());
+		registrationData.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
+		registrationData.setCounter(attestationData.getCounters());
 
-        registrationData.setUncompressedECPoint(attestationData.getUncompressedEcPoint());
-        registrationData.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
-        registrationData.setCounter(attestationData.getCounters());
+		String keyId = commonVerifiers.verifyCredentialId(attestationData, params);
 
-        String keyId = commonVerifiers.verifyCredentialId(attestationData, params);
+		registrationData.setPublicKeyId(keyId);
+		registrationData.setType("public-key");
+		registrationData.setStatus(Fido2RegistrationStatus.registered);
 
-        registrationData.setPublicKeyId(keyId);
-        registrationData.setType("public-key");
-        registrationData.setStatus(Fido2RegistrationStatus.registered);
+		// Store original response
+		registrationData.setAttenstationResponse(params.toString());
 
-        // Store original response
-        registrationData.setAttenstationResponse(params.toString());
+		// Set actual counter value. Note: Fido2 not update initial value in
+		// Fido2RegistrationData to minimize DB updates
+		registrationData.setCounter(registrationEntry.getCounter());
 
-        // Set actual counter value. Note: Fido2 not update initial value in Fido2RegistrationData to minimize DB updates
-        registrationData.setCounter(registrationEntry.getCounter());
+		registrationPersistenceService.update(registrationEntry);
 
-        registrationPersistenceService.update(registrationEntry);
+		// Create result object
+		ObjectNode finishResponseNode = dataMapperService.createObjectNode();
 
-        // Create result object
-        ObjectNode finishResponseNode = dataMapperService.createObjectNode();
+		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
+				registrationData.getType(), registrationData.getPublicKeyId());
+		finishResponseNode.set("createdCredentials",
+				dataMapperService.convertValue(credentialDescriptor, JsonNode.class));
 
-        PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(registrationData.getType(), registrationData.getPublicKeyId());
-        finishResponseNode.set("createdCredentials", dataMapperService.convertValue(credentialDescriptor, JsonNode.class));
+		finishResponseNode.put("status", "ok");
+		finishResponseNode.put("errorMessage", "");
 
-        finishResponseNode.put("status", "ok");
-        finishResponseNode.put("errorMessage", "");
-
-        return finishResponseNode;
-    }
+		return finishResponseNode;
+	}
 
 	private ObjectNode prepareAuthenticatorSelection(JsonNode params) {
-		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
-        UserVerification userVerification = UserVerification.preferred;
-        Boolean requireResidentKey = false;
 
-        if (params.hasNonNull("authenticatorSelection")) {
-        	JsonNode authenticatorSelectionNodeParameter = params.get("authenticatorSelection");
-        	authenticatorAttachment = commonVerifiers.verifyAuthenticatorAttachment(authenticatorSelectionNodeParameter.get("authenticatorAttachment"));
-        	userVerification = commonVerifiers.verifyUserVerification(authenticatorSelectionNodeParameter.get("userVerification"));
-        	requireResidentKey = commonVerifiers.verifyRequireResidentKey(authenticatorSelectionNodeParameter.get("requireResidentKey"));
-        }
+		// default is cross platform
+		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
+		UserVerification userVerification = UserVerification.preferred;
+
+		
+
+		Boolean requireResidentKey = false;
+
+		if (params.hasNonNull("authenticatorSelection")) {
+			log.debug("params.hasNonNull(\"authenticatorSelection\")");
+			JsonNode authenticatorSelectionNodeParameter = params.get("authenticatorSelection");
+			authenticatorAttachment = commonVerifiers
+					.verifyAuthenticatorAttachment(authenticatorSelectionNodeParameter.get("authenticatorAttachment"));
+			userVerification = commonVerifiers
+					.verifyUserVerification(authenticatorSelectionNodeParameter.get("userVerification"));
+			requireResidentKey = commonVerifiers
+					.verifyRequireResidentKey(authenticatorSelectionNodeParameter.get("requireResidentKey"));
+		}
 
 		ObjectNode authenticatorSelectionNode = dataMapperService.createObjectNode();
 		if (authenticatorAttachment != null) {
 			authenticatorSelectionNode.put("authenticatorAttachment", authenticatorAttachment.getAttachment());
 		}
+
 		if (requireResidentKey != null) {
 			authenticatorSelectionNode.put("requireResidentKey", requireResidentKey);
 		}
@@ -247,48 +269,50 @@ public class AttestationService {
 	private ArrayNode preparePublicKeyCredentialSelection() {
 		List<String> requestedCredentialTypes = appConfiguration.getFido2Configuration().getRequestedCredentialTypes();
 
-        ArrayNode credentialParametersNode = dataMapperService.createArrayNode();
+		ArrayNode credentialParametersNode = dataMapperService.createArrayNode();
 		if ((requestedCredentialTypes == null) || requestedCredentialTypes.isEmpty()) {
 			// Add default requested credential types
-	
-	        // FIDO2 RS256
-	        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
-	        credentialParametersNodeRS256.arrayNode().addObject();
-	        credentialParametersNodeRS256.put("type", "public-key");
-	        credentialParametersNodeRS256.put("alg", CoseRSAAlgorithm.RS256.getNumericValue());
-	
-	        // FIDO2 ES256
-	        ObjectNode credentialParametersNodeES256 = credentialParametersNode.addObject();
-	        credentialParametersNodeES256.arrayNode().addObject();
-	        credentialParametersNodeES256.put("type", "public-key");
-	        credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
+
+			// FIDO2 RS256
+			ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+			credentialParametersNodeRS256.arrayNode().addObject();
+			credentialParametersNodeRS256.put("type", "public-key");
+			credentialParametersNodeRS256.put("alg", CoseRSAAlgorithm.RS256.getNumericValue());
+
+			// FIDO2 ES256
+			ObjectNode credentialParametersNodeES256 = credentialParametersNode.addObject();
+			credentialParametersNodeES256.arrayNode().addObject();
+			credentialParametersNodeES256.put("type", "public-key");
+			credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
 		} else {
-			for(String requestedCredentialType : requestedCredentialTypes) {
+			for (String requestedCredentialType : requestedCredentialTypes) {
 				CoseRSAAlgorithm coseRSAAlgorithm = null;
 				try {
 					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
-				} catch (IllegalArgumentException ex) {}
+				} catch (IllegalArgumentException ex) {
+				}
 
 				if (coseRSAAlgorithm != null) {
-			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
-			        credentialParametersNodeRS256.arrayNode().addObject();
-			        credentialParametersNodeRS256.put("type", "public-key");
-			        credentialParametersNodeRS256.put("alg", coseRSAAlgorithm.getNumericValue());
+					ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+					credentialParametersNodeRS256.arrayNode().addObject();
+					credentialParametersNodeRS256.put("type", "public-key");
+					credentialParametersNodeRS256.put("alg", coseRSAAlgorithm.getNumericValue());
 					break;
 				}
 			}
 
-			for(String requestedCredentialType : requestedCredentialTypes) {
+			for (String requestedCredentialType : requestedCredentialTypes) {
 				CoseEC2Algorithm coseEC2Algorithm = null;
 				try {
 					coseEC2Algorithm = CoseEC2Algorithm.valueOf(requestedCredentialType);
-				} catch (IllegalArgumentException ex) {}
+				} catch (IllegalArgumentException ex) {
+				}
 
 				if (coseEC2Algorithm != null) {
-			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
-			        credentialParametersNodeRS256.arrayNode().addObject();
-			        credentialParametersNodeRS256.put("type", "public-key");
-			        credentialParametersNodeRS256.put("alg", coseEC2Algorithm.getNumericValue());
+					ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+					credentialParametersNodeRS256.arrayNode().addObject();
+					credentialParametersNodeRS256.put("type", "public-key");
+					credentialParametersNodeRS256.put("alg", coseEC2Algorithm.getNumericValue());
 					break;
 				}
 			}
@@ -303,56 +327,57 @@ public class AttestationService {
 		if ((requestedParties == null) || requestedParties.isEmpty()) {
 			// Add entry for default RP
 			ObjectNode credentialRpEntityNode = dataMapperService.createObjectNode();
-	        credentialRpEntityNode.put("name", appConfiguration.getIssuer());
-	        credentialRpEntityNode.put("id", documentDomain);
+			credentialRpEntityNode.put("name", appConfiguration.getIssuer());
+			credentialRpEntityNode.put("id", documentDomain);
 		} else {
 			for (RequestedParty requestedParty : requestedParties) {
 				for (String domain : requestedParty.getDomains()) {
 					if (StringHelper.equalsIgnoreCase(documentDomain, domain)) {
 						// Add entry for supported RP
 						ObjectNode credentialRpEntityNode = dataMapperService.createObjectNode();
-				        credentialRpEntityNode.put("name", requestedParty.getName());
-				        credentialRpEntityNode.put("id", documentDomain);
-				        
-				        return credentialRpEntityNode;
+						credentialRpEntityNode.put("name", requestedParty.getName());
+						credentialRpEntityNode.put("id", documentDomain);
+
+						return credentialRpEntityNode;
 					}
 				}
 			}
 		}
 
-        return null;
+		return null;
 	}
 
 	private String generateUserId() {
 		byte[] buffer = new byte[32];
-        new SecureRandom().nextBytes(buffer);
+		new SecureRandom().nextBytes(buffer);
 
-        return base64Service.urlEncodeToString(buffer);
+		return base64Service.urlEncodeToString(buffer);
 	}
 
 	private ObjectNode createUserCredentials(String userId, String username, String displayName) {
 		ObjectNode credentialUserEntityNode = dataMapperService.createObjectNode();
-        credentialUserEntityNode.put("id", userId);
-        credentialUserEntityNode.put("name", username);
-        credentialUserEntityNode.put("displayName", displayName);
+		credentialUserEntityNode.put("id", userId);
+		credentialUserEntityNode.put("name", username);
+		credentialUserEntityNode.put("displayName", displayName);
 
-        return credentialUserEntityNode;
+		return credentialUserEntityNode;
 	}
 
 	private ArrayNode prepareExcludeCredentials(String documentDomain, String username) {
-        List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService.findAllRegisteredByUsername(username);
-        List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
-                .filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
-                .filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
-                .map(f -> dataMapperService.convertValue(
-                        new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(), new String[] {"usb", "ble", "nfc"}, f.getRegistrationData().getPublicKeyId()),
-                        JsonNode.class))
-                .collect(Collectors.toList());
+		List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService
+				.findAllRegisteredByUsername(username);
+		List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
+				.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
+				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
+				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(
+						f.getRegistrationData().getType(), new String[] { "usb", "ble", "nfc", "internal" },
+						f.getRegistrationData().getPublicKeyId()), JsonNode.class))
+				.collect(Collectors.toList());
 
-        ArrayNode excludedCredentials = dataMapperService.createArrayNode();
-        excludedCredentials.addAll(excludedKeys);
+		ArrayNode excludedCredentials = dataMapperService.createArrayNode();
+		excludedCredentials.addAll(excludedKeys);
 
-        return excludedCredentials;
+		return excludedCredentials;
 	}
 
 }
