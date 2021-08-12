@@ -92,7 +92,7 @@ public class AuthClientFactory {
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
+        log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         ApacheHttpClient43Engine engine = null;
         try {
