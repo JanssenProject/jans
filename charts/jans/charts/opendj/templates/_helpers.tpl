@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
      Common labels
 */}}
 {{- define "opendj.labels" -}}
-app: {{ include "opendj.name" . }}
+app: {{ .Release.Name }}-{{ include "opendj.name" . }}
 helm.sh/chart: {{ include "opendj.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

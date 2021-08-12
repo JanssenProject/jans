@@ -15,4 +15,4 @@ spec:
     - port: 8443
       name: tcp-{{ include "client-api.name" . }}-app-connector
   selector:
-    app: {{ include "client-api.name" . }}
+    app: {{ .Release.Name }}-{{ include "client-api.name" . }}

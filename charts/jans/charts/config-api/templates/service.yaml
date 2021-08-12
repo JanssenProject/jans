@@ -15,4 +15,4 @@ spec:
     - port: 8074
       name: tcp-{{ include "config-api.name" . }}-http
   selector:
-    app: {{ include "config-api.name" . }}
+    app: {{ .Release.Name }}-{{ include "config-api.name" . }}

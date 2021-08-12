@@ -1,10 +1,14 @@
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
-{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
 apiVersion: v1
 kind: Service
 metadata:
+  {{- if .Values.multiCluster.enabled }}
+  name: {{ .Values.global.opendj.ldapServiceName }}-node
+  {{- else }}
   name: {{ .Values.global.opendj.ldapServiceName }}
+  {{- end }}
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "opendj.labels" . | indent 4}}
@@ -25,5 +29,49 @@ spec:
   clusterIP: None
   {{- end }}
   selector:
+    {{- if .Values.multiCluster.enabled }}
+    app: {{ .Release.Name }}-{{ include "opendj.name" . }}-regional
+    {{- else }}
+    app: {{ .Release.Name }}-{{ include "opendj.name" . }}
+    {{- end }}
+
+{{- if .Values.multiCluster.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.opendj.ldapServiceName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "opendj.labels" . | indent 4}}
+spec:
+  ports:
+  - port: 1636
+    name: local-tcp-ldaps
+    targetPort: 1636
+    protocol: TCP
+  - port: 1389
+    name: local-tcp-ldap
+    targetPort: 1389
+    protocol: TCP
+  - port: 8989
+    name: local-tcp-replication
+    targetPort: 8989
+    protocol: TCP
+  - port: 4444
+    name: local-tcp-admin
+    targetPort: 4444
+    protocol: TCP
+  - port: 7946
+    name: local-tcp-serf
+    targetPort: 7946
+    protocol: TCP
+  - port: 7946
+    name: local-udp-serf
+    targetPort: 7946
+    protocol: UDP
+  clusterIP: None
+  selector:
     app: {{ include "opendj.name" . }}
+{{- end }}
 {{- end }}

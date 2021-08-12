@@ -2,7 +2,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v2
 name: config
-version: 1.0.0-b8
+version: 1.0.0-b9
 kubeVersion: ">=v1.17.0-0"
 description: Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 type: application
@@ -19,4 +19,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://jans.io/favicon.ico
-appVersion: "1.0.0-b8"
+appVersion: "1.0.0-b9"

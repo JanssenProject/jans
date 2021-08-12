@@ -13,6 +13,6 @@ spec:
           port: 80
           targetPort: 8080
     selector:
-        app: {{ include "auth-server-key-rotation.name" . }}
+        app: {{ .Release.Name }}-{{ include "auth-server-key-rotation.name" . }}
     type: ClusterIP
 {{- end }}

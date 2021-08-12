@@ -30,6 +30,8 @@ image:
   repository: gluufederation/opendj
   # -- Image  tag to use for deploying.
   tag: 5.0.0_dev
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
 multiCluster:
   # -- Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster`
   enabled: false
@@ -107,11 +109,9 @@ livenessProbe:
 # -- Configure the readiness healthcheck for OpenDJ if needed.
 # https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py
 readinessProbe:
-  exec:
-    command:
-    - python3
-    - /app/scripts/healthcheck.py
-  initialDelaySeconds: 25
+  tcpSocket:
+    port: 1636
+  initialDelaySeconds: 60
   timeoutSeconds: 5
   periodSeconds: 25
   failureThreshold: 20
