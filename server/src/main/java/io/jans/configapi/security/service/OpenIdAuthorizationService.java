@@ -77,7 +77,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 tokenScopes = jwtUtil.validateToken(acccessToken);
 
                 // Validate Scopes
-                this.validateScope(tokenScopes, resourceInfo, issuer);
+                this.validateScope(tokenScopes, resourceInfo, issuer, method, path);
                 return;
             } catch (InvalidJwtException exp) {
                 log.error("oAuth Invalid Jwt " + token + " - Exception is " + exp);
@@ -99,18 +99,18 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        this.validateScope(tokenScopes, resourceInfo, issuer);
+        this.validateScope(tokenScopes, resourceInfo, issuer, method, path);
     }
 
-    private void validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
+    private void validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer,String method, String path) throws Exception {
 
         log.info("Get requested scopes");
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {}, issuer: {} ",
-                resourceInfo, resourceScopes, issuer);
+        log.trace("oAuth  Authorization Resource details, resourceInfo: {}, resourceScopes: {}, issuer: {}, method:{} ,path:{} ",
+                resourceInfo, resourceScopes, issuer, method, path);
 
         // Check if resource requires auth server specific scope exists
-        List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
+        List<String> authSpecificScope = getAuthSpecificScopeRequired(method, path);
         log.info("\n oAuth authSpecificScope = " + authSpecificScope + "\n");
 
         if (authSpecificScope == null || authSpecificScope.size() == 0) {

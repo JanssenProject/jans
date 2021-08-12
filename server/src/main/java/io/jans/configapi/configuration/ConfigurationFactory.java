@@ -236,7 +236,7 @@ public class ConfigurationFactory {
         }
         this.loadedRevision = conf.getRevision();
 
-        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
+        log.error("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
                 + this.apiAppConfiguration + " *** \n\n\n");
         this.setApiConfigurationProperties();
     }

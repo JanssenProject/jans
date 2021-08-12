@@ -31,7 +31,7 @@ public class StatResource extends BaseResource {
     StatisticService statisticService;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT })
+    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
             @QueryParam(value = "month") String month, @QueryParam(value = "format") String format) {
