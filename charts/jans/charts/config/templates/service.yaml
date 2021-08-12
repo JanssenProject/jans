@@ -14,6 +14,6 @@ spec:
           port: 80
           targetPort: 8080
     selector:
-        app: {{ include "config.name" . }}-init-load
+        app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
     type: ClusterIP
 {{- end }}

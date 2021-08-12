@@ -1,6 +1,6 @@
 # opendj
 
-![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
+![Version: 1.0.0-b9](https://img.shields.io/badge/Version-1.0.0--b9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
 
 OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 
@@ -35,6 +35,7 @@ Kubernetes: `>=v1.17.0-0`
 | hpa.minReplicas | int | `1` |  |
 | hpa.targetCPUUtilizationPercentage | int | `50` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
+| image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"gluufederation/opendj"` | Image  to use for deploying. |
 | image.tag | string | `"5.0.0_dev"` | Image  tag to use for deploying. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
@@ -58,7 +59,7 @@ Kubernetes: `>=v1.17.0-0`
 | persistence.size | string | `"5Gi"` | OpenDJ volume size |
 | persistence.type | string | `"DirectoryOrCreate"` |  |
 | ports | object | `{"tcp-admin":{"nodePort":"","port":4444,"protocol":"TCP","targetPort":4444},"tcp-ldap":{"nodePort":"","port":1389,"protocol":"TCP","targetPort":1389},"tcp-ldaps":{"nodePort":"","port":1636,"protocol":"TCP","targetPort":1636},"tcp-repl":{"nodePort":"","port":8989,"protocol":"TCP","targetPort":8989},"tcp-serf":{"nodePort":"","port":7946,"protocol":"TCP","targetPort":7946},"udp-serf":{"nodePort":"","port":7946,"protocol":"UDP","targetPort":7946}}` | servicePorts values used in StatefulSet container |
-| readinessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the readiness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
+| readinessProbe | object | `{"failureThreshold":20,"initialDelaySeconds":60,"periodSeconds":25,"tcpSocket":{"port":1636},"timeoutSeconds":5}` | Configure the readiness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
 | replicas | int | `1` | Service replica number. |
 | resources | object | `{"limits":{"cpu":"1500m","memory":"2000Mi"},"requests":{"cpu":"1500m","memory":"2000Mi"}}` | Resource specs. |
 | resources.limits.cpu | string | `"1500m"` | CPU limit. |

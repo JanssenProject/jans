@@ -15,5 +15,5 @@ spec:
   - port: {{ .Values.service.port }}
     name: {{ .Values.service.name }}
   selector:
-    app: {{ include "auth-server.name" . }} #auth-server
+    app: {{ .Release.Name }}-{{ include "auth-server.name" . }} #auth-server
     

@@ -14,8 +14,12 @@ spec:
       name: {{ include "persistence.name" . }}
       labels:
         APP_NAME: persistence-loader
-        app: {{ include "persistence.name" . }}
+        app: {{ .Release.Name }}-{{ include "persistence.name" . }}
     spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
     {{- with .Values.dnsConfig }}
       dnsConfig:
