@@ -12,17 +12,21 @@ spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app: {{ include "fido2.name" . }}
+      app: {{ .Release.Name }}-{{ include "fido2.name" . }}
   template:
     metadata:
       labels:
         APP_NAME: fido2
-        app: {{ include "fido2.name" . }}
+        app: {{ .Release.Name }}-{{ include "fido2.name" . }}
       {{- if .Values.global.istio.ingress }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
     {{- with .Values.dnsConfig }}
       dnsConfig:

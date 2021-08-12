@@ -15,8 +15,12 @@ spec:
       name: {{ include "config.name" . }}-job
       labels:
         APP_NAME: configuration-manager
-        app: {{ include "config.name" . }}-init-load
+        app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
     spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
     {{- with .Values.dnsConfig }}
       dnsConfig:

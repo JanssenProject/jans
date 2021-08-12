@@ -12,19 +12,23 @@ spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app: {{ include "client-api.name" . }}
+      app: {{ .Release.Name }}-{{ include "client-api.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
         APP_NAME: client-api
-        app: {{ include "client-api.name" . }}
+        app: {{ .Release.Name }}-{{ include "client-api.name" . }}
         release: {{ .Release.Name }}
       {{- if .Values.global.istio.ingress }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       dnsPolicy: {{ .Values.dnsPolicy | quote }}
     {{- with .Values.dnsConfig }}
       dnsConfig:

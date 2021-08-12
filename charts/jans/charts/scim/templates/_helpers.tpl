@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "scim.labels" -}}
-app: {{ include "scim.name" . }}
+app: {{ .Release.Name }}-{{ include "scim.name" . }}
 helm.sh/chart: {{ include "scim.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
