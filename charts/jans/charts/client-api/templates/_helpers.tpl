@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "client-api.labels" -}}
-app: {{ include "client-api.name" . }}
+app: {{ .Release.Name }}-{{ include "client-api.name" . }}
 helm.sh/chart: {{ include "client-api.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "config.labels" -}}
-app: {{ include "config.name" . }}-init-load
+app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
 helm.sh/chart: {{ include "config.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

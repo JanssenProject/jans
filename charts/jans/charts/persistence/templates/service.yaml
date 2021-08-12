@@ -14,6 +14,6 @@ spec:
           port: 80
           targetPort: 8080
     selector:
-        app: {{ include "persistence.name" . }}  
+        app: {{ .Release.Name }}-{{ include "persistence.name" . }}
     type: ClusterIP
 {{- end }}

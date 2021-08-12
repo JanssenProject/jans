@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b8](https://img.shields.io/badge/AppVersion-1.0.0--b8-informational?style=flat-square)
+![Version: 1.0.0-b9](https://img.shields.io/badge/Version-1.0.0--b9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b9](https://img.shields.io/badge/AppVersion-1.0.0--b9-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -46,22 +46,12 @@ Kubernetes: `>=v1.17.0-0`
 | configmap.cnCouchbaseSuperUserPasswordFile | string | `"/etc/jans/conf/couchbase_superuser_password"` | The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password. |
 | configmap.cnCouchbaseUrl | string | `"cbjans.default.svc.cluster.local"` | Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster |
 | configmap.cnCouchbaseUser | string | `"jans"` | Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase. |
-| configmap.cnDocumentStoreType | string | `"JCA"` | Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily. |
+| configmap.cnDocumentStoreType | string | `"LOCAL"` | Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily. |
 | configmap.cnGoogleProjectId | string | `"google-project-to-save-config-and-secrets-to"` | Project id of the google project the secret manager belongs to. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnGoogleSecretManagerPassPhrase | string | `"Test1234#"` | Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google. |
 | configmap.cnGoogleSecretManagerServiceAccount | string | `"SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo="` |  |
 | configmap.cnGoogleSpannerDatabaseId | string | `""` | Google Spanner Database ID. Used only when global.cnPersistenceType is spanner. |
 | configmap.cnGoogleSpannerInstanceId | string | `""` |  |
-| configmap.cnJackrabbitAdminId | string | `"admin"` | Jackrabbit admin uid. |
-| configmap.cnJackrabbitAdminIdFile | string | `"/etc/jans/conf/jackrabbit_admin_id"` | The location of the Jackrabbit admin uid config.cnJackrabbitAdminId. The file path must end with jackrabbit_admin_id. |
-| configmap.cnJackrabbitAdminPasswordFile | string | `"/etc/jans/conf/jackrabbit_admin_password"` | The location of the Jackrabbit admin password jackrabbit.secrets.cnJackrabbitAdminPassword. The file path must end with jackrabbit_admin_password. |
-| configmap.cnJackrabbitPostgresDatabaseName | string | `"jackrabbit"` | Jackrabbit postgres database name. |
-| configmap.cnJackrabbitPostgresHost | string | `"postgresql.postgres.svc.cluster.local"` | Postgres url |
-| configmap.cnJackrabbitPostgresPasswordFile | string | `"/etc/jans/conf/postgres_password"` | The location of the Jackrabbit postgres password file jackrabbit.secrets.cnJackrabbitPostgresPassword. The file path must end with postgres_password. |
-| configmap.cnJackrabbitPostgresPort | int | `5432` | Jackrabbit Postgres port |
-| configmap.cnJackrabbitPostgresUser | string | `"jackrabbit"` | Jackrabbit Postgres uid |
-| configmap.cnJackrabbitSyncInterval | int | `300` | Interval between files sync (default to 300 seconds). |
-| configmap.cnJackrabbitUrl | string | `"http://jackrabbit:8080"` | Jackrabbit internal url. Normally left as default. |
 | configmap.cnJettyRequestHeaderSize | int | `8192` | Jetty header size in bytes in the auth server |
 | configmap.cnLdapUrl | string | `"opendj:1636"` |  |
 | configmap.cnMaxRamPercent | string | `"75.0"` | Value passed to Java option -XX:MaxRAMPercentage |
@@ -90,8 +80,9 @@ Kubernetes: `>=v1.17.0-0`
 | dnsPolicy | string | `""` | Add custom dns policy |
 | email | string | `"support@jans.io"` | Email address of the administrator usually. Used for certificate creation. |
 | fullNameOverride | string | `""` |  |
+| image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configuration-manager"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.0_b8"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.0_b9"` | Image  tag to use for deploying. |
 | ldapPassword | string | `"P@ssw0rds"` | LDAP admin password if OpennDJ is used for persistence. |
 | migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
 | migration.enabled | bool | `false` | Boolean flag to enable migration from CE |
