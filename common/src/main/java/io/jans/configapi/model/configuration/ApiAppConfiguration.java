@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,7 +23,7 @@ public class ApiAppConfiguration implements Configuration {
     private String authOpenidRevokeUrl;
 
     private String smallryeHealthRootPath;
-    private List<String> exclusiveAuthScopes;
+    private HashMap<String,List<String>> exclusiveAuthScopes;
 
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
@@ -122,20 +123,20 @@ public class ApiAppConfiguration implements Configuration {
         return corsConfigurationFilters;
     }
 
-    public List<String> getExclusiveAuthScopes() {
+    public HashMap<String,List<String>> getExclusiveAuthScopes() {
         if (exclusiveAuthScopes == null) {
-            exclusiveAuthScopes = new ArrayList<String>();
+            exclusiveAuthScopes = new HashMap<String,List<String>>();
         }
         return exclusiveAuthScopes;
     }
 
-    public void setExclusiveAuthScopes(List<String> exclusiveAuthScopes) {
+    public void setExclusiveAuthScopes(HashMap<String,List<String>> exclusiveAuthScopes) {
         this.exclusiveAuthScopes = exclusiveAuthScopes;
         if (exclusiveAuthScopes == null) {
-            this.exclusiveAuthScopes = new ArrayList<String>();
+            this.exclusiveAuthScopes = new HashMap<String,List<String>>();
         } else {
-            this.exclusiveAuthScopes = new ArrayList<String>();
-            this.exclusiveAuthScopes.addAll(exclusiveAuthScopes);
+            this.exclusiveAuthScopes = new HashMap<String,List<String>>();
+            this.exclusiveAuthScopes.putAll(exclusiveAuthScopes);
         }
     }
 
