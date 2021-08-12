@@ -312,22 +312,19 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(String method, String path) {
-        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - method = " + method + " , path = " + path);
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - method = " + method + " , path = " + path);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getRequestedScopes(method, path);
-        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
                 + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
                 + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
 
         // Check if the path has any exclusiveAuthScopes requirement
         List<String> exclusiveAuthScopesToReq = new ArrayList<String>();
-        if (resourceScopes != null && resourceScopes.size() == 0
-                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() != null
-                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() == 0) {
-            exclusiveAuthScopesToReq = resourceScopes.stream()
-                    .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
-                    .collect(Collectors.toList());
+        if (this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() != null
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() !=0) {
+            exclusiveAuthScopesToReq = configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().get(path);
             // exclusiveAuthScopesToReq =
             // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collector.toList());
         }
@@ -338,22 +335,22 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
-        log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceScopes = " + resourceScopes
                 + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
                 + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
 
         // Check if the path has any exclusiveAuthScopes requirement
         List<String> exclusiveAuthScopesToReq = new ArrayList<String>();
-        if (resourceScopes != null && resourceScopes.size() == 0
+        if (resourceScopes != null && resourceScopes.size() != 0
                 && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() != null
-                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() == 0) {
-            exclusiveAuthScopesToReq = resourceScopes.stream()
+                && this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().size() != 0) {
+           /* exclusiveAuthScopesToReq = resourceScopes.stream()
                     .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList());*/
             // exclusiveAuthScopesToReq =
             // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collectors.toList());
         }
