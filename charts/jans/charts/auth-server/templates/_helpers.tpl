@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "auth-server.labels" -}}
-app: {{ include "auth-server.name" . }}
+app: {{ .Release.Name }}-{{ include "auth-server.name" . }}
 helm.sh/chart: {{ include "auth-server.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

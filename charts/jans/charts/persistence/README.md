@@ -1,6 +1,6 @@
 # persistence
 
-![Version: 1.0.0-b8](https://img.shields.io/badge/Version-1.0.0--b8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b8](https://img.shields.io/badge/AppVersion-1.0.0--b8-informational?style=flat-square)
+![Version: 1.0.0-b9](https://img.shields.io/badge/Version-1.0.0--b9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b9](https://img.shields.io/badge/AppVersion-1.0.0--b9-informational?style=flat-square)
 
 Job to generate data and initial config for Janssen Server persistence layer.
 
@@ -29,8 +29,9 @@ Kubernetes: `>=v1.17.0-0`
 | dnsPolicy | string | `""` | Add custom dns policy |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
+| image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"gluufederation/persistence"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.0_b8"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.0.0_b9"` | Image  tag to use for deploying. |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` |  |
 | resources | object | `{"limits":{"cpu":"300m","memory":"300Mi"},"requests":{"cpu":"300m","memory":"300Mi"}}` | Resource specs. |

@@ -35,7 +35,7 @@ Create chart name and version as used by the chart label.
     Common labels
 */}}
 {{- define "fido2.labels" -}}
-app: {{ include "fido2.name" . }}
+app: {{ .Release.Name }}-{{ include "fido2.name" . }}
 helm.sh/chart: {{ include "fido2.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}

@@ -27,8 +27,96 @@ entries:
       artifacthub.io/license: Apache-2.0
       artifacthub.io/prerelease: "true"
     apiVersion: v2
+    appVersion: 1.0.0-b9
+    created: "2021-08-12T07:27:56.616798-04:00"
+    dependencies:
+    - condition: global.config.enabled
+      name: config
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.opendj.enabled
+      name: opendj
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.scim.enabled
+      name: scim
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.client-api.enabled
+      name: client-api
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ""
+      version: 1.0.0-b9
+    - condition: global.istio.ingress
+      name: cn-istio-ingress
+      repository: ""
+      version: 1.0.0-b9
+    description: Janssen Access and Identity Management
+    digest: 673fb3522dd7efc91973c108a472a38b1e6942c4fe05c47b23f7922a92a935ba
+    home: https://github.com/JanssenProject/jans-cloud-native
+    icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
+    kubeVersion: '>=v1.17.0-0'
+    maintainers:
+    - email: support@gluu.org
+      name: moabu
+    name: jans
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans-cloud-native
+    urls:
+    - jans-1.0.0-b9.tgz
+    version: 1.0.0-b9
+  - annotations:
+      artifacthub.io/changes: |
+        - Janssen 1.0 under dev charts
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/images: |
+        - name: auth-server
+          image: janssenproject/auth-server:1.0.0_dev
+        - name: auth-server-key-rotation
+          image: janssenproject/certmanager:1.0.0_dev
+        - name:  client-api
+          image: janssenproject/client-api:1.0.0_dev
+        - name: configuration-manager
+          image: janssenproject/configuration-manager:1.0.0_dev
+        - name:  config-api
+          image: janssenproject/config-api:1.0.0_dev
+        - name: fido2
+          image: janssenproject/fido2:1.0.0_dev
+        - name: opendj
+          image: gluufederation/opendj:5.0.0_dev
+        - name: persistence
+          image: janssenproject/persistence-loader:1.0.0_dev
+        - name: scim
+          image: janssenproject/scim:1.0.0_dev
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
     appVersion: 1.0.0-b8
-    created: "2021-07-26T08:44:00.041229925Z"
+    created: "2021-08-12T07:27:56.608962-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -116,7 +204,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b7
-    created: "2021-07-26T08:44:00.029587954Z"
+    created: "2021-08-12T07:27:56.599573-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -204,7 +292,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b6
-    created: "2021-07-26T08:44:00.015504369Z"
+    created: "2021-08-12T07:27:56.591659-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -269,7 +357,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-07-26T08:44:00.004495302Z"
+    created: "2021-08-12T07:27:56.581407-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -329,4 +417,4 @@ entries:
     urls:
     - jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-07-26T08:43:59.99598215Z"
+generated: "2021-08-12T07:27:56.573669-04:00"

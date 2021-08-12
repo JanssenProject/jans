@@ -8,7 +8,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-openid-config
   labels:
-    app: auth-server
+    app: {{ $fullName }}-openid-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.openidConfigLabels }}
+{{ toYaml .Values.ingress.openidConfigLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -52,7 +58,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-uma2-config
   labels:
-    app: auth-server
+    app: {{ $fullName }}-uma2-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.uma2ConfigLabels }}
+{{ toYaml .Values.ingress.uma2ConfigLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -96,7 +108,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-webfinger
   labels:
-    app: auth-server
+    app: {{ $fullName }}-webfinger
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.webfingerLabels }}
+{{ toYaml .Values.ingress.webfingerLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -140,7 +158,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-webdiscovery
   labels:
-    app: auth-server
+    app: {{ $fullName }}-webdiscovery
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.webdiscoveryLabels }}
+{{ toYaml .Values.ingress.webdiscoveryLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -184,7 +208,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-scim-config
   labels:
-    app: scim
+    app: {{ $fullName }}-scim-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.scimConfigLabels }}
+{{ toYaml .Values.ingress.scimConfigLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -228,7 +258,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-jans-scim
   labels:
-    app: scim
+    app: {{ $fullName }}-scim
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.scimLabels }}
+{{ toYaml .Values.ingress.scimLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/ssl-services: "scim"
@@ -270,7 +306,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-jans-config-api
   labels:
-    app: config-api
+    app: {{ $fullName }}-jans-config-api
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.configApiLabels }}
+{{ toYaml .Values.ingress.configApiLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/ssl-services: "configapi"
@@ -312,7 +354,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-u2f-config
   labels:
-    app: auth-server
+    app: {{ $fullName }}-u2f-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.u2fConfigLabels }}
+{{ toYaml .Values.ingress.u2fConfigLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -356,7 +404,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-fido2-configuration
   labels:
-    app: fido2
+    app: {{ $fullName }}-fido2
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.fido2ConfigLabels }}
+{{ toYaml .Values.ingress.fido2ConfigLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -400,7 +454,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server
   labels:
-    app: auth-server
+    app: {{ $fullName }}-auth-server
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.authServerLabels }}
+{{ toYaml .Values.ingress.authServerLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/ssl-services: "auth-server"
@@ -442,7 +502,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server-protected-token
   labels:
-    app: auth-server
+    app: {{ $fullName }}-auth-server-protected-token
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.authServerProtectedTokenLabels }}
+{{ toYaml .Values.ingress.authServerProtectedTokenLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/ssl-services: "auth-server"
@@ -487,7 +553,13 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server-protected-register
   labels:
-    app: auth-server
+    app: {{ $fullName }}-auth-server-protected-register
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.authServerProtectedRedisterLabels }}
+{{ toYaml .Values.ingress.authServerProtectedRedisterLabels | indent 4 }}
+{{- end }}
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.org/ssl-services: "auth-server"

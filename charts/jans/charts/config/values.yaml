@@ -66,27 +66,7 @@ configmap:
   # -- Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.
   cnCouchbaseUser: jans
   # -- Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily.
-  cnDocumentStoreType: JCA
-  # -- Jackrabbit admin uid.
-  cnJackrabbitAdminId: admin
-  # -- The location of the Jackrabbit admin uid config.cnJackrabbitAdminId. The file path must end with jackrabbit_admin_id.
-  cnJackrabbitAdminIdFile: /etc/jans/conf/jackrabbit_admin_id
-  # -- The location of the Jackrabbit admin password jackrabbit.secrets.cnJackrabbitAdminPassword. The file path must end with jackrabbit_admin_password.
-  cnJackrabbitAdminPasswordFile: /etc/jans/conf/jackrabbit_admin_password
-  # -- Jackrabbit postgres database name.
-  cnJackrabbitPostgresDatabaseName: jackrabbit
-  # -- Postgres url
-  cnJackrabbitPostgresHost: postgresql.postgres.svc.cluster.local
-  # -- The location of the Jackrabbit postgres password file jackrabbit.secrets.cnJackrabbitPostgresPassword. The file path must end with postgres_password.
-  cnJackrabbitPostgresPasswordFile: /etc/jans/conf/postgres_password
-  # -- Jackrabbit Postgres port
-  cnJackrabbitPostgresPort: 5432
-  # -- Jackrabbit Postgres uid
-  cnJackrabbitPostgresUser: jackrabbit
-  # -- Interval between files sync (default to 300 seconds).
-  cnJackrabbitSyncInterval: 300
-  # -- Jackrabbit internal url. Normally left as default.
-  cnJackrabbitUrl: "http://jackrabbit:8080"
+  cnDocumentStoreType: LOCAL
   # [google_envs] Envs related to using Google
   # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
   cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
@@ -142,7 +122,9 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configuration-manager
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b8
+  tag: 1.0.0_b9
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
 ldapPassword: P@ssw0rds
 # -- Organization name. Used for certificate creation.
