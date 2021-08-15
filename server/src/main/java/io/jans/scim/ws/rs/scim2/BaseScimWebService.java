@@ -12,13 +12,14 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Date;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 
 import org.apache.commons.lang.StringUtils;
@@ -47,8 +48,8 @@ import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
-import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.service.scim2.ExtensionService;
+import io.jans.scim.service.scim2.ExternalConstraintsService;
 import io.jans.scim.service.scim2.UserPersistenceHelper;
 import io.jans.scim.service.scim2.serialization.ListResponseJsonSerializer;
 import io.jans.scim.service.scim2.serialization.ScimResourceSerializer;
@@ -81,7 +82,13 @@ public class BaseScimWebService {
     UserPersistenceHelper userPersistenceHelper;
 
     @Inject
-    ExternalScimService externalScimService;
+    ExternalConstraintsService externalConstraintsService;
+
+    @Context
+    HttpHeaders httpHeaders;
+
+    @Context
+    UriInfo uriInfo;
 
     public static final String SEARCH_SUFFIX = ".search";
     
@@ -91,6 +98,14 @@ public class BaseScimWebService {
 
     public String getEndpointUrl() {
         return endpointUrl;
+    }
+    
+    public Response notFoundResponse(String id, String resourceType) {
+        
+        log.info("{} with inum {} not found", resourceType, id);
+        return getErrorResponse(Response.Status.NOT_FOUND, 
+                String.format("%s with id %s not found", resourceType, id));
+        
     }
 
     public static Response getErrorResponse(Response.Status status, String detail) {
@@ -214,23 +229,33 @@ public class BaseScimWebService {
 
     }
 
-    protected Response prepareSearchRequest(List<String> schemas, String filter, String sortBy, String sortOrder, Integer startIndex,
-                                            Integer count, String attrsList, String excludedAttrsList, SearchRequest request){
+    protected Response prepareSearchRequest(List<String> schemas, String filter, 
+    	String filterPrepend, String sortBy, String sortOrder, Integer startIndex,
+        Integer count, String attrsList, String excludedAttrsList, SearchRequest request) {
 
-        Response response=null;
+        Response response = null;
 
-        if (schemas!=null && schemas.size()==1 && schemas.get(0).equals(SEARCH_REQUEST_SCHEMA_ID)) {
+        if (schemas != null && schemas.size() == 1 && schemas.get(0).equals(SEARCH_REQUEST_SCHEMA_ID)) {
             count = count == null ? getMaxCount() : count;
             //Per spec, a negative value SHALL be interpreted as "0" for count
-            if (count<0)
-                count=0;
+            if (count < 0) {
+                count = 0;
+            }
 
             if (count <= getMaxCount()) {
                 //SCIM searches are 1 indexed
                 startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
 
-                if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue()))
+                if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
                     sortOrder = SortOrder.ASCENDING.getValue();
+                }
+                if (!StringUtils.isEmpty(filterPrepend)) {
+                    if (StringUtils.isEmpty(filter)) {
+                        filter = filterPrepend;
+                    } else {
+                        filter = String.format("%s and (%s)", filterPrepend, filter);
+                    }
+                }
 
                 request.setSchemas(schemas);
                 request.setAttributes(attrsList);
@@ -240,13 +265,12 @@ public class BaseScimWebService {
                 request.setSortOrder(sortOrder);
                 request.setStartIndex(startIndex);
                 request.setCount(count);
-            }
-            else
+            } else {
                 response = getErrorResponse(BAD_REQUEST, ErrorScimType.TOO_MANY, "Maximum number of results per page is " + getMaxCount());
-        }
-        else
+            }
+        } else {
             response = getErrorResponse(BAD_REQUEST, ErrorScimType.INVALID_SYNTAX, "Wrong schema(s) supplied in Search Request");
-
+        }
         return response;
 
     }

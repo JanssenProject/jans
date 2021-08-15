@@ -11,6 +11,7 @@ import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_START_INDEX;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -34,8 +36,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.wordnik.swagger.annotations.ApiOperation;
-
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -44,7 +44,6 @@ import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.fido.GluuCustomFidoDevice;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ErrorScimType;
-import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.Meta;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.fido.FidoDeviceResource;
@@ -55,14 +54,11 @@ import io.jans.scim.service.FidoDeviceService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
+import io.jans.util.Pair;
 
 /**
- * Implementation of /FidoDevices endpoint. Methods here are intercepted and/or decorated.
- * Class org.gluu.oxtrust.service.scim2.interceptor.FidoDeviceWebServiceDecorator is used to apply pre-validations on data.
+ * Implementation of /FidoDevices endpoint. Methods here are intercepted.
  * Filter org.gluu.oxtrust.ws.rs.scim2.AuthorizationProcessingFilter secures invocations
- *
- * @author Val Pecaoco
- * Updated by jgomer on 2017-10-09.
  */
 @Named("scim2FidoDeviceEndpoint")
 @Path("/v2/FidoDevices")
@@ -75,16 +71,58 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     private ScimFilterParserService scimFilterParserService;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager entryManager;
 
     private boolean ldapBackend;
+
+    private String fidoResourceType;
+    
+    private Response doSearchDevices(String userId, String filter, Integer startIndex, 
+            Integer count, String sortBy, String sortOrder, String attrsList, String excludedAttrsList,
+            String method) {
+
+        Response response;
+        try {
+            Pair<String, Response> checkOutput = externalConstraintsService.applySearchCheck(
+                    httpHeaders, uriInfo, method, fidoResourceType);
+            if (checkOutput.getSecond() != null) return checkOutput.getSecond();
+            
+            SearchRequest searchReq = new SearchRequest();
+            response = prepareSearchRequest(searchReq.getSchemas(), filter, checkOutput.getFirst(),
+                    sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList,
+                    searchReq);
+            if (response != null) return response;
+
+            response = validateExistenceOfUser(userId);
+            if (response != null) return response;
+
+            PagedResult<BaseScimResource> resources = searchDevices(userId, searchReq.getFilter(), 
+                    translateSortByAttribute(FidoDeviceResource.class, searchReq.getSortBy()), 
+                    SortOrder.getByValue(searchReq.getSortOrder()), searchReq.getStartIndex(),
+                    searchReq.getCount());
+
+            String json = getListResponseSerialized(resources.getTotalEntriesCount(), 
+                    searchReq.getStartIndex(), resources.getEntries(), searchReq.getAttributesStr(), 
+                    searchReq.getExcludedAttributesStr(), searchReq.getCount() == 0);
+            response = Response.ok(json).location(new URI(endpointUrl)).build();
+        } catch (SCIMException e) {
+            log.error(e.getMessage(), e);
+            response = getErrorResponse(Response.Status.BAD_REQUEST, ErrorScimType.INVALID_FILTER,
+                    e.getMessage());
+        } catch (Exception e) {
+            log.error("Failure at searchDevices method", e);
+            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
+                    "Unexpected error: " + e.getMessage());
+        }
+        return response;
+        
+    }
 
     @POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.write"})
-    @ApiOperation(value = "Create device", response = FidoDeviceResource.class)
     public Response createDevice() {
         log.debug("Executing web service method. createDevice");
         return getErrorResponse(Response.Status.NOT_IMPLEMENTED, "Not implemented; device registration only happens via the FIDO API.");
@@ -96,32 +134,30 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.read"})
     @RefAdjusted
-    @ApiOperation(value = "Find device by id", notes = "Returns a device by id as path param", response = FidoDeviceResource.class)
     public Response getDeviceById(@PathParam("id") String id,
                            @QueryParam("userId") String userId,
                            @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
                            @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList){
 
         Response response;
-        try{
+        try {
             log.debug("Executing web service method. getDeviceById");
-            FidoDeviceResource fidoResource=new FidoDeviceResource();
 
-            GluuCustomFidoDevice device=fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
-            //device cannot be null (see FidoDeviceWebServiceDecorator)
+            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
+            if (device == null) return notFoundResponse(id, fidoResourceType);
+            
+            response = externalConstraintsService.applyEntityCheck(device, httpHeaders,
+                    uriInfo, HttpMethod.GET, fidoResourceType);
+            if (response != null) return response;
 
+            FidoDeviceResource fidoResource = new FidoDeviceResource();
             transferAttributesToFidoResource(device, fidoResource, endpointUrl, getUserInumFromDN(device.getDn()));
 
-            String json=resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
-            response=Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();
-        }
-        catch (SCIMException e){
-            log.error(e.getMessage());
-            response=getErrorResponse(Response.Status.NOT_FOUND, ErrorScimType.INVALID_VALUE, e.getMessage());
-        }
-        catch (Exception e){
+            String json = resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
+            response = Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();
+        } catch (Exception e) {
             log.error("Failure at getDeviceById method", e);
-            response=getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
+            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
         }
         return response;
 
@@ -134,46 +170,54 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.write"})
     @RefAdjusted
-    @ApiOperation(value = "Update device", response = FidoDeviceResource.class)
     public Response updateDevice(
             FidoDeviceResource fidoDeviceResource,
             @PathParam("id") String id,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
-            @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList){
+            @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) {
 
         Response response;
         try {
             log.debug("Executing web service method. updateDevice");
 
-            String userId=fidoDeviceResource.getUserId();
-            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
-            if (device == null)
-                throw new SCIMException("Resource " + id + " not found");
+            //remove externalId, no place to store it in LDAP
+            fidoDeviceResource.setExternalId(null);
 
-            FidoDeviceResource updatedResource=new FidoDeviceResource();
+            if (fidoDeviceResource.getId() != null && !fidoDeviceResource.getId().equals(id))
+                throw new SCIMException("Parameter id does not match id attribute of Device");
+
+            String userId = fidoDeviceResource.getUserId();
+            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);            
+            if (device == null) return notFoundResponse(id, fidoResourceType);
+
+            response = externalConstraintsService.applyEntityCheck(device, httpHeaders,
+                    uriInfo, HttpMethod.PUT, fidoResourceType);
+            if (response != null) return response;
+            
+            executeValidation(fidoDeviceResource, true);
+            
+            FidoDeviceResource updatedResource = new FidoDeviceResource();
             transferAttributesToFidoResource(device, updatedResource, endpointUrl, userId);
 
             updatedResource.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
-            updatedResource=(FidoDeviceResource) ScimResourceUtil.transferToResourceReplace(fidoDeviceResource, updatedResource, extService.getResourceExtensions(updatedResource.getClass()));
+            updatedResource = (FidoDeviceResource) ScimResourceUtil.transferToResourceReplace(fidoDeviceResource,
+            	updatedResource, extService.getResourceExtensions(updatedResource.getClass()));
             transferAttributesToDevice(updatedResource, device);
 
             fidoDeviceService.updateGluuCustomFidoDevice(device);
 
-            String json=resourceSerializer.serialize(updatedResource, attrsList, excludedAttrsList);
-            response=Response.ok(new URI(updatedResource.getMeta().getLocation())).entity(json).build();
-        }
-        catch (SCIMException e){
+            String json = resourceSerializer.serialize(updatedResource, attrsList, excludedAttrsList);
+            response = Response.ok(new URI(updatedResource.getMeta().getLocation())).entity(json).build();
+        } catch (SCIMException e) {
+            log.error("Validation check error: {}", e.getMessage());
+            response = getErrorResponse(Response.Status.BAD_REQUEST, ErrorScimType.INVALID_VALUE, e.getMessage());
+        } catch (InvalidAttributeValueException e) {
             log.error(e.getMessage());
-            response=getErrorResponse(Response.Status.NOT_FOUND, ErrorScimType.INVALID_VALUE, e.getMessage());
-        }
-        catch (InvalidAttributeValueException e){
-            log.error(e.getMessage());
-            response=getErrorResponse(Response.Status.BAD_REQUEST, ErrorScimType.MUTABILITY, e.getMessage());
-        }
-        catch (Exception e){
+            response = getErrorResponse(Response.Status.BAD_REQUEST, ErrorScimType.MUTABILITY, e.getMessage());
+        } catch (Exception e) {
             log.error("Failure at updateDevice method", e);
-            response=getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
+            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
         }
         return response;
 
@@ -184,25 +228,25 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.write"})
-    @ApiOperation(value = "Delete device")
     public Response deleteDevice(@PathParam("id") String id) {
 
         Response response;
         try {
             log.debug("Executing web service method. deleteDevice");
 
-            //No need to check id being non-null. fidoDeviceService will give null if null is provided
             GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(null, id);
-            if (device != null) {
-                fidoDeviceService.removeGluuCustomFidoDevice(device);
-                response = Response.noContent().build();
-            }
-            else
-                response = getErrorResponse(Response.Status.NOT_FOUND, ErrorScimType.INVALID_VALUE, "Resource " + id + " not found");
-        }
-        catch (Exception e){
+            if (device == null) return notFoundResponse(id, fidoResourceType);
+
+            response = externalConstraintsService.applyEntityCheck(device, httpHeaders,
+                    uriInfo, HttpMethod.DELETE, fidoResourceType);
+            if (response != null) return response;
+
+            fidoDeviceService.removeGluuCustomFidoDevice(device);
+            response = Response.noContent().build();
+        } catch (Exception e) {
             log.error("Failure at deleteDevice method", e);
-            response=getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
+            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, 
+                    "Unexpected error: " + e.getMessage());
         }
         return response;
 
@@ -213,7 +257,6 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.read"})
     @RefAdjusted
-    @ApiOperation(value = "Search devices", notes = "Returns a list of devices", response = ListResponse.class)
     public Response searchDevices(
             @QueryParam("userId") String userId,
             @QueryParam(QUERY_PARAM_FILTER) String filter,
@@ -224,24 +267,9 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) {
 
-        Response response;
-        try {
-            log.debug("Executing web service method. searchDevices");
-            sortBy=translateSortByAttribute(FidoDeviceResource.class, sortBy);
-            PagedResult<BaseScimResource> resources = searchDevices(userId, filter, sortBy, SortOrder.getByValue(sortOrder), startIndex, count, endpointUrl);
-
-            String json = getListResponseSerialized(resources.getTotalEntriesCount(), startIndex, resources.getEntries(), attrsList, excludedAttrsList, count==0);
-            response=Response.ok(json).location(new URI(endpointUrl)).build();
-        }
-        catch (SCIMException e){
-            log.error(e.getMessage(), e);
-            response=getErrorResponse(Response.Status.BAD_REQUEST, ErrorScimType.INVALID_FILTER, e.getMessage());
-        }
-        catch (Exception e){
-            log.error("Failure at searchDevices method", e);
-            response=getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
-        }
-        return response;
+        log.debug("Executing web service method. searchDevices");
+        return doSearchDevices(userId, filter, startIndex, count, sortBy, sortOrder,
+                attrsList, excludedAttrsList, HttpMethod.GET);
 
     }
 
@@ -252,19 +280,18 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.read"})
     @RefAdjusted
-    @ApiOperation(value = "Search devices POST /.search", notes = "Returns a list of fido devices", response = ListResponse.class)
     public Response searchDevicesPost(SearchRequest searchRequest, @QueryParam("userId") String userId) {
 
         log.debug("Executing web service method. searchDevicesPost");
+        Response response = doSearchDevices(userId, searchRequest.getFilter(), searchRequest.getStartIndex(), 
+                searchRequest.getCount(), searchRequest.getSortBy(), searchRequest.getSortOrder(), 
+                searchRequest.getAttributesStr(), searchRequest.getExcludedAttributesStr(),
+                HttpMethod.POST);
 
-        URI uri=null;
-        Response response = searchDevices(userId, searchRequest.getFilter(), searchRequest.getStartIndex(), searchRequest.getCount(),
-                searchRequest.getSortBy(), searchRequest.getSortOrder(), searchRequest.getAttributesStr(), searchRequest.getExcludedAttributesStr());
-
+        URI uri = null;
         try {
             uri = new URI(endpointUrl + "/" + SEARCH_SUFFIX);
-        }
-        catch (Exception e){
+        } catch (URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
         return Response.fromResponse(response).location(uri).build();
@@ -342,7 +369,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     }
 
     private PagedResult<BaseScimResource> searchDevices(String userId, String filter, String sortBy, SortOrder sortOrder, int startIndex,
-                                                    int count, String url) throws Exception {
+                                                    int count) throws Exception {
 
         Filter ldapFilter=scimFilterParserService.createFilter(filter, Filter.createPresenceFilter("jansId"), FidoDeviceResource.class);
         log.info("Executing search for fido devices using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}', userId '{}'",
@@ -356,7 +383,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
         
         PagedResult<GluuCustomFidoDevice> list;
         try {
-            list = ldapEntryManager.findPagedEntries(fidoDeviceService.getDnForFidoDevice(userId, null),
+            list = entryManager.findPagedEntries(fidoDeviceService.getDnForFidoDevice(userId, null),
                     GluuCustomFidoDevice.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, getMaxCount());
         } catch (Exception e) {
             log.info("Returning an empty listViewReponse");
@@ -368,7 +395,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
 
         for (GluuCustomFidoDevice device : list.getEntries()){
             FidoDeviceResource scimDev=new FidoDeviceResource();
-            transferAttributesToFidoResource(device, scimDev, url, getUserInumFromDN(device.getDn()));
+            transferAttributesToFidoResource(device, scimDev, endpointUrl, getUserInumFromDN(device.getDn()));
             resources.add(scimDev);
         }
         log.info ("Found {} matching entries - returning {}", list.getTotalEntriesCount(), list.getEntries().size());
@@ -388,7 +415,6 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/fido.write"})
     @RefAdjusted
-    @ApiOperation(value = "PATCH operation", notes = "https://tools.ietf.org/html/rfc7644#section-3.5.2", response = FidoDeviceResource.class)
     public Response patchDevice(
             PatchRequest request,
             @PathParam("id") String id,
@@ -401,9 +427,10 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
 
     @PostConstruct
     public void setup(){
-        //Do not use getClass() here... a typical weld issue...
-        endpointUrl=appConfiguration.getBaseEndpoint() + FidoDeviceWebService.class.getAnnotation(Path.class).value();
+        //Do not use getClass() here...
+        init(FidoDeviceWebService.class);
         ldapBackend = scimFilterParserService.isLdapBackend();
+        fidoResourceType = ScimResourceUtil.getType(FidoDeviceResource.class);
     }
 
 }

@@ -456,6 +456,20 @@ public class Scim2UserService implements Serializable {
 
 	}
 
+	public ScimCustomPerson preCreateUser(UserResource user) {
+
+		log.info("Preparing to create user {}", user.getUserName());
+
+		// There is no need to check attributes mutability in this case as there are no
+		// original attributes (the resource does not exist yet)
+		ScimCustomPerson gluuPerson = new ScimCustomPerson();
+		transferAttributesToPerson(user, gluuPerson);
+		assignComputedAttributesToPerson(gluuPerson);
+		
+		return gluuPerson;
+		
+	}
+
 	/**
 	 * Inserts a new user in LDAP based on the SCIM Resource passed
 	 * 
@@ -464,22 +478,12 @@ public class Scim2UserService implements Serializable {
 	 * @param url Base URL associated to user resources in SCIM (eg. .../scim/v2/Users)
 	 * @throws Exception In case of unexpected error
 	 */
-	public void createUser(UserResource user, String url) throws Exception {
-
-		String userName = user.getUserName();
-		log.info("Preparing to create user {}", userName);
-
-		// There is no need to check attributes mutability in this case as there are no
-		// original attributes
-		// (the resource does not exist yet)
-		ScimCustomPerson gluuPerson = new ScimCustomPerson();
-		transferAttributesToPerson(user, gluuPerson);
-		assignComputedAttributesToPerson(gluuPerson);
+	public void createUser(ScimCustomPerson gluuPerson, UserResource user, String url) throws Exception {
 
 		String location = url + "/" + gluuPerson.getInum();
-		gluuPerson.setAttribute("jansMetaLocation", location);
+		gluuPerson.setAttribute("oxTrustMetaLocation", location);
 
-		log.info("Persisting user {}", userName);
+		log.info("Persisting user {}", user.getUserName());
 		userPersistenceHelper.addCustomObjectClass(gluuPerson);
 
 		if (externalScimService.isEnabled()) {
@@ -502,14 +506,24 @@ public class Scim2UserService implements Serializable {
 
 	}
 
-	public UserResource updateUser(String id, UserResource user, String url) throws InvalidAttributeValueException {
+    public UserResource buildUserResource(ScimCustomPerson person, String url) {
 
-		ScimCustomPerson gluuPerson = userPersistenceHelper.getPersonByInum(id); // This is never null (see decorator involved)
+		if (externalScimService.isEnabled() && !externalScimService.executeScimGetUserMethods(person)) {
+			throw new WebApplicationException("Failed to execute SCIM script successfully",
+					Status.PRECONDITION_FAILED);
+		}
+		
+		UserResource user = new UserResource();
+		transferAttributesToUserResource(person, user, url);
+		
+		return user;
+		
+	}
+
+	public UserResource updateUser(ScimCustomPerson gluuPerson, UserResource user, String url) throws InvalidAttributeValueException {
+
 		UserResource tmpUser = new UserResource();
-
 		transferAttributesToUserResource(gluuPerson, tmpUser, url);
-
-		long now = System.currentTimeMillis();
 		tmpUser.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
 		tmpUser = (UserResource) ScimResourceUtil.transferToResourceReplace(user, tmpUser,
