@@ -159,7 +159,7 @@ public class AuthenticationScheme {
 	 */
 	public static AuthenticationScheme createOAuth2(boolean primary) {
 		return new AuthenticationScheme(
-				"OAuth 2.0", "OAuth2 Bearer Token Authentication Scheme'.",
+				"OAuth 2.0", "OAuth2 Bearer Token Authentication Scheme.",
 				"http://tools.ietf.org/html/rfc6749", "http://tools.ietf.org/html/rfc6749",
 				"oauth2", primary);
 	}
