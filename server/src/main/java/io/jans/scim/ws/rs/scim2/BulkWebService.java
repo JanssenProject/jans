@@ -33,12 +33,11 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang.StringUtils;
 import io.jans.scim.model.scim2.ErrorScimType;
 import io.jans.scim.model.scim2.bulk.BulkOperation;
@@ -52,29 +51,19 @@ import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.util.Pair;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.Authorization;
-
 /**
  * SCIM Bulk Endpoint Implementation
- * 
- * @author Rahat ALi Date: 05.08.2015
- * Re-engineered by jgomer on 2017-11-23.
  */
 @Named("scim2BulkEndpoint")
 @Path("/v2/Bulk")
-@Api(value = "/v2/Bulk", description = "SCIM 2.0 Bulk Endpoint (https://tools.ietf.org/html/rfc7644#section-3.7)",
-        authorizations = {@Authorization(value = "Authorization", type = "uma") })
 public class BulkWebService extends BaseScimWebService {
 
     enum Verb {POST, PUT, PATCH, DELETE}    //HTTP methods involved in bulk requests
 
-    private final Pattern bulkIdPattern= Pattern.compile("bulkId:(\\w+)");
+    private final Pattern bulkIdPattern = Pattern.compile("bulkId:(\\w+)");
 
     private List<Verb> availableMethods;
-    private ObjectMapper mapper=new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     private String usersEndpoint;
     private String groupsEndpoint;
@@ -94,16 +83,12 @@ public class BulkWebService extends BaseScimWebService {
     @Inject
     private Fido2DeviceWebService fido2DeviceWS;
 
-    @Context
-    private HttpHeaders httpHeaders;
-
     @javax.ws.rs.POST
     @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON})
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = {"https://jans.io/scim/bulk"})
-    @ApiOperation(value = "Bulk Operations", notes = "Bulk Operations (https://tools.ietf.org/html/rfc7644#section-3.7)", response = BulkResponse.class)
-    public Response processBulkOperations(@ApiParam(value = "BulkRequest", required = true) BulkRequest request){
+    public Response processBulkOperations(BulkRequest request) {
 
         Response response=prepareRequest(request, getValueFromHeaders(httpHeaders, "Content-Length"));
         if (response==null) {
@@ -188,7 +173,7 @@ public class BulkWebService extends BaseScimWebService {
 
     }
 
-    private Response prepareRequest(BulkRequest request, String contentLength){
+    private Response prepareRequest(BulkRequest request, String contentLength) {
 
         Response response=null;
 
@@ -197,7 +182,7 @@ public class BulkWebService extends BaseScimWebService {
 
         List<BulkOperation> operations=request.getOperations();
 
-        if (operations==null || operations.size()==0)
+        if (operations==null || operations.isEmpty())
             response=getErrorResponse(BAD_REQUEST, ErrorScimType.INVALID_VALUE, "No operations supplied");
         else {
 
@@ -430,7 +415,7 @@ public class BulkWebService extends BaseScimWebService {
     }
 
     @PostConstruct
-    public void setup(){
+    public void setup() {
         //Do not use getClass() here... a typical weld issue...
         endpointUrl=appConfiguration.getBaseEndpoint() + BulkWebService.class.getAnnotation(Path.class).value();
         availableMethods= Arrays.asList(Verb.values());

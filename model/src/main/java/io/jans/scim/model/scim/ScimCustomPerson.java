@@ -12,12 +12,12 @@ import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -101,14 +101,14 @@ public class ScimCustomPerson extends Entry implements Serializable {
 
         List<Object> list = Optional.ofNullable(getTypedAttribute(attributeName))
                 .map(CustomObjectAttribute::getValues).orElse(Collections.emptyList())
-                .stream().filter(el -> el != null).collect(Collectors.toList());
+                .stream().filter(Objects::nonNull).collect(Collectors.toList());
         List<String> result = new ArrayList<>();
 
         for (Object obj : list) {
             //Ugly ugly hack
             if (obj.getClass().equals(Date.class)) {
                 long millis = Date.class.cast(obj).getTime();
-                result.add(DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(millis)));
+                result.add(Instant.ofEpochMilli(millis).toString());
             } else {
                 result.add(obj.toString());
             }

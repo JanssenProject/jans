@@ -39,9 +39,6 @@ import io.jans.scim.service.PersonService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.external.ExternalScimService;
 
-/**
- * @author Val Pecaoco Re-engineered by jgomer on 2017-10-18.
- */
 @ApplicationScoped
 public class Scim2GroupService implements Serializable {
 
@@ -168,6 +165,18 @@ public class Scim2GroupService implements Serializable {
 		}
 	}
 
+	public GluuGroup preCreateGroup(GroupResource group, String usersUrl) throws Exception {
+
+		log.info("Preparing to create group {}", group.getDisplayName());
+
+		GluuGroup gluuGroup = new GluuGroup();
+		transferAttributesToGroup(group, gluuGroup, usersUrl);
+		assignComputedAttributesToGroup(gluuGroup);
+		
+		return gluuGroup;
+		
+	}
+
 	/**
 	 * Inserts a new group in LDAP based on the SCIM Resource passed There is no
 	 * need to check attributes mutability in this case as there are no original
@@ -180,19 +189,12 @@ public class Scim2GroupService implements Serializable {
 	 * @param usersUrl Base URL associated to user resources in SCIM (eg. .../scim/v2/Users)
 	 * @throws Exception In case of unexpected error
 	 */
-	public void createGroup(GroupResource group, String groupsUrl, String usersUrl) throws Exception {
-
-		String groupName = group.getDisplayName();
-		log.info("Preparing to create group {}", groupName);
-
-		GluuGroup gluuGroup = new GluuGroup();
-		transferAttributesToGroup(group, gluuGroup, usersUrl);
-		assignComputedAttributesToGroup(gluuGroup);
+	public void createGroup(GluuGroup gluuGroup, GroupResource group, String groupsUrl, String usersUrl) throws Exception {
 
 		String location = groupsUrl + "/" + gluuGroup.getInum();
-		gluuGroup.setAttribute("jansMetaLocation", location);
+		gluuGroup.setAttribute("oxTrustMetaLocation", location);
 
-		log.info("Persisting group {}", groupName);
+		log.info("Persisting group {}", group.getDisplayName());
 
 		if (externalScimService.isEnabled()) {
 			boolean result = externalScimService.executeScimCreateGroupMethods(gluuGroup);
@@ -216,13 +218,24 @@ public class Scim2GroupService implements Serializable {
 
 	}
 
-	public GroupResource updateGroup(String id, GroupResource group, String groupsUrl, String usersUrl)
+	public GroupResource buildGroupResource(GluuGroup gluuGroup, String endpointUrl, String usersUrl) {
+
+		GroupResource group = new GroupResource();
+		if (externalScimService.isEnabled() && !externalScimService.executeScimGetGroupMethods(gluuGroup)) {
+			throw new WebApplicationException("Failed to execute SCIM script successfully",
+					Status.PRECONDITION_FAILED);
+		}
+		transferAttributesToGroupResource(gluuGroup, group, endpointUrl, usersUrl);
+		
+		return group;
+		
+	}
+
+	public GroupResource updateGroup(GluuGroup gluuGroup, GroupResource group, String groupsUrl, String usersUrl)
 			throws Exception {
 
-		GluuGroup gluuGroup = groupService.getGroupByInum(id); // This is never null (see decorator involved)
 		GroupResource tmpGroup = new GroupResource();
 		transferAttributesToGroupResource(gluuGroup, tmpGroup, groupsUrl, usersUrl);
-
 		tmpGroup.getMeta().setLastModified(DateUtil.millisToISOString(System.currentTimeMillis()));
 
 		tmpGroup = (GroupResource) ScimResourceUtil.transferToResourceReplace(group, tmpGroup,

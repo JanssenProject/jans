@@ -1,9 +1,3 @@
-/*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
 package io.jans.scim.service.scim2.serialization;
 
 import java.util.ArrayList;
@@ -18,18 +12,19 @@ import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.ListResponse;
 import io.jans.scim.model.scim2.extensions.Extension;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.scim2.ExtensionService;
+
 import org.slf4j.Logger;
 
 /**

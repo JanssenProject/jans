@@ -26,10 +26,6 @@ import io.jans.scim.model.scim2.provider.config.ServiceProviderConfig;
 import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.scim2.interceptor.RejectFilterParam;
 
-/**
- * @author Rahat Ali Date: 05.08.2015
- * Updated by jgomer2001 on 2017-09-23
- */
 @Named("serviceProviderConfig")
 @Path("/v2/ServiceProviderConfig")
 public class ServiceProviderConfigWS extends BaseScimWebService {
