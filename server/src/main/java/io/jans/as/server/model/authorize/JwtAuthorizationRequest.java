@@ -22,6 +22,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweDecrypterImpl;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.util.Base64Util;
@@ -140,6 +141,11 @@ public class JwtAuthorizationRequest {
                 jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
 
                 Jwe jwe = jweDecrypter.decrypt(encodedJwt);
+
+                final Jwt nestedJwt = jwe.getSignedJWTPayload();
+                if (nestedJwt != null && !validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
+                    throw new InvalidJwtException("The Nested JWT signature is not valid");
+                }
 
                 loadHeader(jwe.getHeader().toJsonString());
                 loadPayload(jwe.getClaims().toJsonString());
