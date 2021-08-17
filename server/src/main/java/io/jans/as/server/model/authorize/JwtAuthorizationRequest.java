@@ -58,6 +58,7 @@ import java.util.List;
 public class JwtAuthorizationRequest {
 
     private final static Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
+    private final static int SIXTY_MINUTES_AS_SECONDS = 3600;
 
     // Header
     private String type;
@@ -506,7 +507,9 @@ public class JwtAuthorizationRequest {
         }
 
         try {
-            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+            final JwtAuthorizationRequest requestObject = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+            requestObject.validate();
+            return requestObject;
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -515,4 +518,17 @@ public class JwtAuthorizationRequest {
         return null;
     }
 
+    private void validate() throws InvalidJwtException {
+        if (appConfiguration.getFapiCompatibility()) {
+            validateFapi();
+        }
+    }
+
+    private void validateFapi() throws InvalidJwtException {
+        final Integer nbf = getNbf();
+        if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
+            log.error("nbf claim is not set, nbf: " + nbf);
+            throw new InvalidJwtException("nbf claim is not set");
+        }
+    }
 }
