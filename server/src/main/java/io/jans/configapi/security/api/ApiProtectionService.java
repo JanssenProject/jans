@@ -98,6 +98,10 @@ public class ApiProtectionService {
                     if (scope != null) {
                         log.trace("Scope - '" + scopeName + "' exists in cache.");
                         scopeList.add(scope);
+                        // Add to resource cache
+                        apiProtectionCache.putResource(resourceName, scopeList);
+                        log.trace("ApiProtectionService:::createScopeIfNeeded() - 1 - resourceName = " + resourceName
+                                + " ,scopeList = " + scopeList);
                         break;
                     }
 
@@ -148,7 +152,7 @@ public class ApiProtectionService {
 
                 // Add to resource cache
                 apiProtectionCache.putResource(resourceName, scopeList);
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - 2 - resourceName = " + resourceName
                         + " ,scopeList = " + scopeList);
             } // condition
         }

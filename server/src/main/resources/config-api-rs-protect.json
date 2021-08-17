@@ -553,7 +553,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/api/v1/stat/user",
+        "path":"/jans-config-api/api/v1/stat",
         "conditions":[
             {
                 "httpMethods":["GET"],

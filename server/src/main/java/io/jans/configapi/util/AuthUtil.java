@@ -185,7 +185,7 @@ public class AuthUtil {
     }
 
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
-
+        log.error("getRequestedScopes() - resourceInfo = " + resourceInfo);
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
         List<String> scopes = new ArrayList<String>();
@@ -195,6 +195,21 @@ public class AuthUtil {
             scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
             addMethodScopes(resourceInfo, scopes);
         }
+        return scopes;
+    }
+
+    public List<String> getRequestedScopes(ResourceInfo resourceInfo, String methodName) {
+        log.error("getRequestedScopes() - resourceInfo = " + resourceInfo + " , methodName = " + methodName);
+        Class<?> resourceClass = resourceInfo.getResourceClass();
+        ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
+        List<String> scopes = new ArrayList<String>();
+        if (typeAnnotation == null) {
+            addMethodScopes(resourceInfo, methodName, scopes);
+        } else {
+            scopes.addAll(Stream.of(typeAnnotation.scopes()).collect(Collectors.toList()));
+            addMethodScopes(resourceInfo, methodName, scopes);
+        }
+        log.error("getRequestedScopes() - scopes = " + scopes);
         return scopes;
     }
 
@@ -210,6 +225,19 @@ public class AuthUtil {
         if (methodAnnotation != null) {
             scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
         }
+    }
+
+    private void addMethodScopes(ResourceInfo resourceInfo, String methodName, List<String> scopes) {
+        log.error("addMethodScopes() - resourceInfo = " + resourceInfo + " ,methodName = " + methodName + " ,scopes = "
+                + scopes + "\n");
+        Method resourceMethod = resourceInfo.getResourceMethod();
+        log.error("addMethodScopes() - resourceMethod.getName() = " + resourceMethod.getName());
+
+        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+        if (methodAnnotation != null) {
+            scopes.addAll(Stream.of(methodAnnotation.scopes()).collect(Collectors.toList()));
+        }
+
     }
 
     public Token requestAccessToken(final String tokenUrl, final String clientId, final List<String> scopes)
@@ -355,7 +383,7 @@ public class AuthUtil {
                     .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
                     .collect(Collectors.toList());
             // exclusiveAuthScopesToReq =
-            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collectors.toList());
+            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collector.toList());
         }
 
         log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
