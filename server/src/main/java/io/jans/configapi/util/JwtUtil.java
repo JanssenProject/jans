@@ -127,17 +127,16 @@ public class JwtUtil {
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
 
-           
             return scopes;
         } catch (InvalidJwtException exp) {
             log.error("Not a valid Jwt token = " + exp);
             throw exp;
         }
-        
+
     }
-    
+
     public void validateToken(String token, List<String> resourceScopes) throws InvalidJwtException, Exception {
-        log.trace("Validate Jwt Token - token = " + token + " ,resourceScopes = " + resourceScopes+ "\n");
+        log.trace("Validate Jwt Token - token = " + token + " ,resourceScopes = " + resourceScopes + "\n");
         // 1. Parse Jwt token
         // 2. Validate Token
         // 3. Validate Issuer
@@ -215,7 +214,6 @@ public class JwtUtil {
         }
 
     }
-
 
     public boolean validateSignature(Jwt jwt, JSONWebKeySet jsonWebKeySet) {
         log.trace("\n\n JwtUtil::validateSignature() - jwt = " + jwt + " , jsonWebKeySet =" + jsonWebKeySet + "\n");

@@ -95,6 +95,7 @@ public class AuthClientFactory {
         log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         ApacheHttpClient43Engine engine = null;
+        Response response = null;
         try {
             Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -109,15 +110,15 @@ public class AuthClientFactory {
             request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
             engine = ClientFactoryUtil.createEngine(false);
-            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build())
-                    .register(engine);
-            restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-            restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build());
+                   // .register(engine);
+            //restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+           // restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
             ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
                     .newClient(restClient.getConfiguration()).target(tokenUrl);
-            Response response = request.post(Entity.form(multivaluedHashMap));
-            log.debug("Response for Access Token -  response = " + response);
+            response = request.post(Entity.form(multivaluedHashMap));
+            log.error("Response for Access Token -  response = " + response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
 
@@ -130,6 +131,9 @@ public class AuthClientFactory {
         } finally {
             if (engine != null) {
                 engine.close();
+            }
+            if(response!=null) {
+                response.close();
             }
         }
         return null;

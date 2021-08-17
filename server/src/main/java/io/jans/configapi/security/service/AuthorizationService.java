@@ -41,11 +41,15 @@ public abstract class AuthorizationService implements Serializable {
     }
 
     public List<String> getRequestedScopes(String method, String path) {
-        return authUtil.getRequestedScopes( method,path);
+        return authUtil.getRequestedScopes(method, path);
     }
-    
+
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
         return authUtil.getRequestedScopes(resourceInfo);
+    }
+
+    public List<String> getRequestedScopes(ResourceInfo resourceInfo, String method) {
+        return authUtil.getRequestedScopes(resourceInfo, method);
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
@@ -57,18 +61,18 @@ public abstract class AuthorizationService implements Serializable {
     }
 
     public List<String> getAuthSpecificScopeRequired(String method, String path) {
-        return authUtil.getAuthSpecificScopeRequired(method,path);
+        return authUtil.getAuthSpecificScopeRequired(method, path);
     }
-    
+
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
         return authUtil.getAuthSpecificScopeRequired(resourceInfo);
     }
-    
+
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
-        return authUtil.findMissingElements(list1,list2);
+        return authUtil.findMissingElements(list1, list2);
     }
-    
+
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
-        return authUtil.isEqualCollection(list1,list2);
+        return authUtil.isEqualCollection(list1, list2);
     }
 }
