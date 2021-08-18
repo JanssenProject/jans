@@ -138,7 +138,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         // Inrospect
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer "+accessToken,
-                accessToken.substring("Bearer".length()).trim(), issuer);
+                accessToken, issuer);
 
         log.error("Validate token scopes");
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
