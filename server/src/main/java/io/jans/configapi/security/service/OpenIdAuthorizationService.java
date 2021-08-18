@@ -122,14 +122,27 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 || validateScope(tokenScopes, authSpecificScope)) {
             log.error("Validate token scopes as no authSpecificScope required OR token contains authSpecificScope");
             if (!validateScope(tokenScopes, resourceScopes)) {
-                log.error("Insufficient scopes. Required scope: " + resourceScopes + ", however token scopes: "
+                log.error("Insufficient scopes! Required scope: " + resourceScopes + ", however token scopes: "
                         + tokenScopes);
-                throw new WebApplicationException("Insufficient scopes. Required scope: " + resourceScopes
+                throw new WebApplicationException("Insufficient scopes! , Required scope: " + resourceScopes
                         + ", however token scopes: " + tokenScopes,
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
             return;
         }
+        
+        //find missing scopes
+       List<String> missingScopes = findMissingElements(resourceScopes,tokenScopes);
+       log.error("\n oAuth missingScopes = " + missingScopes + "\n");
+        
+       //If only jans-scope missing then procced else throw error
+       if(!isEqualCollection(missingScopes, authSpecificScope)){
+           log.error("Insufficient scopes!! Required scope: " + resourceScopes + ", however token scopes: "
+                   + tokenScopes);
+           throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
+                   + ", however token scopes: " + tokenScopes,
+                   Response.status(Response.Status.UNAUTHORIZED).build());
+       }
 
         // Generate token with required resourceScopes
         resourceScopes.addAll(authSpecificScope);
@@ -142,14 +155,18 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         log.error("Validate token scopes");
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            log.error("Insufficient scopes for new token as well - Required scope: " + resourceScopes
+            log.error("Insufficient scopes!!! for new token as well - Required scope: " + resourceScopes
                     + ", token scopes: " + introspectionResponse.getScope());
-            throw new WebApplicationException("Insufficient scopes. Required scope",
+            throw new WebApplicationException("Insufficient scopes!!! Required scope: " + resourceScopes
+                    + ", token scopes: " + introspectionResponse.getScope(),
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         log.info("Token scopes Valid");
 
     }
+    
+    
+    
 
 }
