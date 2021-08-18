@@ -356,8 +356,6 @@ public class AuthUtil {
             exclusiveAuthScopesToReq = resourceScopes.stream()
                     .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
                     .collect(Collectors.toList());
-            // exclusiveAuthScopesToReq =
-            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collector.toList());
         }
 
         log.info("\n\n AuthUtil:::getAuthSpecificScopeRequired(method,path) - exclusiveAuthScopesToReq = "
@@ -382,8 +380,6 @@ public class AuthUtil {
             exclusiveAuthScopesToReq = resourceScopes.stream()
                     .filter(ele -> configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(ele))
                     .collect(Collectors.toList());
-            // exclusiveAuthScopesToReq =
-            // resourceScopes.stream().filter(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()).collect(Collector.toList());
         }
 
         log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
