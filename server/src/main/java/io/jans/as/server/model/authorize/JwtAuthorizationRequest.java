@@ -530,5 +530,11 @@ public class JwtAuthorizationRequest {
             log.error("nbf claim is not set, nbf: " + nbf);
             throw new InvalidJwtException("nbf claim is not set");
         }
+        final long nowSeconds = System.currentTimeMillis() / 1000;
+        final long nbfDiff = nbf - nowSeconds;
+        if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
+            log.error("nbf claim is more then 60 in the past, nbf: " + nbf + ", nowSeconds: " + nowSeconds);
+            throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
     }
 }
