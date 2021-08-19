@@ -92,9 +92,8 @@ public class AuthClientFactory {
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
+        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
-        ApacheHttpClient43Engine engine = null;
         Response response = null;
         try {
             Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
@@ -106,19 +105,15 @@ public class AuthClientFactory {
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(
                     tokenRequest.getParameters());
             request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-
             request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-            engine = ClientFactoryUtil.createEngine(false);
-            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(tokenUrl).build());
-                   // .register(engine);
-            //restClient.property("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-           // restClient.property("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            RestClientBuilder restClient = RestClientBuilder.newBuilder()
+                    .baseUri(UriBuilder.fromPath(tokenUrl).build());
 
             ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
                     .newClient(restClient.getConfiguration()).target(tokenUrl);
             response = request.post(Entity.form(multivaluedHashMap));
-            log.error("Response for Access Token -  response = " + response);
+            log.debug("Response for Access Token -  response = " + response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
 
@@ -129,10 +124,8 @@ public class AuthClientFactory {
                 return tokenResponse;
             }
         } finally {
-            if (engine != null) {
-                engine.close();
-            }
-            if(response!=null) {
+
+            if (response != null) {
                 response.close();
             }
         }

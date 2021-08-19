@@ -236,7 +236,7 @@ public class ConfigurationFactory {
         }
         this.loadedRevision = conf.getRevision();
 
-        log.error("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
+        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
                 + this.apiAppConfiguration + " *** \n\n\n");
         this.setApiConfigurationProperties();
     }
@@ -260,7 +260,7 @@ public class ConfigurationFactory {
                     .filter(x -> "CorsFilter".equals(x.getFilterName())).findAny().orElse(null);
         }
 
-        log.info("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
+        log.debug("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
                 + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
                 + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter);
 

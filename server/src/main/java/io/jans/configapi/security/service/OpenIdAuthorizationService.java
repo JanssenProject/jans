@@ -77,7 +77,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 tokenScopes = jwtUtil.validateToken(acccessToken);
 
                 // Validate Scopes
-                this.validateScope(tokenScopes, resourceInfo, issuer, method, path);
+                this.validateScope(tokenScopes, resourceInfo, issuer);
                 return;
             } catch (InvalidJwtException exp) {
                 log.error("oAuth Invalid Jwt " + token + " - Exception is " + exp);
@@ -99,28 +99,23 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        this.validateScope(tokenScopes, resourceInfo, issuer, method, path);
+        this.validateScope(tokenScopes, resourceInfo, issuer);
     }
 
-    private void validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer, String method,
-            String path) throws Exception {
+    private void validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
+        log.debug("Validate scope, tokenScopes:{}, resourceInfo: {}, issuer: {}", tokenScopes, resourceInfo, issuer);
 
-        log.error(
-                "oAuth  Authorization Resource details, tokenScopes:{}, resourceInfo: {}, issuer: {}, method:{}, path:{} ",
-                tokenScopes, resourceInfo, issuer, method, path);
-
-        log.error("Get requested scopes");
-        // List<String> resourceScopes = getRequestedScopes(method, path);
+        // Get resource scope
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
 
-        // Check if resource requires auth server specific scope exists
+        // Check if resource requires auth server specific scope
         List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-        log.error("\n oAuth authSpecificScope = " + authSpecificScope + "\n");
+        log.debug(" resourceScopes = " + resourceScopes + " ,authSpecificScope = " + authSpecificScope);
 
         // If No auth scope required OR if token conatins the authSpecificScope
         if ((authSpecificScope == null || authSpecificScope.size() == 0)
                 || validateScope(tokenScopes, authSpecificScope)) {
-            log.error("Validate token scopes as no authSpecificScope required OR token contains authSpecificScope");
+            log.debug("Validating token scopes as no authSpecificScope required OR token contains authSpecificScope");
             if (!validateScope(tokenScopes, resourceScopes)) {
                 log.error("Insufficient scopes! Required scope: " + resourceScopes + ", however token scopes: "
                         + tokenScopes);
@@ -130,30 +125,30 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             }
             return;
         }
-        
-        //find missing scopes
-       List<String> missingScopes = findMissingElements(resourceScopes,tokenScopes);
-       log.error("\n oAuth missingScopes = " + missingScopes + "\n");
-        
-       //If only jans-scope missing then procced else throw error
-       if(!isEqualCollection(missingScopes, authSpecificScope)){
-           log.error("Insufficient scopes!! Required scope: " + resourceScopes + ", however token scopes: "
-                   + tokenScopes);
-           throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
-                   + ", however token scopes: " + tokenScopes,
-                   Response.status(Response.Status.UNAUTHORIZED).build());
-       }
+
+        // find missing scopes
+        List<String> missingScopes = findMissingElements(resourceScopes, tokenScopes);
+        log.debug("missingScopes = " + missingScopes);
+
+        // If only authSpecificScope missing then procced with token creation else throw
+        // error
+        if (!isEqualCollection(missingScopes, authSpecificScope)) {
+            log.error("Insufficient scopes!! Required scope: " + resourceScopes + ", however token scopes: "
+                    + tokenScopes);
+            throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
+                    + ", however token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
+        }
 
         // Generate token with required resourceScopes
         resourceScopes.addAll(authSpecificScope);
         String accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-        log.error("\n Introspecting new accessToken = " + accessToken);
+        log.debug("Introspecting new accessToken = " + accessToken);
 
-        // Inrospect
-        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer "+accessToken,
+        // Introspect
+        IntrospectionResponse introspectionResponse = openIdService.getIntrospectionResponse("Bearer " + accessToken,
                 accessToken, issuer);
 
-        log.error("Validate token scopes");
+        // Validate Token Scope
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
             log.error("Insufficient scopes!!! for new token as well - Required scope: " + resourceScopes
                     + ", token scopes: " + introspectionResponse.getScope());
@@ -165,8 +160,5 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         log.info("Token scopes Valid");
 
     }
-    
-    
-    
 
 }
