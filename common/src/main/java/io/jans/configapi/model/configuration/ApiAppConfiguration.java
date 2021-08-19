@@ -122,6 +122,16 @@ public class ApiAppConfiguration implements Configuration {
         return corsConfigurationFilters;
     }
 
+    public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
+        if (corsConfigurationFilters == null) {
+            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+        } else {
+            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            this.corsConfigurationFilters.addAll(corsConfigurationFilters);
+        }
+    }
+
+
     public List<String> getExclusiveAuthScopes() {
         if (exclusiveAuthScopes == null) {
             exclusiveAuthScopes = new ArrayList<String>();

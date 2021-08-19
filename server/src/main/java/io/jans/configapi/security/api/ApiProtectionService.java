@@ -66,10 +66,8 @@ public class ApiProtectionService {
         Preconditions.checkNotNull(rsResourceList, "Config Api Resource list cannot be null !!!");
 
         createScopeIfNeeded(apiProtectionType);
-        log.trace("ApiProtectionService:::verifyResources() - apiProtectionCache.getAllScopes() = "
-                + apiProtectionCache.getAllScopes() + "\n\n");
-        log.trace("ApiProtectionService:::verifyResources() - apiProtectionCache.getAllResources() = "
-                + apiProtectionCache.getAllResources() + "\n\n");
+        log.trace("ApiProtectionService:::verifyResources() - allScopes:{}, allResources:{} ",
+                apiProtectionCache.getAllScopes(), apiProtectionCache.getAllResources());
 
         updateScopeForClientIfNeeded(clientId);
 
@@ -98,10 +96,6 @@ public class ApiProtectionService {
                     if (scope != null) {
                         log.trace("Scope - '" + scopeName + "' exists in cache.");
                         scopeList.add(scope);
-                        // Add to resource cache
-                        apiProtectionCache.putResource(resourceName, scopeList);
-                        log.trace("ApiProtectionService:::createScopeIfNeeded() - 1 - resourceName = " + resourceName
-                                + " ,scopeList = " + scopeList);
                         break;
                     }
 
@@ -152,7 +146,7 @@ public class ApiProtectionService {
 
                 // Add to resource cache
                 apiProtectionCache.putResource(resourceName, scopeList);
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - 2 - resourceName = " + resourceName
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
                         + " ,scopeList = " + scopeList);
             } // condition
         }
