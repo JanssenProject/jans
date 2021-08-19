@@ -1179,13 +1179,19 @@ public abstract class BaseTest {
         authorizationRequest.setResponseMode(responseMode);
         authorizationRequest.setState(state);
 
+        return authorizationRequest(authorizationRequest, expectedResponseMode, userId, userSecret);
+    }
+
+    public AuthorizationResponse authorizationRequest(
+            final AuthorizationRequest authorizationRequest, final ResponseMode expectedResponseMode,
+            final String userId, final String userSecret) {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
         if (expectedResponseMode != null) {
             assertEquals(authorizationResponse.getResponseMode(), expectedResponseMode);
         } else {
-            assertEquals(authorizationResponse.getResponseMode(), responseMode);
+            assertEquals(authorizationResponse.getResponseMode(), authorizationRequest.getResponseMode());
         }
         assertNotNull(authorizationResponse.getLocation());
         assertNotNull(authorizationResponse.getResponse());
@@ -1194,15 +1200,15 @@ public abstract class BaseTest {
         assertNotNull(authorizationResponse.getExp());
         assertNotNull(authorizationResponse.getState());
 
-        if (responseTypes.contains(ResponseType.CODE)) {
+        if (authorizationRequest.getResponseTypes().contains(ResponseType.CODE)) {
             assertNotNull(authorizationResponse.getCode());
         }
-        if (responseTypes.contains(ResponseType.TOKEN)) {
+        if (authorizationRequest.getResponseTypes().contains(ResponseType.TOKEN)) {
             assertNotNull(authorizationResponse.getAccessToken());
             assertNotNull(authorizationResponse.getTokenType());
             assertNotNull(authorizationResponse.getExpiresIn());
         }
-        if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+        if (authorizationRequest.getResponseTypes().contains(ResponseType.ID_TOKEN)) {
             assertNotNull(authorizationResponse.getIdToken());
         }
 

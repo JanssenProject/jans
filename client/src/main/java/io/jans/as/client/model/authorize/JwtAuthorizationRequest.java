@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.security.PublicKey;
 import java.util.List;
 
+import io.jans.as.model.common.ResponseMode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -54,6 +55,7 @@ public class JwtAuthorizationRequest {
 
     // Payload
     private List<ResponseType> responseTypes;
+    private ResponseMode responseMode;
     private String clientId;
     private List<String> scopes;
     private String redirectUri;
@@ -130,6 +132,7 @@ public class JwtAuthorizationRequest {
     private void setAuthorizationRequestParams(AuthorizationRequest authorizationRequest) {
         if (authorizationRequest != null) {
             this.responseTypes = authorizationRequest.getResponseTypes();
+            this.responseMode = authorizationRequest.getResponseMode();
             this.clientId = authorizationRequest.getClientId();
             this.scopes = authorizationRequest.getScopes();
             this.redirectUri = authorizationRequest.getRedirectUri();
@@ -202,6 +205,14 @@ public class JwtAuthorizationRequest {
 
     public void setResponseTypes(List<ResponseType> responseTypes) {
         this.responseTypes = responseTypes;
+    }
+
+    public ResponseMode getResponseMode() {
+        return responseMode;
+    }
+
+    public void setResponseMode(ResponseMode responseMode) {
+        this.responseMode = responseMode;
     }
 
     public String getClientId() {
@@ -519,6 +530,9 @@ public class JwtAuthorizationRequest {
                     }
                     obj.put("response_type", responseTypeJsonArray);
                 }
+            }
+            if (responseMode != null) {
+                obj.put("response_mode", responseMode);
             }
             if (StringUtils.isNotBlank(clientId)) {
                 obj.put("client_id", clientId);
