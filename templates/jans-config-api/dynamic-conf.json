@@ -10,12 +10,13 @@
   "authOpenidTokenUrl": "${tokenEndpoint}",
   "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
   "smallryeHealthRootPath": "/health-check",
+  "exclusiveAuthScopes": ["jans_stat"],
   "corsConfigurationFilters": [
     {
       "filterName": "CorsFilter",
       "corsAllowedOrigins": "*",
-      "corsAllowedMethods": "GET,PUT,POST,DELETE,PATCH",
-      "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+      "corsAllowedMethods": "GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS",
+      "corsAllowedHeaders": "",
       "corsExposedHeaders": "",
       "corsSupportCredentials": true,
       "corsLoggingEnabled": false,
