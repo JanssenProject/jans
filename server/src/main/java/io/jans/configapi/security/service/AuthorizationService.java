@@ -40,16 +40,8 @@ public abstract class AuthorizationService implements Serializable {
         return authUtil.getRequestedScopes(path);
     }
 
-    public List<String> getRequestedScopes(String method, String path) {
-        return authUtil.getRequestedScopes(method, path);
-    }
-
     public List<String> getRequestedScopes(ResourceInfo resourceInfo) {
         return authUtil.getRequestedScopes(resourceInfo);
-    }
-
-    public List<String> getRequestedScopes(ResourceInfo resourceInfo, String method) {
-        return authUtil.getRequestedScopes(resourceInfo, method);
     }
 
     public boolean validateScope(List<String> authScopes, List<String> resourceScopes) {
@@ -58,10 +50,6 @@ public abstract class AuthorizationService implements Serializable {
 
     public List<String> getApiApprovedIssuer() {
         return this.configurationFactory.getApiApprovedIssuer();
-    }
-
-    public List<String> getAuthSpecificScopeRequired(String method, String path) {
-        return authUtil.getAuthSpecificScopeRequired(method, path);
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
