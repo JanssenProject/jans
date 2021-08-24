@@ -19,10 +19,10 @@ maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 app_versions = {
   "JANS_APP_VERSION": "1.0.0",
   "JANS_BUILD": "-SNAPSHOT", 
-  "JETTY_VERSION": "9.4.31.v20200723", 
+  "JETTY_VERSION": "9.4.35.v20201120", 
   "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
   "JYTHON_VERSION": "2.7.2",
-  "OPENDJ_VERSION": "4.4.10",
+  "OPENDJ_VERSION": "4.4.11",
   "SETUP_BRANCH": "master",
 }
 
