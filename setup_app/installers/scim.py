@@ -54,7 +54,7 @@ class ScimInstaller(JettyInstaller):
         yml_str = self.readFile(os.path.join(self.source_files[1][0]))
         yml_str = yml_str.replace('\t', ' ')
         cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-        config_scopes = cfg_yml['components']['securitySchemes']['scim_auth']['flows']['clientCredentials']['scopes']
+        config_scopes = cfg_yml['components']['securitySchemes']['scim_oauth']['flows']['clientCredentials']['scopes']
 
         scope_ldif_fd = open(self.ldif_scopes_fn, 'wb')
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
