@@ -80,7 +80,6 @@ public class AUIConfigurationService {
         try {
             File jarPath = new File(OAuth2Resource.class.getProtectionDomain().getCodeSource().getLocation().getPath());
             String propertiesPath = jarPath.getParentFile().getAbsolutePath() + "/../config";
-            System.out.println(propertiesPath);
             props.load(new FileInputStream(propertiesPath + "/auiConfiguration.properties"));
             return props;
         } catch (IOException e) {
