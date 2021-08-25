@@ -907,7 +907,7 @@
       "type": "ARRAY<STRING(MAX)>"
     }
   },
-  "excludeedDevicesInf": {
+  "jansTrustedDevices": {
     "mysql": {
       "type": "TEXT"
     },
