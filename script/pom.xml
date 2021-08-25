@@ -92,6 +92,12 @@
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 
+		<dependency>
+		    <groupId>javax.ws.rs</groupId>
+		    <artifactId>javax.ws.rs-api</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+		
 		<!-- Test -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>

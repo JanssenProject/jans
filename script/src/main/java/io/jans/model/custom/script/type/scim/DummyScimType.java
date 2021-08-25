@@ -8,6 +8,8 @@ package io.jans.model.custom.script.type.scim;
 
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 
@@ -117,23 +119,13 @@ public class DummyScimType implements ScimType {
     }
 
     @Override
-    public boolean allowResourceOperation(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes) {
-    	return true;
+    public Response manageResourceOperation(Object context, Object entity, Object payload, Map<String, SimpleCustomProperty> configurationAttributes) {
+  	    return null;
     }
-    
+
     @Override
-    public String allowSearchOperation(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
-    	return "";
-    }
-    
-    @Override
-    public String rejectedResourceOperationResponse(Object context, Object entity, Map<String, SimpleCustomProperty> configurationAttributes) {
-    	return null;
-    }
-    
-    @Override
-    public String rejectedSearchOperationResponse(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public Response manageSearchOperation(Object context, Object searchRequest, Map<String, SimpleCustomProperty> configurationAttributes) {
         return null;
     }
-    
+
 }

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScimProperties implements Serializable {
 
@@ -21,12 +20,22 @@ public class ScimProperties implements Serializable {
 
     private int maxCount;
 
+    private String userExtensionSchemaURI;
+
     public int getMaxCount() {
-        return this.maxCount;
+        return maxCount;
     }
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
+    }
+
+    public String getUserExtensionSchemaURI() {
+        return userExtensionSchemaURI;
+    }
+
+    public void setUserExtensionSchemaURI(String userExtensionSchemaURI) {
+        this.userExtensionSchemaURI = userExtensionSchemaURI;
     }
 
 }
