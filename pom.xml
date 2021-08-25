@@ -43,6 +43,7 @@
 	<modules>
 		<module>common</module>
 		<module>server</module>
+		<module>plugins</module>
 	</modules>
 
 	<repositories>
