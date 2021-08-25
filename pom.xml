@@ -23,7 +23,7 @@
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
 		<weld.version>3.1.2.Final</weld.version>
-		<jetty.version>9.4.34.v20201102</jetty.version>
+		<jetty.version>9.4.43.v20210629</jetty.version>
 		<resteasy.version>4.5.7.Final</resteasy.version>
 		<jackson.version>2.10.1</jackson.version>
 		<microprofile.version>3.0</microprofile.version>
@@ -92,6 +92,7 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+            
 			<!-- Weld -->
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
@@ -254,7 +255,7 @@
 				<version>3.0.3</version>
 			</dependency>
 
-			<!-- RestEasy -->
+			<!-- Resteasy -->
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-cdi</artifactId>
