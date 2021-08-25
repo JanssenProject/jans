@@ -151,22 +151,11 @@ public class AppConfiguration implements Configuration, Serializable {
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
 
-    @JsonProperty("ScimProperties")
-    private ScimProperties scimProperties;
-
     private int passwordResetRequestExpirationTime; // in seconds
     private int cleanServiceInterval;
     private Boolean enforceEmailUniqueness = true;
 
     private Boolean useLocalCache = false;
-
-    public ScimProperties getScimProperties() {
-        return scimProperties;
-    }
-
-    public void setScimProperties(ScimProperties scimProperties) {
-        this.scimProperties = scimProperties;
-    }
 
     public boolean isOxIncommonFlag() {
         return oxIncommonFlag;
