@@ -83,8 +83,8 @@ public class OAuth2Service {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setAuthUsername(auiConfiguration.getAuthServerClientId());
-            tokenRequest.setAuthPassword(auiConfiguration.getAuthServerClientSecret());
+            tokenRequest.setAuthUsername(auiConfiguration.getTokenServerClientId());
+            tokenRequest.setAuthPassword(auiConfiguration.getTokenServerClientSecret());
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setRedirectUri(auiConfiguration.getTokenServerRedirectUrl());
 
@@ -216,6 +216,7 @@ public class OAuth2Service {
                     .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
                     .post(Entity.form(body));
 
+            log.info("Get Access Token body: {}", body.toString());
             log.info("Get Access Token status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
