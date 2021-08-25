@@ -21,9 +21,11 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
+
+import org.apache.commons.lang.StringUtils;
 
 import io.jans.model.GluuAttribute;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.extensions.Extension;
 import io.jans.scim.model.scim2.extensions.ExtensionField;
@@ -34,14 +36,14 @@ import io.jans.model.attribute.AttributeDataType;
 
 import org.slf4j.Logger;
 
-/**
- * Created by jgomer on 2017-09-29.
- */
 @ApplicationScoped
 public class ExtensionService {
 
     @Inject
     private Logger log;
+
+    @Inject
+    AppConfiguration appConfiguration;
 
     @Inject
     private AttributeService attributeService;
@@ -69,10 +71,17 @@ public class ExtensionService {
                     }
                 }
 
-                Extension ext = new Extension(USER_EXT_SCHEMA_ID);
+                String uri = appConfiguration.getUserExtensionSchemaURI();
+                if (StringUtils.isEmpty(uri)) {
+                    uri = USER_EXT_SCHEMA_ID;
+                }
+                Extension ext = new Extension(uri);
                 ext.setFields(fields);
-                ext.setName(USER_EXT_SCHEMA_NAME);
-                ext.setDescription(USER_EXT_SCHEMA_DESCRIPTION);
+
+                if (uri.equals(USER_EXT_SCHEMA_ID)) {
+                    ext.setName(USER_EXT_SCHEMA_NAME);
+                    ext.setDescription(USER_EXT_SCHEMA_DESCRIPTION);
+                }
 
                 list.add(ext);
             }

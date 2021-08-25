@@ -7,17 +7,20 @@
 package io.jans.scim.service.external;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.core.Response;
 
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scim.ScimType;
+import io.jans.orm.model.base.Entry;
 import io.jans.orm.model.PagedResult;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.scim.ScimCustomPerson;
-import io.jans.orm.model.base.Entry;
+import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.service.custom.script.ExternalScriptService;
 
 /**
@@ -26,7 +29,7 @@ import io.jans.service.custom.script.ExternalScriptService;
  */
 @ApplicationScoped
 public class ExternalScimService extends ExternalScriptService {
-	
+
 	private static final long serialVersionUID = 1767751544454591666L;
 
     public ExternalScimService() {
@@ -323,7 +326,7 @@ public class ExternalScimService extends ExternalScriptService {
     private boolean executeScimPostSearchUsersMethod(PagedResult<ScimCustomPerson> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
-        	if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
+            if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
                 return true;
             
             log.debug("Executing python 'SCIM Search Users' method");
@@ -344,7 +347,7 @@ public class ExternalScimService extends ExternalScriptService {
     private boolean executeScimPostSearchGroupsMethod(PagedResult<GluuGroup> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
 
         try {
-        	if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
+            if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
                 return true;
             
             log.debug("Executing python 'SCIM Search Groups' method");
@@ -536,23 +539,21 @@ public class ExternalScimService extends ExternalScriptService {
         return true;
     }
 
-    public boolean executeAllowResourceOperation(Entry entity, OperationContext context) throws Exception {
+    public Response executeManageResourceOperation(Entry entity, Object payload, OperationContext context) throws Exception {
         
         CustomScriptConfiguration configuration = findConfigWithGEVersion(5);
+        Response result = null;
         
-        if (configuration == null) {
-            // All scim operation calls pass
-            return true;
-        }
-        
-        boolean result = false;
         try {
-            log.debug("Executing python 'SCIM Allow Resource Operation' method");
-            ScimType externalType = (ScimType) configuration.getExternalType();
-            Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
+            if (configuration != null) {
+                log.debug("Executing python 'SCIM Manage Resource Operation' method");
+                ScimType externalType = (ScimType) configuration.getExternalType();
+                Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
 
-            result = externalType.allowResourceOperation(context, entity, configurationAttributes);
-            log.debug("executeAllowResourceOperation result = " + result);
+                result = externalType.manageResourceOperation(context, entity, payload, configurationAttributes);
+                log.debug("executeManageResourceOperation result HTTP code = {}", 
+                    Optional.ofNullable(result).map(res -> Integer.toString(res.getStatus())).orElse("none"));
+            }
         } catch (Exception e) {
             logAndSave(configuration, e);
             throw e;
@@ -561,77 +562,26 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
-    public String executeRejectedResourceOperationResponse(Entry entity, OperationContext context) throws Exception {
+    public Response executeManageSearchOperation(SearchRequest searchRequest, OperationContext context) throws Exception {
         
         CustomScriptConfiguration configuration = findConfigWithGEVersion(5);
-        if (configuration == null) {
-            // this is unexpected
-            log.error("No suitable custom script found");
-            throw new Exception("No script with API version 5 encountered");
-        }
+        Response result = null;
 
-        String rejectionError = null;
         try {
-            log.debug("Executing python 'SCIM Rejected Resource Operation Response' method");
-            ScimType externalType = (ScimType) configuration.getExternalType();
-            Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
+            if (configuration != null) {
+                log.debug("Executing python 'SCIM Manage Search Operation' method");
+                ScimType externalType = (ScimType) configuration.getExternalType();
+                Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
 
-            rejectionError = externalType.rejectedResourceOperationResponse(context, entity, configurationAttributes);
-            log.debug("executeRejectedResourceOperationResponse result = " + rejectionError);
-        } catch (Exception e) {
-            logAndSave(configuration, e);
-            throw e;
-        }
-        return rejectionError;
-        
-    }
-    
-    public String executeAllowSearchOperation(OperationContext context) throws Exception {
-        CustomScriptConfiguration configuration = findConfigWithGEVersion(5);
-        
-        if (configuration == null) {
-            // All scim operation calls pass
-            return "";
-        }
-
-        String result = null;
-        try {
-            log.debug("Executing python 'SCIM Allow Search Operation' method");
-            ScimType externalType = (ScimType) configuration.getExternalType();
-            Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
-
-            result = externalType.allowSearchOperation(context, configurationAttributes);
-            log.debug("executeAllowSearchOperation result = " + result);
+                result = externalType.manageSearchOperation(context, searchRequest, configurationAttributes);
+                log.debug("executeManageSearchOperation result HTTP code = {}", 
+                    Optional.ofNullable(result).map(res -> Integer.toString(res.getStatus())).orElse("none"));
+            }
         } catch (Exception e) {
             logAndSave(configuration, e);
             throw e;
         }        
         return result;
-        
-    }
-
-    public String executeRejectedSearchOperationResponse(OperationContext context) throws Exception {
-        
-        CustomScriptConfiguration configuration = findConfigWithGEVersion(5);
-        if (configuration == null) {
-            // this is unexpected
-            log.error("No suitable custom script found");
-            throw new Exception("No script with API version 5 encountered");
-        }
-
-        String rejectionError = null;
-        try {
-            log.debug("Executing python 'SCIM Rejected Search Operation Response' method");
-            ScimType externalType = (ScimType) configuration.getExternalType();
-            Map<String, SimpleCustomProperty> configurationAttributes = configuration.getConfigurationAttributes();
-
-            rejectionError = externalType.rejectedSearchOperationResponse(context, configurationAttributes);
-            log.debug("executeRejectedSearchOperationResponse result = " + rejectionError);
-        } catch (Exception e) {
-            logAndSave(configuration, e);
-            throw e;
-        }
-        return rejectionError;
         
     }
 

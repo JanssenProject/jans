@@ -23,6 +23,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Path;
 
 import org.apache.commons.lang.StringUtils;
+
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.Version;
@@ -230,8 +231,8 @@ public class BaseScimWebService {
     }
 
     protected Response prepareSearchRequest(List<String> schemas, String filter, 
-    	String filterPrepend, String sortBy, String sortOrder, Integer startIndex,
-        Integer count, String attrsList, String excludedAttrsList, SearchRequest request) {
+    	String sortBy, String sortOrder, Integer startIndex, Integer count,
+        String attrsList, String excludedAttrsList, SearchRequest request) {
 
         Response response = null;
 
@@ -248,13 +249,6 @@ public class BaseScimWebService {
 
                 if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
                     sortOrder = SortOrder.ASCENDING.getValue();
-                }
-                if (!StringUtils.isEmpty(filterPrepend)) {
-                    if (StringUtils.isEmpty(filter)) {
-                        filter = filterPrepend;
-                    } else {
-                        filter = String.format("%s and (%s)", filterPrepend, filter);
-                    }
                 }
 
                 request.setSchemas(schemas);

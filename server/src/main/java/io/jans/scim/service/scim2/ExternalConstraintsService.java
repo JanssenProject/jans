@@ -1,7 +1,6 @@
 package io.jans.scim.service.scim2;
 
 import java.util.Optional;
-import java.util.HashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -12,13 +11,15 @@ import javax.ws.rs.core.UriInfo;
 
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.service.external.OperationContext;
 import io.jans.scim.service.external.TokenDetails;
 import io.jans.scim.ws.rs.scim2.BaseScimWebService;
-import io.jans.util.Pair;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
+
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -35,40 +36,41 @@ public class ExternalConstraintsService {
     @Inject
     ExternalScimService externalScimService;
 
-    public Response applyEntityCheck(Entry entity, HttpHeaders httpHeaders, UriInfo uriInfo,
-            String httpMethod, String resourceType) throws Exception {
+    public Response applyEntityCheck(Entry entity, Object payload, HttpHeaders httpHeaders,
+            UriInfo uriInfo, String httpMethod, String resourceType) throws Exception {
         
         Response response = null;
         if (externalScimService.isEnabled()) {
             OperationContext ctx = makeContext(httpHeaders, uriInfo, httpMethod, resourceType);
-
-            if (!externalScimService.executeAllowResourceOperation(entity, ctx)) {
-                String error = externalScimService.executeRejectedResourceOperationResponse(entity, ctx);
-                response = BaseScimWebService.getErrorResponse(Status.FORBIDDEN, error);
-            }
+            response = externalScimService.executeManageResourceOperation(entity, payload, ctx);
         }
         return response;
         
     }
 
-    public Pair<String, Response> applySearchCheck(HttpHeaders httpHeaders, UriInfo uriInfo,
-            String httpMethod, String resourceType) throws Exception {
+    public Response applySearchCheck(SearchRequest searchReq, HttpHeaders httpHeaders,
+            UriInfo uriInfo, String httpMethod, String resourceType) throws Exception {
         
-        Pair<String, Response> result = new Pair<>();
+        Response response = null;
         if (externalScimService.isEnabled()) {
-            OperationContext ctx = makeContext(httpHeaders, uriInfo, httpMethod, resourceType);
 
-            String allow = externalScimService.executeAllowSearchOperation(ctx);
-            if (allow == null) {
-                String error = externalScimService.executeRejectedSearchOperationResponse(ctx);
-                result.setSecond(BaseScimWebService.getErrorResponse(Status.FORBIDDEN, error));
-                
-            } else if (allow.length() > 0) {
-                result.setFirst(allow);                
+            OperationContext ctx = makeContext(httpHeaders, uriInfo, httpMethod, resourceType);
+            response = externalScimService.executeManageSearchOperation(searchReq, ctx);
+            
+            if (response == null) {
+                String filterPrepend = ctx.getFilterPrepend();
+
+                if (!StringUtils.isEmpty(filterPrepend)) {
+                    if (StringUtils.isEmpty(searchReq.getFilter())) {
+                        searchReq.setFilter(filterPrepend);
+                    } else {
+                        searchReq.setFilter(String.format("%s and (%s)", filterPrepend, searchReq.getFilter()));
+                    }
+                }
             }
-            // when length is zero, the call is allowed straight
         }
-        return result;
+        return response;
+
     }
       
     private OperationContext makeContext(HttpHeaders httpHeaders, UriInfo uriInfo,
@@ -81,7 +83,6 @@ public class ExternalConstraintsService {
         ctx.setPath(uriInfo.getPath());
         ctx.setQueryParams(uriInfo.getQueryParameters());
         ctx.setRequestHeaders(httpHeaders.getRequestHeaders());
-        ctx.setPassthroughMap(new HashMap<>());
         
         String token = Optional.ofNullable(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION))
                 .map(authz -> authz.replaceFirst("Bearer\\s+", "")).orElse(null);

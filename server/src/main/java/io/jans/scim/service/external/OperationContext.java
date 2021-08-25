@@ -12,8 +12,8 @@ public class OperationContext {
     private String resourceType;
     private MultivaluedMap<String, String> queryParams;
     private MultivaluedMap<String, String> requestHeaders;
-    private Map<String, Object> passthroughMap;
     private TokenDetails tokenDetails;
+    private String filterPrepend;
 
     public String getPath() {
         return path;
@@ -63,20 +63,19 @@ public class OperationContext {
         this.resourceType = resourceType;
     }
 
-    public Map<String, Object> getPassthroughMap() {
-        return passthroughMap;
-    }
-
-    public void setPassthroughMap(Map<String, Object> passthroughMap) {
-        this.passthroughMap = passthroughMap;
-    }
-
     public TokenDetails getTokenDetails() {
         return tokenDetails;
     }
 
     public void setTokenDetails(TokenDetails tokenDetails) {
         this.tokenDetails = tokenDetails;
+    }
+    public String getFilterPrepend() {
+        return filterPrepend;
+    }
+
+    public void setFilterPrepend(String filterPrepend) {
+        this.filterPrepend = filterPrepend;
     }
 
 }

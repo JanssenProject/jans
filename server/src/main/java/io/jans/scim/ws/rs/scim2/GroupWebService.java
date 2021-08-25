@@ -53,7 +53,6 @@ import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.Scim2GroupService;
 import io.jans.scim.service.scim2.Scim2PatchService;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.util.Pair;
 
 /**
  * Implementation of /Groups endpoint. Methods here are intercepted.
@@ -113,14 +112,13 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
         
         Response response;
         try {
-            Pair<String, Response> checkOutput = externalConstraintsService.applySearchCheck(
-                    httpHeaders, uriInfo, method, groupResourceType);
-            if (checkOutput.getSecond() != null) return checkOutput.getSecond();
-            
             SearchRequest searchReq = new SearchRequest();
-            response = prepareSearchRequest(searchReq.getSchemas(), filter, checkOutput.getFirst(), 
-                    sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, 
-                    searchReq);
+            response = prepareSearchRequest(searchReq.getSchemas(), filter, sortBy,
+                    sortOrder, startIndex, count, attrsList, excludedAttrsList, searchReq);
+            if (response != null) return response;
+
+            response = externalConstraintsService.applySearchCheck(searchReq,
+                    httpHeaders, uriInfo, method, groupResourceType);
             if (response != null) return response;
 
             PagedResult<BaseScimResource> resources = scim2GroupService.searchGroups(
@@ -167,8 +165,8 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             assignMetaInformation(group);
 
             GluuGroup gluuGroup = scim2GroupService.preCreateGroup(group, usersUrl);
-            response = externalConstraintsService.applyEntityCheck(gluuGroup, httpHeaders,
-                    uriInfo, HttpMethod.POST, groupResourceType);
+            response = externalConstraintsService.applyEntityCheck(gluuGroup, group,
+                    httpHeaders, uriInfo, HttpMethod.POST, groupResourceType);
             if (response != null) return response;
 
             scim2GroupService.createGroup(gluuGroup, group, endpointUrl, usersUrl);            
@@ -206,8 +204,8 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             GluuGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
             
-            response = externalConstraintsService.applyEntityCheck(gluuGroup, httpHeaders,
-                    uriInfo, HttpMethod.GET, groupResourceType);
+            response = externalConstraintsService.applyEntityCheck(gluuGroup, null,
+                    httpHeaders, uriInfo, HttpMethod.GET, groupResourceType);
             if (response != null) return response;
 
             GroupResource group = scim2GroupService.buildGroupResource(gluuGroup, endpointUrl, usersUrl);
@@ -254,8 +252,8 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             GluuGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
-            response = externalConstraintsService.applyEntityCheck(gluuGroup, httpHeaders,
-                    uriInfo, HttpMethod.PUT, groupResourceType);
+            response = externalConstraintsService.applyEntityCheck(gluuGroup, group,
+                    httpHeaders, uriInfo, HttpMethod.PUT, groupResourceType);
             if (response != null) return response;
 
             executeValidation(group, true);
@@ -297,8 +295,8 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             GluuGroup gluuGroup = groupService.getGroupByInum(id);
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
-            response = externalConstraintsService.applyEntityCheck(gluuGroup, httpHeaders,
-                    uriInfo, HttpMethod.DELETE, groupResourceType);
+            response = externalConstraintsService.applyEntityCheck(gluuGroup, null,
+                    httpHeaders, uriInfo, HttpMethod.DELETE, groupResourceType);
             if (response != null) return response;
             
             scim2GroupService.deleteGroup(gluuGroup);
@@ -379,8 +377,8 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
             GluuGroup gluuGroup = groupService.getGroupByInum(id);			
             if (gluuGroup == null) return notFoundResponse(id, groupResourceType);
 
-            response = externalConstraintsService.applyEntityCheck(gluuGroup, httpHeaders,
-                    uriInfo, HttpMethod.PATCH, groupResourceType);
+            response = externalConstraintsService.applyEntityCheck(gluuGroup, request,
+                    httpHeaders, uriInfo, HttpMethod.PATCH, groupResourceType);
             if (response != null) return response;
 
             GroupResource group = new GroupResource();
