@@ -33,6 +33,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private String oxAuthIssuer;
     
     private int maxCount;
+    private String userExtensionSchemaURI;
 
     private String loggingLevel;
     private String loggingLayout;
@@ -93,6 +94,14 @@ public class AppConfiguration implements Configuration, Serializable {
         this.maxCount = maxCount;
     }
 
+    public String getUserExtensionSchemaURI() {
+        return userExtensionSchemaURI;
+    }
+
+    public void setUserExtensionSchemaURI(String userExtensionSchemaURI) {
+        this.userExtensionSchemaURI = userExtensionSchemaURI;
+    }
+    
     public String getLoggingLevel() {
         return loggingLevel;
     }
