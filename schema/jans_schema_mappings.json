@@ -407,7 +407,7 @@
     "oxTrustStoreConf": "excludeStoreConf",
     "oxTrustTitle": "jansTitle",
     "oxTrustUserType": "jansUsrTyp",
-    "oxTrustedDevicesInfo": "excludeedDevicesInf",
+    "oxTrustedDevicesInfo": "jansTrustedDevices",
     "oxTrusthonorificPrefix": "jansHonorificPrefix",
     "oxTrusthonorificSuffix": "jansHonorificSuffix",
     "oxTrustx509Certificate": "jans509Certificate",
