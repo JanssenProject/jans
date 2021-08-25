@@ -17,6 +17,7 @@
     "rptConnectionPoolValidateAfterInactivity":10,
     "rptConnectionPoolCustomKeepAliveTimeout":5,
     "maxCount": 200,
+    "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
 
     "useLocalCache":true,
 
