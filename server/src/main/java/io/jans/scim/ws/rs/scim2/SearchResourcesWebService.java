@@ -71,7 +71,7 @@ public class SearchResourcesWebService extends BaseScimWebService {
     public Response search(SearchRequest searchRequest) {
 
         SearchRequest searchReq = new SearchRequest();
-        Response response = prepareSearchRequest(searchRequest.getSchemas(), searchRequest.getFilter(), null, searchRequest.getSortBy(),
+        Response response = prepareSearchRequest(searchRequest.getSchemas(), searchRequest.getFilter(), searchRequest.getSortBy(),
                 searchRequest.getSortOrder(), searchRequest.getStartIndex(), searchRequest.getCount(),
                 searchRequest.getAttributesStr(), searchRequest.getExcludedAttributesStr(), searchReq);
 
