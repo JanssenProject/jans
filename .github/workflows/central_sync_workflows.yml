@@ -88,3 +88,14 @@ jobs:
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
           chmod u+x org_workflows_sync.sh
           bash org_workflows_sync.sh
+
+      - name: Running CODEOWNERS Workflow Sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
+          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
+          PR_BRANCH_NAME: docker_repo_sync
+        run: |
+          wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
+          chmod u+x org_workflows_sync.sh
+          FILES=".github/JANNSEN_CODEOWNERS/*_CODEOWNERS"
+          for FILE in "$FILES"; do repo="${FILE%_CODEOWNERS}"; echo "$repo"; export REPOSITORIES="JanssenProject/$repo"; export WORKFLOW_FILES=".github/JANNSEN_CODEOWNERS/$FILE=.github/CODEOWNERS"; bash org_workflows_sync.sh; done
