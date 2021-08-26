@@ -97,5 +97,5 @@ jobs:
         run: |
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
           chmod u+x org_workflows_sync.sh
-          FILES=".github/JANNSEN_CODEOWNERS/*_CODEOWNERS"
-          for FILE in "$FILES"; do repo="${FILE%_CODEOWNERS}"; echo "$repo"; export REPOSITORIES="JanssenProject/$repo"; export WORKFLOW_FILES=".github/JANNSEN_CODEOWNERS/$FILE=.github/CODEOWNERS"; bash org_workflows_sync.sh; done
+
+          for FILE in .github/JANNSEN_CODEOWNERS/*_CODEOWNERS; do FILENAME=$(basename -- "$FILE"); repo="${FILENAME%_CODEOWNERS}"; echo "$repo"; export REPOSITORIES="JanssenProject/$repo"; export WORKFLOW_FILES="$FILE=.github/CODEOWNERS"; bash org_workflows_sync.sh; done
