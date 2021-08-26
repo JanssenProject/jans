@@ -45,7 +45,7 @@ jobs:
       
       - name: Set up JDK 11
         if: contains(env.JVM_PROJECTS, github.repository)
-        uses: actions/setup-java@v2.1.0
+        uses: actions/setup-java@v2.3.0
         with:
           java-version: '11'
           distribution: 'adopt'
