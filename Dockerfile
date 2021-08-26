@@ -138,7 +138,7 @@ LABEL name="Certmanager" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b8" \
+    release="b9" \
     summary="Janssen Certmanager" \
     description="Manage certs and crypto keys for Janssen Server"
 
