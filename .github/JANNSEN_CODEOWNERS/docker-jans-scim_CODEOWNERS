@@ -1,7 +1,7 @@
-# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Please do not attempt to edit this file without the direct consent from the DevOps team. This file is managed centrally.
 # Contact @moabu
 
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-* @yurem
+* @moabu
