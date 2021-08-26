@@ -42,8 +42,6 @@ public class OAuth2Service {
     @Inject
     AUIConfigurationService auiConfigurationService;
 
-    private Client client = ClientBuilder.newClient();
-
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
@@ -234,7 +232,6 @@ public class OAuth2Service {
                     .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
                     .post(Entity.form(body));
 
-            log.info("Get Access Token body: {}", body.toString());
             log.info("Get Access Token status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
