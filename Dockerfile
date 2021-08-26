@@ -139,7 +139,7 @@ LABEL name="Client API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b8" \
+    release="b9" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
