@@ -218,6 +218,11 @@ class ClientRegistration(ClientRegistrationType):
     def getSoftwareStatementHmacSecret(self, context):
         return ""
 
+    # cert - java.security.cert.X509Certificate
+    # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
+    def isCertValidForClient(self, cert, context):
+        return False
+
     # used for signing the software statement
     def getSoftwareStatementJwks(self, context):
         print "Client registration. getSoftwareStatementJwks method"

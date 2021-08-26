@@ -1,14 +1,5 @@
-# oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2014, Janssen
-#
-# Author: Jose Gonzalez
-#
+# Visit https://www.gluu.org/docs/gluu-server/user-management/scim-scripting/ to learn more
 from io.jans.model.custom.script.type.scim import ScimType
-from io.jans.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList
-from io.jans.oxtrust.ldap.service import PersonService
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.oxtrust.model import JanssenCustomPerson
 
 import java
 
@@ -17,7 +8,7 @@ class ScimEventHandler(ScimType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, customScript, configurationAttributes):
+    def init(self, configurationAttributes):
         print "ScimEventHandler (init): Initialized successfully"
         return True   
 
@@ -26,42 +17,24 @@ class ScimEventHandler(ScimType):
         return True   
 
     def getApiVersion(self):
-        #return 2 if you want the post* scripts being executed
-        return 11
+        return 5
 
     def createUser(self, user, configurationAttributes):
-
-        print "ScimEventHandler (createUser): Current id = " + user.getUid()
-
-        testProp1 = configurationAttributes.get("testProp1").getValue2()
-        testProp2 = configurationAttributes.get("testProp2").getValue2()
-
-        print "ScimEventHandler (createUser): testProp1 = " + testProp1
-        print "ScimEventHandler (createUser): testProp2 = " + testProp2
-
         return True
 
     def updateUser(self, user, configurationAttributes):
-        personService = CdiUtil.bean(PersonService)
-        oldUser = personService.getPersonByUid(user.getUid())
-        print "ScimEventHandler (updateUser): Old displayName %s" % oldUser.getDisplayName()
-        print "ScimEventHandler (updateUser): New displayName " + user.getDisplayName()
         return True
 
     def deleteUser(self, user, configurationAttributes):
-        print "ScimEventHandler (deleteUser): Current id = " + user.getUid()
         return True
 
     def createGroup(self, group, configurationAttributes):
-        print "ScimEventHandler (createGroup): Current displayName = " + group.getDisplayName()
         return True
 
     def updateGroup(self, group, configurationAttributes):
-        print "ScimEventHandler (updateGroup): Current displayName = " + group.getDisplayName()
         return True
 
     def deleteGroup(self, group, configurationAttributes):
-        print "ScimEventHandler (deleteGroup): Current displayName = " + group.getDisplayName()
         return True
         
     def postCreateUser(self, user, configurationAttributes):
@@ -81,3 +54,27 @@ class ScimEventHandler(ScimType):
 
     def postDeleteGroup(self, group, configurationAttributes):
         return True
+    
+    def getUser(self, user, configurationAttributes):
+        return True
+    
+    def getGroup(self, group, configurationAttributes):
+        return True
+        
+    def postSearchUsers(self, results, configurationAttributes):
+        return True
+
+    def postSearchGroups(self, results, configurationAttributes):
+        return True
+        
+    def allowResourceOperation(self, context, entity, configurationAttributes):
+        return True 
+    
+    def allowSearchOperation(self, context, configurationAttributes):
+        return ""
+    
+    def rejectedResourceOperationResponse(self, context, entity, configurationAttributes):
+        return None       
+    
+    def rejectedSearchOperationResponse(self, context, configurationAttributes):
+        return None
