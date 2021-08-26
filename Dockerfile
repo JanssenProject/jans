@@ -1,4 +1,4 @@
-FROM alpine:3.13
+FROM alpine:3.14
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-07-23 16:15'
+ENV CN_BUILD_DATE='2021-08-26 02:14'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
