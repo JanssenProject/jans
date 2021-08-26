@@ -10,6 +10,7 @@ import io.jans.configapi.plugin.adminui.model.auth.TokenResponse;
 import io.jans.configapi.plugin.adminui.model.auth.UserInfoRequest;
 import io.jans.configapi.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.configapi.plugin.adminui.model.config.AUIConfiguration;
+import io.jans.configapi.plugin.adminui.model.exception.ApplicationException;
 import io.jans.configapi.plugin.adminui.service.config.AUIConfigurationService;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -49,6 +50,10 @@ public class OAuth2Service {
     public TokenResponse getAccessToken(String code) throws Exception {
         try {
             log.info("Getting access token with code: {}", code);
+            if(Strings.isNullOrEmpty(code)) {
+                log.error("Bad Request: Authourization `code` blank or empty.");
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: Authourization `code` blank or empty.");
+            }
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -67,10 +72,12 @@ public class OAuth2Service {
             tokenResp.setRefreshToken(tokenResponse.getRefreshToken());
 
             return tokenResp;
-
-        } catch (Exception e) {
-            log.error("Problems processing IdP token call", e);
+        } catch (ApplicationException e) {
+            log.error("Problems processing access token call", e);
             throw e;
+        } catch (Exception e) {
+            log.error("Problems processing access token call", e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing access token call. Check logs for details.");
         }
     }
 
@@ -79,7 +86,11 @@ public class OAuth2Service {
      */
     public TokenResponse getApiProtectionToken(String userInfoJwt) throws Exception {
         try {
-            log.info("Getting access token with userInfoJwt: {}", userInfoJwt);
+            log.info("Getting api-protection token with userInfoJwt: {}", userInfoJwt);
+            if(Strings.isNullOrEmpty(userInfoJwt)) {
+                log.error("Bad Request: User-Info jwt is blank or empty.");
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: User-Info jwt is blank or empty.");
+            }
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -115,9 +126,12 @@ public class OAuth2Service {
 
             return tokenResp;
 
-        } catch (Exception e) {
-            log.error("Problems processing IdP token call", e);
+        } catch (ApplicationException e) {
+            log.error("Problems processing api-protection token call", e);
             throw e;
+        } catch (Exception e) {
+            log.error("Problems processing api-protection token call", e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing api-protection token call. Check logs for details.");
         }
     }
 
@@ -133,7 +147,7 @@ public class OAuth2Service {
 
             if (Strings.isNullOrEmpty(userInfoRequest.getCode()) && Strings.isNullOrEmpty(accessToken)) {
                 log.error("Bad Request: Either `code` or `access_token` is required.");
-                throw new Exception("Bad Request: Either `code` or `access_token` is required.");
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: Either `code` or `access_token` is required.");
             }
 
             if (org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getCode()) && org.apache.logging.log4j.util.Strings.isBlank(accessToken)) {
@@ -169,8 +183,12 @@ public class OAuth2Service {
                 return userInfoResponse;
             }
 
-        } catch(Exception e) {
-            log.error("Problems processing IdP user-info call", e);
+        } catch (ApplicationException e) {
+            log.error("Problems processing user-info call", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Problems processing user-info call", e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing user-info call. Check logs for details.");
         } finally {
             if (engine != null) {
                 engine.close();
@@ -230,6 +248,7 @@ public class OAuth2Service {
 
         } catch(Exception e) {
             log.error("Problems processing IdP token call", e);
+            throw e;
 
         } finally {
             if (engine != null) {
@@ -265,12 +284,4 @@ public class OAuth2Service {
         });
         return claims;
     }
-
-
-
-    /*private static String scopeAsString(List<String> scopes) throws UnsupportedEncodingException {
-        Set<String> scope = Sets.newHashSet();
-        scope.addAll(scopes);
-        return CommonUtils.joinAndUrlEncode(scope);
-    }*/
 }
